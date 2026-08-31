@@ -1,0 +1,49 @@
+{
+  "schema_version": "freq_hrl_mujoco_v18_1_state_actor_dataset_development_v1",
+  "status": "causal_state_dataset_validated_on_reused_paths",
+  "integrity_status": "valid",
+  "evidence_role": "reused_path_causal_actor_state_export_not_model_selection_or_confirmatory",
+  "development_protocol_version": "mujoco_v18_1_state_actor_dataset_v1",
+  "frozen_core_revision": "f94f1f4a6a35d70f6b6d144bd886644e7efb2393",
+  "frozen_source_manifest_sha256": "b06a97fc8f18129a2e1a9c23a52acb01ea683d1445c672074b9a6901ece23af6",
+  "source_run": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "state_dataset_run": "mujoco_v18_1_state_actor_dataset_20260831_r1",
+  "scheduler": {
+    "task_id_first": "t85848",
+    "task_id_last": "t85967",
+    "task_count": 120,
+    "done_task_count": 120,
+    "nodes": [
+      "node003"
+    ],
+    "cpu_cores_per_task": 1,
+    "slurm_used": false
+  },
+  "validation": {
+    "path_count": 120,
+    "reference_feasible_path_count": 113,
+    "actor_floor_path_count": 7,
+    "actor_floor_path_count_by_seed": {
+      "2802248628": 2,
+      "294864529": 5
+    },
+    "state_path_count_by_environment": {
+      "HalfCheetah-v5": 40,
+      "Hopper-v5": 40,
+      "Walker2d-v5": 40
+    },
+    "trajectory_step_count_by_environment": {
+      "HalfCheetah-v5": 40000,
+      "Hopper-v5": 3322,
+      "Walker2d-v5": 6549
+    },
+    "pretransition_causal_alignment_valid": true,
+    "target_labels_read_during_export": false,
+    "target_labels_used_only_as_training_outputs": true,
+    "server_only_npz_path_count": 120
+  },
+  "fresh_validation_paths_accessed": false,
+  "support_gate": false,
+  "next_use": "grouped_reused_path_causal_actor_training_only",
+  "claim_boundary": "Validated causal state export for the unchanged 120 reused development paths only; no model-selection, reward, online-learning, fresh-seed, or manuscript performance claim."
+}

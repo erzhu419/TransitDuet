@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 42)
+        self.assertEqual(len(records), 44)
         by_id = {row["evidence_id"]: row for row in records}
         v17 = by_id["mujoco_v17_zero_dc_plan_development"]
         self.assertEqual(v17["facts"]["gate_counts"]["all_cell_gates"], 1)
@@ -255,6 +255,47 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         )
         self.assertFalse(v17_14["facts"]["fresh_validation_paths_accessed"])
         self.assertFalse(v17_14["facts"]["support_gate"])
+        v18_1 = by_id[
+            "mujoco_v18_1_state_actor_dataset_development"
+        ]
+        self.assertEqual(v18_1["facts"]["path_count"], 120)
+        self.assertEqual(v18_1["facts"]["done_task_count"], 120)
+        self.assertEqual(
+            v18_1["facts"]["trajectory_step_count_by_environment"],
+            {
+                "HalfCheetah-v5": 40000,
+                "Hopper-v5": 3322,
+                "Walker2d-v5": 6549,
+            },
+        )
+        self.assertTrue(
+            v18_1["facts"]["pretransition_causal_alignment_valid"]
+        )
+        self.assertFalse(v18_1["facts"]["support_gate"])
+        v18_2 = by_id[
+            "mujoco_v18_2_state_conditioned_actor_development"
+        ]
+        self.assertEqual(
+            v18_2["facts"]["selected_actor_floor_recovered_path_count"],
+            3,
+        )
+        self.assertEqual(
+            v18_2["facts"]["selected_actor_floor_recovery_by_seed"],
+            {
+                "2802248628": {"recovered": 0, "total": 2},
+                "294864529": {"recovered": 3, "total": 5},
+            },
+        )
+        self.assertEqual(
+            v18_2["facts"]["v17_14_actor_floor_recovered_path_count"],
+            6,
+        )
+        self.assertFalse(
+            v18_2["facts"]
+            ["state_conditioning_improved_frozen_reused_panel"]
+        )
+        self.assertFalse(v18_2["facts"]["fresh_validation_paths_accessed"])
+        self.assertFalse(v18_2["facts"]["support_gate"])
         self.assertEqual(
             by_id["mujoco_v16_2_macro_hold_gauge_development"]["facts"][
                 "gate_counts"
@@ -522,11 +563,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 42)
+            self.assertEqual(summary["record_count"], 44)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 36)
+            self.assertEqual(summary["development_record_count"], 38)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 

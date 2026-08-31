@@ -1,0 +1,91 @@
+{
+  "schema_version": "freq_hrl_mujoco_v18_2_state_conditioned_actor_development_v1",
+  "status": "state_conditioned_actor_stops_before_fresh_path_access",
+  "integrity_status": "valid",
+  "evidence_role": "grouped_reused_path_state_conditioned_actor_selection_not_confirmatory",
+  "development_protocol_version": "mujoco_v18_2_state_conditioned_actor_v1",
+  "frozen_core_revision": "6ebf63c77c5c8ecf2e0784b7361eb90a6d71caf9",
+  "frozen_source_manifest_sha256": "d5842e0972d59182be55881b52de9b4ac074b5b355aa1b4c929e4b7f0a849099",
+  "state_dataset_run": "mujoco_v18_1_state_actor_dataset_20260831_r1",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "target_run": "mujoco_v17_12_nearest_feasible_action_oracle_20260831_r1",
+  "path_count": 120,
+  "grouped_seed_fold_count": 8,
+  "candidate_count": 16,
+  "full_oracle_candidate_count": 16,
+  "scheduler": {
+    "task_id": "t85969",
+    "task_status": "done",
+    "nodes": [
+      "node003"
+    ],
+    "cpu_cores": 16,
+    "workers": 16,
+    "scheduler_runtime_seconds": 48.18329095840454,
+    "worker_runtime_seconds": 18.072914607007988,
+    "peak_ram_sample_available": false,
+    "slurm_used": false
+  },
+  "selected_candidate": {
+    "candidate_id": "state_mlp_w1_h32_floorw64_cap0.025",
+    "proposal_window": 1,
+    "hidden_dim": 32,
+    "hidden_layers": 2,
+    "actor_floor_path_weight": 64.0,
+    "correction_abs_limit": 0.025,
+    "valid_path_count": 120,
+    "corrected_joint_feasible_path_count": 116,
+    "reference_feasible_path_count": 113,
+    "reference_feasible_preserved_path_count": 113,
+    "actor_floor_path_count": 7,
+    "actor_floor_recovered_path_count": 3,
+    "actor_floor_executed_nonzero_path_count": 7,
+    "actor_floor_target_normalized_mse": 0.9523924970694609,
+    "reference_feasible_correction_rms_mean": 0.00043902858298840874,
+    "reference_feasible_correction_rms_maximum": 0.003397219753516112,
+    "correction_abs_maximum": 0.01201233537077151,
+    "actor_floor_recovery_by_seed": {
+      "2802248628": {
+        "recovered": 0,
+        "total": 2
+      },
+      "294864529": {
+        "recovered": 3,
+        "total": 5
+      }
+    }
+  },
+  "candidate_frontier": {
+    "all_reference_feasible_preserved_candidate_count": 16,
+    "maximum_actor_floor_recovered_path_count": 3,
+    "maximum_corrected_joint_feasible_path_count": 116,
+    "candidate_count_by_actor_floor_recovery": {
+      "2": 14,
+      "3": 2
+    }
+  },
+  "comparison_to_v17_14": {
+    "v17_14_actor_floor_recovered_path_count": 6,
+    "v18_2_actor_floor_recovered_path_count": 3,
+    "recovery_change": -3,
+    "state_conditioning_improved_frozen_reused_panel": false
+  },
+  "advancement_gate": {
+    "actor_floor_target_fidelity_gate": false,
+    "all_actor_floor_paths_change_executed_action": true,
+    "all_actor_floor_paths_recovered": false,
+    "all_actor_floor_seed_groups_recovered": false,
+    "all_actor_floor_targets_change_executed_action": true,
+    "all_paths_valid": true,
+    "all_reference_feasible_paths_preserved": true,
+    "expected_actor_floor_path_count": true,
+    "expected_path_count": true,
+    "expected_reference_feasible_path_count": true,
+    "reference_feasible_trust_region_gate": true
+  },
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "support_gate": false,
+  "next_mechanism": "causal_online_frequency_budget_feedback_or_projection_not_more_state_mlp_tuning",
+  "claim_boundary": "Complete exact-oracle audit of the frozen 16-member grouped state-MLP screen on reused paths only; no reward, online-learning, fresh-seed, leakage no-tradeoff, or manuscript performance claim."
+}

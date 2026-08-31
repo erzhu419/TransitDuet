@@ -1201,6 +1201,60 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v18_1_state_actor_dataset_development",
+      "claim_id": "D37_CAUSAL_ACTOR_STATE_DATASET",
+      "claim": "Causal pretransition actor-state traces can be reproduced and aligned with the unchanged reused-path MuJoCo development panel without reading target labels during export.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "causal_state_dataset_validated_on_reused_paths",
+      "integrity_status": "valid",
+      "selection_access": "post_v17_14_reused_paths_state_export_without_target_access",
+      "outcome_provenance": "one_hundred_twenty_server_only_causal_state_traces_exactly_replayed_from_the_frozen_v17_4_checkpoint",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_1_state_actor_dataset",
+      "allowed_wording": "V18.1 exported and validated causal pretransition observation and lower-policy state traces for all 120 unchanged development paths. The export did not read actor-floor labels or target actions, and the 120 NPZ traces remain server-only.",
+      "forbidden_wording": "V18.1 establishes model quality, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or manuscript performance support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v18_1_state_actor_dataset_development.json",
+          "sha256": "c78ee487007808b511160129d14f6c4aa87d622d35a9c72923bcc9fffb623f12"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_1_state_actor_dataset_outcome_2026-08-31.md",
+          "sha256": "c9891c8859be731f2195af0b834e6eba08a01260bb422a3e2ea5b0a455289259"
+        }
+      ]
+    },
+    {
+      "evidence_id": "mujoco_v18_2_state_conditioned_actor_development",
+      "claim_id": "D38_STATE_CONDITIONED_ACTOR",
+      "claim": "Grouped causal state conditioning transfers nearest-feasible actor corrections across held seed groups while preserving already feasible responsibility paths.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "state_conditioned_actor_stops_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "post_v18_1_reused_paths_grouped_by_seed",
+      "outcome_provenance": "sixteen_exact_oracle_state_mlp_candidates_eight_leave_one_seed_out_folds_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_2_state_conditioned_actor",
+      "allowed_wording": "On the unchanged 120-path grouped development panel, every v18.2 candidate preserved all 113 reference-feasible paths. The best state MLP recovered only 3/7 actor-floor paths, versus 6/7 for v17.14, and failed the target-fidelity and complete-recovery gates; no fresh path was accessed.",
+      "forbidden_wording": "V18.2 validates state-conditioned actor correction, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v18_2_state_conditioned_actor_development.json",
+          "sha256": "040cbb21830a60625d657d92b88e95ede55b52b4e25a84168991b9636cd4a78c"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_2_state_conditioned_actor_outcome_2026-08-31.md",
+          "sha256": "3d99c4cb696749369fabd8cc2013e0d36b553c5fa254062f75d3209fab04845c"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

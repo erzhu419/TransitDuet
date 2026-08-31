@@ -1,5 +1,5 @@
 {
-  "development_record_count": 36,
+  "development_record_count": 38,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 42,
+  "record_count": 44,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4652,6 +4652,113 @@
       "selection_access": "post_v17_13_reused_paths_complete_frozen_grid"
     },
     {
+      "allowed_wording": "V18.1 exported and validated causal pretransition observation and lower-policy state traces for all 120 unchanged development paths. The export did not read actor-floor labels or target actions, and the 120 NPZ traces remain server-only.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v18_1_state_actor_dataset_development.json",
+          "role": "decision",
+          "sha256": "c78ee487007808b511160129d14f6c4aa87d622d35a9c72923bcc9fffb623f12"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_1_state_actor_dataset_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "c9891c8859be731f2195af0b834e6eba08a01260bb422a3e2ea5b0a455289259"
+        }
+      ],
+      "claim": "Causal pretransition actor-state traces can be reproduced and aligned with the unchanged reused-path MuJoCo development panel without reading target labels during export.",
+      "claim_id": "D37_CAUSAL_ACTOR_STATE_DATASET",
+      "decision": "causal_state_dataset_validated_on_reused_paths",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v18_1_state_actor_dataset_development",
+      "evidence_stage": "development",
+      "facts": {
+        "decision_status": "causal_state_dataset_validated_on_reused_paths",
+        "done_task_count": 120,
+        "fresh_validation_paths_accessed": false,
+        "integrity_status": "valid",
+        "path_count": 120,
+        "pretransition_causal_alignment_valid": true,
+        "server_only_npz_path_count": 120,
+        "state_path_count_by_environment": {
+          "HalfCheetah-v5": 40,
+          "Hopper-v5": 40,
+          "Walker2d-v5": 40
+        },
+        "support_gate": false,
+        "target_labels_read_during_export": false,
+        "trajectory_step_count_by_environment": {
+          "HalfCheetah-v5": 40000,
+          "Hopper-v5": 3322,
+          "Walker2d-v5": 6549
+        }
+      },
+      "forbidden_wording": "V18.1 establishes model quality, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or manuscript performance support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "one_hundred_twenty_server_only_causal_state_traces_exactly_replayed_from_the_frozen_v17_4_checkpoint",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_1_state_actor_dataset",
+      "positive_claim_supported": false,
+      "selection_access": "post_v17_14_reused_paths_state_export_without_target_access"
+    },
+    {
+      "allowed_wording": "On the unchanged 120-path grouped development panel, every v18.2 candidate preserved all 113 reference-feasible paths. The best state MLP recovered only 3/7 actor-floor paths, versus 6/7 for v17.14, and failed the target-fidelity and complete-recovery gates; no fresh path was accessed.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v18_2_state_conditioned_actor_development.json",
+          "role": "decision",
+          "sha256": "040cbb21830a60625d657d92b88e95ede55b52b4e25a84168991b9636cd4a78c"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_2_state_conditioned_actor_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "3d99c4cb696749369fabd8cc2013e0d36b553c5fa254062f75d3209fab04845c"
+        }
+      ],
+      "claim": "Grouped causal state conditioning transfers nearest-feasible actor corrections across held seed groups while preserving already feasible responsibility paths.",
+      "claim_id": "D38_STATE_CONDITIONED_ACTOR",
+      "decision": "state_conditioned_actor_stops_before_fresh_path_access",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v18_2_state_conditioned_actor_development",
+      "evidence_stage": "development",
+      "facts": {
+        "candidate_count": 16,
+        "decision_status": "state_conditioned_actor_stops_before_fresh_path_access",
+        "eligible_for_fresh_path_validation": false,
+        "fresh_validation_paths_accessed": false,
+        "full_oracle_candidate_count": 16,
+        "grouped_seed_fold_count": 8,
+        "integrity_status": "valid",
+        "path_count": 120,
+        "selected_actor_floor_recovered_path_count": 3,
+        "selected_actor_floor_recovery_by_seed": {
+          "2802248628": {
+            "recovered": 0,
+            "total": 2
+          },
+          "294864529": {
+            "recovered": 3,
+            "total": 5
+          }
+        },
+        "selected_actor_floor_target_normalized_mse": 0.9523924970694609,
+        "selected_reference_feasible_preserved_path_count": 113,
+        "state_conditioning_improved_frozen_reused_panel": false,
+        "support_gate": false,
+        "v17_14_actor_floor_recovered_path_count": 6
+      },
+      "forbidden_wording": "V18.2 validates state-conditioned actor correction, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "sixteen_exact_oracle_state_mlp_candidates_eight_leave_one_seed_out_folds_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_2_state_conditioned_actor",
+      "positive_claim_supported": false,
+      "selection_access": "post_v18_1_reused_paths_grouped_by_seed"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4710,7 +4817,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "90566fa4268eb2a309df2295cc38386ee9d459c4f3ead12ce555db3e6e2eef88",
+  "registry_sha256": "e3d7e9b9de3bb066c4671187ffcc7d7b1021d904863b729d2458dbdb2e57948f",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

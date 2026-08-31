@@ -74,6 +74,12 @@ MUJOCO_V17_13_CAUSAL_ACTOR_ADAPTER_SCHEMA_VERSION = (
 MUJOCO_V17_14_EXHAUSTIVE_ACTOR_ORACLE_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v17_14_exhaustive_actor_oracle_development_v1"
 )
+MUJOCO_V18_1_STATE_ACTOR_DATASET_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v18_1_state_actor_dataset_development_v1"
+)
+MUJOCO_V18_2_STATE_CONDITIONED_ACTOR_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v18_2_state_conditioned_actor_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -2814,6 +2820,212 @@ def _mujoco_v17_14_exhaustive_actor_oracle_facts(
     }
 
 
+def _mujoco_v18_1_state_actor_dataset_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    scheduler = dict(decision.get("scheduler") or {})
+    validation = dict(decision.get("validation") or {})
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V18_1_STATE_ACTOR_DATASET_SCHEMA_VERSION
+        or decision.get("status")
+        != "causal_state_dataset_validated_on_reused_paths"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "reused_path_causal_actor_state_export_not_model_selection_or_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v18_1_state_actor_dataset_v1"
+        or decision.get("frozen_core_revision")
+        != "f94f1f4a6a35d70f6b6d144bd886644e7efb2393"
+        or decision.get("frozen_source_manifest_sha256")
+        != "b06a97fc8f18129a2e1a9c23a52acb01ea683d1445c672074b9a6901ece23af6"
+        or scheduler.get("task_id_first") != "t85848"
+        or scheduler.get("task_id_last") != "t85967"
+        or int(scheduler.get("task_count", -1)) != 120
+        or int(scheduler.get("done_task_count", -1)) != 120
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or int(scheduler.get("cpu_cores_per_task", -1)) != 1
+        or scheduler.get("slurm_used") is not False
+        or int(validation.get("path_count", -1)) != 120
+        or int(validation.get("reference_feasible_path_count", -1)) != 113
+        or int(validation.get("actor_floor_path_count", -1)) != 7
+        or dict(validation.get("actor_floor_path_count_by_seed") or {})
+        != {"2802248628": 2, "294864529": 5}
+        or dict(validation.get("state_path_count_by_environment") or {})
+        != {
+            "HalfCheetah-v5": 40,
+            "Hopper-v5": 40,
+            "Walker2d-v5": 40,
+        }
+        or dict(validation.get("trajectory_step_count_by_environment") or {})
+        != {
+            "HalfCheetah-v5": 40000,
+            "Hopper-v5": 3322,
+            "Walker2d-v5": 6549,
+        }
+        or validation.get("pretransition_causal_alignment_valid") is not True
+        or validation.get("target_labels_read_during_export") is not False
+        or validation.get("target_labels_used_only_as_training_outputs")
+        is not True
+        or int(validation.get("server_only_npz_path_count", -1)) != 120
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`causal_state_dataset_validated_on_reused_paths`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v18.1 causal state dataset decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "done_task_count": 120,
+        "state_path_count_by_environment": dict(
+            validation["state_path_count_by_environment"]
+        ),
+        "trajectory_step_count_by_environment": dict(
+            validation["trajectory_step_count_by_environment"]
+        ),
+        "pretransition_causal_alignment_valid": True,
+        "target_labels_read_during_export": False,
+        "server_only_npz_path_count": 120,
+        "fresh_validation_paths_accessed": False,
+        "support_gate": False,
+    }
+
+
+def _mujoco_v18_2_state_conditioned_actor_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    scheduler = dict(decision.get("scheduler") or {})
+    selected = dict(decision.get("selected_candidate") or {})
+    recovery = dict(selected.get("actor_floor_recovery_by_seed") or {})
+    frontier = dict(decision.get("candidate_frontier") or {})
+    comparison = dict(decision.get("comparison_to_v17_14") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    expected_gate_keys = {
+        "actor_floor_target_fidelity_gate",
+        "all_actor_floor_paths_change_executed_action",
+        "all_actor_floor_paths_recovered",
+        "all_actor_floor_seed_groups_recovered",
+        "all_actor_floor_targets_change_executed_action",
+        "all_paths_valid",
+        "all_reference_feasible_paths_preserved",
+        "expected_actor_floor_path_count",
+        "expected_path_count",
+        "expected_reference_feasible_path_count",
+        "reference_feasible_trust_region_gate",
+    }
+    false_gates = {key for key, value in gate.items() if value is False}
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V18_2_STATE_CONDITIONED_ACTOR_SCHEMA_VERSION
+        or decision.get("status")
+        != "state_conditioned_actor_stops_before_fresh_path_access"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "grouped_reused_path_state_conditioned_actor_selection_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v18_2_state_conditioned_actor_v1"
+        or decision.get("frozen_core_revision")
+        != "6ebf63c77c5c8ecf2e0784b7361eb90a6d71caf9"
+        or decision.get("frozen_source_manifest_sha256")
+        != "d5842e0972d59182be55881b52de9b4ac074b5b355aa1b4c929e4b7f0a849099"
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("grouped_seed_fold_count", -1)) != 8
+        or int(decision.get("candidate_count", -1)) != 16
+        or int(decision.get("full_oracle_candidate_count", -1)) != 16
+        or scheduler.get("task_id") != "t85969"
+        or scheduler.get("task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or int(scheduler.get("cpu_cores", -1)) != 16
+        or int(scheduler.get("workers", -1)) != 16
+        or scheduler.get("peak_ram_sample_available") is not False
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "state_mlp_w1_h32_floorw64_cap0.025"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("corrected_joint_feasible_path_count", -1))
+        != 116
+        or int(selected.get("reference_feasible_path_count", -1)) != 113
+        or int(selected.get(
+            "reference_feasible_preserved_path_count", -1
+        ))
+        != 113
+        or int(selected.get("actor_floor_path_count", -1)) != 7
+        or int(selected.get("actor_floor_recovered_path_count", -1)) != 3
+        or int(selected.get(
+            "actor_floor_executed_nonzero_path_count", -1
+        ))
+        != 7
+        or float(selected.get("actor_floor_target_normalized_mse", -1.0))
+        != 0.9523924970694609
+        or recovery
+        != {
+            "2802248628": {"recovered": 0, "total": 2},
+            "294864529": {"recovered": 3, "total": 5},
+        }
+        or int(frontier.get(
+            "all_reference_feasible_preserved_candidate_count", -1
+        ))
+        != 16
+        or int(frontier.get(
+            "maximum_actor_floor_recovered_path_count", -1
+        ))
+        != 3
+        or int(frontier.get(
+            "maximum_corrected_joint_feasible_path_count", -1
+        ))
+        != 116
+        or dict(frontier.get("candidate_count_by_actor_floor_recovery") or {})
+        != {"2": 14, "3": 2}
+        or int(comparison.get(
+            "v17_14_actor_floor_recovered_path_count", -1
+        ))
+        != 6
+        or int(comparison.get("recovery_change", 0)) != -3
+        or comparison.get("state_conditioning_improved_frozen_reused_panel")
+        is not False
+        or set(gate) != expected_gate_keys
+        or false_gates
+        != {
+            "actor_floor_target_fidelity_gate",
+            "all_actor_floor_paths_recovered",
+            "all_actor_floor_seed_groups_recovered",
+        }
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`state_conditioned_actor_stops_before_fresh_path_access`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v18.2 state actor decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "grouped_seed_fold_count": 8,
+        "candidate_count": 16,
+        "full_oracle_candidate_count": 16,
+        "selected_actor_floor_recovered_path_count": 3,
+        "selected_reference_feasible_preserved_path_count": 113,
+        "selected_actor_floor_target_normalized_mse": float(
+            selected["actor_floor_target_normalized_mse"]
+        ),
+        "selected_actor_floor_recovery_by_seed": recovery,
+        "v17_14_actor_floor_recovered_path_count": 6,
+        "state_conditioning_improved_frozen_reused_panel": False,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -2877,6 +3089,12 @@ PARSERS = {
     ),
     "mujoco_v17_14_exhaustive_actor_oracle": (
         _mujoco_v17_14_exhaustive_actor_oracle_facts
+    ),
+    "mujoco_v18_1_state_actor_dataset": (
+        _mujoco_v18_1_state_actor_dataset_facts
+    ),
+    "mujoco_v18_2_state_conditioned_actor": (
+        _mujoco_v18_2_state_conditioned_actor_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",
