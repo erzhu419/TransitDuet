@@ -305,6 +305,7 @@ class DiagnosticLog:
         'lower_cost_limit',
         'lower_regularity_policy_enabled',
         'lower_regularity_policy_mode',
+        'lower_regularity_policy_constraint_cost_mode',
         'lower_regularity_policy_constraint_scale_mode',
         'lower_regularity_policy_initial_lambda',
         'lower_regularity_policy_cost_mean',
@@ -9211,6 +9212,8 @@ class TransitDuetV2Runner:
                 self.lower_trainer.regularity_policy_enabled),
             'lower_regularity_policy_mode': str(
                 self.lower_trainer.regularity_policy_mode),
+            'lower_regularity_policy_constraint_cost_mode': str(
+                self.lower_trainer.regularity_constraint_cost_mode),
             'lower_regularity_policy_constraint_scale_mode': str(
                 self.lower_trainer.regularity_constraint_scale_mode),
             'lower_regularity_policy_initial_lambda': float(

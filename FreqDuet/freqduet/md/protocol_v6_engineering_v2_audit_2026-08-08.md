@@ -1726,3 +1726,32 @@ verify the analytic pressure, zero-energy V14 equivalence, per-state action-bin
 ordering, runner execution arithmetic, configuration grid, and feature index.
 These are implementation checks only. The 23 MB temporary smoke directory was
 deleted after recording these values and is not used as effect evidence.
+
+### V18 implementation-failure audit and corrected rerun (2026-09-01)
+
+The first formal V18 execution completed all 80 training shards and 320 frozen
+rollouts, but it is not effect evidence for the registered HF-opportunity
+objective. All nine candidates improved headway CV relative to V14 by roughly
+`0.0056--0.0132` while worsening restricted journey by `0.79--1.09 min` and
+increasing mean action, holding, and denied dispatch. This direction contradicted
+the registered intervention and triggered a loss-path audit rather than a
+threshold change.
+
+The audit found a concrete implementation omission: V7 was registered as a
+zero-hold-regret objective, but `_regularity_policy_cost()` did not include V7
+in the modes using `(absolute target cost - zero-hold cost).clamp_min(0)`.
+Consequently, the first execution used absolute target tracking for its dual
+constraint and directly encouraged larger holding. The HF gain gate itself and
+its telemetry were correct, but the run did not implement the registered V14
+constraint semantics. It is therefore labeled an invalid engineering run, not
+a negative algorithm result.
+
+The correction makes constraint-cost semantics an explicit checkpoint and
+diagnostic contract (`zero_hold_regret_v2`) instead of deriving it again in the
+loss function. The V18 gate now rejects any candidate lacking that telemetry,
+and the regression test requires V7 at zero HF energy to equal V14 in both
+constraint cost and capacity gain. The nine configurations and all outcome
+thresholds remain unchanged. To avoid reusing observed outcomes, the corrected
+formal rerun uses fresh training seeds `23013,23031,23053,23077` and frozen
+evaluation seeds `56017,56041,56059,56083`; it remains exploratory and requires
+fresh 200-episode confirmation if any candidate passes.

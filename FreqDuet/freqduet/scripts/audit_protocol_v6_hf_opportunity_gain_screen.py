@@ -68,8 +68,8 @@ CONFIGS = [
     V17_JOURNEY,
     *CANDIDATES,
 ]
-TRAIN_SEEDS = [22013, 22031, 22053, 22077]
-EVAL_SEEDS = [55017, 55041, 55059, 55083]
+TRAIN_SEEDS = [23013, 23031, 23053, 23077]
+EVAL_SEEDS = [56017, 56041, 56059, 56083]
 PRIORITY = [
     "F_freqduet_protocol_v6_w2adhfoppgain_l001_e25_r00025_"
     f"w{weight}_b{penalty}_s0040_hiro"
@@ -133,6 +133,7 @@ def evaluate_hf_opportunity_gain_screen(
         "fleet_denied_dispatch_events", "lower_action_mean",
         "lower_causal_guard_adjustment_mean_s",
         "lower_regularity_policy_enabled", "lower_regularity_policy_mode",
+        "lower_regularity_policy_constraint_cost_mode",
         "lower_regularity_policy_constraint_scale_mode",
         "lower_regularity_policy_initial_lambda",
         "lower_regularity_policy_cost_limit",
@@ -215,6 +216,8 @@ def evaluate_hf_opportunity_gain_screen(
         adjustment = numeric("lower_causal_guard_adjustment_mean_s")
         enabled = numeric("lower_regularity_policy_enabled")
         policy_mode = rows["lower_regularity_policy_mode"].astype(str)
+        constraint_cost_mode = rows[
+            "lower_regularity_policy_constraint_cost_mode"].astype(str)
         scale_mode = rows[
             "lower_regularity_policy_constraint_scale_mode"].astype(str)
         initial = numeric("lower_regularity_policy_initial_lambda")
@@ -266,6 +269,8 @@ def evaluate_hf_opportunity_gain_screen(
                 and (policy_mode
                      == "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"
                     ).all()),
+            "zero_hold_regret_semantics_locked": bool(
+                (constraint_cost_mode == "zero_hold_regret_v2").all()),
             "dimensionless_regret_constraint": bool(
                 (scale_mode == "cost_limit_ratio_v1").all()
                 and np.allclose(initial, 0.01)
@@ -385,7 +390,7 @@ def evaluate_hf_opportunity_gain_screen(
         result["config"] for result in candidate_results if result["passes"]}
     selected = next((name for name in PRIORITY if name in passing), None)
     return {
-        "gate_version": "freqduet-v18-hf-opportunity-gain-screen-v1",
+        "gate_version": "freqduet-v18-hf-opportunity-gain-screen-v2",
         "status": (
             "exploratory_candidate_selected" if selected else "no_pass"),
         "claim_eligible": False,

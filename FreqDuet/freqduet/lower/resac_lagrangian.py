@@ -454,6 +454,7 @@ class RESACLagrangianTrainer:
             regularity_cfg.get('enable', False))
         self.regularity_policy_contract = {'enabled': False}
         self.regularity_policy_mode = 'disabled'
+        self.regularity_constraint_cost_mode = 'disabled'
         self.regularity_constraint_scale_mode = 'raw_cost_v1'
         self.regularity_constraint_cost_scale = 1.0
         self.regularity_initial_lambda = 0.0
@@ -495,6 +496,18 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_hf_opportunity_gain_regret_dual_v7'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
+            zero_hold_regret_modes = {
+                'analytic_two_sided_zero_hold_regret_dual_v2',
+                'analytic_two_sided_capacity_gain_regret_dual_v3',
+                'analytic_two_sided_efficiency_gain_regret_dual_v4',
+                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
+                'analytic_two_sided_target_preserving_gain_regret_dual_v6',
+                'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
+            }
+            self.regularity_constraint_cost_mode = (
+                'zero_hold_regret_v2'
+                if mode in zero_hold_regret_modes
+                else 'absolute_target_cost_v1')
             if self.discrete_actions is None:
                 raise ValueError(
                     'causal regularity policy objective requires action_bins')
@@ -850,6 +863,8 @@ class RESACLagrangianTrainer:
                 'target_headway_scale_s': self.regularity_headway_scale_s,
                 'cost_limit': self.regularity_cost_limit,
                 'cost_cap': self.regularity_cost_cap,
+                'constraint_cost_mode': (
+                    self.regularity_constraint_cost_mode),
                 'constraint_scale_mode': (
                     self.regularity_constraint_scale_mode),
                 'lambda_lr': lambda_lr_regularity,
@@ -941,16 +956,13 @@ class RESACLagrangianTrainer:
         """Return exact conditional action cost for the compact causal target."""
         valid, absolute_action_costs, zero_hold_cost = (
             self._regularity_policy_action_terms(state))
-        if self.regularity_policy_mode in {
-                'analytic_two_sided_zero_hold_regret_dual_v2',
-                'analytic_two_sided_capacity_gain_regret_dual_v3',
-                'analytic_two_sided_efficiency_gain_regret_dual_v4',
-                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
-                'analytic_two_sided_target_preserving_gain_regret_dual_v6'}:
+        if self.regularity_constraint_cost_mode == 'zero_hold_regret_v2':
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
-        else:
+        elif self.regularity_constraint_cost_mode == 'absolute_target_cost_v1':
             action_costs = absolute_action_costs
+        else:
+            raise RuntimeError('unknown regularity constraint cost mode')
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, action_costs
 

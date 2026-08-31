@@ -34,6 +34,7 @@ class ProtocolV6HFOpportunityGainScreenTest(unittest.TestCase):
         root: Path,
         *,
         wrong_hf_scale: bool = False,
+        wrong_constraint_cost_mode: bool = False,
         contaminated_actor_metric: bool = False,
     ) -> None:
         expected_pairs = len(TRAIN_SEEDS) * len(EVAL_SEEDS)
@@ -100,6 +101,11 @@ class ProtocolV6HFOpportunityGainScreenTest(unittest.TestCase):
                         "lower_regularity_policy_mode": (
                             "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"
                             if candidate else "disabled"),
+                        "lower_regularity_policy_constraint_cost_mode": (
+                            "absolute_target_cost_v1"
+                            if candidate and wrong_constraint_cost_mode else
+                            "zero_hold_regret_v2" if candidate else
+                            "disabled"),
                         "lower_regularity_policy_constraint_scale_mode": (
                             "cost_limit_ratio_v1" if candidate else
                             "raw_cost_v1"),
@@ -184,6 +190,18 @@ class ProtocolV6HFOpportunityGainScreenTest(unittest.TestCase):
         self.assertTrue(all(
             not item["mechanism_checks"][
                 "hf_opportunity_gain_contract_locked"]
+            for item in result["candidate_results"]))
+
+    def test_absolute_target_cost_cannot_pass_as_v18(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._artifacts(root, wrong_constraint_cost_mode=True)
+            result = evaluate_hf_opportunity_gain_screen(root)
+
+        self.assertEqual(result["status"], "no_pass")
+        self.assertTrue(all(
+            not item["mechanism_checks"][
+                "zero_hold_regret_semantics_locked"]
             for item in result["candidate_results"]))
 
     def test_frozen_evaluation_actor_metric_must_remain_zero(self):

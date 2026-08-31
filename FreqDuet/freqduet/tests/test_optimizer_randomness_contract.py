@@ -523,8 +523,17 @@ class OptimizerContractTest(unittest.TestCase):
             state_v14, probs_v14)
         _, _, gated_gains = v18._regularity_policy_capacity_gain(
             state_v18, probs_v18)
+        base_cost, _, base_action_costs = v14._regularity_policy_cost(
+            state_v14, probs_v14)
+        gated_cost, _, gated_action_costs = v18._regularity_policy_cost(
+            state_v18, probs_v18)
         gates = v18._regularity_policy_action_efficiency_gate(state_v18)
 
+        torch.testing.assert_close(gated_cost, base_cost.expand(2))
+        torch.testing.assert_close(
+            gated_action_costs,
+            base_action_costs.expand_as(gated_action_costs),
+        )
         torch.testing.assert_close(gated_gains[0], base_gains[0])
         torch.testing.assert_close(
             gated_gains[1], base_gains[0] * (2.0 / 3.0))
@@ -534,6 +543,10 @@ class OptimizerContractTest(unittest.TestCase):
             torch.tensor([2, 2]),
         ))
         contract = v18.regularity_policy_contract["capacity_gated_gain"]
+        self.assertEqual(
+            v18.regularity_policy_contract["constraint_cost_mode"],
+            "zero_hold_regret_v2",
+        )
         self.assertEqual(contract["hf_energy_feature_index"], 4)
         self.assertEqual(contract["hf_energy_scale"], 0.04)
         self.assertEqual(contract["hf_opportunity_cost_penalty"], 1.0)
