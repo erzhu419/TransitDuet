@@ -49,6 +49,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v18_1_state_actor_dataset_development | mujoco_control | development | causal_state_dataset_validated_on_reused_paths | development_only | false |
 | mujoco_v18_2_state_conditioned_actor_development | mujoco_control | development | state_conditioned_actor_stops_before_fresh_path_access | development_only | false |
 | mujoco_v18_3_causal_joint_projection_development | mujoco_control | development | causal_joint_projection_stops_before_fresh_path_access | development_only | false |
+| mujoco_v18_4_receding_joint_projection_development | mujoco_control | development | receding_joint_projection_stops_before_fresh_path_access | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -311,6 +312,12 @@ Forbidden: V18.2 validates state-conditioned actor correction, reward improvemen
 On the unchanged 120-path development panel, the label-free instantaneous joint projector made all 120 paths directly and exact-oracle feasible and recovered 7/7 actor-floor paths. It failed the action trust region severely, with reference correction RMS up to 0.2935 and absolute correction up to 1.8076, so no fresh path was accessed.
 
 Forbidden: V18.3 validates behavior-preserving frequency projection, reward improvement, online learned control, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
+
+### mujoco_v18_4_receding_joint_projection_development
+
+On the unchanged 120-path development panel, the selected H16 damped-velocity projector was exact-oracle feasible on 120/120 corrected totals but directly feasible on only 69/120 realized component traces, recovered 2/7 actor-floor paths, and recorded 40,962 prefix budget violations. This offline-exact versus online-direct gap rejects a moving-horizon debt-amortization rule without a recursive terminal certificate.
+
+Forbidden: V18.4 validates behavior-preserving online frequency projection, reward improvement, recursive feasibility, fresh-seed generalization, learned control, leakage no-tradeoff, or final Freq-HRL manuscript support.
 
 ### legacy_c1_c9_matrix_snapshot
 

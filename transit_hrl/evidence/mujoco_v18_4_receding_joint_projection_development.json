@@ -1,0 +1,106 @@
+{
+  "schema_version": "freq_hrl_mujoco_v18_4_receding_joint_projection_development_v1",
+  "status": "receding_joint_projection_stops_before_fresh_path_access",
+  "integrity_status": "valid",
+  "evidence_role": "reused_path_label_free_causal_receding_projection_not_confirmatory",
+  "development_protocol_version": "mujoco_v18_4_receding_joint_projection_v1",
+  "frozen_core_revision": "7f649e23a05f3bf142255fc777bb4322931cc617",
+  "frozen_source_manifest_sha256": "c7f7f0980508d58ea167d9bd420fc88ecefafb207d8735f791169ea822015dff",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "path_count": 120,
+  "candidate_count": 4,
+  "direct_audit_candidate_count": 4,
+  "exact_oracle_audit_candidate_count": 1,
+  "actor_correction_targets_accessed": false,
+  "reference_feasibility_labels_used_for_evaluation": true,
+  "scheduler": {
+    "task_id": "t85972",
+    "task_status": "done",
+    "nodes": [
+      "node003"
+    ],
+    "cpu_cores": 16,
+    "workers": 16,
+    "scheduler_runtime_seconds": 1631.5103960037231,
+    "worker_runtime_seconds": 1583.4400507989922,
+    "direct_audit_runtime_seconds": 1145.3418207590003,
+    "exact_oracle_runtime_seconds": 438.0905103569967,
+    "peak_ram_mb": 1925,
+    "slurm_used": false
+  },
+  "selected_candidate": {
+    "candidate_id": "joint_mpc_h16_damped_velocity",
+    "valid_path_count": 120,
+    "direct_joint_feasible_path_count": 69,
+    "exact_oracle_audited_path_count": 120,
+    "exact_oracle_joint_feasible_path_count": 120,
+    "reference_feasible_path_count": 113,
+    "direct_reference_feasible_preserved_path_count": 67,
+    "actor_floor_path_count": 7,
+    "direct_actor_floor_recovered_path_count": 2,
+    "actor_floor_executed_nonzero_path_count": 7,
+    "correction_abs_maximum": 0.988801906635327,
+    "reference_feasible_correction_rms_mean": 0.1278522135444848,
+    "reference_feasible_correction_rms_maximum": 0.2507122109046519,
+    "actor_floor_correction_rms_mean": 0.23698184242318546,
+    "actor_floor_correction_rms_maximum": 0.25251917036308946,
+    "total_changed_step_count": 22973,
+    "projection_nonconverged_step_count": 86,
+    "prefix_budget_violation_step_count": 40962,
+    "upper_prefix_power_maximum": 0.013661475575793313,
+    "lower_prefix_power_maximum": 0.001913177040997326,
+    "actor_floor_recovery_by_seed": {
+      "2802248628": {
+        "direct_recovered": 1,
+        "exact_feasible": 2,
+        "total": 2
+      },
+      "294864529": {
+        "direct_recovered": 1,
+        "exact_feasible": 5,
+        "total": 5
+      }
+    }
+  },
+  "candidate_direct_counts": {
+    "joint_mpc_h16_hold": {
+      "direct_joint_feasible": 40,
+      "actor_floor_recovered": 0,
+      "reference_preserved": 40
+    },
+    "joint_mpc_h16_damped_velocity": {
+      "direct_joint_feasible": 69,
+      "actor_floor_recovered": 2,
+      "reference_preserved": 67
+    },
+    "joint_mpc_h32_hold": {
+      "direct_joint_feasible": 40,
+      "actor_floor_recovered": 0,
+      "reference_preserved": 40
+    },
+    "joint_mpc_h32_damped_velocity": {
+      "direct_joint_feasible": 40,
+      "actor_floor_recovered": 0,
+      "reference_preserved": 40
+    }
+  },
+  "advancement_gate": {
+    "actor_floor_trust_region_gate": false,
+    "all_actor_floor_paths_change_executed_action": true,
+    "all_actor_floor_paths_recovered": false,
+    "all_actor_floor_seed_groups_recovered": false,
+    "all_paths_directly_joint_feasible": false,
+    "all_paths_exact_oracle_feasible": true,
+    "all_paths_valid": true,
+    "all_reference_feasible_paths_preserved": false,
+    "global_correction_abs_gate": false,
+    "reference_feasible_trust_region_gate": false,
+    "selected_candidate_exactly_audited_on_all_paths": true
+  },
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "support_gate": false,
+  "diagnosis": "The fixed receding horizon repeatedly defers frequency debt beyond its moving terminal boundary. All corrected totals remain offline decomposable, but the realized causal upper/lower traces violate endpoint upper-frequency power on 51 paths and require behavior-destroying total-action corrections.",
+  "next_mechanism": "recursive_feasibility_projector_with_nonshiftable_terminal_debt_certificate",
+  "claim_boundary": "Label-free causal mechanism selection on 120 reused paths only; receding-horizon exact decomposability does not establish realized online frequency feasibility, behavioral preservation, reward, fresh-seed generalization, learned-policy performance, no-tradeoff, or manuscript support."
+}

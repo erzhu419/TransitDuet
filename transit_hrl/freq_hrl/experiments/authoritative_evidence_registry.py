@@ -83,6 +83,9 @@ MUJOCO_V18_2_STATE_CONDITIONED_ACTOR_SCHEMA_VERSION = (
 MUJOCO_V18_3_CAUSAL_JOINT_PROJECTION_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v18_3_causal_joint_projection_development_v1"
 )
+MUJOCO_V18_4_RECEDING_JOINT_PROJECTION_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v18_4_receding_joint_projection_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -3148,6 +3151,174 @@ def _mujoco_v18_3_causal_joint_projection_facts(
     }
 
 
+def _mujoco_v18_4_receding_joint_projection_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    scheduler = dict(decision.get("scheduler") or {})
+    selected = dict(decision.get("selected_candidate") or {})
+    recovery = dict(selected.get("actor_floor_recovery_by_seed") or {})
+    candidates = dict(decision.get("candidate_direct_counts") or {})
+    gate = dict(decision.get("advancement_gate") or {})
+    expected_gate_keys = {
+        "actor_floor_trust_region_gate",
+        "all_actor_floor_paths_change_executed_action",
+        "all_actor_floor_paths_recovered",
+        "all_actor_floor_seed_groups_recovered",
+        "all_paths_directly_joint_feasible",
+        "all_paths_exact_oracle_feasible",
+        "all_paths_valid",
+        "all_reference_feasible_paths_preserved",
+        "global_correction_abs_gate",
+        "reference_feasible_trust_region_gate",
+        "selected_candidate_exactly_audited_on_all_paths",
+    }
+    false_gates = {key for key, value in gate.items() if value is False}
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V18_4_RECEDING_JOINT_PROJECTION_SCHEMA_VERSION
+        or decision.get("status")
+        != "receding_joint_projection_stops_before_fresh_path_access"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "reused_path_label_free_causal_receding_projection_not_confirmatory"
+        or decision.get("development_protocol_version")
+        != "mujoco_v18_4_receding_joint_projection_v1"
+        or decision.get("frozen_core_revision")
+        != "7f649e23a05f3bf142255fc777bb4322931cc617"
+        or decision.get("frozen_source_manifest_sha256")
+        != "c7f7f0980508d58ea167d9bd420fc88ecefafb207d8735f791169ea822015dff"
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 4
+        or int(decision.get("direct_audit_candidate_count", -1)) != 4
+        or int(decision.get("exact_oracle_audit_candidate_count", -1)) != 1
+        or decision.get("actor_correction_targets_accessed") is not False
+        or decision.get(
+            "reference_feasibility_labels_used_for_evaluation"
+        ) is not True
+        or scheduler.get("task_id") != "t85972"
+        or scheduler.get("task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or int(scheduler.get("cpu_cores", -1)) != 16
+        or int(scheduler.get("workers", -1)) != 16
+        or int(scheduler.get("peak_ram_mb", -1)) != 1925
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id")
+        != "joint_mpc_h16_damped_velocity"
+        or int(selected.get("valid_path_count", -1)) != 120
+        or int(selected.get("direct_joint_feasible_path_count", -1)) != 69
+        or int(selected.get("exact_oracle_audited_path_count", -1)) != 120
+        or int(selected.get("exact_oracle_joint_feasible_path_count", -1))
+        != 120
+        or int(selected.get(
+            "direct_reference_feasible_preserved_path_count", -1
+        ))
+        != 67
+        or int(selected.get(
+            "direct_actor_floor_recovered_path_count", -1
+        ))
+        != 2
+        or int(selected.get(
+            "actor_floor_executed_nonzero_path_count", -1
+        ))
+        != 7
+        or int(selected.get("prefix_budget_violation_step_count", -1))
+        != 40962
+        or float(selected.get("correction_abs_maximum", -1.0))
+        != 0.988801906635327
+        or float(selected.get(
+            "reference_feasible_correction_rms_maximum", -1.0
+        ))
+        != 0.2507122109046519
+        or float(selected.get(
+            "actor_floor_correction_rms_maximum", -1.0
+        ))
+        != 0.25251917036308946
+        or recovery
+        != {
+            "2802248628": {
+                "direct_recovered": 1,
+                "exact_feasible": 2,
+                "total": 2,
+            },
+            "294864529": {
+                "direct_recovered": 1,
+                "exact_feasible": 5,
+                "total": 5,
+            },
+        }
+        or candidates
+        != {
+            "joint_mpc_h16_hold": {
+                "direct_joint_feasible": 40,
+                "actor_floor_recovered": 0,
+                "reference_preserved": 40,
+            },
+            "joint_mpc_h16_damped_velocity": {
+                "direct_joint_feasible": 69,
+                "actor_floor_recovered": 2,
+                "reference_preserved": 67,
+            },
+            "joint_mpc_h32_hold": {
+                "direct_joint_feasible": 40,
+                "actor_floor_recovered": 0,
+                "reference_preserved": 40,
+            },
+            "joint_mpc_h32_damped_velocity": {
+                "direct_joint_feasible": 40,
+                "actor_floor_recovered": 0,
+                "reference_preserved": 40,
+            },
+        }
+        or set(gate) != expected_gate_keys
+        or false_gates
+        != {
+            "actor_floor_trust_region_gate",
+            "all_actor_floor_paths_recovered",
+            "all_actor_floor_seed_groups_recovered",
+            "all_paths_directly_joint_feasible",
+            "all_reference_feasible_paths_preserved",
+            "global_correction_abs_gate",
+            "reference_feasible_trust_region_gate",
+        }
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`receding_joint_projection_stops_before_fresh_path_access`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v18.4 receding projection decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "candidate_count": 4,
+        "direct_audit_candidate_count": 4,
+        "exact_oracle_audit_candidate_count": 1,
+        "actor_correction_targets_accessed": False,
+        "selected_direct_joint_feasible_path_count": 69,
+        "selected_exact_oracle_joint_feasible_path_count": 120,
+        "selected_actor_floor_recovered_path_count": 2,
+        "selected_reference_feasible_preserved_path_count": 67,
+        "selected_correction_abs_maximum": float(
+            selected["correction_abs_maximum"]
+        ),
+        "selected_reference_correction_rms_maximum": float(
+            selected["reference_feasible_correction_rms_maximum"]
+        ),
+        "selected_actor_floor_correction_rms_maximum": float(
+            selected["actor_floor_correction_rms_maximum"]
+        ),
+        "selected_prefix_budget_violation_step_count": 40962,
+        "offline_exact_online_direct_gap_path_count": 51,
+        "fresh_validation_paths_accessed": False,
+        "eligible_for_fresh_path_validation": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -3220,6 +3391,9 @@ PARSERS = {
     ),
     "mujoco_v18_3_causal_joint_projection": (
         _mujoco_v18_3_causal_joint_projection_facts
+    ),
+    "mujoco_v18_4_receding_joint_projection": (
+        _mujoco_v18_4_receding_joint_projection_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

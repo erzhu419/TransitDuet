@@ -1,5 +1,5 @@
 {
-  "development_record_count": 39,
+  "development_record_count": 40,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 45,
+  "record_count": 46,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4807,6 +4807,57 @@
       "selection_access": "post_v18_2_reused_paths_without_target_labels"
     },
     {
+      "allowed_wording": "On the unchanged 120-path development panel, the selected H16 damped-velocity projector was exact-oracle feasible on 120/120 corrected totals but directly feasible on only 69/120 realized component traces, recovered 2/7 actor-floor paths, and recorded 40,962 prefix budget violations. This offline-exact versus online-direct gap rejects a moving-horizon debt-amortization rule without a recursive terminal certificate.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v18_4_receding_joint_projection_development.json",
+          "role": "decision",
+          "sha256": "390e1c5e2c1d784616edd82db4c5c334a0931f381cece3ff4400294875b79665"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_4_receding_joint_projection_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "6d8e34c02b48353a9847976a65e7a4f78d79de24a3e808e06881a4a93f228664"
+        }
+      ],
+      "claim": "A causal receding-horizon joint projector can amortize frequency debt without shifting it beyond the moving horizon or leaving the action trust region.",
+      "claim_id": "D40_RECEDING_JOINT_PROJECTION",
+      "decision": "receding_joint_projection_stops_before_fresh_path_access",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v18_4_receding_joint_projection_development",
+      "evidence_stage": "development",
+      "facts": {
+        "actor_correction_targets_accessed": false,
+        "candidate_count": 4,
+        "decision_status": "receding_joint_projection_stops_before_fresh_path_access",
+        "direct_audit_candidate_count": 4,
+        "eligible_for_fresh_path_validation": false,
+        "exact_oracle_audit_candidate_count": 1,
+        "fresh_validation_paths_accessed": false,
+        "integrity_status": "valid",
+        "offline_exact_online_direct_gap_path_count": 51,
+        "path_count": 120,
+        "selected_actor_floor_correction_rms_maximum": 0.25251917036308946,
+        "selected_actor_floor_recovered_path_count": 2,
+        "selected_correction_abs_maximum": 0.988801906635327,
+        "selected_direct_joint_feasible_path_count": 69,
+        "selected_exact_oracle_joint_feasible_path_count": 120,
+        "selected_prefix_budget_violation_step_count": 40962,
+        "selected_reference_correction_rms_maximum": 0.2507122109046519,
+        "selected_reference_feasible_preserved_path_count": 67,
+        "support_gate": false
+      },
+      "forbidden_wording": "V18.4 validates behavior-preserving online frequency projection, reward improvement, recursive feasibility, fresh-seed generalization, learned control, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "four_frozen_causal_horizon_forecast_candidates_four_hundred_eighty_direct_path_evaluations_one_hundred_twenty_selected_exact_oracle_audits_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_4_receding_joint_projection",
+      "positive_claim_supported": false,
+      "selection_access": "post_v18_3_reused_paths_without_actor_correction_targets"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4865,7 +4916,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "8ed2c50de2d049bd2ba214d3cbd0875120e43d9249a2475d5c5874f3fe66f50c",
+  "registry_sha256": "b8d4a8eb990a198e68dae5e8175abdbc9fef213516d2fcf27465d52e7e6a1a11",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

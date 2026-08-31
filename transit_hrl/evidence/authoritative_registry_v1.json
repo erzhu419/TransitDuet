@@ -1282,6 +1282,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v18_4_receding_joint_projection_development",
+      "claim_id": "D40_RECEDING_JOINT_PROJECTION",
+      "claim": "A causal receding-horizon joint projector can amortize frequency debt without shifting it beyond the moving horizon or leaving the action trust region.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "receding_joint_projection_stops_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "post_v18_3_reused_paths_without_actor_correction_targets",
+      "outcome_provenance": "four_frozen_causal_horizon_forecast_candidates_four_hundred_eighty_direct_path_evaluations_one_hundred_twenty_selected_exact_oracle_audits_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_4_receding_joint_projection",
+      "allowed_wording": "On the unchanged 120-path development panel, the selected H16 damped-velocity projector was exact-oracle feasible on 120/120 corrected totals but directly feasible on only 69/120 realized component traces, recovered 2/7 actor-floor paths, and recorded 40,962 prefix budget violations. This offline-exact versus online-direct gap rejects a moving-horizon debt-amortization rule without a recursive terminal certificate.",
+      "forbidden_wording": "V18.4 validates behavior-preserving online frequency projection, reward improvement, recursive feasibility, fresh-seed generalization, learned control, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v18_4_receding_joint_projection_development.json",
+          "sha256": "390e1c5e2c1d784616edd82db4c5c334a0931f381cece3ff4400294875b79665"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_4_receding_joint_projection_outcome_2026-08-31.md",
+          "sha256": "6d8e34c02b48353a9847976a65e7a4f78d79de24a3e808e06881a4a93f228664"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",
