@@ -86,6 +86,9 @@ MUJOCO_V18_3_CAUSAL_JOINT_PROJECTION_SCHEMA_VERSION = (
 MUJOCO_V18_4_RECEDING_JOINT_PROJECTION_SCHEMA_VERSION = (
     "freq_hrl_mujoco_v18_4_receding_joint_projection_development_v1"
 )
+MUJOCO_V18_5_ACTOR_FLOOR_SIGNAL_SCHEMA_VERSION = (
+    "freq_hrl_mujoco_v18_5_actor_floor_signal_development_v1"
+)
 DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY = Path("transit_hrl/evidence/authoritative_registry_v1.json")
 DEFAULT_OUTPUT_DIR = Path(
@@ -3319,6 +3322,82 @@ def _mujoco_v18_4_receding_joint_projection_facts(
     }
 
 
+def _mujoco_v18_5_actor_floor_signal_facts(
+    paths: dict[str, Path],
+) -> dict[str, Any]:
+    decision = _read_json(paths["decision"])
+    report = paths.get("report")
+    scheduler = dict(decision.get("scheduler") or {})
+    selected = dict(decision.get("selected_signal") or {})
+    if (
+        decision.get("schema_version")
+        != MUJOCO_V18_5_ACTOR_FLOOR_SIGNAL_SCHEMA_VERSION
+        or decision.get("status")
+        != "actor_floor_signal_stops_debt_feedback_direction"
+        or decision.get("integrity_status") != "valid"
+        or decision.get("evidence_role")
+        != "reused_path_causal_actor_floor_signal_diagnostic_only"
+        or decision.get("development_protocol_version")
+        != "mujoco_v18_5_actor_floor_signal_v1"
+        or decision.get("frozen_core_revision")
+        != "e97028fd121693c9c5902f2af61c5833006d887f"
+        or decision.get("frozen_source_manifest_sha256")
+        != "c37f934d1a5fb528b620e27678434148d65b8a727fde04176af5ce58a24b0d08"
+        or int(decision.get("path_count", -1)) != 120
+        or int(decision.get("candidate_count", -1)) != 2
+        or int(decision.get("score_count", -1)) != 6
+        or int(decision.get("assessment_count", -1)) != 12
+        or decision.get("actor_correction_targets_accessed") is not False
+        or scheduler.get("task_id") != "t86055"
+        or scheduler.get("task_status") != "done"
+        or list(scheduler.get("nodes") or []) != ["node003"]
+        or int(scheduler.get("cpu_cores", -1)) != 16
+        or int(scheduler.get("workers", -1)) != 16
+        or int(scheduler.get("peak_ram_mb", -1)) != 811
+        or scheduler.get("slurm_used") is not False
+        or selected.get("candidate_id") != "actor_floor_h16_hold"
+        or selected.get("score_field") != "floor_power_excess_mean"
+        or float(selected.get("global_rank_auc", -1.0))
+        != 0.95448798988622
+        or float(selected.get(
+            "actor_floor_environment_rank_auc", -1.0
+        ))
+        != 0.8441558441558441
+        or int(selected.get("top_7_actor_floor_count", -1)) != 4
+        or int(selected.get("top_14_actor_floor_count", -1)) != 5
+        or int(selected.get("top_28_actor_floor_count", -1)) != 7
+        or int(selected.get("unresolved_v17_14_path_rank", -1)) != 4
+        or selected.get("feedback_screen_eligible") is not False
+        or int(decision.get("eligible_signal_count", -1)) != 0
+        or decision.get("feedback_screen_allowed") is not False
+        or decision.get("fresh_validation_paths_accessed") is not False
+        or decision.get("fresh_path_access_allowed") is not False
+        or decision.get("support_gate") is not False
+        or report is None
+        or "`actor_floor_signal_stops_debt_feedback_direction`"
+        not in report.read_text(encoding="utf-8")
+    ):
+        raise ValueError("MuJoCo v18.5 actor-floor signal decision drifted")
+    return {
+        "decision_status": str(decision["status"]),
+        "integrity_status": "valid",
+        "path_count": 120,
+        "candidate_count": 2,
+        "score_count": 6,
+        "actor_correction_targets_accessed": False,
+        "selected_global_rank_auc": float(selected["global_rank_auc"]),
+        "selected_actor_floor_environment_rank_auc": float(
+            selected["actor_floor_environment_rank_auc"]
+        ),
+        "selected_top_14_actor_floor_count": 5,
+        "selected_unresolved_v17_14_path_rank": 4,
+        "eligible_signal_count": 0,
+        "feedback_screen_allowed": False,
+        "fresh_validation_paths_accessed": False,
+        "support_gate": False,
+    }
+
+
 PARSERS = {
     "mujoco_v12": _mujoco_v12_facts,
     "mujoco_v13": _mujoco_v13_facts,
@@ -3394,6 +3473,9 @@ PARSERS = {
     ),
     "mujoco_v18_4_receding_joint_projection": (
         _mujoco_v18_4_receding_joint_projection_facts
+    ),
+    "mujoco_v18_5_actor_floor_signal": (
+        _mujoco_v18_5_actor_floor_signal_facts
     ),
     "opaque_legacy": lambda paths: {
         "decision_status": "excluded_legacy",

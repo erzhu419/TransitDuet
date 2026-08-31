@@ -1309,6 +1309,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v18_5_actor_floor_signal_development",
+      "claim_id": "D41_CAUSAL_ACTOR_FLOOR_SIGNAL",
+      "claim": "A target-free causal actor-floor score reliably isolates paths that require actor-level total-action correction without broadly activating on reference-feasible behavior.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "actor_floor_signal_stops_debt_feedback_direction",
+      "integrity_status": "valid",
+      "selection_access": "post_v18_4_reused_paths_without_actor_correction_targets",
+      "outcome_provenance": "two_frozen_h16_causal_forecasts_six_scores_twelve_environment_conditioned_assessments_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_5_actor_floor_signal",
+      "allowed_wording": "On the unchanged 120-path development panel, the best target-free H16-hold floor-power score reached global AUC 0.9545 and Hopper-conditioned AUC 0.8442 and ranked the unresolved v17.14 path fourth, but covered only 5/7 actor-floor paths in the global top 14. No preregistered score passed the complete discrimination rule, so a tuned debt-feedback screen was not authorized.",
+      "forbidden_wording": "V18.5 validates a causal correction gate, dual-forecast post-hoc combinations, reward improvement, fresh-seed generalization, learned control, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v18_5_actor_floor_signal_development.json",
+          "sha256": "1c04621399d8a2c4f507d0f8932e88ff75c534e71f15bea1b537482fecd5865b"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_5_actor_floor_signal_outcome_2026-08-31.md",
+          "sha256": "0df1da61d5e84ba21572e55820615fd1c4f37c9df742fdf491376b2c98851579"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

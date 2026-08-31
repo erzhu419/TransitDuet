@@ -1,0 +1,48 @@
+{
+  "schema_version": "freq_hrl_mujoco_v18_5_actor_floor_signal_development_v1",
+  "status": "actor_floor_signal_stops_debt_feedback_direction",
+  "integrity_status": "valid",
+  "evidence_role": "reused_path_causal_actor_floor_signal_diagnostic_only",
+  "development_protocol_version": "mujoco_v18_5_actor_floor_signal_v1",
+  "frozen_core_revision": "e97028fd121693c9c5902f2af61c5833006d887f",
+  "frozen_source_manifest_sha256": "c37f934d1a5fb528b620e27678434148d65b8a727fde04176af5ce58a24b0d08",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "path_count": 120,
+  "candidate_count": 2,
+  "score_count": 6,
+  "assessment_count": 12,
+  "actor_correction_targets_accessed": false,
+  "scheduler": {
+    "task_id": "t86055",
+    "task_status": "done",
+    "nodes": [
+      "node003"
+    ],
+    "cpu_cores": 16,
+    "workers": 16,
+    "scheduler_runtime_seconds": 310.27893805503845,
+    "worker_runtime_seconds": 296.5092068350059,
+    "peak_ram_mb": 811,
+    "slurm_used": false
+  },
+  "selected_signal": {
+    "candidate_id": "actor_floor_h16_hold",
+    "score_field": "floor_power_excess_mean",
+    "global_rank_auc": 0.95448798988622,
+    "actor_floor_environment_rank_auc": 0.8441558441558441,
+    "top_7_actor_floor_count": 4,
+    "top_14_actor_floor_count": 5,
+    "top_28_actor_floor_count": 7,
+    "unresolved_v17_14_path_rank": 4,
+    "feedback_screen_eligible": false
+  },
+  "eligible_signal_count": 0,
+  "feedback_screen_allowed": false,
+  "fresh_validation_paths_accessed": false,
+  "fresh_path_access_allowed": false,
+  "support_gate": false,
+  "diagnosis": "The best preregistered causal score is informative within Hopper and ranks the unresolved path highly, but it misses two actor-floor paths in the global top 14. No preregistered score satisfies the complete discrimination rule, so a target-fitted debt-feedback screen is not authorized on this reused panel.",
+  "posthoc_observation_policy": "Any dual-forecast combination discovered after reading this result is exploratory and may not retroactively change the v18.5 decision or justify further reused-panel tuning.",
+  "next_decision": "Either freeze one theory-specified dual-forecast mechanism directly for untouched fresh validation, or close the MuJoCo actor-floor extension as negative development evidence and narrow the manuscript claim.",
+  "claim_boundary": "Reused-path causal signal diagnostic only; no correction policy, reward, fresh-seed, learned-control, or manuscript claim."
+}
