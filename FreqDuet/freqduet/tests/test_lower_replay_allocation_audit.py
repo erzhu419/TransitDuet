@@ -31,13 +31,24 @@ class LowerReplayAllocationAuditTest(unittest.TestCase):
         base_dim = 9
         rows = []
         specs = [
-            (0.20, 0.80, 0.25, 1.0 / 3.0, 1.0, 10.0),
-            (0.50, 0.50, 0.50, 2.0 / 3.0, 1.0, 20.0),
-            (0.80, 0.20, 0.75, 1.0, 1.0, 45.0),
-            (0.20, 0.80, 0.10, 1.0, 0.0, 45.0),
+            (0.20, 0.80, 0.25, 1.0 / 3.0, 1.0, 10.0, -0.20, 0.05, 0.00, 0.10),
+            (0.50, 0.50, 0.50, 2.0 / 3.0, 1.0, 20.0, 0.10, 0.10, 0.20, 0.20),
+            (0.80, 0.20, 0.75, 1.0, 1.0, 45.0, 0.40, 0.30, 0.80, 0.30),
+            (0.20, 0.80, 0.10, 1.0, 0.0, 45.0, 0.50, 0.10, 0.90, 0.40),
         ]
-        for load, capacity, queue, target_norm, valid, action in specs:
-            state = np.zeros(base_dim + len(FEATURES), dtype=np.float32)
+        for (
+            load,
+            capacity,
+            queue,
+            target_norm,
+            valid,
+            action,
+            local_hf,
+            delta_hf,
+            local_energy,
+            global_energy,
+        ) in specs:
+            state = np.zeros(base_dim + len(FEATURES) + 4, dtype=np.float32)
             state[0] = 1.0
             context = {
                 "load": load,
@@ -48,6 +59,12 @@ class LowerReplayAllocationAuditTest(unittest.TestCase):
             }
             for name, value in context.items():
                 state[base_dim + FEATURES.index(name)] = value
+            state[base_dim + len(FEATURES):] = [
+                local_hf,
+                delta_hf,
+                local_energy,
+                global_energy,
+            ]
             rows.append(
                 (
                     state,
@@ -90,6 +107,10 @@ class LowerReplayAllocationAuditTest(unittest.TestCase):
         self.assertEqual(result["replay_transitions"], 4)
         self.assertEqual(result["valid_transitions"], 3)
         self.assertEqual(result["base_state_dim"], 9)
+        self.assertEqual(result["frequency_start_index"], 17)
+        self.assertEqual(
+            result["hf_feature_indexes"]["local_hf_energy_norm"], 19
+        )
         self.assertAlmostEqual(result["valid_overall"]["action_mean_s"], 25.0)
         self.assertAlmostEqual(
             result["valid_by_load"]["low_0_033"]["action_mean_s"], 10.0
@@ -102,6 +123,13 @@ class LowerReplayAllocationAuditTest(unittest.TestCase):
         )
         self.assertEqual(high_target_high_load["count"], 1)
         self.assertAlmostEqual(high_target_high_load["zero_hold_regret_mean"], 0.0)
+        self.assertEqual(result["valid_by_hf_activity"]["active"]["count"], 2)
+        self.assertAlmostEqual(
+            result["valid_by_hf_energy"]["positive_high_067_100"][
+                "action_mean_s"
+            ],
+            45.0,
+        )
 
     def test_rejects_config_checkpoint_context_mismatch(self):
         with TemporaryDirectory() as tmp:

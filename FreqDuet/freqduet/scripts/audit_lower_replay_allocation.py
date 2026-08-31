@@ -21,6 +21,24 @@ REQUIRED_CONTEXT = {
     "regularity_hold_target_norm",
     "regularity_hold_target_valid",
 }
+HF_FEATURE_NAMES = (
+    "local_hf_residual_norm",
+    "delta_local_hf_residual_norm",
+    "local_hf_energy_norm",
+    "global_hf_energy_norm",
+)
+HF_LAYOUT_START = {
+    "high": 0,
+    "hf": 0,
+    "split": 0,
+    "high_prior": 0,
+    "hf_prior": 0,
+    "high_context": 0,
+    "hf_context": 0,
+    "all": 3,
+    "allfreq": 3,
+    "all_freq": 3,
+}
 
 
 def resolve_config_path(value: str | Path) -> Path:
@@ -89,11 +107,13 @@ def _summary(values: dict[str, np.ndarray], mask: np.ndarray) -> dict[str, objec
         selected["action_s"][target_positive]
         / selected["target_s"][target_positive]
     )
-    return {
+    result = {
         "count": count,
         "action_mean_s": float(selected["action_s"].mean()),
         "action_median_s": float(np.median(selected["action_s"])),
         "target_mean_s": float(selected["target_s"].mean()),
+        "action_minus_target_mean_s": float(
+            selected["action_minus_target_s"].mean()),
         "target_capture_ratio_mean": (
             float(capture.mean()) if capture.size else None),
         "load_mean": float(selected["load"].mean()),
@@ -109,6 +129,63 @@ def _summary(values: dict[str, np.ndarray], mask: np.ndarray) -> dict[str, objec
         "zero_hold_regret_fraction": float(
             (selected["zero_hold_regret"] > 1e-12).mean()),
     }
+    if "local_hf_residual_norm" in selected:
+        result.update({
+            "local_hf_residual_norm_mean": float(
+                selected["local_hf_residual_norm"].mean()),
+            "positive_local_hf_residual_norm_mean": float(
+                selected["positive_local_hf_residual_norm"].mean()),
+            "delta_local_hf_residual_norm_mean": float(
+                selected["delta_local_hf_residual_norm"].mean()),
+            "local_hf_energy_norm_mean": float(
+                selected["local_hf_energy_norm"].mean()),
+            "global_hf_energy_norm_mean": float(
+                selected["global_hf_energy_norm"].mean()),
+            "positive_local_hf_fraction": float(
+                (selected["local_hf_residual_norm"] > 0.0).mean()),
+            "hf_active_fraction": float(selected["hf_active"].mean()),
+        })
+    return result
+
+
+def _positive_quantile_bands(
+    values: np.ndarray,
+    valid: np.ndarray,
+    *,
+    zero_tolerance: float = 0.0,
+) -> tuple[dict[str, object], list[tuple[str, np.ndarray]]]:
+    positive = values[valid & (values > zero_tolerance)]
+    if positive.size:
+        q33, q67 = np.quantile(positive, [1.0 / 3.0, 2.0 / 3.0])
+    else:
+        q33 = q67 = float(zero_tolerance)
+    bands = [
+        ("nonpositive_or_zero", values <= zero_tolerance),
+        (
+            "positive_low_0_033",
+            (values > zero_tolerance) & (values <= q33),
+        ),
+        (
+            "positive_mid_033_067",
+            (values > q33) & (values <= q67),
+        ),
+        ("positive_high_067_100", values > q67),
+    ]
+    metadata = {
+        "zero_tolerance": float(zero_tolerance),
+        "positive_count": int(positive.size),
+        "positive_q33": float(q33),
+        "positive_q67": float(q67),
+    }
+    return metadata, bands
+
+
+def _masked_pearson(
+    left: np.ndarray,
+    right: np.ndarray,
+    mask: np.ndarray,
+) -> float | None:
+    return _pearson(left[mask], right[mask])
 
 
 def audit_lower_replay_allocation(
@@ -167,6 +244,26 @@ def audit_lower_replay_allocation(
     if max(feature_indexes.values()) >= states_array.shape[1]:
         raise ValueError("checkpoint state is shorter than its causal context")
 
+    frequency_cfg = config.get("frequency", {}) or {}
+    lower_mode = str(frequency_cfg.get("lower_mode", "high")).strip().lower()
+    if not bool(frequency_cfg.get("enable", False)) or not bool(
+        frequency_cfg.get("lower_features", False)
+    ):
+        raise ValueError("config has no enabled lower frequency features")
+    if lower_mode not in HF_LAYOUT_START:
+        raise ValueError(
+            "lower frequency mode has no auditable HF feature layout: "
+            f"{lower_mode}"
+        )
+    frequency_start = base_state_dim + len(features)
+    hf_start = frequency_start + HF_LAYOUT_START[lower_mode]
+    hf_feature_indexes = {
+        name: hf_start + offset
+        for offset, name in enumerate(HF_FEATURE_NAMES)
+    }
+    if max(hf_feature_indexes.values()) >= states_array.shape[1]:
+        raise ValueError("checkpoint state is shorter than its HF feature layout")
+
     headway_index = int(contract["target_headway_feature_index"])
     if not 0 <= headway_index < states_array.shape[1]:
         raise ValueError("checkpoint headway feature index is out of range")
@@ -189,9 +286,16 @@ def audit_lower_replay_allocation(
         (target_s / target_headway_s) ** 2, cost_cap
     )
     signed_gain = zero_hold_cost - absolute_cost
+    local_hf_residual = states_array[
+        :, hf_feature_indexes["local_hf_residual_norm"]
+    ]
+    local_hf_energy = np.maximum(
+        states_array[:, hf_feature_indexes["local_hf_energy_norm"]], 0.0
+    )
     values = {
         "action_s": actions_array,
         "target_s": target_s,
+        "action_minus_target_s": actions_array - target_s,
         "load": states_array[:, feature_indexes["load"]],
         "capacity": states_array[:, feature_indexes["capacity"]],
         "queue": states_array[:, feature_indexes["queue"]],
@@ -200,6 +304,20 @@ def audit_lower_replay_allocation(
         "signed_regularity_gain": signed_gain,
         "positive_regularity_gain": np.maximum(signed_gain, 0.0),
         "zero_hold_regret": np.maximum(-signed_gain, 0.0),
+        "local_hf_residual_norm": local_hf_residual,
+        "positive_local_hf_residual_norm": np.maximum(
+            local_hf_residual, 0.0
+        ),
+        "delta_local_hf_residual_norm": states_array[
+            :, hf_feature_indexes["delta_local_hf_residual_norm"]
+        ],
+        "local_hf_energy_norm": local_hf_energy,
+        "global_hf_energy_norm": np.maximum(
+            states_array[:, hf_feature_indexes["global_hf_energy_norm"]], 0.0
+        ),
+        "hf_active": (
+            (local_hf_residual > 0.0) & (local_hf_energy > 1e-12)
+        ).astype(np.float64),
     }
     valid = (
         states_array[:, feature_indexes["regularity_hold_target_valid"]] >= 0.5
@@ -225,6 +343,24 @@ def audit_lower_replay_allocation(
     by_target = {
         name: _summary(values, valid & mask) for name, mask in target_bands
     }
+    residual_band_metadata, residual_bands = _positive_quantile_bands(
+        values["local_hf_residual_norm"], valid
+    )
+    energy_band_metadata, energy_bands = _positive_quantile_bands(
+        values["local_hf_energy_norm"], valid, zero_tolerance=1e-12
+    )
+    by_hf_residual = {
+        name: _summary(values, valid & mask)
+        for name, mask in residual_bands
+    }
+    by_hf_energy = {
+        name: _summary(values, valid & mask)
+        for name, mask in energy_bands
+    }
+    by_hf_activity = {
+        "inactive": _summary(values, valid & (values["hf_active"] < 0.5)),
+        "active": _summary(values, valid & (values["hf_active"] >= 0.5)),
+    }
     joint = []
     for target_name, target_mask in target_bands:
         for load_name, load_mask in load_bands:
@@ -236,9 +372,26 @@ def audit_lower_replay_allocation(
                 }
             )
 
+    target_and_hf_energy = []
+    for target_name, target_mask in target_bands:
+        for energy_name, energy_mask in energy_bands:
+            target_and_hf_energy.append(
+                {
+                    "target_band": target_name,
+                    "hf_energy_band": energy_name,
+                    **_summary(values, valid & target_mask & energy_mask),
+                }
+            )
+
     valid_values = {name: value[valid] for name, value in values.items()}
+    positive_target = valid_values["target_s"] > 1e-9
+    target_capture = np.zeros_like(valid_values["target_s"])
+    target_capture[positive_target] = (
+        valid_values["action_s"][positive_target]
+        / valid_values["target_s"][positive_target]
+    )
     return {
-        "schema": "freqduet-lower-replay-allocation-audit-v1",
+        "schema": "freqduet-lower-replay-allocation-audit-v2",
         "checkpoint": str(checkpoint_path),
         "config": str(config_path),
         "checkpoint_episode": int(state.get("episode", -1)),
@@ -246,6 +399,9 @@ def audit_lower_replay_allocation(
         "valid_transitions": int(valid.sum()),
         "base_state_dim": base_state_dim,
         "context_features": features,
+        "frequency_mode": lower_mode,
+        "frequency_start_index": frequency_start,
+        "hf_feature_indexes": hf_feature_indexes,
         "regularity_contract": contract,
         "overall": _summary(values, np.ones(len(replay), dtype=bool)),
         "valid_overall": _summary(values, valid),
@@ -262,10 +418,49 @@ def audit_lower_replay_allocation(
             "regularity_gain_vs_load": _pearson(
                 valid_values["signed_regularity_gain"], valid_values["load"]
             ),
+            "action_vs_local_hf_residual": _pearson(
+                valid_values["action_s"],
+                valid_values["local_hf_residual_norm"],
+            ),
+            "action_vs_local_hf_energy": _pearson(
+                valid_values["action_s"], valid_values["local_hf_energy_norm"]
+            ),
+            "action_minus_target_vs_local_hf_residual": _pearson(
+                valid_values["action_minus_target_s"],
+                valid_values["local_hf_residual_norm"],
+            ),
+            "action_minus_target_vs_local_hf_energy": _pearson(
+                valid_values["action_minus_target_s"],
+                valid_values["local_hf_energy_norm"],
+            ),
+            "target_capture_vs_local_hf_residual": _masked_pearson(
+                target_capture,
+                valid_values["local_hf_residual_norm"],
+                positive_target,
+            ),
+            "target_capture_vs_local_hf_energy": _masked_pearson(
+                target_capture,
+                valid_values["local_hf_energy_norm"],
+                positive_target,
+            ),
+            "regularity_gain_vs_local_hf_residual": _pearson(
+                valid_values["signed_regularity_gain"],
+                valid_values["local_hf_residual_norm"],
+            ),
+            "regularity_gain_vs_local_hf_energy": _pearson(
+                valid_values["signed_regularity_gain"],
+                valid_values["local_hf_energy_norm"],
+            ),
         },
         "valid_by_load": by_load,
         "valid_by_target": by_target,
+        "hf_residual_band_boundaries": residual_band_metadata,
+        "hf_energy_band_boundaries": energy_band_metadata,
+        "valid_by_hf_residual": by_hf_residual,
+        "valid_by_hf_energy": by_hf_energy,
+        "valid_by_hf_activity": by_hf_activity,
         "valid_by_target_and_load": joint,
+        "valid_by_target_and_hf_energy": target_and_hf_energy,
     }
 
 
