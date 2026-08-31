@@ -26,6 +26,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
     _model_parameter_sha256,
     _raw_projection_target,
     _leakage_constraint_cost,
@@ -1119,6 +1120,50 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
 class MujocoControlIntegrationTest(unittest.TestCase):
+    def test_terminal_reserve_context_only_is_capacity_matched_but_unprojected(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=16
+        )
+        state_dim = mujoco_policy_state_dim(
+            observation_dim,
+            action_dim,
+            terminal_reserve_projection=True,
+        )
+        model = _hierarchical_model(
+            state_dim=state_dim,
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            clip_ratio=0.1,
+            leakage_constraint=False,
+        )
+        batch, row = rollout_hierarchical(
+            model,
+            seed=1897,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=16,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            sample=True,
+            episode_horizon=16,
+            responsibility_mode="additive",
+            lower_action_router_mode="direct",
+            upper_action_decoder_mode="hold",
+            terminal_reserve_context=True,
+            terminal_reserve_projection=False,
+            upper_hf_rms_budget=0.075,
+            lower_lf_rms_budget=0.0475,
+        )
+        self.assertIsNone(batch.upper.projection_target)
+        self.assertIsNone(batch.lower.projection_target)
+        self.assertEqual(row["terminal_reserve_context_enabled"], 1.0)
+        self.assertEqual(row["terminal_reserve_projection_enabled"], 0.0)
+        self.assertIn(
+            "terminal_reserve_raw_prefix_budget_violation_count", row
+        )
+
     def test_terminal_reserve_is_in_the_native_training_loop(self):
         observation_dim, action_dim = environment_dimensions(
             "HalfCheetah-v5", episode_horizon=32
@@ -1179,6 +1224,44 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         metrics = model.update(batch)
         self.assertIn("upper_projection_consistency_loss", metrics)
         self.assertIn("lower_projection_consistency_loss", metrics)
+
+    def test_v19_training_entrypoint_preserves_frozen_controls(self):
+        payload, rows, model = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[1907],
+            selection_seeds=[1909],
+            eval_seeds=[1913],
+            steps=8,
+            episode_horizon=8,
+            iterations=1,
+            optimizer_seed=1931,
+            upper_period=4,
+            hidden_dim=8,
+            ppo_clip_ratio=0.1,
+            upper_projection_consistency_coef=0.01,
+            lower_projection_consistency_coef=0.01,
+            terminal_reserve_projection=True,
+            lower_lf_rms_budget=0.0475,
+            upper_hf_rms_budget=0.075,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+            control_protocol_version=MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
+        )
+        self.assertEqual(payload["protocol_version"], MUJOCO_CONTROL_PROTOCOL_VERSION_V19)
+        self.assertEqual(payload["ppo_clip_ratio"], 0.1)
+        self.assertEqual(payload["upper_projection_consistency_coef"], 0.01)
+        self.assertTrue(payload["terminal_reserve_context_enabled"])
+        self.assertTrue(payload["terminal_reserve_projection_enabled"])
+        self.assertEqual(model.config.clip_ratio, 0.1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0]["terminal_reserve_certificate_violation_count"], 0.0
+        )
 
     def test_explicit_v1416_protocol_keeps_control_arm_comparable(self):
         payload, _, _ = train_mujoco_method(

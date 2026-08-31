@@ -126,6 +126,34 @@ def test_policy_context_is_fixed_size_and_contains_only_realized_history():
     assert scalars[4] == pytest.approx(1.0 / 5.0)
 
 
+def test_observe_executed_matches_raw_prefix_audit_without_projection():
+    projector = _projector()
+    projector.reset(2)
+    upper = np.asarray([[0.0, 0.0], [0.8, -0.8], [-0.8, 0.8]])
+    lower = np.asarray([[0.6, 0.6], [0.6, 0.6], [0.6, 0.6]])
+    rows = [
+        projector.observe_executed(u, l)
+        for u, l in zip(upper, lower, strict=True)
+    ]
+    powers = _prefix_powers(upper, lower)
+    np.testing.assert_allclose(
+        [row["upper_prefix_power"] for row in rows],
+        powers[:, 0],
+        atol=1e-12,
+    )
+    np.testing.assert_allclose(
+        [row["lower_prefix_power"] for row in rows],
+        powers[:, 1],
+        atol=1e-12,
+    )
+    assert not rows[-1]["prefix_budget_feasible"]
+    action_contexts, scalar_contexts = projector.policy_context
+    np.testing.assert_allclose(action_contexts[2], upper[-1], atol=1e-12)
+    np.testing.assert_allclose(action_contexts[-1], lower[-1], atol=1e-12)
+    assert scalar_contexts[1] > 1.0
+    assert scalar_contexts[2] > 1.0
+
+
 def test_backup_tail_flushes_both_finite_memory_filters():
     rng = np.random.default_rng(411)
     upper = rng.uniform(-0.7, 0.7, size=(12, 2))
@@ -204,5 +232,7 @@ def test_configuration_and_reset_contracts_are_fail_closed():
     projector = _projector()
     with pytest.raises(RuntimeError, match="reset"):
         projector.project(np.zeros(1), np.zeros(1))
+    with pytest.raises(RuntimeError, match="reset"):
+        projector.observe_executed(np.zeros(1), np.zeros(1))
     with pytest.raises(ValueError, match="positive"):
         projector.reset(0)

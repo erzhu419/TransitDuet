@@ -293,21 +293,17 @@ class CausalTerminalReserveProjector:
 
         upper_residual = upper_certificate.current_residual(upper)
         lower_residual = lower_certificate.current_residual(lower)
-        step_upper_energy = float(np.sum(np.square(upper_residual)))
-        step_lower_energy = float(np.sum(np.square(lower_residual)))
         upper_margin = upper_certificate.minimum_margin(upper)
         lower_margin = lower_certificate.minimum_margin(lower)
         total = upper + lower
         correction = total - total_proposal
 
-        self._upper_energy += step_upper_energy
-        self._lower_energy += step_lower_energy
-        self._upper_history.append(upper.copy())
-        self._lower_history.append(lower.copy())
-        self._upper_history = self._upper_history[-(self.upper_window - 1):]
-        self._lower_history = self._lower_history[-(self.lower_window - 1):]
-        self._previous_upper = upper.copy()
-        self._step_count += 1
+        self._commit(
+            upper,
+            lower,
+            upper_residual=upper_residual,
+            lower_residual=lower_residual,
+        )
         denominator = float(self._step_count * self._dimension)
 
         return {
@@ -351,6 +347,83 @@ class CausalTerminalReserveProjector:
                 np.max(np.abs(upper + lower - total))
             ),
         }
+
+    def observe_executed(
+        self,
+        upper: Any,
+        lower: Any,
+    ) -> dict[str, Any]:
+        """Advance certificate state without changing the executed components.
+
+        This is the capacity-matched baseline path: it exposes the same causal
+        finite-memory state as :meth:`project`, while retaining the raw policy
+        action and merely auditing whether its realized prefix respects the
+        frequency budgets.
+        """
+
+        self._require_reset()
+        upper_action = self._action(upper, "executed upper")
+        lower_action = self._action(lower, "executed lower")
+        upper_certificate = self._terminal_certificate(
+            history=self._upper_history,
+            window=self.upper_window,
+            rms_budget=self.upper_rms_budget,
+            accumulated_energy=self._upper_energy,
+            high_pass=True,
+            backup_coefficients=np.ones(self.upper_window, dtype=np.float64),
+        )
+        lower_backup = np.zeros(self.lower_window, dtype=np.float64)
+        lower_backup[0] = 1.0
+        lower_certificate = self._terminal_certificate(
+            history=self._lower_history,
+            window=self.lower_window,
+            rms_budget=self.lower_rms_budget,
+            accumulated_energy=self._lower_energy,
+            high_pass=False,
+            backup_coefficients=lower_backup,
+        )
+        upper_residual = upper_certificate.current_residual(upper_action)
+        lower_residual = lower_certificate.current_residual(lower_action)
+        self._commit(
+            upper_action,
+            lower_action,
+            upper_residual=upper_residual,
+            lower_residual=lower_residual,
+        )
+        denominator = float(self._step_count * self._dimension)
+        upper_power = float(self._upper_energy / denominator)
+        lower_power = float(self._lower_energy / denominator)
+        feasible = bool(
+            upper_power <= self.upper_rms_budget ** 2 + self.feasibility_tolerance
+            and lower_power
+            <= self.lower_rms_budget ** 2 + self.feasibility_tolerance
+        )
+        return {
+            "upper": upper_action.copy(),
+            "lower": lower_action.copy(),
+            "upper_residual": upper_residual.copy(),
+            "lower_residual": lower_residual.copy(),
+            "upper_prefix_power": upper_power,
+            "lower_prefix_power": lower_power,
+            "prefix_budget_feasible": feasible,
+        }
+
+    def _commit(
+        self,
+        upper: np.ndarray,
+        lower: np.ndarray,
+        *,
+        upper_residual: np.ndarray,
+        lower_residual: np.ndarray,
+    ) -> None:
+        self._upper_energy += float(np.sum(np.square(upper_residual)))
+        self._lower_energy += float(np.sum(np.square(lower_residual)))
+        self._upper_history.append(np.asarray(upper, dtype=np.float64).copy())
+        self._lower_history.append(np.asarray(lower, dtype=np.float64).copy())
+        self._upper_history = self._upper_history[-(self.upper_window - 1):]
+        self._lower_history = self._lower_history[-(self.lower_window - 1):]
+        self._previous_upper = np.asarray(upper, dtype=np.float64).copy()
+        self._step_count += 1
 
     def _terminal_certificate(
         self,

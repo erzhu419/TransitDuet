@@ -83,6 +83,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5 = (
     "freq_hrl_mujoco_shared_core_v17_5_feasibility_normalized_projection"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V19 = (
+    "freq_hrl_mujoco_shared_core_v19_terminal_reserve_training"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -94,6 +97,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_3,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -1312,6 +1316,7 @@ def rollout_hierarchical(
     episode_horizon: int = 1000,
     responsibility_trace_output: dict[str, np.ndarray] | None = None,
     actor_trace_output: dict[str, np.ndarray] | None = None,
+    terminal_reserve_context: bool = False,
     terminal_reserve_projection: bool = False,
     terminal_reserve_upper_window: int = 8,
     terminal_reserve_lower_window: int = 32,
@@ -1337,6 +1342,8 @@ def rollout_hierarchical(
         or not 0.0 <= float(upper_promotion_gain) <= 1.0
     ):
         raise ValueError("MuJoCo upper promotion gain must be in [0, 1]")
+    if not isinstance(terminal_reserve_context, bool):
+        raise TypeError("terminal_reserve_context must be boolean")
     if not isinstance(terminal_reserve_projection, bool):
         raise TypeError("terminal_reserve_projection must be boolean")
     if terminal_reserve_projection and (
@@ -1455,7 +1462,7 @@ def rollout_hierarchical(
                 upper_action_limit=float(upper_action_scale),
                 lower_action_limit=float(lower_action_scale),
             )
-            if terminal_reserve_projection
+            if terminal_reserve_context or terminal_reserve_projection
             else None
         )
         if terminal_projector is not None:
@@ -1641,6 +1648,7 @@ def rollout_hierarchical(
         upper_cost_values: list[float] = []
         lower_cost_values: list[float] = []
         terminal_projection_rows: list[dict[str, Any]] = []
+        terminal_audit_rows: list[dict[str, Any]] = []
         current_episode_return = 0.0
         episode_index = 0
         episode_seed = int(seed)
@@ -1852,7 +1860,9 @@ def rollout_hierarchical(
             )
             upper_projection_target = None
             lower_projection_target = None
-            if terminal_projector is not None:
+            if terminal_reserve_projection:
+                if terminal_projector is None:
+                    raise RuntimeError("terminal-reserve projector is unavailable")
                 projection_row = terminal_projector.project(
                     proposed_upper_action,
                     proposed_lower_action,
@@ -1878,6 +1888,13 @@ def rollout_hierarchical(
                     scale=float(lower_action_scale),
                 )
             else:
+                if terminal_projector is not None:
+                    terminal_audit_rows.append(
+                        terminal_projector.observe_executed(
+                            proposed_upper_action,
+                            proposed_lower_action,
+                        )
+                    )
                 nominal = np.clip(
                     execution_upper_action + canonical_lower_action,
                     -1.0,
@@ -2373,6 +2390,11 @@ def rollout_hierarchical(
             upper_promotion_gain=effective_upper_promotion_gain,
         )
         if terminal_projector is not None:
+            row["terminal_reserve_context_enabled"] = 1.0
+            row["terminal_reserve_projection_enabled"] = float(
+                terminal_reserve_projection
+            )
+        if terminal_reserve_projection:
             if len(terminal_projection_rows) != len(rewards):
                 raise RuntimeError(
                     "terminal-reserve diagnostics are not step-aligned"
@@ -2390,7 +2412,6 @@ def rollout_hierarchical(
                 for item in terminal_projection_rows
             )
             row.update({
-                "terminal_reserve_projection_enabled": 1.0,
                 "terminal_reserve_certificate_violation_count": float(
                     certificate_violations
                 ),
@@ -2439,6 +2460,23 @@ def rollout_hierarchical(
                 "terminal_reserve_lower_margin_min": float(np.min([
                     item["lower_terminal_reserve_min_margin"]
                     for item in terminal_projection_rows
+                ])),
+            })
+        elif terminal_projector is not None:
+            if len(terminal_audit_rows) != len(rewards):
+                raise RuntimeError(
+                    "terminal-reserve audit diagnostics are not step-aligned"
+                )
+            row.update({
+                "terminal_reserve_raw_prefix_budget_violation_count": float(sum(
+                    not bool(item["prefix_budget_feasible"])
+                    for item in terminal_audit_rows
+                )),
+                "terminal_reserve_raw_upper_prefix_power_max": float(np.max([
+                    item["upper_prefix_power"] for item in terminal_audit_rows
+                ])),
+                "terminal_reserve_raw_lower_prefix_power_max": float(np.max([
+                    item["lower_prefix_power"] for item in terminal_audit_rows
                 ])),
             })
         if responsibility_trace_output is not None:
@@ -3205,6 +3243,7 @@ def _hierarchical_model(
     action_dim: int,
     hidden_dim: int,
     learning_rate: float,
+    clip_ratio: float = 0.2,
     leakage_constraint: bool,
     upper_cost_critic: bool = False,
     upper_constraint: bool = False,
@@ -3251,6 +3290,8 @@ def _hierarchical_model(
     constraint_dual_scale_ema_beta: float = 0.95,
     constraint_dual_scale_floor: float = 1e-6,
 ) -> FrequencySeparatedActorCriticPPO:
+    if not np.isfinite(float(clip_ratio)) or not 0.0 < float(clip_ratio) < 1.0:
+        raise ValueError("PPO clip ratio must be in (0, 1)")
     return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
         upper_state_dim=state_dim,
         lower_state_dim=state_dim,
@@ -3259,6 +3300,7 @@ def _hierarchical_model(
         hidden_dim=int(hidden_dim),
         upper_learning_rate=float(learning_rate),
         lower_learning_rate=float(learning_rate),
+        clip_ratio=float(clip_ratio),
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
@@ -4142,6 +4184,13 @@ def train_mujoco_method(
     upper_period: int = 16,
     hidden_dim: int = 64,
     learning_rate: float = 3e-4,
+    ppo_clip_ratio: float = 0.2,
+    upper_projection_consistency_coef: float = 0.0,
+    lower_projection_consistency_coef: float = 0.0,
+    terminal_reserve_context: bool = False,
+    terminal_reserve_projection: bool = False,
+    terminal_reserve_upper_window: int = 8,
+    terminal_reserve_lower_window: int = 32,
     lower_lf_rms_budget: float = 0.05,
     checkpoint_smoothing_window: int = 8,
     checkpoint_min_delta: float = 1e-3,
@@ -4222,6 +4271,39 @@ def train_mujoco_method(
     name = str(method)
     if name not in METHODS:
         raise ValueError(f"unknown MuJoCo method: {name}")
+    if not np.isfinite(float(ppo_clip_ratio)) or not 0.0 < float(
+        ppo_clip_ratio
+    ) < 1.0:
+        raise ValueError("MuJoCo PPO clip ratio must be in (0, 1)")
+    for role, value in (
+        ("upper", upper_projection_consistency_coef),
+        ("lower", lower_projection_consistency_coef),
+    ):
+        if not np.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(
+                f"MuJoCo {role} projection consistency must be non-negative"
+            )
+    if not isinstance(terminal_reserve_context, bool):
+        raise ValueError("MuJoCo terminal-reserve context flag must be boolean")
+    if not isinstance(terminal_reserve_projection, bool):
+        raise ValueError("MuJoCo terminal-reserve projection flag must be boolean")
+    terminal_reserve_enabled = bool(
+        terminal_reserve_context or terminal_reserve_projection
+    )
+    if terminal_reserve_enabled and name != "freq_hrl":
+        raise ValueError("terminal-reserve training is defined only for Freq-HRL")
+    if (
+        float(upper_projection_consistency_coef) > 0.0
+        or float(lower_projection_consistency_coef) > 0.0
+    ) and not terminal_reserve_projection:
+        raise ValueError(
+            "projection consistency requires terminal-reserve projection"
+        )
+    if terminal_reserve_enabled and (
+        int(terminal_reserve_upper_window) < 2
+        or int(terminal_reserve_lower_window) < 2
+    ):
+        raise ValueError("terminal-reserve windows must be at least two")
     if str(upper_action_decoder_mode) not in UPPER_ACTION_DECODER_MODES:
         raise ValueError("unknown MuJoCo upper-action decoder mode")
     if not isinstance(deployment_frequency_closed_loop_trust_region, bool):
@@ -4438,8 +4520,20 @@ def train_mujoco_method(
         raise ValueError(
             "upper promotion requires headroom zero-DC lower routing"
         )
+    if terminal_reserve_enabled and (
+        str(responsibility_mode) != "additive"
+        or str(lower_action_router_mode) != "direct"
+        or str(upper_action_decoder_mode) != "hold"
+        or float(upper_promotion_gain) != 0.0
+    ):
+        raise ValueError(
+            "terminal-reserve training requires additive responsibility, "
+            "direct lower action, held upper action, and no promotion"
+        )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V19
+        if terminal_reserve_enabled
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5
         if str(lower_action_router_mode)
         == "causal_feasibility_normalized_audit_projection"
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4
@@ -4480,6 +4574,19 @@ def train_mujoco_method(
     selected_protocol_version = str(control_protocol_version)
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
+    if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V19}
+    ):
+        raise ValueError("v19 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
+        and inferred_protocol_version != MUJOCO_CONTROL_PROTOCOL_VERSION_V19
+    ):
+        raise ValueError(
+            "the v19 protocol label requires terminal-reserve context"
+        )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5
         and selected_protocol_version
@@ -5068,6 +5175,9 @@ def train_mujoco_method(
         action_dim,
         observe_router_strength=effective_router_observe_strength,
         lower_action_router_mode=effective_lower_action_router_mode,
+        terminal_reserve_projection=terminal_reserve_enabled,
+        terminal_reserve_upper_window=int(terminal_reserve_upper_window),
+        terminal_reserve_lower_window=int(terminal_reserve_lower_window),
     )
     actor_anchor_zero_state_indices = (
         (int(state_dim) - 1,)
@@ -5290,6 +5400,7 @@ def train_mujoco_method(
         action_dim=action_dim,
         hidden_dim=hidden_dim,
         learning_rate=learning_rate,
+        clip_ratio=ppo_clip_ratio,
         leakage_constraint=True,
         upper_cost_critic=upper_cost_critic_for_capacity,
         upper_constraint=False,
@@ -5686,6 +5797,7 @@ def train_mujoco_method(
             action_dim=action_dim,
             hidden_dim=hidden_dim,
             learning_rate=learning_rate,
+            clip_ratio=ppo_clip_ratio,
             leakage_constraint=leakage_constraint,
             upper_cost_critic=upper_cost_critic_for_capacity,
             upper_constraint=(
@@ -5697,6 +5809,12 @@ def train_mujoco_method(
             lower_constraint_update_mode=lower_constraint_update_mode,
             upper_actor_anchor_coef=upper_actor_anchor_coef,
             lower_actor_anchor_coef=lower_actor_anchor_coef,
+            upper_projection_consistency_coef=(
+                upper_projection_consistency_coef
+            ),
+            lower_projection_consistency_coef=(
+                lower_projection_consistency_coef
+            ),
             actor_anchor_zero_state_indices=(
                 actor_anchor_zero_state_indices
             ),
@@ -5871,6 +5989,14 @@ def train_mujoco_method(
                 collect_trajectory=collect_trajectory,
                 method=name,
                 episode_horizon=episode_horizon,
+                terminal_reserve_context=terminal_reserve_enabled,
+                terminal_reserve_projection=terminal_reserve_projection,
+                terminal_reserve_upper_window=int(
+                    terminal_reserve_upper_window
+                ),
+                terminal_reserve_lower_window=int(
+                    terminal_reserve_lower_window
+                ),
             )
         closed_loop_guard_fn = None
         if deployment_frequency_closed_loop_trust_region:
@@ -6134,6 +6260,14 @@ def train_mujoco_method(
                     sample=False,
                     method=name,
                     episode_horizon=episode_horizon,
+                    terminal_reserve_context=terminal_reserve_enabled,
+                    terminal_reserve_projection=terminal_reserve_projection,
+                    terminal_reserve_upper_window=int(
+                        terminal_reserve_upper_window
+                    ),
+                    terminal_reserve_lower_window=int(
+                        terminal_reserve_lower_window
+                    ),
                 )[1]
             row.update({
                 "training_replicate_seed": int(optimizer_seed),
@@ -6235,6 +6369,23 @@ def train_mujoco_method(
         "steps": int(steps),
         "training_transition_budget_per_path": int(steps),
         "evaluation_episode_horizon": int(episode_horizon),
+        "ppo_clip_ratio": float(ppo_clip_ratio),
+        "upper_projection_consistency_coef": float(
+            upper_projection_consistency_coef
+        ),
+        "lower_projection_consistency_coef": float(
+            lower_projection_consistency_coef
+        ),
+        "terminal_reserve_context_enabled": terminal_reserve_enabled,
+        "terminal_reserve_projection_enabled": bool(
+            terminal_reserve_projection
+        ),
+        "terminal_reserve_upper_window": int(
+            terminal_reserve_upper_window
+        ),
+        "terminal_reserve_lower_window": int(
+            terminal_reserve_lower_window
+        ),
         "bootstrap_contract": (
             "explicit_reward_and_cost_next_value_with_separate_trace_boundary_"
             "and_mdp_terminal"
@@ -6810,6 +6961,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--upper-period", type=int, default=16)
     parser.add_argument("--hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--ppo-clip-ratio", type=float, default=0.2)
+    parser.add_argument(
+        "--upper-projection-consistency-coef", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--lower-projection-consistency-coef", type=float, default=0.0
+    )
+    parser.add_argument("--terminal-reserve-context", action="store_true")
+    parser.add_argument("--terminal-reserve-projection", action="store_true")
+    parser.add_argument(
+        "--terminal-reserve-upper-window", type=int, default=8
+    )
+    parser.add_argument(
+        "--terminal-reserve-lower-window", type=int, default=32
+    )
     parser.add_argument("--lower-lf-rms-budget", type=float, default=0.05)
     parser.add_argument("--upper-action-scale", type=float, default=1.0)
     parser.add_argument("--lower-action-scale", type=float, default=1.0)
@@ -7123,6 +7289,17 @@ def main() -> None:
         upper_period=args.upper_period,
         hidden_dim=args.hidden_dim,
         learning_rate=args.learning_rate,
+        ppo_clip_ratio=args.ppo_clip_ratio,
+        upper_projection_consistency_coef=(
+            args.upper_projection_consistency_coef
+        ),
+        lower_projection_consistency_coef=(
+            args.lower_projection_consistency_coef
+        ),
+        terminal_reserve_context=args.terminal_reserve_context,
+        terminal_reserve_projection=args.terminal_reserve_projection,
+        terminal_reserve_upper_window=args.terminal_reserve_upper_window,
+        terminal_reserve_lower_window=args.terminal_reserve_lower_window,
         lower_lf_rms_budget=args.lower_lf_rms_budget,
         checkpoint_smoothing_window=args.checkpoint_smoothing_window,
         checkpoint_min_delta=args.checkpoint_min_delta,
