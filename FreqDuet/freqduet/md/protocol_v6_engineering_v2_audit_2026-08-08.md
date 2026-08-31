@@ -1784,3 +1784,72 @@ does not remove the journey--regularity tradeoff. V18 is rejected as a mainline
 objective family. Further work must change how the lower policy represents or
 predicts action value, rather than sweep additional gain weights, HF penalties,
 or state-wide scalar gates.
+
+### Engineering-v19 exact discrete lower-critic preregistration (2026-09-01)
+
+V19 changes the lower reward critic rather than adding another execution guard
+or analytic gain multiplier. The lower policy already selects from the exact
+holding library `[0,5,10,15,20,30,45] s`, but the historical reward critic
+receives holding seconds as a continuous scalar. That representation imposes
+unregistered interpolation geometry between categorical actions and mixes the
+large state-value term with the marginal value of holding. V19 evaluates two
+exact categorical alternatives: one Q head per library action (`indexed`) and
+a universal zero-hold-anchored parameterization
+`Q(s,a)=V(s)+A(s,a), A(s,0)=0` (`zero_hold_advantage`). The latter makes the
+zero-second head exactly the state value, learns only the six identifiable
+nonzero-action advantages, and retains the ability to represent any
+categorical Q vector.
+
+Only the lower reward critic and its target network change. The categorical
+actor, replay transitions, seven actions, pessimistic ensemble aggregation,
+cost critic, dual constraint, entropy objective, causal state, upper policy,
+and noguard execution semantics remain inherited. The scalar cost critic is
+deliberately unchanged so the screen isolates reward action-value
+representation. Training and deployment checkpoints explicitly store the
+critic type and exact action library; incompatible restore is rejected.
+
+The four registered candidates cross both critic representations with two
+already-audited objectives: V13 zero-hold regret and same-source V14
+capacity-gated gain at `w=0.020,x=1`. Controls are hard main, noguard, compact
+context-only, current confirmed main, V11 same-entropy, and the scalar V13/V14
+anchors. Fresh training seeds are `24013,24031,24053,24077`; frozen
+common-random-number evaluation seeds are `57017,57041,57059,57083`. The
+screen is 40 episodes with checkpoint 39 and V13 as the aggregation reference.
+
+The locked mechanism gate requires exact critic telemetry, frozen actor and
+critic, exact V13/V14 objective contracts, explicit `zero_hold_regret_v2`
+constraint semantics, action regret at most `0.00025`, causal evidence coverage
+at least `0.50`, and zero execution adjustment. A candidate must improve its
+matched scalar anchor by at least `0.05 min` restricted journey and `0.001`
+headway CV simultaneously, without increasing mean holding action, holding
+vehicle-seconds, or denied dispatch. It must also satisfy the existing
+noguard/current/V11 performance and historical resource limits. Fixed priority
+is V14 zero-hold advantage, V13 zero-hold advantage, V14 indexed, then V13
+indexed. A pass is exploratory only and requires fresh 200-episode
+confirmation; no pass rejects these reward-critic representations without
+changing thresholds.
+
+### V19 implementation smoke and frozen-telemetry audit (2026-09-01)
+
+The first two-episode implementation smoke completed all six scalar/categorical
+rows, exact checkpoint restore, and frozen evaluation, but exposed an existing
+diagnostic mismatch: `lower_policy_frozen`, `lower_critic_frozen`, and
+`upper_policy_frozen` were reported as zero in eval-only episodes. Policy-state
+digests before and after every frozen rollout were identical, so evaluation was
+not updating a model; the flags only represented configured training-phase
+freeze schedules. The runner now reports these fields as one whenever
+`training=False`, matching their names and the already-enforced digest
+contract. A regression test locks this behavior.
+
+A corrected four-candidate smoke used non-formal seeds `24903/57903`. Both
+objectives and both critic representations trained for two episodes, restored
+checkpoint 1, and completed frozen evaluation. Every frozen row reports the
+registered critic type, all three frozen flags equal to one, explicit
+`zero_hold_regret_v2`, zero execution adjustment, and causal-evidence coverage
+above `0.79`. The final training rows have nonzero mean Q action spans:
+approximately `0.130` for the final indexed control and `0.193--0.203` for the
+final zero-hold-advantage critics. The corrected advantage network has seven
+outputs for seven actions, and its zero-action Q is exactly the state-value
+output. This verifies active learning and telemetry only; the smoke outcomes
+are not effect evidence. All temporary smoke directories, including
+checkpoints, are deleted after this record.

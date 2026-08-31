@@ -8,6 +8,7 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     CAPACITY_GAIN_CONFIGS,
     CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
+    DISCRETE_CRITIC_CONFIGS,
     EFFICIENCY_GAIN_CONFIGS,
     FLEET_EFFICIENCY_GAIN_CONFIGS,
     HF_OPPORTUNITY_GAIN_CONFIGS,
@@ -562,6 +563,56 @@ class ProtocolV6ConfigTest(unittest.TestCase):
             for weight in (0.005, 0.01, 0.02)
             for exponent in (1.0, 2.0)
         })
+
+    def test_lower_discrete_critic_configs_lock_action_value_semantics(self):
+        configs = [CONFIRMED_MAIN, *DISCRETE_CRITIC_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(DISCRETE_CRITIC_CONFIGS),
+        )
+
+        for name in DISCRETE_CRITIC_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            expected = (
+                "zero_hold_advantage" if "_qadv0_" in name else "indexed")
+            self.assertEqual(lower["discrete_critic"], expected)
+            self.assertIn(0.0, lower["action_bins"])
+            objective = lower["causal_regularity_policy"]
+            if "w2adcapgain" in name:
+                self.assertEqual(
+                    objective["mode"],
+                    "analytic_two_sided_capacity_gain_regret_dual_v3",
+                )
+                self.assertEqual(
+                    objective["capacity_gated_gain"]["weight"], 0.02)
+            else:
+                self.assertEqual(
+                    objective["mode"],
+                    "analytic_two_sided_zero_hold_regret_dual_v2",
+                )
+
+    def test_zero_hold_advantage_runner_resolves_exact_critic(self):
+        name = (
+            "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_"
+            "w0020_x1_qadv0_hiro")
+        config = load_config(ROOT / "configs_freqduet" / f"{name}.yaml")
+        with TemporaryDirectory() as tmp:
+            config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(config)
+
+        self.assertEqual(
+            runner.lower_trainer.discrete_critic,
+            "zero_hold_advantage",
+        )
+        self.assertTrue(runner.lower_trainer.q_net.zero_hold_advantage)
+        self.assertEqual(
+            runner.lower_trainer.q_net.zero_action_index,
+            0,
+        )
 
     def test_efficiency_gain_configs_lock_v14_semantics_and_grid(self):
         configs = [CONFIRMED_MAIN, *EFFICIENCY_GAIN_CONFIGS]

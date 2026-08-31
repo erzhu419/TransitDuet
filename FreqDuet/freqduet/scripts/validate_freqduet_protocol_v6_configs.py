@@ -53,16 +53,28 @@ NORMALIZED_REGULARITY_CONFIGS = [
     for limit, fraction in (("0010", "50"), ("0020", "25"))
     for initial in ("005", "010", "020")
 ]
+DISCRETE_CRITIC_ZERO_HOLD_CONFIGS = [
+    "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qidx_hiro",
+    "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qadv0_hiro",
+]
 ZERO_HOLD_REGRET_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adregret_l{initial}_e25_r{limit}_hiro"
     for initial in ("001", "005")
     for limit in ("00025", "0005", "0010")
+] + DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
+DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS = [
+    "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qidx_hiro",
+    "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qadv0_hiro",
 ]
 CAPACITY_GAIN_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w{weight}_x{exponent}_hiro"
     for exponent in ("1", "2")
     for weight in ("0005", "0010", "0020")
-]
+] + DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS
+DISCRETE_CRITIC_CONFIGS = (
+    DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
+    + DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS
+)
 EFFICIENCY_GAIN_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adeffgain_l001_e25_r00025_w{weight}_b{penalty}_hiro"
     for penalty in ("05", "10", "20")
@@ -161,6 +173,21 @@ def validate(
         regularity_policy = lower.get(
             "causal_regularity_policy", {}) or {}
         lower_context = (frequency.get("lower_context", {}) or {})
+        if name in DISCRETE_CRITIC_CONFIGS:
+            expected_discrete_critic = (
+                "zero_hold_advantage" if "_qadv0_" in name else "indexed")
+            if lower.get("discrete_critic") != expected_discrete_critic:
+                raise ValueError(
+                    f"{name}: lower discrete critic contract is not locked")
+            action_bins = [float(value) for value in (
+                lower.get("action_bins", []) or [])]
+            if len(action_bins) < 2:
+                raise ValueError(
+                    f"{name}: lower discrete critic requires action bins")
+            if (expected_discrete_critic == "zero_hold_advantage"
+                    and 0.0 not in action_bins):
+                raise ValueError(
+                    f"{name}: zero-hold advantage critic lacks zero action")
         required = {
             "protocol.version": (
                 protocol.get("version"), "freqduet-eval-v6"),

@@ -275,6 +275,7 @@ class DiagnosticLog:
         # lower policy
         'lower_action_mean', 'lower_action_std', 'lower_action_min', 'lower_action_max',
         'lower_headway_state_mode', 'lower_state_input_schema',
+        'lower_discrete_critic',
         'lower_context_gate_enabled', 'lower_context_gate_active_mean',
         'lower_action_bins_gate_enabled', 'lower_action_bins_gate_active_mean',
         'lower_reward_mean', 'lower_reward_std',
@@ -300,6 +301,8 @@ class DiagnosticLog:
         'lower_departure_regularity_post_loss_mean',
         # lower training
         'lower_q_mean', 'lower_q_std', 'lower_q_loss', 'lower_q_mse',
+        'lower_q_action_span_mean',
+        'lower_q_zero_hold_advantage_abs_mean',
         'lower_ood_loss', 'lower_q_l1', 'lower_q_l1_penalty',
         'lower_cost_q_mean', 'lower_cost_q_loss', 'lower_batch_cost_mean',
         'lower_cost_limit',
@@ -2229,6 +2232,8 @@ class TransitDuetV2Runner:
                     'cost_limit_semantics', 'per_decision_rate'),
                 critic_aggregation=lower_cfg.get(
                     'critic_aggregation', 'ensemble_mean_lcb'),
+                discrete_critic=lower_cfg.get(
+                    'discrete_critic', 'continuous_action'),
                 policy_sample_seed=(
                     self.randomness.seed('lower_policy')
                     if self.randomness.isolated else None),
@@ -8589,14 +8594,17 @@ class TransitDuetV2Runner:
 
         # Lower
         lower_policy_frozen = (
-            self.freeze_lower_policy_after_ep is not None
-            and ep >= self.freeze_lower_policy_after_ep)
+            not training
+            or (self.freeze_lower_policy_after_ep is not None
+                and ep >= self.freeze_lower_policy_after_ep))
         lower_critic_frozen = (
-            self.freeze_lower_critic_after_ep is not None
-            and ep >= self.freeze_lower_critic_after_ep)
+            not training
+            or (self.freeze_lower_critic_after_ep is not None
+                and ep >= self.freeze_lower_critic_after_ep))
         upper_policy_frozen = (
-            self.freeze_upper_after_ep is not None
-            and ep >= self.freeze_upper_after_ep)
+            not training
+            or (self.freeze_upper_after_ep is not None
+                and ep >= self.freeze_upper_after_ep))
 
         if (learned_training and not lower_critic_frozen
                 and len(self.replay_buffer) > self.batch_size):
@@ -9140,6 +9148,8 @@ class TransitDuetV2Runner:
             'lower_action_max': round(la_stat['max'], 2),
             'lower_headway_state_mode': self.lower_headway_state_mode,
             'lower_state_input_schema': self.lower_state_input_schema,
+            'lower_discrete_critic': str(
+                self.lower_trainer.discrete_critic),
             'lower_context_gate_enabled': int(getattr(
                 self.env, 'lower_context_gate_enabled', False)),
             'lower_context_gate_active_mean': round(
@@ -9201,6 +9211,10 @@ class TransitDuetV2Runner:
             'lower_q_std': lower_m.get('q_std', 0.),
             'lower_q_loss': lower_m.get('q_loss', 0.),
             'lower_q_mse': lower_m.get('q_mse', 0.),
+            'lower_q_action_span_mean': lower_m.get(
+                'q_action_span_mean', 0.),
+            'lower_q_zero_hold_advantage_abs_mean': lower_m.get(
+                'q_zero_hold_advantage_abs_mean', 0.),
             'lower_ood_loss': lower_m.get('ood_loss', 0.),
             'lower_q_l1': lower_m.get('q_l1', 0.),
             'lower_q_l1_penalty': lower_m.get('q_l1_penalty', 0.),
@@ -10509,6 +10523,10 @@ class TransitDuetV2Runner:
         print(f"  Lower: state={self.lower_state_dim}  K={self.lower_trainer.ensemble_size}  "
               f"batch={self.batch_size}  updates/ep={self.updates_per_episode}"
               f"{bins_note}{last_note}")
+        if self.lower_trainer.discrete_critic != 'continuous_action':
+            print(
+                "    lower_discrete_critic="
+                f"{self.lower_trainer.discrete_critic}")
         if self.lower_state_encoder is not None:
             print("    lower_state_encoder=physical_dimensionless_v1")
         print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "

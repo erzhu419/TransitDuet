@@ -293,6 +293,110 @@ class EnsembleQNetwork(nn.Module):
         return total
 
 
+class IndexedDiscreteEnsembleQNetwork(nn.Module):
+    """Ensemble critic with one exact output per holding-time action.
+
+    ``zero_hold_advantage=True`` uses a domain-aligned dueling
+    parameterization.  The first output is the zero-hold state value and the
+    remaining outputs are the nonzero-action advantages, with ``A(s, 0)=0``:
+
+    ``Q(s, a) = V(s) + A(s, a) - A(s, 0)``.
+
+    This remains able to represent any categorical Q vector while separating
+    the large state-value term from the marginal value of holding.
+    """
+
+    def __init__(self, num_inputs, action_candidates, hidden_dim=64,
+                 ensemble_size=10, n_layers=3,
+                 zero_hold_advantage=False):
+        super().__init__()
+        candidates = torch.as_tensor(
+            action_candidates, dtype=torch.float32).reshape(-1, 1)
+        if candidates.shape[0] < 2:
+            raise ValueError(
+                "action_candidates must contain at least two actions")
+        if not torch.isfinite(candidates).all():
+            raise ValueError("action_candidates must be finite")
+        if torch.unique(candidates).numel() != candidates.numel():
+            raise ValueError("action_candidates contains duplicate actions")
+        self.register_buffer("action_candidates", candidates)
+        self.ensemble_size = int(ensemble_size)
+        self.n_layers = int(n_layers)
+        self.zero_hold_advantage = bool(zero_hold_advantage)
+        zero_matches = torch.isclose(
+            candidates.reshape(-1), torch.tensor(0.0))
+        if self.zero_hold_advantage and int(zero_matches.sum()) != 1:
+            raise ValueError(
+                "zero-hold advantage critic requires one zero-second action")
+        self.zero_action_index = (
+            int(torch.nonzero(zero_matches, as_tuple=False)[0].item())
+            if self.zero_hold_advantage else None)
+
+        output_dim = int(candidates.shape[0])
+        dims = [num_inputs] + [hidden_dim] * n_layers + [output_dim]
+        self.weights = nn.ParameterList()
+        self.biases = nn.ParameterList()
+        for i in range(len(dims) - 1):
+            stddev = 1.0 / np.sqrt(dims[i])
+            self.weights.append(nn.Parameter(
+                torch.randn(
+                    ensemble_size, dims[i], dims[i + 1]) * stddev))
+            self.biases.append(nn.Parameter(
+                torch.zeros(ensemble_size, 1, dims[i + 1])))
+
+    def all_values(self, state):
+        x = state.unsqueeze(0).expand(self.ensemble_size, -1, -1)
+        for i, (weight, bias) in enumerate(zip(self.weights, self.biases)):
+            x = torch.bmm(x, weight) + bias
+            if i < self.n_layers:
+                x = F.relu(x)
+        if not self.zero_hold_advantage:
+            return x
+        state_value = x[..., :1]
+        nonzero_advantages = x[..., 1:]
+        zero_advantage = torch.zeros_like(state_value)
+        advantages = torch.cat((
+            nonzero_advantages[..., :self.zero_action_index],
+            zero_advantage,
+            nonzero_advantages[..., self.zero_action_index:],
+        ), dim=-1)
+        return state_value + advantages
+
+    def action_indices(self, action):
+        distances = (
+            action.unsqueeze(1)
+            - self.action_candidates.unsqueeze(0)
+        ).pow(2).sum(dim=-1)
+        min_distance, indices = distances.min(dim=-1)
+        if torch.any(min_distance > 1e-6):
+            raise ValueError(
+                "indexed discrete critic received an action outside its library")
+        return indices
+
+    def forward(self, state, action):
+        values = self.all_values(state)
+        indices = self.action_indices(action)
+        gather_index = indices.view(1, -1, 1).expand(
+            self.ensemble_size, -1, 1)
+        return values.gather(dim=-1, index=gather_index).squeeze(-1)
+
+    def compute_l1_norm(self, mode="sum"):
+        total = torch.zeros(
+            self.ensemble_size, device=self.weights[0].device)
+        count = 0
+        for weight, bias in zip(self.weights, self.biases):
+            total = (
+                total
+                + weight.abs().sum(dim=(1, 2))
+                + bias.abs().sum(dim=(1, 2)))
+            count += int(
+                weight.shape[1] * weight.shape[2]
+                + bias.shape[1] * bias.shape[2])
+        if mode == "mean":
+            total = total / max(count, 1)
+        return total
+
+
 class CostQNetwork(nn.Module):
     """Single Q-network for cost value estimation (not ensembled)."""
 
@@ -336,6 +440,7 @@ class RESACLagrangianTrainer:
                  entropy_action_coordinates="physical_legacy",
                  cost_limit_semantics="per_decision_rate",
                  critic_aggregation="ensemble_mean_lcb",
+                 discrete_critic="continuous_action",
                  policy_sample_seed=None,
                  action_limit_feature_index=None,
                  regularity_policy_objective=None,
@@ -358,6 +463,12 @@ class RESACLagrangianTrainer:
                 "critic_aggregation must be ensemble_mean_lcb or twin_min")
         if self.critic_aggregation == "twin_min" and int(ensemble_size) != 2:
             raise ValueError("twin_min requires ensemble_size=2")
+        self.discrete_critic = str(discrete_critic).strip().lower()
+        if self.discrete_critic not in {
+                "continuous_action", "indexed", "zero_hold_advantage"}:
+            raise ValueError(
+                "discrete_critic must be continuous_action, indexed, or "
+                "zero_hold_advantage")
         self.beta = beta              # LCB coefficient (negative = pessimistic)
         self.beta_ood = beta_ood      # OOD regularization weight
         self.weight_reg = weight_reg  # L1 regularization weight
@@ -390,12 +501,27 @@ class RESACLagrangianTrainer:
                 state_dim, hidden_dim, action_range,
                 entropy_action_coordinates=entropy_action_coordinates,
                 sample_seed=policy_sample_seed, device=device).to(device)
+        if (self.discrete_actions is None
+                and self.discrete_critic != "continuous_action"):
+            raise ValueError(
+                "an indexed discrete critic requires action_bins")
 
         # Ensemble Q-networks
-        self.q_net = EnsembleQNetwork(
-            state_dim, action_dim, hidden_dim, ensemble_size).to(device)
-        self.target_q_net = EnsembleQNetwork(
-            state_dim, action_dim, hidden_dim, ensemble_size).to(device)
+        if (self.discrete_actions is not None
+                and self.discrete_critic != "continuous_action"):
+            zero_hold_advantage = (
+                self.discrete_critic == "zero_hold_advantage")
+            self.q_net = IndexedDiscreteEnsembleQNetwork(
+                state_dim, self.discrete_actions, hidden_dim, ensemble_size,
+                zero_hold_advantage=zero_hold_advantage).to(device)
+            self.target_q_net = IndexedDiscreteEnsembleQNetwork(
+                state_dim, self.discrete_actions, hidden_dim, ensemble_size,
+                zero_hold_advantage=zero_hold_advantage).to(device)
+        else:
+            self.q_net = EnsembleQNetwork(
+                state_dim, action_dim, hidden_dim, ensemble_size).to(device)
+            self.target_q_net = EnsembleQNetwork(
+                state_dim, action_dim, hidden_dim, ensemble_size).to(device)
         self.target_q_net.load_state_dict(self.q_net.state_dict())
 
         # Cost Q-network (single, not ensembled)
@@ -1062,6 +1188,8 @@ class RESACLagrangianTrainer:
         bins = self.discrete_actions
         if bins is None:
             raise RuntimeError("discrete action values requested without bins")
+        if isinstance(q_net, IndexedDiscreteEnsembleQNetwork):
+            return q_net.all_values(state)
         batch = state.shape[0]
         n_actions = bins.shape[0]
         state_rep = (
@@ -1107,6 +1235,26 @@ class RESACLagrangianTrainer:
         if self.critic_aggregation == "twin_min":
             return q_all.min(dim=0).values, q_mean, q_std
         return q_mean + self.beta * q_std, q_mean, q_std
+
+    def _validate_checkpoint_action_library(self, policy_state):
+        saved_bins = policy_state.get('action_bins')
+        if self.discrete_actions is None:
+            if saved_bins is not None:
+                raise ValueError(
+                    'cannot load a categorical lower checkpoint into a '
+                    'continuous policy')
+            return
+        if saved_bins is None:
+            raise ValueError(
+                'cannot load a continuous lower checkpoint into a '
+                'categorical policy')
+        configured = self.discrete_actions.detach().cpu().reshape(-1)
+        saved = saved_bins.detach().cpu().reshape(-1)
+        if configured.shape != saved.shape or not torch.equal(
+                configured, saved):
+            raise ValueError(
+                'lower checkpoint action library does not match the '
+                'configured library')
 
     def update(self, replay_buffer, batch_size, reward_scale=10.0,
                update_policy=True, tap_signal=None, weight_fn=None):
@@ -1226,6 +1374,8 @@ class RESACLagrangianTrainer:
             'q_l1': l1_norm.item(),
             'q_l1_penalty': (self.weight_reg * l1_norm).item(),
             'cost_q_loss': cost_q_loss.item(),
+            'q_action_span_mean': 0.0,
+            'q_zero_hold_advantage_abs_mean': 0.0,
             'q_grad_norm': q_grad_norm.item() if isinstance(q_grad_norm, torch.Tensor) else float(q_grad_norm),
             'cq_grad_norm': cq_grad_norm.item() if isinstance(cq_grad_norm, torch.Tensor) else float(cq_grad_norm),
             'reward_batch_mean': reward.mean().item(),
@@ -1281,10 +1431,20 @@ class RESACLagrangianTrainer:
             regularity_target_pressure_mean = None
             regularity_hf_energy_mean = None
             regularity_hf_energy_pressure_mean = None
+            q_action_span_mean = None
+            q_zero_hold_advantage_abs_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
                 q_lcb, q_mean, q_std = self._policy_q_value(q_all)
+                q_action_span_mean = (
+                    q_mean.max(dim=-1).values
+                    - q_mean.min(dim=-1).values).mean()
+                zero_index = int(torch.argmin(torch.abs(
+                    self.discrete_actions.reshape(-1))).item())
+                zero_values = q_mean[:, zero_index:zero_index + 1]
+                q_zero_hold_advantage_abs_mean = (
+                    q_mean - zero_values).abs().mean()
                 cost_q_new = self._discrete_cost_values(
                     self.cost_q_net, state)             # [B, A]
                 entropy_log_prob = (probs * log_probs).sum(
@@ -1514,6 +1674,12 @@ class RESACLagrangianTrainer:
                 'lambda': self.lambda_param,
                 'q_mean': q_mean.mean().item(),
                 'q_std': q_std.mean().item(),
+                'q_action_span_mean': (
+                    q_action_span_mean.item()
+                    if q_action_span_mean is not None else 0.0),
+                'q_zero_hold_advantage_abs_mean': (
+                    q_zero_hold_advantage_abs_mean.item()
+                    if q_zero_hold_advantage_abs_mean is not None else 0.0),
                 'cost_q_mean': cost_q_new.mean().item(),
                 'batch_cost_mean': batch_cost_mean.item(),
                 'pi_grad_norm': pi_grad_norm.item() if isinstance(pi_grad_norm, torch.Tensor) else float(pi_grad_norm),
@@ -1597,7 +1763,7 @@ class RESACLagrangianTrainer:
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v7',
+            'format': 'freqduet-lower-training-v8',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -1617,6 +1783,7 @@ class RESACLagrangianTrainer:
             'temperature_contract': self.temperature_contract,
             'cost_limit_semantics': self.cost_limit_semantics,
             'critic_aggregation': self.critic_aggregation,
+            'discrete_critic': self.discrete_critic,
             'policy_sampling_state': self.policy_net.sampling_state(),
             'action_limit_feature_index': self.action_limit_feature_index,
             'regularity_policy_contract': self.regularity_policy_contract,
@@ -1639,7 +1806,8 @@ class RESACLagrangianTrainer:
                 'freqduet-lower-training-v4',
                 'freqduet-lower-training-v5',
                 'freqduet-lower-training-v6',
-                'freqduet-lower-training-v7'}:
+                'freqduet-lower-training-v7',
+                'freqduet-lower-training-v8'}:
             raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
@@ -1647,6 +1815,10 @@ class RESACLagrangianTrainer:
             raise ValueError('lower cost-limit semantics mismatch')
         if state.get('critic_aggregation') != self.critic_aggregation:
             raise ValueError('lower critic aggregation mismatch')
+        saved_discrete_critic = str(
+            state.get('discrete_critic', 'continuous_action')).strip().lower()
+        if saved_discrete_critic != self.discrete_critic:
+            raise ValueError('lower discrete critic mismatch')
         if (state.get('action_limit_feature_index')
                 != self.action_limit_feature_index):
             raise ValueError('lower action-limit feature contract mismatch')
@@ -1664,6 +1836,7 @@ class RESACLagrangianTrainer:
             saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower regularity-policy contract mismatch')
+        self._validate_checkpoint_action_library(state['policy'])
         self.policy_net.load_state_dict(state['policy'])
         self.q_net.load_state_dict(state['q_net'])
         self.target_q_net.load_state_dict(state['target_q_net'])
@@ -1707,6 +1880,7 @@ class RESACLagrangianTrainer:
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
             'temperature_contract': self.temperature_contract,
             'critic_aggregation': self.critic_aggregation,
+            'discrete_critic': self.discrete_critic,
             'entropy_action_coordinates': getattr(
                 self.policy_net, 'entropy_action_coordinates', 'categorical'),
             'policy_sampling_state': self.policy_net.sampling_state(),
@@ -1726,6 +1900,10 @@ class RESACLagrangianTrainer:
             'critic_aggregation', 'ensemble_mean_lcb')
         if saved_aggregation != self.critic_aggregation:
             raise ValueError('lower checkpoint critic aggregation mismatch')
+        saved_discrete_critic = str(
+            ckpt.get('discrete_critic', 'continuous_action')).strip().lower()
+        if saved_discrete_critic != self.discrete_critic:
+            raise ValueError('lower checkpoint discrete critic mismatch')
         if (ckpt.get('action_limit_feature_index')
                 != self.action_limit_feature_index):
             raise ValueError('lower checkpoint action-limit contract mismatch')
@@ -1743,6 +1921,7 @@ class RESACLagrangianTrainer:
             saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower checkpoint regularity-policy mismatch')
+        self._validate_checkpoint_action_library(ckpt['policy'])
         self.policy_net.load_state_dict(ckpt['policy'])
         self.q_net.load_state_dict(ckpt['q_net'])
         self.target_q_net.load_state_dict(ckpt['q_net'])

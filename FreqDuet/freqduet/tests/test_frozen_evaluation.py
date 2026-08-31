@@ -40,6 +40,9 @@ class FrozenEvaluationTest(unittest.TestCase):
                 record_diagnostics=False,
             )
             self.assertGreater(row["n_dispatches"], 0)
+            self.assertEqual(row["lower_policy_frozen"], 1.0)
+            self.assertEqual(row["lower_critic_frozen"], 1.0)
+            self.assertEqual(row["upper_policy_frozen"], 1.0)
             self.assertEqual(before, runner._policy_digest())
 
     def test_deployment_checkpoint_round_trip(self):
