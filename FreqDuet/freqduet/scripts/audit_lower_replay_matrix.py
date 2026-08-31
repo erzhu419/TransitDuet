@@ -162,7 +162,7 @@ def main() -> None:
         writer.writerows(rows)
 
     print(
-        "FREQDUET_REPLAY_AUDIT_COMPLETE "
+        "Eval complete: FREQDUET_REPLAY_AUDIT_COMPLETE "
         f"checkpoints={result['audited_checkpoints']} "
         f"json={args.out_json} csv={args.out_csv}"
     )
