@@ -1462,3 +1462,25 @@ configuration names. Frozen evaluation reported the same utilization
 diagnostics independently reported positive actor gain and distinct nonzero
 pressure for both exponents. These are implementation checks only and are not
 used as effect evidence.
+
+### V16 fleet-conditioned screen dispatch (2026-08-31)
+
+The preregistered 20-config screen was submitted through scheduler as tasks
+`t86787` to `t86866` under run name
+`protocol_v6_fleet_efficiency_gain_ep40_s4_e4_v16`. All 80 one-job shards use
+the clean detached snapshot at commit
+`ba19ad20b0ea4de68af1c3933051cc483d23e92b`, stage `exploratory`, 40 training
+episodes, and the registered four training and four frozen evaluation seeds.
+Tasks are pinned across `node001` through `node006` with distribution
+`14/14/13/13/13/13`, four declared CPU cores and 1270 MB RAM per shard. Heavy
+artifacts are suppressed and result synchronization is disabled.
+
+The initial bulk launch started 60 shards while 20 launch attempts encountered
+transient jump-host SSH resets or remote working-directory probe timeouts.
+Scheduler retried the existing task records; a final targeted dispatch reused
+the last three queued records without creating duplicate shards. The verified
+post-dispatch state is 80 of 80 tasks running. A representative record reports
+the exact source commit and protocol arguments, nonzero CPU and RAM use, and
+the isolated `freqduet-cpu-py310` interpreter. This record establishes source,
+protocol, and initial execution health only. Candidate selection and every
+effect claim remain pending complete aggregation and the locked V16 gate.
