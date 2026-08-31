@@ -373,6 +373,7 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
             lower_learning_rate=1e-2,
             upper_projection_consistency_coef=5.0,
             lower_projection_consistency_coef=5.0,
+            lower_lambda_init=1.0,
             entropy_coef=0.0,
             epochs=4,
             minibatch_size=8,
@@ -413,6 +414,73 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         ))
         with self.assertRaisesRegex(ValueError, "requires projection targets"):
             model.update(self._batch(seed=142))
+
+    def test_reward_guarded_projection_consistency_improves_target_without_reward_loss(self):
+        batch = self._batch(seed=143)
+        batch.upper.reward[:] = 0.0
+        batch.lower.reward[:] = 0.0
+        batch.upper.old_value[:] = 0.0
+        batch.lower.old_value[:] = 0.0
+        batch.upper.projection_target = np.full_like(batch.upper.action, 1.5)
+        batch.lower.projection_target = np.full_like(batch.lower.action, -1.5)
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            upper_learning_rate=1e-2,
+            lower_learning_rate=1e-2,
+            upper_projection_consistency_coef=5.0,
+            lower_projection_consistency_coef=5.0,
+            projection_consistency_update_mode=(
+                "reward_guarded_projection"
+            ),
+            projection_consistency_step_scale=1.0,
+            projection_consistency_max_backtracks=4,
+            projection_consistency_reward_tolerance=0.0,
+            entropy_coef=0.0,
+            epochs=1,
+            minibatch_size=64,
+        ))
+
+        metrics = model.update(batch)
+
+        for level in ("upper", "lower"):
+            self.assertEqual(
+                metrics[f"{level}_projection_guard_attempted"], 1.0
+            )
+            self.assertEqual(
+                metrics[f"{level}_projection_guard_accepted"], 1.0
+            )
+            self.assertLessEqual(
+                metrics[f"{level}_projection_guard_reward_loss_delta"],
+                0.0,
+            )
+            self.assertLess(
+                metrics[
+                    f"{level}_projection_guard_consistency_loss_delta"
+                ],
+                0.0,
+            )
+            self.assertLessEqual(
+                metrics[
+                    f"{level}_projection_guard_native_constraint_loss_delta"
+                ],
+                0.0,
+            )
+
+    def test_unknown_projection_consistency_update_mode_is_rejected(self):
+        with self.assertRaisesRegex(
+            ValueError, "projection_consistency_update_mode"
+        ):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                projection_consistency_update_mode="unknown",
+            ))
 
     def test_lower_cost_critic_can_use_a_distinct_causal_state(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

@@ -27,6 +27,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
     _model_parameter_sha256,
     _raw_projection_target,
     _leakage_constraint_cost,
@@ -1258,6 +1259,67 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         self.assertTrue(payload["terminal_reserve_context_enabled"])
         self.assertTrue(payload["terminal_reserve_projection_enabled"])
         self.assertEqual(model.config.clip_ratio, 0.1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0]["terminal_reserve_certificate_violation_count"], 0.0
+        )
+
+    def test_v20_training_entrypoint_delays_and_guards_consistency(self):
+        payload, rows, model = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[1949],
+            selection_seeds=[1951],
+            eval_seeds=[1973],
+            steps=8,
+            episode_horizon=8,
+            iterations=2,
+            optimizer_seed=1987,
+            upper_period=4,
+            hidden_dim=8,
+            ppo_clip_ratio=0.1,
+            upper_projection_consistency_coef=0.1,
+            lower_projection_consistency_coef=0.1,
+            projection_consistency_update_mode=(
+                "reward_guarded_projection"
+            ),
+            projection_consistency_training_schedule="delayed_linear",
+            projection_consistency_warmup_fraction=0.5,
+            projection_consistency_ramp_fraction=0.5,
+            terminal_reserve_projection=True,
+            lower_lf_rms_budget=0.0475,
+            upper_hf_rms_budget=0.075,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+            control_protocol_version="auto",
+        )
+        self.assertEqual(
+            payload["protocol_version"], MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        )
+        self.assertEqual(
+            payload["projection_consistency_update_mode"],
+            "reward_guarded_projection",
+        )
+        self.assertEqual(
+            [
+                row["projection_consistency_schedule_scale"]
+                for row in payload["history"][1:]
+            ],
+            [0.0, 1.0],
+        )
+        self.assertEqual(
+            payload["history"][1]["lower_projection_guard_attempted"],
+            0.0,
+        )
+        self.assertGreater(
+            payload["history"][2]["lower_projection_guard_attempted"],
+            0.0,
+        )
+        self.assertEqual(model.config.upper_projection_consistency_coef, 0.1)
         self.assertEqual(len(rows), 1)
         self.assertEqual(
             rows[0]["terminal_reserve_certificate_violation_count"], 0.0

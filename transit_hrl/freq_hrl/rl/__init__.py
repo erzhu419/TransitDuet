@@ -53,6 +53,7 @@ from .responsibility_distillation import (
 )
 from .smdp_actor_critic import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
+    PROJECTION_CONSISTENCY_UPDATE_MODES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -64,9 +65,11 @@ from .smdp_actor_critic import (
     concat_level_batches,
 )
 from .training import (
+    PROJECTION_CONSISTENCY_SCHEDULES,
     apply_replay_updates,
     apply_smdp_updates,
     concat_batches,
+    projection_consistency_schedule_scale,
     summarize_numeric_rows,
     train_dual_ppo,
     train_frequency_separated_ppo,
@@ -83,6 +86,8 @@ __all__ = [
     "DualPPOConfig",
     "DeploymentFrequencyStats",
     "DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES",
+    "PROJECTION_CONSISTENCY_SCHEDULES",
+    "PROJECTION_CONSISTENCY_UPDATE_MODES",
     "CausalGRUGaussianActor",
     "CausalGRUStateEncoder",
     "CausalGRUValueNet",
@@ -122,6 +127,7 @@ __all__ = [
     "fold_guarded_restoration_eligibility",
     "fit_actor_output_head",
     "paired_trace_invariance_diagnostics",
+    "projection_consistency_schedule_scale",
     "restoration_snapshot_eligible",
     "select_guarded_restoration_portfolio",
     "deterministic_actor_action",

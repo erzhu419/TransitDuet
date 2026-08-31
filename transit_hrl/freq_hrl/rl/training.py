@@ -48,6 +48,53 @@ JointRolloutFn = Callable[
     [JointActorCriticPPO, int, bool],
     tuple[JointTrajectoryBatch | None, dict[str, Any]],
 ]
+PROJECTION_CONSISTENCY_SCHEDULES = (
+    "constant",
+    "delayed_linear",
+)
+
+
+def projection_consistency_schedule_scale(
+    *,
+    iteration: int,
+    total_iterations: int,
+    schedule: str,
+    warmup_fraction: float,
+    ramp_fraction: float,
+) -> float:
+    """Return the projection-consistency multiplier for one PPO update."""
+
+    if str(schedule) not in PROJECTION_CONSISTENCY_SCHEDULES:
+        raise ValueError("unknown projection-consistency training schedule")
+    if int(total_iterations) < 1:
+        raise ValueError("total_iterations must be positive")
+    if int(iteration) < 0 or int(iteration) >= int(total_iterations):
+        raise ValueError("iteration must index the configured training run")
+    warmup = float(warmup_fraction)
+    ramp = float(ramp_fraction)
+    if (
+        not np.isfinite(warmup)
+        or not np.isfinite(ramp)
+        or not 0.0 <= warmup <= 1.0
+        or not 0.0 <= ramp <= 1.0
+        or warmup + ramp > 1.0
+    ):
+        raise ValueError(
+            "projection-consistency warmup and ramp fractions must be finite, "
+            "non-negative, and sum to at most one"
+        )
+    if str(schedule) == "constant":
+        return 1.0
+    if ramp <= 0.0:
+        raise ValueError(
+            "delayed-linear projection consistency requires a positive ramp"
+        )
+    progress = float(int(iteration) + 1) / float(int(total_iterations))
+    if progress <= warmup:
+        return 0.0
+    if progress >= warmup + ramp:
+        return 1.0
+    return float((progress - warmup) / ramp)
 
 
 def _validated_closed_loop_guard_snapshot(
@@ -981,6 +1028,9 @@ def train_frequency_separated_ppo(
     deployment_frequency_closed_loop_guard_fn: (
         SMDPClosedLoopGuardFn | None
     ) = None,
+    projection_consistency_training_schedule: str = "constant",
+    projection_consistency_warmup_fraction: float = 0.0,
+    projection_consistency_ramp_fraction: float = 0.0,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], FrequencySeparatedActorCriticPPO]:
     """Train Freq-HRL with one upper transition per macro interval."""
     metadata = dict(metadata or {})
@@ -1041,6 +1091,19 @@ def train_frequency_separated_ppo(
         return rank
 
     total_iterations = max(1, int(iterations))
+    projection_consistency_target_upper = float(
+        model.config.upper_projection_consistency_coef
+    )
+    projection_consistency_target_lower = float(
+        model.config.lower_projection_consistency_coef
+    )
+    projection_consistency_schedule_scale(
+        iteration=0,
+        total_iterations=total_iterations,
+        schedule=projection_consistency_training_schedule,
+        warmup_fraction=projection_consistency_warmup_fraction,
+        ramp_fraction=projection_consistency_ramp_fraction,
+    )
     if int(checkpoint_minimum_iteration) >= total_iterations:
         raise ValueError(
             "checkpoint minimum iteration must be below total iterations"
@@ -1275,6 +1338,21 @@ def train_frequency_separated_ppo(
         "upper_actor_anchor_loss": 0.0,
         "lower_actor_anchor_kl": 0.0,
         "lower_actor_anchor_loss": 0.0,
+        "projection_consistency_schedule_scale": (
+            1.0
+            if str(projection_consistency_training_schedule) == "constant"
+            else 0.0
+        ),
+        "upper_projection_consistency_effective_coef": (
+            projection_consistency_target_upper
+            if str(projection_consistency_training_schedule) == "constant"
+            else 0.0
+        ),
+        "lower_projection_consistency_effective_coef": (
+            projection_consistency_target_lower
+            if str(projection_consistency_training_schedule) == "constant"
+            else 0.0
+        ),
         "constraint_mean": 0.0,
         "constraint_lambda": float(model.constraint_lambda),
         "upper_constraint_mean": 0.0,
@@ -1311,6 +1389,19 @@ def train_frequency_separated_ppo(
     }]
 
     for iteration in range(total_iterations):
+        projection_consistency_scale = projection_consistency_schedule_scale(
+            iteration=iteration,
+            total_iterations=total_iterations,
+            schedule=projection_consistency_training_schedule,
+            warmup_fraction=projection_consistency_warmup_fraction,
+            ramp_fraction=projection_consistency_ramp_fraction,
+        )
+        model.config.upper_projection_consistency_coef = float(
+            projection_consistency_target_upper * projection_consistency_scale
+        )
+        model.config.lower_projection_consistency_coef = float(
+            projection_consistency_target_lower * projection_consistency_scale
+        )
         batches: list[HierarchicalTrajectoryBatch] = []
         sampled_rows = []
         rollout_seeds = _iteration_rollout_seeds(
@@ -1376,6 +1467,17 @@ def train_frequency_separated_ppo(
         else:
             guard_metrics = _disabled_closed_loop_guard_metrics()
         metrics.update(guard_metrics)
+        metrics.update({
+            "projection_consistency_schedule_scale": float(
+                projection_consistency_scale
+            ),
+            "upper_projection_consistency_effective_coef": float(
+                model.config.upper_projection_consistency_coef
+            ),
+            "lower_projection_consistency_effective_coef": float(
+                model.config.lower_projection_consistency_coef
+            ),
+        })
         evaluate_checkpoint = _checkpoint_evaluation_due(
             iteration,
             total_iterations=total_iterations,
@@ -1488,6 +1590,21 @@ def train_frequency_separated_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
+        "projection_consistency_training_schedule": str(
+            projection_consistency_training_schedule
+        ),
+        "projection_consistency_warmup_fraction": float(
+            projection_consistency_warmup_fraction
+        ),
+        "projection_consistency_ramp_fraction": float(
+            projection_consistency_ramp_fraction
+        ),
+        "upper_projection_consistency_target_coef": float(
+            projection_consistency_target_upper
+        ),
+        "lower_projection_consistency_target_coef": float(
+            projection_consistency_target_lower
+        ),
         "deployment_frequency_anchor_state_replay_enabled": (
             anchor_state_replay_enabled
         ),

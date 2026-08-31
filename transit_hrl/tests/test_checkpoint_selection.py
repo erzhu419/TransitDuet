@@ -18,6 +18,7 @@ from freq_hrl.rl.training import (
     _apply_closed_loop_actor_guard,
     _closed_loop_guard_accepts,
     _validated_closed_loop_guard_snapshot,
+    projection_consistency_schedule_scale,
     train_frequency_separated_ppo,
     train_joint_ppo,
 )
@@ -533,6 +534,96 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
             "minimum_validation_reward_v1",
         )
         self.assertEqual(heldout[0]["reward_mean"], 30.0)
+
+    def test_smdp_trainer_applies_delayed_projection_consistency_schedule(self):
+        self.assertEqual(
+            [
+                projection_consistency_schedule_scale(
+                    iteration=iteration,
+                    total_iterations=4,
+                    schedule="delayed_linear",
+                    warmup_fraction=0.5,
+                    ramp_fraction=0.5,
+                )
+                for iteration in range(4)
+            ],
+            [0.0, 0.0, 0.5, 1.0],
+        )
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1,
+            lower_state_dim=1,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=4,
+            epochs=1,
+            minibatch_size=4,
+            upper_projection_consistency_coef=2.0,
+            lower_projection_consistency_coef=4.0,
+        ))
+
+        def rollout_fn(_model, seed, train):
+            builder = HierarchicalRolloutBuilder(gamma=0.99)
+            builder.begin_upper(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+            )
+            builder.add_lower(
+                state=np.asarray([0.0], dtype=np.float32),
+                action=np.asarray([0.0], dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=True,
+                upper_projection_target=np.asarray(
+                    [0.25], dtype=np.float32
+                ),
+                lower_projection_target=np.asarray(
+                    [-0.25], dtype=np.float32
+                ),
+            )
+            return (builder.build() if train else None), {
+                "reward_mean": float(seed),
+            }
+
+        payload, _, trained = train_frequency_separated_ppo(
+            model=model,
+            train_seeds=[1],
+            selection_seeds=[10],
+            eval_seeds=[30],
+            iterations=4,
+            rollout_fn=rollout_fn,
+            objective_fn=lambda row: float(row["reward_mean"]),
+            projection_consistency_training_schedule="delayed_linear",
+            projection_consistency_warmup_fraction=0.5,
+            projection_consistency_ramp_fraction=0.5,
+        )
+
+        update_history = payload["history"][1:]
+        self.assertEqual(
+            [
+                row["projection_consistency_schedule_scale"]
+                for row in update_history
+            ],
+            [0.0, 0.0, 0.5, 1.0],
+        )
+        self.assertEqual(
+            [
+                row["upper_projection_consistency_effective_coef"]
+                for row in update_history
+            ],
+            [0.0, 0.0, 1.0, 2.0],
+        )
+        self.assertEqual(
+            payload["upper_projection_consistency_target_coef"], 2.0
+        )
+        self.assertEqual(
+            payload["lower_projection_consistency_target_coef"], 4.0
+        )
+        self.assertEqual(
+            trained.config.upper_projection_consistency_coef, 2.0
+        )
 
     def test_smdp_trainer_accepts_a_state_aligned_rank_contract(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

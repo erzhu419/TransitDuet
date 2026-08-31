@@ -32,6 +32,10 @@ CONSTRAINT_UPDATE_MODES = (
     "reward_guarded_projection",
     "reward_guarded_adam_projection",
 )
+PROJECTION_CONSISTENCY_UPDATE_MODES = (
+    "scalarized",
+    "reward_guarded_projection",
+)
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
     "violation_l2",
@@ -423,6 +427,10 @@ class SMDPPPOConfig:
     lower_actor_anchor_coef: float = 0.0
     upper_projection_consistency_coef: float = 0.0
     lower_projection_consistency_coef: float = 0.0
+    projection_consistency_update_mode: str = "scalarized"
+    projection_consistency_step_scale: float = 1.0
+    projection_consistency_max_backtracks: int = 8
+    projection_consistency_reward_tolerance: float = 0.0
     actor_anchor_zero_state_indices: tuple[int, ...] = ()
     promotion_entropy_coef: float | None = None
     promotion_rate_budget: float = 1.0
@@ -1298,6 +1306,35 @@ class FrequencySeparatedActorCriticPPO:
                     raise ValueError(
                         f"{level}_{suffix} must be finite and non-negative"
                     )
+        if (
+            str(config.projection_consistency_update_mode)
+            not in PROJECTION_CONSISTENCY_UPDATE_MODES
+        ):
+            raise ValueError(
+                "projection_consistency_update_mode must be scalarized or "
+                "reward_guarded_projection"
+            )
+        if (
+            not np.isfinite(float(config.projection_consistency_step_scale))
+            or float(config.projection_consistency_step_scale) <= 0.0
+        ):
+            raise ValueError(
+                "projection_consistency_step_scale must be positive and finite"
+            )
+        if int(config.projection_consistency_max_backtracks) < 0:
+            raise ValueError(
+                "projection_consistency_max_backtracks must be non-negative"
+            )
+        if (
+            not np.isfinite(
+                float(config.projection_consistency_reward_tolerance)
+            )
+            or float(config.projection_consistency_reward_tolerance) < 0.0
+        ):
+            raise ValueError(
+                "projection_consistency_reward_tolerance must be finite and "
+                "non-negative"
+            )
         anchor_indices = tuple(config.actor_anchor_zero_state_indices)
         if any(
             isinstance(index, bool) or int(index) != index or int(index) < 0
@@ -2897,6 +2934,14 @@ class FrequencySeparatedActorCriticPPO:
         projection_coefficient = float(
             getattr(cfg, f"{level}_projection_consistency_coef", 0.0)
         )
+        projection_update_mode = str(
+            cfg.projection_consistency_update_mode
+        )
+        projection_guarded = bool(
+            level in {"upper", "lower"}
+            and projection_coefficient > 0.0
+            and projection_update_mode == "reward_guarded_projection"
+        )
         projection_target_t = None
         if batch.projection_target is not None:
             projection_target_t = torch.as_tensor(
@@ -3064,6 +3109,11 @@ class FrequencySeparatedActorCriticPPO:
                     projection_consistency_loss = (
                         projection_coefficient * projection_consistency_mse
                     )
+                projection_actor_loss = (
+                    torch.zeros_like(projection_consistency_loss)
+                    if projection_guarded
+                    else projection_consistency_loss
+                )
                 policy_loss = (
                     -reward_surrogate
                     - float(cfg.promotion_counterfactual_coef)
@@ -3071,7 +3121,7 @@ class FrequencySeparatedActorCriticPPO:
                     + constraint_loss
                     + promotion_rate_loss
                     + actor_anchor_loss
-                    + projection_consistency_loss
+                    + projection_actor_loss
                 )
                 value_loss = torch.mean((value_net(state[idx]) - returns_t[idx]) ** 2)
                 cost_value_loss = torch.zeros((), dtype=torch.float32, device=self.device)
@@ -3178,7 +3228,11 @@ class FrequencySeparatedActorCriticPPO:
                         ) = current_surrogates()
                         return -current_reward - (
                             entropy_coef * current_entropy
-                        ) + current_anchor + current_projection
+                        ) + current_anchor + (
+                            torch.zeros_like(current_projection)
+                            if projection_guarded
+                            else current_projection
+                        )
 
                     def reward_guard_loss_fn() -> torch.Tensor:
                         (
@@ -3191,7 +3245,11 @@ class FrequencySeparatedActorCriticPPO:
                         return (
                             -current_reward
                             + current_anchor
-                            + current_projection
+                            + (
+                                torch.zeros_like(current_projection)
+                                if projection_guarded
+                                else current_projection
+                            )
                         )
 
                     def constraint_loss_fn() -> torch.Tensor:
@@ -3249,6 +3307,115 @@ class FrequencySeparatedActorCriticPPO:
                     actor_optimizer.step()
                 if actor_updates_enabled:
                     guarded_diagnostics["actor_update_enabled"] = 1.0
+
+                projection_guarded_diagnostics = {
+                    "gradient_dot": 0.0,
+                    "gradient_cosine": 0.0,
+                    "gradient_conflict": 0.0,
+                    "projected_gradient_norm": 0.0,
+                    "accepted": 0.0,
+                    "backtracks": 0.0,
+                    "reward_loss_delta": 0.0,
+                    "reward_guard_max_loss_delta": 0.0,
+                    "constraint_loss_delta": 0.0,
+                    "attempted": 0.0,
+                }
+                if (
+                    actor_updates_enabled
+                    and projection_guarded
+                    and projection_target_t is not None
+                ):
+                    def projection_reward_loss_fn() -> torch.Tensor:
+                        current_logp, _ = actor.log_prob_entropy(
+                            state[idx], action[idx]
+                        )
+                        current_ratio = torch.exp(
+                            (current_logp - old_logp[idx]).clamp(
+                                -20.0, 20.0
+                            )
+                        )
+                        current_clipped = torch.clamp(
+                            current_ratio,
+                            1.0 - cfg.clip_ratio,
+                            1.0 + cfg.clip_ratio,
+                        )
+                        current_reward = torch.minimum(
+                            current_ratio * reward_adv_t[idx],
+                            current_clipped * reward_adv_t[idx],
+                        ).mean()
+                        return -current_reward
+
+                    def projection_loss_fn() -> torch.Tensor:
+                        current_projection_mean = actor.distribution(
+                            state[idx]
+                        ).mean
+                        return projection_coefficient * torch.mean(
+                            torch.square(
+                                current_projection_mean
+                                - projection_target_t[idx]
+                            )
+                        )
+
+                    projection_cost_guard_fn = None
+                    projection_cost_guard_baseline = None
+                    if (
+                        cost_adv_t is not None
+                        and cost_actor_active
+                        and constraint_lambda > 0.0
+                    ):
+                        def projection_cost_guard_fn() -> torch.Tensor:
+                            current_logp, _ = actor.log_prob_entropy(
+                                state[idx], action[idx]
+                            )
+                            current_ratio = torch.exp(
+                                (current_logp - old_logp[idx]).clamp(
+                                    -20.0, 20.0
+                                )
+                            )
+                            current_clipped = torch.clamp(
+                                current_ratio,
+                                1.0 - cfg.clip_ratio,
+                                1.0 + cfg.clip_ratio,
+                            )
+                            current_cost = torch.maximum(
+                                current_ratio * cost_adv_t[idx],
+                                current_clipped * cost_adv_t[idx],
+                            ).mean()
+                            return (
+                                constraint_lambda * current_cost
+                            ).reshape(1)
+
+                        projection_cost_guard_baseline = (
+                            projection_cost_guard_fn().detach()
+                        )
+
+                    projection_guarded_diagnostics.update(
+                        _reward_guarded_constraint_step(
+                            parameters=actor.parameters(),
+                            reward_loss_fn=projection_reward_loss_fn,
+                            constraint_loss_fn=projection_loss_fn,
+                            step_size=(
+                                float(actor_optimizer.param_groups[0]["lr"])
+                                * float(
+                                    cfg.projection_consistency_step_scale
+                                )
+                            ),
+                            max_grad_norm=float(cfg.max_grad_norm),
+                            max_backtracks=int(
+                                cfg.projection_consistency_max_backtracks
+                            ),
+                            reward_tolerance=float(
+                                cfg.projection_consistency_reward_tolerance
+                            ),
+                            reward_guard_values_fn=(
+                                projection_cost_guard_fn
+                            ),
+                            reward_guard_baseline_values=(
+                                projection_cost_guard_baseline
+                            ),
+                        )
+                    )
+                    projection_guarded_diagnostics["attempted"] = 1.0
 
                 value_optimizer.zero_grad()
                 (float(cfg.value_coef) * value_loss).backward()
@@ -3311,6 +3478,41 @@ class FrequencySeparatedActorCriticPPO:
                     ),
                     "projection_consistency_loss": float(
                         projection_consistency_loss.detach().cpu().item()
+                    ),
+                    "projection_guard_attempted": float(
+                        projection_guarded_diagnostics["attempted"]
+                    ),
+                    "projection_guard_accepted": float(
+                        projection_guarded_diagnostics["accepted"]
+                    ),
+                    "projection_gradient_conflict": float(
+                        projection_guarded_diagnostics["gradient_conflict"]
+                    ),
+                    "projection_gradient_cosine": float(
+                        projection_guarded_diagnostics["gradient_cosine"]
+                    ),
+                    "projection_projected_gradient_norm": float(
+                        projection_guarded_diagnostics[
+                            "projected_gradient_norm"
+                        ]
+                    ),
+                    "projection_guard_backtracks": float(
+                        projection_guarded_diagnostics["backtracks"]
+                    ),
+                    "projection_guard_reward_loss_delta": float(
+                        projection_guarded_diagnostics[
+                            "reward_loss_delta"
+                        ]
+                    ),
+                    "projection_guard_consistency_loss_delta": float(
+                        projection_guarded_diagnostics[
+                            "constraint_loss_delta"
+                        ]
+                    ),
+                    "projection_guard_native_constraint_loss_delta": float(
+                        projection_guarded_diagnostics[
+                            "reward_guard_max_loss_delta"
+                        ]
                     ),
                     "constraint_guard_attempted": float(
                         guarded_diagnostics["attempted"]

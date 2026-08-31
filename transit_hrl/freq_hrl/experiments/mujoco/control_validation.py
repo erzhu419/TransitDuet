@@ -40,6 +40,8 @@ from freq_hrl.experiments.reproducibility import (
 )
 from freq_hrl.rl import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
+    PROJECTION_CONSISTENCY_SCHEDULES,
+    PROJECTION_CONSISTENCY_UPDATE_MODES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -86,6 +88,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V19 = (
     "freq_hrl_mujoco_shared_core_v19_terminal_reserve_training"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V20 = (
+    "freq_hrl_mujoco_shared_core_v20_reward_guarded_terminal_reserve_training"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -98,6 +103,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -3255,6 +3261,10 @@ def _hierarchical_model(
     lower_actor_anchor_coef: float = 0.0,
     upper_projection_consistency_coef: float = 0.0,
     lower_projection_consistency_coef: float = 0.0,
+    projection_consistency_update_mode: str = "scalarized",
+    projection_consistency_step_scale: float = 1.0,
+    projection_consistency_max_backtracks: int = 8,
+    projection_consistency_reward_tolerance: float = 0.0,
     actor_anchor_zero_state_indices: tuple[int, ...] = (),
     upper_deployment_frequency_dual_lr: float = 0.0,
     lower_deployment_frequency_dual_lr: float = 0.0,
@@ -3309,6 +3319,18 @@ def _hierarchical_model(
         ),
         lower_projection_consistency_coef=float(
             lower_projection_consistency_coef
+        ),
+        projection_consistency_update_mode=str(
+            projection_consistency_update_mode
+        ),
+        projection_consistency_step_scale=float(
+            projection_consistency_step_scale
+        ),
+        projection_consistency_max_backtracks=int(
+            projection_consistency_max_backtracks
+        ),
+        projection_consistency_reward_tolerance=float(
+            projection_consistency_reward_tolerance
         ),
         deployment_action_transform="tanh",
         upper_deployment_frequency_rms_budget=float(
@@ -4187,6 +4209,13 @@ def train_mujoco_method(
     ppo_clip_ratio: float = 0.2,
     upper_projection_consistency_coef: float = 0.0,
     lower_projection_consistency_coef: float = 0.0,
+    projection_consistency_update_mode: str = "scalarized",
+    projection_consistency_step_scale: float = 1.0,
+    projection_consistency_max_backtracks: int = 8,
+    projection_consistency_reward_tolerance: float = 0.0,
+    projection_consistency_training_schedule: str = "constant",
+    projection_consistency_warmup_fraction: float = 0.0,
+    projection_consistency_ramp_fraction: float = 0.0,
     terminal_reserve_context: bool = False,
     terminal_reserve_projection: bool = False,
     terminal_reserve_upper_window: int = 8,
@@ -4298,6 +4327,27 @@ def train_mujoco_method(
     ) and not terminal_reserve_projection:
         raise ValueError(
             "projection consistency requires terminal-reserve projection"
+        )
+    uses_v20_consistency_training = bool(
+        str(projection_consistency_update_mode) != "scalarized"
+        or str(projection_consistency_training_schedule) != "constant"
+        or float(projection_consistency_warmup_fraction) != 0.0
+        or float(projection_consistency_ramp_fraction) != 0.0
+    )
+    if (
+        str(projection_consistency_update_mode)
+        not in PROJECTION_CONSISTENCY_UPDATE_MODES
+    ):
+        raise ValueError("unknown projection-consistency update mode")
+    if (
+        str(projection_consistency_training_schedule)
+        not in PROJECTION_CONSISTENCY_SCHEDULES
+    ):
+        raise ValueError("unknown projection-consistency training schedule")
+    if uses_v20_consistency_training and not terminal_reserve_projection:
+        raise ValueError(
+            "scheduled or reward-guarded projection consistency requires "
+            "terminal-reserve projection"
         )
     if terminal_reserve_enabled and (
         int(terminal_reserve_upper_window) < 2
@@ -4531,7 +4581,9 @@ def train_mujoco_method(
             "direct lower action, held upper action, and no promotion"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V19
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        if uses_v20_consistency_training
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V19
         if terminal_reserve_enabled
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5
         if str(lower_action_router_mode)
@@ -4575,9 +4627,26 @@ def train_mujoco_method(
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
     if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V20}
+    ):
+        raise ValueError("v20 mechanisms cannot use an earlier protocol label")
+    if (
+        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        and not terminal_reserve_enabled
+    ):
+        raise ValueError(
+            "the v20 protocol label requires terminal-reserve context"
+        )
+    if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
         and selected_protocol_version
-        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V19}
+        not in {
+            "auto",
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+        }
     ):
         raise ValueError("v19 mechanisms cannot use an earlier protocol label")
     if (
@@ -5815,6 +5884,18 @@ def train_mujoco_method(
             lower_projection_consistency_coef=(
                 lower_projection_consistency_coef
             ),
+            projection_consistency_update_mode=(
+                projection_consistency_update_mode
+            ),
+            projection_consistency_step_scale=(
+                projection_consistency_step_scale
+            ),
+            projection_consistency_max_backtracks=(
+                projection_consistency_max_backtracks
+            ),
+            projection_consistency_reward_tolerance=(
+                projection_consistency_reward_tolerance
+            ),
             actor_anchor_zero_state_indices=(
                 actor_anchor_zero_state_indices
             ),
@@ -6195,6 +6276,15 @@ def train_mujoco_method(
                 anchor_state_replay_rollout_seeds or None
             ),
             deployment_frequency_closed_loop_guard_fn=closed_loop_guard_fn,
+            projection_consistency_training_schedule=(
+                projection_consistency_training_schedule
+            ),
+            projection_consistency_warmup_fraction=(
+                projection_consistency_warmup_fraction
+            ),
+            projection_consistency_ramp_fraction=(
+                projection_consistency_ramp_fraction
+            ),
         )
 
     actual_parameters = _module_parameter_count(model)
@@ -6375,6 +6465,27 @@ def train_mujoco_method(
         ),
         "lower_projection_consistency_coef": float(
             lower_projection_consistency_coef
+        ),
+        "projection_consistency_update_mode": str(
+            projection_consistency_update_mode
+        ),
+        "projection_consistency_step_scale": float(
+            projection_consistency_step_scale
+        ),
+        "projection_consistency_max_backtracks": int(
+            projection_consistency_max_backtracks
+        ),
+        "projection_consistency_reward_tolerance": float(
+            projection_consistency_reward_tolerance
+        ),
+        "projection_consistency_training_schedule": str(
+            projection_consistency_training_schedule
+        ),
+        "projection_consistency_warmup_fraction": float(
+            projection_consistency_warmup_fraction
+        ),
+        "projection_consistency_ramp_fraction": float(
+            projection_consistency_ramp_fraction
         ),
         "terminal_reserve_context_enabled": terminal_reserve_enabled,
         "terminal_reserve_projection_enabled": bool(
@@ -6968,6 +7079,31 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--lower-projection-consistency-coef", type=float, default=0.0
     )
+    parser.add_argument(
+        "--projection-consistency-update-mode",
+        choices=PROJECTION_CONSISTENCY_UPDATE_MODES,
+        default="scalarized",
+    )
+    parser.add_argument(
+        "--projection-consistency-step-scale", type=float, default=1.0
+    )
+    parser.add_argument(
+        "--projection-consistency-max-backtracks", type=int, default=8
+    )
+    parser.add_argument(
+        "--projection-consistency-reward-tolerance", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--projection-consistency-training-schedule",
+        choices=PROJECTION_CONSISTENCY_SCHEDULES,
+        default="constant",
+    )
+    parser.add_argument(
+        "--projection-consistency-warmup-fraction", type=float, default=0.0
+    )
+    parser.add_argument(
+        "--projection-consistency-ramp-fraction", type=float, default=0.0
+    )
     parser.add_argument("--terminal-reserve-context", action="store_true")
     parser.add_argument("--terminal-reserve-projection", action="store_true")
     parser.add_argument(
@@ -7295,6 +7431,27 @@ def main() -> None:
         ),
         lower_projection_consistency_coef=(
             args.lower_projection_consistency_coef
+        ),
+        projection_consistency_update_mode=(
+            args.projection_consistency_update_mode
+        ),
+        projection_consistency_step_scale=(
+            args.projection_consistency_step_scale
+        ),
+        projection_consistency_max_backtracks=(
+            args.projection_consistency_max_backtracks
+        ),
+        projection_consistency_reward_tolerance=(
+            args.projection_consistency_reward_tolerance
+        ),
+        projection_consistency_training_schedule=(
+            args.projection_consistency_training_schedule
+        ),
+        projection_consistency_warmup_fraction=(
+            args.projection_consistency_warmup_fraction
+        ),
+        projection_consistency_ramp_fraction=(
+            args.projection_consistency_ramp_fraction
         ),
         terminal_reserve_context=args.terminal_reserve_context,
         terminal_reserve_projection=args.terminal_reserve_projection,
