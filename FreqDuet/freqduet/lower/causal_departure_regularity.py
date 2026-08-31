@@ -91,6 +91,25 @@ def causal_two_sided_zero_hold_regret_cost(
     return float(max(action_cost - zero_hold_cost, 0.0))
 
 
+def holding_action_efficiency_gate(
+    *,
+    action_s: float,
+    action_scale_s: float,
+    penalty: float,
+) -> float:
+    """Discount regularity gain by the holding time used to obtain it."""
+    action = float(action_s)
+    scale = float(action_scale_s)
+    weight = float(penalty)
+    if not all(np.isfinite(value) for value in (action, scale, weight)):
+        raise ValueError("holding efficiency inputs must be finite")
+    if action < 0.0 or scale <= 0.0 or weight < 0.0:
+        raise ValueError(
+            "holding efficiency requires action >= 0, scale > 0, penalty >= 0")
+    action_fraction = float(np.clip(action / scale, 0.0, 1.0))
+    return float(1.0 / (1.0 + weight * action_fraction))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

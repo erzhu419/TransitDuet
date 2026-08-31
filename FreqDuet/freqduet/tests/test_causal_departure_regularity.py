@@ -8,6 +8,7 @@ from lower.causal_departure_regularity import (
     causal_two_sided_action_excess_cost,
     causal_two_sided_holding_target_s,
     causal_two_sided_zero_hold_regret_cost,
+    holding_action_efficiency_gate,
 )
 from runner_v3 import TransitDuetV2Runner
 
@@ -245,6 +246,7 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             regularity_capacity_gain_enabled=True,
             regularity_capacity_feature_index=2,
             regularity_capacity_exponent=2.0,
+            regularity_capacity_action_efficiency_penalty=0.0,
             discrete_actions=None,
         )
         runner._ep_lower_regularity_policy_evidence_valid = []
@@ -253,6 +255,7 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
         runner._ep_lower_regularity_policy_action_regrets = []
         runner._ep_lower_regularity_policy_capacity_gates = []
         runner._ep_lower_regularity_policy_capacity_gains = []
+        runner._ep_lower_regularity_policy_action_efficiency_gates = []
         runner._ep_lower_regularity_policy_oracle_action_costs = []
         runner._ep_lower_regularity_policy_excess_action_costs = []
         runner._ep_lower_regularity_policy_target_actions = []
@@ -279,6 +282,18 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             runner._ep_lower_regularity_policy_capacity_gains[0],
             0.25 * expected_zero_hold_cost,
         )
+        self.assertEqual(
+            runner._ep_lower_regularity_policy_action_efficiency_gates,
+            [1.0],
+        )
+
+    def test_holding_efficiency_gate_is_smooth_and_dimensionless(self):
+        self.assertEqual(holding_action_efficiency_gate(
+            action_s=0.0, action_scale_s=45.0, penalty=2.0), 1.0)
+        self.assertAlmostEqual(holding_action_efficiency_gate(
+            action_s=22.5, action_scale_s=45.0, penalty=2.0), 0.5)
+        self.assertAlmostEqual(holding_action_efficiency_gate(
+            action_s=45.0, action_scale_s=45.0, penalty=2.0), 1.0 / 3.0)
 
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):

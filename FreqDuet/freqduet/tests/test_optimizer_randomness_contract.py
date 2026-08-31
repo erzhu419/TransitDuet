@@ -194,7 +194,8 @@ class OptimizerContractTest(unittest.TestCase):
             cost_limit=0.001, conditional_entropy=False,
             constraint_scale_mode="raw_cost_v1", initial_lambda=1.0,
             policy_mode="analytic_two_sided_target_dual_v1",
-            capacity_gain_weight=0.02, capacity_exponent=1.0):
+            capacity_gain_weight=0.02, capacity_exponent=1.0,
+            action_efficiency_penalty=0.0):
         conditional = (
             {
                 "enable": True,
@@ -207,9 +208,10 @@ class OptimizerContractTest(unittest.TestCase):
             }
             if conditional_entropy else {"enable": False}
         )
-        capacity_mode = (
-            policy_mode
-            == "analytic_two_sided_capacity_gain_regret_dual_v3")
+        capacity_mode = policy_mode in {
+            "analytic_two_sided_capacity_gain_regret_dual_v3",
+            "analytic_two_sided_efficiency_gain_regret_dual_v4",
+        }
         regularity = {
             "enable": True,
             "mode": policy_mode,
@@ -230,11 +232,15 @@ class OptimizerContractTest(unittest.TestCase):
         if capacity_mode:
             regularity["capacity_gated_gain"] = {
                 "enable": True,
-                "mode": "positive_zero_hold_gain_v1",
+                "mode": (
+                    "positive_zero_hold_efficiency_gain_v2"
+                    if action_efficiency_penalty > 0.0
+                    else "positive_zero_hold_gain_v1"),
                 "capacity_feature_index": 3,
                 "weight": capacity_gain_weight,
                 "gain_scale": 0.002,
                 "capacity_exponent": capacity_exponent,
+                "action_efficiency_penalty": action_efficiency_penalty,
             }
         return RESACLagrangianTrainer(
             state_dim=4 if capacity_mode else 3,
@@ -350,6 +356,29 @@ class OptimizerContractTest(unittest.TestCase):
             invalid_replay, 16, reward_scale=1.0)
         self.assertEqual(
             invalid_metrics["regularity_policy_capacity_gain_bonus"], 0.0)
+
+    def test_efficiency_gain_discounts_large_holding_in_actor_objective(self):
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_efficiency_gain_regret_dual_v4",
+            action_efficiency_penalty=1.0,
+        )
+        state = torch.tensor([[0.6, 1.0, 1.0, 1.0]], dtype=torch.float32)
+        probs = torch.tensor([[0.0, 1.0]], dtype=torch.float32)
+
+        expected, valid, gains = trainer._regularity_policy_capacity_gain(
+            state, probs)
+
+        zero_hold_cost = (45.0 / 360.0) ** 2
+        self.assertAlmostEqual(gains[0, 0].item(), 0.0, places=7)
+        self.assertAlmostEqual(
+            gains[0, 1].item(), 0.5 * zero_hold_cost, places=7)
+        self.assertAlmostEqual(expected.item(), 0.5 * zero_hold_cost, places=7)
+        self.assertEqual(valid.item(), 1.0)
+        self.assertEqual(
+            trainer.regularity_policy_contract["capacity_gated_gain"]
+            ["action_efficiency_penalty"],
+            1.0,
+        )
 
     def test_causal_regularity_dual_uses_only_valid_evidence(self):
         torch.manual_seed(53)

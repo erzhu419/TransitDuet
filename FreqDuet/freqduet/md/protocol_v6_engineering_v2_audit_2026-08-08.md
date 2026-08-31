@@ -1281,3 +1281,84 @@ The post-dispatch health probe found all 56 tasks running with nonzero CPU and
 RAM samples. This record establishes execution identity only. Confirmation,
 claim eligibility, aggregation, and effect estimates remain pending until every
 shard completes and the locked confirmation gate passes.
+
+### V14 200-episode independent confirmation outcome (2026-08-31)
+
+All 56 shards completed without retry or failure. Scheduler task `t85973`
+performed the strict node-side aggregate and synchronized only the four small
+combined-summary artifacts. The aggregate verifies the exact seven-config
+matrix, eight fresh training seeds, eight fresh common-random-number evaluation
+seeds, 448 unique checkpoint-199 rollouts, clean unchanged source commit
+`4246c7f92aec9f109424b4f7fec3d284bf7b8198`, and the unchanged scenario
+contract.
+
+The locked gate returns `capacity_gain_not_confirmed`. Every mechanism check
+passes: positive capacity-gated gain is realized in every rollout, causal
+evidence coverage and zero execution adjustment hold, the gain arithmetic is
+exact, and action regret remains within the registered limit. The candidate
+improves headway CV relative to V13 by `-0.00872`, with paired 95% confidence
+interval upper bound `-0.00142`, but misses the preregistered minimum effect of
+`-0.010`. Restricted journey worsens by `+0.25003 min`, with confidence interval
+upper bound `+0.42874 min`, and therefore fails the `+0.20 min` noninferiority
+limit. All eight training-seed mean CV deltas are negative, so the failure is
+an effect-size and journey tradeoff rather than inconsistent direction.
+
+The allocation evidence identifies the remaining defect. Relative to V13, the
+candidate raises mean lower action from `11.88 s` to `13.41 s`, holding from
+`61767.73` to `69753.83 vehicle-s`, and denied dispatch events from `59983.42`
+to `94101.03`, while reducing mean distance to the analytic target from
+`11.56 s` to `9.91 s`. The actor-only benefit therefore buys local regularity
+by moving farther toward the full balancing action, but remaining capacity does
+not capture the fleet-cycle opportunity cost of those extra holding seconds.
+V15 must change the objective's allocation efficiency; changing the V14 gate,
+reusing its confirmation seeds, or extending the same global weight sweep is
+ruled out.
+
+## Engineering-v15 holding-efficiency gain preregistration (2026-08-31)
+
+V15 preserves the V14/V13 compact causal state, seven discrete holding bins,
+zero-hold regret constraint, conditional entropy, remaining-capacity gate, and
+zero execution adjustment. It changes only the actor-only regularity benefit.
+For discrete action `a`, action range `a_max`, and V14 positive capacity-gated
+gain `G(a)`, the new benefit is
+`G_eff(a) = G(a) / (1 + beta * a / a_max)`. The multiplier is one at zero
+holding, decreases smoothly with the holding time consumed, uses only the
+current candidate action, and cannot make a non-improving or overshooting
+action positive. It therefore represents holding opportunity cost without
+adding a latent fleet variable or changing the deployment state.
+
+The locked grid crosses gain weights `0.025`, `0.030`, and `0.035` with action
+efficiency penalties `beta=0.5`, `1.0`, and `2.0`; capacity exponent remains
+one. Controls are historical hard main, `noguard`, compact context-only,
+confirmed main, V11 same-entropy, the V13 tight anchor, and the same-source V14
+selected configuration. Fresh training seeds are `19013,19031,19053,19077`;
+fresh evaluation seeds are `52017,52041,52059,52083`. The 40-episode screen
+therefore contains 64 independent training jobs and 256 frozen
+common-random-number rollouts.
+
+The locked mechanism gate requires the exact V4 policy and V2 efficiency-gain
+contracts, unchanged V13 regret settings, positive causal executed gain in
+every rollout, an executed efficiency gate strictly below one and no smaller
+than `1/(1+beta)`, exact gain/scale/bonus arithmetic, causal evidence coverage,
+and zero execution adjustment. A candidate must improve journey by at least
+`0.05 min` and CV by at least `0.001` relative to same-source V14 while not
+increasing mean action, holding, or denied dispatch. It must also retain the
+V14 absolute gates versus V13, `noguard`, confirmed main, V11, and the
+historical resource limits. Priority is fixed by lower gain weight and then
+lower efficiency penalty. A selected row remains exploratory and requires a
+fresh 200-episode confirmation; no pass rules out this objective family.
+
+### V15 implementation smoke (2026-08-31)
+
+A local two-episode smoke used one engineering training seed and one frozen
+evaluation seed for V13, V14, and the middle V15 row (`w=0.03,beta=1`). All
+three completed training, checkpoint restore, frozen evaluation, and strict
+aggregation. V13 reports zero gain. V14 retains efficiency penalty zero and
+executed efficiency gate exactly one. V15 reports executed gate `0.81818`,
+positive gain `0.00091908`, scaled gain `0.45954`, and bonus `0.0137862`, with
+the registered arithmetic. Training diagnostics independently show positive
+actor gain and efficiency gates `0.76465` and `0.81592` in the two episodes.
+Frozen evaluation correctly reports actor-update metrics as zero because no
+optimizer step occurs; the locked gate therefore uses serialized contract,
+unit-tested actor mathematics, and executed frozen metrics rather than treating
+those zero fields as evidence. The smoke is an implementation result only.

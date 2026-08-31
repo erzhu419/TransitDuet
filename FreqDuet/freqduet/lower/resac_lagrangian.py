@@ -467,16 +467,19 @@ class RESACLagrangianTrainer:
         self.regularity_alpha_optimizer = None
         self.regularity_capacity_gain_enabled = False
         self.regularity_capacity_feature_index = None
+        self.regularity_capacity_gain_mode = 'disabled'
         self.regularity_capacity_gain_weight = 0.0
         self.regularity_capacity_gain_scale = 1.0
         self.regularity_capacity_exponent = 1.0
+        self.regularity_capacity_action_efficiency_penalty = 0.0
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
             if mode not in {
                     'analytic_two_sided_target_dual_v1',
                     'analytic_two_sided_zero_hold_regret_dual_v2',
-                    'analytic_two_sided_capacity_gain_regret_dual_v3'}:
+                    'analytic_two_sided_capacity_gain_regret_dual_v3',
+                    'analytic_two_sided_efficiency_gain_regret_dual_v4'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             if self.discrete_actions is None:
@@ -608,14 +611,20 @@ class RESACLagrangianTrainer:
                 regularity_cfg.get('capacity_gated_gain', {}) or {})
             capacity_gain_enabled = bool(
                 capacity_gain_cfg.get('enable', False))
-            if (mode == 'analytic_two_sided_capacity_gain_regret_dual_v3'):
+            capacity_gain_modes = {
+                'analytic_two_sided_capacity_gain_regret_dual_v3': (
+                    'positive_zero_hold_gain_v1'),
+                'analytic_two_sided_efficiency_gain_regret_dual_v4': (
+                    'positive_zero_hold_efficiency_gain_v2'),
+            }
+            if mode in capacity_gain_modes:
                 if not capacity_gain_enabled:
                     raise ValueError(
                         'capacity-gain regularity mode requires an enabled '
                         'capacity_gated_gain contract')
                 gain_mode = str(capacity_gain_cfg.get(
-                    'mode', 'positive_zero_hold_gain_v1')).strip().lower()
-                if gain_mode != 'positive_zero_hold_gain_v1':
+                    'mode', capacity_gain_modes[mode])).strip().lower()
+                if gain_mode != capacity_gain_modes[mode]:
                     raise ValueError('unknown capacity-gated regularity gain mode')
                 capacity_feature_index = int(
                     capacity_gain_cfg['capacity_feature_index'])
@@ -626,6 +635,9 @@ class RESACLagrangianTrainer:
                 gain_scale = float(capacity_gain_cfg.get('gain_scale', 0.002))
                 capacity_exponent = float(
                     capacity_gain_cfg.get('capacity_exponent', 1.0))
+                action_efficiency_penalty = float(
+                    capacity_gain_cfg.get(
+                        'action_efficiency_penalty', 0.0))
                 if not np.isfinite(gain_weight) or gain_weight <= 0.0:
                     raise ValueError(
                         'capacity-gated gain weight must be positive')
@@ -636,12 +648,26 @@ class RESACLagrangianTrainer:
                         or capacity_exponent <= 0.0):
                     raise ValueError(
                         'capacity-gated gain exponent must be positive')
+                if (not np.isfinite(action_efficiency_penalty)
+                        or action_efficiency_penalty < 0.0):
+                    raise ValueError(
+                        'capacity-gated action efficiency penalty must be '
+                        'finite and non-negative')
+                efficiency_mode = (
+                    gain_mode == 'positive_zero_hold_efficiency_gain_v2')
+                if efficiency_mode != (action_efficiency_penalty > 0.0):
+                    raise ValueError(
+                        'V2 efficiency gain requires a positive action '
+                        'efficiency penalty and V1 requires zero')
                 self.regularity_capacity_gain_enabled = True
                 self.regularity_capacity_feature_index = (
                     capacity_feature_index)
+                self.regularity_capacity_gain_mode = gain_mode
                 self.regularity_capacity_gain_weight = gain_weight
                 self.regularity_capacity_gain_scale = gain_scale
                 self.regularity_capacity_exponent = capacity_exponent
+                self.regularity_capacity_action_efficiency_penalty = (
+                    action_efficiency_penalty)
                 capacity_gain_contract = {
                     'enabled': True,
                     'mode': gain_mode,
@@ -649,6 +675,8 @@ class RESACLagrangianTrainer:
                     'weight': gain_weight,
                     'gain_scale': gain_scale,
                     'capacity_exponent': capacity_exponent,
+                    'action_efficiency_penalty': (
+                        action_efficiency_penalty),
                 }
             else:
                 if capacity_gain_enabled:
@@ -759,7 +787,8 @@ class RESACLagrangianTrainer:
             self._regularity_policy_action_terms(state))
         if self.regularity_policy_mode in {
                 'analytic_two_sided_zero_hold_regret_dual_v2',
-                'analytic_two_sided_capacity_gain_regret_dual_v3'}:
+                'analytic_two_sided_capacity_gain_regret_dual_v3',
+                'analytic_two_sided_efficiency_gain_regret_dual_v4'}:
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
         else:
@@ -779,8 +808,21 @@ class RESACLagrangianTrainer:
         action_gains = (
             zero_hold_cost - absolute_action_costs
         ).clamp_min(0.0) * capacity.unsqueeze(-1)
+        action_gains = (
+            action_gains
+            * self._regularity_policy_action_efficiency_gate().view(1, -1))
         expected_gain = (action_probs * action_gains).sum(dim=-1)
         return expected_gain, valid, action_gains
+
+    def _regularity_policy_action_efficiency_gate(self):
+        """Return the fixed per-bin holding-efficiency multiplier."""
+        if not self.regularity_capacity_gain_enabled:
+            raise RuntimeError('capacity-gated regularity gain is disabled')
+        action_fraction = (
+            self.discrete_actions / self.regularity_action_target_scale_s
+        ).clamp(0.0, 1.0)
+        penalty = self.regularity_capacity_action_efficiency_penalty
+        return 1.0 / (1.0 + penalty * action_fraction)
 
     def _discrete_q_values(self, q_net, state):
         """Evaluate a scalar-action critic on every configured action bin."""
@@ -973,6 +1015,7 @@ class RESACLagrangianTrainer:
             'regularity_policy_scaled_capacity_gain_mean': 0.0,
             'regularity_policy_capacity_gain_bonus': 0.0,
             'regularity_policy_capacity_gate_mean': 0.0,
+            'regularity_policy_action_efficiency_gate_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
@@ -994,6 +1037,7 @@ class RESACLagrangianTrainer:
             regularity_capacity_gain_mean = None
             regularity_scaled_capacity_gain_mean = None
             regularity_capacity_gate_mean = None
+            regularity_action_efficiency_gate_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -1073,6 +1117,14 @@ class RESACLagrangianTrainer:
                             self.regularity_capacity_exponent)
                         regularity_capacity_gate_mean = (
                             capacity_gate * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        action_efficiency_gate = (
+                            self._regularity_policy_action_efficiency_gate())
+                        expected_action_efficiency_gate = (
+                            probs * action_efficiency_gate.view(1, -1)
+                        ).sum(dim=-1)
+                        regularity_action_efficiency_gate_mean = (
+                            expected_action_efficiency_gate * valid_weights
                         ).sum().div(valid_weight_sum)
                         regularity_capacity_gain_bonus = (
                             self.regularity_capacity_gain_weight
@@ -1225,6 +1277,10 @@ class RESACLagrangianTrainer:
                 'regularity_policy_capacity_gate_mean': (
                     regularity_capacity_gate_mean.item()
                     if regularity_capacity_gate_mean is not None else 0.0),
+                'regularity_policy_action_efficiency_gate_mean': (
+                    regularity_action_efficiency_gate_mean.item()
+                    if regularity_action_efficiency_gate_mean is not None
+                    else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
                     float((

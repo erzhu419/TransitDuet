@@ -8,6 +8,7 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     CAPACITY_GAIN_CONFIGS,
     CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
+    EFFICIENCY_GAIN_CONFIGS,
     NORMALIZED_REGULARITY_CONFIGS,
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
@@ -557,6 +558,41 @@ class ProtocolV6ConfigTest(unittest.TestCase):
             (weight, exponent)
             for weight in (0.005, 0.01, 0.02)
             for exponent in (1.0, 2.0)
+        })
+
+    def test_efficiency_gain_configs_lock_v14_semantics_and_grid(self):
+        configs = [CONFIRMED_MAIN, *EFFICIENCY_GAIN_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(EFFICIENCY_GAIN_CONFIGS),
+        )
+
+        observed = set()
+        for name in EFFICIENCY_GAIN_CONFIGS:
+            config = resolved_config(name)
+            objective = config["lower"]["causal_regularity_policy"]
+            gain = objective["capacity_gated_gain"]
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_efficiency_gain_regret_dual_v4",
+            )
+            self.assertEqual(
+                gain["mode"],
+                "positive_zero_hold_efficiency_gain_v2",
+            )
+            self.assertEqual(gain["capacity_exponent"], 1.0)
+            self.assertEqual(gain["gain_scale"], 0.002)
+            self.assertEqual(objective["cost_limit"], 0.00025)
+            self.assertEqual(objective["initial_lambda"], 0.01)
+            observed.add((
+                gain["weight"], gain["action_efficiency_penalty"]))
+        self.assertEqual(observed, {
+            (weight, penalty)
+            for weight in (0.025, 0.03, 0.035)
+            for penalty in (0.5, 1.0, 2.0)
         })
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):
