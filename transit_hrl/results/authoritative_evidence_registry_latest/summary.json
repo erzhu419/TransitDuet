@@ -1,5 +1,5 @@
 {
-  "development_record_count": 38,
+  "development_record_count": 39,
   "excluded_legacy_record_count": 2,
   "mixed_or_negative_record_count": 2,
   "policy": {
@@ -11,7 +11,7 @@
     "unregistered_artifacts": "excluded"
   },
   "positive_supported_record_count": 2,
-  "record_count": 44,
+  "record_count": 45,
   "records": [
     {
       "allowed_wording": "On the frozen v12 protocol, Freq-HRL reduced the registered responsibility-space lower-LF diagnostic and met return noninferiority in HalfCheetah-v5, Hopper-v5, and Walker2d-v5. This result does not establish separation of the pre-routing lower action or the upper-action high-frequency budget.",
@@ -4759,6 +4759,54 @@
       "selection_access": "post_v18_1_reused_paths_grouped_by_seed"
     },
     {
+      "allowed_wording": "On the unchanged 120-path development panel, the label-free instantaneous joint projector made all 120 paths directly and exact-oracle feasible and recovered 7/7 actor-floor paths. It failed the action trust region severely, with reference correction RMS up to 0.2935 and absolute correction up to 1.8076, so no fresh path was accessed.",
+      "artifact_hashes_verified": true,
+      "artifacts": [
+        {
+          "path": "transit_hrl/evidence/mujoco_v18_3_causal_joint_projection_development.json",
+          "role": "decision",
+          "sha256": "882c1545112c4a927ad8b4828ffc6a041cd3ce30c7858f58ba10b378676f2121"
+        },
+        {
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_3_causal_joint_projection_outcome_2026-08-31.md",
+          "role": "report",
+          "sha256": "c647c2c7ea1dc1252b76047a3fbba601c9013017e56c4a9235c9e6ac4654531a"
+        }
+      ],
+      "claim": "A label-free causal joint projection can recover actor-floor frequency feasibility while preserving already feasible paths within a behavior trust region.",
+      "claim_id": "D39_CAUSAL_JOINT_PROJECTION",
+      "decision": "causal_joint_projection_stops_before_fresh_path_access",
+      "domain": "mujoco_control",
+      "evidence_id": "mujoco_v18_3_causal_joint_projection_development",
+      "evidence_stage": "development",
+      "facts": {
+        "candidate_count": 2,
+        "decision_status": "causal_joint_projection_stops_before_fresh_path_access",
+        "eligible_for_fresh_path_validation": false,
+        "fresh_validation_paths_accessed": false,
+        "integrity_status": "valid",
+        "path_count": 120,
+        "prefix_ledger_valid_path_count": 42,
+        "selected_actor_floor_correction_rms_maximum": 0.30193708336206443,
+        "selected_actor_floor_recovered_path_count": 7,
+        "selected_correction_abs_maximum": 1.8075526888835756,
+        "selected_direct_joint_feasible_path_count": 120,
+        "selected_exact_oracle_joint_feasible_path_count": 120,
+        "selected_reference_correction_rms_maximum": 0.2934515838846031,
+        "selected_reference_feasible_preserved_path_count": 113,
+        "support_gate": false,
+        "target_labels_accessed": false
+      },
+      "forbidden_wording": "V18.3 validates behavior-preserving frequency projection, reward improvement, online learned control, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "integrity_status": "valid",
+      "manuscript_reportable": false,
+      "outcome_provenance": "two_frozen_causal_budget_semantics_two_hundred_forty_exact_oracle_path_evaluations_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_3_causal_joint_projection",
+      "positive_claim_supported": false,
+      "selection_access": "post_v18_2_reused_paths_without_target_labels"
+    },
+    {
       "allowed_wording": "This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.",
       "artifact_hashes_verified": true,
       "artifacts": [
@@ -4817,7 +4865,7 @@
       "selection_access": "mixed_historical"
     }
   ],
-  "registry_sha256": "e3d7e9b9de3bb066c4671187ffcc7d7b1021d904863b729d2458dbdb2e57948f",
+  "registry_sha256": "8ed2c50de2d049bd2ba214d3cbd0875120e43d9249a2475d5c5874f3fe66f50c",
   "reportable_record_count": 4,
   "schema_version": "freq_hrl_authoritative_evidence_registry_v1"
 }

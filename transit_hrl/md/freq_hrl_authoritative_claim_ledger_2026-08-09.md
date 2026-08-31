@@ -48,6 +48,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v17_14_exhaustive_actor_oracle_development | mujoco_control | development | exhaustive_actor_oracle_closes_frozen_linear_fir_grid | development_only | false |
 | mujoco_v18_1_state_actor_dataset_development | mujoco_control | development | causal_state_dataset_validated_on_reused_paths | development_only | false |
 | mujoco_v18_2_state_conditioned_actor_development | mujoco_control | development | state_conditioned_actor_stops_before_fresh_path_access | development_only | false |
+| mujoco_v18_3_causal_joint_projection_development | mujoco_control | development | causal_joint_projection_stops_before_fresh_path_access | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -304,6 +305,12 @@ Forbidden: V18.1 establishes model quality, reward improvement, online learning,
 On the unchanged 120-path grouped development panel, every v18.2 candidate preserved all 113 reference-feasible paths. The best state MLP recovered only 3/7 actor-floor paths, versus 6/7 for v17.14, and failed the target-fidelity and complete-recovery gates; no fresh path was accessed.
 
 Forbidden: V18.2 validates state-conditioned actor correction, reward improvement, online learning, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
+
+### mujoco_v18_3_causal_joint_projection_development
+
+On the unchanged 120-path development panel, the label-free instantaneous joint projector made all 120 paths directly and exact-oracle feasible and recovered 7/7 actor-floor paths. It failed the action trust region severely, with reference correction RMS up to 0.2935 and absolute correction up to 1.8076, so no fresh path was accessed.
+
+Forbidden: V18.3 validates behavior-preserving frequency projection, reward improvement, online learned control, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.
 
 ### legacy_c1_c9_matrix_snapshot
 

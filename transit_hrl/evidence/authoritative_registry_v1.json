@@ -1255,6 +1255,33 @@
       ]
     },
     {
+      "evidence_id": "mujoco_v18_3_causal_joint_projection_development",
+      "claim_id": "D39_CAUSAL_JOINT_PROJECTION",
+      "claim": "A label-free causal joint projection can recover actor-floor frequency feasibility while preserving already feasible paths within a behavior trust region.",
+      "domain": "mujoco_control",
+      "evidence_stage": "development",
+      "decision": "causal_joint_projection_stops_before_fresh_path_access",
+      "integrity_status": "valid",
+      "selection_access": "post_v18_2_reused_paths_without_target_labels",
+      "outcome_provenance": "two_frozen_causal_budget_semantics_two_hundred_forty_exact_oracle_path_evaluations_and_one_hundred_twenty_reused_paths",
+      "paper_disposition": "development_only",
+      "parser": "mujoco_v18_3_causal_joint_projection",
+      "allowed_wording": "On the unchanged 120-path development panel, the label-free instantaneous joint projector made all 120 paths directly and exact-oracle feasible and recovered 7/7 actor-floor paths. It failed the action trust region severely, with reference correction RMS up to 0.2935 and absolute correction up to 1.8076, so no fresh path was accessed.",
+      "forbidden_wording": "V18.3 validates behavior-preserving frequency projection, reward improvement, online learned control, fresh-seed generalization, leakage no-tradeoff, or final Freq-HRL manuscript support.",
+      "artifacts": [
+        {
+          "role": "decision",
+          "path": "transit_hrl/evidence/mujoco_v18_3_causal_joint_projection_development.json",
+          "sha256": "882c1545112c4a927ad8b4828ffc6a041cd3ce30c7858f58ba10b378676f2121"
+        },
+        {
+          "role": "report",
+          "path": "transit_hrl/md/freq_hrl_mujoco_v18_3_causal_joint_projection_outcome_2026-08-31.md",
+          "sha256": "c647c2c7ea1dc1252b76047a3fbba601c9013017e56c4a9235c9e6ac4654531a"
+        }
+      ]
+    },
+    {
       "evidence_id": "legacy_c1_c9_matrix_snapshot",
       "claim_id": "LEGACY_C1_C9",
       "claim": "Historical raw-only C1-C9 matrix generated before the current independent audit.",

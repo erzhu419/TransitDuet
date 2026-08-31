@@ -22,7 +22,7 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         records = validate_registry(
             load_registry(self.registry_path), self.root
         )
-        self.assertEqual(len(records), 44)
+        self.assertEqual(len(records), 45)
         by_id = {row["evidence_id"]: row for row in records}
         v17 = by_id["mujoco_v17_zero_dc_plan_development"]
         self.assertEqual(v17["facts"]["gate_counts"]["all_cell_gates"], 1)
@@ -296,6 +296,25 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
         )
         self.assertFalse(v18_2["facts"]["fresh_validation_paths_accessed"])
         self.assertFalse(v18_2["facts"]["support_gate"])
+        v18_3 = by_id[
+            "mujoco_v18_3_causal_joint_projection_development"
+        ]
+        self.assertEqual(
+            v18_3["facts"]["selected_direct_joint_feasible_path_count"],
+            120,
+        )
+        self.assertEqual(
+            v18_3["facts"]["selected_actor_floor_recovered_path_count"],
+            7,
+        )
+        self.assertGreater(
+            v18_3["facts"]["selected_reference_correction_rms_maximum"],
+            0.01,
+        )
+        self.assertEqual(
+            v18_3["facts"]["prefix_ledger_valid_path_count"], 42
+        )
+        self.assertFalse(v18_3["facts"]["support_gate"])
         self.assertEqual(
             by_id["mujoco_v16_2_macro_hold_gauge_development"]["facts"][
                 "gate_counts"
@@ -563,11 +582,11 @@ class AuthoritativeEvidenceRegistryTest(unittest.TestCase):
                 output_dir=root / "results",
                 md_output=root / "ledger.md",
             )
-            self.assertEqual(summary["record_count"], 44)
+            self.assertEqual(summary["record_count"], 45)
             self.assertEqual(summary["reportable_record_count"], 4)
             self.assertEqual(summary["positive_supported_record_count"], 2)
             self.assertEqual(summary["mixed_or_negative_record_count"], 2)
-            self.assertEqual(summary["development_record_count"], 38)
+            self.assertEqual(summary["development_record_count"], 39)
             self.assertTrue((root / "results" / "summary.json").is_file())
             self.assertTrue((root / "ledger.md").is_file())
 
