@@ -1362,3 +1362,23 @@ Frozen evaluation correctly reports actor-update metrics as zero because no
 optimizer step occurs; the locked gate therefore uses serialized contract,
 unit-tested actor mathematics, and executed frozen metrics rather than treating
 those zero fields as evidence. The smoke is an implementation result only.
+
+### V15 holding-efficiency screen dispatch (2026-08-31)
+
+The preregistered screen was submitted through scheduler as tasks `t85985` to
+`t86048` under run name
+`protocol_v6_efficiency_gain_ep40_s4_e4_v15`. All 64 one-job shards use the
+clean detached snapshot at commit
+`ce472066eb7b7525f5367f81e7259395b932d40c`, stage `exploratory`, 40 training
+episodes, and the registered four training and four frozen evaluation seeds.
+Tasks are pinned across `node001` through `node006` with distribution
+`11/11/11/11/10/10`, four declared CPU cores and 1270 MB RAM per shard. Heavy
+artifacts are suppressed and result synchronization is disabled.
+
+Seven first launch attempts encountered transient jump-host SSH connection
+closures; scheduler retried the existing task records, and the post-dispatch
+probe found all 64 tasks running. Representative node probes showed nonzero CPU
+and RAM use, and logs contained no Python exception or configuration failure.
+This record establishes execution identity and initial health only. Candidate
+selection and every effect claim remain pending complete aggregation and the
+locked efficiency-gain screen gate.
