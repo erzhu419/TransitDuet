@@ -4,6 +4,10 @@ from .action_decoders import (
     CausalSmoothstepMacroPlan,
     CausalZeroDCMacroProjector,
 )
+from .causal_joint_frequency_projector import (
+    BUDGET_MODES,
+    CausalJointFrequencyProjector,
+)
 from .diagnostics import FrequencyDiagnostics, binned_mutual_information
 from .leakage import (
     ActionEffectOperator,
@@ -54,6 +58,8 @@ from .types import ExogenousBin, FrequencyFeatures, PromotionSignal
 __all__ = [
     "ActionEffectOperator",
     "BinnedExogenousStreamAdapter",
+    "BUDGET_MODES",
+    "CausalJointFrequencyProjector",
     "CausalPromotionGate",
     "CausalRecedingHorizonResponsibilityPlanner",
     "CausalLeakageRewardShaper",
