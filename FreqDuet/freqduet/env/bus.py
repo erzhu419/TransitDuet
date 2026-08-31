@@ -259,6 +259,7 @@ class Bus(object):
               frequency_tracker=None, lower_frequency_enabled=False,
               lower_context_enabled=False, lower_context_queue_norm=50.0,
               lower_context_features=None, lower_context_gate_value=1.0,
+              lower_fleet_utilization=0.0,
               causal_holding_guard=None,
               causal_holding_action_scale_s=60.0,
               headway_recorder=None,
@@ -277,6 +278,8 @@ class Bus(object):
         self._lower_context_features = list(lower_context_features or [])
         self._lower_context_gate_value = float(np.clip(
             lower_context_gate_value, 0.0, 1.0))
+        self._lower_fleet_utilization = float(np.clip(
+            lower_fleet_utilization, 0.0, 1.0))
         self._causal_holding_guard = causal_holding_guard
         self._causal_holding_action_scale_s = max(
             float(causal_holding_action_scale_s), 1e-6)
@@ -533,6 +536,7 @@ class Bus(object):
                     'speed_residual': float(np.clip(speed_residual, -2.0, 2.0)),
                     'shock_age': float(np.clip(shock_age, 0.0, 1.0)),
                     'schedule_slack': float(np.clip(schedule_slack, -2.0, 2.0)),
+                    'fleet_utilization': self._lower_fleet_utilization,
                     'causal_hold_limit': float(np.clip(
                         causal_hold_limit, 0.0, 1.0)),
                     'fwd_headway_norm': float(np.clip(fwd_norm, 0.0, 3.0)),

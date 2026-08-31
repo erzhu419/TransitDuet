@@ -110,6 +110,46 @@ def holding_action_efficiency_gate(
     return float(1.0 / (1.0 + weight * action_fraction))
 
 
+def fleet_utilization_pressure(
+    *,
+    utilization: float,
+    pressure_start: float,
+    pressure_full: float,
+    exponent: float = 1.0,
+) -> float:
+    """Return smooth fleet pressure from causal in-service utilization."""
+    value = float(utilization)
+    start = float(pressure_start)
+    full = float(pressure_full)
+    power = float(exponent)
+    if not all(np.isfinite(x) for x in (value, start, full, power)):
+        raise ValueError("fleet utilization pressure inputs must be finite")
+    if value < 0.0 or not 0.0 <= start < full or power <= 0.0:
+        raise ValueError(
+            "fleet utilization pressure requires utilization >= 0, "
+            "0 <= start < full, exponent > 0")
+    normalized = float(np.clip((value - start) / (full - start), 0.0, 1.0))
+    return float(normalized ** power)
+
+
+def holding_fleet_efficiency_gate(
+    *,
+    action_s: float,
+    action_scale_s: float,
+    penalty: float,
+    fleet_pressure: float,
+) -> float:
+    """Discount holding gain only in proportion to current fleet pressure."""
+    pressure = float(fleet_pressure)
+    if not np.isfinite(pressure) or not 0.0 <= pressure <= 1.0:
+        raise ValueError("fleet pressure must lie in [0, 1]")
+    return holding_action_efficiency_gate(
+        action_s=action_s,
+        action_scale_s=action_scale_s,
+        penalty=float(penalty) * pressure,
+    )
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

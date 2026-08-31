@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_w2adfleetgain_l001_e25_r00025_w0030_b05_p1_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adfleetgain_l001_e25_r00025_w0030_b10_p1_hiro
+
+protocol:
+  role: exploratory_compact_w2_fleet_efficiency_gain_l001_e25_r00025_w0030_b10_p1_v6
+
+lower:
+  causal_regularity_policy:
+    capacity_gated_gain:
+      action_efficiency_penalty: 1.0

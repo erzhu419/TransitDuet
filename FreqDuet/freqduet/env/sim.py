@@ -799,6 +799,13 @@ class env_bus(object):
                     scenario_tape=self.scenario_tape,
                 )
         self.lower_context_gate_value = self._lower_context_gate_value()
+        fleet_target = max(float(getattr(
+            self, '_n_fleet_target', len(self.bus_all))), 1.0)
+        lower_fleet_utilization = float(np.clip(
+            sum(1 for bus in self.bus_all if bus.on_route) / fleet_target,
+            0.0,
+            1.0,
+        ))
         # update bus state
         apc_frequency_counts = {}
         for bus in self.bus_all:
@@ -823,6 +830,7 @@ class env_bus(object):
                           lower_context_queue_norm=self.lower_context_queue_norm,
                           lower_context_features=self.lower_context_features,
                           lower_context_gate_value=self.lower_context_gate_value,
+                          lower_fleet_utilization=lower_fleet_utilization,
                           causal_holding_guard=getattr(
                               self, 'lower_causal_holding_guard', None),
                           causal_holding_action_scale_s=getattr(
@@ -1096,6 +1104,7 @@ class env_bus(object):
             'causal_hold_limit',
             'prev_queue',
             'next_queue',
+            'fleet_utilization',
         }
         self.lower_context_features = [
             str(x) for x in requested_context if str(x) in allowed_context

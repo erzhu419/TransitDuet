@@ -472,6 +472,10 @@ class RESACLagrangianTrainer:
         self.regularity_capacity_gain_scale = 1.0
         self.regularity_capacity_exponent = 1.0
         self.regularity_capacity_action_efficiency_penalty = 0.0
+        self.regularity_capacity_fleet_utilization_feature_index = None
+        self.regularity_capacity_fleet_pressure_start = 0.0
+        self.regularity_capacity_fleet_pressure_full = 1.0
+        self.regularity_capacity_fleet_pressure_exponent = 1.0
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -479,7 +483,8 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_target_dual_v1',
                     'analytic_two_sided_zero_hold_regret_dual_v2',
                     'analytic_two_sided_capacity_gain_regret_dual_v3',
-                    'analytic_two_sided_efficiency_gain_regret_dual_v4'}:
+                    'analytic_two_sided_efficiency_gain_regret_dual_v4',
+                    'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             if self.discrete_actions is None:
@@ -616,6 +621,8 @@ class RESACLagrangianTrainer:
                     'positive_zero_hold_gain_v1'),
                 'analytic_two_sided_efficiency_gain_regret_dual_v4': (
                     'positive_zero_hold_efficiency_gain_v2'),
+                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5': (
+                    'positive_zero_hold_fleet_efficiency_gain_v3'),
             }
             if mode in capacity_gain_modes:
                 if not capacity_gain_enabled:
@@ -638,6 +645,37 @@ class RESACLagrangianTrainer:
                 action_efficiency_penalty = float(
                     capacity_gain_cfg.get(
                         'action_efficiency_penalty', 0.0))
+                fleet_efficiency_mode = (
+                    gain_mode
+                    == 'positive_zero_hold_fleet_efficiency_gain_v3')
+                fleet_utilization_feature_index = None
+                fleet_pressure_start = 0.0
+                fleet_pressure_full = 1.0
+                fleet_pressure_exponent = 1.0
+                if fleet_efficiency_mode:
+                    fleet_utilization_feature_index = int(
+                        capacity_gain_cfg[
+                            'fleet_utilization_feature_index'])
+                    fleet_pressure_start = float(
+                        capacity_gain_cfg.get('fleet_pressure_start', 0.8))
+                    fleet_pressure_full = float(
+                        capacity_gain_cfg.get('fleet_pressure_full', 1.0))
+                    fleet_pressure_exponent = float(
+                        capacity_gain_cfg.get('fleet_pressure_exponent', 1.0))
+                    if not (0 <= fleet_utilization_feature_index
+                            < int(state_dim)):
+                        raise ValueError(
+                            'fleet efficiency feature index is out of range')
+                    if not (np.isfinite(fleet_pressure_start)
+                            and np.isfinite(fleet_pressure_full)
+                            and 0.0 <= fleet_pressure_start
+                            < fleet_pressure_full <= 1.0):
+                        raise ValueError(
+                            'fleet pressure requires 0 <= start < full <= 1')
+                    if (not np.isfinite(fleet_pressure_exponent)
+                            or fleet_pressure_exponent <= 0.0):
+                        raise ValueError(
+                            'fleet pressure exponent must be positive')
                 if not np.isfinite(gain_weight) or gain_weight <= 0.0:
                     raise ValueError(
                         'capacity-gated gain weight must be positive')
@@ -653,8 +691,10 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'capacity-gated action efficiency penalty must be '
                         'finite and non-negative')
-                efficiency_mode = (
-                    gain_mode == 'positive_zero_hold_efficiency_gain_v2')
+                efficiency_mode = gain_mode in {
+                    'positive_zero_hold_efficiency_gain_v2',
+                    'positive_zero_hold_fleet_efficiency_gain_v3',
+                }
                 if efficiency_mode != (action_efficiency_penalty > 0.0):
                     raise ValueError(
                         'V2 efficiency gain requires a positive action '
@@ -668,6 +708,14 @@ class RESACLagrangianTrainer:
                 self.regularity_capacity_exponent = capacity_exponent
                 self.regularity_capacity_action_efficiency_penalty = (
                     action_efficiency_penalty)
+                self.regularity_capacity_fleet_utilization_feature_index = (
+                    fleet_utilization_feature_index)
+                self.regularity_capacity_fleet_pressure_start = (
+                    fleet_pressure_start)
+                self.regularity_capacity_fleet_pressure_full = (
+                    fleet_pressure_full)
+                self.regularity_capacity_fleet_pressure_exponent = (
+                    fleet_pressure_exponent)
                 capacity_gain_contract = {
                     'enabled': True,
                     'mode': gain_mode,
@@ -678,6 +726,14 @@ class RESACLagrangianTrainer:
                     'action_efficiency_penalty': (
                         action_efficiency_penalty),
                 }
+                if fleet_efficiency_mode:
+                    capacity_gain_contract.update({
+                        'fleet_utilization_feature_index': (
+                            fleet_utilization_feature_index),
+                        'fleet_pressure_start': fleet_pressure_start,
+                        'fleet_pressure_full': fleet_pressure_full,
+                        'fleet_pressure_exponent': fleet_pressure_exponent,
+                    })
             else:
                 if capacity_gain_enabled:
                     raise ValueError(
@@ -788,7 +844,8 @@ class RESACLagrangianTrainer:
         if self.regularity_policy_mode in {
                 'analytic_two_sided_zero_hold_regret_dual_v2',
                 'analytic_two_sided_capacity_gain_regret_dual_v3',
-                'analytic_two_sided_efficiency_gain_regret_dual_v4'}:
+                'analytic_two_sided_efficiency_gain_regret_dual_v4',
+                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5'}:
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
         else:
@@ -810,19 +867,41 @@ class RESACLagrangianTrainer:
         ).clamp_min(0.0) * capacity.unsqueeze(-1)
         action_gains = (
             action_gains
-            * self._regularity_policy_action_efficiency_gate().view(1, -1))
+            * self._regularity_policy_action_efficiency_gate(state))
         expected_gain = (action_probs * action_gains).sum(dim=-1)
         return expected_gain, valid, action_gains
 
-    def _regularity_policy_action_efficiency_gate(self):
-        """Return the fixed per-bin holding-efficiency multiplier."""
+    def _regularity_policy_fleet_pressure(self, state):
+        """Return causal fleet pressure for the V5 actor objective."""
+        index = self.regularity_capacity_fleet_utilization_feature_index
+        if index is None:
+            return torch.ones(
+                state.shape[0], dtype=state.dtype, device=state.device)
+        utilization = state[:, index].clamp(0.0, 1.0)
+        width = (
+            self.regularity_capacity_fleet_pressure_full
+            - self.regularity_capacity_fleet_pressure_start)
+        pressure = (
+            (utilization - self.regularity_capacity_fleet_pressure_start)
+            / width
+        ).clamp(0.0, 1.0)
+        return pressure.pow(
+            self.regularity_capacity_fleet_pressure_exponent)
+
+    def _regularity_policy_action_efficiency_gate(self, state):
+        """Return the state-conditional per-bin efficiency multiplier."""
         if not self.regularity_capacity_gain_enabled:
             raise RuntimeError('capacity-gated regularity gain is disabled')
         action_fraction = (
             self.discrete_actions / self.regularity_action_target_scale_s
-        ).clamp(0.0, 1.0)
+        ).clamp(0.0, 1.0).view(-1)
         penalty = self.regularity_capacity_action_efficiency_penalty
-        return 1.0 / (1.0 + penalty * action_fraction)
+        pressure = self._regularity_policy_fleet_pressure(state)
+        return 1.0 / (
+            1.0
+            + penalty
+            * pressure.unsqueeze(-1)
+            * action_fraction.unsqueeze(0))
 
     def _discrete_q_values(self, q_net, state):
         """Evaluate a scalar-action critic on every configured action bin."""
@@ -1016,6 +1095,8 @@ class RESACLagrangianTrainer:
             'regularity_policy_capacity_gain_bonus': 0.0,
             'regularity_policy_capacity_gate_mean': 0.0,
             'regularity_policy_action_efficiency_gate_mean': 0.0,
+            'regularity_policy_fleet_utilization_mean': 0.0,
+            'regularity_policy_fleet_pressure_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
@@ -1038,6 +1119,8 @@ class RESACLagrangianTrainer:
             regularity_scaled_capacity_gain_mean = None
             regularity_capacity_gate_mean = None
             regularity_action_efficiency_gate_mean = None
+            regularity_fleet_utilization_mean = None
+            regularity_fleet_pressure_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -1119,13 +1202,27 @@ class RESACLagrangianTrainer:
                             capacity_gate * valid_weights
                         ).sum().div(valid_weight_sum)
                         action_efficiency_gate = (
-                            self._regularity_policy_action_efficiency_gate())
+                            self._regularity_policy_action_efficiency_gate(
+                                state))
                         expected_action_efficiency_gate = (
-                            probs * action_efficiency_gate.view(1, -1)
+                            probs * action_efficiency_gate
                         ).sum(dim=-1)
                         regularity_action_efficiency_gate_mean = (
                             expected_action_efficiency_gate * valid_weights
                         ).sum().div(valid_weight_sum)
+                        fleet_index = (
+                            self.regularity_capacity_fleet_utilization_feature_index)
+                        if fleet_index is not None:
+                            fleet_utilization = state[
+                                :, fleet_index].clamp(0.0, 1.0)
+                            fleet_pressure = (
+                                self._regularity_policy_fleet_pressure(state))
+                            regularity_fleet_utilization_mean = (
+                                fleet_utilization * valid_weights
+                            ).sum().div(valid_weight_sum)
+                            regularity_fleet_pressure_mean = (
+                                fleet_pressure * valid_weights
+                            ).sum().div(valid_weight_sum)
                         regularity_capacity_gain_bonus = (
                             self.regularity_capacity_gain_weight
                             * regularity_scaled_capacity_gain_mean)
@@ -1281,6 +1378,12 @@ class RESACLagrangianTrainer:
                     regularity_action_efficiency_gate_mean.item()
                     if regularity_action_efficiency_gate_mean is not None
                     else 0.0),
+                'regularity_policy_fleet_utilization_mean': (
+                    regularity_fleet_utilization_mean.item()
+                    if regularity_fleet_utilization_mean is not None else 0.0),
+                'regularity_policy_fleet_pressure_mean': (
+                    regularity_fleet_pressure_mean.item()
+                    if regularity_fleet_pressure_mean is not None else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
                     float((

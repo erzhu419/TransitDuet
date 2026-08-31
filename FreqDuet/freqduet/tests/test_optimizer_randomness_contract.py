@@ -195,7 +195,8 @@ class OptimizerContractTest(unittest.TestCase):
             constraint_scale_mode="raw_cost_v1", initial_lambda=1.0,
             policy_mode="analytic_two_sided_target_dual_v1",
             capacity_gain_weight=0.02, capacity_exponent=1.0,
-            action_efficiency_penalty=0.0):
+            action_efficiency_penalty=0.0,
+            fleet_pressure_start=0.75):
         conditional = (
             {
                 "enable": True,
@@ -211,6 +212,7 @@ class OptimizerContractTest(unittest.TestCase):
         capacity_mode = policy_mode in {
             "analytic_two_sided_capacity_gain_regret_dual_v3",
             "analytic_two_sided_efficiency_gain_regret_dual_v4",
+            "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5",
         }
         regularity = {
             "enable": True,
@@ -233,6 +235,10 @@ class OptimizerContractTest(unittest.TestCase):
             regularity["capacity_gated_gain"] = {
                 "enable": True,
                 "mode": (
+                    "positive_zero_hold_fleet_efficiency_gain_v3"
+                    if policy_mode
+                    == "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5"
+                    else
                     "positive_zero_hold_efficiency_gain_v2"
                     if action_efficiency_penalty > 0.0
                     else "positive_zero_hold_gain_v1"),
@@ -242,8 +248,19 @@ class OptimizerContractTest(unittest.TestCase):
                 "capacity_exponent": capacity_exponent,
                 "action_efficiency_penalty": action_efficiency_penalty,
             }
+            if (policy_mode
+                    == "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5"):
+                regularity["capacity_gated_gain"].update({
+                    "fleet_utilization_feature_index": 4,
+                    "fleet_pressure_start": fleet_pressure_start,
+                    "fleet_pressure_full": 1.0,
+                    "fleet_pressure_exponent": 1.0,
+                })
         return RESACLagrangianTrainer(
-            state_dim=4 if capacity_mode else 3,
+            state_dim=(
+                5 if policy_mode
+                == "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5"
+                else 4 if capacity_mode else 3),
             action_range=45.0,
             action_bins=[0.0, 45.0],
             ensemble_size=2,
@@ -379,6 +396,33 @@ class OptimizerContractTest(unittest.TestCase):
             ["action_efficiency_penalty"],
             1.0,
         )
+
+    def test_fleet_efficiency_gain_only_discounts_under_fleet_pressure(self):
+        trainer = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5"),
+            action_efficiency_penalty=1.0,
+            fleet_pressure_start=0.75,
+        )
+        state = torch.tensor([
+            [0.6, 1.0, 1.0, 1.0, 0.75],
+            [0.6, 1.0, 1.0, 1.0, 1.0],
+        ], dtype=torch.float32)
+        probs = torch.tensor([[0.0, 1.0], [0.0, 1.0]], dtype=torch.float32)
+
+        expected, valid, gains = trainer._regularity_policy_capacity_gain(
+            state, probs)
+
+        zero_hold_cost = (45.0 / 360.0) ** 2
+        self.assertAlmostEqual(gains[0, 1].item(), zero_hold_cost, places=7)
+        self.assertAlmostEqual(
+            gains[1, 1].item(), 0.5 * zero_hold_cost, places=7)
+        self.assertAlmostEqual(expected[0].item(), zero_hold_cost, places=7)
+        self.assertAlmostEqual(expected[1].item(), 0.5 * zero_hold_cost, places=7)
+        self.assertTrue(torch.equal(valid, torch.ones_like(valid)))
+        contract = trainer.regularity_policy_contract["capacity_gated_gain"]
+        self.assertEqual(contract["fleet_utilization_feature_index"], 4)
+        self.assertEqual(contract["fleet_pressure_start"], 0.75)
 
     def test_causal_regularity_dual_uses_only_valid_evidence(self):
         torch.manual_seed(53)

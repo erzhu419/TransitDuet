@@ -1382,3 +1382,83 @@ and RAM use, and logs contained no Python exception or configuration failure.
 This record establishes execution identity and initial health only. Candidate
 selection and every effect claim remain pending complete aggregation and the
 locked efficiency-gain screen gate.
+
+### V15 holding-efficiency screen outcome (2026-08-31)
+
+All 64 shards completed successfully. Scheduler task `t86745` performed the
+strict node-side aggregate and synchronized only the four combined-summary
+artifacts. The manifest verifies the exact 16-config matrix, four fresh
+training seeds, four fresh common-random-number evaluation seeds, 256 unique
+checkpoint-39 rollouts, clean source commit
+`ce472066eb7b7525f5367f81e7259395b932d40c`, and the registered exploratory
+protocol.
+
+The locked gate returns `no_pass`; no V15 row is eligible for confirmation.
+Every candidate passes the mechanism contract, including positive realized
+gain, active capacity and efficiency gates, exact arithmetic, causal evidence,
+the zero-hold regret limit, and zero execution adjustment. The failure is an
+outcome tradeoff. Relative to same-source V14, every efficiency candidate
+reduces or preserves action and holding, but every row has worse mean headway
+CV. The closest row (`w=0.025,beta=1`) changes journey by `-0.04948 min` and CV
+by `+0.00050`; it narrowly misses the registered `-0.05 min` journey gain and
+fails the required `-0.001` CV gain. The strongest journey row
+(`w=0.025,beta=2`) improves journey by `-0.14348 min` but worsens CV by
+`+0.01769`.
+
+Per-training-seed comparison confirms a state-dependent Pareto tradeoff rather
+than one anomalous seed: the near row sometimes increases holding and improves
+CV, while in other seeds it suppresses holding and improves journey. A fixed
+action-only efficiency penalty cannot distinguish useful anti-bunching holds
+from holds made while the fleet is saturated. V16 must condition the soft
+opportunity cost on causal fleet utilization; changing V15 thresholds or
+continuing a global `weight,beta` sweep is ruled out.
+
+## Engineering-v16 fleet-conditioned efficiency gain preregistration (2026-08-31)
+
+V16 preserves the V13/V14 compact causal target, seven discrete actions,
+conditional entropy, zero-hold regret constraint, remaining-seat capacity gate,
+and noguard execution semantics. It adds one deployable context feature:
+`fleet_utilization`, the fraction of the executable fleet budget currently
+reported in service by the AVL roster. It changes only the actor-side positive
+regularity gain. For utilization `u`, pressure exponent `p`, and V14 gain
+`G(a)`, the registered objective is
+`q(u)=clip((u-0.9)/(1.0-0.9),0,1)^p` and
+`G_fleet(a,u)=G(a)/(1+beta*(a/a_max)*q(u))`. Below 90 percent utilization it is
+exactly V14; at full utilization it becomes the V15 action-efficiency cost.
+No action is clipped, replaced, or adjusted after policy inference.
+
+The locked grid crosses gain weights `0.020`, `0.025`, and `0.030`, high-pressure
+penalties `beta=0.5` and `1.0`, and pressure exponents `p=1` and `2`, for 12
+candidates. Controls are historical hard main, `noguard`, compact context-only,
+confirmed main, V11 same-entropy, V13, same-source V14, and the nearest V15 row.
+Fresh training seeds are `20013,20031,20053,20077`; fresh evaluation seeds are
+`53017,53041,53059,53083`. Exact scheduler command-field search found no prior
+use. The 40-episode screen therefore contains 80 independent training jobs and
+320 frozen common-random-number rollouts.
+
+The locked mechanism gate requires the exact V5/V3 objective contracts, fleet
+utilization and pressure strictly inside their valid causal ranges in every
+rollout, nonconstant pressure below saturation, positive realized gain, exact
+gain arithmetic, the V13 regret and evidence limits, and zero execution
+adjustment. Outcome gates retain all V15 comparisons and resource limits. In
+particular, a candidate must improve V14 journey by at least `0.05 min` and CV
+by at least `0.001`, with lower action and no increase in holding or denied
+dispatch. It must also improve CV over the nearest V15 row by at least `0.001`
+while keeping journey within `+0.02 min`. Priority is lower gain weight, lower
+penalty, then linear before quadratic pressure. A selected row remains
+exploratory and requires fresh 200-episode confirmation; no pass rejects this
+objective family without changing thresholds.
+
+### V16 implementation smoke (2026-08-31)
+
+The first two-episode smoke verified V14/V15 backward compatibility and showed
+that action-time utilization was high enough for fleet pressure to matter but
+that pressure starts `0.75` and `0.90` were too similar. Before any formal seed
+was used, the grid was therefore frozen to start `0.90` with exponents one and
+two. A second two-episode checkpoint/restore smoke used only the final p1/p2
+configuration names. Frozen evaluation reported the same utilization
+`0.92418`, pressures `0.43353` and `0.37246`, efficiency gates `0.94534` and
+`0.95360`, positive realized gains, and zero execution adjustment. Training
+diagnostics independently reported positive actor gain and distinct nonzero
+pressure for both exponents. These are implementation checks only and are not
+used as effect evidence.

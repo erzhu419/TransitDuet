@@ -8,7 +8,9 @@ from lower.causal_departure_regularity import (
     causal_two_sided_action_excess_cost,
     causal_two_sided_holding_target_s,
     causal_two_sided_zero_hold_regret_cost,
+    fleet_utilization_pressure,
     holding_action_efficiency_gate,
+    holding_fleet_efficiency_gate,
 )
 from runner_v3 import TransitDuetV2Runner
 
@@ -294,6 +296,35 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             action_s=22.5, action_scale_s=45.0, penalty=2.0), 0.5)
         self.assertAlmostEqual(holding_action_efficiency_gate(
             action_s=45.0, action_scale_s=45.0, penalty=2.0), 1.0 / 3.0)
+
+    def test_fleet_efficiency_gate_recovers_v14_below_pressure_start(self):
+        self.assertEqual(fleet_utilization_pressure(
+            utilization=0.75,
+            pressure_start=0.75,
+            pressure_full=1.0,
+        ), 0.0)
+        self.assertAlmostEqual(fleet_utilization_pressure(
+            utilization=0.875,
+            pressure_start=0.75,
+            pressure_full=1.0,
+        ), 0.5)
+        self.assertEqual(fleet_utilization_pressure(
+            utilization=1.0,
+            pressure_start=0.75,
+            pressure_full=1.0,
+        ), 1.0)
+        self.assertEqual(holding_fleet_efficiency_gate(
+            action_s=45.0,
+            action_scale_s=45.0,
+            penalty=1.0,
+            fleet_pressure=0.0,
+        ), 1.0)
+        self.assertAlmostEqual(holding_fleet_efficiency_gate(
+            action_s=45.0,
+            action_scale_s=45.0,
+            penalty=1.0,
+            fleet_pressure=1.0,
+        ), 0.5)
 
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):
