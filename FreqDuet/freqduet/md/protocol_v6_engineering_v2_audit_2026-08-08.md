@@ -1571,3 +1571,26 @@ gradients. Unit tests independently compare V17 against V14 on the same state
 and verify that the complete per-action gain vector differs only by one scalar
 and has the same argmax. These are implementation checks only; no outcome claim
 is made before the locked 40-episode matrix finishes.
+
+### V17 target-preserving gain screen dispatch (2026-08-31)
+
+The preregistered 21-config screen was submitted through scheduler as tasks
+`t86967` to `t87050` under run name
+`protocol_v6_target_preserving_gain_ep40_s4_e4_v17`. All 84 one-job shards use
+the clean detached snapshot at commit
+`c6b94265975870990f4a4427dc3b4182d32d13cb`, stage `exploratory`, 40 training
+episodes, and the registered four training and four frozen evaluation seeds.
+Tasks are pinned evenly across `node001` through `node006`, 14 per node, with
+four declared CPU cores and 1270 MB RAM per shard. Heavy artifacts are
+suppressed and result synchronization is disabled.
+
+The initial dispatch launched 66 shards and left 18 in scheduler-managed retry
+after transient jump-host SSH resets or remote working-directory probe
+timeouts. Scheduler reused the original records; no duplicate shard was
+created. The verified final state is 84 of 84 tasks running, with exactly 14 on
+each node. Representative target-preserving candidate `t86976` reports the
+exact source commit, clean tracked state, isolated `freqduet-cpu-py310`
+interpreter, approximately 100 percent CPU use, and 412 MB resident RAM. This
+record establishes source, protocol, and initial execution health only. Every
+effect and selection claim remains pending strict aggregation and the locked
+V17 gate.
