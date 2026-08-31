@@ -27,6 +27,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_4,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
     _model_parameter_sha256,
+    _raw_projection_target,
     _leakage_constraint_cost,
     _with_explicit_bootstrap,
     behavior_robust_checkpoint_diagnostics,
@@ -65,6 +66,20 @@ def mujoco_available() -> bool:
 
 
 class MujocoFrequencyAdapterTest(unittest.TestCase):
+    def test_terminal_reserve_context_dimension_and_raw_target_are_exact(self):
+        base = mujoco_policy_state_dim(17, 6)
+        certified = mujoco_policy_state_dim(
+            17,
+            6,
+            terminal_reserve_projection=True,
+            terminal_reserve_upper_window=8,
+            terminal_reserve_lower_window=32,
+        )
+        self.assertEqual(certified - base, (7 + 31) * 6 + 5)
+        action = np.asarray([-0.75, 0.0, 0.5], dtype=np.float32)
+        raw = _raw_projection_target(action, scale=1.0)
+        np.testing.assert_allclose(np.tanh(raw), action, atol=1e-6)
+
     def test_deployment_constraint_contract_separates_guard_ablations(self):
         contracts = {
             (replay, trust, closed): deployment_frequency_constraint_contract(
@@ -1104,6 +1119,67 @@ class MujocoFrequencyAdapterTest(unittest.TestCase):
 
 @unittest.skipUnless(mujoco_available(), "MuJoCo runtime is unavailable")
 class MujocoControlIntegrationTest(unittest.TestCase):
+    def test_terminal_reserve_is_in_the_native_training_loop(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=32
+        )
+        state_dim = mujoco_policy_state_dim(
+            observation_dim,
+            action_dim,
+            terminal_reserve_projection=True,
+        )
+        model = _hierarchical_model(
+            state_dim=state_dim,
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+            upper_projection_consistency_coef=0.5,
+            lower_projection_consistency_coef=0.5,
+        )
+        batch, row = rollout_hierarchical(
+            model,
+            seed=1901,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=32,
+            upper_period=8,
+            frequency_routing=True,
+            leakage_constraint=False,
+            sample=True,
+            episode_horizon=32,
+            responsibility_mode="additive",
+            lower_action_router_mode="direct",
+            upper_action_decoder_mode="hold",
+            terminal_reserve_projection=True,
+            upper_hf_rms_budget=0.075,
+            lower_lf_rms_budget=0.0475,
+        )
+        self.assertIsNotNone(batch.upper.projection_target)
+        self.assertIsNotNone(batch.lower.projection_target)
+        self.assertEqual(
+            batch.upper.projection_target.shape,
+            batch.upper.action.shape,
+        )
+        self.assertEqual(
+            batch.lower.projection_target.shape,
+            batch.lower.action.shape,
+        )
+        self.assertEqual(
+            row["terminal_reserve_certificate_violation_count"], 0.0
+        )
+        self.assertLessEqual(
+            row["terminal_reserve_upper_prefix_power_max"],
+            0.075 ** 2 + 1e-8,
+        )
+        self.assertLessEqual(
+            row["terminal_reserve_lower_prefix_power_max"],
+            0.0475 ** 2 + 1e-8,
+        )
+        metrics = model.update(batch)
+        self.assertIn("upper_projection_consistency_loss", metrics)
+        self.assertIn("lower_projection_consistency_loss", metrics)
+
     def test_explicit_v1416_protocol_keeps_control_arm_comparable(self):
         payload, _, _ = train_mujoco_method(
             method="freq_hrl_no_leakage",

@@ -16,6 +16,7 @@ import torch
 from freq_hrl.core import (
     CausalRollingBandTracker,
     CausalSmoothstepMacroPlan,
+    CausalTerminalReserveProjector,
     LeakageRegularizer,
     evaluate_rms_leakage_budget,
 )
@@ -753,6 +754,9 @@ def mujoco_policy_state_dim(
     *,
     observe_router_strength: bool = False,
     lower_action_router_mode: str = "direct",
+    terminal_reserve_projection: bool = False,
+    terminal_reserve_upper_window: int = 8,
+    terminal_reserve_lower_window: int = 32,
 ) -> int:
     if int(observation_dim) < 1 or int(action_dim) < 1:
         raise ValueError("MuJoCo observation and action dimensions must be positive")
@@ -771,12 +775,34 @@ def mujoco_policy_state_dim(
     else:
         filter_context_count = 2
         router_scalar_count = 0
+    if terminal_reserve_projection:
+        if (
+            int(terminal_reserve_upper_window) < 2
+            or int(terminal_reserve_lower_window) < 2
+        ):
+            raise ValueError("terminal-reserve windows must be at least two")
+        filter_context_count += (
+            int(terminal_reserve_upper_window) - 1
+            + int(terminal_reserve_lower_window) - 1
+        )
+        router_scalar_count += 5
     return (
         int(observation_dim)
         + (3 + filter_context_count) * int(action_dim)
         + router_scalar_count
         + int(bool(observe_router_strength))
     )
+
+
+def _raw_projection_target(action: np.ndarray, *, scale: float) -> np.ndarray:
+    """Map one certified bounded component back to Gaussian actor space."""
+
+    bound = float(scale)
+    if not np.isfinite(bound) or bound <= 0.0:
+        raise ValueError("projection target scale must be positive")
+    normalized = np.asarray(action, dtype=np.float64) / bound
+    normalized = np.clip(normalized, -1.0 + 1e-6, 1.0 - 1e-6)
+    return np.arctanh(normalized).astype(np.float32)
 
 
 def lower_action_router_training_strength(
@@ -1286,6 +1312,9 @@ def rollout_hierarchical(
     episode_horizon: int = 1000,
     responsibility_trace_output: dict[str, np.ndarray] | None = None,
     actor_trace_output: dict[str, np.ndarray] | None = None,
+    terminal_reserve_projection: bool = False,
+    terminal_reserve_upper_window: int = 8,
+    terminal_reserve_lower_window: int = 32,
 ) -> tuple[HierarchicalTrajectoryBatch | None, dict[str, Any]]:
     if str(leakage_constraint_scope) not in LEAKAGE_CONSTRAINT_SCOPES:
         raise ValueError("unknown MuJoCo leakage constraint scope")
@@ -1308,6 +1337,18 @@ def rollout_hierarchical(
         or not 0.0 <= float(upper_promotion_gain) <= 1.0
     ):
         raise ValueError("MuJoCo upper promotion gain must be in [0, 1]")
+    if not isinstance(terminal_reserve_projection, bool):
+        raise TypeError("terminal_reserve_projection must be boolean")
+    if terminal_reserve_projection and (
+        str(responsibility_mode) != "additive"
+        or str(lower_action_router_mode) != "direct"
+        or str(upper_action_decoder_mode) != "hold"
+        or float(upper_promotion_gain) != 0.0
+    ):
+        raise ValueError(
+            "terminal-reserve projection requires additive responsibility, "
+            "direct lower action, held upper action, and no promotion"
+        )
     headroom_zero_dc_router = (
         str(lower_action_router_mode) == "causal_macro_zero_dc_headroom"
     )
@@ -1405,6 +1446,20 @@ def rollout_hierarchical(
         model.reset_recurrent_inference()
         decomposer = CausalBandDecomposer()
         action_dim = int(env.action_space.shape[0])
+        terminal_projector = (
+            CausalTerminalReserveProjector(
+                upper_window=int(terminal_reserve_upper_window),
+                lower_window=int(terminal_reserve_lower_window),
+                upper_rms_budget=float(upper_hf_rms_budget),
+                lower_rms_budget=float(lower_lf_rms_budget),
+                upper_action_limit=float(upper_action_scale),
+                lower_action_limit=float(lower_action_scale),
+            )
+            if terminal_reserve_projection
+            else None
+        )
+        if terminal_projector is not None:
+            terminal_projector.reset(action_dim)
         previous_action = np.zeros(action_dim, dtype=np.float32)
         upper_anchor = np.zeros(action_dim, dtype=np.float32)
         upper_policy_action = np.zeros(action_dim, dtype=np.float32)
@@ -1453,8 +1508,8 @@ def rollout_hierarchical(
                 or streaming_audit_projection_router
             ):
                 action_blocks, _ = lower_router.policy_context
-                return action_blocks
-            if headroom_zero_dc_router:
+                contexts = action_blocks
+            elif headroom_zero_dc_router:
                 strength = float(lower_action_router_strength)
                 baseline = (
                     latent_responsibility_lf,
@@ -1471,17 +1526,26 @@ def rollout_hierarchical(
                         lower_router.context,
                     )
                 if strength == 0.0:
-                    return baseline
-                if strength == 1.0:
-                    return target
-                return tuple(
-                    (1.0 - strength) * left + strength * right
-                    for left, right in zip(baseline, target)
-                )
-            if function_preserving_router:
+                    contexts = baseline
+                elif strength == 1.0:
+                    contexts = target
+                else:
+                    contexts = tuple(
+                        (1.0 - strength) * left + strength * right
+                        for left, right in zip(baseline, target)
+                    )
+            elif function_preserving_router:
                 context = lower_router.context
-                return context, context
-            return responsibility.raw_lower_lf, lower_router.context
+                contexts = (context, context)
+            else:
+                contexts = (
+                    responsibility.raw_lower_lf,
+                    lower_router.context,
+                )
+            if terminal_projector is not None:
+                terminal_actions, _ = terminal_projector.policy_context
+                contexts = (*contexts, *terminal_actions)
+            return contexts
 
         def cost_filter_contexts() -> tuple[np.ndarray, ...]:
             if (
@@ -1489,11 +1553,19 @@ def rollout_hierarchical(
                 or streaming_audit_projection_router
             ):
                 action_blocks, _ = lower_router.policy_context
-                return action_blocks
-            if function_preserving_router:
+                contexts = action_blocks
+            elif function_preserving_router:
                 context = latent_lower_lf_tracker.low
-                return context, context
-            return raw_lower_lf_tracker.low, responsibility_lf_tracker.low
+                contexts = (context, context)
+            else:
+                contexts = (
+                    raw_lower_lf_tracker.low,
+                    responsibility_lf_tracker.low,
+                )
+            if terminal_projector is not None:
+                terminal_actions, _ = terminal_projector.policy_context
+                contexts = (*contexts, *terminal_actions)
+            return contexts
 
         def router_scalar_contexts() -> tuple[float, ...]:
             if (
@@ -1501,8 +1573,13 @@ def rollout_hierarchical(
                 or streaming_audit_projection_router
             ):
                 _, scalars = lower_router.policy_context
-                return scalars
-            return ()
+                contexts = scalars
+            else:
+                contexts = ()
+            if terminal_projector is not None:
+                _, terminal_scalars = terminal_projector.policy_context
+                contexts = (*contexts, *terminal_scalars)
+            return contexts
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
         rewards: list[float] = []
         executed_actions: list[np.ndarray] = []
@@ -1563,6 +1640,7 @@ def rollout_hierarchical(
         upper_constraint_costs: list[float] = []
         upper_cost_values: list[float] = []
         lower_cost_values: list[float] = []
+        terminal_projection_rows: list[dict[str, Any]] = []
         current_episode_return = 0.0
         episode_index = 0
         episode_seed = int(seed)
@@ -1756,6 +1834,8 @@ def rollout_hierarchical(
                 upper_anchor + router_upper_transfer,
                 dtype=np.float32,
             )
+            proposed_upper_action = effective_upper_action.copy()
+            proposed_lower_action = lower_residual.copy()
             canonical_lower_action = (
                 latent_lower_residual
                 if str(lower_action_router_mode)
@@ -1770,9 +1850,39 @@ def rollout_hierarchical(
                 if str(upper_action_decoder_mode) == "causal_smoothstep_plan"
                 else upper_policy_action
             )
-            nominal = np.clip(
-                execution_upper_action + canonical_lower_action, -1.0, 1.0
-            )
+            upper_projection_target = None
+            lower_projection_target = None
+            if terminal_projector is not None:
+                projection_row = terminal_projector.project(
+                    proposed_upper_action,
+                    proposed_lower_action,
+                )
+                terminal_projection_rows.append(projection_row)
+                effective_upper_action = np.asarray(
+                    projection_row["upper"], dtype=np.float32
+                )
+                lower_residual = np.asarray(
+                    projection_row["lower"], dtype=np.float32
+                )
+                nominal = np.clip(
+                    np.asarray(projection_row["total"], dtype=np.float32),
+                    -1.0,
+                    1.0,
+                )
+                upper_projection_target = _raw_projection_target(
+                    effective_upper_action,
+                    scale=float(upper_action_scale),
+                )
+                lower_projection_target = _raw_projection_target(
+                    lower_residual,
+                    scale=float(lower_action_scale),
+                )
+            else:
+                nominal = np.clip(
+                    execution_upper_action + canonical_lower_action,
+                    -1.0,
+                    1.0,
+                )
             executed = np.clip(nominal + disturbance, -1.0, 1.0)
             env_action = action_from_unit_box(
                 executed, env.action_space.low, env.action_space.high
@@ -1890,6 +2000,8 @@ def rollout_hierarchical(
                 cost_state=lower_cost_state,
                 cost=float(lower_cost),
                 done=done,
+                upper_projection_target=upper_projection_target,
+                lower_projection_target=lower_projection_target,
             )
             rewards.append(float(reward))
             current_episode_return += float(reward)
@@ -1960,8 +2072,8 @@ def rollout_hierarchical(
                 dtype=np.float32,
             ))
             reconstruction_errors.append(
-                np.asarray(effective_upper_action, dtype=np.float64)
-                + np.asarray(lower_residual, dtype=np.float64)
+                np.asarray(proposed_upper_action, dtype=np.float64)
+                + np.asarray(proposed_lower_action, dtype=np.float64)
                 - np.asarray(execution_upper_action, dtype=np.float64)
                 - np.asarray(canonical_lower_action, dtype=np.float64)
             )
@@ -2113,6 +2225,8 @@ def rollout_hierarchical(
                 responsibility.reset(action_dim)
                 lower_router.reset(action_dim)
                 upper_plan.reset(action_dim)
+                if terminal_projector is not None:
+                    terminal_projector.reset(action_dim)
                 responsibility_lf_tracker.reset(action_dim)
                 raw_lower_lf_tracker.reset(action_dim)
                 latent_lower_lf_tracker.reset(action_dim)
@@ -2258,6 +2372,75 @@ def rollout_hierarchical(
             ),
             upper_promotion_gain=effective_upper_promotion_gain,
         )
+        if terminal_projector is not None:
+            if len(terminal_projection_rows) != len(rewards):
+                raise RuntimeError(
+                    "terminal-reserve diagnostics are not step-aligned"
+                )
+            certificate_violations = sum(
+                (
+                    float(item["upper_prefix_power"])
+                    > float(upper_hf_rms_budget) ** 2 + 1e-8
+                )
+                or (
+                    float(item["lower_prefix_power"])
+                    > float(lower_lf_rms_budget) ** 2 + 1e-8
+                )
+                or not bool(item["terminal_certificate_feasible"])
+                for item in terminal_projection_rows
+            )
+            row.update({
+                "terminal_reserve_projection_enabled": 1.0,
+                "terminal_reserve_certificate_violation_count": float(
+                    certificate_violations
+                ),
+                "terminal_reserve_fixed_total_rate": float(np.mean([
+                    item["fixed_total_feasible"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_total_action_change_rate": float(np.mean([
+                    item["total_action_changed"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_projection_converged_rate": float(np.mean([
+                    item["projection_converged"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_recursive_fallback_rate": float(np.mean([
+                    item["recursive_fallback_used"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_correction_rms_mean": float(np.mean([
+                    item["correction_rms"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_correction_rms_max": float(np.max([
+                    item["correction_rms"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_component_correction_rms_mean": float(
+                    np.mean([
+                        item["component_correction_rms"]
+                        for item in terminal_projection_rows
+                    ])
+                ),
+                "terminal_reserve_upper_prefix_power_max": float(np.max([
+                    item["upper_prefix_power"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_lower_prefix_power_max": float(np.max([
+                    item["lower_prefix_power"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_upper_margin_min": float(np.min([
+                    item["upper_terminal_reserve_min_margin"]
+                    for item in terminal_projection_rows
+                ])),
+                "terminal_reserve_lower_margin_min": float(np.min([
+                    item["lower_terminal_reserve_min_margin"]
+                    for item in terminal_projection_rows
+                ])),
+            })
         if responsibility_trace_output is not None:
             responsibility_trace_output.clear()
             responsibility_trace_output.update({
@@ -3031,6 +3214,8 @@ def _hierarchical_model(
     lower_constraint_update_mode: str = "reward_guarded_adam_projection",
     upper_actor_anchor_coef: float = 0.0,
     lower_actor_anchor_coef: float = 0.0,
+    upper_projection_consistency_coef: float = 0.0,
+    lower_projection_consistency_coef: float = 0.0,
     actor_anchor_zero_state_indices: tuple[int, ...] = (),
     upper_deployment_frequency_dual_lr: float = 0.0,
     lower_deployment_frequency_dual_lr: float = 0.0,
@@ -3077,6 +3262,12 @@ def _hierarchical_model(
         epochs=4,
         minibatch_size=512,
         init_log_std=-0.7,
+        upper_projection_consistency_coef=float(
+            upper_projection_consistency_coef
+        ),
+        lower_projection_consistency_coef=float(
+            lower_projection_consistency_coef
+        ),
         deployment_action_transform="tanh",
         upper_deployment_frequency_rms_budget=float(
             upper_deployment_frequency_rms_budget

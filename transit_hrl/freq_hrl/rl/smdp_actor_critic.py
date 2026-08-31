@@ -421,6 +421,8 @@ class SMDPPPOConfig:
     entropy_coef: float = 0.001
     upper_actor_anchor_coef: float = 0.0
     lower_actor_anchor_coef: float = 0.0
+    upper_projection_consistency_coef: float = 0.0
+    lower_projection_consistency_coef: float = 0.0
     actor_anchor_zero_state_indices: tuple[int, ...] = ()
     promotion_entropy_coef: float | None = None
     promotion_rate_budget: float = 1.0
@@ -520,6 +522,7 @@ class LevelTrajectoryBatch:
     terminal: np.ndarray | None = None
     next_cost_value: np.ndarray | None = None
     deployment_frequency_group: np.ndarray | None = None
+    projection_target: np.ndarray | None = None
 
     def validate(
         self,
@@ -622,6 +625,17 @@ class LevelTrajectoryBatch:
                     f"{level} deployment_frequency_group must contain "
                     f"{n} non-negative integer labels"
                 )
+        if self.projection_target is not None:
+            target = np.asarray(self.projection_target)
+            if (
+                target.ndim != 2
+                or target.shape != (n, int(action_dim))
+                or not np.all(np.isfinite(target))
+            ):
+                raise ValueError(
+                    f"{level} projection_target shape must be "
+                    f"({n}, {action_dim}) with finite values"
+                )
 
     @property
     def size(self) -> int:
@@ -689,6 +703,7 @@ class HierarchicalRolloutBuilder:
                 "old_logp",
                 "old_value",
                 "cost",
+                "projection_target",
             )
         }
         self._lower: dict[str, list[Any]] = {
@@ -702,6 +717,7 @@ class HierarchicalRolloutBuilder:
                 "old_logp",
                 "old_value",
                 "cost",
+                "projection_target",
             )
         }
         self._hf: dict[str, list[Any]] = {
@@ -711,6 +727,8 @@ class HierarchicalRolloutBuilder:
         self._hf_enabled: bool | None = None
         self._upper_cost_state_enabled: bool | None = None
         self._lower_cost_state_enabled: bool | None = None
+        self._upper_projection_target_enabled: bool | None = None
+        self._lower_projection_target_enabled: bool | None = None
 
     @property
     def has_pending_upper(self) -> bool:
@@ -746,6 +764,7 @@ class HierarchicalRolloutBuilder:
             "value": float(value),
             "rewards": [],
             "costs": [],
+            "projection_target": [],
         }
         if self._upper_cost_state_enabled is None:
             self._upper_cost_state_enabled = cost_state_enabled
@@ -769,6 +788,8 @@ class HierarchicalRolloutBuilder:
         hf_value: float | None = None,
         hf_reward: float | None = None,
         hf_cost: float = 0.0,
+        upper_projection_target: np.ndarray | None = None,
+        lower_projection_target: np.ndarray | None = None,
     ) -> None:
         if self._pending_upper is None:
             raise RuntimeError("begin_upper must be called before add_lower")
@@ -789,6 +810,22 @@ class HierarchicalRolloutBuilder:
             raise ValueError(
                 "lower cost-state presence must be consistent within an episode"
             )
+        upper_projection_enabled = upper_projection_target is not None
+        lower_projection_enabled = lower_projection_target is not None
+        if (
+            self._upper_projection_target_enabled is not None
+            and self._upper_projection_target_enabled != upper_projection_enabled
+        ):
+            raise ValueError(
+                "upper projection-target presence must be consistent within an episode"
+            )
+        if (
+            self._lower_projection_target_enabled is not None
+            and self._lower_projection_target_enabled != lower_projection_enabled
+        ):
+            raise ValueError(
+                "lower projection-target presence must be consistent within an episode"
+            )
         self._lower["state"].append(np.asarray(state, dtype=np.float32).copy())
         if cost_state_enabled:
             self._lower["cost_state"].append(
@@ -801,8 +838,20 @@ class HierarchicalRolloutBuilder:
         self._lower["old_logp"].append(float(logp))
         self._lower["old_value"].append(float(value))
         self._lower["cost"].append(float(cost))
+        if lower_projection_enabled:
+            self._lower["projection_target"].append(
+                np.asarray(lower_projection_target, dtype=np.float32).copy()
+            )
+        if upper_projection_enabled:
+            self._pending_upper["projection_target"].append(
+                np.asarray(upper_projection_target, dtype=np.float32).copy()
+            )
         if self._lower_cost_state_enabled is None:
             self._lower_cost_state_enabled = cost_state_enabled
+        if self._upper_projection_target_enabled is None:
+            self._upper_projection_target_enabled = upper_projection_enabled
+        if self._lower_projection_target_enabled is None:
+            self._lower_projection_target_enabled = lower_projection_enabled
         if self._hf_enabled is None:
             self._hf_enabled = hf_enabled
         if hf_enabled:
@@ -846,6 +895,11 @@ class HierarchicalRolloutBuilder:
         self._upper["old_logp"].append(float(pending["logp"]))
         self._upper["old_value"].append(float(pending["value"]))
         self._upper["cost"].append(float(np.dot(discounts, np.asarray(costs, dtype=np.float64))))
+        if pending["projection_target"]:
+            self._upper["projection_target"].append(np.mean(
+                np.asarray(pending["projection_target"], dtype=np.float32),
+                axis=0,
+            ))
         self._pending_upper = None
 
     @staticmethod
@@ -867,6 +921,11 @@ class HierarchicalRolloutBuilder:
             counterfactual_advantage=(
                 np.asarray(data["counterfactual_advantage"], dtype=np.float32)
                 if data.get("counterfactual_advantage") else None
+            ),
+            projection_target=(
+                np.asarray(data["projection_target"], dtype=np.float32)
+                if data.get("projection_target")
+                else None
             ),
         )
 
@@ -1008,6 +1067,7 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
     counterfactual_batches = [
         item.counterfactual_advantage for item in items
     ]
+    projection_target_batches = [item.projection_target for item in items]
     cost_state_batches = [item.cost_state for item in items]
     if any(item is None for item in cost_state_batches) and not all(
         item is None for item in cost_state_batches
@@ -1020,6 +1080,12 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
     ):
         raise ValueError(
             "counterfactual advantages must be present for every batch or none"
+        )
+    if any(item is None for item in projection_target_batches) and not all(
+        item is None for item in projection_target_batches
+    ):
+        raise ValueError(
+            "projection targets must be present for every level batch or none"
         )
     explicit_bootstrap = [
         item.next_value is not None and item.terminal is not None
@@ -1108,6 +1174,15 @@ def concat_level_batches(batches: Iterable[LevelTrajectoryBatch]) -> LevelTrajec
         ),
         deployment_frequency_group=np.concatenate(
             frequency_groups, axis=0
+        ),
+        projection_target=(
+            None
+            if all(item is None for item in projection_target_batches)
+            else np.concatenate([
+                np.asarray(item)
+                for item in projection_target_batches
+                if item is not None
+            ], axis=0)
         ),
     )
 
@@ -1214,13 +1289,15 @@ class FrequencySeparatedActorCriticPPO:
                 "promotion_advantage_huber_delta must be positive and finite"
             )
         for level in ("upper", "lower"):
-            coefficient = float(
-                getattr(config, f"{level}_actor_anchor_coef")
-            )
-            if not np.isfinite(coefficient) or coefficient < 0.0:
-                raise ValueError(
-                    f"{level}_actor_anchor_coef must be finite and non-negative"
-                )
+            for suffix in (
+                "actor_anchor_coef",
+                "projection_consistency_coef",
+            ):
+                coefficient = float(getattr(config, f"{level}_{suffix}"))
+                if not np.isfinite(coefficient) or coefficient < 0.0:
+                    raise ValueError(
+                        f"{level}_{suffix} must be finite and non-negative"
+                    )
         anchor_indices = tuple(config.actor_anchor_zero_state_indices)
         if any(
             isinstance(index, bool) or int(index) != index or int(index) < 0
@@ -2817,6 +2894,20 @@ class FrequencySeparatedActorCriticPPO:
         )
         action = torch.as_tensor(batch.action, dtype=torch.float32, device=self.device)
         old_logp = torch.as_tensor(batch.old_logp, dtype=torch.float32, device=self.device)
+        projection_coefficient = float(
+            getattr(cfg, f"{level}_projection_consistency_coef", 0.0)
+        )
+        projection_target_t = None
+        if batch.projection_target is not None:
+            projection_target_t = torch.as_tensor(
+                batch.projection_target,
+                dtype=torch.float32,
+                device=self.device,
+            )
+        elif projection_coefficient > 0.0:
+            raise ValueError(
+                f"{level} projection consistency requires projection targets"
+            )
         reward_adv, returns = self._gae(
             batch.reward,
             batch.done,
@@ -2957,6 +3048,22 @@ class FrequencySeparatedActorCriticPPO:
                     actor=actor,
                     state=state[idx],
                 )
+                projection_consistency_mse = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                projection_consistency_loss = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                if projection_target_t is not None:
+                    projection_mean = actor.distribution(state[idx]).mean
+                    projection_consistency_mse = torch.mean(
+                        torch.square(
+                            projection_mean - projection_target_t[idx]
+                        )
+                    )
+                    projection_consistency_loss = (
+                        projection_coefficient * projection_consistency_mse
+                    )
                 policy_loss = (
                     -reward_surrogate
                     - float(cfg.promotion_counterfactual_coef)
@@ -2964,6 +3071,7 @@ class FrequencySeparatedActorCriticPPO:
                     + constraint_loss
                     + promotion_rate_loss
                     + actor_anchor_loss
+                    + projection_consistency_loss
                 )
                 value_loss = torch.mean((value_net(state[idx]) - returns_t[idx]) ** 2)
                 cost_value_loss = torch.zeros((), dtype=torch.float32, device=self.device)
@@ -3006,7 +3114,11 @@ class FrequencySeparatedActorCriticPPO:
                     guarded_diagnostics["actor_update_enabled"] = 0.0
                 elif guarded_update:
                     def current_surrogates() -> tuple[
-                        torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor
+                        torch.Tensor,
+                        torch.Tensor,
+                        torch.Tensor,
+                        torch.Tensor,
+                        torch.Tensor,
                     ]:
                         current_logp, current_entropy = (
                             actor.log_prob_entropy(
@@ -3034,29 +3146,56 @@ class FrequencySeparatedActorCriticPPO:
                             actor=actor,
                             state=state[idx],
                         )
+                        current_projection_loss = torch.zeros(
+                            (), dtype=torch.float32, device=self.device
+                        )
+                        if projection_target_t is not None:
+                            current_projection_mean = actor.distribution(
+                                state[idx]
+                            ).mean
+                            current_projection_loss = (
+                                projection_coefficient
+                                * torch.mean(torch.square(
+                                    current_projection_mean
+                                    - projection_target_t[idx]
+                                ))
+                            )
                         return (
                             current_reward,
                             current_entropy.mean(),
                             current_cost,
                             current_anchor_loss,
+                            current_projection_loss,
                         )
 
                     def reward_actor_loss_fn() -> torch.Tensor:
-                        current_reward, current_entropy, _, current_anchor = (
-                            current_surrogates()
-                        )
+                        (
+                            current_reward,
+                            current_entropy,
+                            _,
+                            current_anchor,
+                            current_projection,
+                        ) = current_surrogates()
                         return -current_reward - (
                             entropy_coef * current_entropy
-                        ) + current_anchor
+                        ) + current_anchor + current_projection
 
                     def reward_guard_loss_fn() -> torch.Tensor:
-                        current_reward, _, _, current_anchor = (
-                            current_surrogates()
+                        (
+                            current_reward,
+                            _,
+                            _,
+                            current_anchor,
+                            current_projection,
+                        ) = current_surrogates()
+                        return (
+                            -current_reward
+                            + current_anchor
+                            + current_projection
                         )
-                        return -current_reward + current_anchor
 
                     def constraint_loss_fn() -> torch.Tensor:
-                        _, _, current_cost, _ = current_surrogates()
+                        _, _, current_cost, _, _ = current_surrogates()
                         return constraint_lambda * current_cost
 
                     if (
@@ -3166,6 +3305,12 @@ class FrequencySeparatedActorCriticPPO:
                     ),
                     "actor_anchor_loss": float(
                         actor_anchor_loss.detach().cpu().item()
+                    ),
+                    "projection_consistency_mse": float(
+                        projection_consistency_mse.detach().cpu().item()
+                    ),
+                    "projection_consistency_loss": float(
+                        projection_consistency_loss.detach().cpu().item()
                     ),
                     "constraint_guard_attempted": float(
                         guarded_diagnostics["attempted"]

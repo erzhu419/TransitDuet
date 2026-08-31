@@ -120,6 +120,53 @@ class CausalTerminalReserveProjector:
         self._previous_upper = np.zeros(dimension, dtype=np.float64)
         self._step_count = 0
 
+    @property
+    def policy_context(self) -> tuple[tuple[np.ndarray, ...], tuple[float, ...]]:
+        """Return a fixed-size causal context sufficient for the certificate."""
+
+        self._require_reset()
+
+        def padded_history(
+            history: list[np.ndarray], window: int
+        ) -> tuple[np.ndarray, ...]:
+            width = int(window) - 1
+            padding = width - len(history)
+            rows = [
+                np.zeros(self._dimension, dtype=np.float32)
+                for _ in range(padding)
+            ]
+            rows.extend(
+                np.asarray(value, dtype=np.float32).copy()
+                for value in history[-width:]
+            )
+            return tuple(rows)
+
+        time = max(self._step_count, 1)
+        upper_capacity = (
+            time * self._dimension * self.upper_rms_budget ** 2
+        )
+        lower_capacity = (
+            time * self._dimension * self.lower_rms_budget ** 2
+        )
+        action_contexts = (
+            *padded_history(self._upper_history, self.upper_window),
+            *padded_history(self._lower_history, self.lower_window),
+        )
+        scalar_contexts = (
+            float(np.log1p(self._step_count)),
+            float(self._upper_energy / upper_capacity),
+            float(self._lower_energy / lower_capacity),
+            float(
+                min(self._step_count, self.upper_window - 1)
+                / (self.upper_window - 1)
+            ),
+            float(
+                min(self._step_count, self.lower_window - 1)
+                / (self.lower_window - 1)
+            ),
+        )
+        return action_contexts, scalar_contexts
+
     def project(
         self,
         proposed_upper: Any,

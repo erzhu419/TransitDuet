@@ -110,6 +110,22 @@ def test_shifted_backup_is_feasible_at_the_next_replan():
     np.testing.assert_allclose(second["total"], first["upper"], atol=1e-10)
 
 
+def test_policy_context_is_fixed_size_and_contains_only_realized_history():
+    projector = _projector()
+    projector.reset(2)
+    initial_actions, initial_scalars = projector.policy_context
+    assert len(initial_actions) == (4 - 1) + (6 - 1)
+    assert len(initial_scalars) == 5
+    assert all(np.array_equal(value, np.zeros(2)) for value in initial_actions)
+    row = projector.project(np.array([0.3, -0.2]), np.zeros(2))
+    actions, scalars = projector.policy_context
+    np.testing.assert_allclose(actions[2], row["upper"], atol=1e-12)
+    np.testing.assert_allclose(actions[-1], row["lower"], atol=1e-12)
+    assert scalars[0] == pytest.approx(np.log(2.0))
+    assert scalars[3] == pytest.approx(1.0 / 3.0)
+    assert scalars[4] == pytest.approx(1.0 / 5.0)
+
+
 def test_backup_tail_flushes_both_finite_memory_filters():
     rng = np.random.default_rng(411)
     upper = rng.uniform(-0.7, 0.7, size=(12, 2))

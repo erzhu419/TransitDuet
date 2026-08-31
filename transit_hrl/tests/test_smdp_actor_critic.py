@@ -92,6 +92,35 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
         self.assertEqual(float(batch.upper.done[-1]), 1.0)
         self.assertEqual(float(batch.lower.done[-1]), 1.0)
 
+    def test_projection_targets_align_with_both_decision_rates(self):
+        builder = HierarchicalRolloutBuilder(gamma=0.95)
+        builder.begin_upper(
+            state=np.zeros(3, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+        )
+        for index, target in enumerate((0.2, 0.6)):
+            builder.add_lower(
+                state=np.zeros(2, dtype=np.float32),
+                action=np.zeros(1, dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=index == 1,
+                upper_projection_target=np.asarray(
+                    [target], dtype=np.float32
+                ),
+                lower_projection_target=np.asarray(
+                    [-target], dtype=np.float32
+                ),
+            )
+        batch = builder.build()
+        np.testing.assert_allclose(batch.upper.projection_target, [[0.4]])
+        np.testing.assert_allclose(
+            batch.lower.projection_target, [[-0.2], [-0.6]]
+        )
+
     def test_sparse_promotion_gate_owns_rewards_until_next_decision(self):
         builder = PromotionRolloutBuilder(gamma=0.9)
         builder.begin(
@@ -325,6 +354,65 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
                 lower_actor_anchor_coef=1.0,
                 actor_anchor_zero_state_indices=(2,),
             ))
+
+    def test_projection_consistency_moves_actor_mean_toward_certified_target(self):
+        batch = self._batch(seed=141)
+        batch.upper.reward[:] = 0.0
+        batch.lower.reward[:] = 0.0
+        batch.upper.old_value[:] = 0.0
+        batch.lower.old_value[:] = 0.0
+        batch.upper.projection_target = np.full_like(batch.upper.action, 1.5)
+        batch.lower.projection_target = np.full_like(batch.lower.action, -1.5)
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            upper_learning_rate=1e-2,
+            lower_learning_rate=1e-2,
+            upper_projection_consistency_coef=5.0,
+            lower_projection_consistency_coef=5.0,
+            entropy_coef=0.0,
+            epochs=4,
+            minibatch_size=8,
+        ))
+        lower_state = torch.as_tensor(batch.lower.state, dtype=torch.float32)
+        lower_target = torch.as_tensor(
+            batch.lower.projection_target, dtype=torch.float32
+        )
+        with torch.no_grad():
+            before = torch.mean(torch.square(
+                model.lower_actor.distribution(lower_state).mean - lower_target
+            )).item()
+        metrics = model.update(batch)
+        with torch.no_grad():
+            after = torch.mean(torch.square(
+                model.lower_actor.distribution(lower_state).mean - lower_target
+            )).item()
+        self.assertGreater(metrics["upper_projection_consistency_mse"], 0.0)
+        self.assertGreater(metrics["lower_projection_consistency_loss"], 0.0)
+        self.assertLess(after, before)
+
+    def test_projection_consistency_requires_aligned_targets(self):
+        with self.assertRaisesRegex(ValueError, "non-negative"):
+            FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                upper_state_dim=3,
+                lower_state_dim=2,
+                upper_action_dim=1,
+                lower_action_dim=1,
+                upper_projection_consistency_coef=-1.0,
+            ))
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            upper_projection_consistency_coef=1.0,
+            epochs=1,
+        ))
+        with self.assertRaisesRegex(ValueError, "requires projection targets"):
+            model.update(self._batch(seed=142))
 
     def test_lower_cost_critic_can_use_a_distinct_causal_state(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
