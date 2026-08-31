@@ -1755,3 +1755,32 @@ thresholds remain unchanged. To avoid reusing observed outcomes, the corrected
 formal rerun uses fresh training seeds `23013,23031,23053,23077` and frozen
 evaluation seeds `56017,56041,56059,56083`; it remains exploratory and requires
 fresh 200-episode confirmation if any candidate passes.
+
+### V18 corrected outcome (2026-09-01)
+
+The corrected V18r1 screen completed 80/80 scheduler shards and all 320 frozen
+common-random-number rollouts with no failed or retried task. The strict
+aggregator verified the clean source commit, exact 20-configuration matrix,
+fresh seeds, 40-episode exploratory protocol, V13 reference, unique rollouts,
+and run manifests. Every candidate also passed the mechanism gate, including
+the explicit `zero_hold_regret_v2` constraint-cost contract, frozen actor,
+causal HF evidence, positive realized gain, regret limit, and zero execution
+adjustment. The result is therefore valid effect evidence for the registered
+objective.
+
+The locked gate returns `no_pass`. The closest resource-preserving candidate,
+`w=0.025,beta_H=0.5`, improves restricted journey relative to same-source V14
+by `0.13559 min` and does not increase mean action, holding vehicle-seconds, or
+denied dispatch, but worsens headway CV by `0.00731` and is not CV-noninferior
+to current main or V11. At the other side of the frontier,
+`w=0.020,beta_H=0.5` improves V14 headway CV by `0.00309` but worsens journey
+by `0.04334 min` and increases action, holding, and denied dispatch. No row
+satisfies the preregistered joint outcome gate; no candidate is eligible for
+200-episode confirmation or a paper claim.
+
+The corrected result confirms that smoothly scaling the positive analytic gain
+by local HF energy still changes its strength against the passenger critic and
+does not remove the journey--regularity tradeoff. V18 is rejected as a mainline
+objective family. Further work must change how the lower policy represents or
+predicts action value, rather than sweep additional gain weights, HF penalties,
+or state-wide scalar gates.
