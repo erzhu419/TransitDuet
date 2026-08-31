@@ -1,0 +1,10 @@
+_extends: F_freqduet_protocol_v6_w2adtpgain_l001_e25_r00025_w0020_b10_t1_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adtpgain_l001_e25_r00025_w0025_b10_t1_hiro
+
+protocol:
+  role: exploratory_compact_w2_target_preserving_gain_l001_e25_r00025_w0025_b10_t1_v6
+
+lower:
+  causal_regularity_policy:
+    capacity_gated_gain:
+      weight: 0.025

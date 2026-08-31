@@ -75,6 +75,13 @@ FLEET_EFFICIENCY_GAIN_CONFIGS = [
     for penalty in ("05", "10")
     for weight in ("0020", "0025", "0030")
 ]
+TARGET_PRESERVING_GAIN_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adtpgain_l001_e25_r00025_"
+    f"w{weight}_b{penalty}_t{target_exponent}_hiro"
+    for target_exponent in ("0", "1")
+    for penalty in ("05", "10")
+    for weight in ("0020", "0025", "0030")
+]
 EXPERIMENTAL_CONFIGS = [
     "F_freqduet_protocol_v6_maskguard_hiro",
     "F_freqduet_protocol_v6_maskguard_nofreq_hiro",
@@ -103,6 +110,7 @@ EXPERIMENTAL_CONFIGS = [
     *CAPACITY_GAIN_CONFIGS,
     *EFFICIENCY_GAIN_CONFIGS,
     *FLEET_EFFICIENCY_GAIN_CONFIGS,
+    *TARGET_PRESERVING_GAIN_CONFIGS,
 ]
 
 
@@ -224,6 +232,9 @@ def validate(
                 raise ValueError(
                     f"{name}: regularity policy uses non-causal evidence")
             expected_policy_mode = (
+                "analytic_two_sided_target_preserving_gain_regret_dual_v6"
+                if name in TARGET_PRESERVING_GAIN_CONFIGS
+                else
                 "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5"
                 if name in FLEET_EFFICIENCY_GAIN_CONFIGS
                 else
@@ -244,7 +255,8 @@ def validate(
             gain_configs = (
                 CAPACITY_GAIN_CONFIGS
                 + EFFICIENCY_GAIN_CONFIGS
-                + FLEET_EFFICIENCY_GAIN_CONFIGS)
+                + FLEET_EFFICIENCY_GAIN_CONFIGS
+                + TARGET_PRESERVING_GAIN_CONFIGS)
             if name in gain_configs:
                 gain = regularity_policy.get(
                     "capacity_gated_gain", {}) or {}
@@ -252,6 +264,9 @@ def validate(
                     raise ValueError(
                         f"{name}: capacity gain lacks causal capacity state")
                 expected_gain_mode = (
+                    "positive_zero_hold_target_preserving_gain_v4"
+                    if name in TARGET_PRESERVING_GAIN_CONFIGS
+                    else
                     "positive_zero_hold_fleet_efficiency_gain_v3"
                     if name in FLEET_EFFICIENCY_GAIN_CONFIGS
                     else
@@ -264,7 +279,9 @@ def validate(
                         f"{name}: capacity gain contract is not locked")
                 allowed_weights = (
                     {0.02, 0.025, 0.03}
-                    if name in FLEET_EFFICIENCY_GAIN_CONFIGS
+                    if name in (
+                        FLEET_EFFICIENCY_GAIN_CONFIGS
+                        + TARGET_PRESERVING_GAIN_CONFIGS)
                     else
                     {0.025, 0.03, 0.035}
                     if name in EFFICIENCY_GAIN_CONFIGS
@@ -278,7 +295,8 @@ def validate(
                 allowed_exponents = (
                     {1.0} if name in (
                         EFFICIENCY_GAIN_CONFIGS
-                        + FLEET_EFFICIENCY_GAIN_CONFIGS)
+                        + FLEET_EFFICIENCY_GAIN_CONFIGS
+                        + TARGET_PRESERVING_GAIN_CONFIGS)
                     else {1.0, 2.0})
                 if (float(gain.get("capacity_exponent", -1.0))
                         not in allowed_exponents):
@@ -294,19 +312,35 @@ def validate(
                         not in expected_penalties):
                     raise ValueError(
                         f"{name}: action efficiency penalty is not registered")
-                if name in FLEET_EFFICIENCY_GAIN_CONFIGS:
+                if name in (
+                        FLEET_EFFICIENCY_GAIN_CONFIGS
+                        + TARGET_PRESERVING_GAIN_CONFIGS):
                     if "fleet_utilization" not in features:
                         raise ValueError(
                             f"{name}: fleet efficiency lacks causal fleet state")
                     if float(gain.get("fleet_pressure_start", -1.0)) != 0.9:
                         raise ValueError(
                             f"{name}: fleet pressure start is not registered")
+                    pressure_exponents = (
+                        {1.0} if name in TARGET_PRESERVING_GAIN_CONFIGS
+                        else {1.0, 2.0})
                     if (float(gain.get("fleet_pressure_full", -1.0)) != 1.0
                             or float(gain.get(
-                                "fleet_pressure_exponent", -1.0)) not in {
-                                    1.0, 2.0}):
+                                "fleet_pressure_exponent", -1.0))
+                            not in pressure_exponents):
                         raise ValueError(
                             f"{name}: fleet pressure contract is not locked")
+                if name in TARGET_PRESERVING_GAIN_CONFIGS:
+                    if float(gain.get(
+                            "opportunity_cost_penalty", -1.0)) not in {
+                                0.5, 1.0}:
+                        raise ValueError(
+                            f"{name}: opportunity-cost penalty is not registered")
+                    if float(gain.get(
+                            "target_pressure_exponent", -1.0)) not in {
+                                0.0, 1.0}:
+                        raise ValueError(
+                            f"{name}: target pressure exponent is not registered")
                 if (float(regularity_policy.get("cost_limit", -1.0))
                         != 0.00025
                         or float(regularity_policy.get(

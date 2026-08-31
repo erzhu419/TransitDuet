@@ -476,6 +476,8 @@ class RESACLagrangianTrainer:
         self.regularity_capacity_fleet_pressure_start = 0.0
         self.regularity_capacity_fleet_pressure_full = 1.0
         self.regularity_capacity_fleet_pressure_exponent = 1.0
+        self.regularity_capacity_opportunity_cost_penalty = 0.0
+        self.regularity_capacity_target_pressure_exponent = 0.0
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -484,7 +486,8 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_zero_hold_regret_dual_v2',
                     'analytic_two_sided_capacity_gain_regret_dual_v3',
                     'analytic_two_sided_efficiency_gain_regret_dual_v4',
-                    'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5'}:
+                    'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
+                    'analytic_two_sided_target_preserving_gain_regret_dual_v6'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             if self.discrete_actions is None:
@@ -623,6 +626,8 @@ class RESACLagrangianTrainer:
                     'positive_zero_hold_efficiency_gain_v2'),
                 'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5': (
                     'positive_zero_hold_fleet_efficiency_gain_v3'),
+                'analytic_two_sided_target_preserving_gain_regret_dual_v6': (
+                    'positive_zero_hold_target_preserving_gain_v4'),
             }
             if mode in capacity_gain_modes:
                 if not capacity_gain_enabled:
@@ -645,9 +650,19 @@ class RESACLagrangianTrainer:
                 action_efficiency_penalty = float(
                     capacity_gain_cfg.get(
                         'action_efficiency_penalty', 0.0))
-                fleet_efficiency_mode = (
+                opportunity_cost_penalty = float(
+                    capacity_gain_cfg.get(
+                        'opportunity_cost_penalty', 0.0))
+                target_pressure_exponent = float(
+                    capacity_gain_cfg.get(
+                        'target_pressure_exponent', 0.0))
+                target_preserving_mode = (
                     gain_mode
-                    == 'positive_zero_hold_fleet_efficiency_gain_v3')
+                    == 'positive_zero_hold_target_preserving_gain_v4')
+                fleet_efficiency_mode = gain_mode in {
+                    'positive_zero_hold_fleet_efficiency_gain_v3',
+                    'positive_zero_hold_target_preserving_gain_v4',
+                }
                 fleet_utilization_feature_index = None
                 fleet_pressure_start = 0.0
                 fleet_pressure_full = 1.0
@@ -676,6 +691,16 @@ class RESACLagrangianTrainer:
                             or fleet_pressure_exponent <= 0.0):
                         raise ValueError(
                             'fleet pressure exponent must be positive')
+                if (not np.isfinite(opportunity_cost_penalty)
+                        or opportunity_cost_penalty < 0.0):
+                    raise ValueError(
+                        'opportunity-cost penalty must be finite and '
+                        'non-negative')
+                if (not np.isfinite(target_pressure_exponent)
+                        or target_pressure_exponent < 0.0):
+                    raise ValueError(
+                        'target pressure exponent must be finite and '
+                        'non-negative')
                 if not np.isfinite(gain_weight) or gain_weight <= 0.0:
                     raise ValueError(
                         'capacity-gated gain weight must be positive')
@@ -699,6 +724,11 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'V2 efficiency gain requires a positive action '
                         'efficiency penalty and V1 requires zero')
+                if target_preserving_mode != (
+                        opportunity_cost_penalty > 0.0):
+                    raise ValueError(
+                        'V4 target-preserving gain requires a positive '
+                        'opportunity-cost penalty and older modes require zero')
                 self.regularity_capacity_gain_enabled = True
                 self.regularity_capacity_feature_index = (
                     capacity_feature_index)
@@ -716,6 +746,10 @@ class RESACLagrangianTrainer:
                     fleet_pressure_full)
                 self.regularity_capacity_fleet_pressure_exponent = (
                     fleet_pressure_exponent)
+                self.regularity_capacity_opportunity_cost_penalty = (
+                    opportunity_cost_penalty)
+                self.regularity_capacity_target_pressure_exponent = (
+                    target_pressure_exponent)
                 capacity_gain_contract = {
                     'enabled': True,
                     'mode': gain_mode,
@@ -733,6 +767,13 @@ class RESACLagrangianTrainer:
                         'fleet_pressure_start': fleet_pressure_start,
                         'fleet_pressure_full': fleet_pressure_full,
                         'fleet_pressure_exponent': fleet_pressure_exponent,
+                    })
+                if target_preserving_mode:
+                    capacity_gain_contract.update({
+                        'opportunity_cost_penalty': (
+                            opportunity_cost_penalty),
+                        'target_pressure_exponent': (
+                            target_pressure_exponent),
                     })
             else:
                 if capacity_gain_enabled:
@@ -845,7 +886,8 @@ class RESACLagrangianTrainer:
                 'analytic_two_sided_zero_hold_regret_dual_v2',
                 'analytic_two_sided_capacity_gain_regret_dual_v3',
                 'analytic_two_sided_efficiency_gain_regret_dual_v4',
-                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5'}:
+                'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
+                'analytic_two_sided_target_preserving_gain_regret_dual_v6'}:
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
         else:
@@ -892,6 +934,17 @@ class RESACLagrangianTrainer:
         """Return the state-conditional per-bin efficiency multiplier."""
         if not self.regularity_capacity_gain_enabled:
             raise RuntimeError('capacity-gated regularity gain is disabled')
+        if (self.regularity_capacity_gain_mode
+                == 'positive_zero_hold_target_preserving_gain_v4'):
+            target_pressure = self._regularity_policy_target_pressure(state)
+            pressure = self._regularity_policy_fleet_pressure(state)
+            scalar_gate = 1.0 / (
+                1.0
+                + self.regularity_capacity_opportunity_cost_penalty
+                * pressure
+                * target_pressure)
+            return scalar_gate.unsqueeze(-1).expand(
+                state.shape[0], self.discrete_actions.shape[0])
         action_fraction = (
             self.discrete_actions / self.regularity_action_target_scale_s
         ).clamp(0.0, 1.0).view(-1)
@@ -902,6 +955,15 @@ class RESACLagrangianTrainer:
             + penalty
             * pressure.unsqueeze(-1)
             * action_fraction.unsqueeze(0))
+
+    def _regularity_policy_target_pressure(self, state):
+        """Return the causal target magnitude used by the V6 state gate."""
+        target_fraction = state[
+            :, self.regularity_target_feature_index].clamp(0.0, 1.0)
+        exponent = self.regularity_capacity_target_pressure_exponent
+        if exponent == 0.0:
+            return torch.ones_like(target_fraction)
+        return target_fraction.pow(exponent)
 
     def _discrete_q_values(self, q_net, state):
         """Evaluate a scalar-action critic on every configured action bin."""
@@ -1097,6 +1159,7 @@ class RESACLagrangianTrainer:
             'regularity_policy_action_efficiency_gate_mean': 0.0,
             'regularity_policy_fleet_utilization_mean': 0.0,
             'regularity_policy_fleet_pressure_mean': 0.0,
+            'regularity_policy_target_pressure_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
@@ -1121,6 +1184,7 @@ class RESACLagrangianTrainer:
             regularity_action_efficiency_gate_mean = None
             regularity_fleet_utilization_mean = None
             regularity_fleet_pressure_mean = None
+            regularity_target_pressure_mean = None
             if discrete_policy:
                 probs, log_probs, _ = self.policy_net.dist_info(state)
                 q_all = self._discrete_q_values(self.q_net, state)  # [K, B, A]
@@ -1223,6 +1287,14 @@ class RESACLagrangianTrainer:
                             regularity_fleet_pressure_mean = (
                                 fleet_pressure * valid_weights
                             ).sum().div(valid_weight_sum)
+                            if (self.regularity_capacity_gain_mode
+                                    == 'positive_zero_hold_target_preserving_gain_v4'):
+                                target_pressure = (
+                                    self._regularity_policy_target_pressure(
+                                        state))
+                                regularity_target_pressure_mean = (
+                                    target_pressure * valid_weights
+                                ).sum().div(valid_weight_sum)
                         regularity_capacity_gain_bonus = (
                             self.regularity_capacity_gain_weight
                             * regularity_scaled_capacity_gain_mean)
@@ -1384,6 +1456,9 @@ class RESACLagrangianTrainer:
                 'regularity_policy_fleet_pressure_mean': (
                     regularity_fleet_pressure_mean.item()
                     if regularity_fleet_pressure_mean is not None else 0.0),
+                'regularity_policy_target_pressure_mean': (
+                    regularity_target_pressure_mean.item()
+                    if regularity_target_pressure_mean is not None else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_entropy_valid_mean': (
                     float((

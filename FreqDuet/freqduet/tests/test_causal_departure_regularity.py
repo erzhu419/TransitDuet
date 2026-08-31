@@ -11,6 +11,8 @@ from lower.causal_departure_regularity import (
     fleet_utilization_pressure,
     holding_action_efficiency_gate,
     holding_fleet_efficiency_gate,
+    holding_target_preserving_fleet_efficiency_gate,
+    holding_target_pressure,
 )
 from runner_v3 import TransitDuetV2Runner
 
@@ -325,6 +327,38 @@ class CausalDepartureRegularityCostTest(unittest.TestCase):
             penalty=1.0,
             fleet_pressure=1.0,
         ), 0.5)
+
+    def test_target_preserving_gate_is_state_scalar(self):
+        self.assertEqual(holding_target_pressure(
+            target_action_s=0.0,
+            action_scale_s=45.0,
+            exponent=0.0,
+        ), 1.0)
+        self.assertAlmostEqual(holding_target_pressure(
+            target_action_s=22.5,
+            action_scale_s=45.0,
+            exponent=1.0,
+        ), 0.5)
+        self.assertAlmostEqual(
+            holding_target_preserving_fleet_efficiency_gate(
+                target_action_s=22.5,
+                action_scale_s=45.0,
+                penalty=1.0,
+                fleet_pressure=0.5,
+                target_pressure_exponent=1.0,
+            ),
+            0.8,
+        )
+        self.assertEqual(
+            holding_target_preserving_fleet_efficiency_gate(
+                target_action_s=45.0,
+                action_scale_s=45.0,
+                penalty=2.0,
+                fleet_pressure=0.0,
+                target_pressure_exponent=1.0,
+            ),
+            1.0,
+        )
 
     def test_enabled_cost_requires_positive_weight(self):
         with self.assertRaisesRegex(ValueError, "cost_weight > 0"):

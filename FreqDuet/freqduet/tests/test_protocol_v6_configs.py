@@ -14,6 +14,7 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
     ROOT,
+    TARGET_PRESERVING_GAIN_CONFIGS,
     ZERO_HOLD_REGRET_CONFIGS,
     validate,
 )
@@ -650,6 +651,67 @@ class ProtocolV6ConfigTest(unittest.TestCase):
             runner.lower_trainer
             .regularity_capacity_fleet_utilization_feature_index,
             expected_index,
+        )
+
+    def test_target_preserving_configs_lock_v17_geometry_and_grid(self):
+        configs = [CONFIRMED_MAIN, *TARGET_PRESERVING_GAIN_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(TARGET_PRESERVING_GAIN_CONFIGS),
+        )
+
+        observed = set()
+        for name in TARGET_PRESERVING_GAIN_CONFIGS:
+            config = resolved_config(name)
+            objective = config["lower"]["causal_regularity_policy"]
+            gain = objective["capacity_gated_gain"]
+            features = config["frequency"]["lower_context"]["features"]
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_target_preserving_gain_regret_dual_v6",
+            )
+            self.assertEqual(
+                gain["mode"],
+                "positive_zero_hold_target_preserving_gain_v4",
+            )
+            self.assertIn("fleet_utilization", features)
+            self.assertEqual(gain["action_efficiency_penalty"], 0.0)
+            self.assertEqual(gain["fleet_pressure_start"], 0.9)
+            self.assertEqual(gain["fleet_pressure_full"], 1.0)
+            self.assertEqual(gain["fleet_pressure_exponent"], 1.0)
+            self.assertEqual(gain["capacity_exponent"], 1.0)
+            self.assertEqual(objective["cost_limit"], 0.00025)
+            self.assertEqual(objective["initial_lambda"], 0.01)
+            observed.add((
+                gain["weight"],
+                gain["opportunity_cost_penalty"],
+                gain["target_pressure_exponent"],
+            ))
+        self.assertEqual(observed, {
+            (weight, penalty, target_exponent)
+            for weight in (0.02, 0.025, 0.03)
+            for penalty in (0.5, 1.0)
+            for target_exponent in (0.0, 1.0)
+        })
+
+        runner_config = resolved_config(TARGET_PRESERVING_GAIN_CONFIGS[0])
+        with TemporaryDirectory() as tmp:
+            runner_config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(runner_config)
+        expected_index = (
+            runner.env._base_state_dim
+            + runner.env.lower_context_features.index("fleet_utilization"))
+        trainer = runner.lower_trainer
+        self.assertEqual(
+            trainer.regularity_capacity_fleet_utilization_feature_index,
+            expected_index,
+        )
+        self.assertEqual(
+            trainer.regularity_capacity_gain_mode,
+            "positive_zero_hold_target_preserving_gain_v4",
         )
 
     def test_v6_nofrequency_state_dimension_is_derived_from_environment(self):

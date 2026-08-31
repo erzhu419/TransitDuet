@@ -1484,3 +1484,90 @@ the exact source commit and protocol arguments, nonzero CPU and RAM use, and
 the isolated `freqduet-cpu-py310` interpreter. This record establishes source,
 protocol, and initial execution health only. Candidate selection and every
 effect claim remain pending complete aggregation and the locked V16 gate.
+
+### V16 fleet-conditioned screen outcome (2026-08-31)
+
+All 80 shards completed successfully. Scheduler task `t86939` performed the
+strict node-side aggregate; only the four combined-summary artifacts were
+synchronized locally. The manifest verifies the exact 20-config matrix, four
+fresh training seeds, four fresh common-random-number evaluation seeds, 320
+unique checkpoint-39 rollouts, clean source commit
+`ba19ad20b0ea4de68af1c3933051cc483d23e92b`, and the registered exploratory
+protocol.
+
+The locked gate returns `no_pass`; no V16 row is eligible for confirmation.
+Every candidate passes the registered mechanism, causal-evidence, regret,
+arithmetic, and zero-execution-adjustment checks. The nearest row
+(`w=0.030,beta=0.5,p=1`) improves journey relative to same-source V14 by
+`-0.16169 min`, but worsens headway CV by `+0.00528`. Relative to the nearest
+V15 row it improves journey by `-0.03583 min` and worsens CV by `+0.00029`.
+Its mean action is `7.94 s`, holding is `41293.8 vehicle-s`, and denied
+dispatch is `31047.6`; V14 is `9.18 s`, `47729.7 vehicle-s`, and `37776.7`.
+Thus the failure is not missing activation or excess resource use. The
+action-dependent multiplier systematically suppresses larger useful holds and
+moves the within-state regularity-gain optimum away from the causal target.
+
+The V15 and V16 screens jointly rule out another global action-dependent
+`weight,beta,pressure` sweep. The next objective must retain noguard execution
+semantics and preserve the V14 per-action gain ordering inside each state.
+
+## Engineering-v17 target-preserving fleet gain preregistration (2026-08-31)
+
+V17 preserves the V14 compact causal target, seven discrete actions,
+conditional entropy, zero-hold regret constraint, remaining-capacity gate, and
+noguard execution semantics. It also retains the V16 causal fleet-utilization
+feature. It removes the action-dependent efficiency multiplier. For V14 gain
+`G(a,s)`, fleet pressure
+`q(u)=clip((u-0.9)/(1.0-0.9),0,1)`, normalized causal target `t(s)`, target
+exponent `r`, and opportunity-cost penalty `beta`, the new actor-side gain is
+
+`G_tp(a,s) = G(a,s) / (1 + beta * q(u) * t(s)^r)`.
+
+For `r=0`, target pressure is defined as one, including a zero target; this is
+the target-agnostic state-scalar branch. For `r=1`, high target magnitude
+increases the opportunity-cost discount. In either branch every action bin in
+the same state receives exactly the same positive multiplier, so the V14 gain
+ordering and argmax are unchanged. No action is clipped, replaced, or adjusted
+after policy inference.
+
+The locked grid crosses gain weights `0.020`, `0.025`, and `0.030`,
+opportunity-cost penalties `beta=0.5` and `1.0`, and target exponents `r=0`
+and `1`, for 12 candidates. Fleet-pressure start/full/exponent are fixed to
+`0.9/1.0/1.0`; action-efficiency penalty is exactly zero. Controls are
+historical hard main, `noguard`, compact context-only, confirmed main, V11,
+V13, same-source V14, nearest V15, and nearest V16. Fresh training seeds are
+`21013,21031,21053,21077`; fresh evaluation seeds are
+`54017,54041,54059,54083`. Exact scheduler command-field search found no prior
+use. The 40-episode screen contains 84 independent training jobs and 336
+frozen common-random-number rollouts.
+
+The locked mechanism gate requires the exact V6/V4 target-preserving
+contracts, action-dependent penalty zero, the registered state-scalar
+arithmetic, active causal fleet and target signals, positive realized gain,
+the V13 regret and evidence limits, and zero execution adjustment. A candidate
+must improve V14 journey by at least `0.05 min` and CV by at least `0.001`,
+without increasing mean action, holding, or denied dispatch. It must improve
+CV over both nearest V15 and V16 by at least `0.001` while keeping journey
+within `+0.02 min`, improve target absolute error over V16, and retain the
+historical absolute gates against V13, `noguard`, confirmed main, and V11.
+Priority is lower gain weight, lower opportunity penalty, then `r=1` before
+`r=0`. A selected row remains exploratory and requires fresh long-training
+confirmation; no pass rejects this objective family without threshold changes.
+
+### V17 implementation smoke (2026-08-31)
+
+A three-config two-episode checkpoint/restore smoke verified V13 plus the
+`w=0.025,beta=1` V17 rows for `r=0` and `r=1`. Both V17 rows report positive
+executed gain, zero action-dependent penalty, zero execution adjustment, and
+the same fleet utilization (`0.97030`) and pressure (`0.81955`). The `r=0`
+row reports target pressure `1.0` and state-scalar gate `0.58136`; the `r=1`
+row reports target pressure `0.42491` and gate `0.82061`, matching the locked
+formula.
+
+A separate warmup-free actor smoke forced optimizer updates. Its final episode
+reports actor gain `0.00057661`, fleet pressure `0.87154`, target pressure
+`0.40377`, and state-scalar gate `0.81443`, with nonzero policy and critic
+gradients. Unit tests independently compare V17 against V14 on the same state
+and verify that the complete per-action gain vector differs only by one scalar
+and has the same argmax. These are implementation checks only; no outcome claim
+is made before the locked 40-episode matrix finishes.

@@ -150,6 +150,48 @@ def holding_fleet_efficiency_gate(
     )
 
 
+def holding_target_pressure(
+    *,
+    target_action_s: float,
+    action_scale_s: float,
+    exponent: float,
+) -> float:
+    """Return a dimensionless causal target-magnitude pressure."""
+    target = float(target_action_s)
+    scale = float(action_scale_s)
+    power = float(exponent)
+    if not all(np.isfinite(value) for value in (target, scale, power)):
+        raise ValueError("target pressure inputs must be finite")
+    if target < 0.0 or scale <= 0.0 or power < 0.0:
+        raise ValueError(
+            "target pressure requires target >= 0, scale > 0, exponent >= 0")
+    target_fraction = float(np.clip(target / scale, 0.0, 1.0))
+    return float(target_fraction ** power) if power > 0.0 else 1.0
+
+
+def holding_target_preserving_fleet_efficiency_gate(
+    *,
+    target_action_s: float,
+    action_scale_s: float,
+    penalty: float,
+    fleet_pressure: float,
+    target_pressure_exponent: float,
+) -> float:
+    """Discount a state's gain without changing its action-bin ordering."""
+    weight = float(penalty)
+    pressure = float(fleet_pressure)
+    if not np.isfinite(weight) or weight < 0.0:
+        raise ValueError("opportunity-cost penalty must be finite and non-negative")
+    if not np.isfinite(pressure) or not 0.0 <= pressure <= 1.0:
+        raise ValueError("fleet pressure must lie in [0, 1]")
+    target_pressure = holding_target_pressure(
+        target_action_s=target_action_s,
+        action_scale_s=action_scale_s,
+        exponent=target_pressure_exponent,
+    )
+    return float(1.0 / (1.0 + weight * pressure * target_pressure))
+
+
 @dataclass(frozen=True)
 class DepartureRegularityContext:
     """Immutable action-time evidence used when the transition settles."""

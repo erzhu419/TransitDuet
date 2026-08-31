@@ -1,0 +1,31 @@
+_extends: F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adtpgain_l001_e25_r00025_w0020_b05_t0_hiro
+
+protocol:
+  role: exploratory_compact_w2_target_preserving_gain_l001_e25_r00025_w0020_b05_t0_v6
+
+frequency:
+  lower_context:
+    features:
+      - load
+      - capacity
+      - queue
+      - speed_residual
+      - shock_age
+      - schedule_slack
+      - regularity_hold_target_norm
+      - regularity_hold_target_valid
+      - fleet_utilization
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_target_preserving_gain_regret_dual_v6
+    capacity_gated_gain:
+      mode: positive_zero_hold_target_preserving_gain_v4
+      weight: 0.02
+      action_efficiency_penalty: 0.0
+      opportunity_cost_penalty: 0.5
+      fleet_pressure_start: 0.9
+      fleet_pressure_full: 1.0
+      fleet_pressure_exponent: 1.0
+      target_pressure_exponent: 0.0
