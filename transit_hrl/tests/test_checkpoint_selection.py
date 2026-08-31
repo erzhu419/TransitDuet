@@ -624,6 +624,12 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
         self.assertEqual(
             trained.config.upper_projection_consistency_coef, 2.0
         )
+        self.assertEqual(
+            payload["projection_consistency_guard_training"]["upper"][
+                "active_iteration_count"
+            ],
+            0.0,
+        )
 
     def test_smdp_trainer_accepts_a_state_aligned_rank_contract(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(

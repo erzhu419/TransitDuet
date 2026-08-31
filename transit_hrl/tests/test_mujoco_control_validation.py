@@ -1319,6 +1319,15 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             payload["history"][2]["lower_projection_guard_attempted"],
             0.0,
         )
+        lower_guard = payload["projection_consistency_guard_training"][
+            "lower"
+        ]
+        self.assertEqual(lower_guard["active_iteration_count"], 1.0)
+        self.assertGreater(lower_guard["attempted_mass"], 0.0)
+        self.assertLessEqual(lower_guard["reward_loss_delta_max"], 0.0)
+        self.assertLessEqual(
+            lower_guard["native_constraint_loss_delta_max"], 0.0
+        )
         self.assertEqual(model.config.upper_projection_consistency_coef, 0.1)
         self.assertEqual(len(rows), 1)
         self.assertEqual(

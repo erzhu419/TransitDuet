@@ -1581,6 +1581,69 @@ def train_frequency_separated_ppo(
         + float(row.get("promotion_value_optimizer_steps", 0.0))
         for row in history
     ))
+
+    def projection_guard_training_summary(level: str) -> dict[str, float]:
+        attempted_key = f"{level}_projection_guard_attempted"
+        attempted_rows = [
+            row for row in history
+            if float(row.get(attempted_key, 0.0)) > 0.0
+        ]
+        attempted_mass = float(sum(
+            float(row.get(attempted_key, 0.0)) for row in attempted_rows
+        ))
+        accepted_mass = float(sum(
+            float(row.get(f"{level}_projection_guard_accepted", 0.0))
+            for row in attempted_rows
+        ))
+        return {
+            "active_iteration_count": float(len(attempted_rows)),
+            "attempted_mass": attempted_mass,
+            "accepted_mass": accepted_mass,
+            "acceptance_rate": (
+                accepted_mass / attempted_mass
+                if attempted_mass > 0.0 else 0.0
+            ),
+            "reward_loss_delta_max": max(
+                (
+                    float(row.get(
+                        f"{level}_projection_guard_reward_loss_delta",
+                        0.0,
+                    ))
+                    for row in attempted_rows
+                ),
+                default=0.0,
+            ),
+            "native_constraint_loss_delta_max": max(
+                (
+                    float(row.get(
+                        f"{level}_projection_guard_native_constraint_loss_delta",
+                        0.0,
+                    ))
+                    for row in attempted_rows
+                ),
+                default=0.0,
+            ),
+            "consistency_loss_delta_mean": (
+                float(np.mean([
+                    float(row.get(
+                        f"{level}_projection_guard_consistency_loss_delta",
+                        0.0,
+                    ))
+                    for row in attempted_rows
+                ]))
+                if attempted_rows else 0.0
+            ),
+            "gradient_conflict_rate": (
+                float(np.mean([
+                    float(row.get(
+                        f"{level}_projection_gradient_conflict", 0.0
+                    ))
+                    for row in attempted_rows
+                ]))
+                if attempted_rows else 0.0
+            ),
+        }
+
     payload = {
         "policy": policy,
         "trainer": "frequency_separated_smdp_ppo_v2",
@@ -1590,6 +1653,10 @@ def train_frequency_separated_ppo(
         "selection_seeds": selection_seed_list,
         "eval_seeds": list(eval_seeds),
         "iterations": int(iterations),
+        "projection_consistency_guard_training": {
+            level: projection_guard_training_summary(level)
+            for level in ("upper", "lower")
+        },
         "projection_consistency_training_schedule": str(
             projection_consistency_training_schedule
         ),
