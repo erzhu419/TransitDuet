@@ -271,16 +271,12 @@ def evaluate_target_preserving_gain_screen(
         minimum_efficiency = 1.0 / (1.0 + penalty)
         if target_exponent == 0.0:
             target_signal_valid = bool(
-                np.allclose(target_pressure, 1.0)
-                and np.allclose(actor_target_pressure, 1.0))
+                np.allclose(target_pressure, 1.0))
         else:
             target_signal_valid = bool(
                 _finite(target_pressure)
                 and (target_pressure > 0.0).all()
-                and (target_pressure < 1.0).all()
-                and _finite(actor_target_pressure)
-                and (actor_target_pressure > 0.0).all()
-                and (actor_target_pressure < 1.0).all())
+                and (target_pressure < 1.0).all())
 
         mechanism_checks = {
             "paired_rollouts_complete": pairs_complete,
@@ -319,6 +315,9 @@ def evaluate_target_preserving_gain_screen(
                 and (fleet_pressure < 1.0).all()),
             "target_signal_matches_registered_exponent": (
                 target_signal_valid),
+            "frozen_evaluation_has_no_actor_updates": bool(
+                _finite(actor_target_pressure)
+                and (actor_target_pressure.abs() <= 1e-12).all()),
             "realized_gain_active_in_every_rollout": bool(
                 _finite(realized_gain) and (realized_gain > 0.0).all()),
             "capacity_gate_active_in_every_rollout": bool(
@@ -413,7 +412,7 @@ def evaluate_target_preserving_gain_screen(
         result["config"] for result in candidate_results if result["passes"]}
     selected = next((name for name in PRIORITY if name in passing), None)
     return {
-        "gate_version": "freqduet-v17-target-preserving-gain-screen-v1",
+        "gate_version": "freqduet-v17-target-preserving-gain-screen-v2",
         "status": (
             "exploratory_candidate_selected" if selected else "no_pass"),
         "claim_eligible": False,

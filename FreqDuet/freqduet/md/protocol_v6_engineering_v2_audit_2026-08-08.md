@@ -1588,9 +1588,67 @@ The initial dispatch launched 66 shards and left 18 in scheduler-managed retry
 after transient jump-host SSH resets or remote working-directory probe
 timeouts. Scheduler reused the original records; no duplicate shard was
 created. The verified final state is 84 of 84 tasks running, with exactly 14 on
-each node. Representative target-preserving candidate `t86976` reports the
-exact source commit, clean tracked state, isolated `freqduet-cpu-py310`
-interpreter, approximately 100 percent CPU use, and 412 MB resident RAM. This
-record establishes source, protocol, and initial execution health only. Every
-effect and selection claim remains pending strict aggregation and the locked
-V17 gate.
+each node. Representative target-preserving candidate `t87003` is the first
+candidate/seed shard (`job-start=36`), reports the exact source commit, clean
+tracked state, and isolated `freqduet-cpu-py310` interpreter, and completed
+with 685 MB peak RAM. This record establishes source, protocol, and execution
+health only. Every effect and selection claim remains pending strict
+aggregation and the locked V17 gate.
+
+### V17 frozen-evaluation audit correction (2026-08-31)
+
+After all shards finished and before interpreting any outcome comparison, the
+first gate execution exposed one internally inconsistent mechanism check. It
+required `lower_regularity_policy_actor_target_pressure_mean` to be nonzero in
+the frozen evaluation table. Frozen evaluation deliberately performs no actor
+optimizer update, so this and the other actor-update diagnostics are exactly
+zero; the V15 audit contract already records that behavior. Execution-side
+target pressure, gain, and gate metrics were nonzero and matched the registered
+formula in all V17 rollouts.
+
+Gate version `freqduet-v17-target-preserving-gain-screen-v2` corrects only this
+diagnostic mismatch. It validates target pressure from the executed frozen
+policy and separately requires the frozen actor-update metric to remain zero.
+The config list, seeds, source, pairing, mechanism parameters, outcome
+thresholds, priority order, and all effect values are unchanged. A regression
+test now rejects nonzero actor-update telemetry in frozen evaluation. This is
+an audit-contract correction, not a candidate or threshold change.
+
+### V17 target-preserving gain screen outcome (2026-08-31)
+
+All 84 shards completed successfully, with no failed or cancelled task.
+Scheduler task `t87122` performed the strict node-side aggregate and
+synchronized only four combined-summary files (approximately 1.4 MB). The
+manifest verifies the exact 21-config matrix, four fresh training seeds, four
+fresh common-random-number evaluation seeds, 336 unique checkpoint-39
+rollouts, clean source commit
+`c6b94265975870990f4a4427dc3b4182d32d13cb`, and the registered exploratory
+protocol.
+
+The corrected locked gate returns `no_pass`; no V17 row is eligible for
+confirmation. All strict and mechanism checks pass for all 12 candidates:
+executed target and fleet pressure are active, the state-scalar arithmetic is
+correct, realized gain is positive, frozen evaluation performs no actor
+update, causal evidence and zero-hold regret satisfy their limits, and
+execution adjustment remains zero. The failure is entirely in the registered
+outcome checks.
+
+The closest CV row (`w=0.030,beta=0.5,r=0`) changes restricted journey by
+`+0.01295 min` and headway CV by `+0.00213` relative to same-source V14. It
+also raises mean action from `7.5975 s` to `7.6519 s`, holding from
+`39501.9` to `39797.2 vehicle-s`, and denied dispatch from `26780.0` to
+`27426.8`. Its four training-seed mean CV deltas versus V14 have two positive
+and two negative signs, so the small aggregate gap is not a stable hidden
+improvement. The strongest journey row (`w=0.030,beta=1,r=1`) improves journey
+by `-0.09912 min` but worsens CV by `+0.02029` while reducing mean action to
+`6.3950 s`.
+
+Across the grid, stronger state-wide discount generally removes holding and
+improves journey at the cost of headway stability. Preserving the V14 gain
+ordering inside a state is therefore insufficient: a global state scalar still
+changes the gain's strength relative to the passenger critic and produces the
+same journey--CV frontier seen in V15 and V16. Another
+`weight,beta,target-pressure` sweep is ruled out. The next intervention must
+allocate regularity credit to causally attributable high-frequency demand
+states, as required by the lower-controller responsibility in `dev_manual.md`,
+rather than discount all actions in a state uniformly.

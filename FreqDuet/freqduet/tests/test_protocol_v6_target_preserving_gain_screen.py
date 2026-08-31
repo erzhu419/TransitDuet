@@ -27,7 +27,13 @@ from scripts.audit_protocol_v6_target_preserving_gain_screen import (
 
 
 class ProtocolV6TargetPreservingGainScreenTest(unittest.TestCase):
-    def _artifacts(self, root: Path, *, wrong_action_penalty: bool = False):
+    def _artifacts(
+        self,
+        root: Path,
+        *,
+        wrong_action_penalty: bool = False,
+        contaminated_actor_metric: bool = False,
+    ):
         expected_pairs = len(TRAIN_SEEDS) * len(EVAL_SEEDS)
         (root / "matrix_manifest.json").write_text(json.dumps({
             "strict_complete": True,
@@ -140,7 +146,8 @@ class ProtocolV6TargetPreservingGainScreenTest(unittest.TestCase):
                         "lower_regularity_policy_target_pressure_mean": (
                             target_pressure),
                         "lower_regularity_policy_actor_target_pressure_mean": (
-                            target_pressure),
+                            target_pressure
+                            if contaminated_actor_metric else 0.0),
                     })
         pd.DataFrame(rows).to_csv(root / "frozen_per_eval.csv", index=False)
         pd.DataFrame([{"config": config} for config in CONFIGS]).to_csv(
@@ -180,6 +187,18 @@ class ProtocolV6TargetPreservingGainScreenTest(unittest.TestCase):
         self.assertTrue(all(
             not item["mechanism_checks"][
                 "target_preserving_gain_contract_locked"]
+            for item in result["candidate_results"]))
+
+    def test_frozen_evaluation_actor_metric_must_remain_zero(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._artifacts(root, contaminated_actor_metric=True)
+            result = evaluate_target_preserving_gain_screen(root)
+
+        self.assertEqual(result["status"], "no_pass")
+        self.assertTrue(all(
+            not item["mechanism_checks"][
+                "frozen_evaluation_has_no_actor_updates"]
             for item in result["candidate_results"]))
 
     def test_wrong_seed_grid_fails_before_selection(self):
