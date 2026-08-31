@@ -8,6 +8,10 @@ from .causal_joint_frequency_projector import (
     BUDGET_MODES,
     CausalJointFrequencyProjector,
 )
+from .causal_receding_horizon_joint_projector import (
+    AffineQuadraticBallProjector,
+    CausalRecedingHorizonJointProjector,
+)
 from .diagnostics import FrequencyDiagnostics, binned_mutual_information
 from .leakage import (
     ActionEffectOperator,
@@ -57,9 +61,11 @@ from .types import ExogenousBin, FrequencyFeatures, PromotionSignal
 
 __all__ = [
     "ActionEffectOperator",
+    "AffineQuadraticBallProjector",
     "BinnedExogenousStreamAdapter",
     "BUDGET_MODES",
     "CausalJointFrequencyProjector",
+    "CausalRecedingHorizonJointProjector",
     "CausalPromotionGate",
     "CausalRecedingHorizonResponsibilityPlanner",
     "CausalLeakageRewardShaper",
