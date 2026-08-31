@@ -1,5 +1,6 @@
 import argparse
 import ast
+import json
 from pathlib import Path
 import shlex
 from unittest import mock
@@ -93,6 +94,32 @@ def test_submitter_builds_capacity_matched_raw_and_projected_commands():
     assert scheduler_spec["allowed_nodes"] == args.nodes
     assert scheduler_spec["cpu"] == 1
     assert scheduler_spec["allow_duplicate"] is False
+
+
+def test_scheduler_lookup_reads_compacted_successes_from_results_archive():
+    signature = submit.task_signature(
+        "v19_test",
+        "HalfCheetah-v5",
+        spec.RAW_CONTEXT_BASELINE,
+        spec.OPTIMIZER_SEEDS[0],
+    )
+    completed = mock.Mock(stdout=json.dumps({
+        "results": [{
+            "source": "archive",
+            "id": "t1",
+            "status": "done",
+            "signature": signature,
+            "node": "node001",
+        }],
+    }))
+    with mock.patch.object(submit.subprocess, "run", return_value=completed) as run:
+        tasks = submit._scheduler_tasks("v19_test")
+
+    assert tasks[signature]["id"] == "t1"
+    command = run.call_args.args[0]
+    assert "results" in command
+    assert "--include-empty" in command
+    assert "--no-log-scan" in command
 
 
 def _synthetic_cell(arm: str, *, supported: bool):

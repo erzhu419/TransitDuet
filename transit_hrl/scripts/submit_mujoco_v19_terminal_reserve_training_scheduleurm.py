@@ -321,13 +321,21 @@ def _scheduler_tasks(run_name: str) -> dict[str, dict[str, Any]]:
         [
             sys.executable,
             str(SCHEDULER),
-            "status",
-            "--all",
+            "results",
+            "--signature",
+            f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/*",
+            "--status",
+            "queued",
+            "launching",
+            "running",
+            "done",
+            "failed",
+            "cancelled",
+            "--limit",
+            "0",
+            "--include-empty",
+            "--no-log-scan",
             "--json",
-            "--brief",
-            "--readonly",
-            "--lock-timeout",
-            "30",
         ],
         check=True,
         capture_output=True,
@@ -335,7 +343,7 @@ def _scheduler_tasks(run_name: str) -> dict[str, dict[str, Any]]:
     )
     prefix = f"Freq-HRL/{SIGNATURE_VERSION}/{run_name}/"
     grouped: dict[str, list[dict[str, Any]]] = {}
-    for task in json.loads(completed.stdout).get("tasks", []):
+    for task in json.loads(completed.stdout).get("results", []):
         signature = str(task.get("signature", ""))
         if signature.startswith(prefix):
             grouped.setdefault(signature, []).append(dict(task))
