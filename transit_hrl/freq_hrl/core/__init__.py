@@ -12,6 +12,7 @@ from .causal_receding_horizon_joint_projector import (
     AffineQuadraticBallProjector,
     CausalRecedingHorizonJointProjector,
 )
+from .causal_terminal_reserve_projector import CausalTerminalReserveProjector
 from .diagnostics import FrequencyDiagnostics, binned_mutual_information
 from .leakage import (
     ActionEffectOperator,
@@ -66,6 +67,7 @@ __all__ = [
     "BUDGET_MODES",
     "CausalJointFrequencyProjector",
     "CausalRecedingHorizonJointProjector",
+    "CausalTerminalReserveProjector",
     "CausalPromotionGate",
     "CausalRecedingHorizonResponsibilityPlanner",
     "CausalLeakageRewardShaper",

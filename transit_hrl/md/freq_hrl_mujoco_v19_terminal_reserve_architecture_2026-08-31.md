@@ -1,0 +1,181 @@
+# MuJoCo v19 Terminal-Reserve Freq-HRL Architecture
+
+## Decision
+
+V18.5 exhausted the unchanged 120-path development panel without producing an
+eligible actor-floor signal. That panel is retired from mechanism selection.
+V19 changes the controller architecture instead of tuning another horizon,
+forecast mode, gate, or score on those paths.
+
+The new mechanism is `CausalTerminalReserveProjector`. It executes an action
+only when the current upper/lower responsibility split has an explicit backup
+continuation whose every prefix satisfies the cumulative frequency budgets.
+The backup reaches a zero-residual invariant tail in finite time, so frequency
+debt cannot be shifted beyond a moving optimization horizon.
+
+## Frequency State
+
+For action dimension `d`, let the upper responsibility residual be the causal
+high-pass residual
+
+```text
+r^U_t = u_t - MA_WU(u)_t,
+```
+
+and let the lower responsibility residual be the causal low-pass residual
+
+```text
+r^L_t = MA_WL(l)_t.
+```
+
+The realized prefix ledgers are
+
+```text
+E^U_t = sum_{i < t} ||r^U_i||^2,
+E^L_t = sum_{i < t} ||r^L_i||^2.
+```
+
+The required constraints at every realized prefix are
+
+```text
+E^U_t <= t d B_U^2,
+E^L_t <= t d B_L^2.
+```
+
+The rolling means use the available causal prefix during startup and the full
+finite window afterward. These are the same online quantities used by the
+existing responsibility audit.
+
+## Constructive Terminal Reserve
+
+At time `t`, the projector considers current upper action `x` and lower action
+`y`. Their certified continuations are fixed, not optimized forecasts:
+
+```text
+upper: x, x, ..., x        for W_U actions, then hold x forever
+lower: y, 0, ..., 0        for W_L actions, then remain zero forever
+```
+
+For each `k = 1, ..., W_U`, upper admissibility requires
+
+```text
+E^U_t + sum_{j < k} ||r^U_{t+j}(x)||^2
+    <= (t + k) d B_U^2.
+```
+
+The analogous inequalities are imposed for every lower prefix through `W_L`.
+After the finite continuation, the upper history is constant and the lower
+history is zero; both future residuals are therefore exactly zero.
+
+Each residual along either continuation is affine in the current action:
+
+```text
+r_{t+j}(x) = alpha_j x + b_j.
+```
+
+Consequently, every prefix inequality is an isotropic quadratic ball in the
+current action dimension. The online problem intersects at most `W_U + W_L`
+balls and one component box; it does not optimize an `H x d` action plan.
+
+## Physical-Action Rule
+
+Let the proposed physical action be `a = u_proposed + l_proposed`.
+
+1. Project the proposed upper action onto the intersection of the upper
+   terminal-reserve balls, the lower balls transformed by `l = a - u`, and the
+   component box. If the intersection is feasible, preserve `a` exactly.
+2. If no certified fixed-total split is found, project upper and lower proposals
+   independently into their certified component sets. Only this branch may
+   change the physical action.
+3. If finite numerical iteration does not produce a certified component, use
+   the previous certified backup action: hold the previous upper action and set
+   lower to zero. This is a correctness fallback, not a tuned policy branch.
+
+The projector reports fixed-total feasibility, physical correction, component
+correction, both realized prefix powers, both terminal reserve margins,
+projection convergence, and backup use.
+
+## Recursive-Feasibility Proposition
+
+**Proposition.** Assume exact evaluation of the stated finite-memory filters,
+positive budgets, bounded component actions, and an initial zero history. If
+the projector executes only terminal-certified actions, then a certified
+component action exists at every subsequent step and both realized prefix
+budgets hold for all time.
+
+**Argument.** At reset, zero upper/lower actions have zero residual energy and
+are certified. Suppose the action at time `t` is certified. After its first
+residual is added to the ledger, the remaining suffix of its certified backup
+is available at `t+1`: hold the realized upper action and choose zero lower
+action. Every new prefix inequality is exactly the corresponding old certified
+inequality with its already-realized first term moved into the ledger. The
+suffix therefore remains feasible. After at most the filter-window length, its
+residual is zero forever. Induction establishes nonempty admissible sets and
+the prefix bounds at every step.
+
+This proposition does not claim reward preservation, optimality, robustness to
+an incorrectly implemented filter, or a guarantee for arbitrary nonlinear
+frequency encoders. Those require separate empirical or theoretical evidence.
+
+## Training-Time Integration
+
+V19 must be a training-time physical controller, not a post-hoc trace repair.
+
+- The environment executes the certified upper/lower components and their sum.
+- Replay/rollout records contain raw proposals, certified components, terminal
+  margins, fixed-total feasibility, and physical/component corrections.
+- Critics are trained on executed actions.
+- The actor receives a target-free projection-consistency term proportional to
+  the squared raw-to-certified component correction. Its coefficient is fixed
+  before fresh evaluation and is diagnostic during development.
+- A small action trust region limits update-induced proposal movement. It is a
+  training stability constraint, not a reward floor and not a selection score.
+- Any straight-through treatment of the non-differentiable projection must be
+  disclosed and ablated against detached projection-consistency training.
+
+The training objective is allowed to improve proposal feasibility over time;
+the runtime certificate remains authoritative even if the actor does not learn
+to stay inside the admissible set.
+
+## Required Local Gates
+
+Before scheduler dispatch, tests must establish all of the following:
+
+1. every realized upper and lower prefix respects its exact online budget;
+2. a feasible fixed-total split preserves the physical action;
+3. fixed-total infeasibility can alter the physical action but remains certified;
+4. the shifted backup remains feasible at the next replan;
+5. the finite backup flushes both filter residuals to zero;
+6. future proposals cannot alter an already realized prefix;
+7. a deterministic v18 moving-horizon debt trace violates a prefix budget while
+   the terminal-reserve projector does not.
+
+Passing these gates establishes implementation behavior only. It is not
+experimental support for the manuscript.
+
+## Fresh-Panel Contract
+
+The first v19 scheduler panel is development-only and must be frozen before any
+new trajectory result is read.
+
+- Use a source revision containing this architecture and its training wiring.
+- Use optimizer, environment, and evaluation seeds disjoint from the retired
+  v17/v18 120-path panel.
+- Record the exact seed manifest and cell definitions before dispatch.
+- Compare raw shared Freq-HRL, terminal reserve without consistency learning,
+  and terminal reserve with consistency learning.
+- Primary mechanism outcomes are zero realized prefix violations, correction
+  RMS, fixed-total rate, backup-use rate, and return change.
+- Stop if the certificate fails on any realized prefix. Do not replace direct
+  feasibility with an offline full-horizon existence result.
+- A development result cannot enter the authoritative manuscript evidence
+  registry. A later confirmation requires a separately frozen revision,
+  thresholds, and disjoint seeds.
+
+## Claim Boundary
+
+V19 currently supplies a code path, a constructive invariant, and local tests.
+It does not yet establish learned behavior, reward non-inferiority, cross-task
+generalization, fresh-seed performance, or paper-level support. The retired
+v17/v18 panel may be used to explain prior failures, but not to select or report
+v19 as a successful method.
