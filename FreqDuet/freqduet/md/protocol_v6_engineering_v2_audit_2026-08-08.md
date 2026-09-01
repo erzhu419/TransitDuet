@@ -1974,3 +1974,52 @@ rollout and will reject the objective if the independent dual does not
 converge. The smoke establishes implementation, restore, and telemetry only;
 none of its outcome values is used for selection. Its temporary logs and all
 checkpoints were deleted after recording these diagnostics.
+
+### V20 causal APC passenger-holding dual outcome (2026-09-01)
+
+All 52 formal shards completed through scheduler with no retry or failed task.
+Task `t88713` performed the node-side strict aggregate and preregistered audit.
+The manifest verifies the exact 13-configuration matrix, four fresh training
+seeds, four fresh common-random-number evaluation seeds, 208 unique frozen
+checkpoint-39 rollouts, 40 training episodes, exploratory stage, scalar V13
+reference, and clean source commit
+`806b5379d46ead71ab92f3cb34bd04e982708f3d`. Only the five combined CSV/JSON
+artifacts were synchronized; no checkpoint or shard log was copied locally.
+
+The locked gate returns `no_pass`, so no V20 row is eligible for confirmation.
+The `b_P=0.04` zero-hold-advantage row violates its passenger budget in at
+least one frozen rollout. The `b_P=0.06` and `b_P=0.08` rows satisfy their
+budgets, while only the matched scalar `b_P=0.08` control satisfies the full
+mechanism-control contract. All three promotion candidates nevertheless fail
+the outcome gate. Relative to scalar V13, `b_P=0.04/0.06/0.08` improve
+restricted journey by `0.38994/0.34578/0.29998 min`, but worsen headway CV by
+`0.11618/0.08538/0.07103`. Relative to unbounded zero-hold advantage they
+improve journey by `0.34731/0.30315/0.25734 min`, but worsen CV by
+`0.10123/0.07043/0.05608`. Mean action, holding vehicle-seconds, and denied
+dispatch all decrease, so the failure is not a resource or execution-guard
+artifact: passenger time is recovered by removing regularity-producing
+holding.
+
+Task `t88955` then audited 12 replay checkpoints in place on node001 and
+synchronized only the resulting JSON. On valid causal transitions, mean
+action and signed regularity gain fall from `6.403 s / 0.00204` for scalar V13
+to `4.791 s / 0.00138` for unbounded zero-hold advantage and to
+`3.794 s / 0.00106` for its `b_P=0.08` passenger-dual counterpart. The same
+collapse occurs where the lower controller is supposed to respond most
+strongly: in HF-active states the sequence is
+`7.324 s / 0.00268`, `5.179 s / 0.00181`, and
+`3.919 s / 0.00137`. It is therefore not a useful selective removal of
+high-load or low-frequency holding.
+
+The structural cause is the conjunction of two otherwise valid terms.
+Zero-hold regret is
+`max(C_target(a)-C_target(0), 0)`, so zero holding and every action that is no
+worse than zero holding have zero constraint cost. The independent passenger
+dual then prefers the smallest actions throughout that broad zero-regret set;
+sharing the causal-validity mask does not identify which seconds were caused
+by the analytic regularity term. V20 is rejected as a mainline objective
+family, and further passenger-budget sweeps are ruled out. A successor must
+first preserve a causal minimum fraction of the available two-sided
+regularity gain, especially in HF-active states, and only then minimize APC
+person-delay. This must be implemented as a training objective or soft
+constraint, not as execution clipping or a post-policy guard.
