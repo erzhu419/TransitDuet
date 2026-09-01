@@ -207,6 +207,8 @@ class OptimizerContractTest(unittest.TestCase):
             action_bins=None,
             passenger_cost_limit=None,
             passenger_action_norm_s=45.0,
+            dual_update_mode=None,
+            augmented_lagrangian_rho=None,
             cost_cap=0.25):
         conditional = (
             {
@@ -294,8 +296,10 @@ class OptimizerContractTest(unittest.TestCase):
                     "hf_opportunity_cost_penalty": (
                         hf_opportunity_cost_penalty),
                 })
-        gain_floor_mode = (
-            policy_mode == "analytic_two_sided_hf_gain_floor_dual_v8")
+        gain_floor_mode = policy_mode in {
+            "analytic_two_sided_hf_gain_floor_dual_v8",
+            "analytic_two_sided_hf_aggregate_gain_floor_dual_v9",
+        }
         state_dim = (
             5 if policy_mode
             in {
@@ -307,13 +311,22 @@ class OptimizerContractTest(unittest.TestCase):
         if gain_floor_mode:
             regularity["regularity_gain_floor"] = {
                 "enable": True,
-                "mode": "causal_hf_relative_gain_floor_v1",
+                "mode": (
+                    "causal_hf_aggregate_gain_floor_v2"
+                    if policy_mode
+                    == "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
+                    else "causal_hf_relative_gain_floor_v1"),
                 "hf_energy_feature_index": 3,
                 "base_fraction": gain_floor_base_fraction,
                 "hf_increment": gain_floor_hf_increment,
                 "hf_energy_scale": hf_energy_scale,
                 "hf_energy_exponent": hf_energy_exponent,
             }
+        if dual_update_mode is not None:
+            regularity["dual_update_mode"] = dual_update_mode
+        if augmented_lagrangian_rho is not None:
+            regularity["augmented_lagrangian_rho"] = (
+                augmented_lagrangian_rho)
         if passenger_cost_limit is not None:
             regularity["passenger_holding_constraint"] = {
                 "enable": True,
@@ -328,6 +341,13 @@ class OptimizerContractTest(unittest.TestCase):
                 "lambda_max": 2.0,
                 "initial_lambda": 0.01,
             }
+            if dual_update_mode is not None:
+                regularity["passenger_holding_constraint"][
+                    "dual_update_mode"] = dual_update_mode
+            if augmented_lagrangian_rho is not None:
+                regularity["passenger_holding_constraint"][
+                    "augmented_lagrangian_rho"] = (
+                        augmented_lagrangian_rho)
             state_dim += 1
         return RESACLagrangianTrainer(
             state_dim=state_dim,
@@ -491,6 +511,8 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertEqual(
             contract["constraint_cost_mode"],
             "hf_relative_gain_shortfall_v3")
+        self.assertNotIn("dual_update_mode", contract)
+        self.assertNotIn("augmented_lagrangian_rho", contract)
         self.assertEqual(
             contract["regularity_gain_floor"]["hf_energy_feature_index"], 3)
 
@@ -551,6 +573,214 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertNotEqual(
             trainer.regularity_passenger_lambda_param,
             initial_passenger_lambda,
+        )
+
+    def test_aggregate_gain_floor_uses_absolute_required_gain(self):
+        bins = [0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0]
+        trainer = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"),
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=bins,
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            dual_update_mode="projected_violation_v1",
+            augmented_lagrangian_rho=0.5,
+            cost_cap=1.0,
+        )
+        states = torch.tensor([
+            [0.5, 0.5, 1.0, 0.0],
+            [0.5, 0.1, 1.0, 0.04],
+            [0.5, 0.0, 1.0, 0.04],
+        ], dtype=torch.float32)
+        probs = torch.full((3, len(bins)), 1.0 / len(bins))
+
+        (
+            valid,
+            _,
+            pressure,
+            required_fraction,
+            gains,
+            maximum_gain,
+            required_gain,
+            absolute_shortfalls,
+            eligible,
+        ) = trainer._regularity_aggregate_gain_floor_action_terms(states)
+        expected_cost, cost_valid, action_costs = (
+            trainer._regularity_policy_cost(states, probs))
+
+        torch.testing.assert_close(pressure, torch.tensor([0.0, 0.5, 0.5]))
+        torch.testing.assert_close(
+            required_fraction, torch.tensor([0.3, 0.45, 0.45]))
+        torch.testing.assert_close(
+            required_gain, required_fraction * maximum_gain)
+        torch.testing.assert_close(
+            absolute_shortfalls,
+            (required_gain.unsqueeze(-1) - gains).clamp_min(0.0))
+        self.assertEqual(eligible.tolist(), [1.0, 1.0, 0.0])
+        self.assertTrue(torch.equal(valid, cost_valid))
+        torch.testing.assert_close(action_costs, absolute_shortfalls)
+        torch.testing.assert_close(
+            expected_cost, absolute_shortfalls.mean(dim=-1))
+        self.assertEqual(
+            trainer.regularity_constraint_cost_mode,
+            "hf_aggregate_gain_shortfall_v4",
+        )
+
+    def test_projected_duals_and_augmented_terms_are_exact_and_round_trip(self):
+        torch.manual_seed(157)
+        trainer = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"),
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            passenger_cost_limit=0.08,
+            dual_update_mode="projected_violation_v1",
+            augmented_lagrangian_rho=0.5,
+            cost_cap=1.0,
+        )
+        replay = CostReplayBuffer(64, seed=163)
+        replay_state = np.array(
+            [0.5, 0.5, 1.0, 0.04, 1.0], dtype=np.float32)
+        for index in range(16):
+            replay.push(
+                replay_state, 0.0, 0.0, 0.0,
+                replay_state, True, index)
+        initial_regularity_lambda = trainer.regularity_lambda_param
+        initial_passenger_lambda = trainer.regularity_passenger_lambda_param
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        regularity_gap = metrics[
+            "regularity_policy_scaled_constraint_gap"]
+        passenger_gap = metrics[
+            "regularity_passenger_holding_scaled_constraint_gap"]
+        self.assertAlmostEqual(
+            trainer.regularity_lambda_param,
+            np.clip(
+                initial_regularity_lambda
+                + trainer.regularity_lambda_lr * regularity_gap,
+                trainer.regularity_lambda_min,
+                trainer.regularity_lambda_max,
+            ),
+            places=7,
+        )
+        self.assertAlmostEqual(
+            trainer.regularity_passenger_lambda_param,
+            np.clip(
+                initial_passenger_lambda
+                + trainer.regularity_passenger_lambda_lr * passenger_gap,
+                trainer.regularity_passenger_lambda_min,
+                trainer.regularity_passenger_lambda_max,
+            ),
+            places=7,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_policy_augmented_penalty"],
+            0.25 * max(regularity_gap, 0.0) ** 2,
+            places=6,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_passenger_holding_augmented_penalty"],
+            0.25 * max(passenger_gap, 0.0) ** 2,
+            places=6,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_policy_cost_mean"],
+            metrics["regularity_gain_floor_aggregate_shortfall_ratio"],
+            places=7,
+        )
+
+        restored = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"),
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            passenger_cost_limit=0.08,
+            dual_update_mode="projected_violation_v1",
+            augmented_lagrangian_rho=0.5,
+            cost_cap=1.0,
+        )
+        restored.load_training_state_dict(trainer.training_state_dict())
+        self.assertEqual(
+            restored.regularity_policy_contract,
+            trainer.regularity_policy_contract,
+        )
+        self.assertAlmostEqual(
+            restored.regularity_lambda_param,
+            trainer.regularity_lambda_param,
+        )
+        self.assertAlmostEqual(
+            restored.regularity_passenger_lambda_param,
+            trainer.regularity_passenger_lambda_param,
+        )
+
+    def test_aggregate_gain_floor_uses_tpc_weights_in_both_ratio_terms(self):
+        torch.manual_seed(167)
+        trainer = self._regularity_trainer(
+            policy_mode=(
+                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"),
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            dual_update_mode="projected_violation_v1",
+            augmented_lagrangian_rho=0.0,
+            cost_cap=1.0,
+        )
+        low_gain_state = np.array(
+            [0.5, 0.1, 1.0, 0.04], dtype=np.float32)
+        high_gain_state = np.array(
+            [0.5, 0.5, 1.0, 0.04], dtype=np.float32)
+        replay = CostReplayBuffer(64, seed=173)
+        states = []
+        weights = []
+        for index in range(16):
+            state = low_gain_state if index < 8 else high_gain_state
+            states.append(state)
+            weights.append(1.8 if index < 8 else 0.2)
+            replay.push(state, 0.0, 0.0, 0.0, state, True, index)
+
+        state_tensor = torch.tensor(np.asarray(states), dtype=torch.float32)
+        weight_tensor = torch.tensor(weights, dtype=torch.float32)
+        with torch.no_grad():
+            probs, _, _ = trainer.policy_net.dist_info(state_tensor)
+            (*_, required_gain, shortfalls, _) = (
+                trainer._regularity_aggregate_gain_floor_action_terms(
+                    state_tensor))
+            expected_shortfall = (probs * shortfalls).sum(dim=-1)
+            expected_ratio = (
+                expected_shortfall * weight_tensor).sum().div(
+                    (required_gain * weight_tensor).sum()).item()
+
+        def weight_fn(trip_ids):
+            return np.where(
+                trip_ids < 8, 1.8, 0.2).astype(np.float32)
+
+        metrics = trainer.update(
+            replay, 16, reward_scale=1.0, weight_fn=weight_fn)
+
+        self.assertAlmostEqual(
+            metrics["regularity_policy_cost_mean"],
+            expected_ratio,
+            places=7,
+        )
+        self.assertAlmostEqual(
+            metrics["regularity_gain_floor_aggregate_shortfall_ratio"],
+            expected_ratio,
+            places=7,
         )
 
     def test_capacity_gain_rewards_only_positive_low_load_improvement(self):

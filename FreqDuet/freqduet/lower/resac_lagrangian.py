@@ -583,6 +583,9 @@ class RESACLagrangianTrainer:
         self.regularity_constraint_cost_mode = 'disabled'
         self.regularity_constraint_scale_mode = 'raw_cost_v1'
         self.regularity_constraint_cost_scale = 1.0
+        self.regularity_dual_update_mode = 'log_adam_v1'
+        self.regularity_lambda_lr = 0.0
+        self.regularity_augmented_lagrangian_rho = 0.0
         self.regularity_initial_lambda = 0.0
         self.log_regularity_lambda = None
         self.regularity_lambda_optimizer = None
@@ -626,6 +629,9 @@ class RESACLagrangianTrainer:
         self.regularity_passenger_cost_limit = 0.0
         self.regularity_passenger_constraint_scale_mode = 'raw_cost_v1'
         self.regularity_passenger_constraint_cost_scale = 1.0
+        self.regularity_passenger_dual_update_mode = 'log_adam_v1'
+        self.regularity_passenger_lambda_lr = 0.0
+        self.regularity_passenger_augmented_lagrangian_rho = 0.0
         self.regularity_passenger_initial_lambda = 0.0
         self.regularity_passenger_lambda_min = 0.0
         self.regularity_passenger_lambda_max = 0.0
@@ -642,7 +648,8 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
                     'analytic_two_sided_target_preserving_gain_regret_dual_v6',
                     'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
-                    'analytic_two_sided_hf_gain_floor_dual_v8'}:
+                    'analytic_two_sided_hf_gain_floor_dual_v8',
+                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             zero_hold_regret_modes = {
@@ -656,6 +663,9 @@ class RESACLagrangianTrainer:
             if mode == 'analytic_two_sided_hf_gain_floor_dual_v8':
                 self.regularity_constraint_cost_mode = (
                     'hf_relative_gain_shortfall_v3')
+            elif mode == 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9':
+                self.regularity_constraint_cost_mode = (
+                    'hf_aggregate_gain_shortfall_v4')
             elif mode in zero_hold_regret_modes:
                 self.regularity_constraint_cost_mode = 'zero_hold_regret_v2'
             else:
@@ -689,6 +699,10 @@ class RESACLagrangianTrainer:
                     'constraint_scale_mode', 'raw_cost_v1')).strip().lower()
             lambda_lr_regularity = float(
                 regularity_cfg.get('lambda_lr', 1e-3))
+            regularity_dual_update_mode = str(regularity_cfg.get(
+                'dual_update_mode', 'log_adam_v1')).strip().lower()
+            regularity_augmented_lagrangian_rho = float(
+                regularity_cfg.get('augmented_lagrangian_rho', 0.0))
             self.regularity_lambda_min = float(
                 regularity_cfg.get('lambda_min', 1e-3))
             self.regularity_lambda_max = float(
@@ -722,6 +736,13 @@ class RESACLagrangianTrainer:
             if not np.isfinite(lambda_lr_regularity) or (
                     lambda_lr_regularity <= 0.0):
                 raise ValueError('regularity lambda_lr must be positive')
+            if regularity_dual_update_mode not in {
+                    'log_adam_v1', 'projected_violation_v1'}:
+                raise ValueError('unknown regularity dual update mode')
+            if (not np.isfinite(regularity_augmented_lagrangian_rho)
+                    or regularity_augmented_lagrangian_rho < 0.0):
+                raise ValueError(
+                    'regularity augmented-Lagrangian rho must be non-negative')
             if not (0.0 < self.regularity_lambda_min
                     <= initial_lambda <= self.regularity_lambda_max):
                 raise ValueError(
@@ -730,6 +751,10 @@ class RESACLagrangianTrainer:
                 [float(np.log(initial_lambda))], dtype=torch.float32,
                 requires_grad=True, device=device)
             self.regularity_initial_lambda = initial_lambda
+            self.regularity_dual_update_mode = regularity_dual_update_mode
+            self.regularity_lambda_lr = lambda_lr_regularity
+            self.regularity_augmented_lagrangian_rho = (
+                regularity_augmented_lagrangian_rho)
             self.regularity_lambda_optimizer = optim.Adam(
                 [self.log_regularity_lambda], lr=lambda_lr_regularity)
             entropy_cfg = dict(
@@ -1007,18 +1032,26 @@ class RESACLagrangianTrainer:
             gain_floor_cfg = dict(
                 regularity_cfg.get('regularity_gain_floor', {}) or {})
             gain_floor_enabled = bool(gain_floor_cfg.get('enable', False))
-            gain_floor_mode_enabled = (
-                mode == 'analytic_two_sided_hf_gain_floor_dual_v8')
+            gain_floor_mode_enabled = mode in {
+                'analytic_two_sided_hf_gain_floor_dual_v8',
+                'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+            }
             if gain_floor_enabled != gain_floor_mode_enabled:
                 raise ValueError(
-                    'V8 regularity mode and gain-floor contract must be '
+                    'V8/V9 regularity mode and gain-floor contract must be '
                     'enabled together')
             if gain_floor_enabled:
                 gain_floor_mode = str(gain_floor_cfg.get(
                     'mode', 'causal_hf_relative_gain_floor_v1'
                 )).strip().lower()
-                if gain_floor_mode != 'causal_hf_relative_gain_floor_v1':
-                    raise ValueError('unknown regularity gain-floor mode')
+                expected_gain_floor_mode = (
+                    'causal_hf_aggregate_gain_floor_v2'
+                    if mode
+                    == 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'
+                    else 'causal_hf_relative_gain_floor_v1')
+                if gain_floor_mode != expected_gain_floor_mode:
+                    raise ValueError(
+                        'regularity policy and gain-floor modes disagree')
                 hf_energy_feature_index = int(
                     gain_floor_cfg['hf_energy_feature_index'])
                 if not 0 <= hf_energy_feature_index < int(state_dim):
@@ -1087,6 +1120,13 @@ class RESACLagrangianTrainer:
                 'initial_lambda': initial_lambda,
                 'conditional_entropy': entropy_contract,
             }
+            if 'dual_update_mode' in regularity_cfg:
+                self.regularity_policy_contract['dual_update_mode'] = (
+                    self.regularity_dual_update_mode)
+            if 'augmented_lagrangian_rho' in regularity_cfg:
+                self.regularity_policy_contract[
+                    'augmented_lagrangian_rho'] = (
+                        self.regularity_augmented_lagrangian_rho)
             if capacity_gain_contract is not None:
                 self.regularity_policy_contract[
                     'capacity_gated_gain'] = capacity_gain_contract
@@ -1119,6 +1159,10 @@ class RESACLagrangianTrainer:
                 )).strip().lower()
                 passenger_lambda_lr = float(
                     passenger_cfg.get('lambda_lr', 1e-3))
+                passenger_dual_update_mode = str(passenger_cfg.get(
+                    'dual_update_mode', 'log_adam_v1')).strip().lower()
+                passenger_augmented_lagrangian_rho = float(
+                    passenger_cfg.get('augmented_lagrangian_rho', 0.0))
                 passenger_lambda_min = float(
                     passenger_cfg.get('lambda_min', 1e-4))
                 passenger_lambda_max = float(
@@ -1143,6 +1187,15 @@ class RESACLagrangianTrainer:
                         or passenger_lambda_lr <= 0.0):
                     raise ValueError(
                         'passenger holding lambda_lr must be positive')
+                if passenger_dual_update_mode not in {
+                        'log_adam_v1', 'projected_violation_v1'}:
+                    raise ValueError(
+                        'unknown passenger holding dual update mode')
+                if (not np.isfinite(passenger_augmented_lagrangian_rho)
+                        or passenger_augmented_lagrangian_rho < 0.0):
+                    raise ValueError(
+                        'passenger augmented-Lagrangian rho must be '
+                        'non-negative')
                 if not (0.0 < passenger_lambda_min
                         <= passenger_initial_lambda
                         <= passenger_lambda_max):
@@ -1158,6 +1211,11 @@ class RESACLagrangianTrainer:
                 self.regularity_passenger_cost_limit = passenger_cost_limit
                 self.regularity_passenger_constraint_scale_mode = (
                     passenger_scale_mode)
+                self.regularity_passenger_dual_update_mode = (
+                    passenger_dual_update_mode)
+                self.regularity_passenger_lambda_lr = passenger_lambda_lr
+                self.regularity_passenger_augmented_lagrangian_rho = (
+                    passenger_augmented_lagrangian_rho)
                 if passenger_scale_mode == 'cost_limit_ratio_v1':
                     self.regularity_passenger_constraint_cost_scale = (
                         passenger_cost_limit)
@@ -1184,6 +1242,14 @@ class RESACLagrangianTrainer:
                     'lambda_max': passenger_lambda_max,
                     'initial_lambda': passenger_initial_lambda,
                 }
+                if 'dual_update_mode' in passenger_cfg:
+                    self.regularity_passenger_holding_contract[
+                        'dual_update_mode'] = (
+                            self.regularity_passenger_dual_update_mode)
+                if 'augmented_lagrangian_rho' in passenger_cfg:
+                    self.regularity_passenger_holding_contract[
+                        'augmented_lagrangian_rho'] = (
+                            self.regularity_passenger_augmented_lagrangian_rho)
             self.regularity_policy_contract[
                 'passenger_holding_constraint'] = (
                     self.regularity_passenger_holding_contract)
@@ -1236,6 +1302,16 @@ class RESACLagrangianTrainer:
 
     def _scale_regularity_passenger_cost(self, cost):
         return cost / self.regularity_passenger_constraint_cost_scale
+
+    @staticmethod
+    def _projected_log_dual_step(
+            log_parameter, *, learning_rate, violation, minimum, maximum):
+        """Apply direct projected ascent while preserving log checkpoint state."""
+        with torch.no_grad():
+            value = log_parameter.exp().add(
+                float(learning_rate) * violation.detach())
+            value.clamp_(min=float(minimum), max=float(maximum))
+            log_parameter.copy_(value.log())
 
     def _regularity_evidence_valid(self, state):
         if not self.regularity_policy_enabled:
@@ -1293,6 +1369,10 @@ class RESACLagrangianTrainer:
                 == 'hf_relative_gain_shortfall_v3'):
             (_, _, _, _, _, action_costs, _) = (
                 self._regularity_gain_floor_action_terms(state))
+        elif (self.regularity_constraint_cost_mode
+                == 'hf_aggregate_gain_shortfall_v4'):
+            (_, _, _, _, _, _, _, action_costs, _) = (
+                self._regularity_aggregate_gain_floor_action_terms(state))
         elif self.regularity_constraint_cost_mode == 'zero_hold_regret_v2':
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
@@ -1305,6 +1385,41 @@ class RESACLagrangianTrainer:
 
     def _regularity_gain_floor_action_terms(self, state):
         """Return exact V21 HF floor terms for every categorical action."""
+        (
+            valid,
+            hf_energy,
+            hf_pressure,
+            required_fraction,
+            positive_gains,
+            maximum_gain,
+            _,
+            _,
+            eligible,
+        ) = self._regularity_aggregate_gain_floor_action_terms(state)
+        gain_fractions = torch.where(
+            eligible.bool().unsqueeze(-1),
+            positive_gains / maximum_gain.clamp_min(1e-12).unsqueeze(-1),
+            torch.ones_like(positive_gains),
+        )
+        shortfalls = (
+            required_fraction.unsqueeze(-1) - gain_fractions).clamp_min(0.0)
+        shortfalls = torch.where(
+            eligible.bool().unsqueeze(-1),
+            shortfalls,
+            torch.zeros_like(shortfalls),
+        )
+        return (
+            valid,
+            hf_energy,
+            hf_pressure,
+            required_fraction,
+            gain_fractions,
+            shortfalls,
+            eligible,
+        )
+
+    def _regularity_aggregate_gain_floor_action_terms(self, state):
+        """Return V22 absolute gain requirements and shortfalls by action."""
         if not self.regularity_gain_floor_enabled:
             raise RuntimeError('regularity gain floor is disabled')
         valid, absolute_action_costs, zero_hold_cost = (
@@ -1313,11 +1428,6 @@ class RESACLagrangianTrainer:
             zero_hold_cost - absolute_action_costs).clamp_min(0.0)
         maximum_gain = positive_gains.max(dim=-1).values
         eligible = maximum_gain > 1e-12
-        gain_fractions = torch.where(
-            eligible.unsqueeze(-1),
-            positive_gains / maximum_gain.clamp_min(1e-12).unsqueeze(-1),
-            torch.ones_like(positive_gains),
-        )
         index = self.regularity_gain_floor_hf_energy_feature_index
         hf_energy = state[:, index].clamp_min(0.0)
         scaled_energy = (
@@ -1327,17 +1437,27 @@ class RESACLagrangianTrainer:
         required_fraction = (
             self.regularity_gain_floor_base_fraction
             + self.regularity_gain_floor_hf_increment * hf_pressure)
-        shortfalls = (
-            required_fraction.unsqueeze(-1) - gain_fractions).clamp_min(0.0)
-        shortfalls = torch.where(
-            eligible.unsqueeze(-1), shortfalls, torch.zeros_like(shortfalls))
+        required_gain = torch.where(
+            eligible,
+            required_fraction * maximum_gain,
+            torch.zeros_like(maximum_gain),
+        )
+        absolute_shortfalls = (
+            required_gain.unsqueeze(-1) - positive_gains).clamp_min(0.0)
+        absolute_shortfalls = torch.where(
+            eligible.unsqueeze(-1),
+            absolute_shortfalls,
+            torch.zeros_like(absolute_shortfalls),
+        )
         return (
             valid,
             hf_energy,
             hf_pressure,
             required_fraction,
-            gain_fractions,
-            shortfalls,
+            positive_gains,
+            maximum_gain,
+            required_gain,
+            absolute_shortfalls,
             eligible.float(),
         )
 
@@ -1667,6 +1787,12 @@ class RESACLagrangianTrainer:
                 self.regularity_scaled_cost_limit),
             'regularity_policy_scaled_constraint_gap': 0.0,
             'regularity_policy_penalty': 0.0,
+            'regularity_policy_augmented_penalty': 0.0,
+            'regularity_policy_augmented_lagrangian_rho': float(
+                self.regularity_augmented_lagrangian_rho),
+            'regularity_policy_projected_dual': float(
+                self.regularity_dual_update_mode
+                == 'projected_violation_v1'),
             'regularity_policy_capacity_gain_mean': 0.0,
             'regularity_policy_scaled_capacity_gain_mean': 0.0,
             'regularity_policy_capacity_gain_bonus': 0.0,
@@ -1684,6 +1810,9 @@ class RESACLagrangianTrainer:
             'regularity_gain_floor_hf_pressure_mean': 0.0,
             'regularity_gain_floor_expected_gain_fraction_mean': 0.0,
             'regularity_gain_floor_expected_shortfall_mean': 0.0,
+            'regularity_gain_floor_required_gain_mean': 0.0,
+            'regularity_gain_floor_expected_absolute_shortfall_mean': 0.0,
+            'regularity_gain_floor_aggregate_shortfall_ratio': 0.0,
             'regularity_gain_floor_eligible_fraction': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_passenger_holding_enabled': float(
@@ -1695,6 +1824,12 @@ class RESACLagrangianTrainer:
             'regularity_passenger_holding_constraint_gap': 0.0,
             'regularity_passenger_holding_scaled_constraint_gap': 0.0,
             'regularity_passenger_holding_penalty': 0.0,
+            'regularity_passenger_holding_augmented_penalty': 0.0,
+            'regularity_passenger_holding_augmented_lagrangian_rho': float(
+                self.regularity_passenger_augmented_lagrangian_rho),
+            'regularity_passenger_holding_projected_dual': float(
+                self.regularity_passenger_dual_update_mode
+                == 'projected_violation_v1'),
             'regularity_passenger_holding_load_mean': 0.0,
             'regularity_passenger_lambda': (
                 self.regularity_passenger_lambda_param),
@@ -1729,6 +1864,9 @@ class RESACLagrangianTrainer:
             regularity_gain_floor_hf_pressure_mean = None
             regularity_gain_floor_expected_gain_fraction_mean = None
             regularity_gain_floor_expected_shortfall_mean = None
+            regularity_gain_floor_required_gain_mean = None
+            regularity_gain_floor_expected_absolute_shortfall_mean = None
+            regularity_gain_floor_aggregate_shortfall_ratio = None
             regularity_gain_floor_eligible_fraction = None
             regularity_passenger_cost_mean = None
             regularity_passenger_scaled_cost_mean = None
@@ -1774,9 +1912,12 @@ class RESACLagrangianTrainer:
                                 + lam * cost_q_new.squeeze(-1))
             policy_loss = (policy_terms * w).mean()
             regularity_penalty = torch.zeros((), device=self.device)
+            regularity_augmented_penalty = torch.zeros((), device=self.device)
             regularity_capacity_gain_bonus = torch.zeros(
                 (), device=self.device)
             regularity_passenger_penalty = torch.zeros(
+                (), device=self.device)
+            regularity_passenger_augmented_penalty = torch.zeros(
                 (), device=self.device)
             if self.regularity_policy_enabled:
                 regularity_cost, regularity_valid, regularity_action_costs = (
@@ -1784,18 +1925,43 @@ class RESACLagrangianTrainer:
                 valid_weights = w * regularity_valid
                 valid_weight_sum = valid_weights.sum()
                 if bool(valid_weight_sum.detach().item() > 0.0):
-                    regularity_cost_mean = (
-                        regularity_cost * valid_weights
-                    ).sum().div(valid_weight_sum)
                     regularity_oracle_cost = regularity_action_costs.min(
                         dim=-1).values
-                    regularity_oracle_cost_mean = (
-                        regularity_oracle_cost * valid_weights
-                    ).sum().div(valid_weight_sum)
-                    regularity_excess_cost_mean = (
-                        (regularity_cost - regularity_oracle_cost)
-                        * valid_weights
-                    ).sum().div(valid_weight_sum)
+                    if (self.regularity_constraint_cost_mode
+                            == 'hf_aggregate_gain_shortfall_v4'):
+                        (*_, floor_required_gain, _, _) = (
+                            self._regularity_aggregate_gain_floor_action_terms(
+                                state))
+                        required_gain_sum = (
+                            floor_required_gain * valid_weights).sum()
+                        if bool(required_gain_sum.detach().item() > 0.0):
+                            regularity_cost_mean = (
+                                regularity_cost * valid_weights
+                            ).sum().div(required_gain_sum)
+                            regularity_oracle_cost_mean = (
+                                regularity_oracle_cost * valid_weights
+                            ).sum().div(required_gain_sum)
+                            regularity_excess_cost_mean = (
+                                (regularity_cost - regularity_oracle_cost)
+                                * valid_weights
+                            ).sum().div(required_gain_sum)
+                        else:
+                            zero_cost = (
+                                regularity_cost * valid_weights).sum() * 0.0
+                            regularity_cost_mean = zero_cost
+                            regularity_oracle_cost_mean = zero_cost
+                            regularity_excess_cost_mean = zero_cost
+                    else:
+                        regularity_cost_mean = (
+                            regularity_cost * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_oracle_cost_mean = (
+                            regularity_oracle_cost * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_excess_cost_mean = (
+                            (regularity_cost - regularity_oracle_cost)
+                            * valid_weights
+                        ).sum().div(valid_weight_sum)
                     regularity_scaled_cost_mean = (
                         self._scale_regularity_constraint_cost(
                             regularity_cost_mean))
@@ -1804,7 +1970,15 @@ class RESACLagrangianTrainer:
                     regularity_penalty = (
                         self.log_regularity_lambda.exp().detach()
                         * regularity_scaled_cost_mean)
-                    policy_loss = policy_loss + regularity_penalty
+                    regularity_scaled_gap = (
+                        regularity_scaled_cost_mean
+                        - self.regularity_scaled_cost_limit)
+                    regularity_augmented_penalty = (
+                        0.5 * self.regularity_augmented_lagrangian_rho
+                        * torch.relu(regularity_scaled_gap).pow(2))
+                    policy_loss = (
+                        policy_loss + regularity_penalty
+                        + regularity_augmented_penalty)
                     if self.regularity_gain_floor_enabled:
                         (
                             floor_valid,
@@ -1843,6 +2017,40 @@ class RESACLagrangianTrainer:
                         regularity_gain_floor_expected_shortfall_mean = (
                             floor_expected_shortfall * valid_weights
                         ).sum().div(valid_weight_sum.clamp_min(1e-8))
+                        (
+                            aggregate_valid,
+                            _,
+                            _,
+                            _,
+                            _,
+                            _,
+                            floor_required_gain,
+                            floor_absolute_shortfalls,
+                            _,
+                        ) = self._regularity_aggregate_gain_floor_action_terms(
+                            state)
+                        if not torch.equal(aggregate_valid, regularity_valid):
+                            raise RuntimeError(
+                                'regularity and aggregate-floor validity '
+                                'diverged')
+                        floor_expected_absolute_shortfall = (
+                            probs * floor_absolute_shortfalls).sum(dim=-1)
+                        regularity_gain_floor_required_gain_mean = (
+                            floor_required_gain * valid_weights
+                        ).sum().div(valid_weight_sum.clamp_min(1e-8))
+                        regularity_gain_floor_expected_absolute_shortfall_mean = (
+                            floor_expected_absolute_shortfall * valid_weights
+                        ).sum().div(valid_weight_sum.clamp_min(1e-8))
+                        required_gain_sum = (
+                            floor_required_gain * valid_weights).sum()
+                        if bool(required_gain_sum.detach().item() > 0.0):
+                            regularity_gain_floor_aggregate_shortfall_ratio = (
+                                floor_expected_absolute_shortfall * valid_weights
+                            ).sum().div(required_gain_sum)
+                        else:
+                            regularity_gain_floor_aggregate_shortfall_ratio = (
+                                floor_expected_absolute_shortfall
+                                * valid_weights).sum() * 0.0
                     if self.regularity_capacity_gain_enabled:
                         capacity_gain, gain_valid, _ = (
                             self._regularity_policy_capacity_gain(
@@ -1931,8 +2139,17 @@ class RESACLagrangianTrainer:
                         regularity_passenger_penalty = (
                             self.log_regularity_passenger_lambda.exp().detach()
                             * regularity_passenger_scaled_cost_mean)
+                        regularity_passenger_scaled_gap = (
+                            regularity_passenger_scaled_cost_mean
+                            - self.regularity_passenger_scaled_cost_limit)
+                        regularity_passenger_augmented_penalty = (
+                            0.5
+                            * self.regularity_passenger_augmented_lagrangian_rho
+                            * torch.relu(
+                                regularity_passenger_scaled_gap).pow(2))
                         policy_loss = (
-                            policy_loss + regularity_passenger_penalty)
+                            policy_loss + regularity_passenger_penalty
+                            + regularity_passenger_augmented_penalty)
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -2020,31 +2237,55 @@ class RESACLagrangianTrainer:
             self.log_lambda.data.clamp_(min=-5.0, max=1.5)  # λ ∈ [e^-5, e^1.5] ≈ [0.007, 4.5]
 
             if regularity_cost_mean is not None:
-                regularity_lambda_loss = (
-                    -self.log_regularity_lambda.exp()
-                    * (regularity_scaled_cost_mean.detach()
-                       - self.regularity_scaled_cost_limit))
-                self.regularity_lambda_optimizer.zero_grad()
-                regularity_lambda_loss.backward()
-                self.regularity_lambda_optimizer.step()
-                self.log_regularity_lambda.data.clamp_(
-                    min=float(np.log(self.regularity_lambda_min)),
-                    max=float(np.log(self.regularity_lambda_max)),
-                )
+                regularity_violation = (
+                    regularity_scaled_cost_mean.detach()
+                    - self.regularity_scaled_cost_limit)
+                if (self.regularity_dual_update_mode
+                        == 'projected_violation_v1'):
+                    self._projected_log_dual_step(
+                        self.log_regularity_lambda,
+                        learning_rate=self.regularity_lambda_lr,
+                        violation=regularity_violation,
+                        minimum=self.regularity_lambda_min,
+                        maximum=self.regularity_lambda_max,
+                    )
+                else:
+                    regularity_lambda_loss = (
+                        -self.log_regularity_lambda.exp()
+                        * regularity_violation)
+                    self.regularity_lambda_optimizer.zero_grad()
+                    regularity_lambda_loss.backward()
+                    self.regularity_lambda_optimizer.step()
+                    self.log_regularity_lambda.data.clamp_(
+                        min=float(np.log(self.regularity_lambda_min)),
+                        max=float(np.log(self.regularity_lambda_max)),
+                    )
             if regularity_passenger_cost_mean is not None:
-                regularity_passenger_lambda_loss = (
-                    -self.log_regularity_passenger_lambda.exp()
-                    * (regularity_passenger_scaled_cost_mean.detach()
-                       - self.regularity_passenger_scaled_cost_limit))
-                self.regularity_passenger_lambda_optimizer.zero_grad()
-                regularity_passenger_lambda_loss.backward()
-                self.regularity_passenger_lambda_optimizer.step()
-                self.log_regularity_passenger_lambda.data.clamp_(
-                    min=float(np.log(
-                        self.regularity_passenger_lambda_min)),
-                    max=float(np.log(
-                        self.regularity_passenger_lambda_max)),
-                )
+                regularity_passenger_violation = (
+                    regularity_passenger_scaled_cost_mean.detach()
+                    - self.regularity_passenger_scaled_cost_limit)
+                if (self.regularity_passenger_dual_update_mode
+                        == 'projected_violation_v1'):
+                    self._projected_log_dual_step(
+                        self.log_regularity_passenger_lambda,
+                        learning_rate=self.regularity_passenger_lambda_lr,
+                        violation=regularity_passenger_violation,
+                        minimum=self.regularity_passenger_lambda_min,
+                        maximum=self.regularity_passenger_lambda_max,
+                    )
+                else:
+                    regularity_passenger_lambda_loss = (
+                        -self.log_regularity_passenger_lambda.exp()
+                        * regularity_passenger_violation)
+                    self.regularity_passenger_lambda_optimizer.zero_grad()
+                    regularity_passenger_lambda_loss.backward()
+                    self.regularity_passenger_lambda_optimizer.step()
+                    self.log_regularity_passenger_lambda.data.clamp_(
+                        min=float(np.log(
+                            self.regularity_passenger_lambda_min)),
+                        max=float(np.log(
+                            self.regularity_passenger_lambda_max)),
+                    )
 
             metrics.update({
                 'policy_loss': policy_loss.item(),
@@ -2087,6 +2328,13 @@ class RESACLagrangianTrainer:
                     - self.regularity_scaled_cost_limit
                     if regularity_scaled_cost_mean is not None else 0.0),
                 'regularity_policy_penalty': regularity_penalty.item(),
+                'regularity_policy_augmented_penalty': (
+                    regularity_augmented_penalty.item()),
+                'regularity_policy_augmented_lagrangian_rho': float(
+                    self.regularity_augmented_lagrangian_rho),
+                'regularity_policy_projected_dual': float(
+                    self.regularity_dual_update_mode
+                    == 'projected_violation_v1'),
                 'regularity_policy_capacity_gain_mean': (
                     regularity_capacity_gain_mean.item()
                     if regularity_capacity_gain_mean is not None else 0.0),
@@ -2140,6 +2388,18 @@ class RESACLagrangianTrainer:
                     regularity_gain_floor_expected_shortfall_mean.item()
                     if regularity_gain_floor_expected_shortfall_mean is not None
                     else 0.0),
+                'regularity_gain_floor_required_gain_mean': (
+                    regularity_gain_floor_required_gain_mean.item()
+                    if regularity_gain_floor_required_gain_mean is not None
+                    else 0.0),
+                'regularity_gain_floor_expected_absolute_shortfall_mean': (
+                    regularity_gain_floor_expected_absolute_shortfall_mean.item()
+                    if regularity_gain_floor_expected_absolute_shortfall_mean
+                    is not None else 0.0),
+                'regularity_gain_floor_aggregate_shortfall_ratio': (
+                    regularity_gain_floor_aggregate_shortfall_ratio.item()
+                    if regularity_gain_floor_aggregate_shortfall_ratio
+                    is not None else 0.0),
                 'regularity_gain_floor_eligible_fraction': (
                     regularity_gain_floor_eligible_fraction.item()
                     if regularity_gain_floor_eligible_fraction is not None
@@ -2163,6 +2423,13 @@ class RESACLagrangianTrainer:
                     else 0.0),
                 'regularity_passenger_holding_penalty': (
                     regularity_passenger_penalty.item()),
+                'regularity_passenger_holding_augmented_penalty': (
+                    regularity_passenger_augmented_penalty.item()),
+                'regularity_passenger_holding_augmented_lagrangian_rho': float(
+                    self.regularity_passenger_augmented_lagrangian_rho),
+                'regularity_passenger_holding_projected_dual': float(
+                    self.regularity_passenger_dual_update_mode
+                    == 'projected_violation_v1'),
                 'regularity_passenger_holding_load_mean': (
                     regularity_passenger_load_mean.item()
                     if regularity_passenger_load_mean is not None else 0.0),

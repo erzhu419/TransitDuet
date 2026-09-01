@@ -7,6 +7,8 @@ from runner_v3 import TransitDuetV2Runner
 from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 from scripts.validate_freqduet_protocol_v6_configs import (
+    ALL_GAIN_FLOOR_CONFIGS,
+    ALL_GAIN_FLOOR_PASSENGER_CONFIGS,
     CAPACITY_GAIN_CONFIGS,
     CONDITIONAL_ENTROPY_CONFIGS,
     CONFIRMATION_CONFIGS,
@@ -24,6 +26,8 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     REGULARITY_POLICY_CONFIGS,
     ROOT,
     TARGET_PRESERVING_GAIN_CONFIGS,
+    V22_GAIN_FLOOR_FACTORIAL_CONFIGS,
+    V22_GAIN_FLOOR_FACTORIAL_EXPECTED,
     ZERO_HOLD_REGRET_CONFIGS,
     validate,
 )
@@ -421,7 +425,7 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                 "zero_hold_advantage"
                 if name in (
                     PASSENGER_HOLDING_QADV_CONFIGS
-                    + GAIN_FLOOR_PASSENGER_CONFIGS)
+                    + ALL_GAIN_FLOOR_PASSENGER_CONFIGS)
                 else "continuous_action",
             )
 
@@ -580,6 +584,102 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(
             runner._ep_lower_regularity_gain_floor_selected_shortfalls[-1],
             0.0,
+        )
+
+    def test_v22_gain_floor_factorial_locks_optimizer_and_aggregate_telemetry(
+            self):
+        configs = [CONFIRMED_MAIN, *V22_GAIN_FLOOR_FACTORIAL_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(V22_GAIN_FLOOR_FACTORIAL_CONFIGS),
+        )
+
+        for name in V22_GAIN_FLOOR_FACTORIAL_CONFIGS:
+            allocation, dual_update_mode, augmented_rho = (
+                V22_GAIN_FLOOR_FACTORIAL_EXPECTED[name])
+            config = resolved_config(name)
+            objective = config["lower"]["causal_regularity_policy"]
+            passenger = objective["passenger_holding_constraint"]
+            floor = objective["regularity_gain_floor"]
+            self.assertEqual(
+                objective["mode"],
+                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
+                if allocation == "aggregate"
+                else "analytic_two_sided_hf_gain_floor_dual_v8",
+            )
+            self.assertEqual(
+                floor["mode"],
+                "causal_hf_aggregate_gain_floor_v2"
+                if allocation == "aggregate"
+                else "causal_hf_relative_gain_floor_v1",
+            )
+            self.assertEqual(floor["base_fraction"], 0.30)
+            self.assertEqual(floor["hf_increment"], 0.30)
+            self.assertEqual(
+                objective["dual_update_mode"], dual_update_mode)
+            self.assertEqual(
+                passenger["dual_update_mode"], dual_update_mode)
+            self.assertEqual(
+                objective["augmented_lagrangian_rho"], augmented_rho)
+            self.assertEqual(
+                passenger["augmented_lagrangian_rho"], augmented_rho)
+
+        main_name = next(
+            name for name, expected in V22_GAIN_FLOOR_FACTORIAL_EXPECTED.items()
+            if expected
+            == ("aggregate", "projected_violation_v1", 0.5))
+        runner_config = resolved_config(main_name)
+        with TemporaryDirectory() as tmp:
+            runner_config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(runner_config)
+
+        trainer = runner.lower_trainer
+        self.assertEqual(
+            trainer.regularity_constraint_cost_mode,
+            "hf_aggregate_gain_shortfall_v4",
+        )
+        self.assertEqual(
+            trainer.regularity_dual_update_mode,
+            "projected_violation_v1",
+        )
+        self.assertEqual(trainer.regularity_augmented_lagrangian_rho, 0.5)
+        base = runner.env._base_state_dim
+        features = runner.env.lower_context_features
+        raw_state = np.zeros(runner.env.state_dim, dtype=np.float32)
+        raw_state[3] = 1.0
+        raw_state[4] = 600.0
+        raw_state[5] = 1.0
+        raw_state[7] = 600.0
+        raw_state[base + features.index("load")] = 0.5
+        raw_state[
+            base + features.index("regularity_hold_target_norm")] = 0.5
+        raw_state[
+            base + features.index("regularity_hold_target_valid")] = 1.0
+        raw_state[base + len(features) + 2] = 0.04
+
+        runner._lower_policy_action(raw_state, deterministic=True)
+
+        self.assertEqual(
+            len(runner._ep_lower_regularity_gain_floor_required_gains), 1)
+        self.assertEqual(
+            len(runner
+                ._ep_lower_regularity_gain_floor_expected_absolute_shortfalls),
+            1,
+        )
+        self.assertEqual(
+            len(runner
+                ._ep_lower_regularity_gain_floor_selected_absolute_shortfalls),
+            1,
+        )
+        self.assertGreater(
+            runner._ep_lower_regularity_gain_floor_required_gains[0], 0.0)
+        self.assertLessEqual(
+            runner
+            ._ep_lower_regularity_gain_floor_expected_absolute_shortfalls[0],
+            runner._ep_lower_regularity_gain_floor_required_gains[0],
         )
 
     def test_conditional_entropy_configs_are_causal_and_fail_closed(self):
@@ -786,10 +886,14 @@ class ProtocolV6ConfigTest(unittest.TestCase):
                 )
                 self.assertEqual(
                     objective["capacity_gated_gain"]["weight"], 0.02)
-            elif name in GAIN_FLOOR_CONFIGS:
+            elif name in ALL_GAIN_FLOOR_CONFIGS:
                 self.assertEqual(
                     objective["mode"],
-                    "analytic_two_sided_hf_gain_floor_dual_v8",
+                    "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
+                    if name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED
+                    and V22_GAIN_FLOOR_FACTORIAL_EXPECTED[name][0]
+                    == "aggregate"
+                    else "analytic_two_sided_hf_gain_floor_dual_v8",
                 )
                 self.assertTrue(
                     objective["regularity_gain_floor"]["enable"])

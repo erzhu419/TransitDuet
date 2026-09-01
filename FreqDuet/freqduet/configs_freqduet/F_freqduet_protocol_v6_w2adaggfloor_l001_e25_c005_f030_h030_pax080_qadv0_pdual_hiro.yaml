@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v6_w2adaggfloor_l001_e25_c005_f030_h030_pax080_qadv0_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adaggfloor_l001_e25_c005_f030_h030_pax080_qadv0_pdual_hiro
+
+protocol:
+  role: exploratory_compact_w2_hf_aggregate_gain_floor_projected_dual_v6
+
+lower:
+  causal_regularity_policy:
+    dual_update_mode: projected_violation_v1
+    passenger_holding_constraint:
+      dual_update_mode: projected_violation_v1

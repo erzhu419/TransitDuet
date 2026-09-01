@@ -310,6 +310,8 @@ class DiagnosticLog:
         'lower_regularity_policy_mode',
         'lower_regularity_policy_constraint_cost_mode',
         'lower_regularity_policy_constraint_scale_mode',
+        'lower_regularity_policy_dual_update_mode',
+        'lower_regularity_policy_augmented_lagrangian_rho',
         'lower_regularity_policy_initial_lambda',
         'lower_regularity_policy_cost_mean',
         'lower_regularity_policy_oracle_cost_mean',
@@ -320,6 +322,7 @@ class DiagnosticLog:
         'lower_regularity_policy_scaled_limit',
         'lower_regularity_policy_scaled_constraint_gap',
         'lower_regularity_policy_penalty',
+        'lower_regularity_policy_augmented_penalty',
         'lower_regularity_policy_capacity_gain_enabled',
         'lower_regularity_policy_capacity_gain_mode',
         'lower_regularity_policy_capacity_gain_weight',
@@ -365,6 +368,9 @@ class DiagnosticLog:
         'lower_regularity_gain_floor_actor_hf_pressure_mean',
         'lower_regularity_gain_floor_actor_expected_gain_fraction_mean',
         'lower_regularity_gain_floor_actor_expected_shortfall_mean',
+        'lower_regularity_gain_floor_actor_required_gain_mean',
+        'lower_regularity_gain_floor_actor_expected_absolute_shortfall_mean',
+        'lower_regularity_gain_floor_actor_aggregate_shortfall_ratio',
         'lower_regularity_gain_floor_actor_eligible_fraction',
         'lower_regularity_gain_floor_required_fraction_mean',
         'lower_regularity_gain_floor_hf_pressure_mean',
@@ -373,12 +379,19 @@ class DiagnosticLog:
         'lower_regularity_gain_floor_expected_shortfall_mean',
         'lower_regularity_gain_floor_selected_shortfall_mean',
         'lower_regularity_gain_floor_selected_shortfall_max',
+        'lower_regularity_gain_floor_required_gain_mean',
+        'lower_regularity_gain_floor_expected_absolute_shortfall_mean',
+        'lower_regularity_gain_floor_selected_absolute_shortfall_mean',
+        'lower_regularity_gain_floor_expected_aggregate_shortfall_ratio',
+        'lower_regularity_gain_floor_selected_aggregate_shortfall_ratio',
         'lower_regularity_gain_floor_eligible_mean',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
         'lower_regularity_passenger_holding_enabled',
         'lower_regularity_passenger_holding_mode',
         'lower_regularity_passenger_constraint_scale_mode',
+        'lower_regularity_passenger_dual_update_mode',
+        'lower_regularity_passenger_augmented_lagrangian_rho',
         'lower_regularity_passenger_initial_lambda',
         'lower_regularity_passenger_cost_limit',
         'lower_regularity_passenger_scaled_limit',
@@ -387,6 +400,7 @@ class DiagnosticLog:
         'lower_regularity_passenger_actor_constraint_gap',
         'lower_regularity_passenger_actor_scaled_constraint_gap',
         'lower_regularity_passenger_actor_penalty',
+        'lower_regularity_passenger_actor_augmented_penalty',
         'lower_regularity_passenger_actor_load_mean',
         'lower_regularity_passenger_expected_cost_mean',
         'lower_regularity_passenger_selected_cost_mean',
@@ -2241,8 +2255,9 @@ class TransitDuetV2Runner:
                         + 2)
                 regularity_policy_cfg[
                     'capacity_gated_gain'] = capacity_gain_cfg
-            if (regularity_mode
-                    == 'analytic_two_sided_hf_gain_floor_dual_v8'):
+            if regularity_mode in {
+                    'analytic_two_sided_hf_gain_floor_dual_v8',
+                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'}:
                 lower_frequency_mode = str(
                     freq_cfg.get('lower_mode', 'high')).strip().lower()
                 if (not self.env.frequency_lower_enabled
@@ -2256,7 +2271,7 @@ class TransitDuetV2Runner:
                         'regularity_gain_floor', {}) or {})
                 if not bool(gain_floor_cfg.get('enable', False)):
                     raise ValueError(
-                        'V8 regularity mode requires an enabled gain floor')
+                        'V8/V9 regularity mode requires an enabled gain floor')
                 gain_floor_cfg['hf_energy_feature_index'] = (
                     base_state_dim
                     + len(self.env.lower_context_features)
@@ -2828,6 +2843,9 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_gain_floor_selected_gain_fractions = []
         self._ep_lower_regularity_gain_floor_expected_shortfalls = []
         self._ep_lower_regularity_gain_floor_selected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_required_gains = []
+        self._ep_lower_regularity_gain_floor_expected_absolute_shortfalls = []
+        self._ep_lower_regularity_gain_floor_selected_absolute_shortfalls = []
         self._ep_lower_regularity_gain_floor_eligible = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
@@ -5796,6 +5814,7 @@ class TransitDuetV2Runner:
         passenger_load = None
         floor_gain_fractions = None
         floor_shortfalls = None
+        floor_absolute_shortfalls = None
         if self.lower_action_bins is not None:
             with torch.no_grad():
                 probs, log_probs, _ = self.lower_trainer.policy_net.dist_info(
@@ -5830,6 +5849,32 @@ class TransitDuetV2Runner:
                         self._ep_lower_regularity_gain_floor_expected_shortfalls.append(
                             expected_shortfall)
                         floor_shortfalls = floor_shortfall_terms.reshape(-1)
+                        (
+                            aggregate_valid,
+                            _,
+                            _,
+                            _,
+                            _,
+                            _,
+                            floor_required_gain,
+                            floor_absolute_shortfall_terms,
+                            _,
+                        ) = (
+                            self.lower_trainer
+                            ._regularity_aggregate_gain_floor_action_terms(
+                                state_tensor.unsqueeze(0)))
+                        if not torch.equal(aggregate_valid, floor_valid):
+                            raise RuntimeError(
+                                'relative and aggregate floor validity diverged')
+                        expected_absolute_shortfall = float((
+                            probs * floor_absolute_shortfall_terms
+                        ).sum(dim=-1).item())
+                        self._ep_lower_regularity_gain_floor_required_gains.append(
+                            float(floor_required_gain.item()))
+                        self._ep_lower_regularity_gain_floor_expected_absolute_shortfalls.append(
+                            expected_absolute_shortfall)
+                        floor_absolute_shortfalls = (
+                            floor_absolute_shortfall_terms.reshape(-1))
                         if eligible >= 0.5:
                             expected_gain = float((
                                 probs * floor_gain_terms
@@ -5871,6 +5916,9 @@ class TransitDuetV2Runner:
             if floor_shortfalls is not None:
                 self._ep_lower_regularity_gain_floor_selected_shortfalls.append(
                     float(floor_shortfalls[selected_index].item()))
+            if floor_absolute_shortfalls is not None:
+                self._ep_lower_regularity_gain_floor_selected_absolute_shortfalls.append(
+                    float(floor_absolute_shortfalls[selected_index].item()))
         if passenger_load is not None:
             selected_cost = (
                 passenger_load
@@ -8210,6 +8258,9 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_gain_floor_selected_gain_fractions = []
         self._ep_lower_regularity_gain_floor_expected_shortfalls = []
         self._ep_lower_regularity_gain_floor_selected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_required_gains = []
+        self._ep_lower_regularity_gain_floor_expected_absolute_shortfalls = []
+        self._ep_lower_regularity_gain_floor_selected_absolute_shortfalls = []
         self._ep_lower_regularity_gain_floor_eligible = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
@@ -8928,6 +8979,24 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_gain_floor_expected_shortfalls)
         lower_regularity_gain_floor_selected_shortfall_stat = _stat(
             self._ep_lower_regularity_gain_floor_selected_shortfalls)
+        lower_regularity_gain_floor_required_gain_stat = _stat(
+            self._ep_lower_regularity_gain_floor_required_gains)
+        lower_regularity_gain_floor_expected_absolute_shortfall_stat = _stat(
+            self._ep_lower_regularity_gain_floor_expected_absolute_shortfalls)
+        lower_regularity_gain_floor_selected_absolute_shortfall_stat = _stat(
+            self._ep_lower_regularity_gain_floor_selected_absolute_shortfalls)
+        floor_required_gain_sum = float(sum(
+            self._ep_lower_regularity_gain_floor_required_gains))
+        lower_regularity_gain_floor_expected_aggregate_ratio = (
+            float(sum(
+                self._ep_lower_regularity_gain_floor_expected_absolute_shortfalls))
+            / floor_required_gain_sum
+            if floor_required_gain_sum > 1e-12 else 0.0)
+        lower_regularity_gain_floor_selected_aggregate_ratio = (
+            float(sum(
+                self._ep_lower_regularity_gain_floor_selected_absolute_shortfalls))
+            / floor_required_gain_sum
+            if floor_required_gain_sum > 1e-12 else 0.0)
         lower_regularity_gain_floor_eligible_stat = _stat(
             self._ep_lower_regularity_gain_floor_eligible)
         lower_regularity_policy_target_stat = _stat(
@@ -9413,6 +9482,10 @@ class TransitDuetV2Runner:
                 self.lower_trainer.regularity_constraint_cost_mode),
             'lower_regularity_policy_constraint_scale_mode': str(
                 self.lower_trainer.regularity_constraint_scale_mode),
+            'lower_regularity_policy_dual_update_mode': str(
+                self.lower_trainer.regularity_dual_update_mode),
+            'lower_regularity_policy_augmented_lagrangian_rho': float(
+                self.lower_trainer.regularity_augmented_lagrangian_rho),
             'lower_regularity_policy_initial_lambda': float(
                 self.lower_trainer.regularity_initial_lambda),
             'lower_regularity_policy_cost_mean': lower_m.get(
@@ -9434,6 +9507,8 @@ class TransitDuetV2Runner:
                 'regularity_policy_scaled_constraint_gap', 0.),
             'lower_regularity_policy_penalty': lower_m.get(
                 'regularity_policy_penalty', 0.),
+            'lower_regularity_policy_augmented_penalty': lower_m.get(
+                'regularity_policy_augmented_penalty', 0.),
             'lower_regularity_policy_capacity_gain_enabled': int(
                 self.lower_trainer.regularity_capacity_gain_enabled),
             'lower_regularity_policy_capacity_gain_mode': str(
@@ -9544,6 +9619,16 @@ class TransitDuetV2Runner:
             'lower_regularity_gain_floor_actor_expected_shortfall_mean': (
                 lower_m.get(
                     'regularity_gain_floor_expected_shortfall_mean', 0.0)),
+            'lower_regularity_gain_floor_actor_required_gain_mean': (
+                lower_m.get(
+                    'regularity_gain_floor_required_gain_mean', 0.0)),
+            'lower_regularity_gain_floor_actor_expected_absolute_shortfall_mean': (
+                lower_m.get(
+                    'regularity_gain_floor_expected_absolute_shortfall_mean',
+                    0.0)),
+            'lower_regularity_gain_floor_actor_aggregate_shortfall_ratio': (
+                lower_m.get(
+                    'regularity_gain_floor_aggregate_shortfall_ratio', 0.0)),
             'lower_regularity_gain_floor_actor_eligible_fraction': lower_m.get(
                 'regularity_gain_floor_eligible_fraction', 0.0),
             'lower_regularity_gain_floor_required_fraction_mean': round(
@@ -9562,6 +9647,18 @@ class TransitDuetV2Runner:
                 lower_regularity_gain_floor_selected_shortfall_stat['mean'], 8),
             'lower_regularity_gain_floor_selected_shortfall_max': round(
                 lower_regularity_gain_floor_selected_shortfall_stat['max'], 8),
+            'lower_regularity_gain_floor_required_gain_mean': round(
+                lower_regularity_gain_floor_required_gain_stat['mean'], 8),
+            'lower_regularity_gain_floor_expected_absolute_shortfall_mean': round(
+                lower_regularity_gain_floor_expected_absolute_shortfall_stat[
+                    'mean'], 8),
+            'lower_regularity_gain_floor_selected_absolute_shortfall_mean': round(
+                lower_regularity_gain_floor_selected_absolute_shortfall_stat[
+                    'mean'], 8),
+            'lower_regularity_gain_floor_expected_aggregate_shortfall_ratio': round(
+                lower_regularity_gain_floor_expected_aggregate_ratio, 8),
+            'lower_regularity_gain_floor_selected_aggregate_shortfall_ratio': round(
+                lower_regularity_gain_floor_selected_aggregate_ratio, 8),
             'lower_regularity_gain_floor_eligible_mean': round(
                 lower_regularity_gain_floor_eligible_stat['mean'], 8),
             'lower_regularity_policy_cost_limit': float(
@@ -9576,6 +9673,12 @@ class TransitDuetV2Runner:
             'lower_regularity_passenger_constraint_scale_mode': str(
                 self.lower_trainer
                 .regularity_passenger_constraint_scale_mode),
+            'lower_regularity_passenger_dual_update_mode': str(
+                self.lower_trainer
+                .regularity_passenger_dual_update_mode),
+            'lower_regularity_passenger_augmented_lagrangian_rho': float(
+                self.lower_trainer
+                .regularity_passenger_augmented_lagrangian_rho),
             'lower_regularity_passenger_initial_lambda': float(
                 self.lower_trainer.regularity_passenger_initial_lambda),
             'lower_regularity_passenger_cost_limit': float(
@@ -9594,6 +9697,8 @@ class TransitDuetV2Runner:
                     0.0)),
             'lower_regularity_passenger_actor_penalty': lower_m.get(
                 'regularity_passenger_holding_penalty', 0.0),
+            'lower_regularity_passenger_actor_augmented_penalty': lower_m.get(
+                'regularity_passenger_holding_augmented_penalty', 0.0),
             'lower_regularity_passenger_actor_load_mean': lower_m.get(
                 'regularity_passenger_holding_load_mean', 0.0),
             'lower_regularity_passenger_expected_cost_mean': round(
