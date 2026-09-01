@@ -1886,3 +1886,91 @@ rejected as mainline replacements. Further work should not sweep critic-head
 parameterizations; it must alter the learned passenger-versus-regularity
 objective or the higher-level counterfactual value assignment while retaining
 noguard action semantics.
+
+### Engineering-v20 causal APC passenger-holding dual preregistration (2026-09-01)
+
+V19 isolates the remaining conflict. Its exact zero-hold-advantage critic
+allocates more holding to improve regularity, but the resulting onboard delay
+enters the learned actor only indirectly through executed replay reward. The
+analytic regularity term, by contrast, is available exactly for every action
+bin during each actor update. This asymmetry can reduce CV while increasing
+holding vehicle-seconds and restricted passenger journey. V20 gives the causal
+APC externality the same action-resolved actor representation; it does not add
+an execution guard, reward bonus, capacity heuristic, or post-policy clipping.
+
+For an observation with valid compact two-sided AVL evidence, let `l(s)` be
+the current post-service APC load ratio clipped to `[0,1]`, and let the fixed
+holding library be `A=[0,5,10,15,20,30,45] s`. The registered per-action
+normalized onboard person-delay is
+
+`c_P(s,a) = l(s) * a / 45`.
+
+The actor minimizes its inherited SAC, passenger, and V13 zero-hold-regret
+terms plus an independent `lambda_P E_pi[c_P(s,a)]`. The passenger dual is
+updated from `E_pi[c_P]-b_P`; ratio scaling divides both the cost and budget by
+the positive `b_P`, leaving the feasible set unchanged. This term is active
+only under the same `regularity_hold_target_valid` mask as V13, so it constrains
+the additional holding attributed to the analytic regularity objective rather
+than globally suppressing holding where two-sided evidence is absent. `load`
+is already a causal `deployable_apc_avl_v4` state feature. Checkpoints store an
+independent passenger lambda, optimizer, and exact contract.
+
+The locked intervention budgets are `b_P in {0.04,0.06,0.08}`. At a 50 percent
+load ratio these correspond to expected holding budgets of approximately
+`3.6,5.4,7.2 s`. Each budget is crossed with the V13 scalar reward critic as a
+mechanism control and with the V19 zero-hold-advantage critic as a promotion
+candidate. The full 13-config matrix contains historical hard main, `noguard`,
+compact context-only, confirmed main, V11 same-entropy, scalar V13, unbounded
+V13 zero-hold-advantage, the three scalar passenger-dual controls, and the
+three passenger-dual zero-hold-advantage candidates. Fresh training seeds are
+`25013,25031,25053,25077`; frozen common-random-number evaluation seeds are
+`58017,58041,58059,58083`. Training is 40 episodes with checkpoint 39 and
+scalar V13 as the aggregation reference, yielding 52 training shards and 208
+frozen rollouts.
+
+The locked mechanism gate requires the exact passenger contract and critic,
+frozen lower actor/critic and upper actor, explicit `zero_hold_regret_v2`, V13
+action regret at most `0.00025`, causal-evidence coverage at least `0.50`, zero
+execution adjustment, finite bounded passenger dual, active passive APC
+telemetry, and expected passenger cost no greater than the registered budget
+in every frozen rollout. Non-passenger controls must remain passenger-dual
+disabled, and each matched scalar passenger control must pass the same
+mechanism checks.
+
+An outcome pass must improve scalar V13 by at least `0.05 min` restricted
+journey and `0.001` headway CV, without increasing mean action, holding
+vehicle-seconds, or denied dispatch. It must also improve unbounded V19
+zero-hold-advantage journey by at least `0.05 min` while allowing at most
+`+0.002` CV, and retain the registered noguard/current/V11 and historical
+resource gates. Fixed priority is the weakest feasible constraint first:
+`b_P=0.08`, then `0.06`, then `0.04`. A passing row remains exploratory and
+requires fresh 200-episode confirmation. A no-pass result rejects these three
+action-resolved APC budgets without changing thresholds after observation.
+
+### V20 implementation smoke (2026-09-01)
+
+A six-row, two-episode smoke used the non-formal training/evaluation seeds
+`25903/58903`. It covered scalar V13, unbounded V19 zero-hold advantage, the
+scalar `b_P=0.06` mechanism control, and all three passenger-dual
+zero-hold-advantage candidates. All rows trained through checkpoint 1,
+restored the V9 lower training state, and completed frozen evaluation and
+strict development aggregation.
+
+Passenger-dual actor telemetry is active rather than a static config label.
+At the final training update, expected actor costs are `0.1637--0.1761`,
+scaled costs are `2.06--4.09`, penalties are `0.0218--0.0433`, mean causal APC
+load is approximately `0.617`, and each independent passenger lambda has
+increased from `0.01` to `0.01058--0.01059`. Frozen qadv rows report all three
+policy/critic flags as frozen, zero execution adjustment, causal-evidence
+coverage `0.77`, and action regret approximately `0.000092`. Passive frozen
+APC load and both expected and selected person-delay costs are finite and
+nonzero; non-passenger controls remain disabled with zero passenger telemetry.
+
+As expected for only 30 actor/dual updates, frozen expected passenger costs
+(`0.161--0.178`) do not yet satisfy the registered `0.04--0.08` budgets. This
+is not an efficacy failure or a reason to change the registered hyperparameters:
+the formal 40-episode gate explicitly requires budget satisfaction in every
+rollout and will reject the objective if the independent dual does not
+converge. The smoke establishes implementation, restore, and telemetry only;
+none of its outcome values is used for selection. Its temporary logs and all
+checkpoints were deleted after recording these diagnostics.

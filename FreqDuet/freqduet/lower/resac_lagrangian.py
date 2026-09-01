@@ -609,6 +609,20 @@ class RESACLagrangianTrainer:
         self.regularity_capacity_hf_energy_scale = 1.0
         self.regularity_capacity_hf_energy_exponent = 1.0
         self.regularity_capacity_hf_opportunity_cost_penalty = 0.0
+        self.regularity_passenger_holding_enabled = False
+        self.regularity_passenger_holding_contract = {'enabled': False}
+        self.regularity_passenger_holding_mode = 'disabled'
+        self.regularity_passenger_load_feature_index = None
+        self.regularity_passenger_action_norm_s = 1.0
+        self.regularity_passenger_load_clip = 1.0
+        self.regularity_passenger_cost_limit = 0.0
+        self.regularity_passenger_constraint_scale_mode = 'raw_cost_v1'
+        self.regularity_passenger_constraint_cost_scale = 1.0
+        self.regularity_passenger_initial_lambda = 0.0
+        self.regularity_passenger_lambda_min = 0.0
+        self.regularity_passenger_lambda_max = 0.0
+        self.log_regularity_passenger_lambda = None
+        self.regularity_passenger_lambda_optimizer = None
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -1002,6 +1016,104 @@ class RESACLagrangianTrainer:
             if capacity_gain_contract is not None:
                 self.regularity_policy_contract[
                     'capacity_gated_gain'] = capacity_gain_contract
+            passenger_cfg = dict(
+                regularity_cfg.get('passenger_holding_constraint', {}) or {})
+            passenger_enabled = bool(passenger_cfg.get('enable', False))
+            if passenger_enabled:
+                passenger_mode = str(passenger_cfg.get(
+                    'mode', 'causal_apc_person_delay_dual_v1'
+                )).strip().lower()
+                if passenger_mode != 'causal_apc_person_delay_dual_v1':
+                    raise ValueError(
+                        'unknown passenger holding constraint mode')
+                load_feature_index = int(
+                    passenger_cfg['load_feature_index'])
+                if not 0 <= load_feature_index < int(state_dim):
+                    raise ValueError(
+                        'passenger holding load feature index is out of range')
+                action_norm_s = float(
+                    passenger_cfg.get('action_norm_s', self.action_range))
+                load_clip = float(passenger_cfg.get('load_clip', 1.0))
+                passenger_cost_limit = float(
+                    passenger_cfg.get('cost_limit', 0.06))
+                passenger_scale_mode = str(passenger_cfg.get(
+                    'constraint_scale_mode', 'raw_cost_v1'
+                )).strip().lower()
+                passenger_lambda_lr = float(
+                    passenger_cfg.get('lambda_lr', 1e-3))
+                passenger_lambda_min = float(
+                    passenger_cfg.get('lambda_min', 1e-4))
+                passenger_lambda_max = float(
+                    passenger_cfg.get('lambda_max', 2.0))
+                passenger_initial_lambda = float(
+                    passenger_cfg.get('initial_lambda', 0.01))
+                if not np.isfinite(action_norm_s) or action_norm_s <= 0.0:
+                    raise ValueError(
+                        'passenger holding action norm must be positive')
+                if not np.isfinite(load_clip) or load_clip <= 0.0:
+                    raise ValueError(
+                        'passenger holding load clip must be positive')
+                if (not np.isfinite(passenger_cost_limit)
+                        or passenger_cost_limit <= 0.0):
+                    raise ValueError(
+                        'passenger holding cost limit must be positive')
+                if passenger_scale_mode not in {
+                        'raw_cost_v1', 'cost_limit_ratio_v1'}:
+                    raise ValueError(
+                        'unknown passenger holding constraint scale mode')
+                if (not np.isfinite(passenger_lambda_lr)
+                        or passenger_lambda_lr <= 0.0):
+                    raise ValueError(
+                        'passenger holding lambda_lr must be positive')
+                if not (0.0 < passenger_lambda_min
+                        <= passenger_initial_lambda
+                        <= passenger_lambda_max):
+                    raise ValueError(
+                        'require 0 < passenger lambda_min <= initial_lambda '
+                        '<= lambda_max')
+                self.regularity_passenger_holding_enabled = True
+                self.regularity_passenger_holding_mode = passenger_mode
+                self.regularity_passenger_load_feature_index = (
+                    load_feature_index)
+                self.regularity_passenger_action_norm_s = action_norm_s
+                self.regularity_passenger_load_clip = load_clip
+                self.regularity_passenger_cost_limit = passenger_cost_limit
+                self.regularity_passenger_constraint_scale_mode = (
+                    passenger_scale_mode)
+                if passenger_scale_mode == 'cost_limit_ratio_v1':
+                    self.regularity_passenger_constraint_cost_scale = (
+                        passenger_cost_limit)
+                self.regularity_passenger_lambda_min = passenger_lambda_min
+                self.regularity_passenger_lambda_max = passenger_lambda_max
+                self.regularity_passenger_initial_lambda = (
+                    passenger_initial_lambda)
+                self.log_regularity_passenger_lambda = torch.tensor(
+                    [float(np.log(passenger_initial_lambda))],
+                    dtype=torch.float32, requires_grad=True, device=device)
+                self.regularity_passenger_lambda_optimizer = optim.Adam(
+                    [self.log_regularity_passenger_lambda],
+                    lr=passenger_lambda_lr)
+                self.regularity_passenger_holding_contract = {
+                    'enabled': True,
+                    'mode': passenger_mode,
+                    'load_feature_index': load_feature_index,
+                    'action_norm_s': action_norm_s,
+                    'load_clip': load_clip,
+                    'cost_limit': passenger_cost_limit,
+                    'constraint_scale_mode': passenger_scale_mode,
+                    'lambda_lr': passenger_lambda_lr,
+                    'lambda_min': passenger_lambda_min,
+                    'lambda_max': passenger_lambda_max,
+                    'initial_lambda': passenger_initial_lambda,
+                }
+            self.regularity_policy_contract[
+                'passenger_holding_constraint'] = (
+                    self.regularity_passenger_holding_contract)
+        elif bool((regularity_cfg.get(
+                'passenger_holding_constraint', {}) or {}).get(
+                    'enable', False)):
+            raise ValueError(
+                'passenger holding constraint requires regularity policy')
 
     @property
     def lambda_param(self):
@@ -1020,6 +1132,12 @@ class RESACLagrangianTrainer:
         return self.log_regularity_alpha.exp().item()
 
     @property
+    def regularity_passenger_lambda_param(self):
+        if self.log_regularity_passenger_lambda is None:
+            return 0.0
+        return self.log_regularity_passenger_lambda.exp().item()
+
+    @property
     def regularity_scaled_cost_limit(self):
         if not self.regularity_policy_enabled:
             return 0.0
@@ -1027,8 +1145,19 @@ class RESACLagrangianTrainer:
             self.regularity_cost_limit
             / self.regularity_constraint_cost_scale)
 
+    @property
+    def regularity_passenger_scaled_cost_limit(self):
+        if not self.regularity_passenger_holding_enabled:
+            return 0.0
+        return (
+            self.regularity_passenger_cost_limit
+            / self.regularity_passenger_constraint_cost_scale)
+
     def _scale_regularity_constraint_cost(self, cost):
         return cost / self.regularity_constraint_cost_scale
+
+    def _scale_regularity_passenger_cost(self, cost):
+        return cost / self.regularity_passenger_constraint_cost_scale
 
     def _regularity_evidence_valid(self, state):
         if not self.regularity_policy_enabled:
@@ -1091,6 +1220,30 @@ class RESACLagrangianTrainer:
             raise RuntimeError('unknown regularity constraint cost mode')
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, action_costs
+
+    def _regularity_passenger_holding_action_terms(self, state):
+        """Return causal APC load and exact person-delay cost for every bin."""
+        if not self.regularity_passenger_holding_enabled:
+            raise RuntimeError(
+                'passenger holding constraint is disabled')
+        valid = self._regularity_evidence_valid(state)
+        load = state[
+            :, self.regularity_passenger_load_feature_index
+        ].clamp(0.0, self.regularity_passenger_load_clip)
+        action_fraction = (
+            self.discrete_actions.view(1, -1)
+            / self.regularity_passenger_action_norm_s
+        ).clamp_min(0.0)
+        action_costs = load.unsqueeze(-1) * action_fraction
+        return valid, load, action_costs
+
+    def _regularity_passenger_holding_policy_cost(
+            self, state, action_probs):
+        """Return expected normalized onboard holding person-delay."""
+        valid, load, action_costs = (
+            self._regularity_passenger_holding_action_terms(state))
+        expected_cost = (action_probs * action_costs).sum(dim=-1)
+        return expected_cost, valid, load, action_costs
 
     def _regularity_policy_capacity_gain(self, state, action_probs):
         """Reward regularity improvement only where spare capacity is causal."""
@@ -1405,6 +1558,18 @@ class RESACLagrangianTrainer:
             'regularity_policy_hf_energy_mean': 0.0,
             'regularity_policy_hf_energy_pressure_mean': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
+            'regularity_passenger_holding_enabled': float(
+                self.regularity_passenger_holding_enabled),
+            'regularity_passenger_holding_cost_mean': 0.0,
+            'regularity_passenger_holding_scaled_cost_mean': 0.0,
+            'regularity_passenger_holding_scaled_limit': float(
+                self.regularity_passenger_scaled_cost_limit),
+            'regularity_passenger_holding_constraint_gap': 0.0,
+            'regularity_passenger_holding_scaled_constraint_gap': 0.0,
+            'regularity_passenger_holding_penalty': 0.0,
+            'regularity_passenger_holding_load_mean': 0.0,
+            'regularity_passenger_lambda': (
+                self.regularity_passenger_lambda_param),
             'regularity_entropy_split_enabled': float(
                 self.regularity_entropy_split_enabled),
             'regularity_entropy_target_fraction': float(
@@ -1431,6 +1596,9 @@ class RESACLagrangianTrainer:
             regularity_target_pressure_mean = None
             regularity_hf_energy_mean = None
             regularity_hf_energy_pressure_mean = None
+            regularity_passenger_cost_mean = None
+            regularity_passenger_scaled_cost_mean = None
+            regularity_passenger_load_mean = None
             q_action_span_mean = None
             q_zero_hold_advantage_abs_mean = None
             if discrete_policy:
@@ -1473,6 +1641,8 @@ class RESACLagrangianTrainer:
             policy_loss = (policy_terms * w).mean()
             regularity_penalty = torch.zeros((), device=self.device)
             regularity_capacity_gain_bonus = torch.zeros(
+                (), device=self.device)
+            regularity_passenger_penalty = torch.zeros(
                 (), device=self.device)
             if self.regularity_policy_enabled:
                 regularity_cost, regularity_valid, regularity_action_costs = (
@@ -1569,6 +1739,28 @@ class RESACLagrangianTrainer:
                             * regularity_scaled_capacity_gain_mean)
                         policy_loss = (
                             policy_loss - regularity_capacity_gain_bonus)
+                    if self.regularity_passenger_holding_enabled:
+                        (passenger_cost, passenger_valid, passenger_load,
+                         _) = self._regularity_passenger_holding_policy_cost(
+                            state, probs)
+                        if not torch.equal(
+                                passenger_valid, regularity_valid):
+                            raise RuntimeError(
+                                'regularity and passenger validity diverged')
+                        regularity_passenger_cost_mean = (
+                            passenger_cost * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_passenger_scaled_cost_mean = (
+                            self._scale_regularity_passenger_cost(
+                                regularity_passenger_cost_mean))
+                        regularity_passenger_load_mean = (
+                            passenger_load * valid_weights
+                        ).sum().div(valid_weight_sum)
+                        regularity_passenger_penalty = (
+                            self.log_regularity_passenger_lambda.exp().detach()
+                            * regularity_passenger_scaled_cost_mean)
+                        policy_loss = (
+                            policy_loss + regularity_passenger_penalty)
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -1667,6 +1859,20 @@ class RESACLagrangianTrainer:
                     min=float(np.log(self.regularity_lambda_min)),
                     max=float(np.log(self.regularity_lambda_max)),
                 )
+            if regularity_passenger_cost_mean is not None:
+                regularity_passenger_lambda_loss = (
+                    -self.log_regularity_passenger_lambda.exp()
+                    * (regularity_passenger_scaled_cost_mean.detach()
+                       - self.regularity_passenger_scaled_cost_limit))
+                self.regularity_passenger_lambda_optimizer.zero_grad()
+                regularity_passenger_lambda_loss.backward()
+                self.regularity_passenger_lambda_optimizer.step()
+                self.log_regularity_passenger_lambda.data.clamp_(
+                    min=float(np.log(
+                        self.regularity_passenger_lambda_min)),
+                    max=float(np.log(
+                        self.regularity_passenger_lambda_max)),
+                )
 
             metrics.update({
                 'policy_loss': policy_loss.item(),
@@ -1741,6 +1947,29 @@ class RESACLagrangianTrainer:
                     regularity_hf_energy_pressure_mean.item()
                     if regularity_hf_energy_pressure_mean is not None else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
+                'regularity_passenger_holding_cost_mean': (
+                    regularity_passenger_cost_mean.item()
+                    if regularity_passenger_cost_mean is not None else 0.0),
+                'regularity_passenger_holding_scaled_cost_mean': (
+                    regularity_passenger_scaled_cost_mean.item()
+                    if regularity_passenger_scaled_cost_mean is not None
+                    else 0.0),
+                'regularity_passenger_holding_constraint_gap': (
+                    regularity_passenger_cost_mean.item()
+                    - self.regularity_passenger_cost_limit
+                    if regularity_passenger_cost_mean is not None else 0.0),
+                'regularity_passenger_holding_scaled_constraint_gap': (
+                    regularity_passenger_scaled_cost_mean.item()
+                    - self.regularity_passenger_scaled_cost_limit
+                    if regularity_passenger_scaled_cost_mean is not None
+                    else 0.0),
+                'regularity_passenger_holding_penalty': (
+                    regularity_passenger_penalty.item()),
+                'regularity_passenger_holding_load_mean': (
+                    regularity_passenger_load_mean.item()
+                    if regularity_passenger_load_mean is not None else 0.0),
+                'regularity_passenger_lambda': (
+                    self.regularity_passenger_lambda_param),
                 'regularity_entropy_valid_mean': (
                     float((
                         -entropy_log_prob.squeeze(-1) * valid_weights
@@ -1763,7 +1992,7 @@ class RESACLagrangianTrainer:
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v8',
+            'format': 'freqduet-lower-training-v9',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -1799,6 +2028,12 @@ class RESACLagrangianTrainer:
             'regularity_alpha_optimizer': (
                 self.regularity_alpha_optimizer.state_dict()
                 if self.regularity_entropy_split_enabled else None),
+            'log_regularity_passenger_lambda': (
+                self.log_regularity_passenger_lambda.detach().clone()
+                if self.regularity_passenger_holding_enabled else None),
+            'regularity_passenger_lambda_optimizer': (
+                self.regularity_passenger_lambda_optimizer.state_dict()
+                if self.regularity_passenger_holding_enabled else None),
         }
 
     def load_training_state_dict(self, state):
@@ -1807,7 +2042,8 @@ class RESACLagrangianTrainer:
                 'freqduet-lower-training-v5',
                 'freqduet-lower-training-v6',
                 'freqduet-lower-training-v7',
-                'freqduet-lower-training-v8'}:
+                'freqduet-lower-training-v8',
+                'freqduet-lower-training-v9'}:
             raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
@@ -1834,6 +2070,12 @@ class RESACLagrangianTrainer:
                 not in saved_regularity_contract):
             saved_regularity_contract = dict(saved_regularity_contract)
             saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
+        if (saved_regularity_contract.get('enabled')
+                and 'passenger_holding_constraint'
+                not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['passenger_holding_constraint'] = {
+                'enabled': False}
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower regularity-policy contract mismatch')
         self._validate_checkpoint_action_library(state['policy'])
@@ -1863,6 +2105,18 @@ class RESACLagrangianTrainer:
                 state['log_regularity_alpha'].to(self.device))
             self.regularity_alpha_optimizer.load_state_dict(
                 state['regularity_alpha_optimizer'])
+        if self.regularity_passenger_holding_enabled:
+            if state.get('log_regularity_passenger_lambda') is None:
+                raise ValueError(
+                    'lower checkpoint is missing passenger holding dual state')
+            self.log_regularity_passenger_lambda.data.copy_(
+                state['log_regularity_passenger_lambda'].to(self.device))
+            self.regularity_passenger_lambda_optimizer.load_state_dict(
+                state['regularity_passenger_lambda_optimizer'])
+            self.log_regularity_passenger_lambda.data.clamp_(
+                min=float(np.log(self.regularity_passenger_lambda_min)),
+                max=float(np.log(self.regularity_passenger_lambda_max)),
+            )
         if self.auto_entropy:
             if state.get('log_alpha') is None:
                 raise ValueError('lower checkpoint is missing entropy state')
@@ -1892,6 +2146,9 @@ class RESACLagrangianTrainer:
             'log_regularity_alpha': (
                 self.log_regularity_alpha.data
                 if self.regularity_entropy_split_enabled else None),
+            'log_regularity_passenger_lambda': (
+                self.log_regularity_passenger_lambda.data
+                if self.regularity_passenger_holding_enabled else None),
         }, path)
 
     def load(self, path):
@@ -1919,6 +2176,12 @@ class RESACLagrangianTrainer:
                 not in saved_regularity_contract):
             saved_regularity_contract = dict(saved_regularity_contract)
             saved_regularity_contract['constraint_scale_mode'] = 'raw_cost_v1'
+        if (saved_regularity_contract.get('enabled')
+                and 'passenger_holding_constraint'
+                not in saved_regularity_contract):
+            saved_regularity_contract = dict(saved_regularity_contract)
+            saved_regularity_contract['passenger_holding_constraint'] = {
+                'enabled': False}
         if saved_regularity_contract != self.regularity_policy_contract:
             raise ValueError('lower checkpoint regularity-policy mismatch')
         self._validate_checkpoint_action_library(ckpt['policy'])
@@ -1943,6 +2206,16 @@ class RESACLagrangianTrainer:
             self.log_regularity_alpha.data.clamp_(
                 min=float(np.log(self.regularity_alpha_min)),
                 max=float(np.log(self.regularity_alpha_max)),
+            )
+        if self.regularity_passenger_holding_enabled:
+            if ckpt.get('log_regularity_passenger_lambda') is None:
+                raise ValueError(
+                    'lower checkpoint is missing passenger holding dual state')
+            self.log_regularity_passenger_lambda.data.copy_(
+                ckpt['log_regularity_passenger_lambda'].to(self.device))
+            self.log_regularity_passenger_lambda.data.clamp_(
+                min=float(np.log(self.regularity_passenger_lambda_min)),
+                max=float(np.log(self.regularity_passenger_lambda_max)),
             )
         if ckpt.get('log_alpha') is not None:
             self.log_alpha.data = ckpt['log_alpha']

@@ -1,6 +1,8 @@
 from tempfile import TemporaryDirectory
 import unittest
 
+import numpy as np
+
 from runner_v3 import TransitDuetV2Runner
 from runner_v3 import load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
@@ -13,6 +15,8 @@ from scripts.validate_freqduet_protocol_v6_configs import (
     FLEET_EFFICIENCY_GAIN_CONFIGS,
     HF_OPPORTUNITY_GAIN_CONFIGS,
     NORMALIZED_REGULARITY_CONFIGS,
+    PASSENGER_HOLDING_CONFIGS,
+    PASSENGER_HOLDING_QADV_CONFIGS,
     PROMOTED_CONFIGS,
     REGULARITY_POLICY_CONFIGS,
     ROOT,
@@ -384,6 +388,87 @@ class ProtocolV6ConfigTest(unittest.TestCase):
         self.assertEqual(contract["target_headway_feature_index"], 0)
         self.assertEqual(contract["action_target_scale_s"], 45.0)
         self.assertEqual(contract["target_headway_scale_s"], 600.0)
+
+    def test_passenger_holding_configs_lock_apc_dual_and_runner_telemetry(self):
+        configs = [CONFIRMED_MAIN, *PASSENGER_HOLDING_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(configs)
+        result = validate(configs, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"],
+            sorted(PASSENGER_HOLDING_CONFIGS),
+        )
+
+        for name in PASSENGER_HOLDING_CONFIGS:
+            config = resolved_config(name)
+            lower = config["lower"]
+            objective = lower["causal_regularity_policy"]
+            passenger = objective["passenger_holding_constraint"]
+            self.assertFalse(lower["causal_holding_guard"]["enable"])
+            self.assertEqual(
+                lower["observation_contract"], "deployable_apc_avl_v4")
+            self.assertIn(
+                "load", config["frequency"]["lower_context"]["features"])
+            self.assertEqual(
+                passenger["mode"], "causal_apc_person_delay_dual_v1")
+            self.assertEqual(passenger["action_norm_s"], 45.0)
+            self.assertIn(passenger["cost_limit"], {0.04, 0.06, 0.08})
+            self.assertEqual(
+                lower.get("discrete_critic", "continuous_action"),
+                "zero_hold_advantage"
+                if name in PASSENGER_HOLDING_QADV_CONFIGS
+                else "continuous_action",
+            )
+
+        runner_config = resolved_config(PASSENGER_HOLDING_QADV_CONFIGS[1])
+        with TemporaryDirectory() as tmp:
+            runner_config.setdefault("logging", {})["logs_dir"] = tmp
+            runner = TransitDuetV2Runner(runner_config)
+
+        contract = runner.lower_trainer.regularity_policy_contract[
+            "passenger_holding_constraint"]
+        base = runner.env._base_state_dim
+        features = runner.env.lower_context_features
+        load_index = base + features.index("load")
+        self.assertEqual(contract["load_feature_index"], load_index)
+        self.assertTrue(contract["enabled"])
+
+        raw_state = np.zeros(runner.env.state_dim, dtype=np.float32)
+        raw_state[3] = 1.0
+        raw_state[4] = 600.0
+        raw_state[5] = 1.0
+        raw_state[7] = 600.0
+        raw_state[load_index] = 0.5
+        raw_state[
+            base + features.index("regularity_hold_target_norm")] = 0.5
+        raw_state[
+            base + features.index("regularity_hold_target_valid")] = 1.0
+        action = runner._lower_policy_action(
+            raw_state, deterministic=True)
+
+        self.assertEqual(
+            len(runner._ep_lower_regularity_passenger_expected_costs), 1)
+        self.assertEqual(
+            len(runner._ep_lower_regularity_passenger_selected_costs), 1)
+        self.assertEqual(
+            len(runner._ep_lower_regularity_passenger_loads), 1)
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_passenger_loads[0], 0.5, places=7)
+        self.assertAlmostEqual(
+            runner._ep_lower_regularity_passenger_selected_costs[0],
+            0.5 * float(action[0]) / 45.0,
+            places=7,
+        )
+
+        gated_config = resolved_config(PASSENGER_HOLDING_QADV_CONFIGS[1])
+        gated_config["frequency"]["lower_context"]["gate"] = {
+            "enable": True,
+            "mode": "current",
+        }
+        with TemporaryDirectory() as tmp:
+            gated_config.setdefault("logging", {})["logs_dir"] = tmp
+            with self.assertRaisesRegex(ValueError, "ungated APC load"):
+                TransitDuetV2Runner(gated_config)
 
     def test_conditional_entropy_configs_are_causal_and_fail_closed(self):
         configs = [CONFIRMED_MAIN, *CONDITIONAL_ENTROPY_CONFIGS]

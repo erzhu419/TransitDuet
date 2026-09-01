@@ -1,0 +1,19 @@
+_extends: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_paxdual_b080_hiro
+
+protocol:
+  role: exploratory_compact_w2_zero_hold_regret_apc_passenger_dual_b080_v6
+
+lower:
+  causal_regularity_policy:
+    passenger_holding_constraint:
+      enable: true
+      mode: causal_apc_person_delay_dual_v1
+      action_norm_s: 45.0
+      load_clip: 1.0
+      cost_limit: 0.08
+      constraint_scale_mode: cost_limit_ratio_v1
+      lambda_lr: 0.001
+      lambda_min: 0.0001
+      lambda_max: 2.0
+      initial_lambda: 0.01

@@ -356,6 +356,22 @@ class DiagnosticLog:
         'lower_regularity_policy_hf_energy_pressure_mean',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
+        'lower_regularity_passenger_holding_enabled',
+        'lower_regularity_passenger_holding_mode',
+        'lower_regularity_passenger_constraint_scale_mode',
+        'lower_regularity_passenger_initial_lambda',
+        'lower_regularity_passenger_cost_limit',
+        'lower_regularity_passenger_scaled_limit',
+        'lower_regularity_passenger_actor_cost_mean',
+        'lower_regularity_passenger_actor_scaled_cost_mean',
+        'lower_regularity_passenger_actor_constraint_gap',
+        'lower_regularity_passenger_actor_scaled_constraint_gap',
+        'lower_regularity_passenger_actor_penalty',
+        'lower_regularity_passenger_actor_load_mean',
+        'lower_regularity_passenger_expected_cost_mean',
+        'lower_regularity_passenger_selected_cost_mean',
+        'lower_regularity_passenger_load_mean',
+        'lower_regularity_passenger_lambda',
         'lower_regularity_entropy_split_enabled',
         'lower_regularity_entropy_target_fraction',
         'lower_regularity_entropy_valid_mean',
@@ -2205,6 +2221,27 @@ class TransitDuetV2Runner:
                         + 2)
                 regularity_policy_cfg[
                     'capacity_gated_gain'] = capacity_gain_cfg
+            passenger_cfg = copy.deepcopy(
+                regularity_policy_cfg.get(
+                    'passenger_holding_constraint', {}) or {})
+            if bool(passenger_cfg.get('enable', False)):
+                if self.lower_observation_contract != 'deployable_apc_avl_v4':
+                    raise ValueError(
+                        'passenger holding constraint requires '
+                        'deployable_apc_avl_v4')
+                if 'load' not in self.env.lower_context_features:
+                    raise ValueError(
+                        'passenger holding constraint requires the causal APC '
+                        'load lower-context feature')
+                if self.env.lower_context_gate_enabled:
+                    raise ValueError(
+                        'passenger holding constraint requires an ungated APC '
+                        'load lower-context feature')
+                passenger_cfg['load_feature_index'] = (
+                    base_state_dim
+                    + self.env.lower_context_features.index('load'))
+                regularity_policy_cfg[
+                    'passenger_holding_constraint'] = passenger_cfg
         if self.decouple_init_seeds and not self.randomness.isolated:
             torch.manual_seed(self.base_seed + 2001)
         with self.randomness.torch_initialization('lower_init'):
@@ -2745,6 +2782,9 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_hf_energy_pressures = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
+        self._ep_lower_regularity_passenger_expected_costs = []
+        self._ep_lower_regularity_passenger_selected_costs = []
+        self._ep_lower_regularity_passenger_loads = []
         self._ep_lower_policy_entropies = []
         self._ep_lower_regularity_policy_valid_entropies = []
         self._ep_upper_deltas = []      # all δ_t this episode
@@ -5704,6 +5744,7 @@ class TransitDuetV2Runner:
             return np.asarray([0.0], dtype=np.float32)
         state = self._augment_lower_state(obs, last_action)
         state_tensor = torch.from_numpy(state).float().to(self.device)
+        passenger_load = None
         if self.lower_action_bins is not None:
             with torch.no_grad():
                 probs, log_probs, _ = self.lower_trainer.policy_net.dist_info(
@@ -5717,6 +5758,17 @@ class TransitDuetV2Runner:
                     if bool(valid.item() >= 0.5):
                         self._ep_lower_regularity_policy_valid_entropies.append(
                             entropy)
+                if self.lower_trainer.regularity_passenger_holding_enabled:
+                    expected_cost, valid, load, _ = (
+                        self.lower_trainer
+                        ._regularity_passenger_holding_policy_cost(
+                            state_tensor.unsqueeze(0), probs))
+                    if bool(valid.item() >= 0.5):
+                        passenger_load = float(load.item())
+                        self._ep_lower_regularity_passenger_expected_costs.append(
+                            float(expected_cost.item()))
+                        self._ep_lower_regularity_passenger_loads.append(
+                            passenger_load)
         if self.lower_causal_guard_policy_mask_enabled:
             feasible = self.lower_trainer.policy_net.feasible_action_mask(
                 state_tensor.unsqueeze(0))
@@ -5725,7 +5777,15 @@ class TransitDuetV2Runner:
         action = self.lower_trainer.policy_net.get_action(
             state_tensor,
             deterministic=deterministic)
-        return self._quantize_lower_action(action)
+        action = self._quantize_lower_action(action)
+        if passenger_load is not None:
+            selected_cost = (
+                passenger_load
+                * max(self._lower_action_scalar(action), 0.0)
+                / self.lower_trainer.regularity_passenger_action_norm_s)
+            self._ep_lower_regularity_passenger_selected_costs.append(
+                selected_cost)
+        return action
 
     def _bus_for_agent(self, bus_id):
         bus_id = int(bus_id)
@@ -8053,6 +8113,9 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_hf_energy_pressures = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
+        self._ep_lower_regularity_passenger_expected_costs = []
+        self._ep_lower_regularity_passenger_selected_costs = []
+        self._ep_lower_regularity_passenger_loads = []
         self._ep_lower_policy_entropies = []
         self._ep_lower_regularity_policy_valid_entropies = []
         self._ep_upper_deltas_by_dir = {True: [], False: []}
@@ -8757,6 +8820,12 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_policy_target_actions)
         lower_regularity_policy_error_stat = _stat(
             self._ep_lower_regularity_policy_abs_errors)
+        lower_regularity_passenger_expected_cost_stat = _stat(
+            self._ep_lower_regularity_passenger_expected_costs)
+        lower_regularity_passenger_selected_cost_stat = _stat(
+            self._ep_lower_regularity_passenger_selected_costs)
+        lower_regularity_passenger_load_stat = _stat(
+            self._ep_lower_regularity_passenger_loads)
         lower_policy_entropy_stat = _stat(
             self._ep_lower_policy_entropies)
         lower_regularity_policy_valid_entropy_stat = _stat(
@@ -9341,6 +9410,42 @@ class TransitDuetV2Runner:
             'lower_regularity_lambda': lower_m.get(
                 'regularity_lambda',
                 self.lower_trainer.regularity_lambda_param),
+            'lower_regularity_passenger_holding_enabled': int(
+                self.lower_trainer.regularity_passenger_holding_enabled),
+            'lower_regularity_passenger_holding_mode': str(
+                self.lower_trainer.regularity_passenger_holding_mode),
+            'lower_regularity_passenger_constraint_scale_mode': str(
+                self.lower_trainer
+                .regularity_passenger_constraint_scale_mode),
+            'lower_regularity_passenger_initial_lambda': float(
+                self.lower_trainer.regularity_passenger_initial_lambda),
+            'lower_regularity_passenger_cost_limit': float(
+                self.lower_trainer.regularity_passenger_cost_limit),
+            'lower_regularity_passenger_scaled_limit': float(
+                self.lower_trainer.regularity_passenger_scaled_cost_limit),
+            'lower_regularity_passenger_actor_cost_mean': lower_m.get(
+                'regularity_passenger_holding_cost_mean', 0.0),
+            'lower_regularity_passenger_actor_scaled_cost_mean': lower_m.get(
+                'regularity_passenger_holding_scaled_cost_mean', 0.0),
+            'lower_regularity_passenger_actor_constraint_gap': lower_m.get(
+                'regularity_passenger_holding_constraint_gap', 0.0),
+            'lower_regularity_passenger_actor_scaled_constraint_gap': (
+                lower_m.get(
+                    'regularity_passenger_holding_scaled_constraint_gap',
+                    0.0)),
+            'lower_regularity_passenger_actor_penalty': lower_m.get(
+                'regularity_passenger_holding_penalty', 0.0),
+            'lower_regularity_passenger_actor_load_mean': lower_m.get(
+                'regularity_passenger_holding_load_mean', 0.0),
+            'lower_regularity_passenger_expected_cost_mean': round(
+                lower_regularity_passenger_expected_cost_stat['mean'], 8),
+            'lower_regularity_passenger_selected_cost_mean': round(
+                lower_regularity_passenger_selected_cost_stat['mean'], 8),
+            'lower_regularity_passenger_load_mean': round(
+                lower_regularity_passenger_load_stat['mean'], 8),
+            'lower_regularity_passenger_lambda': lower_m.get(
+                'regularity_passenger_lambda',
+                self.lower_trainer.regularity_passenger_lambda_param),
             'lower_regularity_entropy_split_enabled': int(
                 self.lower_trainer.regularity_entropy_split_enabled),
             'lower_regularity_entropy_target_fraction': float(

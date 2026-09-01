@@ -53,15 +53,27 @@ NORMALIZED_REGULARITY_CONFIGS = [
     for limit, fraction in (("0010", "50"), ("0020", "25"))
     for initial in ("005", "010", "020")
 ]
+PASSENGER_HOLDING_SCALAR_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_"
+    f"paxdual_b{budget}_hiro"
+    for budget in ("040", "060", "080")
+]
+PASSENGER_HOLDING_QADV_CONFIGS = [
+    f"F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_"
+    f"paxdual_b{budget}_qadv0_hiro"
+    for budget in ("040", "060", "080")
+]
+PASSENGER_HOLDING_CONFIGS = (
+    PASSENGER_HOLDING_SCALAR_CONFIGS + PASSENGER_HOLDING_QADV_CONFIGS)
 DISCRETE_CRITIC_ZERO_HOLD_CONFIGS = [
     "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qidx_hiro",
     "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qadv0_hiro",
-]
+] + PASSENGER_HOLDING_QADV_CONFIGS
 ZERO_HOLD_REGRET_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adregret_l{initial}_e25_r{limit}_hiro"
     for initial in ("001", "005")
     for limit in ("00025", "0005", "0010")
-] + DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
+] + DISCRETE_CRITIC_ZERO_HOLD_CONFIGS + PASSENGER_HOLDING_SCALAR_CONFIGS
 DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS = [
     "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qidx_hiro",
     "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qadv0_hiro",
@@ -289,6 +301,57 @@ def validate(
             if not compact_features.issubset(features):
                 raise ValueError(
                     f"{name}: regularity policy lacks compact causal state")
+            passenger = regularity_policy.get(
+                "passenger_holding_constraint", {}) or {}
+            passenger_enabled = bool(passenger.get("enable"))
+            if passenger_enabled != (name in PASSENGER_HOLDING_CONFIGS):
+                raise ValueError(
+                    f"{name}: passenger holding constraint registration "
+                    "mismatch")
+            if passenger_enabled:
+                if lower.get("observation_contract") != "deployable_apc_avl_v4":
+                    raise ValueError(
+                        f"{name}: passenger holding constraint requires the "
+                        "deployable APC/AVL observation contract")
+                if "load" not in features:
+                    raise ValueError(
+                        f"{name}: passenger holding constraint lacks causal "
+                        "APC load")
+                if bool((lower_context.get("gate", {}) or {}).get("enable")):
+                    raise ValueError(
+                        f"{name}: passenger holding constraint cannot use a "
+                        "gated APC load")
+                expected_budget = next(
+                    value for marker, value in (
+                        ("_b040_", 0.04),
+                        ("_b060_", 0.06),
+                        ("_b080_", 0.08),
+                    ) if marker in name)
+                expected_passenger_contract = {
+                    "enable": True,
+                    "mode": "causal_apc_person_delay_dual_v1",
+                    "action_norm_s": 45.0,
+                    "load_clip": 1.0,
+                    "cost_limit": expected_budget,
+                    "constraint_scale_mode": "cost_limit_ratio_v1",
+                    "lambda_lr": 0.001,
+                    "lambda_min": 0.0001,
+                    "lambda_max": 2.0,
+                    "initial_lambda": 0.01,
+                }
+                observed_passenger_contract = {
+                    key: passenger.get(key)
+                    for key in expected_passenger_contract
+                }
+                if observed_passenger_contract != expected_passenger_contract:
+                    raise ValueError(
+                        f"{name}: passenger holding contract is not locked")
+                if (float(regularity_policy.get("cost_limit", -1.0))
+                        != 0.00025
+                        or float(regularity_policy.get(
+                            "initial_lambda", -1.0)) != 0.01):
+                    raise ValueError(
+                        f"{name}: passenger dual changed the V13 anchor")
             gain_configs = (
                 CAPACITY_GAIN_CONFIGS
                 + EFFICIENCY_GAIN_CONFIGS

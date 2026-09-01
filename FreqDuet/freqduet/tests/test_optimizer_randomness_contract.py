@@ -202,7 +202,9 @@ class OptimizerContractTest(unittest.TestCase):
             hf_opportunity_cost_penalty=0.0,
             hf_energy_scale=0.04,
             hf_energy_exponent=1.0,
-            action_bins=None):
+            action_bins=None,
+            passenger_cost_limit=None,
+            passenger_action_norm_s=45.0):
         conditional = (
             {
                 "enable": True,
@@ -289,21 +291,104 @@ class OptimizerContractTest(unittest.TestCase):
                     "hf_opportunity_cost_penalty": (
                         hf_opportunity_cost_penalty),
                 })
+        state_dim = (
+            5 if policy_mode
+            in {
+                "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5",
+                "analytic_two_sided_target_preserving_gain_regret_dual_v6",
+                "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
+            }
+            else 4 if capacity_mode else 3)
+        if passenger_cost_limit is not None:
+            regularity["passenger_holding_constraint"] = {
+                "enable": True,
+                "mode": "causal_apc_person_delay_dual_v1",
+                "load_feature_index": state_dim,
+                "action_norm_s": passenger_action_norm_s,
+                "load_clip": 1.0,
+                "cost_limit": passenger_cost_limit,
+                "constraint_scale_mode": "cost_limit_ratio_v1",
+                "lambda_lr": 1e-2,
+                "lambda_min": 1e-4,
+                "lambda_max": 2.0,
+                "initial_lambda": 0.01,
+            }
+            state_dim += 1
         return RESACLagrangianTrainer(
-            state_dim=(
-                5 if policy_mode
-                in {
-                    "analytic_two_sided_fleet_efficiency_gain_regret_dual_v5",
-                    "analytic_two_sided_target_preserving_gain_regret_dual_v6",
-                    "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
-                }
-                else 4 if capacity_mode else 3),
+            state_dim=state_dim,
             action_range=45.0,
             action_bins=(action_bins or [0.0, 45.0]),
             ensemble_size=2,
             hidden_dim=8,
             auto_entropy=conditional_entropy,
             regularity_policy_objective=regularity,
+        )
+
+    def test_passenger_holding_dual_uses_exact_apc_action_cost_and_round_trips(self):
+        torch.manual_seed(131)
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_zero_hold_regret_dual_v2",
+            cost_limit=0.00025,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0],
+            passenger_cost_limit=0.04,
+            passenger_action_norm_s=10.0,
+        )
+        state = torch.tensor(
+            [[0.6, 1.0 / 3.0, 1.0, 0.5]], dtype=torch.float32)
+        probs = torch.full((1, 3), 1.0 / 3.0, dtype=torch.float32)
+
+        expected, valid, load, costs = (
+            trainer._regularity_passenger_holding_policy_cost(state, probs))
+
+        torch.testing.assert_close(
+            costs,
+            torch.tensor([[0.0, 0.25, 0.5]], dtype=torch.float32),
+        )
+        self.assertAlmostEqual(expected.item(), 0.25, places=7)
+        self.assertAlmostEqual(load.item(), 0.5, places=7)
+        self.assertEqual(valid.item(), 1.0)
+        self.assertEqual(trainer.regularity_passenger_scaled_cost_limit, 1.0)
+
+        replay = CostReplayBuffer(64, seed=137)
+        replay_state = np.array(
+            [0.6, 1.0 / 3.0, 1.0, 1.0], dtype=np.float32)
+        for idx in range(16):
+            replay.push(
+                replay_state, 0.0, 0.0, 0.0,
+                replay_state, True, idx)
+        initial_passenger_lambda = trainer.regularity_passenger_lambda_param
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        self.assertEqual(metrics["regularity_passenger_holding_enabled"], 1.0)
+        self.assertGreater(
+            metrics["regularity_passenger_holding_cost_mean"], 0.04)
+        self.assertGreater(
+            trainer.regularity_passenger_lambda_param,
+            initial_passenger_lambda,
+        )
+        self.assertGreater(
+            metrics["regularity_passenger_holding_penalty"], 0.0)
+
+        restored = self._regularity_trainer(
+            policy_mode="analytic_two_sided_zero_hold_regret_dual_v2",
+            cost_limit=0.00025,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0],
+            passenger_cost_limit=0.04,
+            passenger_action_norm_s=10.0,
+        )
+        restored.load_training_state_dict(trainer.training_state_dict())
+        self.assertEqual(
+            restored.regularity_policy_contract,
+            trainer.regularity_policy_contract,
+        )
+        self.assertAlmostEqual(
+            restored.regularity_passenger_lambda_param,
+            trainer.regularity_passenger_lambda_param,
+            places=7,
         )
 
     def test_causal_regularity_cost_matches_two_sided_action_term(self):
@@ -714,7 +799,7 @@ class OptimizerContractTest(unittest.TestCase):
         restored = self._regularity_trainer(conditional_entropy=True)
         restored.load_training_state_dict(state)
 
-        self.assertEqual(state["format"], "freqduet-lower-training-v8")
+        self.assertEqual(state["format"], "freqduet-lower-training-v9")
         self.assertAlmostEqual(
             restored.regularity_alpha_param,
             trainer.regularity_alpha_param,

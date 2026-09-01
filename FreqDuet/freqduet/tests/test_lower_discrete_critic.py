@@ -138,7 +138,7 @@ class LowerDiscreteCriticTest(unittest.TestCase):
     def test_training_checkpoint_locks_discrete_critic(self):
         trainer = self._trainer(discrete_critic="zero_hold_advantage")
         state = trainer.training_state_dict()
-        self.assertEqual(state["format"], "freqduet-lower-training-v8")
+        self.assertEqual(state["format"], "freqduet-lower-training-v9")
         self.assertEqual(state["discrete_critic"], "zero_hold_advantage")
         with self.assertRaisesRegex(ValueError, "discrete critic"):
             self._trainer(discrete_critic="indexed").load_training_state_dict(
