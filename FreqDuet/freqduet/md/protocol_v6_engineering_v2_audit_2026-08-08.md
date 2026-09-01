@@ -2219,3 +2219,42 @@ gain states. V22 may use that form only if it makes the registered `0.05/0.08`
 budgets jointly feasible across all audited checkpoints and the low-gain
 quartile evidence supports the mechanism; all V22 effect seeds must remain
 fresh.
+
+### V21 replay-feasibility audit outcome (2026-09-01)
+
+The registered audit evaluated all 16 joint-candidate episode-39 checkpoints
+from source commit `ae326f2696`. It covered 3,328,000 replay transitions, of
+which 2,705,709 have valid compact two-sided evidence. Task `t89202` produced
+all 16 JSON results with process exit code zero. Its final uppercase custom
+marker was not recognized by the scheduler success classifier, so the automatic
+retry `t89203` was cancelled; task `t89204` then verified the complete result
+count with a recognized `DONE` marker. Only the 132 KB JSON directory was
+synchronized. No checkpoint or replay buffer was copied locally.
+
+Both registered V21 constraints are jointly feasible over the exact action
+library in every audited checkpoint. The minimum passenger cost at relative
+floor shortfall `0.05` ranges from `0.03161` to `0.05742`, below the passenger
+budget `0.08` throughout. Conversely, the minimum relative shortfall at
+passenger cost `0.08` ranges from `0.00000` to `0.01222`, also below its budget
+throughout. V21's frozen failures are therefore not caused by an empty feasible
+set. The learned replay policies instead have expected passenger cost
+`0.11228--0.14196`, while regularity multipliers remain only
+`0.01235--0.02086` and passenger multipliers `0.01783--0.03000`; the log-Adam
+dual cold start did not move the actor to the available constrained frontier in
+40 episodes.
+
+The absolute-gain hypothesis is also supported. The lowest attainable-gain
+quartile contributes only `4.56--5.27%` of total `G_max`, but contributes
+`44.72--61.88%` of the learned policy's relative-shortfall mass. Reweighting
+shortfall by required absolute gain removes this disproportion while retaining
+joint feasibility in all 16 checkpoints: the exact minimum passenger cost at a
+`0.05` aggregate weighted shortfall is `0.05140--0.07534`, and the minimum
+weighted shortfall at passenger cost `0.08` is `0.00000--0.03104`.
+
+This audit rules out both an infeasible-budget explanation and another fraction
+sweep. V22 must correct the optimization dynamics and the state allocation at
+the same time: use aggregate attainable-gain-weighted shortfall, direct
+projected dual ascent on normalized violations, and an augmented-Lagrangian
+primal term. It must retain V21's causal state, exact action library,
+zero-hold-advantage reward critic, passenger cost, and zero execution
+adjustment, and it must use fresh effect seeds.
