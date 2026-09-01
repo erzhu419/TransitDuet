@@ -2132,3 +2132,23 @@ budget convergence is assessed only in the locked 40-episode formal matrix.
 The smoke establishes that the exact action-wise costs, HF-conditioned
 formula, dual separation, checkpoint round trip, passive telemetry, and
 noguard execution semantics are wired consistently.
+
+### Engineering-v21 formal matrix dispatch (2026-09-01)
+
+The locked 40-episode matrix was dispatched from clean detached source commit
+`d0d213947f1deeaa7e2c32becd0620dbd6f073e0` under scheduler run
+`protocol_v6_hf_gain_floor_ep40_s4_e4_v21`. The 60 one-training-seed shards
+are scheduler tasks `t88968` through `t89027`, distributed evenly with ten
+tasks on each of `node001` through `node006`. Each task uses one physical CPU
+core, `1536 MB` declared RAM, one matrix worker, one Torch/BLAS thread, and the
+isolated remote interpreter
+`/home/zhengliang01/scheduleurm_work/conda_envs/freqduet-cpu-py310/bin/python`.
+No shard logs or checkpoints are synchronized locally.
+
+The scheduler inventory contained no pre-existing V21 signature before
+submission. Transient jump-host SSH connection limits affected the first
+launch wave, but the scheduler retried the existing task records rather than
+creating replacements; all 60 tasks subsequently entered `running`, exactly
+ten per node. This dispatch record is not an outcome claim. Aggregation, the
+strict mechanism/outcome gate, and any small-artifact synchronization occur
+only after every shard reaches a successful terminal state.
