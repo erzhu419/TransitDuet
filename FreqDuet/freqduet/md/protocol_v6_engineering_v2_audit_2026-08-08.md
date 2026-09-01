@@ -2197,3 +2197,25 @@ actions and separate genuine budget infeasibility from insufficient dual
 convergence. It must also report how much of the floor pressure comes from
 low-absolute-gain states. No V21 seed or outcome may be reused for V22 effect
 selection.
+
+### V21 replay-feasibility audit registration (2026-09-01)
+
+The post-outcome audit is diagnostic only. For each of the four joint V21
+candidate configurations and all four formal training seeds, it reads the
+episode-39 checkpoint in place and evaluates all seven feasible actions on every
+causal-valid replay state. No checkpoint is copied locally. The audit computes
+the exact minimum passenger cost attainable at the registered relative-floor
+budget, the exact minimum relative-floor shortfall attainable at the passenger
+budget, the learned policy's replay costs, and the absolute attainable-gain
+distribution. The one-constraint finite-action linear programs are solved
+through their separable Lagrange dual, including the endpoint policy mixture at
+a discrete frontier jump.
+
+For diagnosis, the same action table also reports an aggregate-gain-weighted
+shortfall: `max(rho(s) G_max(s) - G(s,a), 0)` divided by mean required gain.
+This is not a V21 gate replacement and cannot rescue a V21 row. It tests the
+specific hypothesis that the rejected relative floor overprices low-absolute-
+gain states. V22 may use that form only if it makes the registered `0.05/0.08`
+budgets jointly feasible across all audited checkpoints and the low-gain
+quartile evidence supports the mechanism; all V22 effect seeds must remain
+fresh.
