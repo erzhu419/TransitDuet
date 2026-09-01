@@ -2152,3 +2152,48 @@ creating replacements; all 60 tasks subsequently entered `running`, exactly
 ten per node. This dispatch record is not an outcome claim. Aggregation, the
 strict mechanism/outcome gate, and any small-artifact synchronization occur
 only after every shard reaches a successful terminal state.
+
+### Engineering-v21 formal outcome (2026-09-01)
+
+All 60 formal shards completed successfully with zero scheduler retry. Task
+`t89188` performed the node-side strict aggregate and locked V21 audit. The
+manifest verifies the exact 15-configuration matrix, four registered training
+seeds, four common-random-number evaluation seeds, checkpoint 39, 240 unique
+frozen rollouts, complete run manifests, and clean source commit
+`d0d213947f1deeaa7e2c32becd0620dbd6f073e0`. Only the five combined CSV/JSON
+artifacts (approximately 1.1 MB) were synchronized locally; no shard log or
+checkpoint was copied.
+
+The locked gate returns `no_pass`, and no V21 row is eligible for confirmation.
+Both floor-only controls violate the `0.05` expected-shortfall budget in at
+least one frozen rollout; the `(0.40,0.25)` control is closest with mean/max
+shortfall `0.0464/0.0536`, while the constant `(0.50,0.00)` control also misses
+the inherited regret limit. Every passenger-dual candidate violates both
+registered budgets in at least one rollout. Their maximum expected floor
+shortfalls are `0.0558--0.0820`, and maximum expected passenger costs are
+`0.1229--0.1361` against the locked `0.08` limit. The critic, frozen-policy,
+causal-evidence, exact action-cost, independent-dual, and zero-execution-
+adjustment contracts otherwise pass, so this is a valid objective result rather
+than an implementation or aggregation failure.
+
+The outcome direction is a regularity--journey tradeoff. The closest joint row,
+`(rho_0,rho_H)=(0.30,0.30)`, improves headway CV relative to scalar V13 by
+`-0.00714` but worsens restricted journey by `+0.04947 min`, raises holding by
+`5,892.2 vehicle-s`, and raises denied dispatch by `1,776.2` events. The
+constant `(0.50,0.00)` passenger row has the smallest journey loss
+(`+0.02166 min`) but only `-0.00186` CV and still raises holding by
+`3,518.4 vehicle-s`. All four joint rows beat current main, `noguard`, and V11
+on journey, and recover at least `0.0290` CV from the V20 passenger-collapse
+control, but none improves journey over scalar V13 or unbounded V19, and none
+avoids increasing mean action and holding over V13.
+
+V21 therefore rejects the per-state relative gain-floor family and its
+registered fractions without changing any observed threshold. The floor does
+restore the intended action semantics, but it prices the same fractional
+shortfall in every eligible state even when the absolute attainable regularity
+gain is very small. Before defining a successor, a read-only checkpoint audit
+must determine the exact passenger--floor feasible frontier over the seven
+actions and separate genuine budget infeasibility from insufficient dual
+convergence. It must also report how much of the floor pressure comes from
+low-absolute-gain states. No V21 seed or outcome may be reused for V22 effect
+selection.
