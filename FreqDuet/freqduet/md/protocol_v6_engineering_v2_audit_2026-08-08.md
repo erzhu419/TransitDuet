@@ -1853,3 +1853,36 @@ outputs for seven actions, and its zero-action Q is exactly the state-value
 output. This verifies active learning and telemetry only; the smoke outcomes
 are not effect evidence. All temporary smoke directories, including
 checkpoints, are deleted after this record.
+
+### V19 exact discrete lower-critic outcome (2026-09-01)
+
+The formal V19 screen completed all 44 scheduler shards and 176 frozen
+common-random-number rollouts from clean source commit `c23839c2f1`. The strict
+aggregator verified the exact 11-configuration matrix, registered train and
+evaluation seeds, 40-episode exploratory protocol, V13 reference, unique
+rollouts, clean source manifests, and frozen evaluation. Every candidate passed
+all ten mechanism checks: the requested categorical critic and scalar control
+critics were locked, the inherited objective and `zero_hold_regret_v2`
+contracts held, action regret stayed below the registered limit, causal
+evidence was present, and execution adjustment remained exactly zero. This is
+therefore a valid negative effect result rather than an implementation failure.
+
+The locked gate returns `no_pass`. Relative to scalar V13, the indexed and
+zero-hold-advantage critics improve headway CV by `0.00889` and `0.00896`, but
+worsen restricted journey by `0.23992 min` and `0.18503 min`. They also increase
+mean holding action by `1.878 s` and `1.395 s`, holding vehicle-seconds by
+`9,774.1` and `7,254.7`, and denied dispatch events by `7,242.3` and `5,836.0`.
+Relative to same-source V14, indexed and zero-hold-advantage worsen restricted
+journey by `0.08615 min` and `0.08093 min`; neither improves CV, and both again
+increase action, holding, and denied dispatch. No candidate is eligible for a
+200-episode confirmation or paper claim.
+
+V19 shows that removing continuous interpolation from the categorical holding
+library changes the learned action values but does not solve the underlying
+journey--regularity conflict. The V13 variants move strongly toward more
+holding and lower CV, while V14's capacity term suppresses the CV benefit
+without recovering journey. Both exact categorical reward-critic families are
+rejected as mainline replacements. Further work should not sweep critic-head
+parameterizations; it must alter the learned passenger-versus-regularity
+objective or the higher-level counterfactual value assignment while retaining
+noguard action semantics.
