@@ -2023,3 +2023,80 @@ first preserve a causal minimum fraction of the available two-sided
 regularity gain, especially in HF-active states, and only then minimize APC
 person-delay. This must be implemented as a training objective or soft
 constraint, not as execution clipping or a post-policy guard.
+
+### Engineering-v21 HF-conditioned regularity-gain floor preregistration (2026-09-01)
+
+V21 keeps the V19 zero-hold-advantage reward critic, seven fixed holding bins,
+compact causal two-sided AVL target, deployable APC load, conditional entropy,
+upper policy, and noguard action execution. It replaces V13's one-sided
+zero-hold-regret constraint with a soft lower bound on the regularity benefit
+that the actor must retain before the independent V20 passenger dual can
+remove holding. There is no action mask, clipping, fallback, policy mixture,
+or post-policy adjustment.
+
+For the existing clipped two-sided action loss `L(s,a)`, define
+
+`G(s,a) = max(L(s,0) - L(s,a), 0)`,
+
+`G_max(s) = max_{a' in A} G(s,a')`, and
+
+`r_G(s,a) = G(s,a) / G_max(s)` when `G_max(s)>0`; states with no attainable
+positive gain have zero floor cost. With the already-observed causal local HF
+energy `e_H(s)`, the registered pressure and required fraction are
+
+`p_H(s) = (e_H(s)/0.04) / (1 + e_H(s)/0.04)` and
+
+`rho(s) = rho_0 + rho_H p_H(s)`.
+
+The exact per-action floor shortfall is
+
+`c_F(s,a) = max(rho(s) - r_G(s,a), 0)`.
+
+An independent regularity multiplier enforces
+`E_pi[c_F] <= 0.05` under the same valid compact two-sided evidence mask.
+When enabled, the passenger multiplier remains the unchanged V20 total
+person-delay constraint `E_pi[load * a / 45] <= 0.08`. Thus required
+regularity holding remains priced as passenger delay, but the passenger dual
+cannot satisfy its budget merely by collapsing the lower controller's
+causally attributable HF response. Both costs are exact over all seven action
+bins during the actor update.
+
+Two floor-only mechanism controls use `(rho_0,rho_H)=(0.50,0.00)` and
+`(0.40,0.25)`. Four passenger-dual candidates use
+`(0.50,0.00)`, `(0.30,0.30)`, `(0.40,0.25)`, and `(0.50,0.20)`. The constant
+row distinguishes a regularity floor from HF conditioning; the three smooth
+HF rows span weaker to stronger inactive-state preservation while keeping the
+maximum required fraction between `0.60` and `0.70`. The full matrix also
+contains hard main, `noguard`, compact context-only, confirmed main, V11,
+scalar V13, unbounded V19 zero-hold advantage, scalar V20 `b_P=0.08`, and
+zero-hold-advantage V20 `b_P=0.08`, for 15 configurations.
+
+Fresh formal training seeds are `26013,26031,26053,26077`; frozen
+common-random-number evaluation seeds are `59017,59041,59059,59083`.
+Training is 40 episodes with checkpoint 39, exploratory stage, and scalar V13
+as the aggregation reference, yielding 60 training shards and 240 frozen
+rollouts. Candidate priority is the passenger-dual HF rows
+`(0.30,0.30)`, `(0.40,0.25)`, `(0.50,0.20)`, followed by the constant
+`(0.50,0.00)` row.
+
+The mechanism gate requires the exact `hf_relative_gain_shortfall_v3`
+constraint contract; the registered pressure, required fraction, gain
+fraction, and shortfall arithmetic in actor and passive frozen telemetry;
+expected floor shortfall no greater than `0.05` in every frozen rollout;
+expected total passenger cost no greater than `0.08` in every candidate
+rollout; finite bounded independent multipliers; at least `0.50` causal
+evidence coverage; original zero-hold action regret no greater than `0.00025`;
+frozen lower actor/critic and upper actor; the exact categorical critic and
+action library; and zero execution adjustment. Floor-only and V20 controls
+must retain their registered disabled/enabled contracts.
+
+An outcome pass must improve scalar V13 restricted journey by at least
+`0.05 min` and headway CV by at least `0.001`, without increasing mean lower
+action, holding vehicle-seconds, or denied dispatch. It must also improve
+unbounded V19 zero-hold advantage by at least `0.05 min` journey and
+`0.001` CV, improve V20 `b_P=0.08` CV by at least `0.020` while allowing at
+most `+0.20 min` journey, beat `noguard`, current main, and V11 under the
+existing V20 margins, and retain the historical holding/denied limits. A pass
+is exploratory only and requires fresh 200-episode confirmation. A no-pass
+rejects this gain-floor family without changing its fractions or thresholds
+after observing the matrix.
