@@ -354,6 +354,26 @@ class DiagnosticLog:
         'lower_regularity_policy_target_pressure_mean',
         'lower_regularity_policy_hf_energy_mean',
         'lower_regularity_policy_hf_energy_pressure_mean',
+        'lower_regularity_gain_floor_enabled',
+        'lower_regularity_gain_floor_mode',
+        'lower_regularity_gain_floor_base_fraction',
+        'lower_regularity_gain_floor_hf_increment',
+        'lower_regularity_gain_floor_hf_energy_scale',
+        'lower_regularity_gain_floor_hf_energy_exponent',
+        'lower_regularity_gain_floor_actor_required_fraction_mean',
+        'lower_regularity_gain_floor_actor_hf_energy_mean',
+        'lower_regularity_gain_floor_actor_hf_pressure_mean',
+        'lower_regularity_gain_floor_actor_expected_gain_fraction_mean',
+        'lower_regularity_gain_floor_actor_expected_shortfall_mean',
+        'lower_regularity_gain_floor_actor_eligible_fraction',
+        'lower_regularity_gain_floor_required_fraction_mean',
+        'lower_regularity_gain_floor_hf_pressure_mean',
+        'lower_regularity_gain_floor_expected_gain_fraction_mean',
+        'lower_regularity_gain_floor_selected_gain_fraction_mean',
+        'lower_regularity_gain_floor_expected_shortfall_mean',
+        'lower_regularity_gain_floor_selected_shortfall_mean',
+        'lower_regularity_gain_floor_selected_shortfall_max',
+        'lower_regularity_gain_floor_eligible_mean',
         'lower_regularity_policy_cost_limit',
         'lower_regularity_lambda',
         'lower_regularity_passenger_holding_enabled',
@@ -2221,6 +2241,28 @@ class TransitDuetV2Runner:
                         + 2)
                 regularity_policy_cfg[
                     'capacity_gated_gain'] = capacity_gain_cfg
+            if (regularity_mode
+                    == 'analytic_two_sided_hf_gain_floor_dual_v8'):
+                lower_frequency_mode = str(
+                    freq_cfg.get('lower_mode', 'high')).strip().lower()
+                if (not self.env.frequency_lower_enabled
+                        or lower_frequency_mode not in {
+                            'high', 'hf', 'split'}):
+                    raise ValueError(
+                        'HF gain floor requires high-mode causal lower '
+                        'frequency features')
+                gain_floor_cfg = copy.deepcopy(
+                    regularity_policy_cfg.get(
+                        'regularity_gain_floor', {}) or {})
+                if not bool(gain_floor_cfg.get('enable', False)):
+                    raise ValueError(
+                        'V8 regularity mode requires an enabled gain floor')
+                gain_floor_cfg['hf_energy_feature_index'] = (
+                    base_state_dim
+                    + len(self.env.lower_context_features)
+                    + 2)
+                regularity_policy_cfg[
+                    'regularity_gain_floor'] = gain_floor_cfg
             passenger_cfg = copy.deepcopy(
                 regularity_policy_cfg.get(
                     'passenger_holding_constraint', {}) or {})
@@ -2780,6 +2822,13 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_target_pressures = []
         self._ep_lower_regularity_policy_hf_energies = []
         self._ep_lower_regularity_policy_hf_energy_pressures = []
+        self._ep_lower_regularity_gain_floor_required_fractions = []
+        self._ep_lower_regularity_gain_floor_hf_pressures = []
+        self._ep_lower_regularity_gain_floor_expected_gain_fractions = []
+        self._ep_lower_regularity_gain_floor_selected_gain_fractions = []
+        self._ep_lower_regularity_gain_floor_expected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_selected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_eligible = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_regularity_passenger_expected_costs = []
@@ -5745,6 +5794,8 @@ class TransitDuetV2Runner:
         state = self._augment_lower_state(obs, last_action)
         state_tensor = torch.from_numpy(state).float().to(self.device)
         passenger_load = None
+        floor_gain_fractions = None
+        floor_shortfalls = None
         if self.lower_action_bins is not None:
             with torch.no_grad():
                 probs, log_probs, _ = self.lower_trainer.policy_net.dist_info(
@@ -5758,6 +5809,38 @@ class TransitDuetV2Runner:
                     if bool(valid.item() >= 0.5):
                         self._ep_lower_regularity_policy_valid_entropies.append(
                             entropy)
+                if self.lower_trainer.regularity_gain_floor_enabled:
+                    (
+                        floor_valid,
+                        _,
+                        floor_hf_pressure,
+                        floor_required,
+                        floor_gain_terms,
+                        floor_shortfall_terms,
+                        floor_eligible,
+                    ) = self.lower_trainer._regularity_gain_floor_action_terms(
+                        state_tensor.unsqueeze(0))
+                    if bool(floor_valid.item() >= 0.5):
+                        eligible = float(floor_eligible.item())
+                        expected_shortfall = float((
+                            probs * floor_shortfall_terms
+                        ).sum(dim=-1).item())
+                        self._ep_lower_regularity_gain_floor_eligible.append(
+                            eligible)
+                        self._ep_lower_regularity_gain_floor_expected_shortfalls.append(
+                            expected_shortfall)
+                        floor_shortfalls = floor_shortfall_terms.reshape(-1)
+                        if eligible >= 0.5:
+                            expected_gain = float((
+                                probs * floor_gain_terms
+                            ).sum(dim=-1).item())
+                            self._ep_lower_regularity_gain_floor_required_fractions.append(
+                                float(floor_required.item()))
+                            self._ep_lower_regularity_gain_floor_hf_pressures.append(
+                                float(floor_hf_pressure.item()))
+                            self._ep_lower_regularity_gain_floor_expected_gain_fractions.append(
+                                expected_gain)
+                            floor_gain_fractions = floor_gain_terms.reshape(-1)
                 if self.lower_trainer.regularity_passenger_holding_enabled:
                     expected_cost, valid, load, _ = (
                         self.lower_trainer
@@ -5778,6 +5861,16 @@ class TransitDuetV2Runner:
             state_tensor,
             deterministic=deterministic)
         action = self._quantize_lower_action(action)
+        if floor_gain_fractions is not None or floor_shortfalls is not None:
+            bins = self.lower_trainer.discrete_actions.reshape(-1)
+            selected_index = int(torch.argmin(torch.abs(
+                bins - self._lower_action_scalar(action))).item())
+            if floor_gain_fractions is not None:
+                self._ep_lower_regularity_gain_floor_selected_gain_fractions.append(
+                    float(floor_gain_fractions[selected_index].item()))
+            if floor_shortfalls is not None:
+                self._ep_lower_regularity_gain_floor_selected_shortfalls.append(
+                    float(floor_shortfalls[selected_index].item()))
         if passenger_load is not None:
             selected_cost = (
                 passenger_load
@@ -8111,6 +8204,13 @@ class TransitDuetV2Runner:
         self._ep_lower_regularity_policy_target_pressures = []
         self._ep_lower_regularity_policy_hf_energies = []
         self._ep_lower_regularity_policy_hf_energy_pressures = []
+        self._ep_lower_regularity_gain_floor_required_fractions = []
+        self._ep_lower_regularity_gain_floor_hf_pressures = []
+        self._ep_lower_regularity_gain_floor_expected_gain_fractions = []
+        self._ep_lower_regularity_gain_floor_selected_gain_fractions = []
+        self._ep_lower_regularity_gain_floor_expected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_selected_shortfalls = []
+        self._ep_lower_regularity_gain_floor_eligible = []
         self._ep_lower_regularity_policy_target_actions = []
         self._ep_lower_regularity_policy_abs_errors = []
         self._ep_lower_regularity_passenger_expected_costs = []
@@ -8816,6 +8916,20 @@ class TransitDuetV2Runner:
             self._ep_lower_regularity_policy_hf_energies)
         lower_regularity_policy_hf_energy_pressure_stat = _stat(
             self._ep_lower_regularity_policy_hf_energy_pressures)
+        lower_regularity_gain_floor_required_fraction_stat = _stat(
+            self._ep_lower_regularity_gain_floor_required_fractions)
+        lower_regularity_gain_floor_hf_pressure_stat = _stat(
+            self._ep_lower_regularity_gain_floor_hf_pressures)
+        lower_regularity_gain_floor_expected_gain_fraction_stat = _stat(
+            self._ep_lower_regularity_gain_floor_expected_gain_fractions)
+        lower_regularity_gain_floor_selected_gain_fraction_stat = _stat(
+            self._ep_lower_regularity_gain_floor_selected_gain_fractions)
+        lower_regularity_gain_floor_expected_shortfall_stat = _stat(
+            self._ep_lower_regularity_gain_floor_expected_shortfalls)
+        lower_regularity_gain_floor_selected_shortfall_stat = _stat(
+            self._ep_lower_regularity_gain_floor_selected_shortfalls)
+        lower_regularity_gain_floor_eligible_stat = _stat(
+            self._ep_lower_regularity_gain_floor_eligible)
         lower_regularity_policy_target_stat = _stat(
             self._ep_lower_regularity_policy_target_actions)
         lower_regularity_policy_error_stat = _stat(
@@ -9405,6 +9519,51 @@ class TransitDuetV2Runner:
                 lower_regularity_policy_hf_energy_stat['mean'], 8),
             'lower_regularity_policy_hf_energy_pressure_mean': round(
                 lower_regularity_policy_hf_energy_pressure_stat['mean'], 8),
+            'lower_regularity_gain_floor_enabled': int(
+                self.lower_trainer.regularity_gain_floor_enabled),
+            'lower_regularity_gain_floor_mode': str(
+                self.lower_trainer.regularity_gain_floor_mode),
+            'lower_regularity_gain_floor_base_fraction': float(
+                self.lower_trainer.regularity_gain_floor_base_fraction),
+            'lower_regularity_gain_floor_hf_increment': float(
+                self.lower_trainer.regularity_gain_floor_hf_increment),
+            'lower_regularity_gain_floor_hf_energy_scale': float(
+                self.lower_trainer.regularity_gain_floor_hf_energy_scale),
+            'lower_regularity_gain_floor_hf_energy_exponent': float(
+                self.lower_trainer.regularity_gain_floor_hf_energy_exponent),
+            'lower_regularity_gain_floor_actor_required_fraction_mean': (
+                lower_m.get(
+                    'regularity_gain_floor_required_fraction_mean', 0.0)),
+            'lower_regularity_gain_floor_actor_hf_energy_mean': lower_m.get(
+                'regularity_gain_floor_hf_energy_mean', 0.0),
+            'lower_regularity_gain_floor_actor_hf_pressure_mean': lower_m.get(
+                'regularity_gain_floor_hf_pressure_mean', 0.0),
+            'lower_regularity_gain_floor_actor_expected_gain_fraction_mean': (
+                lower_m.get(
+                    'regularity_gain_floor_expected_gain_fraction_mean', 0.0)),
+            'lower_regularity_gain_floor_actor_expected_shortfall_mean': (
+                lower_m.get(
+                    'regularity_gain_floor_expected_shortfall_mean', 0.0)),
+            'lower_regularity_gain_floor_actor_eligible_fraction': lower_m.get(
+                'regularity_gain_floor_eligible_fraction', 0.0),
+            'lower_regularity_gain_floor_required_fraction_mean': round(
+                lower_regularity_gain_floor_required_fraction_stat['mean'], 8),
+            'lower_regularity_gain_floor_hf_pressure_mean': round(
+                lower_regularity_gain_floor_hf_pressure_stat['mean'], 8),
+            'lower_regularity_gain_floor_expected_gain_fraction_mean': round(
+                lower_regularity_gain_floor_expected_gain_fraction_stat['mean'],
+                8),
+            'lower_regularity_gain_floor_selected_gain_fraction_mean': round(
+                lower_regularity_gain_floor_selected_gain_fraction_stat['mean'],
+                8),
+            'lower_regularity_gain_floor_expected_shortfall_mean': round(
+                lower_regularity_gain_floor_expected_shortfall_stat['mean'], 8),
+            'lower_regularity_gain_floor_selected_shortfall_mean': round(
+                lower_regularity_gain_floor_selected_shortfall_stat['mean'], 8),
+            'lower_regularity_gain_floor_selected_shortfall_max': round(
+                lower_regularity_gain_floor_selected_shortfall_stat['max'], 8),
+            'lower_regularity_gain_floor_eligible_mean': round(
+                lower_regularity_gain_floor_eligible_stat['mean'], 8),
             'lower_regularity_policy_cost_limit': float(
                 getattr(self.lower_trainer, 'regularity_cost_limit', 0.0)),
             'lower_regularity_lambda': lower_m.get(

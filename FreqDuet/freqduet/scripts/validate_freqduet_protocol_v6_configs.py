@@ -63,8 +63,42 @@ PASSENGER_HOLDING_QADV_CONFIGS = [
     f"paxdual_b{budget}_qadv0_hiro"
     for budget in ("040", "060", "080")
 ]
+GAIN_FLOOR_ONLY_SPECS = [
+    ("050", "000", 0.50, 0.00),
+    ("040", "025", 0.40, 0.25),
+]
+GAIN_FLOOR_PASSENGER_SPECS = [
+    ("050", "000", 0.50, 0.00),
+    ("030", "030", 0.30, 0.30),
+    ("040", "025", 0.40, 0.25),
+    ("050", "020", 0.50, 0.20),
+]
+GAIN_FLOOR_ONLY_CONFIGS = [
+    "F_freqduet_protocol_v6_w2adgfloor_l001_e25_c005_"
+    f"f{base}_h{increment}_qadv0_hiro"
+    for base, increment, _, _ in GAIN_FLOOR_ONLY_SPECS
+]
+GAIN_FLOOR_PASSENGER_CONFIGS = [
+    "F_freqduet_protocol_v6_w2adgfloor_l001_e25_c005_"
+    f"f{base}_h{increment}_pax080_qadv0_hiro"
+    for base, increment, _, _ in GAIN_FLOOR_PASSENGER_SPECS
+]
+GAIN_FLOOR_CONFIGS = (
+    GAIN_FLOOR_ONLY_CONFIGS + GAIN_FLOOR_PASSENGER_CONFIGS)
+GAIN_FLOOR_EXPECTED = {
+    name: (base_fraction, hf_increment)
+    for name, (_, _, base_fraction, hf_increment) in zip(
+        GAIN_FLOOR_ONLY_CONFIGS, GAIN_FLOOR_ONLY_SPECS)
+}
+GAIN_FLOOR_EXPECTED.update({
+    name: (base_fraction, hf_increment)
+    for name, (_, _, base_fraction, hf_increment) in zip(
+        GAIN_FLOOR_PASSENGER_CONFIGS, GAIN_FLOOR_PASSENGER_SPECS)
+})
 PASSENGER_HOLDING_CONFIGS = (
-    PASSENGER_HOLDING_SCALAR_CONFIGS + PASSENGER_HOLDING_QADV_CONFIGS)
+    PASSENGER_HOLDING_SCALAR_CONFIGS
+    + PASSENGER_HOLDING_QADV_CONFIGS
+    + GAIN_FLOOR_PASSENGER_CONFIGS)
 DISCRETE_CRITIC_ZERO_HOLD_CONFIGS = [
     "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qidx_hiro",
     "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qadv0_hiro",
@@ -86,6 +120,7 @@ CAPACITY_GAIN_CONFIGS = [
 DISCRETE_CRITIC_CONFIGS = (
     DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
     + DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS
+    + GAIN_FLOOR_CONFIGS
 )
 EFFICIENCY_GAIN_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adeffgain_l001_e25_r00025_w{weight}_b{penalty}_hiro"
@@ -142,6 +177,7 @@ EXPERIMENTAL_CONFIGS = [
     *FLEET_EFFICIENCY_GAIN_CONFIGS,
     *TARGET_PRESERVING_GAIN_CONFIGS,
     *HF_OPPORTUNITY_GAIN_CONFIGS,
+    *GAIN_FLOOR_CONFIGS,
 ]
 
 
@@ -278,6 +314,9 @@ def validate(
                 raise ValueError(
                     f"{name}: regularity policy uses non-causal evidence")
             expected_policy_mode = (
+                "analytic_two_sided_hf_gain_floor_dual_v8"
+                if name in GAIN_FLOOR_CONFIGS
+                else
                 "analytic_two_sided_hf_opportunity_gain_regret_dual_v7"
                 if name in HF_OPPORTUNITY_GAIN_CONFIGS
                 else
@@ -326,6 +365,7 @@ def validate(
                         ("_b040_", 0.04),
                         ("_b060_", 0.06),
                         ("_b080_", 0.08),
+                        ("_pax080_", 0.08),
                     ) if marker in name)
                 expected_passenger_contract = {
                     "enable": True,
@@ -346,12 +386,50 @@ def validate(
                 if observed_passenger_contract != expected_passenger_contract:
                     raise ValueError(
                         f"{name}: passenger holding contract is not locked")
+                expected_regularity_limit = (
+                    0.05 if name in GAIN_FLOOR_CONFIGS else 0.00025)
                 if (float(regularity_policy.get("cost_limit", -1.0))
-                        != 0.00025
+                        != expected_regularity_limit
                         or float(regularity_policy.get(
                             "initial_lambda", -1.0)) != 0.01):
                     raise ValueError(
-                        f"{name}: passenger dual changed the V13 anchor")
+                        f"{name}: passenger dual changed its regularity anchor")
+            gain_floor = regularity_policy.get(
+                "regularity_gain_floor", {}) or {}
+            gain_floor_enabled = bool(gain_floor.get("enable"))
+            if gain_floor_enabled != (name in GAIN_FLOOR_CONFIGS):
+                raise ValueError(
+                    f"{name}: regularity gain-floor registration mismatch")
+            if gain_floor_enabled:
+                expected_base, expected_increment = GAIN_FLOOR_EXPECTED[name]
+                expected_floor_contract = {
+                    "enable": True,
+                    "mode": "causal_hf_relative_gain_floor_v1",
+                    "base_fraction": expected_base,
+                    "hf_increment": expected_increment,
+                    "hf_energy_scale": 0.04,
+                    "hf_energy_exponent": 1.0,
+                }
+                observed_floor_contract = {
+                    key: gain_floor.get(key)
+                    for key in expected_floor_contract
+                }
+                if observed_floor_contract != expected_floor_contract:
+                    raise ValueError(
+                        f"{name}: regularity gain-floor contract is not locked")
+                if frequency.get("lower_mode") != "high":
+                    raise ValueError(
+                        f"{name}: regularity gain floor requires high mode")
+                if (float(regularity_policy.get("cost_limit", -1.0)) != 0.05
+                        or float(regularity_policy.get(
+                            "cost_cap", -1.0)) != 1.0
+                        or regularity_policy.get(
+                            "constraint_scale_mode")
+                        != "cost_limit_ratio_v1"
+                        or float(regularity_policy.get(
+                            "initial_lambda", -1.0)) != 0.01):
+                    raise ValueError(
+                        f"{name}: regularity gain-floor dual is not locked")
             gain_configs = (
                 CAPACITY_GAIN_CONFIGS
                 + EFFICIENCY_GAIN_CONFIGS

@@ -202,9 +202,12 @@ class OptimizerContractTest(unittest.TestCase):
             hf_opportunity_cost_penalty=0.0,
             hf_energy_scale=0.04,
             hf_energy_exponent=1.0,
+            gain_floor_base_fraction=0.4,
+            gain_floor_hf_increment=0.25,
             action_bins=None,
             passenger_cost_limit=None,
-            passenger_action_norm_s=45.0):
+            passenger_action_norm_s=45.0,
+            cost_cap=0.25):
         conditional = (
             {
                 "enable": True,
@@ -233,7 +236,7 @@ class OptimizerContractTest(unittest.TestCase):
             "action_target_scale_s": 45.0,
             "target_headway_scale_s": 600.0,
             "cost_limit": cost_limit,
-            "cost_cap": 0.25,
+            "cost_cap": cost_cap,
             "constraint_scale_mode": constraint_scale_mode,
             "lambda_lr": 1e-2,
             "lambda_min": 1e-3,
@@ -291,6 +294,8 @@ class OptimizerContractTest(unittest.TestCase):
                     "hf_opportunity_cost_penalty": (
                         hf_opportunity_cost_penalty),
                 })
+        gain_floor_mode = (
+            policy_mode == "analytic_two_sided_hf_gain_floor_dual_v8")
         state_dim = (
             5 if policy_mode
             in {
@@ -298,7 +303,17 @@ class OptimizerContractTest(unittest.TestCase):
                 "analytic_two_sided_target_preserving_gain_regret_dual_v6",
                 "analytic_two_sided_hf_opportunity_gain_regret_dual_v7",
             }
-            else 4 if capacity_mode else 3)
+            else 4 if capacity_mode or gain_floor_mode else 3)
+        if gain_floor_mode:
+            regularity["regularity_gain_floor"] = {
+                "enable": True,
+                "mode": "causal_hf_relative_gain_floor_v1",
+                "hf_energy_feature_index": 3,
+                "base_fraction": gain_floor_base_fraction,
+                "hf_increment": gain_floor_hf_increment,
+                "hf_energy_scale": hf_energy_scale,
+                "hf_energy_exponent": hf_energy_exponent,
+            }
         if passenger_cost_limit is not None:
             regularity["passenger_holding_constraint"] = {
                 "enable": True,
@@ -425,6 +440,117 @@ class OptimizerContractTest(unittest.TestCase):
         self.assertEqual(
             trainer.regularity_policy_contract["mode"],
             "analytic_two_sided_zero_hold_regret_dual_v2",
+        )
+
+    def test_hf_gain_floor_uses_relative_attainable_gain_and_round_trips(self):
+        bins = [0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0]
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_hf_gain_floor_dual_v8",
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=bins,
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            cost_cap=1.0,
+        )
+        states = torch.tensor([
+            [0.5, 0.5, 1.0, 0.0],
+            [0.5, 0.5, 1.0, 0.04],
+            [0.5, 0.0, 1.0, 0.04],
+        ], dtype=torch.float32)
+        probs = torch.full((3, len(bins)), 1.0 / len(bins))
+
+        (
+            valid,
+            _,
+            pressure,
+            required,
+            gain_fractions,
+            shortfalls,
+            eligible,
+        ) = trainer._regularity_gain_floor_action_terms(states)
+        expected_cost, cost_valid, action_costs = (
+            trainer._regularity_policy_cost(states, probs))
+
+        torch.testing.assert_close(pressure, torch.tensor([0.0, 0.5, 0.5]))
+        torch.testing.assert_close(
+            required, torch.tensor([0.3, 0.45, 0.45]))
+        self.assertEqual(gain_fractions[0, 0].item(), 0.0)
+        self.assertEqual(gain_fractions[0].max().item(), 1.0)
+        self.assertAlmostEqual(shortfalls[0, 0].item(), 0.3, places=7)
+        self.assertAlmostEqual(shortfalls[1, 0].item(), 0.45, places=7)
+        self.assertTrue(torch.equal(shortfalls[2], torch.zeros_like(
+            shortfalls[2])))
+        self.assertEqual(eligible.tolist(), [1.0, 1.0, 0.0])
+        self.assertTrue(torch.equal(valid, cost_valid))
+        torch.testing.assert_close(action_costs, shortfalls)
+        torch.testing.assert_close(
+            expected_cost, shortfalls.mean(dim=-1))
+        contract = trainer.regularity_policy_contract
+        self.assertEqual(
+            contract["constraint_cost_mode"],
+            "hf_relative_gain_shortfall_v3")
+        self.assertEqual(
+            contract["regularity_gain_floor"]["hf_energy_feature_index"], 3)
+
+        restored = self._regularity_trainer(
+            policy_mode="analytic_two_sided_hf_gain_floor_dual_v8",
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=bins,
+            gain_floor_base_fraction=0.3,
+            gain_floor_hf_increment=0.3,
+            cost_cap=1.0,
+        )
+        restored.load_training_state_dict(trainer.training_state_dict())
+        self.assertEqual(restored.regularity_policy_contract, contract)
+
+    def test_hf_gain_floor_and_passenger_duals_update_independently(self):
+        torch.manual_seed(149)
+        trainer = self._regularity_trainer(
+            policy_mode="analytic_two_sided_hf_gain_floor_dual_v8",
+            cost_limit=0.05,
+            constraint_scale_mode="cost_limit_ratio_v1",
+            initial_lambda=0.01,
+            action_bins=[0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+            gain_floor_base_fraction=0.4,
+            gain_floor_hf_increment=0.25,
+            passenger_cost_limit=0.08,
+            cost_cap=1.0,
+        )
+        replay = CostReplayBuffer(64, seed=151)
+        eligible_state = np.array(
+            [0.5, 0.5, 1.0, 0.04, 0.5], dtype=np.float32)
+        ineligible_state = np.array(
+            [0.5, 0.0, 1.0, 0.04, 0.5], dtype=np.float32)
+        for index in range(16):
+            state = eligible_state if index % 2 == 0 else ineligible_state
+            replay.push(state, 0.0, 0.0, 0.0, state, True, index)
+        initial_floor_lambda = trainer.regularity_lambda_param
+        initial_passenger_lambda = trainer.regularity_passenger_lambda_param
+
+        metrics = trainer.update(replay, 16, reward_scale=1.0)
+
+        self.assertEqual(metrics["regularity_gain_floor_enabled"], 1.0)
+        self.assertAlmostEqual(
+            metrics["regularity_gain_floor_eligible_fraction"], 0.5)
+        self.assertGreater(
+            metrics["regularity_gain_floor_expected_shortfall_mean"], 0.0)
+        self.assertAlmostEqual(
+            metrics["regularity_gain_floor_expected_shortfall_mean"],
+            metrics["regularity_policy_cost_mean"],
+            places=7,
+        )
+        self.assertGreater(metrics["regularity_policy_penalty"], 0.0)
+        self.assertGreater(
+            metrics["regularity_passenger_holding_penalty"], 0.0)
+        self.assertNotEqual(
+            trainer.regularity_lambda_param, initial_floor_lambda)
+        self.assertNotEqual(
+            trainer.regularity_passenger_lambda_param,
+            initial_passenger_lambda,
         )
 
     def test_capacity_gain_rewards_only_positive_low_load_improvement(self):

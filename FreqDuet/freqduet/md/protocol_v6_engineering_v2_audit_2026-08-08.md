@@ -2100,3 +2100,35 @@ existing V20 margins, and retain the historical holding/denied limits. A pass
 is exploratory only and requires fresh 200-episode confirmation. A no-pass
 rejects this gain-floor family without changing its fractions or thresholds
 after observing the matrix.
+
+### Engineering-v21 implementation smoke (2026-09-01)
+
+All six registered V21 gain-floor configurations completed a two-episode
+training and frozen-checkpoint evaluation smoke with training seed `26903`
+and evaluation seed `59903`. This run is an implementation check only and is
+not effect evidence. Every frozen row restored checkpoint 1, reported frozen
+lower actor, lower critic, and upper actor, and had exactly zero causal-guard
+execution adjustment.
+
+The passive frozen telemetry reproduces
+`rho = rho_0 + rho_H * p_H`: the largest discrepancy computed from the
+aggregated CSV fields is `1.5e-8`, attributable to decimal serialization.
+Mean HF pressure is `0.267864`, mean eligible-state coverage is `0.520319`,
+and the required fractions separate exactly as registered: `0.380359` for
+`(0.30,0.30)`, `0.466966` for `(0.40,0.25)`, `0.500000` for
+`(0.50,0.00)`, and `0.553573` for `(0.50,0.20)`. Floor-only controls report
+the passenger constraint disabled with zero passenger cost; all four joint
+candidates report it enabled. Training diagnostics contain finite,
+independently nonzero regularity and passenger multipliers.
+
+As expected for only two episodes, the learned categorical policies do not
+yet satisfy the preregistered expected-cost budgets: frozen expected floor
+shortfall over all causal-valid states ranges from `0.0674` to `0.1194`, and
+joint-candidate expected passenger cost is about `0.154`. The training-side
+gain-floor expected-shortfall diagnostic is exactly equal to the regularity
+policy cost for all six rows, including zero-cost states where no positive
+gain is attainable. These values neither pass nor fail the V21 effect gate;
+budget convergence is assessed only in the locked 40-episode formal matrix.
+The smoke establishes that the exact action-wise costs, HF-conditioned
+formula, dual separation, checkpoint round trip, passive telemetry, and
+noguard execution semantics are wired consistently.

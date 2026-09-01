@@ -1,0 +1,19 @@
+_extends: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_qadv0_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adgfloor_l001_e25_c005_f050_h000_qadv0_hiro
+
+protocol:
+  role: exploratory_compact_w2_hf_gain_floor_c005_f050_h000_qadv0_v6
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_hf_gain_floor_dual_v8
+    cost_limit: 0.05
+    cost_cap: 1.0
+    constraint_scale_mode: cost_limit_ratio_v1
+    regularity_gain_floor:
+      enable: true
+      mode: causal_hf_relative_gain_floor_v1
+      base_fraction: 0.50
+      hf_increment: 0.00
+      hf_energy_scale: 0.04
+      hf_energy_exponent: 1.0

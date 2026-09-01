@@ -609,6 +609,14 @@ class RESACLagrangianTrainer:
         self.regularity_capacity_hf_energy_scale = 1.0
         self.regularity_capacity_hf_energy_exponent = 1.0
         self.regularity_capacity_hf_opportunity_cost_penalty = 0.0
+        self.regularity_gain_floor_enabled = False
+        self.regularity_gain_floor_contract = {'enabled': False}
+        self.regularity_gain_floor_mode = 'disabled'
+        self.regularity_gain_floor_hf_energy_feature_index = None
+        self.regularity_gain_floor_base_fraction = 0.0
+        self.regularity_gain_floor_hf_increment = 0.0
+        self.regularity_gain_floor_hf_energy_scale = 1.0
+        self.regularity_gain_floor_hf_energy_exponent = 1.0
         self.regularity_passenger_holding_enabled = False
         self.regularity_passenger_holding_contract = {'enabled': False}
         self.regularity_passenger_holding_mode = 'disabled'
@@ -633,7 +641,8 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_efficiency_gain_regret_dual_v4',
                     'analytic_two_sided_fleet_efficiency_gain_regret_dual_v5',
                     'analytic_two_sided_target_preserving_gain_regret_dual_v6',
-                    'analytic_two_sided_hf_opportunity_gain_regret_dual_v7'}:
+                    'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
+                    'analytic_two_sided_hf_gain_floor_dual_v8'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
             zero_hold_regret_modes = {
@@ -644,10 +653,13 @@ class RESACLagrangianTrainer:
                 'analytic_two_sided_target_preserving_gain_regret_dual_v6',
                 'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
             }
-            self.regularity_constraint_cost_mode = (
-                'zero_hold_regret_v2'
-                if mode in zero_hold_regret_modes
-                else 'absolute_target_cost_v1')
+            if mode == 'analytic_two_sided_hf_gain_floor_dual_v8':
+                self.regularity_constraint_cost_mode = (
+                    'hf_relative_gain_shortfall_v3')
+            elif mode in zero_hold_regret_modes:
+                self.regularity_constraint_cost_mode = 'zero_hold_regret_v2'
+            else:
+                self.regularity_constraint_cost_mode = 'absolute_target_cost_v1'
             if self.discrete_actions is None:
                 raise ValueError(
                     'causal regularity policy objective requires action_bins')
@@ -992,6 +1004,68 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'capacity_gated_gain requires the V3 regularity mode')
                 capacity_gain_contract = None
+            gain_floor_cfg = dict(
+                regularity_cfg.get('regularity_gain_floor', {}) or {})
+            gain_floor_enabled = bool(gain_floor_cfg.get('enable', False))
+            gain_floor_mode_enabled = (
+                mode == 'analytic_two_sided_hf_gain_floor_dual_v8')
+            if gain_floor_enabled != gain_floor_mode_enabled:
+                raise ValueError(
+                    'V8 regularity mode and gain-floor contract must be '
+                    'enabled together')
+            if gain_floor_enabled:
+                gain_floor_mode = str(gain_floor_cfg.get(
+                    'mode', 'causal_hf_relative_gain_floor_v1'
+                )).strip().lower()
+                if gain_floor_mode != 'causal_hf_relative_gain_floor_v1':
+                    raise ValueError('unknown regularity gain-floor mode')
+                hf_energy_feature_index = int(
+                    gain_floor_cfg['hf_energy_feature_index'])
+                if not 0 <= hf_energy_feature_index < int(state_dim):
+                    raise ValueError(
+                        'regularity gain-floor HF feature index is out of range')
+                base_fraction = float(
+                    gain_floor_cfg.get('base_fraction', 0.4))
+                hf_increment = float(
+                    gain_floor_cfg.get('hf_increment', 0.25))
+                hf_energy_scale = float(
+                    gain_floor_cfg.get('hf_energy_scale', 0.04))
+                hf_energy_exponent = float(
+                    gain_floor_cfg.get('hf_energy_exponent', 1.0))
+                if (not np.isfinite(base_fraction)
+                        or not np.isfinite(hf_increment)
+                        or base_fraction < 0.0
+                        or hf_increment < 0.0
+                        or base_fraction + hf_increment > 1.0):
+                    raise ValueError(
+                        'regularity gain-floor fractions require base >= 0, '
+                        'increment >= 0, and base + increment <= 1')
+                if (not np.isfinite(hf_energy_scale)
+                        or hf_energy_scale <= 0.0):
+                    raise ValueError(
+                        'regularity gain-floor HF energy scale must be positive')
+                if (not np.isfinite(hf_energy_exponent)
+                        or hf_energy_exponent <= 0.0):
+                    raise ValueError(
+                        'regularity gain-floor HF exponent must be positive')
+                self.regularity_gain_floor_enabled = True
+                self.regularity_gain_floor_mode = gain_floor_mode
+                self.regularity_gain_floor_hf_energy_feature_index = (
+                    hf_energy_feature_index)
+                self.regularity_gain_floor_base_fraction = base_fraction
+                self.regularity_gain_floor_hf_increment = hf_increment
+                self.regularity_gain_floor_hf_energy_scale = hf_energy_scale
+                self.regularity_gain_floor_hf_energy_exponent = (
+                    hf_energy_exponent)
+                self.regularity_gain_floor_contract = {
+                    'enabled': True,
+                    'mode': gain_floor_mode,
+                    'hf_energy_feature_index': hf_energy_feature_index,
+                    'base_fraction': base_fraction,
+                    'hf_increment': hf_increment,
+                    'hf_energy_scale': hf_energy_scale,
+                    'hf_energy_exponent': hf_energy_exponent,
+                }
             self.regularity_policy_contract = {
                 'enabled': True,
                 'mode': mode,
@@ -1016,6 +1090,10 @@ class RESACLagrangianTrainer:
             if capacity_gain_contract is not None:
                 self.regularity_policy_contract[
                     'capacity_gated_gain'] = capacity_gain_contract
+            if self.regularity_gain_floor_enabled:
+                self.regularity_policy_contract[
+                    'regularity_gain_floor'] = (
+                        self.regularity_gain_floor_contract)
             passenger_cfg = dict(
                 regularity_cfg.get('passenger_holding_constraint', {}) or {})
             passenger_enabled = bool(passenger_cfg.get('enable', False))
@@ -1211,7 +1289,11 @@ class RESACLagrangianTrainer:
         """Return exact conditional action cost for the compact causal target."""
         valid, absolute_action_costs, zero_hold_cost = (
             self._regularity_policy_action_terms(state))
-        if self.regularity_constraint_cost_mode == 'zero_hold_regret_v2':
+        if (self.regularity_constraint_cost_mode
+                == 'hf_relative_gain_shortfall_v3'):
+            (_, _, _, _, _, action_costs, _) = (
+                self._regularity_gain_floor_action_terms(state))
+        elif self.regularity_constraint_cost_mode == 'zero_hold_regret_v2':
             action_costs = (
                 absolute_action_costs - zero_hold_cost).clamp_min(0.0)
         elif self.regularity_constraint_cost_mode == 'absolute_target_cost_v1':
@@ -1220,6 +1302,44 @@ class RESACLagrangianTrainer:
             raise RuntimeError('unknown regularity constraint cost mode')
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, action_costs
+
+    def _regularity_gain_floor_action_terms(self, state):
+        """Return exact V21 HF floor terms for every categorical action."""
+        if not self.regularity_gain_floor_enabled:
+            raise RuntimeError('regularity gain floor is disabled')
+        valid, absolute_action_costs, zero_hold_cost = (
+            self._regularity_policy_action_terms(state))
+        positive_gains = (
+            zero_hold_cost - absolute_action_costs).clamp_min(0.0)
+        maximum_gain = positive_gains.max(dim=-1).values
+        eligible = maximum_gain > 1e-12
+        gain_fractions = torch.where(
+            eligible.unsqueeze(-1),
+            positive_gains / maximum_gain.clamp_min(1e-12).unsqueeze(-1),
+            torch.ones_like(positive_gains),
+        )
+        index = self.regularity_gain_floor_hf_energy_feature_index
+        hf_energy = state[:, index].clamp_min(0.0)
+        scaled_energy = (
+            hf_energy / self.regularity_gain_floor_hf_energy_scale
+        ).pow(self.regularity_gain_floor_hf_energy_exponent)
+        hf_pressure = scaled_energy / (1.0 + scaled_energy)
+        required_fraction = (
+            self.regularity_gain_floor_base_fraction
+            + self.regularity_gain_floor_hf_increment * hf_pressure)
+        shortfalls = (
+            required_fraction.unsqueeze(-1) - gain_fractions).clamp_min(0.0)
+        shortfalls = torch.where(
+            eligible.unsqueeze(-1), shortfalls, torch.zeros_like(shortfalls))
+        return (
+            valid,
+            hf_energy,
+            hf_pressure,
+            required_fraction,
+            gain_fractions,
+            shortfalls,
+            eligible.float(),
+        )
 
     def _regularity_passenger_holding_action_terms(self, state):
         """Return causal APC load and exact person-delay cost for every bin."""
@@ -1557,6 +1677,14 @@ class RESACLagrangianTrainer:
             'regularity_policy_target_pressure_mean': 0.0,
             'regularity_policy_hf_energy_mean': 0.0,
             'regularity_policy_hf_energy_pressure_mean': 0.0,
+            'regularity_gain_floor_enabled': float(
+                self.regularity_gain_floor_enabled),
+            'regularity_gain_floor_required_fraction_mean': 0.0,
+            'regularity_gain_floor_hf_energy_mean': 0.0,
+            'regularity_gain_floor_hf_pressure_mean': 0.0,
+            'regularity_gain_floor_expected_gain_fraction_mean': 0.0,
+            'regularity_gain_floor_expected_shortfall_mean': 0.0,
+            'regularity_gain_floor_eligible_fraction': 0.0,
             'regularity_lambda': self.regularity_lambda_param,
             'regularity_passenger_holding_enabled': float(
                 self.regularity_passenger_holding_enabled),
@@ -1596,6 +1724,12 @@ class RESACLagrangianTrainer:
             regularity_target_pressure_mean = None
             regularity_hf_energy_mean = None
             regularity_hf_energy_pressure_mean = None
+            regularity_gain_floor_required_fraction_mean = None
+            regularity_gain_floor_hf_energy_mean = None
+            regularity_gain_floor_hf_pressure_mean = None
+            regularity_gain_floor_expected_gain_fraction_mean = None
+            regularity_gain_floor_expected_shortfall_mean = None
+            regularity_gain_floor_eligible_fraction = None
             regularity_passenger_cost_mean = None
             regularity_passenger_scaled_cost_mean = None
             regularity_passenger_load_mean = None
@@ -1671,6 +1805,44 @@ class RESACLagrangianTrainer:
                         self.log_regularity_lambda.exp().detach()
                         * regularity_scaled_cost_mean)
                     policy_loss = policy_loss + regularity_penalty
+                    if self.regularity_gain_floor_enabled:
+                        (
+                            floor_valid,
+                            floor_hf_energy,
+                            floor_hf_pressure,
+                            floor_required_fraction,
+                            floor_gain_fractions,
+                            floor_shortfalls,
+                            floor_eligible,
+                        ) = self._regularity_gain_floor_action_terms(state)
+                        if not torch.equal(floor_valid, regularity_valid):
+                            raise RuntimeError(
+                                'regularity and gain-floor validity diverged')
+                        floor_expected_gain_fraction = (
+                            probs * floor_gain_fractions).sum(dim=-1)
+                        floor_expected_shortfall = (
+                            probs * floor_shortfalls).sum(dim=-1)
+                        eligible_weights = valid_weights * floor_eligible
+                        eligible_weight_sum = eligible_weights.sum()
+                        regularity_gain_floor_eligible_fraction = (
+                            eligible_weight_sum.div(
+                                valid_weight_sum.clamp_min(1e-8)))
+                        if bool(eligible_weight_sum.detach().item() > 0.0):
+                            regularity_gain_floor_required_fraction_mean = (
+                                floor_required_fraction * eligible_weights
+                            ).sum().div(eligible_weight_sum)
+                            regularity_gain_floor_hf_energy_mean = (
+                                floor_hf_energy * eligible_weights
+                            ).sum().div(eligible_weight_sum)
+                            regularity_gain_floor_hf_pressure_mean = (
+                                floor_hf_pressure * eligible_weights
+                            ).sum().div(eligible_weight_sum)
+                            regularity_gain_floor_expected_gain_fraction_mean = (
+                                floor_expected_gain_fraction * eligible_weights
+                            ).sum().div(eligible_weight_sum)
+                        regularity_gain_floor_expected_shortfall_mean = (
+                            floor_expected_shortfall * valid_weights
+                        ).sum().div(valid_weight_sum.clamp_min(1e-8))
                     if self.regularity_capacity_gain_enabled:
                         capacity_gain, gain_valid, _ = (
                             self._regularity_policy_capacity_gain(
@@ -1946,6 +2118,32 @@ class RESACLagrangianTrainer:
                 'regularity_policy_hf_energy_pressure_mean': (
                     regularity_hf_energy_pressure_mean.item()
                     if regularity_hf_energy_pressure_mean is not None else 0.0),
+                'regularity_gain_floor_enabled': float(
+                    self.regularity_gain_floor_enabled),
+                'regularity_gain_floor_required_fraction_mean': (
+                    regularity_gain_floor_required_fraction_mean.item()
+                    if regularity_gain_floor_required_fraction_mean is not None
+                    else 0.0),
+                'regularity_gain_floor_hf_energy_mean': (
+                    regularity_gain_floor_hf_energy_mean.item()
+                    if regularity_gain_floor_hf_energy_mean is not None
+                    else 0.0),
+                'regularity_gain_floor_hf_pressure_mean': (
+                    regularity_gain_floor_hf_pressure_mean.item()
+                    if regularity_gain_floor_hf_pressure_mean is not None
+                    else 0.0),
+                'regularity_gain_floor_expected_gain_fraction_mean': (
+                    regularity_gain_floor_expected_gain_fraction_mean.item()
+                    if regularity_gain_floor_expected_gain_fraction_mean
+                    is not None else 0.0),
+                'regularity_gain_floor_expected_shortfall_mean': (
+                    regularity_gain_floor_expected_shortfall_mean.item()
+                    if regularity_gain_floor_expected_shortfall_mean is not None
+                    else 0.0),
+                'regularity_gain_floor_eligible_fraction': (
+                    regularity_gain_floor_eligible_fraction.item()
+                    if regularity_gain_floor_eligible_fraction is not None
+                    else 0.0),
                 'regularity_lambda': self.regularity_lambda_param,
                 'regularity_passenger_holding_cost_mean': (
                     regularity_passenger_cost_mean.item()

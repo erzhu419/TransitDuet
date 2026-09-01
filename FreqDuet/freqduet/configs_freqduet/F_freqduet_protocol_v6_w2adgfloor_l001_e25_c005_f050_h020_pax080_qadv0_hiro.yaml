@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v6_w2adgfloor_l001_e25_c005_f050_h000_pax080_qadv0_hiro.yaml
+_name: F_freqduet_protocol_v6_w2adgfloor_l001_e25_c005_f050_h020_pax080_qadv0_hiro
+
+protocol:
+  role: exploratory_compact_w2_hf_gain_floor_c005_f050_h020_pax080_qadv0_v6
+
+lower:
+  causal_regularity_policy:
+    regularity_gain_floor:
+      base_fraction: 0.50
+      hf_increment: 0.20
