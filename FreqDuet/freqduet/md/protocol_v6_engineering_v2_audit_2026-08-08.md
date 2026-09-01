@@ -2258,3 +2258,82 @@ projected dual ascent on normalized violations, and an augmented-Lagrangian
 primal term. It must retain V21's causal state, exact action library,
 zero-hold-advantage reward critic, passenger cost, and zero execution
 adjustment, and it must use fresh effect seeds.
+
+### V21 rejected-artifact cleanup (2026-09-01)
+
+After the locked `no_pass` outcome and the completed replay audit, scheduler
+task `t89212` removed the rejected V21 `logs_shards` and `shard_summaries`
+directories from the remote snapshot, releasing `9308 MB`. The locked
+`combined_summary`, its gate JSON and manifest, and the small local replay-audit
+JSONs remain available. No accepted ancestor, source snapshot, or paper result
+was deleted.
+
+### Engineering-v22 aggregate-gain optimization preregistration (2026-09-01)
+
+V22 tests the two mechanisms identified by the V21 replay audit without another
+gain-fraction search. Every V22 row fixes `(rho_0,rho_H)=(0.30,0.30)`, the first
+joint candidate in V21's registered priority order, and retains V21's causal
+compact state, seven holding actions, zero-hold-advantage reward critic,
+passenger action cost, valid-evidence mask, and exactly zero post-policy action
+adjustment. The regularity and passenger budgets remain `0.05` and `0.08`.
+
+For state `s` and action `a`, let `G(s,a)` and `G_max(s)` be the same absolute
+regularity gain and attainable maximum used by V21, and let
+`R(s)=rho(s) G_max(s)`. V22's aggregate-gain constraint is
+
+`C_G = sum_i w_i E_pi[max(R_i-G_i(a),0)] / sum_i w_i R_i <= 0.05`,
+
+where `w_i` is the existing replay/TPC sample weight and only causal-valid
+states contribute to either sum. A batch with zero total required gain has zero
+regularity cost. Unlike V21's mean per-state relative shortfall, this ratio
+allocates constraint pressure in proportion to attainable absolute gain and
+therefore does not give low-gain states equal influence. The passenger
+constraint remains `C_P=E_w[load*a/45] <= 0.08`.
+
+The registered projected-dual update is applied independently to each enabled
+constraint after its existing cost-limit normalization:
+
+`lambda <- clip(lambda + 0.001 * (C/b - 1), 0.0001, 2.0)`.
+
+The registered augmented-Lagrangian coefficient is `mu=0.5`; when enabled, the
+actor receives `0.5*mu*max(C/b-1,0)^2` in addition to
+`lambda*(C/b)`. The quadratic term is computed from the differentiable batch
+cost, while the projected multiplier update uses a detached violation. There is
+no action mask, fallback, clipping, guard, or execution-time correction.
+
+The mechanism matrix is the full factorial of floor allocation
+`{V21 relative, V22 aggregate}`, dual update `{log-Adam, projected}`, and
+augmented coefficient `{0,0.5}`. The existing V21 `(relative, log-Adam, 0)` row
+is the historical anchor; the other seven rows are new configurations. All
+eight use the same fractions, budgets, action critic, and passenger constraint.
+Five additional anchors are included unchanged: confirmed main, `noguard`,
+scalar V13, V19 zero-hold advantage, and V20 zero-hold-advantage passenger
+budget `0.08`. This yields 13 configurations and prevents a mechanism result
+from being confused with historical baseline drift.
+
+Implementation smoke uses training seed `27903` and frozen evaluation seed
+`60903` for two episodes and is wiring evidence only. Formal screening uses
+fresh training seeds `27013,27031,27053,27077`, frozen common-random-number
+evaluation seeds `60017,60041,60059,60083`, 40 training episodes, checkpoint
+39, and the exploratory protocol. No V21 effect seed is reused.
+
+The mechanism gate requires exact action-wise aggregate numerator and required-
+gain telemetry, equality of actor and passive formulas, finite independent
+multipliers, exact registered projected or log-Adam updates, exact augmented
+penalties, at least `0.50` causal evidence coverage, frozen lower actor/critic
+and upper actor during evaluation, the seven-action zero-hold-advantage critic,
+and zero execution adjustment. Every candidate must satisfy maximum frozen
+regularity cost `<=0.05` and passenger cost `<=0.08`; a row that misses either
+budget is ineligible regardless of journey or CV.
+
+Among eligible rows, a V22 outcome pass must improve scalar V13 restricted
+journey by at least `0.05 min` and headway CV by at least `0.001`, without
+increasing mean lower action, holding vehicle-seconds, or denied dispatch. It
+must also improve V19 by the same journey/CV margins, improve V20 CV by at least
+`0.020` while allowing at most `+0.20 min` journey, and beat confirmed main and
+`noguard` under the inherited V20 margins. Candidate priority is the fully
+specified `(aggregate, projected, mu=0.5)` row, followed by
+`(aggregate, projected, 0)`, `(aggregate, log-Adam, mu=0.5)`, and the remaining
+factorial controls. A screen pass remains exploratory and requires fresh
+200-episode confirmation; a no-pass rejects this optimizer/allocation family
+without post-outcome changes to fractions, budgets, update rate, or `mu`.
