@@ -2560,3 +2560,30 @@ outcome gate. V23 must therefore use a training-time batch projection or
 distillation target, retain zero post-policy execution adjustment, and lock a
 replay-to-frozen distribution-shift margin before any fresh-seed effect result
 is observed. A per-state execution guard is not an admissible successor.
+
+### V23 replay-to-frozen margin calibration registration (2026-09-08)
+
+V23 retains the aggregate attainable-gain allocation because the V21 audit
+showed that a per-state relative floor assigns disproportionate pressure to
+low-absolute-gain states. Relative rows remain diagnostic controls but cannot
+be selected as the V23 structural successor. The original outcome budgets stay
+fixed at regularity `0.05` and passenger cost `0.08`.
+
+Before any V23 effect seed is created, the training targets are calibrated from
+the completed V22 diagnostic evidence. For each allocation separately, every
+episode-39 replay policy cost is paired with its four frozen common-random-
+number rollout costs. For each constraint, define the one-sided transfer shift
+as `frozen_cost - replay_cost`. The margin is the positive maximum shift across
+all rows of the allocation, rounded upward to the next `0.001`; the replay
+target is the unchanged outcome budget minus that margin. This deterministic
+maximum rule is fixed before training and is not a quantile or efficacy-tuned
+hyperparameter.
+
+The calibration must verify the exact 32 checkpoint and 128 factorial frozen-
+rollout inventories, checkpoint and evaluation episode 39, frozen lower policy
+and critic, finite costs, and matching relative/aggregate cost semantics. After
+the aggregate targets are locked, a second read-only audit must establish joint
+feasibility on all 16 aggregate checkpoints both over the complete replay table
+and over deterministic 512-transition minibatches. No V23 effect run may start
+unless that feasibility audit passes. V23 effect seeds must be fresh and no
+post-policy action adjustment is permitted.
