@@ -2526,3 +2526,37 @@ distillation mechanism and retain zero post-policy execution adjustment. If a
 V22 policy already meets replay budgets but fails frozen evaluation, V23 must
 also preregister a distribution-shift margin rather than claiming that replay
 projection alone solves transfer. Any V23 effect test must use fresh seeds.
+
+### Post-V22 joint-projection replay audit outcome (2026-09-08)
+
+The registered audit completed on `node001--node006`. Tasks
+`t89492--t89523` produced the exact 32-result inventory (eight factorial
+configurations by four training seeds), task `t89529` passed all three strict
+aggregator unit tests on `node001`, and task `t89532` completed the strict
+aggregate with exit code zero. Only the 64 KiB JSON and 16 KiB row CSV were
+synchronized locally; replay tables and checkpoints remain server-side.
+
+All 32 empirical joint frontiers are feasible, all active-set Newton solves
+converge, and all projected aggregate costs meet the unchanged `0.05`
+regularity and `0.08` passenger budgets within `1e-8`. A training-batch joint
+projection is therefore mechanically supported. Per-state hard projection is
+not supported: deterministic joint-feasible state coverage ranges from
+`0.6493` to `0.6815` (mean `0.6670`), far below the preregistered `0.95`
+threshold.
+
+The required projection is strongly configuration-dependent. Relative
+projected-dual checkpoints already satisfy both replay budgets and require no
+material probability change, whereas relative log-Adam `mu=0` requires a mean
+`3.11 s` action reduction. Aggregate projected-dual checkpoints require mean
+action reductions of `2.77 s` (`mu=0`) and `2.66 s` (`mu=0.5`), mean KL shifts
+of `5.73` and `4.19`, and argmax changes in `30.7%` and `28.7%` of valid replay
+states. Those large corrections agree with the earlier low-entropy,
+high-holding failure diagnosis rather than rescuing the rejected policies.
+
+The audit also rules out replay projection as a complete V23 mechanism. Both
+relative projected-dual rows already meet replay budgets without projection,
+but their frozen rollouts still exceed the regularity budget and fail the V22
+outcome gate. V23 must therefore use a training-time batch projection or
+distillation target, retain zero post-policy execution adjustment, and lock a
+replay-to-frozen distribution-shift margin before any fresh-seed effect result
+is observed. A per-state execution guard is not an admissible successor.
