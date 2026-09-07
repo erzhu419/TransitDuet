@@ -74,9 +74,27 @@ def _joint_kl_projection(
         mass = np.where(feasible, np.exp(logits - maximum), 0.0)
         return mass / mass.sum(axis=1, keepdims=True)
 
-    def expected_costs(probabilities: np.ndarray) -> np.ndarray:
+    def projection_state(multiplier: np.ndarray):
+        probabilities = distribution(multiplier)
         per_state = np.einsum("na,kna->kn", probabilities, costs)
-        return per_state @ weights
+        expected = per_state @ weights
+        second = np.einsum(
+            "na,kna,lna->nkl", probabilities, costs, costs)
+        covariance = second - np.einsum(
+            "kn,ln->nkl", per_state, per_state)
+        hessian = np.einsum("n,nkl->kl", weights, covariance)
+        logits = (
+            log_base
+            - multiplier[0] * regularity
+            - multiplier[1] * passenger)
+        logits = np.where(feasible, logits, -np.inf)
+        maximum = np.max(logits, axis=1)
+        partition = maximum + np.log(np.sum(
+            np.where(feasible, np.exp(logits - maximum[:, None]), 0.0),
+            axis=1,
+        ))
+        objective = float(weights @ partition + multiplier @ limits)
+        return probabilities, expected, hessian, objective
 
     frontier = _minimum_primary_at_constraint(
         passenger, regularity, feasible, float(regularity_limit))
@@ -101,49 +119,56 @@ def _joint_kl_projection(
     iterations = 0
     for iteration in range(1, int(max_iterations) + 1):
         iterations = iteration
-        for constraint in range(2):
-            trial = multipliers.copy()
-            trial[constraint] = 0.0
-            if expected_costs(distribution(trial))[constraint] <= (
-                    limits[constraint] + tolerance):
-                multipliers[constraint] = 0.0
-                continue
-            low = 0.0
-            high = max(1.0, float(multipliers[constraint]))
-            trial[constraint] = high
-            cost = expected_costs(distribution(trial))[constraint]
-            while cost > limits[constraint] + tolerance and high < 1e8:
-                low = high
-                high *= 2.0
-                trial[constraint] = high
-                cost = expected_costs(distribution(trial))[constraint]
-            if cost > limits[constraint] + tolerance:
-                multipliers[constraint] = high
-                continue
-            for _ in range(70):
-                midpoint = 0.5 * (low + high)
-                trial[constraint] = midpoint
-                if expected_costs(distribution(trial))[constraint] > (
-                        limits[constraint]):
-                    low = midpoint
-                else:
-                    high = midpoint
-            multipliers[constraint] = high
-
-        probabilities = distribution(multipliers)
-        residual = expected_costs(probabilities) - limits
+        probabilities, expected, hessian, objective = projection_state(
+            multipliers)
+        gradient = limits - expected
         kkt = max(
-            abs(float(residual[index]))
+            abs(float(gradient[index]))
             if multipliers[index] > tolerance
-            else max(float(residual[index]), 0.0)
+            else max(-float(gradient[index]), 0.0)
             for index in range(2)
         )
         if kkt <= tolerance:
             converged = True
             break
+        active = np.flatnonzero(
+            (multipliers > tolerance) | (gradient < 0.0))
+        if not active.size:
+            converged = True
+            break
+        active_hessian = hessian[np.ix_(active, active)]
+        active_gradient = gradient[active]
+        ridge = max(1e-12, float(np.trace(active_hessian)) * 1e-10)
+        try:
+            active_direction = np.linalg.solve(
+                active_hessian + ridge * np.eye(active.size),
+                -active_gradient,
+            )
+        except np.linalg.LinAlgError:
+            active_direction = -active_gradient
+        direction = np.zeros(2, dtype=np.float64)
+        direction[active] = active_direction
+        if (not np.isfinite(direction).all()
+                or float(gradient @ direction) >= 0.0):
+            direction.fill(0.0)
+            direction[active] = -active_gradient
 
-    probabilities = distribution(multipliers)
-    projected_costs = expected_costs(probabilities)
+        accepted = False
+        step = 1.0
+        for _ in range(50):
+            candidate = np.maximum(multipliers + step * direction, 0.0)
+            delta = candidate - multipliers
+            _, _, _, candidate_objective = projection_state(candidate)
+            if candidate_objective <= (
+                    objective + 1e-4 * float(gradient @ delta)):
+                multipliers = candidate
+                accepted = True
+                break
+            step *= 0.5
+        if not accepted:
+            break
+
+    probabilities, projected_costs, _, _ = projection_state(multipliers)
     return {
         "joint_feasible": True,
         "frontier": frontier,
