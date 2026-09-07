@@ -2449,3 +2449,46 @@ the two projected rows' `independent_duals_finite_and_bounded` fields
 remains `no_pass`. Task `t89419` was an environment-only failed attempt because
 the isolated interpreter has no `pytest`; no package was installed, and the
 standard-library `unittest` run supplied the valid test evidence.
+
+### Engineering-v22 optimizer trajectory diagnosis (2026-09-07)
+
+Commit `c6f6e0882e` adds a read-only trajectory audit for the 32 V22 factorial
+training runs. It requires every candidate/seed pair, exact episodes `0--39`,
+the registered allocation, dual update, and augmented coefficient, then reports
+first/last-window changes, constraint-gap signs, multiplier boundary hits,
+total variation, action, entropy, holding, and denial. Scheduler task `t89475`
+passed both synthetic completeness and trajectory-statistics tests on `node001`.
+Task `t89476` then audited all eight candidates and four seeds in place on the
+server; only the approximately 1 MB JSON/CSV summary was synchronized locally.
+
+The trajectories distinguish four failure modes:
+
+* Relative projected rows reduce late-window mean action to `5.11 s` (`mu=0`)
+  and `4.59 s` (`mu=0.5`). Passenger multipliers finish at the lower bound for
+  every seed, while regularity multipliers finish at the lower bound for two of
+  four and four of four seeds, respectively. Their late replay-batch normalized
+  costs are below one, but frozen evaluation misses the regularity budget and
+  worsens CV. The replay constraint therefore does not transfer to the frozen
+  state distribution.
+* Aggregate projected rows keep late-window mean action at `11.58 s` and
+  `10.71 s`. Their passenger constraint gap is positive in every recorded
+  episode, passenger multipliers rise to `0.95` and `0.92`, and policy entropy
+  falls to `0.22` and `0.17`. Regularity-gap sign changes average `13.0` and
+  `16.25` per seed. This is a low-entropy, high-action regime rather than dual
+  convergence; frozen holding and denied dispatch increase sharply.
+* Aggregate log-Adam is smoother, but its passenger gap is positive for
+  `100%` (`mu=0`) and `93.8%` (`mu=0.5`) of recorded episodes while late
+  passenger multipliers remain only `0.026` and `0.017`. Its multiplicative
+  log-parameter dynamics do not enforce the passenger budget on this horizon.
+* Relative log-Adam preserves more entropy but misses one or both budgets and
+  does not jointly improve journey and CV.
+
+The direct projected update and its checkpoint semantics are implemented as
+registered; the failure is not a sign or serialization bug. Both V22 dual
+schemes leave the analytic finite-action costs as soft terms competing with the
+learned Q scale. A successor must not tune the rejected V22 fractions, budgets,
+dual learning rate, or `mu`. The justified structural successor is a
+training-time constrained categorical policy or exact finite-action probability
+projection that enforces the two causal analytic costs in the policy
+distribution itself, with the same seven actions and zero post-policy execution
+adjustment. That design requires a new preregistration and fresh seeds.
