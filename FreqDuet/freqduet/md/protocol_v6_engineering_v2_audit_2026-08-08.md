@@ -2699,3 +2699,36 @@ existing V20 no-harm margins against confirmed main and `noguard`. A screen
 pass remains exploratory and requires a fresh 200-episode confirmation. A
 no-pass rejects this exact-target formulation without post-outcome target,
 fraction, support-floor, or solver changes.
+
+### Engineering-v23 implementation smoke outcome (2026-09-08)
+
+The exact joint projection, V10 trainer path, diagnostics, and locked V23
+configuration were implemented at source commit `78db57d9c2`. Server task
+`t89570` passed all 18 focused solver/trainer/config tests and task `t89571`
+passed all 89 broader randomness, resume, frozen-evaluation, and causal-
+regularity regression tests on `node003`. The first end-to-end task `t89572`
+completed training and frozen evaluation but was rejected during aggregation:
+the staged worktree omitted `.git`, so its run manifest correctly reported
+unavailable provenance. It is not retained as V23 evidence.
+
+Task `t89576` reran the identical registered two-episode smoke on `node003`
+with commit, branch, and clean-tree provenance supplied explicitly. It finished
+with exit code zero and a strict complete one-rollout aggregate. Both recorded
+training projections converged in eight iterations. Their projected
+regularity costs were `0.03599999845` and `0.03599999845`, passenger costs were
+`0.07500000298` and `0.07500000298`, and maximum positive constraint residual
+was `3.45e-13`. Multipliers, projection KL, target entropy, reverse KL, and
+action-change diagnostics were finite. The old regularity/passenger duals,
+all four soft/augmented penalties, and post-policy execution adjustment were
+exactly zero. Frozen evaluation also locked all three policies and achieved
+causal evidence coverage `0.8006`.
+
+The two-episode frozen regularity/passenger costs were `0.3032/0.1599`; these
+are intentionally not an effect or budget result under the preregistration.
+Only the 40-episode fresh-seed screen may decide the outcome gate. Task
+`t89580` passed the first four strict-gate tests on `node002`; after adding the
+registered critic, aggregate gain-floor, and conditional-entropy contract
+checks, task `t89581` passed all four updated tests on the same server. The
+smoke review bundle contains only JSON/CSV evidence and no checkpoint. The
+mechanical implementation gate therefore authorizes the unchanged formal V23
+screen; it does not authorize a performance claim.
