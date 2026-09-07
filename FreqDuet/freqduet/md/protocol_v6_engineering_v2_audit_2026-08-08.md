@@ -2732,3 +2732,46 @@ checks, task `t89581` passed all four updated tests on the same server. The
 smoke review bundle contains only JSON/CSV evidence and no checkpoint. The
 mechanical implementation gate therefore authorizes the unchanged formal V23
 screen; it does not authorize a performance claim.
+
+### Engineering-v23 formal screen and transfer diagnosis (2026-09-08)
+
+The registered 40-episode screen completed all 28 training shards (`t89587`
+through `t89614`) on `node001--node006`. It contains the seven locked configs,
+four fresh training seeds, four common-random-number frozen evaluation seeds,
+and 112 unique frozen rollouts. Node-side aggregation and the preregistered
+gate ran as task `t89616`; all provenance, completeness, frozen-policy, exact
+projection, causal-evidence, zero-soft-dual, and zero-execution-adjustment
+checks passed.
+
+The outcome is nevertheless a strict `no_pass`. All 160 recorded projections
+converged in at most 10 iterations. Their maximum replay target costs were
+`0.0360000081` for regularity and `0.0750000030` for passenger holding, with a
+maximum positive constraint residual of `9.62e-9`. In frozen evaluation,
+however, V23 reached regularity cost `0.08438331`, above the locked `0.05`
+budget; the passenger maximum `0.07811219` remained within its `0.08` budget.
+Relative to scalar V13, V23 changed journey by `-0.09495 min` but worsened CV
+by `+0.01917`. Relative to V19 zero-hold-advantage it changed journey by
+`-0.36642 min` and worsened CV by `+0.03908`. It also failed the registered CV
+recovery against V20 (`-0.00537`, required at most `-0.020`) and CV
+non-inferiority against confirmed main (`+0.03584`). The exact V23 formulation
+is rejected and is not eligible for a 200-episode confirmation.
+
+Task `t89720` passed all three server-side tests for the actor/teacher transfer
+audit. Task `t89743` then analyzed the retained training diagnostics and frozen
+rollouts on `node001`. In episodes 30--39, every training seed retained an
+actor regularity cost above the exact teacher target. The seed-level excesses
+were `0.01910`, `0.02527`, `0.01726`, and `0.02336`, for a mean of `0.02125`.
+Mean actor-to-teacher reverse KL remained `0.281--0.397`, while the teacher
+required `0.58--0.75 s` more expected holding than the actor. Three seeds then
+incurred an additional frozen-distribution gap; the mean frozen-minus-replay
+actor regularity cost was `+0.00862`. Three of four train seeds violated the
+frozen regularity budget.
+
+This separates the failure mechanisms: the primary defect is incomplete
+actor-to-projected-teacher transfer already visible on replay batches, followed
+by a smaller rollout-distribution shift. V24 must therefore constrain the
+learned actor itself and report post-update actor costs; changing V23's
+`0.036/0.075` targets, projection fraction, support floor, or solver after this
+outcome is not permitted. The historical frequency state, compact causal lower
+target, seven executable actions, aggregate-gain semantics, passenger cost,
+and zero post-policy execution adjustment remain part of the successor design.
