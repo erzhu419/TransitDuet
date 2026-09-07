@@ -2603,3 +2603,23 @@ cost `0.075`. For context only, the rejected relative allocation would require
 targets `0.033/0.076`; it has a larger positive regularity shift and does not
 replace the selected aggregate semantics. These targets are now immutable for
 the V23 feasibility audit and any subsequent fresh-seed effect screen.
+
+### V23 locked-target projection feasibility registration (2026-09-08)
+
+The feasibility audit covers all four V22 aggregate configurations and four
+training seeds, for exactly 16 episode-39 checkpoints. Each checkpoint is
+audited first on its complete lower replay table at the locked aggregate
+regularity/passenger targets `0.036/0.075`. It is then audited on 256 uniform
+samples without replacement of the actual lower training batch size 512,
+using NumPy PCG64 seed `230908` independently for each checkpoint. The
+aggregate required-gain denominator is recomputed inside each minibatch exactly
+as in lower training.
+
+The feasibility gate passes only if all 16 full-replay frontiers are jointly
+feasible, all 16 projections converge and meet both targets within `1e-8`, and
+all 4,096 sampled minibatch frontiers satisfy the same conditions. Inventory,
+checkpoint episode, action library, original budgets, locked targets, aggregate
+cost mode, batch size/count, and sampling seed are strict. A no-pass changes
+the proposed training mechanism before implementation; it does not permit
+loosening either locked target. This remains a read-only V22 diagnostic and
+uses no V23 effect seed.

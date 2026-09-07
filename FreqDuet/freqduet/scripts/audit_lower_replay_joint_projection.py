@@ -191,7 +191,7 @@ def _entropy(probabilities: np.ndarray) -> np.ndarray:
     )
 
 
-def audit_replay_joint_projection(
+def _load_replay_projection_table(
     checkpoint_path: str | Path,
     config_path: str | Path,
 ) -> dict[str, object]:
@@ -296,20 +296,48 @@ def audit_replay_joint_projection(
         feasible = action_bins[None, :] <= action_limit_s[:, None] + 1e-6
         feasible[:, int(np.argmin(np.abs(action_bins)))] = True
 
-    valid_probabilities = probabilities[valid]
-    valid_passenger = passenger_costs[valid]
-    valid_feasible = feasible[valid]
     required_gain_mean = float(floor["required_gain"][valid].mean())
     if required_gain_mean <= 0.0:
         raise ValueError("replay has no positive required regularity gain")
+    return {
+        "checkpoint": str(checkpoint_path),
+        "config": str(config_path),
+        "checkpoint_episode": int(state.get("episode", -1)),
+        "constraint_cost_mode": str(cost_mode),
+        "action_bins_s": action_bins,
+        "valid": valid,
+        "probabilities": probabilities,
+        "relative_shortfall": floor["relative_shortfall"],
+        "absolute_shortfall": floor["absolute_shortfall"],
+        "required_gain": floor["required_gain"],
+        "passenger_costs": passenger_costs,
+        "feasible": feasible,
+        "configured_regularity_limit": float(contract["cost_limit"]),
+        "configured_passenger_limit": float(passenger_contract["cost_limit"]),
+        "required_gain_mean": required_gain_mean,
+    }
+
+
+def audit_replay_joint_projection(
+    checkpoint_path: str | Path,
+    config_path: str | Path,
+) -> dict[str, object]:
+    table = _load_replay_projection_table(checkpoint_path, config_path)
+    valid = table["valid"]
+    valid_probabilities = table["probabilities"][valid]
+    valid_passenger = table["passenger_costs"][valid]
+    valid_feasible = table["feasible"][valid]
+    action_bins = table["action_bins_s"]
+    required_gain_mean = float(table["required_gain_mean"])
+    cost_mode = str(table["constraint_cost_mode"])
     if cost_mode == "hf_aggregate_gain_shortfall_v4":
         valid_regularity = (
-            floor["absolute_shortfall"][valid] / required_gain_mean)
+            table["absolute_shortfall"][valid] / required_gain_mean)
     else:
-        valid_regularity = floor["relative_shortfall"][valid]
+        valid_regularity = table["relative_shortfall"][valid]
 
-    regularity_limit = float(contract["cost_limit"])
-    passenger_limit = float(passenger_contract["cost_limit"])
+    regularity_limit = float(table["configured_regularity_limit"])
+    passenger_limit = float(table["configured_passenger_limit"])
     projection = _joint_kl_projection(
         valid_probabilities,
         valid_regularity,
@@ -363,13 +391,13 @@ def audit_replay_joint_projection(
     )
     return {
         "schema": "freqduet-replay-joint-kl-projection-v1",
-        "checkpoint": str(checkpoint_path),
-        "config": str(config_path),
-        "checkpoint_episode": int(state.get("episode", -1)),
+        "checkpoint": table["checkpoint"],
+        "config": table["config"],
+        "checkpoint_episode": int(table["checkpoint_episode"]),
         "constraint_cost_mode": str(cost_mode),
-        "replay_transitions": int(len(states)),
+        "replay_transitions": int(len(valid)),
         "valid_transitions": int(valid.sum()),
-        "action_bins_s": action_bins.tolist(),
+        "action_bins_s": table["action_bins_s"].tolist(),
         "regularity_cost_limit": regularity_limit,
         "passenger_cost_limit": passenger_limit,
         "required_gain_mean": required_gain_mean,
