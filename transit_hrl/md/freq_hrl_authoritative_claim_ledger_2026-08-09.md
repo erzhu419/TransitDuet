@@ -51,6 +51,8 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v18_3_causal_joint_projection_development | mujoco_control | development | causal_joint_projection_stops_before_fresh_path_access | development_only | false |
 | mujoco_v18_4_receding_joint_projection_development | mujoco_control | development | receding_joint_projection_stops_before_fresh_path_access | development_only | false |
 | mujoco_v18_5_actor_floor_signal_development | mujoco_control | development | actor_floor_signal_stops_debt_feedback_direction | development_only | false |
+| mujoco_v19_terminal_reserve_training_development | mujoco_control | development | terminal_reserve_training_not_supported | development_only | false |
+| mujoco_v20_reward_guarded_reserve_training_development | mujoco_control | development | reward_guarded_reserve_training_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -325,6 +327,33 @@ Forbidden: V18.4 validates behavior-preserving online frequency projection, rewa
 On the unchanged 120-path development panel, the best target-free H16-hold floor-power score reached global AUC 0.9545 and Hopper-conditioned AUC 0.8442 and ranked the unresolved v17.14 path fourth, but covered only 5/7 actor-floor paths in the global top 14. No preregistered score passed the complete discrimination rule, so a tuned debt-feedback screen was not authorized.
 
 Forbidden: V18.5 validates a causal correction gate, dual-forecast post-hoc combinations, reward improvement, fresh-seed generalization, learned control, leakage no-tradeoff, or final Freq-HRL manuscript support.
+
+### mujoco_v19_terminal_reserve_training_development
+
+On 180 fresh development cells, the recursive terminal-reserve controller
+enforced every realized upper and lower prefix budget for the valid projected
+arms. No fixed actor-consistency coefficient jointly passed the registered
+correction and reward gates. The largest coefficient also missed the projection
+convergence gate, and the 128-iteration budget truncated projected policy
+learning.
+
+Forbidden: V19 validates reward-preserving terminal-reserve learning, selects a
+consistency coefficient, supports leakage no-tradeoff, or supplies manuscript
+confirmation.
+
+### mujoco_v20_reward_guarded_reserve_training_development
+
+On 144 fresh long-horizon development cells, the terminal-reserve baseline
+again passed the registered certificate, prefix-budget, convergence, and
+fallback gates. Delayed scalarized consistency reduced pooled correction but
+failed reward and physical-burden gates. Reward-guarded consistency accepted
+more than 95% of its local updates without positive same-minibatch reward or
+native-constraint deltas, but produced no CI-supported component-correction
+improvement in any environment. Neither candidate was eligible.
+
+Forbidden: V20 validates heldout reward preservation, selects a guarded
+consistency policy, supports leakage no-tradeoff, supplies confirmatory
+evidence, or warrants coefficient tuning on the retired v20 roots.
 
 ### legacy_c1_c9_matrix_snapshot
 
