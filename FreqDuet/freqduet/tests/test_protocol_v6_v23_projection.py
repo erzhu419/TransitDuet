@@ -1,11 +1,13 @@
 from tempfile import TemporaryDirectory
+from pathlib import Path
 import unittest
 
-from runner_v3 import DiagnosticsLogger, TransitDuetV2Runner, load_config
+from runner_v3 import DiagnosticLog, TransitDuetV2Runner, load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
 
 
 CONFIG = "F_freqduet_protocol_v6_v23_jointproj_r036_p075_hiro"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProtocolV6V23ProjectionConfigTest(unittest.TestCase):
@@ -40,7 +42,7 @@ class ProtocolV6V23ProjectionConfigTest(unittest.TestCase):
 
     def test_runner_exposes_projection_contract_without_execution_guard(self):
         config = load_config(
-            f"configs_freqduet/{CONFIG}.yaml")
+            ROOT / "configs_freqduet" / f"{CONFIG}.yaml")
         with TemporaryDirectory() as tmp:
             config.setdefault("logging", {})["logs_dir"] = tmp
             runner = TransitDuetV2Runner(config)
@@ -64,11 +66,11 @@ class ProtocolV6V23ProjectionConfigTest(unittest.TestCase):
         self.assertFalse(runner.lower_causal_holding_guard.enabled)
         self.assertIn(
             "lower_regularity_projection_target_regularity_cost",
-            DiagnosticsLogger.HEADER,
+            DiagnosticLog.HEADER,
         )
         self.assertIn(
             "lower_regularity_projection_actor_reverse_kl",
-            DiagnosticsLogger.HEADER,
+            DiagnosticLog.HEADER,
         )
 
 
