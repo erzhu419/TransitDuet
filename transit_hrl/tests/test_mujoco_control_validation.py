@@ -28,6 +28,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
     _model_parameter_sha256,
     _raw_projection_target,
     _leakage_constraint_cost,
@@ -1329,6 +1330,75 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             lower_guard["native_constraint_loss_delta_max"], 0.0
         )
         self.assertEqual(model.config.upper_projection_consistency_coef, 0.1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0]["terminal_reserve_certificate_violation_count"], 0.0
+        )
+
+    def test_v21_training_entrypoint_weights_certified_actions_by_advantage(self):
+        payload, rows, model = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[1993],
+            selection_seeds=[1997],
+            eval_seeds=[1999],
+            steps=8,
+            episode_horizon=8,
+            iterations=1,
+            optimizer_seed=2003,
+            upper_period=4,
+            hidden_dim=8,
+            ppo_clip_ratio=0.1,
+            upper_projection_consistency_coef=0.1,
+            lower_projection_consistency_coef=0.1,
+            projection_consistency_weighting="exp_reward_advantage",
+            projection_consistency_advantage_temperature=1.0,
+            projection_consistency_advantage_weight_clip=5.0,
+            terminal_reserve_projection=True,
+            lower_lf_rms_budget=0.0475,
+            upper_hf_rms_budget=0.075,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+            control_protocol_version="auto",
+        )
+
+        self.assertEqual(
+            payload["protocol_version"], MUJOCO_CONTROL_PROTOCOL_VERSION_V21
+        )
+        self.assertEqual(
+            payload["projection_consistency_weighting"],
+            "exp_reward_advantage",
+        )
+        self.assertEqual(
+            payload["projection_consistency_advantage_temperature"], 1.0
+        )
+        self.assertEqual(
+            payload["projection_consistency_advantage_weight_clip"], 5.0
+        )
+        self.assertEqual(
+            model.config.projection_consistency_weighting,
+            "exp_reward_advantage",
+        )
+        self.assertGreaterEqual(
+            payload["history"][1][
+                "lower_projection_consistency_weight_max"
+            ],
+            1.0,
+        )
+        lower_weight_summary = payload[
+            "projection_consistency_weight_training"
+        ]["lower"]
+        self.assertEqual(
+            lower_weight_summary["active_iteration_count"], 1.0
+        )
+        self.assertGreaterEqual(lower_weight_summary["weight_max"], 1.0)
+        self.assertGreater(
+            lower_weight_summary["weighted_mse_mean"], 0.0
+        )
         self.assertEqual(len(rows), 1)
         self.assertEqual(
             rows[0]["terminal_reserve_certificate_violation_count"], 0.0

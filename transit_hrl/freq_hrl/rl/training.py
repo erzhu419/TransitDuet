@@ -1644,6 +1644,54 @@ def train_frequency_separated_ppo(
             ),
         }
 
+    def projection_consistency_training_summary(
+        level: str,
+    ) -> dict[str, float]:
+        coefficient_key = (
+            f"{level}_projection_consistency_effective_coef"
+        )
+        mse_key = f"{level}_projection_consistency_mse"
+        active_rows = [
+            row for row in history
+            if (
+                float(row.get(coefficient_key, 0.0)) > 0.0
+                and mse_key in row
+            )
+        ]
+        unweighted = [
+            float(row[f"{level}_projection_consistency_mse"])
+            for row in active_rows
+            if f"{level}_projection_consistency_mse" in row
+        ]
+        weighted = [
+            float(row[f"{level}_projection_consistency_weighted_mse"])
+            for row in active_rows
+            if f"{level}_projection_consistency_weighted_mse" in row
+        ]
+        weight_means = [
+            float(row[f"{level}_projection_consistency_weight_mean"])
+            for row in active_rows
+            if f"{level}_projection_consistency_weight_mean" in row
+        ]
+        weight_maxima = [
+            float(row[f"{level}_projection_consistency_weight_max"])
+            for row in active_rows
+            if f"{level}_projection_consistency_weight_max" in row
+        ]
+        return {
+            "active_iteration_count": float(len(active_rows)),
+            "unweighted_mse_mean": (
+                float(np.mean(unweighted)) if unweighted else 0.0
+            ),
+            "weighted_mse_mean": (
+                float(np.mean(weighted)) if weighted else 0.0
+            ),
+            "weight_mean": (
+                float(np.mean(weight_means)) if weight_means else 0.0
+            ),
+            "weight_max": max(weight_maxima, default=0.0),
+        }
+
     payload = {
         "policy": policy,
         "trainer": "frequency_separated_smdp_ppo_v2",
@@ -1655,6 +1703,10 @@ def train_frequency_separated_ppo(
         "iterations": int(iterations),
         "projection_consistency_guard_training": {
             level: projection_guard_training_summary(level)
+            for level in ("upper", "lower")
+        },
+        "projection_consistency_weight_training": {
+            level: projection_consistency_training_summary(level)
             for level in ("upper", "lower")
         },
         "projection_consistency_training_schedule": str(

@@ -54,6 +54,7 @@ from .responsibility_distillation import (
 from .smdp_actor_critic import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     PROJECTION_CONSISTENCY_UPDATE_MODES,
+    PROJECTION_CONSISTENCY_WEIGHTING_MODES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -88,6 +89,7 @@ __all__ = [
     "DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES",
     "PROJECTION_CONSISTENCY_SCHEDULES",
     "PROJECTION_CONSISTENCY_UPDATE_MODES",
+    "PROJECTION_CONSISTENCY_WEIGHTING_MODES",
     "CausalGRUGaussianActor",
     "CausalGRUStateEncoder",
     "CausalGRUValueNet",

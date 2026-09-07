@@ -36,6 +36,10 @@ PROJECTION_CONSISTENCY_UPDATE_MODES = (
     "scalarized",
     "reward_guarded_projection",
 )
+PROJECTION_CONSISTENCY_WEIGHTING_MODES = (
+    "uniform",
+    "exp_reward_advantage",
+)
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
     "violation_l2",
@@ -45,6 +49,36 @@ CONSTRAINT_DUAL_NORMALIZATION_MODES = (
     "none",
     "ema_abs",
 )
+
+
+def _projection_consistency_weights(
+    advantage: torch.Tensor,
+    *,
+    mode: str,
+    temperature: float,
+    weight_clip: float,
+) -> torch.Tensor:
+    """Return detached per-transition weights for certified-action learning."""
+
+    name = str(mode)
+    if name == "uniform":
+        return torch.ones_like(advantage).detach()
+    if name != "exp_reward_advantage":
+        raise ValueError(f"unknown projection consistency weighting: {name}")
+    scale = float(temperature)
+    clip = float(weight_clip)
+    log_clip = float(np.log(clip))
+    standardized = torch.clamp(
+        advantage.detach() / scale,
+        min=-log_clip,
+        max=log_clip,
+    )
+    unnormalized = torch.exp(standardized)
+    normalizer = torch.clamp_min(
+        unnormalized.mean(),
+        torch.finfo(unnormalized.dtype).eps,
+    )
+    return (unnormalized / normalizer).detach()
 
 
 def _upper_tail_cvar(values: torch.Tensor, *, alpha: float) -> torch.Tensor:
@@ -428,6 +462,9 @@ class SMDPPPOConfig:
     upper_projection_consistency_coef: float = 0.0
     lower_projection_consistency_coef: float = 0.0
     projection_consistency_update_mode: str = "scalarized"
+    projection_consistency_weighting: str = "uniform"
+    projection_consistency_advantage_temperature: float = 1.0
+    projection_consistency_advantage_weight_clip: float = 5.0
     projection_consistency_step_scale: float = 1.0
     projection_consistency_max_backtracks: int = 8
     projection_consistency_reward_tolerance: float = 0.0
@@ -1313,6 +1350,34 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "projection_consistency_update_mode must be scalarized or "
                 "reward_guarded_projection"
+            )
+        if (
+            str(config.projection_consistency_weighting)
+            not in PROJECTION_CONSISTENCY_WEIGHTING_MODES
+        ):
+            raise ValueError(
+                "projection_consistency_weighting must be uniform or "
+                "exp_reward_advantage"
+            )
+        if (
+            not np.isfinite(
+                float(config.projection_consistency_advantage_temperature)
+            )
+            or float(config.projection_consistency_advantage_temperature) <= 0.0
+        ):
+            raise ValueError(
+                "projection_consistency_advantage_temperature must be "
+                "positive and finite"
+            )
+        if (
+            not np.isfinite(
+                float(config.projection_consistency_advantage_weight_clip)
+            )
+            or float(config.projection_consistency_advantage_weight_clip) < 1.0
+        ):
+            raise ValueError(
+                "projection_consistency_advantage_weight_clip must be finite "
+                "and at least one"
             )
         if (
             not np.isfinite(float(config.projection_consistency_step_scale))
@@ -3096,18 +3161,45 @@ class FrequencySeparatedActorCriticPPO:
                 projection_consistency_mse = torch.zeros(
                     (), dtype=torch.float32, device=self.device
                 )
+                projection_consistency_weighted_mse = torch.zeros(
+                    (), dtype=torch.float32, device=self.device
+                )
+                projection_consistency_weight = torch.ones(
+                    (idx.numel(),), dtype=torch.float32, device=self.device
+                )
                 projection_consistency_loss = torch.zeros(
                     (), dtype=torch.float32, device=self.device
                 )
                 if projection_target_t is not None:
                     projection_mean = actor.distribution(state[idx]).mean
-                    projection_consistency_mse = torch.mean(
+                    projection_squared_error = torch.mean(
                         torch.square(
                             projection_mean - projection_target_t[idx]
+                        ),
+                        dim=-1,
+                    )
+                    projection_consistency_weight = (
+                        _projection_consistency_weights(
+                            reward_adv_t[idx],
+                            mode=cfg.projection_consistency_weighting,
+                            temperature=(
+                                cfg.projection_consistency_advantage_temperature
+                            ),
+                            weight_clip=(
+                                cfg.projection_consistency_advantage_weight_clip
+                            ),
                         )
                     )
+                    projection_consistency_mse = torch.mean(
+                        projection_squared_error
+                    )
+                    projection_consistency_weighted_mse = torch.mean(
+                        projection_consistency_weight
+                        * projection_squared_error
+                    )
                     projection_consistency_loss = (
-                        projection_coefficient * projection_consistency_mse
+                        projection_coefficient
+                        * projection_consistency_weighted_mse
                     )
                 projection_actor_loss = (
                     torch.zeros_like(projection_consistency_loss)
@@ -3203,12 +3295,19 @@ class FrequencySeparatedActorCriticPPO:
                             current_projection_mean = actor.distribution(
                                 state[idx]
                             ).mean
-                            current_projection_loss = (
-                                projection_coefficient
-                                * torch.mean(torch.square(
+                            current_projection_error = torch.mean(
+                                torch.square(
                                     current_projection_mean
                                     - projection_target_t[idx]
-                                ))
+                                ),
+                                dim=-1,
+                            )
+                            current_projection_loss = (
+                                projection_coefficient
+                                * torch.mean(
+                                    projection_consistency_weight
+                                    * current_projection_error
+                                )
                             )
                         return (
                             current_reward,
@@ -3349,11 +3448,16 @@ class FrequencySeparatedActorCriticPPO:
                         current_projection_mean = actor.distribution(
                             state[idx]
                         ).mean
-                        return projection_coefficient * torch.mean(
+                        current_projection_error = torch.mean(
                             torch.square(
                                 current_projection_mean
                                 - projection_target_t[idx]
-                            )
+                            ),
+                            dim=-1,
+                        )
+                        return projection_coefficient * torch.mean(
+                            projection_consistency_weight
+                            * current_projection_error
                         )
 
                     projection_cost_guard_fn = None
@@ -3478,6 +3582,15 @@ class FrequencySeparatedActorCriticPPO:
                     ),
                     "projection_consistency_loss": float(
                         projection_consistency_loss.detach().cpu().item()
+                    ),
+                    "projection_consistency_weighted_mse": float(
+                        projection_consistency_weighted_mse.detach().cpu().item()
+                    ),
+                    "projection_consistency_weight_mean": float(
+                        projection_consistency_weight.mean().detach().cpu().item()
+                    ),
+                    "projection_consistency_weight_max": float(
+                        projection_consistency_weight.max().detach().cpu().item()
                     ),
                     "projection_guard_attempted": float(
                         projection_guarded_diagnostics["attempted"]

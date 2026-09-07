@@ -21,6 +21,7 @@ from freq_hrl.experiments.trading.strong_learned_baseline_validation import (
     count_parameters,
 )
 from freq_hrl.rl.smdp_actor_critic import (
+    _projection_consistency_weights,
     _reward_guarded_adam_step,
     _project_constraint_gradients,
     _reward_guarded_constraint_step,
@@ -394,6 +395,100 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertGreater(metrics["upper_projection_consistency_mse"], 0.0)
         self.assertGreater(metrics["lower_projection_consistency_loss"], 0.0)
         self.assertLess(after, before)
+
+    def test_reward_advantage_weights_prioritize_successful_certified_actions(self):
+        advantage = torch.as_tensor([-2.0, 0.0, 2.0])
+        uniform = _projection_consistency_weights(
+            advantage,
+            mode="uniform",
+            temperature=1.0,
+            weight_clip=5.0,
+        )
+        weighted = _projection_consistency_weights(
+            advantage,
+            mode="exp_reward_advantage",
+            temperature=1.0,
+            weight_clip=5.0,
+        )
+
+        torch.testing.assert_close(uniform, torch.ones_like(advantage))
+        torch.testing.assert_close(
+            weighted,
+            torch.as_tensor([0.2, 1.0, 5.0])
+            / torch.as_tensor([0.2, 1.0, 5.0]).mean(),
+        )
+        self.assertAlmostEqual(float(weighted.mean()), 1.0, places=6)
+        self.assertFalse(weighted.requires_grad)
+
+    def test_reward_selective_projection_consistency_reports_weighting(self):
+        batch = self._batch(seed=144)
+        batch.upper.reward = np.linspace(
+            -1.0, 1.0, batch.upper.size, dtype=np.float32
+        )
+        batch.lower.reward = np.linspace(
+            -1.0, 1.0, batch.lower.size, dtype=np.float32
+        )
+        batch.upper.old_value[:] = 0.0
+        batch.lower.old_value[:] = 0.0
+        batch.upper.projection_target = np.full_like(batch.upper.action, 1.5)
+        batch.lower.projection_target = np.full_like(batch.lower.action, -1.5)
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+            upper_projection_consistency_coef=1.0,
+            lower_projection_consistency_coef=1.0,
+            projection_consistency_weighting="exp_reward_advantage",
+            projection_consistency_advantage_temperature=1.0,
+            projection_consistency_advantage_weight_clip=5.0,
+            entropy_coef=0.0,
+            epochs=1,
+            minibatch_size=64,
+        ))
+
+        metrics = model.update(batch)
+
+        for level in ("upper", "lower"):
+            self.assertGreater(
+                metrics[f"{level}_projection_consistency_weight_max"],
+                1.0,
+            )
+            self.assertGreater(
+                metrics[f"{level}_projection_consistency_weighted_mse"],
+                0.0,
+            )
+            self.assertEqual(
+                metrics[f"{level}_projection_guard_attempted"],
+                0.0,
+            )
+
+    def test_projection_consistency_weighting_rejects_invalid_configuration(self):
+        invalid = (
+            (
+                {"projection_consistency_weighting": "unknown"},
+                "projection_consistency_weighting",
+            ),
+            (
+                {"projection_consistency_advantage_temperature": 0.0},
+                "advantage_temperature",
+            ),
+            (
+                {"projection_consistency_advantage_weight_clip": 0.5},
+                "advantage_weight_clip",
+            ),
+        )
+        for values, message in invalid:
+            with self.subTest(values=values):
+                with self.assertRaisesRegex(ValueError, message):
+                    FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+                        upper_state_dim=3,
+                        lower_state_dim=2,
+                        upper_action_dim=1,
+                        lower_action_dim=1,
+                        **values,
+                    ))
 
     def test_projection_consistency_requires_aligned_targets(self):
         with self.assertRaisesRegex(ValueError, "non-negative"):

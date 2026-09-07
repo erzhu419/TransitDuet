@@ -42,6 +42,7 @@ from freq_hrl.rl import (
     DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES,
     PROJECTION_CONSISTENCY_SCHEDULES,
     PROJECTION_CONSISTENCY_UPDATE_MODES,
+    PROJECTION_CONSISTENCY_WEIGHTING_MODES,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     HierarchicalTrajectoryBatch,
@@ -91,6 +92,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V19 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V20 = (
     "freq_hrl_mujoco_shared_core_v20_reward_guarded_terminal_reserve_training"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V21 = (
+    "freq_hrl_mujoco_shared_core_v21_reward_selective_feasible_action_training"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -104,6 +108,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V17_5,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -3262,6 +3267,9 @@ def _hierarchical_model(
     upper_projection_consistency_coef: float = 0.0,
     lower_projection_consistency_coef: float = 0.0,
     projection_consistency_update_mode: str = "scalarized",
+    projection_consistency_weighting: str = "uniform",
+    projection_consistency_advantage_temperature: float = 1.0,
+    projection_consistency_advantage_weight_clip: float = 5.0,
     projection_consistency_step_scale: float = 1.0,
     projection_consistency_max_backtracks: int = 8,
     projection_consistency_reward_tolerance: float = 0.0,
@@ -3322,6 +3330,15 @@ def _hierarchical_model(
         ),
         projection_consistency_update_mode=str(
             projection_consistency_update_mode
+        ),
+        projection_consistency_weighting=str(
+            projection_consistency_weighting
+        ),
+        projection_consistency_advantage_temperature=float(
+            projection_consistency_advantage_temperature
+        ),
+        projection_consistency_advantage_weight_clip=float(
+            projection_consistency_advantage_weight_clip
         ),
         projection_consistency_step_scale=float(
             projection_consistency_step_scale
@@ -4210,6 +4227,9 @@ def train_mujoco_method(
     upper_projection_consistency_coef: float = 0.0,
     lower_projection_consistency_coef: float = 0.0,
     projection_consistency_update_mode: str = "scalarized",
+    projection_consistency_weighting: str = "uniform",
+    projection_consistency_advantage_temperature: float = 1.0,
+    projection_consistency_advantage_weight_clip: float = 5.0,
     projection_consistency_step_scale: float = 1.0,
     projection_consistency_max_backtracks: int = 8,
     projection_consistency_reward_tolerance: float = 0.0,
@@ -4328,6 +4348,9 @@ def train_mujoco_method(
         raise ValueError(
             "projection consistency requires terminal-reserve projection"
         )
+    uses_v21_reward_selective_consistency = bool(
+        str(projection_consistency_weighting) != "uniform"
+    )
     uses_v20_consistency_training = bool(
         str(projection_consistency_update_mode) != "scalarized"
         or str(projection_consistency_training_schedule) != "constant"
@@ -4340,14 +4363,36 @@ def train_mujoco_method(
     ):
         raise ValueError("unknown projection-consistency update mode")
     if (
+        str(projection_consistency_weighting)
+        not in PROJECTION_CONSISTENCY_WEIGHTING_MODES
+    ):
+        raise ValueError("unknown projection-consistency weighting")
+    if (
+        not np.isfinite(float(projection_consistency_advantage_temperature))
+        or float(projection_consistency_advantage_temperature) <= 0.0
+    ):
+        raise ValueError(
+            "projection-consistency advantage temperature must be positive"
+        )
+    if (
+        not np.isfinite(float(projection_consistency_advantage_weight_clip))
+        or float(projection_consistency_advantage_weight_clip) < 1.0
+    ):
+        raise ValueError(
+            "projection-consistency advantage weight clip must be at least one"
+        )
+    if (
         str(projection_consistency_training_schedule)
         not in PROJECTION_CONSISTENCY_SCHEDULES
     ):
         raise ValueError("unknown projection-consistency training schedule")
-    if uses_v20_consistency_training and not terminal_reserve_projection:
+    if (
+        uses_v20_consistency_training
+        or uses_v21_reward_selective_consistency
+    ) and not terminal_reserve_projection:
         raise ValueError(
-            "scheduled or reward-guarded projection consistency requires "
-            "terminal-reserve projection"
+            "scheduled, guarded, or reward-selective projection consistency "
+            "requires terminal-reserve projection"
         )
     if terminal_reserve_enabled and (
         int(terminal_reserve_upper_window) < 2
@@ -4581,7 +4626,9 @@ def train_mujoco_method(
             "direct lower action, held upper action, and no promotion"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V21
+        if uses_v21_reward_selective_consistency
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V20
         if uses_v20_consistency_training
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V19
         if terminal_reserve_enabled
@@ -4627,17 +4674,31 @@ def train_mujoco_method(
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
     if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V21
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V21}
+    ):
+        raise ValueError("v21 mechanisms cannot use an earlier protocol label")
+    if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V20
         and selected_protocol_version
-        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V20}
+        not in {
+            "auto",
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
+        }
     ):
         raise ValueError("v20 mechanisms cannot use an earlier protocol label")
     if (
-        selected_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V20
+        selected_protocol_version
+        in {
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
+        }
         and not terminal_reserve_enabled
     ):
         raise ValueError(
-            "the v20 protocol label requires terminal-reserve context"
+            "the v20/v21 protocol labels require terminal-reserve context"
         )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
@@ -4646,6 +4707,7 @@ def train_mujoco_method(
             "auto",
             MUJOCO_CONTROL_PROTOCOL_VERSION_V19,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
         }
     ):
         raise ValueError("v19 mechanisms cannot use an earlier protocol label")
@@ -5887,6 +5949,15 @@ def train_mujoco_method(
             projection_consistency_update_mode=(
                 projection_consistency_update_mode
             ),
+            projection_consistency_weighting=(
+                projection_consistency_weighting
+            ),
+            projection_consistency_advantage_temperature=(
+                projection_consistency_advantage_temperature
+            ),
+            projection_consistency_advantage_weight_clip=(
+                projection_consistency_advantage_weight_clip
+            ),
             projection_consistency_step_scale=(
                 projection_consistency_step_scale
             ),
@@ -6468,6 +6539,15 @@ def train_mujoco_method(
         ),
         "projection_consistency_update_mode": str(
             projection_consistency_update_mode
+        ),
+        "projection_consistency_weighting": str(
+            projection_consistency_weighting
+        ),
+        "projection_consistency_advantage_temperature": float(
+            projection_consistency_advantage_temperature
+        ),
+        "projection_consistency_advantage_weight_clip": float(
+            projection_consistency_advantage_weight_clip
         ),
         "projection_consistency_step_scale": float(
             projection_consistency_step_scale
@@ -7085,6 +7165,21 @@ def build_parser() -> argparse.ArgumentParser:
         default="scalarized",
     )
     parser.add_argument(
+        "--projection-consistency-weighting",
+        choices=PROJECTION_CONSISTENCY_WEIGHTING_MODES,
+        default="uniform",
+    )
+    parser.add_argument(
+        "--projection-consistency-advantage-temperature",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--projection-consistency-advantage-weight-clip",
+        type=float,
+        default=5.0,
+    )
+    parser.add_argument(
         "--projection-consistency-step-scale", type=float, default=1.0
     )
     parser.add_argument(
@@ -7434,6 +7529,15 @@ def main() -> None:
         ),
         projection_consistency_update_mode=(
             args.projection_consistency_update_mode
+        ),
+        projection_consistency_weighting=(
+            args.projection_consistency_weighting
+        ),
+        projection_consistency_advantage_temperature=(
+            args.projection_consistency_advantage_temperature
+        ),
+        projection_consistency_advantage_weight_clip=(
+            args.projection_consistency_advantage_weight_clip
         ),
         projection_consistency_step_scale=(
             args.projection_consistency_step_scale
