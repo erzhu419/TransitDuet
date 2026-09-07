@@ -2587,3 +2587,19 @@ feasibility on all 16 aggregate checkpoints both over the complete replay table
 and over deterministic 512-transition minibatches. No V23 effect run may start
 unless that feasibility audit passes. V23 effect seeds must be fresh and no
 post-policy action adjustment is permitted.
+
+### V23 replay-to-frozen margin calibration outcome (2026-09-08)
+
+Task `t89538` passed all three calibration tests on `node001`. Task `t89540`
+then verified the exact 32-checkpoint and 128-factorial-rollout inventories and
+completed the registered calibration with exit code zero. It synchronized only
+a 76 KiB JSON and a 32 KiB CSV.
+
+For the selected aggregate allocation, the regularity transfer shift ranges
+from `-0.007963` to `+0.013283` and the passenger shift from `-0.021758` to
+`+0.004746`. Upward rounding fixes the margins at `0.014` and `0.005`, so the
+V23 replay targets are locked at aggregate regularity `0.036` and passenger
+cost `0.075`. For context only, the rejected relative allocation would require
+targets `0.033/0.076`; it has a larger positive regularity shift and does not
+replace the selected aggregate semantics. These targets are now immutable for
+the V23 feasibility audit and any subsequent fresh-seed effect screen.
