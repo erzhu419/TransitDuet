@@ -2367,3 +2367,21 @@ single frozen rollout per row. These observations do not change any registered
 threshold and do not pass or fail the V22 formal gate. Budget convergence,
 cross-rollout HF conditioning, and all outcome comparisons remain reserved for
 the locked 40-episode matrix.
+
+### Engineering-v22 formal matrix dispatch (2026-09-07)
+
+The locked formal matrix was dispatched from clean detached source commit
+`b82e6e2acc2f17872699ab8d6828a9c7fda6272d` under scheduler run
+`protocol_v6_aggregate_gain_ep40_s4_e4_v22`. Its 52 one-training-seed shards
+are tasks `t89269` through `t89320`: nine each on `node001` through `node004`
+and eight each on `node005` and `node006`. All 52 entered `running` with zero
+retry after dispatch.
+
+Each shard uses one physical CPU core, `1536 MB` declared RAM, one matrix
+worker, one Torch/BLAS thread, the four registered common-random-number frozen
+evaluation seeds, and the isolated remote `freqduet-cpu-py310` interpreter.
+The matrix has exactly 13 registered configurations, four fresh training
+seeds, 40 training episodes, and checkpoint 39. No log, CSV, or checkpoint is
+configured for automatic local synchronization. This is a dispatch record,
+not an outcome claim; strict aggregation and the preregistered V22 gate remain
+pending successful completion of all shards.
