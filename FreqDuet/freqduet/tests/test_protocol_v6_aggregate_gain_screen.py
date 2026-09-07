@@ -236,6 +236,35 @@ class ProtocolV6AggregateGainScreenTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "strict checks failed"):
                 evaluate_aggregate_gain_screen(root)
 
+    def test_accepts_float32_serialized_projected_dual_floor(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_fixture(root)
+            per_eval_path = root / "frozen_per_eval.csv"
+            per_eval = pd.read_csv(per_eval_path)
+            projected = (
+                per_eval["lower_regularity_policy_dual_update_mode"]
+                == "projected_violation_v1"
+            )
+            serialized_floor = 9.99999901978299e-05
+            per_eval.loc[projected, "lower_regularity_lambda"] = (
+                serialized_floor)
+            per_eval.loc[projected, "lower_regularity_passenger_lambda"] = (
+                serialized_floor)
+            per_eval.to_csv(per_eval_path, index=False)
+            result = evaluate_aggregate_gain_screen(root)
+
+        projected_rows = [
+            row for row in result["candidate_results"]
+            if row["dual_update_mode"] == "projected_violation_v1"
+        ]
+        self.assertTrue(projected_rows)
+        self.assertTrue(all(
+            row["mechanism_checks"][
+                "independent_duals_finite_and_bounded"]
+            for row in projected_rows
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()

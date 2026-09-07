@@ -350,11 +350,11 @@ def _mechanism_checks(
             and (passenger_load <= 1.0 + 1e-12).all()),
         "independent_duals_finite_and_bounded": bool(
             _finite(regularity_lambda)
-            and (regularity_lambda >= 0.0001 - 1e-12).all()
-            and (regularity_lambda <= 2.0 + 1e-12).all()
+            and (regularity_lambda >= 0.0001 - 1e-9).all()
+            and (regularity_lambda <= 2.0 + 1e-9).all()
             and _finite(passenger_lambda)
-            and (passenger_lambda >= 0.0001 - 1e-12).all()
-            and (passenger_lambda <= 2.0 + 1e-12).all()),
+            and (passenger_lambda >= 0.0001 - 1e-9).all()
+            and (passenger_lambda <= 2.0 + 1e-9).all()),
         "regret_limit_satisfied_every_rollout": bool(
             _finite(regret) and (regret <= 0.00025 + 1e-12).all()),
         "causal_evidence_coverage": bool(
