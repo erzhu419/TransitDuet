@@ -2651,3 +2651,51 @@ as a training-time exact joint categorical target with explicit projection and
 distillation diagnostics, causal aggregate cost semantics, and zero
 post-policy execution adjustment. The locked `0.036/0.075` targets and fresh-
 seed requirement remain unchanged.
+
+### Engineering-v23 exact categorical projection preregistration (2026-09-08)
+
+V23 is a structural replacement for V22's soft regularity and passenger
+duals, not another coefficient sweep. It retains the causal compact lower
+state, aggregate attainable-gain cost, `(rho_0,rho_H)=(0.30,0.30)`, APC load
+cost, seven actions `[0,5,10,15,20,30,45] s`, zero-hold-advantage critic,
+conditional valid-state entropy, and zero post-policy execution adjustment.
+The original frozen outcome budgets remain `0.05/0.08`; the calibrated replay
+targets are fixed at `0.036/0.075`.
+
+For each training batch, the valid-state unconstrained soft target is
+
+`pi_0(a|s) proportional to exp((Q_LCB(s,a)-lambda_S Q_C(s,a))/alpha(s))`.
+
+Using the existing replay/TPC weights, V23 computes the batch aggregate-gain
+denominator and solves the weighted minimum-KL projection of `pi_0` subject to
+both calibrated targets and the executable categorical action support. Two
+nonnegative multipliers are solved jointly by active-set Newton updates with
+backtracking, support floor `1e-12`, at most 200 iterations, and KKT/budget
+tolerance `1e-8`. The actor minimizes the reverse KL to the detached projected
+target on causal-valid states; invalid states retain the ordinary safe SAC
+objective. The old regularity/passenger dual penalties, optimizers, and
+checkpoint states are absent in this mode. A nonconverged or over-budget target
+fails the run rather than invoking a fallback or changing a target.
+
+Implementation smoke uses training seed `28903`, frozen evaluation seed
+`61903`, two episodes, and is not effect evidence. Formal screening uses fresh
+training seeds `28013,28031,28053,28077`, frozen common-random-number evaluation
+seeds `61017,61041,61059,61083`, 40 episodes, checkpoint 39, and the exploratory
+protocol. The single V23 candidate is compared with unchanged hard main,
+confirmed main, `noguard`, scalar V13, V19 zero-hold-advantage, and V20
+zero-hold-advantage passenger-budget `0.08` controls under the same seeds.
+
+The implementation gate requires every applied projection to converge and meet
+both calibrated targets within `1e-8`, finite multipliers and KL diagnostics,
+no soft regularity/passenger penalty, exact aggregate numerator/denominator
+telemetry, at least `0.50` causal evidence coverage, frozen lower actor/critic
+and upper actor during evaluation, and exactly zero execution adjustment. The
+outcome gate first requires maximum frozen regularity/passenger costs
+`<=0.05/0.08`. It then inherits V22's preregistered comparisons: at least
+`0.05 min` journey and `0.001` CV improvement over scalar V13 and V19 without
+increasing lower action, holding vehicle-seconds, or denied dispatch; at least
+`0.020` CV improvement over V20 with no more than `+0.20 min` journey; and the
+existing V20 no-harm margins against confirmed main and `noguard`. A screen
+pass remains exploratory and requires a fresh 200-episode confirmation. A
+no-pass rejects this exact-target formulation without post-outcome target,
+fraction, support-floor, or solver changes.
