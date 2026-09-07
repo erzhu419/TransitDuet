@@ -2623,3 +2623,31 @@ cost mode, batch size/count, and sampling seed are strict. A no-pass changes
 the proposed training mechanism before implementation; it does not permit
 loosening either locked target. This remains a read-only V22 diagnostic and
 uses no V23 effect seed.
+
+### V23 locked-target projection feasibility outcome (2026-09-08)
+
+Task `t89546` passed all nine solver, per-checkpoint, and strict-aggregate tests
+on `node001`. Task `t89547` then reproduced the preceding full-replay audit
+semantics exactly on a real checkpoint and passed a tight-target eight-batch
+smoke. Formal tasks `t89548--t89563` evaluated the preregistered 16-checkpoint
+inventory on `node001--node006`; task `t89565` performed the strict node-side
+aggregate. The mistyped task `t89564` was cancelled before dispatch and
+contributed no result. Only the 20 KiB aggregate JSON and 5.9 KiB row CSV were
+synchronized locally.
+
+The gate passes without exception. All 16 complete replay frontiers are jointly
+feasible and converged, and all 4,096 deterministic minibatch projections are
+jointly feasible, converged, and within the locked targets. Projected complete-
+replay regularity costs are `0.036000000--0.036000003`, projected passenger
+costs are `0.075000000--0.075000003`; the corresponding worst minibatch values
+are at most `0.036000010` and `0.075000010`, respectively. The tiny excesses
+are within the registered `1e-8` numerical tolerance.
+
+The correction is not uniformly small: complete-replay mean action changes
+range from `-4.8841 s` to `-0.1034 s`, and projection KL ranges from `0.00535`
+to `8.82393`. This confirms mechanical feasibility while ruling out an
+interpretation as a harmless post-hoc guard. V23 is therefore authorized only
+as a training-time exact joint categorical target with explicit projection and
+distillation diagnostics, causal aggregate cost semantics, and zero
+post-policy execution adjustment. The locked `0.036/0.075` targets and fresh-
+seed requirement remain unchanged.
