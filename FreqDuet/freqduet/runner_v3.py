@@ -323,6 +323,27 @@ class DiagnosticLog:
         'lower_regularity_policy_scaled_constraint_gap',
         'lower_regularity_policy_penalty',
         'lower_regularity_policy_augmented_penalty',
+        'lower_regularity_projection_enabled',
+        'lower_regularity_projection_mode',
+        'lower_regularity_projection_applied',
+        'lower_regularity_projection_converged',
+        'lower_regularity_projection_iterations',
+        'lower_regularity_projection_valid_count',
+        'lower_regularity_projection_regularity_target',
+        'lower_regularity_projection_passenger_target',
+        'lower_regularity_projection_base_regularity_cost',
+        'lower_regularity_projection_base_passenger_cost',
+        'lower_regularity_projection_target_regularity_cost',
+        'lower_regularity_projection_target_passenger_cost',
+        'lower_regularity_projection_regularity_multiplier',
+        'lower_regularity_projection_passenger_multiplier',
+        'lower_regularity_projection_target_kl_from_soft',
+        'lower_regularity_projection_target_entropy',
+        'lower_regularity_projection_actor_reverse_kl',
+        'lower_regularity_projection_base_action_mean_s',
+        'lower_regularity_projection_target_action_mean_s',
+        'lower_regularity_projection_target_action_change_mean_s',
+        'lower_regularity_projection_max_constraint_violation',
         'lower_regularity_policy_capacity_gain_enabled',
         'lower_regularity_policy_capacity_gain_mode',
         'lower_regularity_policy_capacity_gain_weight',
@@ -2257,7 +2278,8 @@ class TransitDuetV2Runner:
                     'capacity_gated_gain'] = capacity_gain_cfg
             if regularity_mode in {
                     'analytic_two_sided_hf_gain_floor_dual_v8',
-                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'}:
+                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+                    'analytic_two_sided_hf_aggregate_gain_projection_v10'}:
                 lower_frequency_mode = str(
                     freq_cfg.get('lower_mode', 'high')).strip().lower()
                 if (not self.env.frequency_lower_enabled
@@ -9509,6 +9531,52 @@ class TransitDuetV2Runner:
                 'regularity_policy_penalty', 0.),
             'lower_regularity_policy_augmented_penalty': lower_m.get(
                 'regularity_policy_augmented_penalty', 0.),
+            'lower_regularity_projection_enabled': int(
+                self.lower_trainer.regularity_projection_enabled),
+            'lower_regularity_projection_mode': str(
+                self.lower_trainer.regularity_projection_mode),
+            'lower_regularity_projection_applied': lower_m.get(
+                'regularity_projection_applied', 0.0),
+            'lower_regularity_projection_converged': lower_m.get(
+                'regularity_projection_converged', 0.0),
+            'lower_regularity_projection_iterations': lower_m.get(
+                'regularity_projection_iterations', 0.0),
+            'lower_regularity_projection_valid_count': lower_m.get(
+                'regularity_projection_valid_count', 0.0),
+            'lower_regularity_projection_regularity_target': lower_m.get(
+                'regularity_projection_regularity_target',
+                self.lower_trainer
+                .regularity_projection_regularity_target),
+            'lower_regularity_projection_passenger_target': lower_m.get(
+                'regularity_projection_passenger_target',
+                self.lower_trainer.regularity_projection_passenger_target),
+            'lower_regularity_projection_base_regularity_cost': lower_m.get(
+                'regularity_projection_base_regularity_cost', 0.0),
+            'lower_regularity_projection_base_passenger_cost': lower_m.get(
+                'regularity_projection_base_passenger_cost', 0.0),
+            'lower_regularity_projection_target_regularity_cost': lower_m.get(
+                'regularity_projection_target_regularity_cost', 0.0),
+            'lower_regularity_projection_target_passenger_cost': lower_m.get(
+                'regularity_projection_target_passenger_cost', 0.0),
+            'lower_regularity_projection_regularity_multiplier': lower_m.get(
+                'regularity_projection_regularity_multiplier', 0.0),
+            'lower_regularity_projection_passenger_multiplier': lower_m.get(
+                'regularity_projection_passenger_multiplier', 0.0),
+            'lower_regularity_projection_target_kl_from_soft': lower_m.get(
+                'regularity_projection_target_kl_from_soft', 0.0),
+            'lower_regularity_projection_target_entropy': lower_m.get(
+                'regularity_projection_target_entropy', 0.0),
+            'lower_regularity_projection_actor_reverse_kl': lower_m.get(
+                'regularity_projection_actor_reverse_kl', 0.0),
+            'lower_regularity_projection_base_action_mean_s': lower_m.get(
+                'regularity_projection_base_action_mean_s', 0.0),
+            'lower_regularity_projection_target_action_mean_s': lower_m.get(
+                'regularity_projection_target_action_mean_s', 0.0),
+            'lower_regularity_projection_target_action_change_mean_s': (
+                lower_m.get(
+                    'regularity_projection_target_action_change_mean_s', 0.0)),
+            'lower_regularity_projection_max_constraint_violation': lower_m.get(
+                'regularity_projection_max_constraint_violation', 0.0),
             'lower_regularity_policy_capacity_gain_enabled': int(
                 self.lower_trainer.regularity_capacity_gain_enabled),
             'lower_regularity_policy_capacity_gain_mode': str(

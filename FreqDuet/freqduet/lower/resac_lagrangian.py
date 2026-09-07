@@ -27,6 +27,8 @@ import torch.nn.functional as F
 from torch.distributions import Normal
 import numpy as np
 
+from lower.categorical_projection import joint_weighted_kl_projection
+
 
 # ──────────────────── Networks ────────────────────
 
@@ -589,6 +591,7 @@ class RESACLagrangianTrainer:
         self.regularity_initial_lambda = 0.0
         self.log_regularity_lambda = None
         self.regularity_lambda_optimizer = None
+        self.regularity_soft_dual_enabled = False
         self.regularity_entropy_split_enabled = False
         self.regularity_entropy_target_fraction = 0.98
         self.regularity_alpha_min = self.minimum_alpha
@@ -637,6 +640,15 @@ class RESACLagrangianTrainer:
         self.regularity_passenger_lambda_max = 0.0
         self.log_regularity_passenger_lambda = None
         self.regularity_passenger_lambda_optimizer = None
+        self.regularity_passenger_soft_dual_enabled = False
+        self.regularity_projection_enabled = False
+        self.regularity_projection_contract = {'enabled': False}
+        self.regularity_projection_mode = 'disabled'
+        self.regularity_projection_regularity_target = 0.0
+        self.regularity_projection_passenger_target = 0.0
+        self.regularity_projection_tolerance = 1e-8
+        self.regularity_projection_max_iterations = 200
+        self.regularity_projection_support_floor = 1e-12
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -649,9 +661,12 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_target_preserving_gain_regret_dual_v6',
                     'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
                     'analytic_two_sided_hf_gain_floor_dual_v8',
-                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'}:
+                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+                    'analytic_two_sided_hf_aggregate_gain_projection_v10'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
+            exact_projection_mode = (
+                mode == 'analytic_two_sided_hf_aggregate_gain_projection_v10')
             zero_hold_regret_modes = {
                 'analytic_two_sided_zero_hold_regret_dual_v2',
                 'analytic_two_sided_capacity_gain_regret_dual_v3',
@@ -663,7 +678,9 @@ class RESACLagrangianTrainer:
             if mode == 'analytic_two_sided_hf_gain_floor_dual_v8':
                 self.regularity_constraint_cost_mode = (
                     'hf_relative_gain_shortfall_v3')
-            elif mode == 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9':
+            elif mode in {
+                    'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+                    'analytic_two_sided_hf_aggregate_gain_projection_v10'}:
                 self.regularity_constraint_cost_mode = (
                     'hf_aggregate_gain_shortfall_v4')
             elif mode in zero_hold_regret_modes:
@@ -737,26 +754,38 @@ class RESACLagrangianTrainer:
                     lambda_lr_regularity <= 0.0):
                 raise ValueError('regularity lambda_lr must be positive')
             if regularity_dual_update_mode not in {
-                    'log_adam_v1', 'projected_violation_v1'}:
+                    'log_adam_v1', 'projected_violation_v1',
+                    'exact_projection_v1'}:
                 raise ValueError('unknown regularity dual update mode')
+            if exact_projection_mode != (
+                    regularity_dual_update_mode == 'exact_projection_v1'):
+                raise ValueError(
+                    'V10 regularity mode and exact projection update must be '
+                    'enabled together')
             if (not np.isfinite(regularity_augmented_lagrangian_rho)
                     or regularity_augmented_lagrangian_rho < 0.0):
                 raise ValueError(
                     'regularity augmented-Lagrangian rho must be non-negative')
+            if (exact_projection_mode
+                    and regularity_augmented_lagrangian_rho != 0.0):
+                raise ValueError(
+                    'exact projection does not use an augmented penalty')
             if not (0.0 < self.regularity_lambda_min
                     <= initial_lambda <= self.regularity_lambda_max):
                 raise ValueError(
                     'require 0 < lambda_min <= initial_lambda <= lambda_max')
-            self.log_regularity_lambda = torch.tensor(
-                [float(np.log(initial_lambda))], dtype=torch.float32,
-                requires_grad=True, device=device)
-            self.regularity_initial_lambda = initial_lambda
             self.regularity_dual_update_mode = regularity_dual_update_mode
             self.regularity_lambda_lr = lambda_lr_regularity
             self.regularity_augmented_lagrangian_rho = (
                 regularity_augmented_lagrangian_rho)
-            self.regularity_lambda_optimizer = optim.Adam(
-                [self.log_regularity_lambda], lr=lambda_lr_regularity)
+            if not exact_projection_mode:
+                self.log_regularity_lambda = torch.tensor(
+                    [float(np.log(initial_lambda))], dtype=torch.float32,
+                    requires_grad=True, device=device)
+                self.regularity_initial_lambda = initial_lambda
+                self.regularity_lambda_optimizer = optim.Adam(
+                    [self.log_regularity_lambda], lr=lambda_lr_regularity)
+                self.regularity_soft_dual_enabled = True
             entropy_cfg = dict(
                 regularity_cfg.get('conditional_entropy', {}) or {})
             self.regularity_entropy_split_enabled = bool(
@@ -1035,6 +1064,7 @@ class RESACLagrangianTrainer:
             gain_floor_mode_enabled = mode in {
                 'analytic_two_sided_hf_gain_floor_dual_v8',
                 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+                'analytic_two_sided_hf_aggregate_gain_projection_v10',
             }
             if gain_floor_enabled != gain_floor_mode_enabled:
                 raise ValueError(
@@ -1046,8 +1076,10 @@ class RESACLagrangianTrainer:
                 )).strip().lower()
                 expected_gain_floor_mode = (
                     'causal_hf_aggregate_gain_floor_v2'
-                    if mode
-                    == 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9'
+                    if mode in {
+                        'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
+                        'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                    }
                     else 'causal_hf_relative_gain_floor_v1')
                 if gain_floor_mode != expected_gain_floor_mode:
                     raise ValueError(
@@ -1120,6 +1152,11 @@ class RESACLagrangianTrainer:
                 'initial_lambda': initial_lambda,
                 'conditional_entropy': entropy_contract,
             }
+            if exact_projection_mode:
+                for key in (
+                        'lambda_lr', 'lambda_min', 'lambda_max',
+                        'initial_lambda'):
+                    self.regularity_policy_contract.pop(key)
             if 'dual_update_mode' in regularity_cfg:
                 self.regularity_policy_contract['dual_update_mode'] = (
                     self.regularity_dual_update_mode)
@@ -1188,14 +1225,25 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'passenger holding lambda_lr must be positive')
                 if passenger_dual_update_mode not in {
-                        'log_adam_v1', 'projected_violation_v1'}:
+                        'log_adam_v1', 'projected_violation_v1',
+                        'exact_projection_v1'}:
                     raise ValueError(
                         'unknown passenger holding dual update mode')
+                if exact_projection_mode != (
+                        passenger_dual_update_mode == 'exact_projection_v1'):
+                    raise ValueError(
+                        'V10 passenger constraint and exact projection update '
+                        'must be enabled together')
                 if (not np.isfinite(passenger_augmented_lagrangian_rho)
                         or passenger_augmented_lagrangian_rho < 0.0):
                     raise ValueError(
                         'passenger augmented-Lagrangian rho must be '
                         'non-negative')
+                if (exact_projection_mode
+                        and passenger_augmented_lagrangian_rho != 0.0):
+                    raise ValueError(
+                        'exact projection does not use a passenger augmented '
+                        'penalty')
                 if not (0.0 < passenger_lambda_min
                         <= passenger_initial_lambda
                         <= passenger_lambda_max):
@@ -1221,14 +1269,16 @@ class RESACLagrangianTrainer:
                         passenger_cost_limit)
                 self.regularity_passenger_lambda_min = passenger_lambda_min
                 self.regularity_passenger_lambda_max = passenger_lambda_max
-                self.regularity_passenger_initial_lambda = (
-                    passenger_initial_lambda)
-                self.log_regularity_passenger_lambda = torch.tensor(
-                    [float(np.log(passenger_initial_lambda))],
-                    dtype=torch.float32, requires_grad=True, device=device)
-                self.regularity_passenger_lambda_optimizer = optim.Adam(
-                    [self.log_regularity_passenger_lambda],
-                    lr=passenger_lambda_lr)
+                if not exact_projection_mode:
+                    self.regularity_passenger_initial_lambda = (
+                        passenger_initial_lambda)
+                    self.log_regularity_passenger_lambda = torch.tensor(
+                        [float(np.log(passenger_initial_lambda))],
+                        dtype=torch.float32, requires_grad=True, device=device)
+                    self.regularity_passenger_lambda_optimizer = optim.Adam(
+                        [self.log_regularity_passenger_lambda],
+                        lr=passenger_lambda_lr)
+                    self.regularity_passenger_soft_dual_enabled = True
                 self.regularity_passenger_holding_contract = {
                     'enabled': True,
                     'mode': passenger_mode,
@@ -1242,6 +1292,11 @@ class RESACLagrangianTrainer:
                     'lambda_max': passenger_lambda_max,
                     'initial_lambda': passenger_initial_lambda,
                 }
+                if exact_projection_mode:
+                    for key in (
+                            'lambda_lr', 'lambda_min', 'lambda_max',
+                            'initial_lambda'):
+                        self.regularity_passenger_holding_contract.pop(key)
                 if 'dual_update_mode' in passenger_cfg:
                     self.regularity_passenger_holding_contract[
                         'dual_update_mode'] = (
@@ -1253,6 +1308,98 @@ class RESACLagrangianTrainer:
             self.regularity_policy_contract[
                 'passenger_holding_constraint'] = (
                     self.regularity_passenger_holding_contract)
+            projection_cfg = dict(
+                regularity_cfg.get('categorical_projection', {}) or {})
+            projection_enabled = bool(projection_cfg.get('enable', False))
+            if projection_enabled != exact_projection_mode:
+                raise ValueError(
+                    'V10 regularity mode and categorical projection contract '
+                    'must be enabled together')
+            if projection_enabled:
+                if not passenger_enabled:
+                    raise ValueError(
+                        'exact joint projection requires the passenger holding '
+                        'constraint')
+                projection_mode = str(projection_cfg.get(
+                    'mode', 'joint_kl_soft_policy_target_v1'
+                )).strip().lower()
+                if projection_mode != 'joint_kl_soft_policy_target_v1':
+                    raise ValueError('unknown categorical projection mode')
+                regularity_target = float(
+                    projection_cfg.get('regularity_target', 0.036))
+                passenger_target = float(
+                    projection_cfg.get('passenger_target', 0.075))
+                projection_tolerance = float(
+                    projection_cfg.get('tolerance', 1e-8))
+                projection_max_iterations = int(
+                    projection_cfg.get('max_iterations', 200))
+                projection_support_floor = float(
+                    projection_cfg.get('support_floor', 1e-12))
+                if not np.isclose(
+                        regularity_target, 0.036, rtol=0.0, atol=1e-12):
+                    raise ValueError(
+                        'V23 regularity projection target is locked at 0.036')
+                if not np.isclose(
+                        passenger_target, 0.075, rtol=0.0, atol=1e-12):
+                    raise ValueError(
+                        'V23 passenger projection target is locked at 0.075')
+                if not np.isclose(
+                        projection_tolerance, 1e-8, rtol=0.0, atol=1e-16):
+                    raise ValueError(
+                        'V23 projection tolerance is locked at 1e-8')
+                if projection_max_iterations != 200:
+                    raise ValueError(
+                        'V23 projection max_iterations is locked at 200')
+                if not np.isclose(
+                        projection_support_floor, 1e-12,
+                        rtol=0.0, atol=1e-20):
+                    raise ValueError(
+                        'V23 projection support_floor is locked at 1e-12')
+                if not np.isclose(
+                        self.regularity_cost_limit, 0.05,
+                        rtol=0.0, atol=1e-12):
+                    raise ValueError(
+                        'V23 source regularity budget must remain 0.05')
+                if not np.isclose(
+                        self.regularity_passenger_cost_limit, 0.08,
+                        rtol=0.0, atol=1e-12):
+                    raise ValueError(
+                        'V23 source passenger budget must remain 0.08')
+                registered_actions = torch.tensor(
+                    [0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+                    dtype=self.discrete_actions.dtype,
+                    device=self.discrete_actions.device,
+                ).view(-1, 1)
+                if not torch.equal(self.discrete_actions, registered_actions):
+                    raise ValueError(
+                        'V23 exact projection requires the registered seven '
+                        'holding actions')
+                self.regularity_projection_enabled = True
+                self.regularity_projection_mode = projection_mode
+                self.regularity_projection_regularity_target = (
+                    regularity_target)
+                self.regularity_projection_passenger_target = passenger_target
+                self.regularity_projection_tolerance = projection_tolerance
+                self.regularity_projection_max_iterations = (
+                    projection_max_iterations)
+                self.regularity_projection_support_floor = (
+                    projection_support_floor)
+                self.regularity_projection_contract = {
+                    'enabled': True,
+                    'mode': projection_mode,
+                    'regularity_target': regularity_target,
+                    'passenger_target': passenger_target,
+                    'tolerance': projection_tolerance,
+                    'max_iterations': projection_max_iterations,
+                    'support_floor': projection_support_floor,
+                    'base_policy': 'pessimistic_safe_soft_policy_v1',
+                    'distillation': 'reverse_kl_v1',
+                    'validity': 'compact_causal_target_v7',
+                    'execution_adjustment': 'none',
+                }
+                self.regularity_policy_contract[
+                    'categorical_projection'] = (
+                        self.regularity_projection_contract)
         elif bool((regularity_cfg.get(
                 'passenger_holding_constraint', {}) or {}).get(
                     'enable', False)):
@@ -1484,6 +1631,84 @@ class RESACLagrangianTrainer:
             self._regularity_passenger_holding_action_terms(state))
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, load, action_costs
+
+    def _regularity_projected_soft_policy_target(
+            self, state, q_lcb, safety_cost_q, sample_weights,
+            safety_lambda):
+        """Return the exact V23 constrained target on causal-valid rows."""
+        if not self.regularity_projection_enabled:
+            raise RuntimeError('categorical policy projection is disabled')
+        valid = self._regularity_evidence_valid(state).bool()
+        valid_indices = torch.nonzero(valid, as_tuple=False).reshape(-1)
+        if not valid_indices.numel():
+            return {
+                'applied': False,
+                'valid': valid,
+                'valid_indices': valid_indices,
+            }
+
+        entropy_alpha = self._entropy_alpha_for_state(state).detach()
+        safe_soft_logits = (
+            q_lcb.detach()
+            - safety_lambda.detach() * safety_cost_q.detach()
+        ) / entropy_alpha.clamp_min(1e-12).unsqueeze(-1)
+        feasible = self.policy_net.feasible_action_mask(state)
+        (*_, required_gain, regularity_action_costs, _) = (
+            self._regularity_aggregate_gain_floor_action_terms(state))
+        passenger_valid, _, passenger_action_costs = (
+            self._regularity_passenger_holding_action_terms(state))
+        if not torch.equal(passenger_valid.bool(), valid):
+            raise RuntimeError(
+                'regularity and passenger projection validity diverged')
+
+        valid_weights = sample_weights.index_select(0, valid_indices)
+        weight_sum = valid_weights.sum().clamp_min(1e-12)
+        required_gain_mean = (
+            required_gain.index_select(0, valid_indices) * valid_weights
+        ).sum().div(weight_sum)
+        valid_regularity_costs = regularity_action_costs.index_select(
+            0, valid_indices)
+        if bool((required_gain_mean > 1e-12).item()):
+            valid_regularity_costs = (
+                valid_regularity_costs / required_gain_mean)
+        else:
+            valid_regularity_costs = torch.zeros_like(
+                valid_regularity_costs)
+        valid_passenger_costs = passenger_action_costs.index_select(
+            0, valid_indices)
+        projection = joint_weighted_kl_projection(
+            safe_soft_logits.index_select(0, valid_indices),
+            torch.stack((
+                valid_regularity_costs, valid_passenger_costs), dim=0),
+            feasible.index_select(0, valid_indices),
+            valid_weights,
+            torch.tensor([
+                self.regularity_projection_regularity_target,
+                self.regularity_projection_passenger_target,
+            ], dtype=state.dtype, device=state.device),
+            tolerance=self.regularity_projection_tolerance,
+            max_iterations=self.regularity_projection_max_iterations,
+            support_floor=self.regularity_projection_support_floor,
+        )
+        maximum_violation = float(
+            projection['constraint_residuals'].clamp_min(0.0).max().item())
+        if (not projection['converged']
+                or maximum_violation > self.regularity_projection_tolerance):
+            costs = projection['expected_costs'].detach().cpu().tolist()
+            raise RuntimeError(
+                'V23 categorical projection failed its locked gate: '
+                f"converged={projection['converged']} costs={costs} "
+                f"iterations={projection['iterations']}")
+        projection.update({
+            'applied': True,
+            'valid': valid,
+            'valid_indices': valid_indices,
+            'valid_weights': valid_weights,
+            'required_gain_mean': required_gain_mean,
+            'regularity_action_costs': valid_regularity_costs,
+            'passenger_action_costs': valid_passenger_costs,
+        })
+        return projection
 
     def _regularity_policy_capacity_gain(self, state, action_probs):
         """Reward regularity improvement only where spare capacity is causal."""
@@ -1839,6 +2064,29 @@ class RESACLagrangianTrainer:
                 self.regularity_entropy_target_fraction),
             'regularity_entropy_valid_mean': 0.0,
             'regularity_alpha': self.regularity_alpha_param,
+            'regularity_projection_enabled': float(
+                self.regularity_projection_enabled),
+            'regularity_projection_applied': 0.0,
+            'regularity_projection_converged': 0.0,
+            'regularity_projection_iterations': 0.0,
+            'regularity_projection_valid_count': 0.0,
+            'regularity_projection_regularity_target': float(
+                self.regularity_projection_regularity_target),
+            'regularity_projection_passenger_target': float(
+                self.regularity_projection_passenger_target),
+            'regularity_projection_base_regularity_cost': 0.0,
+            'regularity_projection_base_passenger_cost': 0.0,
+            'regularity_projection_target_regularity_cost': 0.0,
+            'regularity_projection_target_passenger_cost': 0.0,
+            'regularity_projection_regularity_multiplier': 0.0,
+            'regularity_projection_passenger_multiplier': 0.0,
+            'regularity_projection_target_kl_from_soft': 0.0,
+            'regularity_projection_target_entropy': 0.0,
+            'regularity_projection_actor_reverse_kl': 0.0,
+            'regularity_projection_base_action_mean_s': 0.0,
+            'regularity_projection_target_action_mean_s': 0.0,
+            'regularity_projection_target_action_change_mean_s': 0.0,
+            'regularity_projection_max_constraint_violation': 0.0,
         }
 
         if update_policy:
@@ -1871,6 +2119,7 @@ class RESACLagrangianTrainer:
             regularity_passenger_cost_mean = None
             regularity_passenger_scaled_cost_mean = None
             regularity_passenger_load_mean = None
+            regularity_projection_metrics = None
             q_action_span_mean = None
             q_zero_hold_advantage_abs_mean = None
             if discrete_policy:
@@ -1967,18 +2216,19 @@ class RESACLagrangianTrainer:
                             regularity_cost_mean))
                     regularity_valid_fraction = valid_weight_sum.div(
                         w.sum().clamp_min(1e-8))
-                    regularity_penalty = (
-                        self.log_regularity_lambda.exp().detach()
-                        * regularity_scaled_cost_mean)
                     regularity_scaled_gap = (
                         regularity_scaled_cost_mean
                         - self.regularity_scaled_cost_limit)
-                    regularity_augmented_penalty = (
-                        0.5 * self.regularity_augmented_lagrangian_rho
-                        * torch.relu(regularity_scaled_gap).pow(2))
-                    policy_loss = (
-                        policy_loss + regularity_penalty
-                        + regularity_augmented_penalty)
+                    if self.regularity_soft_dual_enabled:
+                        regularity_penalty = (
+                            self.log_regularity_lambda.exp().detach()
+                            * regularity_scaled_cost_mean)
+                        regularity_augmented_penalty = (
+                            0.5 * self.regularity_augmented_lagrangian_rho
+                            * torch.relu(regularity_scaled_gap).pow(2))
+                        policy_loss = (
+                            policy_loss + regularity_penalty
+                            + regularity_augmented_penalty)
                     if self.regularity_gain_floor_enabled:
                         (
                             floor_valid,
@@ -2136,20 +2386,132 @@ class RESACLagrangianTrainer:
                         regularity_passenger_load_mean = (
                             passenger_load * valid_weights
                         ).sum().div(valid_weight_sum)
-                        regularity_passenger_penalty = (
-                            self.log_regularity_passenger_lambda.exp().detach()
-                            * regularity_passenger_scaled_cost_mean)
                         regularity_passenger_scaled_gap = (
                             regularity_passenger_scaled_cost_mean
                             - self.regularity_passenger_scaled_cost_limit)
-                        regularity_passenger_augmented_penalty = (
-                            0.5
-                            * self.regularity_passenger_augmented_lagrangian_rho
-                            * torch.relu(
-                                regularity_passenger_scaled_gap).pow(2))
-                        policy_loss = (
-                            policy_loss + regularity_passenger_penalty
-                            + regularity_passenger_augmented_penalty)
+                        if self.regularity_passenger_soft_dual_enabled:
+                            regularity_passenger_penalty = (
+                                self.log_regularity_passenger_lambda.exp(
+                                ).detach()
+                                * regularity_passenger_scaled_cost_mean)
+                            regularity_passenger_augmented_penalty = (
+                                0.5
+                                * self.regularity_passenger_augmented_lagrangian_rho
+                                * torch.relu(
+                                    regularity_passenger_scaled_gap).pow(2))
+                            policy_loss = (
+                                policy_loss + regularity_passenger_penalty
+                                + regularity_passenger_augmented_penalty)
+                    if self.regularity_projection_enabled:
+                        projection = (
+                            self._regularity_projected_soft_policy_target(
+                                state, q_lcb, cost_q_new, w, lam))
+                        if projection['applied']:
+                            indices = projection['valid_indices']
+                            actor_probabilities = probs.index_select(
+                                0, indices).to(dtype=torch.float64)
+                            target_probabilities = projection['probabilities']
+                            feasible_actions = (
+                                self.policy_net.feasible_action_mask(state)
+                                .index_select(0, indices))
+                            actor_log_probabilities = torch.where(
+                                feasible_actions,
+                                actor_probabilities.clamp_min(1e-300).log(),
+                                torch.zeros_like(actor_probabilities),
+                            )
+                            target_log_probabilities = torch.where(
+                                feasible_actions,
+                                target_probabilities.clamp_min(1e-300).log(),
+                                torch.zeros_like(target_probabilities),
+                            )
+                            actor_reverse_kl = torch.sum(
+                                actor_probabilities * (
+                                    actor_log_probabilities
+                                    - target_log_probabilities),
+                                dim=-1,
+                            )
+                            projection_policy_terms = (
+                                self._entropy_alpha_for_state(state)
+                                .index_select(0, indices)
+                                .to(dtype=torch.float64)
+                                * actor_reverse_kl)
+                            constrained_terms = policy_terms.to(
+                                dtype=torch.float64).scatter(
+                                    0, indices, projection_policy_terms)
+                            policy_loss = (
+                                constrained_terms * w.to(dtype=torch.float64)
+                            ).mean()
+
+                            normalized_weights = (
+                                projection['valid_weights'].to(
+                                    dtype=torch.float64)
+                                / projection['valid_weights'].sum().to(
+                                    dtype=torch.float64))
+                            projection_costs = torch.stack((
+                                projection['regularity_action_costs'],
+                                projection['passenger_action_costs'],
+                            ), dim=0).to(dtype=torch.float64)
+                            base_state_costs = torch.einsum(
+                                'ba,cba->cb',
+                                projection['base_probabilities'],
+                                projection_costs)
+                            base_costs = torch.einsum(
+                                'b,cb->c', normalized_weights,
+                                base_state_costs)
+                            actions = self.discrete_actions.reshape(-1).to(
+                                dtype=torch.float64)
+                            base_actions = torch.einsum(
+                                'ba,a->b',
+                                projection['base_probabilities'], actions)
+                            target_actions = torch.einsum(
+                                'ba,a->b', target_probabilities, actions)
+                            actor_actions = torch.einsum(
+                                'ba,a->b', actor_probabilities, actions)
+                            maximum_violation = projection[
+                                'constraint_residuals'].clamp_min(0.0).max()
+                            regularity_projection_metrics = {
+                                'regularity_projection_applied': 1.0,
+                                'regularity_projection_converged': float(
+                                    projection['converged']),
+                                'regularity_projection_iterations': float(
+                                    projection['iterations']),
+                                'regularity_projection_valid_count': float(
+                                    indices.numel()),
+                                'regularity_projection_base_regularity_cost': (
+                                    base_costs[0].item()),
+                                'regularity_projection_base_passenger_cost': (
+                                    base_costs[1].item()),
+                                'regularity_projection_target_regularity_cost': (
+                                    projection['expected_costs'][0].item()),
+                                'regularity_projection_target_passenger_cost': (
+                                    projection['expected_costs'][1].item()),
+                                'regularity_projection_regularity_multiplier': (
+                                    projection['multipliers'][0].item()),
+                                'regularity_projection_passenger_multiplier': (
+                                    projection['multipliers'][1].item()),
+                                'regularity_projection_target_kl_from_soft': (
+                                    projection['weighted_kl'].item()),
+                                'regularity_projection_target_entropy': (
+                                    projection['weighted_entropy'].item()),
+                                'regularity_projection_actor_reverse_kl': (
+                                    torch.dot(
+                                        normalized_weights,
+                                        actor_reverse_kl).item()),
+                                'regularity_projection_base_action_mean_s': (
+                                    torch.dot(
+                                        normalized_weights,
+                                        base_actions).item()),
+                                'regularity_projection_target_action_mean_s': (
+                                    torch.dot(
+                                        normalized_weights,
+                                        target_actions).item()),
+                                'regularity_projection_target_action_change_mean_s': (
+                                    torch.dot(
+                                        normalized_weights,
+                                        target_actions - actor_actions).item()),
+                                'regularity_projection_max_constraint_violation': (
+                                    maximum_violation.item()),
+                            }
 
             self.policy_optimizer.zero_grad()
             policy_loss.backward()
@@ -2236,7 +2598,8 @@ class RESACLagrangianTrainer:
             self.lambda_optimizer.step()
             self.log_lambda.data.clamp_(min=-5.0, max=1.5)  # λ ∈ [e^-5, e^1.5] ≈ [0.007, 4.5]
 
-            if regularity_cost_mean is not None:
+            if (regularity_cost_mean is not None
+                    and self.regularity_soft_dual_enabled):
                 regularity_violation = (
                     regularity_scaled_cost_mean.detach()
                     - self.regularity_scaled_cost_limit)
@@ -2260,7 +2623,8 @@ class RESACLagrangianTrainer:
                         min=float(np.log(self.regularity_lambda_min)),
                         max=float(np.log(self.regularity_lambda_max)),
                     )
-            if regularity_passenger_cost_mean is not None:
+            if (regularity_passenger_cost_mean is not None
+                    and self.regularity_passenger_soft_dual_enabled):
                 regularity_passenger_violation = (
                     regularity_passenger_scaled_cost_mean.detach()
                     - self.regularity_passenger_scaled_cost_limit)
@@ -2445,6 +2809,8 @@ class RESACLagrangianTrainer:
                     else 0.0),
                 'regularity_alpha': self.regularity_alpha_param,
             })
+            if regularity_projection_metrics is not None:
+                metrics.update(regularity_projection_metrics)
 
         # ──── Soft target update ────
         for tp, p in zip(self.target_q_net.parameters(), self.q_net.parameters()):
@@ -2483,10 +2849,10 @@ class RESACLagrangianTrainer:
             'regularity_policy_contract': self.regularity_policy_contract,
             'log_regularity_lambda': (
                 self.log_regularity_lambda.detach().clone()
-                if self.regularity_policy_enabled else None),
+                if self.regularity_soft_dual_enabled else None),
             'regularity_lambda_optimizer': (
                 self.regularity_lambda_optimizer.state_dict()
-                if self.regularity_policy_enabled else None),
+                if self.regularity_soft_dual_enabled else None),
             'log_regularity_alpha': (
                 self.log_regularity_alpha.detach().clone()
                 if self.regularity_entropy_split_enabled else None),
@@ -2495,10 +2861,10 @@ class RESACLagrangianTrainer:
                 if self.regularity_entropy_split_enabled else None),
             'log_regularity_passenger_lambda': (
                 self.log_regularity_passenger_lambda.detach().clone()
-                if self.regularity_passenger_holding_enabled else None),
+                if self.regularity_passenger_soft_dual_enabled else None),
             'regularity_passenger_lambda_optimizer': (
                 self.regularity_passenger_lambda_optimizer.state_dict()
-                if self.regularity_passenger_holding_enabled else None),
+                if self.regularity_passenger_soft_dual_enabled else None),
         }
 
     def load_training_state_dict(self, state):
@@ -2554,7 +2920,7 @@ class RESACLagrangianTrainer:
         self.cost_q_optimizer.load_state_dict(state['cost_q_optimizer'])
         self.log_lambda.data.copy_(state['log_lambda'].to(self.device))
         self.lambda_optimizer.load_state_dict(state['lambda_optimizer'])
-        if self.regularity_policy_enabled:
+        if self.regularity_soft_dual_enabled:
             if state.get('log_regularity_lambda') is None:
                 raise ValueError(
                     'lower checkpoint is missing regularity dual state')
@@ -2570,7 +2936,7 @@ class RESACLagrangianTrainer:
                 state['log_regularity_alpha'].to(self.device))
             self.regularity_alpha_optimizer.load_state_dict(
                 state['regularity_alpha_optimizer'])
-        if self.regularity_passenger_holding_enabled:
+        if self.regularity_passenger_soft_dual_enabled:
             if state.get('log_regularity_passenger_lambda') is None:
                 raise ValueError(
                     'lower checkpoint is missing passenger holding dual state')
@@ -2607,13 +2973,13 @@ class RESACLagrangianTrainer:
             'regularity_policy_contract': self.regularity_policy_contract,
             'log_regularity_lambda': (
                 self.log_regularity_lambda.data
-                if self.regularity_policy_enabled else None),
+                if self.regularity_soft_dual_enabled else None),
             'log_regularity_alpha': (
                 self.log_regularity_alpha.data
                 if self.regularity_entropy_split_enabled else None),
             'log_regularity_passenger_lambda': (
                 self.log_regularity_passenger_lambda.data
-                if self.regularity_passenger_holding_enabled else None),
+                if self.regularity_passenger_soft_dual_enabled else None),
         }, path)
 
     def load(self, path):
@@ -2656,7 +3022,7 @@ class RESACLagrangianTrainer:
         self.cost_q_net.load_state_dict(ckpt['cost_q_net'])
         self.target_cost_q_net.load_state_dict(ckpt['cost_q_net'])
         self.log_lambda.data = ckpt['log_lambda']
-        if self.regularity_policy_enabled:
+        if self.regularity_soft_dual_enabled:
             if ckpt.get('log_regularity_lambda') is None:
                 raise ValueError(
                     'lower checkpoint is missing regularity dual state')
@@ -2672,7 +3038,7 @@ class RESACLagrangianTrainer:
                 min=float(np.log(self.regularity_alpha_min)),
                 max=float(np.log(self.regularity_alpha_max)),
             )
-        if self.regularity_passenger_holding_enabled:
+        if self.regularity_passenger_soft_dual_enabled:
             if ckpt.get('log_regularity_passenger_lambda') is None:
                 raise ValueError(
                     'lower checkpoint is missing passenger holding dual state')

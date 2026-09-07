@@ -1,0 +1,22 @@
+_extends: F_freqduet_protocol_v6_w2adaggfloor_l001_e25_c005_f030_h030_pax080_qadv0_hiro.yaml
+_name: F_freqduet_protocol_v6_v23_jointproj_r036_p075_hiro
+
+protocol:
+  role: exploratory_compact_w2_exact_joint_projection_v23
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_hf_aggregate_gain_projection_v10
+    dual_update_mode: exact_projection_v1
+    augmented_lagrangian_rho: 0.0
+    categorical_projection:
+      enable: true
+      mode: joint_kl_soft_policy_target_v1
+      regularity_target: 0.036
+      passenger_target: 0.075
+      tolerance: 1.0e-8
+      max_iterations: 200
+      support_floor: 1.0e-12
+    passenger_holding_constraint:
+      dual_update_mode: exact_projection_v1
+      augmented_lagrangian_rho: 0.0
