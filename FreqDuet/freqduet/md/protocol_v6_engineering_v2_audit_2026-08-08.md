@@ -2346,9 +2346,16 @@ and the complete eight-row V22 factorial on training seed `27903`, frozen
 evaluation seed `60903`, two training episodes, and checkpoint 1. The combined
 manifest verifies nine unique rollouts, common random numbers, complete run
 manifests, and clean detached source commit
-`b82e6e2acc2f17872699ab8d6828a9c7fda6272d`. Only the small diagnostics,
-manifests, histories, and stdout logs were synchronized; no checkpoint was
-copied locally.
+`b82e6e2acc2f17872699ab8d6828a9c7fda6272d`.
+
+The smoke `result-sync logs` scope initially included each run's nested
+checkpoint directory and therefore copied nine checkpoints locally. This was
+detected during the post-run inventory rather than treated as a valid minimal
+sync. All nine local copies were removed, and scheduler task `t89332` removed
+the corresponding nine remote directories (`106,248,052` bytes) on `node001`.
+The cleanup verified zero remaining checkpoint directories and all nine run
+manifests intact. Diagnostics, manifests, histories, evaluation CSVs, and
+stdout logs remain as the smoke evidence.
 
 All source and completeness checks pass. For every factorial row, the smoke
 also verifies the registered allocation mode, cost mode, dual update, augmented
