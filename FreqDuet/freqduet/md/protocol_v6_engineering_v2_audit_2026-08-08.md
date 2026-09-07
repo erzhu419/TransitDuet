@@ -2401,3 +2401,51 @@ directories and run manifests before invoking the strict aggregate and
 and fails on an incomplete inventory. Only the resulting `combined_summary`
 CSV/JSON directory is configured for synchronization to the local snapshot;
 training logs and checkpoints remain on the server.
+
+### Engineering-v22 formal outcome (2026-09-07)
+
+All 52 formal shards and the server-side follower completed. The aggregate
+contains the registered 13 configurations, four training seeds, four frozen
+evaluation seeds, and exactly 208 unique rollouts. The manifest verifies common
+random numbers, exact seed/config sets, 40 training episodes, complete run and
+evaluation manifests, the clean V22 source commit, and the scalar V13 reference.
+No shard required a retry. The preregistered gate returns `no_pass`, with
+`selected_for_confirmation=null` and `claim_eligible=false`.
+
+The eight candidate rows are shown below. Journey and CV deltas are candidate
+minus scalar V13, so negative journey and negative CV are improvements. Budget
+limits are regularity `<=0.05` and passenger `<=0.08`.
+
+| Allocation | Dual update | `mu` | Reg. max | Pax max | Journey delta (min) | CV delta | Pass |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| relative | log-Adam | 0 | 0.06399178 | 0.11574509 | +0.240602 | -0.029494 | no |
+| relative | projected | 0 | 0.05667545 | 0.06895663 | -0.167360 | +0.051000 | no |
+| relative | log-Adam | 0.5 | 0.06326970 | 0.08313803 | -0.045111 | +0.034906 | no |
+| relative | projected | 0.5 | 0.05795451 | 0.06522148 | -0.132429 | +0.070819 | no |
+| aggregate | log-Adam | 0 | 0.04680697 | 0.13057020 | +0.312733 | -0.017894 | no |
+| aggregate | projected | 0 | 0.06839112 | 0.13602196 | +2.901182 | +0.539394 | no |
+| aggregate | log-Adam | 0.5 | 0.05392126 | 0.08871942 | -0.016706 | +0.059987 | no |
+| aggregate | projected | 0.5 | 0.06701294 | 0.13553023 | +2.364420 | +0.506569 | no |
+
+This is not a near-pass. Relative projected updates improve journey but worsen
+CV and miss the regularity budget. Aggregate log-Adam can improve CV, but the
+`mu=0` row misses the passenger budget and worsens journey and resource use;
+the `mu=0.5` row misses both budgets and CV. Aggregate projected updates enter a
+high-action, high-holding, high-denial regime and fail budgets and outcomes.
+Thus the locked result rejects the V22 aggregate-gain optimizer/allocation
+factorial. Fractions, budgets, update rate, and `mu` must not be tuned against
+these outcomes.
+
+The first formal audit also exposed one audit-only numerical issue. Projected
+dual values written from float32 at the registered `0.0001` lower bound round
+tripped through CSV as `9.99999901978299e-05`; the original `1e-12` comparison
+tolerance incorrectly marked two projected rows as out of bounds. Commit
+`300d7f16bf6ed464775ec827fd2c5a1d073e434d` changes only this bound tolerance to
+`1e-9` and adds the exact observed value as a regression case. Scheduler task
+`t89470` passed all four audit tests on `node001`, and task `t89473` replayed the
+gate on the original 208-rollout aggregate. The corrected JSON differs in only
+the two projected rows' `independent_duals_finite_and_bounded` fields
+(`false -> true`); every strict check remains true and the formal decision
+remains `no_pass`. Task `t89419` was an environment-only failed attempt because
+the isolated interpreter has no `pytest`; no package was installed, and the
+standard-library `unittest` run supplied the valid test evidence.
