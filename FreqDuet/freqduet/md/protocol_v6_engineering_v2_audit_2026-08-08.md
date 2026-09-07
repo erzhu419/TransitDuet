@@ -2392,3 +2392,12 @@ seeds, 40 training episodes, and checkpoint 39. No log, CSV, or checkpoint is
 configured for automatic local synchronization. This is a dispatch record,
 not an outcome claim; strict aggregation and the preregistered V22 gate remain
 pending successful completion of all shards.
+
+Scheduler task `t89333` is a server-side completion follower pinned to
+`node001`; no local compute task is used. It waits for exactly 52 nonempty
+frozen-evaluation CSVs and 52 evaluation manifests, then verifies the 52 shard
+directories and run manifests before invoking the strict aggregate and
+`audit_protocol_v6_aggregate_gain_screen.py`. The wait has an eight-hour bound
+and fails on an incomplete inventory. Only the resulting `combined_summary`
+CSV/JSON directory is configured for synchronization to the local snapshot;
+training logs and checkpoints remain on the server.
