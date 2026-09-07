@@ -2337,3 +2337,33 @@ specified `(aggregate, projected, mu=0.5)` row, followed by
 factorial controls. A screen pass remains exploratory and requires fresh
 200-episode confirmation; a no-pass rejects this optimizer/allocation family
 without post-outcome changes to fractions, budgets, update rate, or `mu`.
+
+### Engineering-v22 implementation smoke outcome (2026-09-07)
+
+Scheduler tasks `t89217` through `t89225` completed successfully with no failed
+or cancelled shard. The nine one-configuration shards covered confirmed main
+and the complete eight-row V22 factorial on training seed `27903`, frozen
+evaluation seed `60903`, two training episodes, and checkpoint 1. The combined
+manifest verifies nine unique rollouts, common random numbers, complete run
+manifests, and clean detached source commit
+`b82e6e2acc2f17872699ab8d6828a9c7fda6272d`. Only the small diagnostics,
+manifests, histories, and stdout logs were synchronized; no checkpoint was
+copied locally.
+
+All source and completeness checks pass. For every factorial row, the smoke
+also verifies the registered allocation mode, cost mode, dual update, augmented
+coefficient, regularity and passenger budgets, zero-hold-advantage critic,
+frozen upper/lower policies and critic, independent finite multipliers, exactly
+zero execution adjustment, active passenger telemetry, and both relative and
+aggregate shortfall arithmetic identities. Confirmed main keeps the gain floor
+disabled. Thus the V22 implementation and checkpoint-to-frozen-evaluation
+telemetry are wired consistently.
+
+The two-episode policies are not effect- or budget-eligible. Frozen expected
+regularity cost is `0.0616--0.0635` for the four relative rows and
+`0.1039--0.2844` for the four aggregate rows; passenger cost is
+`0.1631--0.2729`. HF-conditioning variation also cannot be established from a
+single frozen rollout per row. These observations do not change any registered
+threshold and do not pass or fail the V22 formal gate. Budget convergence,
+cross-rollout HF conditioning, and all outcome comparisons remain reserved for
+the locked 40-episode matrix.
