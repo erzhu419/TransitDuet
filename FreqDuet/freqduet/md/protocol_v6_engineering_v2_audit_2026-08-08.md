@@ -2492,3 +2492,37 @@ training-time constrained categorical policy or exact finite-action probability
 projection that enforces the two causal analytic costs in the policy
 distribution itself, with the same seven actions and zero post-policy execution
 adjustment. That design requires a new preregistration and fresh seeds.
+
+### Post-V22 joint-projection replay audit registration (2026-09-08)
+
+Before defining V23, a read-only audit will evaluate the exact minimum-KL joint
+projection of every V22 learned categorical policy on its episode-39 replay
+table. It covers all eight factorial configurations and four V22 training seeds,
+for exactly 32 checkpoints. Checkpoints remain on `node001--node006`; only JSON
+and the final aggregate CSV are eligible for local synchronization.
+
+For each causal-valid replay state, the audit reconstructs all seven executable
+actions, the registered relative or aggregate regularity cost, and passenger
+holding cost. It then solves the convex empirical projection
+
+`min_pi E_s[KL(pi(.|s) || pi_V22(.|s))]`
+
+subject to the unchanged global replay budgets `E[C_G] <= 0.05` and
+`E[C_P] <= 0.08`, per-state probability normalization, and the existing causal
+action mask. The two nonnegative dual variables are solved jointly with an
+active-set Newton method and backtracking to KKT tolerance `1e-8`; all feasible
+actions receive only a numerical support floor of `1e-12`. The audit reports
+joint frontier feasibility, convergence, multipliers, KL and L1 probability
+shift, argmax changes, action and entropy changes, and the fraction of states
+with a deterministic action satisfying both budgets.
+
+This is a mechanism audit, not an effect screen, and cannot promote a V22 row.
+Batch projection is supported only if all 32 empirical frontiers are feasible,
+all 32 solves converge, and every projected cost is within `1e-8` of both
+budgets. A per-state projection architecture additionally requires at least
+`0.95` deterministic joint-feasible state coverage in every checkpoint. If only
+batch projection is supported, V23 must use a training-time batch projection or
+distillation mechanism and retain zero post-policy execution adjustment. If a
+V22 policy already meets replay budgets but fails frozen evaluation, V23 must
+also preregister a distribution-shift margin rather than claiming that replay
+projection alone solves transfer. Any V23 effect test must use fresh seeds.
