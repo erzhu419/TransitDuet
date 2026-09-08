@@ -97,8 +97,14 @@ class HeadwayEventRecorder:
         self._follower_forecasts_by_follower_ready: dict[
             tuple[int, bool, int], list[dict[str, Any]]
         ] = {}
+        self._follower_forecasts_by_follower_action: dict[
+            tuple[int, bool, int], list[dict[str, Any]]
+        ] = {}
         self._follower_forecasts_by_follower_departure: dict[
             tuple[int, bool, int], list[dict[str, Any]]
+        ] = {}
+        self._executed_holding_actions: dict[
+            tuple[int, bool, int], float
         ] = {}
         self._resolved_follower_forecasts: list[dict[str, Any]] = []
         self.headways_s: list[float] = []
@@ -193,6 +199,23 @@ class HeadwayEventRecorder:
             row["follower_action_ready_time_s"] = ready
             self._resolve_follower_forecast(row)
 
+    def record_executed_holding_action(
+        self,
+        station_id: int,
+        direction: bool,
+        trip_id: int,
+        action_s: float,
+    ) -> None:
+        """Record the final physical action, excluding simulator tick delay."""
+        action = float(action_s)
+        if not np.isfinite(action) or action < 0.0:
+            return
+        key = (int(station_id), bool(direction), int(trip_id))
+        self._executed_holding_actions[key] = action
+        for row in self._follower_forecasts_by_follower_action.pop(key, []):
+            row["follower_action_s"] = action
+            self._update_follower_followup(row)
+
     def record_follower_departure_forecast(
         self,
         *,
@@ -250,6 +273,7 @@ class HeadwayEventRecorder:
             "source": source_value,
             "current_departure_time_s": None,
             "follower_action_ready_time_s": None,
+            "follower_action_s": None,
             "follower_departure_time_s": None,
             "resolved": False,
         }
@@ -262,17 +286,23 @@ class HeadwayEventRecorder:
             current_key, []).append(row)
         self._follower_forecasts_by_follower_ready.setdefault(
             follower_key, []).append(row)
+        self._follower_forecasts_by_follower_action.setdefault(
+            follower_key, []).append(row)
         self._follower_forecasts_by_follower_departure.setdefault(
             follower_key, []).append(row)
         if follower_key in self._action_ready:
             row["follower_action_ready_time_s"] = self._action_ready[
                 follower_key]
             self._resolve_follower_forecast(row)
+        if follower_key in self._executed_holding_actions:
+            row["follower_action_s"] = self._executed_holding_actions[
+                follower_key]
+            self._update_follower_followup(row)
         return True
 
     def _resolve_follower_forecast(self, row: dict[str, Any]) -> None:
         if row["resolved"]:
-            self._update_follower_future_hold(row)
+            self._update_follower_followup(row)
             return
         current_departure = row["current_departure_time_s"]
         follower_ready = row["follower_action_ready_time_s"]
@@ -322,16 +352,19 @@ class HeadwayEventRecorder:
             "resolved": True,
         })
         self._resolved_follower_forecasts.append(row)
-        self._update_follower_future_hold(row)
+        self._update_follower_followup(row)
 
     @staticmethod
-    def _update_follower_future_hold(row: dict[str, Any]) -> None:
+    def _update_follower_followup(row: dict[str, Any]) -> None:
+        action = row.get("follower_action_s")
+        if action is not None:
+            row["follower_future_hold_s"] = max(float(action), 0.0)
         ready = row.get("follower_action_ready_time_s")
         departure = row.get("follower_departure_time_s")
-        if ready is None or departure is None:
+        if ready is None or departure is None or action is None:
             return
-        row["follower_future_hold_s"] = max(
-            float(departure) - float(ready), 0.0)
+        row["follower_action_execution_error_s"] = (
+            float(departure) - float(ready) - float(action))
 
     def previous_departure_event(
         self, station_id: int, direction: bool
@@ -365,6 +398,14 @@ class HeadwayEventRecorder:
     def _follower_forecast_summary(self) -> dict[str, float | int]:
         registered = len(self._follower_forecasts)
         resolved = len(self._resolved_follower_forecasts)
+        action_resolved_rows = [
+            row for row in self._resolved_follower_forecasts
+            if "follower_future_hold_s" in row
+        ]
+        departure_resolved_rows = [
+            row for row in self._resolved_follower_forecasts
+            if "follower_action_execution_error_s" in row
+        ]
         result: dict[str, float | int] = {
             "follower_forecast_decision_count": int(
                 self._follower_forecast_decisions),
@@ -374,10 +415,10 @@ class HeadwayEventRecorder:
                 registered / max(self._follower_forecast_decisions, 1)),
             "follower_forecast_resolution_rate": float(
                 resolved / max(registered, 1)),
-            "follower_forecast_departure_resolved_count": int(sum(
-                "follower_future_hold_s" in row
-                for row in self._resolved_follower_forecasts
-            )),
+            "follower_forecast_action_resolved_count": int(
+                len(action_resolved_rows)),
+            "follower_forecast_departure_resolved_count": int(
+                len(departure_resolved_rows)),
         }
         metric_names = (
             "predicted_follower_gap_s",
@@ -401,6 +442,7 @@ class HeadwayEventRecorder:
                 "follower_forecast_target_action_prediction_mae_s": 0.0,
                 "follower_forecast_follower_future_hold_s_mean": 0.0,
                 "follower_forecast_follower_future_hold_positive_rate": 0.0,
+                "follower_forecast_follower_action_execution_error_s_mean": 0.0,
             })
             return result
 
@@ -425,10 +467,13 @@ class HeadwayEventRecorder:
             "follower_forecast_target_action_prediction_mae_s": float(
                 np.abs(target_error).mean()),
         })
-        future_holds = np.asarray([
-            row["follower_future_hold_s"]
-            for row in self._resolved_follower_forecasts
-            if "follower_future_hold_s" in row
+        future_holds = np.asarray(
+            [row["follower_future_hold_s"] for row in action_resolved_rows],
+            dtype=np.float64,
+        )
+        execution_errors = np.asarray([
+            row["follower_action_execution_error_s"]
+            for row in departure_resolved_rows
         ], dtype=np.float64)
         result.update({
             "follower_forecast_follower_future_hold_s_mean": (
@@ -436,6 +481,9 @@ class HeadwayEventRecorder:
             "follower_forecast_follower_future_hold_positive_rate": (
                 float((future_holds > 1e-9).mean())
                 if future_holds.size else 0.0),
+            "follower_forecast_follower_action_execution_error_s_mean": (
+                float(execution_errors.mean())
+                if execution_errors.size else 0.0),
         })
         return result
 

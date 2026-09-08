@@ -9493,6 +9493,8 @@ class TransitDuetV2Runner:
                 'follower_forecast_registered_count', 0)),
             'follower_forecast_resolved_count': int(env_details.get(
                 'follower_forecast_resolved_count', 0)),
+            'follower_forecast_action_resolved_count': int(env_details.get(
+                'follower_forecast_action_resolved_count', 0)),
             'follower_forecast_departure_resolved_count': int(
                 env_details.get(
                     'follower_forecast_departure_resolved_count', 0)),
@@ -9559,6 +9561,10 @@ class TransitDuetV2Runner:
                 float(env_details.get(
                     'follower_forecast_follower_future_hold_positive_rate',
                     0.0)), 8),
+            'follower_forecast_follower_action_execution_error_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_follower_action_execution_error_s_mean',
+                    0.0)), 6),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(

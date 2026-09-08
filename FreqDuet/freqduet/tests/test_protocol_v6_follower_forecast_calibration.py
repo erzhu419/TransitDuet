@@ -7,6 +7,7 @@ import pandas as pd
 
 from scripts.audit_protocol_v6_follower_forecast_calibration import (
     CONFIGS,
+    ACTION_METRICS,
     DEPARTURE_METRICS,
     EVAL_SEEDS,
     EXACT_RMSE_METRICS,
@@ -60,10 +61,12 @@ class FollowerForecastCalibrationAuditTest(unittest.TestCase):
                         "follower_forecast_decision_count": 100,
                         "follower_forecast_registered_count": 80,
                         "follower_forecast_resolved_count": 70,
+                        "follower_forecast_action_resolved_count": 68,
                         "follower_forecast_departure_resolved_count": 65,
                     }
                     row.update({column: 1.0 for column in RESOLVED_METRICS})
                     row.update({column: 1.0 for column in EXACT_RMSE_METRICS})
+                    row.update({column: 1.0 for column in ACTION_METRICS})
                     row.update({column: 1.0 for column in DEPARTURE_METRICS})
                     row[
                         "follower_forecast_target_action_prediction_mae_s"

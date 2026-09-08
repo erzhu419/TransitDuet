@@ -28,6 +28,7 @@ COUNT_COLUMNS = (
     "follower_forecast_decision_count",
     "follower_forecast_registered_count",
     "follower_forecast_resolved_count",
+    "follower_forecast_action_resolved_count",
     "follower_forecast_departure_resolved_count",
 )
 RESOLVED_METRICS = (
@@ -48,6 +49,9 @@ EXACT_RMSE_METRICS = (
     "follower_forecast_raw_gap_prediction_rmse_s",
 )
 DEPARTURE_METRICS = (
+    "follower_forecast_follower_action_execution_error_s_mean",
+)
+ACTION_METRICS = (
     "follower_forecast_follower_future_hold_s_mean",
     "follower_forecast_follower_future_hold_positive_rate",
 )
@@ -82,13 +86,16 @@ def _summarize(frame: pd.DataFrame) -> dict[str, float | int]:
     decisions = counts[COUNT_COLUMNS[0]]
     registered = counts[COUNT_COLUMNS[1]]
     resolved = counts[COUNT_COLUMNS[2]]
-    departed = counts[COUNT_COLUMNS[3]]
-    if not 0 < resolved <= registered <= decisions or not 0 < departed <= resolved:
+    action_resolved = counts[COUNT_COLUMNS[3]]
+    departed = counts[COUNT_COLUMNS[4]]
+    if (not 0 < departed <= action_resolved <= resolved
+            or not resolved <= registered <= decisions):
         raise ValueError(f"invalid follower forecast counts: {counts}")
     result: dict[str, float | int] = {
         **counts,
         "valid_rate": float(registered / decisions),
         "resolution_rate": float(resolved / registered),
+        "action_resolution_rate": float(action_resolved / resolved),
         "departure_resolution_rate": float(departed / resolved),
     }
     result.update({
@@ -104,8 +111,13 @@ def _summarize(frame: pd.DataFrame) -> dict[str, float | int]:
     result.update({
         column: _weighted_mean(
             frame, column,
-            "follower_forecast_departure_resolved_count",
+            "follower_forecast_action_resolved_count",
         )
+        for column in ACTION_METRICS
+    })
+    result.update({
+        column: _weighted_mean(
+            frame, column, "follower_forecast_departure_resolved_count")
         for column in DEPARTURE_METRICS
     })
     return result
@@ -126,7 +138,8 @@ def audit_follower_forecast_calibration(
     required = {
         "config", "train_seed", "eval_seed", "lower_policy_frozen",
         "lower_critic_frozen", "upper_policy_frozen", *COUNT_COLUMNS,
-        *RESOLVED_METRICS, *EXACT_RMSE_METRICS, *DEPARTURE_METRICS,
+        *RESOLVED_METRICS, *EXACT_RMSE_METRICS, *ACTION_METRICS,
+        *DEPARTURE_METRICS,
     }
     missing = sorted(required.difference(per_eval.columns))
     if missing:
@@ -207,7 +220,7 @@ def audit_follower_forecast_calibration(
     else:
         diagnosis = "local_surrogate_mismatch_beyond_forecast"
     return {
-        "schema_version": "freqduet-v25-follower-forecast-audit-v1",
+        "schema_version": "freqduet-v25-follower-forecast-audit-v2",
         "status": "mechanical_pass",
         "effect_evidence": False,
         "strict_checks": strict_checks,

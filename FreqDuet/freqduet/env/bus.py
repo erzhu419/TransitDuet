@@ -598,12 +598,14 @@ class Bus(object):
             # execute. Reusing the previous station's action would create a
             # physical hold with no corresponding replay transition.
             self.dwelling_time = 0.0
+            self._record_executed_holding_action(0.0)
             self.state = BusState.DWELLING
 
     def _start_dwelling(self, action, current_time=None):
         dwell_time = self._normalize_action(action)
         if dwell_time is not None:
             dwell_time = max(0.0, dwell_time)
+            self._record_executed_holding_action(dwell_time)
 
         should_record = (
             dwell_time is not None
@@ -640,6 +642,18 @@ class Bus(object):
             self.last_action_station_id = int(self.last_station.station_id)
 
         self.state = BusState.DWELLING
+
+    def _record_executed_holding_action(self, action_s):
+        recorder = getattr(self, '_headway_recorder', None)
+        if (recorder is None
+                or not hasattr(recorder, 'record_executed_holding_action')):
+            return
+        recorder.record_executed_holding_action(
+            int(self.last_station.station_id),
+            bool(self.direction),
+            int(self.trip_id),
+            float(action_s),
+        )
 
     def _headway_reward_cost(self, target_headway):
         """Return the common station-arrival reward and constraint signal."""

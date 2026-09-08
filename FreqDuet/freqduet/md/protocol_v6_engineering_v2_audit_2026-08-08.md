@@ -2962,3 +2962,32 @@ The initial three-arm submission attempt was rejected locally by the V6
 preflight before any scheduler task or rollout existed because it omitted the
 required historical/promoted main. This four-arm correction was committed
 before effect data and is the only preflight amendment.
+
+### Engineering-v25 timing-baseline correction (2026-09-08)
+
+The first four-arm diagnostic completed as tasks `t90040--t90043`, followed by
+node-side aggregation `t90044`. All strict provenance, completeness, CRN, and
+frozen-policy checks passed. The forecast portion is usable: over 60,114
+matched action-ready events, pooled target-action MAE was `4.0945 s` and the
+pooled hold-need sign-error rate was `0.08545`, both below the locked material-
+forecast-error thresholds. V24 reverse-KL four-step alone was less accurate
+(`5.5528 s` and `0.11773`), so per-policy diagnostics remain important.
+
+The sequential-holding output from this run is not accepted. It reported a
+positive rate of exactly `1.0` for every policy, including zero-action events.
+Inspection showed that the initial recorder inferred discretionary holding as
+`final departure - action-ready`; the simulator necessarily spends a state-
+transition tick before a zero-action departure, so this definition classified
+that execution latency as holding. The resulting mean (`10.8784 s`) also mixes
+physical action with timing overhead. The automatic v1 label
+`sequential_holding_primary` is therefore invalid as a branch decision.
+
+Before reusing any result, the recorder is amended to match the follower's
+final executed holding action directly. A separate departure match reports
+`departure - action-ready - executed action` only as an execution-timing
+diagnostic. Counts distinguish action-resolved and departure-resolved rows; a
+zero action contributes zero holding and a negative positive-rate indicator.
+The configs, seeds, two-episode horizon, forecast and sequential thresholds,
+and deterministic branch rule remain unchanged. The corrected rerun is a
+measurement repair, not an independent confirmation or an opportunity to
+retune the gate.

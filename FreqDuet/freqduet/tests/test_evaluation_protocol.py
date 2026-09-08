@@ -120,15 +120,58 @@ class MeasurementTest(unittest.TestCase):
         )
         self.assertEqual(
             summary["follower_forecast_departure_resolved_count"], 0)
-        recorder.record_departure(3, True, 300.0, trip_id=12)
+        recorder.record_executed_holding_action(
+            3, True, trip_id=12, action_s=20.0)
         summary = recorder.summary()
         self.assertEqual(
-            summary["follower_forecast_departure_resolved_count"], 1)
+            summary["follower_forecast_action_resolved_count"], 1)
         self.assertAlmostEqual(
             summary["follower_forecast_follower_future_hold_s_mean"], 20.0)
         self.assertEqual(
             summary[
                 "follower_forecast_follower_future_hold_positive_rate"],
+            1.0,
+        )
+        recorder.record_departure(3, True, 300.0, trip_id=12)
+        summary = recorder.summary()
+        self.assertEqual(
+            summary["follower_forecast_departure_resolved_count"], 1)
+        self.assertAlmostEqual(
+            summary[
+                "follower_forecast_follower_action_execution_error_s_mean"],
+            0.0,
+        )
+
+    def test_zero_follower_action_excludes_simulator_departure_tick(self):
+        recorder = HeadwayEventRecorder()
+        recorder.record_follower_departure_forecast(
+            station_id=3,
+            direction=True,
+            decision_time_s=100.0,
+            current_trip_id=10,
+            follower_trip_id=12,
+            predicted_follower_gap_s=200.0,
+            forward_departure_gap_s=100.0,
+            action_s=0.0,
+            action_cap_s=45.0,
+            source="same_time_avl_journey_speed_eta",
+        )
+        recorder.record_departure(3, True, 101.0, trip_id=10)
+        recorder.record_action_ready(3, True, 280.0, trip_id=12)
+        recorder.record_executed_holding_action(
+            3, True, trip_id=12, action_s=0.0)
+        recorder.record_departure(3, True, 281.0, trip_id=12)
+        summary = recorder.summary()
+        self.assertEqual(
+            summary["follower_forecast_follower_future_hold_s_mean"], 0.0)
+        self.assertEqual(
+            summary[
+                "follower_forecast_follower_future_hold_positive_rate"],
+            0.0,
+        )
+        self.assertEqual(
+            summary[
+                "follower_forecast_follower_action_execution_error_s_mean"],
             1.0,
         )
 
