@@ -2827,9 +2827,10 @@ projection controls. No historical result is substituted for a matched arm.
 For each V24 candidate, the actor-transfer gate is evaluated over episodes
 30--39. Each train seed's mean post-update actor regularity and passenger costs
 must be at most `0.05` and `0.08`. Across all four seeds and ten late episodes,
-the mean post/pre ratio for the configured KL must be at most `0.75`, and the
-mean absolute actor-to-teacher action gap must be at most `0.75` of the matched
-V23 value. All exact teachers must still meet `0.036/0.075` within `1e-8`.
+the configured KL may not increase in any recorded late episode, mean
+post-update reverse KL must be at most `0.75` of matched V23, and the mean
+absolute actor-to-teacher action gap must be at most `0.75` of matched V23.
+All exact teachers must still meet `0.036/0.075` within `1e-8`.
 
 The frozen outcome gate retains every V23 requirement: maximum regularity and
 passenger costs `<=0.05/0.08`; at least `0.05 min` journey and `0.001` CV
@@ -2845,3 +2846,25 @@ four-step, then forward-KL eight-step. A 40-episode pass is exploratory only and
 requires a fresh 200-episode confirmation. A no-pass rejects the registered
 factorial; it does not permit post-outcome changes to targets, thresholds,
 support, seeds, or candidate priority.
+
+### Engineering-v24 implementation smoke outcome and pre-effect amendment (2026-09-08)
+
+Server task `t89856` ran the exact four-candidate, two-episode smoke on
+`node006` from clean source commit `e14ff223f3`. The strict smoke gate passed:
+all eight teacher projections converged within `0.036/0.075`, all registered
+KL objectives decreased, all pre/post diagnostics were finite, all soft dual
+and augmented-penalty terms were zero, frozen policies were locked, causal
+evidence was present, and execution adjustment was zero. The synchronized
+review bundle is about 152 KiB and contains no checkpoint. These runs are explicitly
+non-effect evidence and did not select a candidate.
+
+The smoke measured episode-mean post/pre configured-KL ratios of `0.9947`
+(forward one-step), `0.9693` (reverse four-step), `0.9811` (forward four-step),
+and `0.9680` (forward eight-step). This established that the originally worded
+`0.75` post/pre formal threshold measures the local optimizer step rather than
+the cumulative actor-transfer defect diagnosed in V23. Before any formal V24
+effect seed was submitted, that threshold was therefore corrected above to an
+apples-to-apples late-training post-update reverse-KL ratio against a freshly
+rerun matched V23 control. Local configured KL remains fail-closed
+nonincreasing. No outcome budget, effect threshold, seed, candidate, target,
+or candidate priority changed in this pre-effect amendment.
