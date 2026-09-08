@@ -73,11 +73,13 @@ class Bus(object):
         self.forward_predecessor_trip_id = None
         self.pre_action_forward_headway = None
         self.pre_action_forward_headway_source = "unavailable"
+        self.pre_action_time_s = None
         self.pre_action_follower_departure_gap = None
         self.pre_action_follower_eta = None
         self.pre_action_follower_spatial_gap = None
         self.pre_action_follower_speed = None
         self.pre_action_follower_bus_id = None
+        self.pre_action_follower_trip_id = None
         self.pre_action_follower_source = "unavailable"
         self._lower_state_input_schema = "legacy_headway_deviation"
         self._lower_observation_contract = "latent_oracle_legacy"
@@ -346,6 +348,15 @@ class Bus(object):
     def _prepare_for_action(self, current_time, bus_all, debug):
         self.forward_bus = list(filter(lambda x: self.trip_id - 2 in x.trip_id_list, bus_all))
         self.backward_bus = list(filter(lambda x: self.trip_id + 2 in x.trip_id_list, bus_all))
+        self.pre_action_time_s = float(current_time)
+        recorder = getattr(self, '_headway_recorder', None)
+        if recorder is not None and hasattr(recorder, 'record_action_ready'):
+            recorder.record_action_ready(
+                int(self.last_station.station_id),
+                bool(self.direction),
+                float(current_time),
+                int(self.trip_id),
+            )
         self._update_pre_action_forward_headway(current_time)
         self._update_pre_action_follower_eta(current_time, bus_all)
 
@@ -781,6 +792,7 @@ class Bus(object):
             self.pre_action_follower_spatial_gap = None
             self.pre_action_follower_speed = None
             self.pre_action_follower_bus_id = None
+            self.pre_action_follower_trip_id = None
             self.pre_action_follower_source = "current_avl_unavailable"
             return
         snapshots = []
@@ -814,6 +826,14 @@ class Bus(object):
         self.pre_action_follower_spatial_gap = estimate.spatial_gap_m
         self.pre_action_follower_speed = estimate.speed_mps
         self.pre_action_follower_bus_id = estimate.follower_bus_id
+        follower = next((
+            bus for bus in bus_all
+            if int(getattr(bus, 'bus_id', -1)) == int(
+                estimate.follower_bus_id
+                if estimate.follower_bus_id is not None else -1)
+        ), None)
+        self.pre_action_follower_trip_id = (
+            int(getattr(follower, 'trip_id')) if follower is not None else None)
         self.pre_action_follower_source = estimate.source
 
     def arrive_station(self, current_time, bus_all, debug):
@@ -917,11 +937,13 @@ class Bus(object):
         self.forward_predecessor_trip_id = None
         self.pre_action_forward_headway = None
         self.pre_action_forward_headway_source = "unavailable"
+        self.pre_action_time_s = None
         self.pre_action_follower_departure_gap = None
         self.pre_action_follower_eta = None
         self.pre_action_follower_spatial_gap = None
         self.pre_action_follower_speed = None
         self.pre_action_follower_bus_id = None
+        self.pre_action_follower_trip_id = None
         self.pre_action_follower_source = "unavailable"
 
         self.last_station_dis = 0.

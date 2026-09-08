@@ -1,4 +1,4 @@
-"""Same-time AVL estimate of the following bus's departure gap."""
+"""Same-time AVL estimate of the following bus's no-hold departure gap."""
 
 from __future__ import annotations
 
@@ -45,6 +45,9 @@ def estimate_follower_departure_gap(
     behind the controlled bus. Its observed journey-average speed is preferred
     because it already reflects upstream dwell and holding. Current speed and a
     conservative fraction of the static segment speed are causal fallbacks.
+    The returned gap includes a proxy for mandatory service dwell, so it ends at
+    the follower's next action-ready time. It intentionally excludes the
+    follower's future discretionary holding action.
     """
 
     progress = _finite_nonnegative(current_progress_m)

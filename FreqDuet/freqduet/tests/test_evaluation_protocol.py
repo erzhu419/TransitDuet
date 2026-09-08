@@ -75,6 +75,84 @@ class MeasurementTest(unittest.TestCase):
         self.assertEqual(summary["headway_sample_count"], 3)
         self.assertAlmostEqual(summary["headway_mean_s"], 320.0)
 
+    def test_follower_forecast_resolves_against_departure_events(self):
+        recorder = HeadwayEventRecorder()
+        registered = recorder.record_follower_departure_forecast(
+            station_id=3,
+            direction=True,
+            decision_time_s=100.0,
+            current_trip_id=10,
+            follower_trip_id=12,
+            predicted_follower_gap_s=200.0,
+            forward_departure_gap_s=100.0,
+            action_s=30.0,
+            action_cap_s=45.0,
+            source="same_time_avl_journey_speed_eta",
+        )
+        self.assertTrue(registered)
+        recorder.record_departure(3, True, 131.0, trip_id=10)
+        self.assertEqual(
+            recorder.summary()["follower_forecast_resolved_count"], 0)
+        recorder.record_action_ready(3, True, 280.0, trip_id=12)
+        summary = recorder.summary()
+        self.assertEqual(summary["follower_forecast_decision_count"], 1)
+        self.assertEqual(summary["follower_forecast_registered_count"], 1)
+        self.assertEqual(summary["follower_forecast_resolved_count"], 1)
+        self.assertEqual(summary["follower_forecast_valid_rate"], 1.0)
+        self.assertEqual(summary["follower_forecast_resolution_rate"], 1.0)
+        self.assertAlmostEqual(
+            summary["follower_forecast_raw_gap_prediction_error_s_mean"],
+            20.0,
+        )
+        self.assertAlmostEqual(
+            summary[
+                "follower_forecast_post_hold_gap_prediction_error_s_mean"],
+            21.0,
+        )
+        self.assertAlmostEqual(
+            summary[
+                "follower_forecast_target_action_prediction_error_s_mean"],
+            5.0,
+        )
+        self.assertAlmostEqual(
+            summary["follower_forecast_departure_timing_error_s_mean"],
+            1.0,
+        )
+        self.assertEqual(
+            summary["follower_forecast_departure_resolved_count"], 0)
+        recorder.record_departure(3, True, 300.0, trip_id=12)
+        summary = recorder.summary()
+        self.assertEqual(
+            summary["follower_forecast_departure_resolved_count"], 1)
+        self.assertAlmostEqual(
+            summary["follower_forecast_follower_future_hold_s_mean"], 20.0)
+        self.assertEqual(
+            summary[
+                "follower_forecast_follower_future_hold_positive_rate"],
+            1.0,
+        )
+
+    def test_invalid_follower_forecast_is_counted_but_not_registered(self):
+        recorder = HeadwayEventRecorder()
+        registered = recorder.record_follower_departure_forecast(
+            station_id=3,
+            direction=True,
+            decision_time_s=100.0,
+            current_trip_id=10,
+            follower_trip_id=None,
+            predicted_follower_gap_s=None,
+            forward_departure_gap_s=100.0,
+            action_s=0.0,
+            action_cap_s=45.0,
+            source="no_same_direction_avl_follower",
+        )
+        self.assertFalse(registered)
+        summary = recorder.summary()
+        self.assertEqual(summary["follower_forecast_decision_count"], 1)
+        self.assertEqual(summary["follower_forecast_registered_count"], 0)
+        self.assertEqual(summary["follower_forecast_resolved_count"], 0)
+        self.assertEqual(summary["follower_forecast_valid_rate"], 0.0)
+
     def test_service_cost_penalises_suppressed_service(self):
         valid, _ = composite_service_cost(5.0, 12, 0.2, 12)
         invalid, components = composite_service_cost(

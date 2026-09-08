@@ -6003,8 +6003,33 @@ class TransitDuetV2Runner:
                 obs, last_action=last_action, deterministic=deterministic)
             action = self._apply_causal_holding_guard(action, bus)
             action = self._apply_lower_fleet_noharm(action, bus)
+        self._record_causal_follower_forecast(bus, action)
         self._capture_lower_action_context(bus_id, bus)
         return action
+
+    def _record_causal_follower_forecast(self, bus, action):
+        recorder = getattr(self.env, 'headway_events', None)
+        if (bus is None or recorder is None
+                or not hasattr(
+                    recorder, 'record_follower_departure_forecast')):
+            return
+        station = getattr(bus, 'last_station', None)
+        recorder.record_follower_departure_forecast(
+            station_id=int(getattr(station, 'station_id', -1)),
+            direction=bool(getattr(bus, 'direction', True)),
+            decision_time_s=getattr(bus, 'pre_action_time_s', None),
+            current_trip_id=getattr(bus, 'trip_id', None),
+            follower_trip_id=getattr(
+                bus, 'pre_action_follower_trip_id', None),
+            predicted_follower_gap_s=getattr(
+                bus, 'pre_action_follower_departure_gap', None),
+            forward_departure_gap_s=getattr(
+                bus, 'pre_action_forward_headway', None),
+            action_s=self._lower_action_scalar(action),
+            action_cap_s=float(
+                self.env.lower_causal_holding_action_scale_s),
+            source=getattr(bus, 'pre_action_follower_source', None),
+        )
 
     def _capture_lower_action_context(self, bus_id, bus):
         context = self.lower_departure_regularity.capture(
@@ -9462,6 +9487,78 @@ class TransitDuetV2Runner:
             'terminal_dispatch_execution_error_abs_mean_s': round(float(
                 env_details.get(
                     'terminal_dispatch_execution_error_abs_mean_s', 0.0)), 6),
+            'follower_forecast_decision_count': int(env_details.get(
+                'follower_forecast_decision_count', 0)),
+            'follower_forecast_registered_count': int(env_details.get(
+                'follower_forecast_registered_count', 0)),
+            'follower_forecast_resolved_count': int(env_details.get(
+                'follower_forecast_resolved_count', 0)),
+            'follower_forecast_departure_resolved_count': int(
+                env_details.get(
+                    'follower_forecast_departure_resolved_count', 0)),
+            'follower_forecast_valid_rate': round(float(env_details.get(
+                'follower_forecast_valid_rate', 0.0)), 8),
+            'follower_forecast_resolution_rate': round(float(env_details.get(
+                'follower_forecast_resolution_rate', 0.0)), 8),
+            'follower_forecast_predicted_follower_gap_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_predicted_follower_gap_s_mean', 0.0)),
+                6),
+            'follower_forecast_actual_follower_gap_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_actual_follower_gap_s_mean', 0.0)), 6),
+            'follower_forecast_raw_gap_prediction_error_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_raw_gap_prediction_error_s_mean', 0.0)),
+                6),
+            'follower_forecast_raw_gap_prediction_mae_s': round(float(
+                env_details.get(
+                    'follower_forecast_raw_gap_prediction_mae_s', 0.0)), 6),
+            'follower_forecast_raw_gap_prediction_rmse_s': round(float(
+                env_details.get(
+                    'follower_forecast_raw_gap_prediction_rmse_s', 0.0)), 6),
+            'follower_forecast_raw_gap_prediction_p90_abs_s': round(float(
+                env_details.get(
+                    'follower_forecast_raw_gap_prediction_p90_abs_s', 0.0)), 6),
+            'follower_forecast_post_hold_gap_prediction_error_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_post_hold_gap_prediction_error_s_mean',
+                    0.0)), 6),
+            'follower_forecast_predicted_target_action_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_predicted_target_action_s_mean', 0.0)),
+                6),
+            'follower_forecast_realized_target_action_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_realized_target_action_s_mean', 0.0)),
+                6),
+            'follower_forecast_target_action_prediction_error_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_target_action_prediction_error_s_mean',
+                    0.0)), 6),
+            'follower_forecast_target_action_prediction_mae_s': round(float(
+                env_details.get(
+                    'follower_forecast_target_action_prediction_mae_s', 0.0)),
+                6),
+            'follower_forecast_departure_timing_error_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_departure_timing_error_s_mean', 0.0)),
+                6),
+            'follower_forecast_hold_need_false_positive_mean': round(float(
+                env_details.get(
+                    'follower_forecast_hold_need_false_positive_mean', 0.0)),
+                8),
+            'follower_forecast_hold_need_false_negative_mean': round(float(
+                env_details.get(
+                    'follower_forecast_hold_need_false_negative_mean', 0.0)),
+                8),
+            'follower_forecast_follower_future_hold_s_mean': round(float(
+                env_details.get(
+                    'follower_forecast_follower_future_hold_s_mean', 0.0)), 6),
+            'follower_forecast_follower_future_hold_positive_rate': round(
+                float(env_details.get(
+                    'follower_forecast_follower_future_hold_positive_rate',
+                    0.0)), 8),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(

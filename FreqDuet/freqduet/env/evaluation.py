@@ -88,6 +88,19 @@ class HeadwayEventRecorder:
         self._last_arrival: dict[tuple[int, bool], float] = {}
         self._last_arrival_trip: dict[tuple[int, bool], int] = {}
         self._last_departure: dict[tuple[int, bool], dict[str, float | int]] = {}
+        self._action_ready: dict[tuple[int, bool, int], float] = {}
+        self._follower_forecast_decisions = 0
+        self._follower_forecasts: list[dict[str, Any]] = []
+        self._follower_forecasts_by_current: dict[
+            tuple[int, bool, int], list[dict[str, Any]]
+        ] = {}
+        self._follower_forecasts_by_follower_ready: dict[
+            tuple[int, bool, int], list[dict[str, Any]]
+        ] = {}
+        self._follower_forecasts_by_follower_departure: dict[
+            tuple[int, bool, int], list[dict[str, Any]]
+        ] = {}
+        self._resolved_follower_forecasts: list[dict[str, Any]] = []
         self.headways_s: list[float] = []
         self.events: list[dict[str, Any]] = []
 
@@ -145,10 +158,180 @@ class HeadwayEventRecorder:
         departure_time_s: float,
         trip_id: int,
     ) -> None:
-        self._last_departure[(int(station_id), bool(direction))] = {
-            "time_s": float(departure_time_s),
+        station = int(station_id)
+        direction_value = bool(direction)
+        trip = int(trip_id)
+        departure = float(departure_time_s)
+        self._last_departure[(station, direction_value)] = {
+            "time_s": departure,
             "trip_id": int(trip_id),
         }
+        key = (station, direction_value, trip)
+        touched: list[dict[str, Any]] = []
+        for row in self._follower_forecasts_by_current.pop(key, []):
+            row["current_departure_time_s"] = departure
+            touched.append(row)
+        for row in self._follower_forecasts_by_follower_departure.pop(
+                key, []):
+            row["follower_departure_time_s"] = departure
+            touched.append(row)
+        for row in touched:
+            self._resolve_follower_forecast(row)
+
+    def record_action_ready(
+        self,
+        station_id: int,
+        direction: bool,
+        action_ready_time_s: float,
+        trip_id: int,
+    ) -> None:
+        """Resolve forecasts at the pre-control point they actually predict."""
+        key = (int(station_id), bool(direction), int(trip_id))
+        ready = float(action_ready_time_s)
+        self._action_ready[key] = ready
+        for row in self._follower_forecasts_by_follower_ready.pop(key, []):
+            row["follower_action_ready_time_s"] = ready
+            self._resolve_follower_forecast(row)
+
+    def record_follower_departure_forecast(
+        self,
+        *,
+        station_id: int,
+        direction: bool,
+        decision_time_s: float | None,
+        current_trip_id: int | None,
+        follower_trip_id: int | None,
+        predicted_follower_gap_s: float | None,
+        forward_departure_gap_s: float | None,
+        action_s: float,
+        action_cap_s: float,
+        source: str | None,
+    ) -> bool:
+        """Register one causal AVL forecast for later departure calibration."""
+        self._follower_forecast_decisions += 1
+        source_value = str(source or "unavailable").strip().lower()
+        numeric = (
+            decision_time_s,
+            predicted_follower_gap_s,
+            forward_departure_gap_s,
+            action_s,
+            action_cap_s,
+        )
+        if (
+            current_trip_id is None
+            or follower_trip_id is None
+            or int(current_trip_id) == int(follower_trip_id)
+            or not source_value.startswith("same_time_avl_")
+            or any(value is None for value in numeric)
+        ):
+            return False
+        decision, predicted_gap, forward_gap, action, action_cap = (
+            float(value) for value in numeric
+        )
+        if (
+            not np.isfinite(np.asarray(
+                [decision, predicted_gap, forward_gap, action, action_cap]
+            )).all()
+            or min(decision, predicted_gap, forward_gap, action) < 0.0
+            or action_cap <= 0.0
+        ):
+            return False
+
+        row: dict[str, Any] = {
+            "station_id": int(station_id),
+            "direction": bool(direction),
+            "decision_time_s": decision,
+            "current_trip_id": int(current_trip_id),
+            "follower_trip_id": int(follower_trip_id),
+            "predicted_follower_gap_s": predicted_gap,
+            "forward_departure_gap_s": forward_gap,
+            "action_s": action,
+            "action_cap_s": action_cap,
+            "source": source_value,
+            "current_departure_time_s": None,
+            "follower_action_ready_time_s": None,
+            "follower_departure_time_s": None,
+            "resolved": False,
+        }
+        self._follower_forecasts.append(row)
+        current_key = (
+            int(station_id), bool(direction), int(current_trip_id))
+        follower_key = (
+            int(station_id), bool(direction), int(follower_trip_id))
+        self._follower_forecasts_by_current.setdefault(
+            current_key, []).append(row)
+        self._follower_forecasts_by_follower_ready.setdefault(
+            follower_key, []).append(row)
+        self._follower_forecasts_by_follower_departure.setdefault(
+            follower_key, []).append(row)
+        if follower_key in self._action_ready:
+            row["follower_action_ready_time_s"] = self._action_ready[
+                follower_key]
+            self._resolve_follower_forecast(row)
+        return True
+
+    def _resolve_follower_forecast(self, row: dict[str, Any]) -> None:
+        if row["resolved"]:
+            self._update_follower_future_hold(row)
+            return
+        current_departure = row["current_departure_time_s"]
+        follower_ready = row["follower_action_ready_time_s"]
+        if current_departure is None or follower_ready is None:
+            return
+
+        actual_raw_gap = float(follower_ready) - row["decision_time_s"]
+        actual_post_hold_gap = (
+            float(follower_ready) - float(current_departure))
+        predicted_post_hold_gap = max(
+            row["predicted_follower_gap_s"] - row["action_s"], 0.0)
+        predicted_target = float(np.clip(
+            0.5 * (
+                row["predicted_follower_gap_s"]
+                - row["forward_departure_gap_s"]
+            ),
+            0.0,
+            row["action_cap_s"],
+        ))
+        realized_target = float(np.clip(
+            0.5 * (
+                actual_raw_gap - row["forward_departure_gap_s"]
+            ),
+            0.0,
+            row["action_cap_s"],
+        ))
+        row.update({
+            "actual_follower_gap_s": actual_raw_gap,
+            "raw_gap_prediction_error_s": (
+                row["predicted_follower_gap_s"] - actual_raw_gap),
+            "predicted_post_hold_gap_s": predicted_post_hold_gap,
+            "actual_post_hold_gap_s": actual_post_hold_gap,
+            "post_hold_gap_prediction_error_s": (
+                predicted_post_hold_gap - actual_post_hold_gap),
+            "predicted_target_action_s": predicted_target,
+            "realized_target_action_s": realized_target,
+            "target_action_prediction_error_s": (
+                predicted_target - realized_target),
+            "departure_timing_error_s": (
+                float(current_departure)
+                - row["decision_time_s"]
+                - row["action_s"]),
+            "hold_need_false_positive": float(
+                predicted_target > 1e-9 and realized_target <= 1e-9),
+            "hold_need_false_negative": float(
+                predicted_target <= 1e-9 and realized_target > 1e-9),
+            "resolved": True,
+        })
+        self._resolved_follower_forecasts.append(row)
+        self._update_follower_future_hold(row)
+
+    @staticmethod
+    def _update_follower_future_hold(row: dict[str, Any]) -> None:
+        ready = row.get("follower_action_ready_time_s")
+        departure = row.get("follower_departure_time_s")
+        if ready is None or departure is None:
+            return
+        row["follower_future_hold_s"] = max(
+            float(departure) - float(ready), 0.0)
 
     def previous_departure_event(
         self, station_id: int, direction: bool
@@ -159,22 +342,102 @@ class HeadwayEventRecorder:
     def summary(self) -> dict[str, float | int]:
         values = np.asarray(self.headways_s, dtype=np.float64)
         if values.size == 0:
-            return {
+            result = {
                 "headway_event_count": len(self.events),
                 "headway_sample_count": 0,
                 "headway_mean_s": 0.0,
                 "headway_std_s": 0.0,
                 "headway_cv": 0.0,
             }
-        mean = float(values.mean())
-        std = float(values.std())
-        return {
-            "headway_event_count": len(self.events),
-            "headway_sample_count": int(values.size),
-            "headway_mean_s": mean,
-            "headway_std_s": std,
-            "headway_cv": std / max(mean, 1.0),
+        else:
+            mean = float(values.mean())
+            std = float(values.std())
+            result = {
+                "headway_event_count": len(self.events),
+                "headway_sample_count": int(values.size),
+                "headway_mean_s": mean,
+                "headway_std_s": std,
+                "headway_cv": std / max(mean, 1.0),
+            }
+        result.update(self._follower_forecast_summary())
+        return result
+
+    def _follower_forecast_summary(self) -> dict[str, float | int]:
+        registered = len(self._follower_forecasts)
+        resolved = len(self._resolved_follower_forecasts)
+        result: dict[str, float | int] = {
+            "follower_forecast_decision_count": int(
+                self._follower_forecast_decisions),
+            "follower_forecast_registered_count": int(registered),
+            "follower_forecast_resolved_count": int(resolved),
+            "follower_forecast_valid_rate": float(
+                registered / max(self._follower_forecast_decisions, 1)),
+            "follower_forecast_resolution_rate": float(
+                resolved / max(registered, 1)),
+            "follower_forecast_departure_resolved_count": int(sum(
+                "follower_future_hold_s" in row
+                for row in self._resolved_follower_forecasts
+            )),
         }
+        metric_names = (
+            "predicted_follower_gap_s",
+            "actual_follower_gap_s",
+            "raw_gap_prediction_error_s",
+            "post_hold_gap_prediction_error_s",
+            "predicted_target_action_s",
+            "realized_target_action_s",
+            "target_action_prediction_error_s",
+            "departure_timing_error_s",
+            "hold_need_false_positive",
+            "hold_need_false_negative",
+        )
+        if not resolved:
+            for name in metric_names:
+                result[f"follower_forecast_{name}_mean"] = 0.0
+            result.update({
+                "follower_forecast_raw_gap_prediction_mae_s": 0.0,
+                "follower_forecast_raw_gap_prediction_rmse_s": 0.0,
+                "follower_forecast_raw_gap_prediction_p90_abs_s": 0.0,
+                "follower_forecast_target_action_prediction_mae_s": 0.0,
+                "follower_forecast_follower_future_hold_s_mean": 0.0,
+                "follower_forecast_follower_future_hold_positive_rate": 0.0,
+            })
+            return result
+
+        arrays = {
+            name: np.asarray(
+                [row[name] for row in self._resolved_follower_forecasts],
+                dtype=np.float64,
+            )
+            for name in metric_names
+        }
+        for name, array in arrays.items():
+            result[f"follower_forecast_{name}_mean"] = float(array.mean())
+        raw_error = arrays["raw_gap_prediction_error_s"]
+        target_error = arrays["target_action_prediction_error_s"]
+        result.update({
+            "follower_forecast_raw_gap_prediction_mae_s": float(
+                np.abs(raw_error).mean()),
+            "follower_forecast_raw_gap_prediction_rmse_s": float(
+                np.sqrt(np.mean(raw_error ** 2))),
+            "follower_forecast_raw_gap_prediction_p90_abs_s": float(
+                np.quantile(np.abs(raw_error), 0.9)),
+            "follower_forecast_target_action_prediction_mae_s": float(
+                np.abs(target_error).mean()),
+        })
+        future_holds = np.asarray([
+            row["follower_future_hold_s"]
+            for row in self._resolved_follower_forecasts
+            if "follower_future_hold_s" in row
+        ], dtype=np.float64)
+        result.update({
+            "follower_forecast_follower_future_hold_s_mean": (
+                float(future_holds.mean()) if future_holds.size else 0.0),
+            "follower_forecast_follower_future_hold_positive_rate": (
+                float((future_holds > 1e-9).mean())
+                if future_holds.size else 0.0),
+        })
+        return result
 
 
 def compute_wait_metrics(
