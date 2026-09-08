@@ -525,6 +525,7 @@ class HeadwayEventRecorder:
                 "follower_forecast_target_action_prediction_mae_s": 0.0,
                 "follower_forecast_base_target_action_prediction_mae_s": 0.0,
                 "follower_forecast_calibration_requested_adjustment_abs_mean_s": 0.0,
+                "follower_forecast_calibration_requested_adjustment_abs_max_s": 0.0,
                 "follower_forecast_calibration_target_adjustment_abs_mean_s": 0.0,
                 "follower_forecast_follower_future_hold_s_mean": 0.0,
                 "follower_forecast_follower_future_hold_positive_rate": 0.0,
@@ -563,6 +564,9 @@ class HeadwayEventRecorder:
             "follower_forecast_calibration_requested_adjustment_abs_mean_s": float(
                 np.abs(arrays[
                     "calibration_requested_adjustment_s"]).mean()),
+            "follower_forecast_calibration_requested_adjustment_abs_max_s": float(
+                np.abs(arrays[
+                    "calibration_requested_adjustment_s"]).max()),
             "follower_forecast_calibration_target_adjustment_abs_mean_s": float(
                 np.abs(arrays["calibration_target_adjustment_s"]).mean()),
         })

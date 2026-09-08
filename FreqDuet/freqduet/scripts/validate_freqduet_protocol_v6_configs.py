@@ -150,6 +150,18 @@ PROJECTION_CONFIG_EXPECTED = {
     ),
 }
 PROJECTION_CONFIGS = list(PROJECTION_CONFIG_EXPECTED)
+V26_FOLLOWER_CALIBRATION_EXPECTED = {
+    "F_freqduet_protocol_v6_v26_histbias_a20_c10_hiro": (
+        "historical_target_bias_v1", 0.2, 0.0, 10.0),
+    "F_freqduet_protocol_v6_v26_histridge_a10_r005_c10_hiro": (
+        "historical_target_ridge_v1", 0.1, 0.05, 10.0),
+    "F_freqduet_protocol_v6_v26_histridge_a20_r005_c10_hiro": (
+        "historical_target_ridge_v1", 0.2, 0.05, 10.0),
+    "F_freqduet_protocol_v6_v26_histridge_a20_r005_c20_hiro": (
+        "historical_target_ridge_v1", 0.2, 0.05, 20.0),
+}
+V26_FOLLOWER_CALIBRATION_CONFIGS = list(
+    V26_FOLLOWER_CALIBRATION_EXPECTED)
 ALL_GAIN_FLOOR_CONFIGS = (
     GAIN_FLOOR_CONFIGS + V22_GAIN_FLOOR_FACTORIAL_CONFIGS)
 ALL_GAIN_FLOOR_PASSENGER_CONFIGS = (
@@ -238,6 +250,7 @@ EXPERIMENTAL_CONFIGS = [
     *HF_OPPORTUNITY_GAIN_CONFIGS,
     *ALL_GAIN_FLOOR_CONFIGS,
     *PROJECTION_CONFIGS,
+    *V26_FOLLOWER_CALIBRATION_CONFIGS,
 ]
 
 
@@ -280,7 +293,36 @@ def validate(
             "causal_departure_regularity", {}) or {}
         regularity_policy = lower.get(
             "causal_regularity_policy", {}) or {}
+        follower_calibration = lower.get(
+            "follower_forecast_calibration", {}) or {}
         lower_context = (frequency.get("lower_context", {}) or {})
+        if name in V26_FOLLOWER_CALIBRATION_EXPECTED:
+            expected_mode, expected_alpha, expected_ridge, expected_cap = (
+                V26_FOLLOWER_CALIBRATION_EXPECTED[name])
+            expected_calibration_contract = {
+                "enable": True,
+                "mode": expected_mode,
+                "min_history_episodes": 5,
+                "min_samples_per_episode": 128,
+                "history_alpha": expected_alpha,
+                "ridge": expected_ridge,
+                "residual_clip_s": 30.0,
+                "adjustment_cap_s": expected_cap,
+                "time_period_s": 50400.0,
+            }
+            observed_calibration_contract = {
+                key: follower_calibration.get(key)
+                for key in expected_calibration_contract
+            }
+            if (observed_calibration_contract
+                    != expected_calibration_contract):
+                raise ValueError(
+                    f"{name}: historical follower calibration contract "
+                    "is not locked")
+            if not str(protocol.get("role", "")).startswith(
+                    "exploratory_historical_follower_half_gap_"):
+                raise ValueError(
+                    f"{name}: follower calibration role is not explicit")
         if name in PROJECTION_CONFIGS:
             if lower.get("discrete_critic") != "zero_hold_advantage":
                 raise ValueError(

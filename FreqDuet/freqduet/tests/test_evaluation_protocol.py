@@ -220,6 +220,11 @@ class MeasurementTest(unittest.TestCase):
                 "follower_forecast_calibration_target_adjustment_s_mean"],
             -10.0,
         )
+        self.assertEqual(
+            summary[
+                "follower_forecast_calibration_requested_adjustment_abs_max_s"],
+            10.0,
+        )
         samples = recorder.follower_forecast_calibration_samples()
         self.assertEqual(len(samples), 1)
         self.assertEqual(samples[0]["calibration_features"], (1.0, 0.5))

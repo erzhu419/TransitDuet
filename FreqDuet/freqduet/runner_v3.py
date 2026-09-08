@@ -300,6 +300,7 @@ class DiagnosticLog:
         'follower_forecast_base_hold_need_false_negative_mean',
         'follower_forecast_calibration_requested_adjustment_s_mean',
         'follower_forecast_calibration_requested_adjustment_abs_mean_s',
+        'follower_forecast_calibration_requested_adjustment_abs_max_s',
         'follower_forecast_calibration_effective_adjustment_s_mean',
         'follower_forecast_calibration_target_adjustment_s_mean',
         'follower_forecast_calibration_target_adjustment_abs_mean_s',
@@ -9704,6 +9705,10 @@ class TransitDuetV2Runner:
             'follower_forecast_calibration_requested_adjustment_abs_mean_s': (
                 round(float(env_details.get(
                     'follower_forecast_calibration_requested_adjustment_abs_mean_s',
+                    0.0)), 6)),
+            'follower_forecast_calibration_requested_adjustment_abs_max_s': (
+                round(float(env_details.get(
+                    'follower_forecast_calibration_requested_adjustment_abs_max_s',
                     0.0)), 6)),
             'follower_forecast_calibration_effective_adjustment_s_mean': round(
                 float(env_details.get(

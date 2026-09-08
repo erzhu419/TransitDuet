@@ -1,0 +1,17 @@
+_extends: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro.yaml
+_name: F_freqduet_protocol_v6_v26_histridge_a20_r005_c10_hiro
+
+protocol:
+  role: exploratory_historical_follower_half_gap_ridge_balanced_v26
+
+lower:
+  follower_forecast_calibration:
+    enable: true
+    mode: historical_target_ridge_v1
+    min_history_episodes: 5
+    min_samples_per_episode: 128
+    history_alpha: 0.2
+    ridge: 0.05
+    residual_clip_s: 30.0
+    adjustment_cap_s: 10.0
+    time_period_s: 50400.0

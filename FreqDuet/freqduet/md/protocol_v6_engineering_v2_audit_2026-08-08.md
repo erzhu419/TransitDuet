@@ -3123,3 +3123,87 @@ factor is authorized as a separate ablation for all three mature policies. The
 next version must correct the forecast from information available strictly
 before the current action and must not alter sampled-action execution, add a
 post-policy guard, or resume projection-target tuning.
+
+### Engineering-v26 historical follower calibration preregistration (2026-09-08)
+
+V26 implements the branch authorized by the mature V25 audit. It retains the
+scalar V13 lower objective, seven executable holding actions, historical
+frequency prior, sampled-action execution, and no post-policy guard. It changes
+only the causal follower estimate supplied to the existing compact two-sided
+regularity target. The response is the clipped historical half-gap residual,
+`0.5 * (eventual follower action-ready gap - base same-time AVL forecast)`.
+Multiplying this response by two when correcting the follower gap preserves the
+unconstrained target-action geometry before the existing `[0, action_cap]`
+clip, including observations whose base target lies on a clipping boundary.
+
+The calibrator is updated once after each completed learned-policy training
+day. Fixed-expert days, the current incomplete day, and all evaluation days do
+not update it. Each update first forms day-normalized Gram and response
+sufficient statistics and then applies a registered exponential history
+weight, so busy days do not dominate solely by producing more decisions. The
+model may be used only after five accepted historical days, each with at least
+128 resolved same-follower action-ready events. One immutable AVL snapshot is
+frozen before the simulation's bus-update loop and shared by every bus whose
+action becomes ready on that tick; consequently, a same-time feature cannot
+depend on bus traversal order. The learned state and its full parameter
+contract are included in deployment checkpoints and in the frozen-policy
+digest. Evaluation must leave that digest unchanged.
+
+The four exploratory candidates are fixed before any V26 effect rollout:
+
+- `v26_histbias_a20_c10`: intercept-only, history alpha `0.20`, cap `10 s`;
+- `v26_histridge_a10_r005_c10`: contextual ridge, alpha `0.10`, ridge `0.05`, cap `10 s`;
+- `v26_histridge_a20_r005_c10`: contextual ridge, alpha `0.20`, ridge `0.05`, cap `10 s`;
+- `v26_histridge_a20_r005_c20`: contextual ridge, alpha `0.20`, ridge `0.05`, cap `20 s`.
+
+All use a `30 s` response clip and explicit `50,400 s` service-period
+contract. Contextual features are current deployable APC/AVL quantities and
+cyclic route/time coordinates only. There is no same-day outcome, future
+follower holding, future departure, or scenario label in the prediction
+features. Candidate priority is contextual alpha `0.20` cap `10`, contextual
+alpha `0.10` cap `10`, contextual alpha `0.20` cap `20`, then intercept-only.
+Priority is architectural, preferring bounded context at the registered
+timescale; it is not outcome-ranked.
+
+The non-effect smoke uses promoted `confirmed_main` as the validator-required
+protocol anchor, scalar V13 as the paired reference, all four candidates,
+training seed `31903`, frozen scenario seed `64903`, eight training episodes,
+and checkpoint 7. Adding `confirmed_main` to the originally planned V13-plus-
+candidate smoke is a pre-effect fail-closed correction: the V6 validator
+requires a historical or promoted main in every matrix. Smoke must verify clean
+identified source, exact manifests and CRN, frozen policies, one accepted
+update per learned day, post-update history `1..8`, no used-generation
+activation in episodes `0..4`, active use in episodes `5..7`, exact cap
+compliance, nonzero fitted/used corrections, complete forecast resolution,
+checkpointed history 8 in evaluation, no evaluation update, and exact
+base/effective forecast identity for both disabled controls. Smoke carries
+`effect_evidence=false`; only a complete mechanical pass authorizes the formal
+screen.
+
+The exploratory formal screen is fixed at 40 episodes/checkpoint 39, training
+seeds `32013, 32031, 32053, 32077`, and common frozen scenario seeds
+`65017, 65041, 65059, 65083`. Controls are historical `main`, promoted
+`confirmed_main`, `noguard`, and scalar V13; scalar V13 is the paired outcome
+reference. The aggregate must contain exactly 128 unique frozen rollouts and
+must pass source, manifest, scenario-tape, frozen-policy, disabled-control
+identity, activation-timing, cap, and complete-resolution checks.
+
+A candidate is eligible for fresh confirmation only if every mechanical check
+passes and all of these precommitted effect conditions hold:
+
+- event-count-weighted target-action MAE improves its own uncalibrated base by
+  at least `0.5 s`, with at least `0.25 s` improvement in three of four
+  training seeds;
+- pooled hold-need sign error is no more than `0.005` worse than its own base,
+  and the same noninferiority holds in at least three training seeds;
+- paired headway CV versus scalar V13 is at most `-0.003`, with a negative
+  train-seed mean delta in at least three of four training seeds;
+- paired restricted journey time is no more than `+0.10 min`, service cost no
+  more than `+0.003`, passenger unserved rate no more than `+0.002`, and mean
+  lower action no more than `+1.0 s`, all versus scalar V13.
+
+The first complete pass in the registered architectural priority is selected
+for an independent fresh-seed confirmation. The screen itself has
+`claim_eligible=false`. If no candidate passes, V26 is not promoted and these
+outcomes may not be used to loosen thresholds, reorder candidates, or resume
+V23/V24 projection tuning.
