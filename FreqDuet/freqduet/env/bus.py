@@ -3,8 +3,8 @@ import numbers
 import numpy as np
 
 from lower.causal_follower_eta import (
-    AVLVehicleSnapshot,
     estimate_follower_departure_gap,
+    freeze_avl_vehicle_snapshots,
 )
 from lower.causal_departure_regularity import (
     causal_two_sided_holding_target_s,
@@ -273,6 +273,7 @@ class Bus(object):
               causal_holding_guard=None,
               causal_holding_action_scale_s=60.0,
               follower_target_calibrator=None,
+              follower_avl_snapshots=None,
               headway_recorder=None,
               lower_state_input_schema="legacy_headway_deviation",
               lower_observation_contract="latent_oracle_legacy",
@@ -295,6 +296,7 @@ class Bus(object):
         self._causal_holding_action_scale_s = max(
             float(causal_holding_action_scale_s), 1e-6)
         self._follower_target_calibrator = follower_target_calibrator
+        self._follower_avl_snapshots = follower_avl_snapshots
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -827,23 +829,9 @@ class Bus(object):
             self.pre_action_follower_calibration_active = False
             self.pre_action_follower_calibration_history_episodes = 0
             return
-        snapshots = []
-        for bus in bus_all:
-            try:
-                route_speed = float(bus.current_route.speed_limit)
-            except (AttributeError, KeyError, TypeError, ValueError):
-                route_speed = 0.0
-            snapshots.append(AVLVehicleSnapshot(
-                bus_id=int(getattr(bus, 'bus_id', -1)),
-                direction=bool(getattr(bus, 'direction', True)),
-                on_route=bool(getattr(bus, 'on_route', False)),
-                progress_m=float(getattr(bus, 'travel_distance', 0.0)),
-                launch_time_s=float(getattr(
-                    bus, 'launch_time', current_time)),
-                current_speed_mps=float(getattr(
-                    bus, 'current_speed', 0.0)),
-                route_speed_mps=route_speed,
-            ))
+        snapshots = getattr(self, '_follower_avl_snapshots', None)
+        if snapshots is None:
+            snapshots = freeze_avl_vehicle_snapshots(bus_all)
         estimate = estimate_follower_departure_gap(
             current_bus_id=int(self.bus_id),
             current_direction=bool(self.direction),
@@ -859,14 +847,7 @@ class Bus(object):
         self.pre_action_follower_spatial_gap = estimate.spatial_gap_m
         self.pre_action_follower_speed = estimate.speed_mps
         self.pre_action_follower_bus_id = estimate.follower_bus_id
-        follower = next((
-            bus for bus in bus_all
-            if int(getattr(bus, 'bus_id', -1)) == int(
-                estimate.follower_bus_id
-                if estimate.follower_bus_id is not None else -1)
-        ), None)
-        self.pre_action_follower_trip_id = (
-            int(getattr(follower, 'trip_id')) if follower is not None else None)
+        self.pre_action_follower_trip_id = estimate.follower_trip_id
         self.pre_action_follower_source = estimate.source
         self.pre_action_follower_base_target_action_s = None
         self.pre_action_follower_calibrated_target_action_s = None
@@ -888,7 +869,6 @@ class Bus(object):
             target_headway_s=float(self._target_headway),
             action_cap_s=float(self._causal_holding_action_scale_s),
             eta_s=estimate.eta_s,
-            spatial_gap_m=estimate.spatial_gap_m,
             speed_mps=estimate.speed_mps,
             service_dwell_s=float(getattr(
                 self, 'last_service_dwell_s', 0.0)),

@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from env.timetable import Timetable
-from env.bus import Bus
+from env.bus import Bus, BusState
 from env.evaluation import (
     EpisodeProtocol,
     HeadwayEventRecorder,
@@ -27,6 +27,7 @@ from env.scenario import ScenarioTape
 from env.station import Station
 from env.visualize import visualize
 from frequency import DemandEventLogger, DemandFrequencyTracker, fit_harmonic_prior
+from lower.causal_follower_eta import freeze_avl_vehicle_snapshots
 from gym.spaces.box import Box
 from gym.spaces import MultiDiscrete
 
@@ -807,6 +808,14 @@ class env_bus(object):
             0.0,
             1.0,
         ))
+        follower_avl_snapshots = None
+        if any(
+                bus.on_route
+                and bus.state == BusState.HOLDING
+                and bus.holding_time <= 1
+                for bus in self.bus_all):
+            follower_avl_snapshots = freeze_avl_vehicle_snapshots(
+                self.bus_all)
         # update bus state
         apc_frequency_counts = {}
         for bus in self.bus_all:
@@ -839,6 +848,7 @@ class env_bus(object):
                               60.0),
                           follower_target_calibrator=(
                               self.follower_target_calibrator),
+                          follower_avl_snapshots=follower_avl_snapshots,
                           headway_recorder=(
                               self.headway_events
                               if self.headway_state_mode == 'arrival_event'

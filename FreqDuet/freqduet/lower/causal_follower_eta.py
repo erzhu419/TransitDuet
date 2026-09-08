@@ -17,6 +17,7 @@ class AVLVehicleSnapshot:
     launch_time_s: float
     current_speed_mps: float
     route_speed_mps: float
+    trip_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -26,8 +27,38 @@ class FollowerDepartureEstimate:
     spatial_gap_m: float | None
     speed_mps: float | None
     follower_bus_id: int | None
+    follower_trip_id: int | None
     source: str
     valid: bool
+
+
+def freeze_avl_vehicle_snapshots(
+    vehicles: Iterable[Any],
+) -> tuple[AVLVehicleSnapshot, ...]:
+    """Freeze one simulation tick before any vehicle mutates its state."""
+    snapshots = []
+    for vehicle in vehicles:
+        try:
+            route_speed = float(vehicle.current_route.speed_limit)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            route_speed = 0.0
+        try:
+            progress = float(vehicle.travel_distance)
+        except (AttributeError, TypeError, ValueError):
+            progress = 0.0
+        trip_id = getattr(vehicle, "trip_id", None)
+        snapshots.append(AVLVehicleSnapshot(
+            bus_id=int(getattr(vehicle, "bus_id", -1)),
+            direction=bool(getattr(vehicle, "direction", True)),
+            on_route=bool(getattr(vehicle, "on_route", False)),
+            progress_m=progress,
+            launch_time_s=float(getattr(vehicle, "launch_time", 0.0)),
+            current_speed_mps=float(getattr(
+                vehicle, "current_speed", 0.0)),
+            route_speed_mps=route_speed,
+            trip_id=None if trip_id is None else int(trip_id),
+        ))
+    return tuple(snapshots)
 
 
 @dataclass(frozen=True)
@@ -44,7 +75,7 @@ class FollowerTargetCalibrationResult:
 
 
 class HistoricalFollowerTargetCalibrator:
-    """Fit a compact target-residual prior from completed service days.
+    """Fit a compact action-equivalent gap prior from completed service days.
 
     Predictions made during episode ``d`` only use matched follower outcomes
     from episodes strictly before ``d``.  The runner updates the sufficient
@@ -54,6 +85,7 @@ class HistoricalFollowerTargetCalibrator:
     """
 
     SCHEMA = "freqduet-historical-follower-target-calibrator-v1"
+    UPDATE_SOURCE = "completed_learned_training_days_v1"
     DISABLED = "disabled"
     BIAS = "historical_target_bias_v1"
     CONTEXT_RIDGE = "historical_target_ridge_v1"
@@ -65,7 +97,6 @@ class HistoricalFollowerTargetCalibrator:
         "forward_gap_norm",
         "eta_norm",
         "service_dwell_norm",
-        "spatial_eta_norm",
         "speed_norm",
         "route_progress",
         "route_progress_sq",
@@ -90,6 +121,7 @@ class HistoricalFollowerTargetCalibrator:
         ridge: float = 0.05,
         residual_clip_s: float = 30.0,
         adjustment_cap_s: float = 10.0,
+        time_period_s: float = 14.0 * 3600.0,
     ) -> None:
         self.enabled = bool(enabled)
         self.mode = str(mode).strip().lower() if self.enabled else self.DISABLED
@@ -101,6 +133,7 @@ class HistoricalFollowerTargetCalibrator:
         self.ridge = float(ridge)
         self.residual_clip_s = float(residual_clip_s)
         self.adjustment_cap_s = float(adjustment_cap_s)
+        self.time_period_s = float(time_period_s)
         if self.min_history_episodes < 1:
             raise ValueError("min_history_episodes must be positive")
         if self.min_samples_per_episode < 1:
@@ -115,6 +148,8 @@ class HistoricalFollowerTargetCalibrator:
         if not np.isfinite(self.adjustment_cap_s) \
                 or self.adjustment_cap_s <= 0.0:
             raise ValueError("adjustment_cap_s must be finite and positive")
+        if not np.isfinite(self.time_period_s) or self.time_period_s <= 0.0:
+            raise ValueError("time_period_s must be finite and positive")
 
         dimension = len(self.feature_names)
         self._gram = np.zeros((dimension, dimension), dtype=np.float64)
@@ -139,6 +174,7 @@ class HistoricalFollowerTargetCalibrator:
             ridge=cfg.get("ridge", 0.05),
             residual_clip_s=cfg.get("residual_clip_s", 30.0),
             adjustment_cap_s=cfg.get("adjustment_cap_s", 10.0),
+            time_period_s=cfg.get("time_period_s", 14.0 * 3600.0),
         )
 
     @property
@@ -163,7 +199,6 @@ class HistoricalFollowerTargetCalibrator:
         target_headway_s: float,
         action_cap_s: float,
         eta_s: float | None,
-        spatial_gap_m: float | None,
         speed_mps: float | None,
         service_dwell_s: float,
         route_progress: float,
@@ -200,7 +235,6 @@ class HistoricalFollowerTargetCalibrator:
             target_headway_s=target_headway,
             action_cap_s=action_cap,
             eta_s=eta_s,
-            spatial_gap_m=spatial_gap_m,
             speed_mps=speed_mps,
             service_dwell_s=service_dwell_s,
             route_progress=route_progress,
@@ -218,10 +252,9 @@ class HistoricalFollowerTargetCalibrator:
                 self.adjustment_cap_s,
             ))
 
-        # The response is an action-target residual.  Two seconds of gap
-        # correction move the unconstrained balancing action by one second.
-        # Applying the cap in action units bounds the effective gap correction
-        # even for observations at a clipping boundary.
+        # The response is the unclipped half-gap residual.  Two seconds of gap
+        # correction move the unconstrained balancing action by one second, so
+        # the mapping remains exact even when the final action target clips.
         calibrated_gap = max(base_gap + 2.0 * requested, 0.0)
         calibrated_target = _two_sided_target(
             calibrated_gap, forward_gap, action_cap)
@@ -254,15 +287,18 @@ class HistoricalFollowerTargetCalibrator:
         residuals: list[float] = []
         for row in rows:
             values = row.get("calibration_features")
-            base_target = row.get("base_predicted_target_action_s")
-            realized_target = row.get("realized_target_action_s")
-            if values is None or base_target is None or realized_target is None:
+            base_gap = row.get("base_predicted_follower_gap_s")
+            actual_gap = row.get("actual_follower_gap_s")
+            if values is None or base_gap is None or actual_gap is None:
                 continue
             vector = np.asarray(values, dtype=np.float64).reshape(-1)
             if vector.size != len(self.feature_names) \
                     or not np.isfinite(vector).all():
                 continue
-            residual = float(realized_target) - float(base_target)
+            # Half-gap residual is the globally linear action-equivalent
+            # correction before target clipping.  Multiplying its prediction
+            # by two therefore remains exact at both action boundaries.
+            residual = 0.5 * (float(actual_gap) - float(base_gap))
             if not np.isfinite(residual):
                 continue
             features.append(vector)
@@ -326,6 +362,8 @@ class HistoricalFollowerTargetCalibrator:
                 "ridge": self.ridge,
                 "residual_clip_s": self.residual_clip_s,
                 "adjustment_cap_s": self.adjustment_cap_s,
+                "time_period_s": self.time_period_s,
+                "update_source": self.UPDATE_SOURCE,
             },
             "gram": self._gram.copy(),
             "rhs": self._rhs.copy(),
@@ -389,7 +427,6 @@ class HistoricalFollowerTargetCalibrator:
         target_headway_s: float,
         action_cap_s: float,
         eta_s: float | None,
-        spatial_gap_m: float | None,
         speed_mps: float | None,
         service_dwell_s: float,
         route_progress: float,
@@ -404,13 +441,12 @@ class HistoricalFollowerTargetCalibrator:
         target = max(float(target_headway_s), 1.0)
         action_cap = max(float(action_cap_s), 1.0)
         eta = _finite_nonnegative_optional(eta_s) or 0.0
-        spatial = _finite_nonnegative_optional(spatial_gap_m) or 0.0
         speed = _finite_positive_optional(speed_mps) or 0.25
         dwell = _finite_nonnegative_optional(service_dwell_s) or 0.0
         progress = float(np.clip(route_progress, 0.0, 1.0))
         station = float(np.clip(station_phase, 0.0, 1.0))
-        day_phase = (float(current_time_s) % (14.0 * 3600.0)) / (
-            14.0 * 3600.0)
+        day_phase = (
+            float(current_time_s) % self.time_period_s) / self.time_period_s
         time_angle = 2.0 * np.pi * day_phase
         station_angle = 2.0 * np.pi * station
         source_value = str(source).strip().lower()
@@ -426,7 +462,6 @@ class HistoricalFollowerTargetCalibrator:
             np.clip(forward_departure_gap_s / target, 0.0, 3.0),
             np.clip(eta / target, 0.0, 3.0),
             np.clip(dwell / action_cap, 0.0, 2.0),
-            np.clip(spatial / (target * speed), 0.0, 3.0),
             np.clip(speed / 15.0, 0.0, 2.0),
             progress,
             progress * progress,
@@ -519,6 +554,8 @@ def estimate_follower_departure_gap(
         spatial_gap_m=float(spatial_gap),
         speed_mps=float(speed),
         follower_bus_id=int(follower.bus_id),
+        follower_trip_id=(
+            None if follower.trip_id is None else int(follower.trip_id)),
         source=source,
         valid=True,
     )
@@ -531,6 +568,7 @@ def _invalid(source: str) -> FollowerDepartureEstimate:
         spatial_gap_m=None,
         speed_mps=None,
         follower_bus_id=None,
+        follower_trip_id=None,
         source=str(source),
         valid=False,
     )

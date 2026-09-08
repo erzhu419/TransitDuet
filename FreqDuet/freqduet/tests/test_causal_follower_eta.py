@@ -1,9 +1,11 @@
 import unittest
+from types import SimpleNamespace
 
 from lower.causal_follower_eta import (
     AVLVehicleSnapshot,
     HistoricalFollowerTargetCalibrator,
     estimate_follower_departure_gap,
+    freeze_avl_vehicle_snapshots,
 )
 
 
@@ -106,7 +108,6 @@ class HistoricalFollowerTargetCalibratorTest(unittest.TestCase):
             target_headway_s=180.0,
             action_cap_s=60.0,
             eta_s=180.0,
-            spatial_gap_m=900.0,
             speed_mps=5.0,
             service_dwell_s=20.0,
             route_progress=0.4,
@@ -121,10 +122,10 @@ class HistoricalFollowerTargetCalibratorTest(unittest.TestCase):
         return [
             {
                 "calibration_features": prediction.features,
-                "base_predicted_target_action_s": (
-                    prediction.base_target_action_s),
-                "realized_target_action_s": (
-                    prediction.base_target_action_s + residual),
+                "base_predicted_follower_gap_s": (
+                    prediction.base_departure_gap_s),
+                "actual_follower_gap_s": (
+                    prediction.base_departure_gap_s + 2.0 * residual),
             }
             for _ in range(count)
         ]
@@ -185,6 +186,46 @@ class HistoricalFollowerTargetCalibratorTest(unittest.TestCase):
         self.assertLessEqual(
             abs(active.calibrated_departure_gap_s - 200.0), 6.0)
 
+    def test_half_gap_correction_is_bounded_across_target_clipping(self):
+        calibrator = HistoricalFollowerTargetCalibrator(
+            enabled=True,
+            mode="historical_target_bias_v1",
+            min_history_episodes=1,
+            min_samples_per_episode=1,
+            history_alpha=1.0,
+            ridge=0.0,
+            adjustment_cap_s=3.0,
+        )
+        initial = self.prediction(calibrator)
+        calibrator.update_episode(
+            self.rows(initial, residual=8.0, count=1), episode=0)
+
+        def predict(base_gap):
+            return calibrator.calibrate(
+                base_departure_gap_s=base_gap,
+                forward_departure_gap_s=100.0,
+                target_headway_s=180.0,
+                action_cap_s=60.0,
+                eta_s=100.0,
+                speed_mps=5.0,
+                service_dwell_s=20.0,
+                route_progress=0.5,
+                station_phase=0.5,
+                current_time_s=3600.0,
+                direction=True,
+                source="same_time_avl_journey_speed_eta",
+            )
+
+        below = predict(80.0)
+        crossing = predict(96.0)
+        upper = predict(230.0)
+        self.assertEqual(below.calibrated_departure_gap_s, 86.0)
+        self.assertEqual(below.calibrated_target_action_s, 0.0)
+        self.assertEqual(crossing.calibrated_departure_gap_s, 102.0)
+        self.assertEqual(crossing.calibrated_target_action_s, 1.0)
+        self.assertEqual(upper.calibrated_departure_gap_s, 236.0)
+        self.assertEqual(upper.calibrated_target_action_s, 60.0)
+
     def test_state_round_trip_preserves_prediction_and_update_order(self):
         source = HistoricalFollowerTargetCalibrator(
             enabled=True,
@@ -208,6 +249,40 @@ class HistoricalFollowerTargetCalibratorTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "monotonically"):
             restored.update_episode(
                 self.rows(initial, residual=-4.0, count=1), episode=3)
+
+    def test_frozen_avl_snapshot_is_order_and_mutation_invariant(self):
+        def bus(bus_id, progress, trip_id):
+            return SimpleNamespace(
+                bus_id=bus_id,
+                trip_id=trip_id,
+                direction=True,
+                on_route=True,
+                travel_distance=progress,
+                launch_time=0.0,
+                current_speed=5.0,
+                current_route=SimpleNamespace(speed_limit=10.0),
+            )
+
+        buses = [bus(1, 1000.0, 10), bus(2, 800.0, 12), bus(3, 500.0, 14)]
+        frozen = freeze_avl_vehicle_snapshots(buses)
+        reversed_frozen = freeze_avl_vehicle_snapshots(reversed(buses))
+        buses[1].travel_distance = 1200.0
+        buses[1].trip_id = 99
+
+        kwargs = dict(
+            current_bus_id=1,
+            current_direction=True,
+            current_progress_m=1000.0,
+            current_time_s=200.0,
+            service_dwell_proxy_s=10.0,
+        )
+        forward = estimate_follower_departure_gap(
+            vehicles=frozen, **kwargs)
+        reverse = estimate_follower_departure_gap(
+            vehicles=reversed_frozen, **kwargs)
+        self.assertEqual(forward, reverse)
+        self.assertEqual(forward.follower_bus_id, 2)
+        self.assertEqual(forward.follower_trip_id, 12)
 
 
 if __name__ == "__main__":

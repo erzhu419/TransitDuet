@@ -307,13 +307,14 @@ class DiagnosticLog:
         'follower_forecast_calibration_history_episodes_mean',
         'follower_target_calibration_enabled',
         'follower_target_calibration_mode',
-        'follower_target_calibration_active',
-        'follower_target_calibration_history_episodes',
-        'follower_target_calibration_history_samples',
-        'follower_target_calibration_coefficient_norm',
-        'follower_target_calibration_intercept_s',
+        'follower_target_calibration_post_update_active',
+        'follower_target_calibration_post_update_history_episodes',
+        'follower_target_calibration_post_update_history_samples',
+        'follower_target_calibration_post_update_coefficient_norm',
+        'follower_target_calibration_post_update_intercept_s',
         'follower_target_calibration_episode_samples',
         'follower_target_calibration_episode_updated',
+        'follower_target_calibration_update_source',
         'invalid_headway_decisions_masked',
         'lower_observation_contract', 'headway_reward_mode',
         'frequency_observation_source', 'lower_observation_ledger_hash',
@@ -8702,7 +8703,7 @@ class TransitDuetV2Runner:
             'episode_samples_accepted': 0,
             'episode_updated': 0,
         }
-        if training and self.follower_target_calibrator.enabled:
+        if learned_training and self.follower_target_calibrator.enabled:
             follower_calibration_update = (
                 self.follower_target_calibrator.update_episode(
                     self.env.headway_events
@@ -9727,21 +9728,23 @@ class TransitDuetV2Runner:
                 follower_calibration_update.get('enabled', 0)),
             'follower_target_calibration_mode': str(
                 self.follower_target_calibrator.mode),
-            'follower_target_calibration_active': int(
+            'follower_target_calibration_post_update_active': int(
                 follower_calibration_update.get('active', 0)),
-            'follower_target_calibration_history_episodes': int(
+            'follower_target_calibration_post_update_history_episodes': int(
                 follower_calibration_update.get('history_episodes', 0)),
-            'follower_target_calibration_history_samples': int(
+            'follower_target_calibration_post_update_history_samples': int(
                 follower_calibration_update.get('history_samples', 0)),
-            'follower_target_calibration_coefficient_norm': round(float(
+            'follower_target_calibration_post_update_coefficient_norm': round(float(
                 follower_calibration_update.get('coefficient_norm', 0.0)), 8),
-            'follower_target_calibration_intercept_s': round(float(
+            'follower_target_calibration_post_update_intercept_s': round(float(
                 follower_calibration_update.get('intercept_s', 0.0)), 8),
             'follower_target_calibration_episode_samples': int(
                 follower_calibration_update.get(
                     'episode_samples_accepted', 0)),
             'follower_target_calibration_episode_updated': int(
                 follower_calibration_update.get('episode_updated', 0)),
+            'follower_target_calibration_update_source': str(
+                self.follower_target_calibrator.UPDATE_SOURCE),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(
