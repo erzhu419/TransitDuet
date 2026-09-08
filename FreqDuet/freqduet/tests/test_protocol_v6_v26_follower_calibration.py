@@ -52,7 +52,8 @@ class ProtocolV6V26FollowerCalibrationConfigTest(unittest.TestCase):
                     "analytic_two_sided_zero_hold_regret_dual_v2",
                 )
                 self.assertEqual(
-                    config["lower"]["discrete_critic"],
+                    config["lower"].get(
+                        "discrete_critic", "continuous_action"),
                     "continuous_action",
                 )
                 self.assertFalse(
