@@ -1155,7 +1155,7 @@ class OptimizerContractTest(unittest.TestCase):
         restored = self._regularity_trainer(conditional_entropy=True)
         restored.load_training_state_dict(state)
 
-        self.assertEqual(state["format"], "freqduet-lower-training-v9")
+        self.assertEqual(state["format"], "freqduet-lower-training-v10")
         self.assertAlmostEqual(
             restored.regularity_alpha_param,
             trainer.regularity_alpha_param,

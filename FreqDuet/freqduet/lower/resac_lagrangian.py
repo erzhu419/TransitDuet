@@ -20,6 +20,8 @@ The v4 paper describes these equations directly and includes a standard
 constrained-SAC ablation instead of relying on a method-name equivalence claim.
 """
 
+import copy
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -446,6 +448,7 @@ class RESACLagrangianTrainer:
                  policy_sample_seed=None,
                  action_limit_feature_index=None,
                  regularity_policy_objective=None,
+                 multistep_regularity_objective=None,
                  device='cpu'):
         self.device = device
         self.gamma = gamma
@@ -651,6 +654,9 @@ class RESACLagrangianTrainer:
         self.regularity_projection_support_floor = 1e-12
         self.regularity_projection_distillation = 'reverse_kl_v1'
         self.regularity_projection_distillation_steps = 1
+        self.multistep_regularity_objective = (
+            multistep_regularity_objective)
+        self.regularity_multistep_value_enabled = False
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -665,9 +671,18 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_hf_gain_floor_dual_v8',
                     'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
                     'analytic_two_sided_hf_aggregate_gain_projection_v10',
-                    'analytic_two_sided_hf_aggregate_gain_projection_v11'}:
+                    'analytic_two_sided_hf_aggregate_gain_projection_v11',
+                    'causal_multistep_arrival_delta_regret_dual_v12'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
+            multistep_value_mode = (
+                mode == 'causal_multistep_arrival_delta_regret_dual_v12')
+            if multistep_value_mode != (
+                    self.multistep_regularity_objective is not None):
+                raise ValueError(
+                    'V12 regularity mode and multi-step value objective must '
+                    'be enabled together')
+            self.regularity_multistep_value_enabled = multistep_value_mode
             exact_projection_modes = {
                 'analytic_two_sided_hf_aggregate_gain_projection_v10',
                 'analytic_two_sided_hf_aggregate_gain_projection_v11',
@@ -692,6 +707,9 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_hf_aggregate_gain_projection_v11'}:
                 self.regularity_constraint_cost_mode = (
                     'hf_aggregate_gain_shortfall_v4')
+            elif multistep_value_mode:
+                self.regularity_constraint_cost_mode = (
+                    'downstream_arrival_value_regret_v5')
             elif mode in zero_hold_regret_modes:
                 self.regularity_constraint_cost_mode = 'zero_hold_regret_v2'
             else:
@@ -1163,6 +1181,10 @@ class RESACLagrangianTrainer:
                 'initial_lambda': initial_lambda,
                 'conditional_entropy': entropy_contract,
             }
+            if self.regularity_multistep_value_enabled:
+                self.regularity_policy_contract['multi_step_value'] = (
+                    copy.deepcopy(
+                        self.multistep_regularity_objective.contract))
             if exact_projection_mode:
                 for key in (
                         'lambda_lr', 'lambda_min', 'lambda_max',
@@ -1447,6 +1469,9 @@ class RESACLagrangianTrainer:
                     'enable', False)):
             raise ValueError(
                 'passenger holding constraint requires regularity policy')
+        elif self.multistep_regularity_objective is not None:
+            raise ValueError(
+                'multi-step value objective requires regularity policy')
 
     @property
     def lambda_param(self):
@@ -1552,6 +1577,14 @@ class RESACLagrangianTrainer:
 
     def _regularity_policy_cost(self, state, action_probs):
         """Return exact conditional action cost for the compact causal target."""
+        if self.regularity_multistep_value_enabled:
+            valid = self._regularity_evidence_valid(state)
+            return self.multistep_regularity_objective.policy_cost(
+                state,
+                action_probs,
+                valid,
+                self.regularity_cost_cap,
+            )
         valid, absolute_action_costs, zero_hold_cost = (
             self._regularity_policy_action_terms(state))
         if (self.regularity_constraint_cost_mode
@@ -1953,6 +1986,12 @@ class RESACLagrangianTrainer:
                        returning per-sample IS weights for TPC-Lower. Weights should
                        already be clipped + normalised (mean ≈ 1).
         """
+        if self.regularity_multistep_value_enabled:
+            self.multistep_regularity_objective.update(
+                batch_size=batch_size,
+                weight_fn=weight_fn,
+            )
+
         state, action, reward, cost, next_state, done, trip_ids = \
             replay_buffer.sample(batch_size)
 
@@ -2993,11 +3032,15 @@ class RESACLagrangianTrainer:
                          self.cost_q_net.parameters()):
             tp.data.copy_(tp.data * (1 - self.soft_tau) + p.data * self.soft_tau)
 
+        if self.regularity_multistep_value_enabled:
+            metrics.update(
+                self.multistep_regularity_objective.telemetry())
+
         return metrics
 
     def training_state_dict(self):
         return {
-            'format': 'freqduet-lower-training-v9',
+            'format': 'freqduet-lower-training-v10',
             'policy': self.policy_net.state_dict(),
             'q_net': self.q_net.state_dict(),
             'target_q_net': self.target_q_net.state_dict(),
@@ -3039,6 +3082,9 @@ class RESACLagrangianTrainer:
             'regularity_passenger_lambda_optimizer': (
                 self.regularity_passenger_lambda_optimizer.state_dict()
                 if self.regularity_passenger_soft_dual_enabled else None),
+            'multistep_regularity': (
+                self.multistep_regularity_objective.training_state_dict()
+                if self.regularity_multistep_value_enabled else None),
         }
 
     def load_training_state_dict(self, state):
@@ -3048,7 +3094,8 @@ class RESACLagrangianTrainer:
                 'freqduet-lower-training-v6',
                 'freqduet-lower-training-v7',
                 'freqduet-lower-training-v8',
-                'freqduet-lower-training-v9'}:
+                'freqduet-lower-training-v9',
+                'freqduet-lower-training-v10'}:
             raise ValueError('not a FreqDuet lower training checkpoint')
         if state.get('temperature_contract') != self.temperature_contract:
             raise ValueError('lower temperature contract mismatch')
@@ -3129,6 +3176,16 @@ class RESACLagrangianTrainer:
             self.alpha_optimizer.load_state_dict(state['alpha_optimizer'])
         self.alpha = float(state['alpha'])
         self.policy_net.set_sampling_state(state.get('policy_sampling_state'))
+        saved_multistep = state.get('multistep_regularity')
+        if self.regularity_multistep_value_enabled:
+            if saved_multistep is None:
+                raise ValueError(
+                    'lower checkpoint is missing multi-step value state')
+            self.multistep_regularity_objective.load_training_state_dict(
+                saved_multistep)
+        elif saved_multistep is not None:
+            raise ValueError(
+                'lower checkpoint unexpectedly contains multi-step value state')
 
     def save(self, path):
         torch.save({
@@ -3154,6 +3211,9 @@ class RESACLagrangianTrainer:
             'log_regularity_passenger_lambda': (
                 self.log_regularity_passenger_lambda.data
                 if self.regularity_passenger_soft_dual_enabled else None),
+            'multistep_regularity': (
+                self.multistep_regularity_objective.deployment_state_dict()
+                if self.regularity_multistep_value_enabled else None),
         }, path)
 
     def load(self, path):
@@ -3234,3 +3294,13 @@ class RESACLagrangianTrainer:
                     self.log_alpha.exp().item(), self.maximum_alpha)
         self.policy_net.set_sampling_state(
             ckpt.get('policy_sampling_state'))
+        saved_multistep = ckpt.get('multistep_regularity')
+        if self.regularity_multistep_value_enabled:
+            if saved_multistep is None:
+                raise ValueError(
+                    'lower checkpoint is missing multi-step value state')
+            self.multistep_regularity_objective.load_deployment_state_dict(
+                saved_multistep)
+        elif saved_multistep is not None:
+            raise ValueError(
+                'lower checkpoint unexpectedly contains multi-step value state')

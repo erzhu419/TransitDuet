@@ -162,6 +162,13 @@ V26_FOLLOWER_CALIBRATION_EXPECTED = {
 }
 V26_FOLLOWER_CALIBRATION_CONFIGS = list(
     V26_FOLLOWER_CALIBRATION_EXPECTED)
+V27_MULTISTEP_VALUE_EXPECTED = {
+    "F_freqduet_protocol_v6_v27_msvalue_h2_u000_r0010_hiro": (2, 0.0),
+    "F_freqduet_protocol_v6_v27_msvalue_h4_u000_r0010_hiro": (4, 0.0),
+    "F_freqduet_protocol_v6_v27_msvalue_h4_u050_r0010_hiro": (4, 0.5),
+    "F_freqduet_protocol_v6_v27_msvalue_h6_u050_r0010_hiro": (6, 0.5),
+}
+V27_MULTISTEP_VALUE_CONFIGS = list(V27_MULTISTEP_VALUE_EXPECTED)
 ALL_GAIN_FLOOR_CONFIGS = (
     GAIN_FLOOR_CONFIGS + V22_GAIN_FLOOR_FACTORIAL_CONFIGS)
 ALL_GAIN_FLOOR_PASSENGER_CONFIGS = (
@@ -255,6 +262,7 @@ EXPERIMENTAL_CONFIGS = [
     *ALL_GAIN_FLOOR_CONFIGS,
     *PROJECTION_CONFIGS,
     *V26_FOLLOWER_CALIBRATION_CONFIGS,
+    *V27_MULTISTEP_VALUE_CONFIGS,
 ]
 
 
@@ -327,6 +335,60 @@ def validate(
                     "exploratory_historical_follower_half_gap_"):
                 raise ValueError(
                     f"{name}: follower calibration role is not explicit")
+        if name in V27_MULTISTEP_VALUE_EXPECTED:
+            expected_horizon, expected_ucb = (
+                V27_MULTISTEP_VALUE_EXPECTED[name])
+            multistep = regularity_policy.get(
+                "multi_step_value", {}) or {}
+            expected_multistep = {
+                "enable": True,
+                "mode": "discounted_future_arrival_cost_change_v1",
+                "horizon_steps": expected_horizon,
+                "discount": 1.0,
+                "ucb_beta": expected_ucb,
+                "min_replay_size": 512,
+                "min_critic_updates": 30,
+                "replay_capacity": 500000,
+                "hidden_dim": 64,
+                "ensemble_size": 5,
+                "n_layers": 2,
+                "lr": 0.0003,
+                "weight_decay": 0.00001,
+            }
+            if {
+                key: multistep.get(key) for key in expected_multistep
+            } != expected_multistep:
+                raise ValueError(
+                    f"{name}: V27 multi-step value contract is not locked")
+            if regularity_policy.get("mode") != (
+                    "causal_multistep_arrival_delta_regret_dual_v12"):
+                raise ValueError(
+                    f"{name}: V27 regularity policy mode is not locked")
+            if float(regularity_policy.get("cost_limit", -1.0)) != 0.001:
+                raise ValueError(
+                    f"{name}: V27 regularity budget is not locked")
+            if regularity_policy.get(
+                    "constraint_scale_mode") != "cost_limit_ratio_v1":
+                raise ValueError(
+                    f"{name}: V27 regularity scaling is not locked")
+            if lower.get("action_bins") != [
+                    0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0]:
+                raise ValueError(
+                    f"{name}: V27 action library is not locked")
+            if lower.get("discrete_critic", "continuous_action") != (
+                    "continuous_action"):
+                raise ValueError(
+                    f"{name}: V27 must retain the V13 reward critic")
+            if bool(guard.get("enable", False)):
+                raise ValueError(
+                    f"{name}: V27 must retain no-guard execution")
+            if bool(follower_calibration.get("enable", False)):
+                raise ValueError(
+                    f"{name}: V27 cannot inherit rejected V26 calibration")
+            if not str(protocol.get("role", "")).startswith(
+                    "exploratory_causal_multistep_arrival_value_"):
+                raise ValueError(
+                    f"{name}: V27 role is not explicit")
         if name in PROJECTION_CONFIGS:
             if lower.get("discrete_critic") != "zero_hold_advantage":
                 raise ValueError(
@@ -430,6 +492,9 @@ def validate(
             expected_policy_mode = (
                 PROJECTION_CONFIG_EXPECTED[name][0]
                 if name in PROJECTION_CONFIG_EXPECTED
+                else
+                "causal_multistep_arrival_delta_regret_dual_v12"
+                if name in V27_MULTISTEP_VALUE_EXPECTED
                 else "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
                 if (name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED
                     and V22_GAIN_FLOOR_FACTORIAL_EXPECTED[name][0]

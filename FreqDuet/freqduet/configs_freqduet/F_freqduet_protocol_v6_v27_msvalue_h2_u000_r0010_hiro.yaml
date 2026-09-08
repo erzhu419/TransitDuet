@@ -1,0 +1,24 @@
+_extends: F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro.yaml
+_name: F_freqduet_protocol_v6_v27_msvalue_h2_u000_r0010_hiro
+
+protocol:
+  role: exploratory_causal_multistep_arrival_value_h2_ucb000_v27
+
+lower:
+  causal_regularity_policy:
+    mode: causal_multistep_arrival_delta_regret_dual_v12
+    cost_limit: 0.001
+    multi_step_value:
+      enable: true
+      mode: discounted_future_arrival_cost_change_v1
+      horizon_steps: 2
+      discount: 1.0
+      ucb_beta: 0.0
+      min_replay_size: 512
+      min_critic_updates: 30
+      replay_capacity: 500000
+      hidden_dim: 64
+      ensemble_size: 5
+      n_layers: 2
+      lr: 0.0003
+      weight_decay: 0.00001

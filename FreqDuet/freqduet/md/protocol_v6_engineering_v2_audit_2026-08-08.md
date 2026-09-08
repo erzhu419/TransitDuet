@@ -3273,3 +3273,67 @@ effect candidate must replace the one-step action target with a causal
 multi-step value target while retaining historical frequency inputs, seven
 executable sampled actions, frozen-evaluation semantics, and no post-policy
 guard.
+
+### Engineering-v27 causal multi-step arrival-value preregistration (2026-09-09)
+
+V27 replaces the rejected action-time two-sided surrogate, not the V13 reward
+critic or the V26 follower estimator. For a lower decision at state `s_t`, the
+training-only label is the discounted mean of the next `H` exact same-trip
+arrival-event squared headway deviations minus the already observed deviation
+at `s_t`. A finite-horizon categorical ensemble predicts this downstream
+change for each executable action. The actor retains the V13 dual semantics but
+uses positive predicted regret relative to the zero-second action. Thus state
+value and natural downstream recovery cancel before the constraint is applied.
+The value ensemble is an auxiliary training objective; future events never
+enter an observation or an evaluation-time action.
+
+Only complete `H`-transition labels are admitted. Streams are keyed by episode
+and physical trip, terminal short tails are discarded, and all remaining tails
+are discarded at the service-day boundary. This prevents a target from crossing
+a trip or evaluation day. The exact training checkpoint contains the value
+critic, optimizer, replay, pending streams, counters, and independent replay
+RNG; the deployment checkpoint and frozen-policy digest contain the learned
+critic. The inherited causal historical-frequency state, seven actions
+`[0,5,10,15,20,30,45] s`, V13 continuous reward critic, conditional entropy,
+sampled execution, and no-guard action semantics are unchanged. Rejected V26
+calibration is disabled.
+
+The registered factorial is `H=2,UCB=0`, `H=4,UCB=0`, `H=4,UCB=0.5`, and
+`H=6,UCB=0.5`, all with uniform temporal weights, a `0.001` positive-regret
+budget, five value critics, 64-unit two-layer heads, replay warm-up of 512
+complete labels, and actor activation after 30 critic updates. The controls are
+confirmed main, `noguard`, scalar V13, and the rejected V19 zero-hold-advantage
+reward critic. Training seeds are `31013,31031,31057,31081`; frozen common
+evaluation seeds are `65011,65029,65047,65071`. The exploratory screen is 40
+episodes with checkpoint 39 and scalar V13 as the aggregation reference.
+
+The mechanical gate requires the exact target, boundary, action, horizon,
+uncertainty, reward-critic, causal-state, no-calibration, and no-guard contracts;
+at least 512 complete labels; at least 30 value-critic updates; finite nonzero
+target variance and critic loss; nonzero categorical value span; a ready value
+objective; frozen upper/lower/value critics in evaluation; and zero execution
+adjustment. Completeness, clean-source manifests, unique rollouts, scenario-tape
+identity, and common random numbers remain fail-closed requirements.
+
+An outcome pass must improve paired headway CV over scalar V13 by at least
+`0.002` overall and in at least three of four training-seed blocks, while
+restricted journey is no worse than `+0.05 min`, service cost no worse than
+`+0.003`, mean lower action no worse than `+0.25 s`, holding vehicle-seconds no
+worse than `+3%`, and unserved rate does not increase. It must improve journey
+over V19 by at least `0.05 min` while remaining within `+0.001` CV and without
+using more holding. Fixed selection priority is `H4/UCB0.5`, `H4/UCB0`,
+`H2/UCB0`, then `H6/UCB0.5`. A pass is exploratory and requires fresh
+200-episode confirmation. A no-pass rejects this observational finite-horizon
+value family; it does not authorize budget, horizon, UCB, V26-calibration, or
+one-step-surrogate retuning. The successor would require matched simulator
+counterfactual branches or the Phase-4 terminal/first-stop dispatch mechanism.
+
+The first V27 smoke attempt (`t90311`) was cancelled before completion and is
+inadmissible. Implementation review found that the deployment checkpoint
+restored the auxiliary critic update count but not its training-ready state;
+because deployment intentionally omits replay contents, frozen evaluation would
+have treated the trained objective as unready and silently disabled its policy
+cost. The corrected deployment contract stores and validates readiness plus
+non-model training counters, while frozen actions still use only the decision
+state and learned critic. A fresh server regression and smoke are required from
+the corrected source revision.

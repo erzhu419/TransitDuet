@@ -81,6 +81,9 @@ from upper.counterfactual_action_selector import (
 )
 from lower.resac_lagrangian import RESACLagrangianTrainer
 from lower.cost_replay_buffer import CostReplayBuffer
+from lower.causal_multistep_value import (
+    CausalMultiStepRegularityObjective,
+)
 from lower.lifecycle import LowerEpisodeLifecycle
 from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
@@ -375,6 +378,29 @@ class DiagnosticLog:
         'lower_regularity_policy_scaled_constraint_gap',
         'lower_regularity_policy_penalty',
         'lower_regularity_policy_augmented_penalty',
+        'lower_multistep_value_enabled',
+        'lower_multistep_value_mode',
+        'lower_multistep_value_horizon_steps',
+        'lower_multistep_value_discount',
+        'lower_multistep_value_ucb_beta',
+        'lower_multistep_value_ready',
+        'lower_multistep_value_replay_size',
+        'lower_multistep_value_targets_emitted',
+        'lower_multistep_value_terminal_tails_discarded',
+        'lower_multistep_value_episode_tails_discarded',
+        'lower_multistep_value_critic_updates',
+        'lower_multistep_value_critic_loss',
+        'lower_multistep_value_target_mean',
+        'lower_multistep_value_target_std',
+        'lower_multistep_value_prediction_mean',
+        'lower_multistep_value_prediction_std',
+        'lower_multistep_value_grad_norm',
+        'lower_multistep_value_action_span_mean',
+        'lower_multistep_value_advantage_mean',
+        'lower_multistep_value_advantage_std_mean',
+        'lower_multistep_value_positive_regret_mean',
+        'lower_multistep_value_positive_regret_max',
+        'lower_multistep_value_frozen',
         'lower_regularity_projection_enabled',
         'lower_regularity_projection_mode',
         'lower_regularity_projection_distillation',
@@ -834,6 +860,16 @@ class TransitDuetV2Runner:
             'upper_residual_selector', 'headway_value_selector',
             'terminal_value_selector', 'fixed_expert_selector',
             'tpc_mixture', 'reachability_init', 'reachability_replay')
+        lower_regularity_cfg = (
+            (config.get('lower', {}) or {}).get(
+                'causal_regularity_policy', {}) or {})
+        if (
+            bool(lower_regularity_cfg.get('enable', False))
+            and str(lower_regularity_cfg.get('mode', '')).strip().lower()
+            == 'causal_multistep_arrival_delta_regret_dual_v12'
+        ):
+            self._random_stream_names += (
+                'lower_multistep_init', 'lower_multistep_replay')
         self.randomness_manifest = self.randomness.manifest(
             self._random_stream_names)
         self.fleet_rng = self.randomness.numpy('fleet')
@@ -2285,6 +2321,7 @@ class TransitDuetV2Runner:
             None if self.lower_action_bins_gate_enabled else self.lower_action_bins)
         regularity_policy_cfg = copy.deepcopy(
             lower_cfg.get('causal_regularity_policy', {}) or {})
+        regularity_mode = 'disabled'
         if bool(regularity_policy_cfg.get('enable', False)):
             evidence_mode = str(regularity_policy_cfg.get(
                 'evidence_mode', 'compact_causal_target_v7')).strip().lower()
@@ -2417,6 +2454,38 @@ class TransitDuetV2Runner:
                     + self.env.lower_context_features.index('load'))
                 regularity_policy_cfg[
                     'passenger_holding_constraint'] = passenger_cfg
+        multistep_regularity_objective = None
+        if regularity_mode == (
+                'causal_multistep_arrival_delta_regret_dual_v12'):
+            multistep_cfg = copy.deepcopy(
+                regularity_policy_cfg.get('multi_step_value', {}) or {})
+            if not bool(multistep_cfg.get('enable', False)):
+                raise ValueError(
+                    'V12 regularity policy requires multi_step_value')
+            registered_actions = np.asarray(
+                [0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0],
+                dtype=np.float32,
+            )
+            if (
+                lower_trainer_action_bins is None
+                or not np.array_equal(
+                    lower_trainer_action_bins, registered_actions)
+            ):
+                raise ValueError(
+                    'V12 multi-step value requires the registered seven '
+                    'holding actions')
+            with self.randomness.torch_initialization(
+                    'lower_multistep_init'):
+                multistep_regularity_objective = (
+                    CausalMultiStepRegularityObjective(
+                        state_dim=lower_state_dim,
+                        action_candidates=lower_trainer_action_bins,
+                        config=multistep_cfg,
+                        replay_seed=(
+                            self.randomness.seed('lower_multistep_replay')
+                            if self.randomness.isolated else None),
+                        device=device,
+                    ))
         if self.decouple_init_seeds and not self.randomness.isolated:
             torch.manual_seed(self.base_seed + 2001)
         with self.randomness.torch_initialization('lower_init'):
@@ -2453,6 +2522,8 @@ class TransitDuetV2Runner:
                 action_limit_feature_index=(
                     self.lower_action_limit_feature_index),
                 regularity_policy_objective=regularity_policy_cfg,
+                multistep_regularity_objective=(
+                    multistep_regularity_objective),
                 device=device)
         self.lower_state_dim = lower_state_dim
 
@@ -6390,6 +6461,19 @@ class TransitDuetV2Runner:
             max(0.0, requested - allowed))
         return adjusted
 
+    def _lower_decision_arrival_cost(self, raw_state):
+        """Return the causal arrival cost already observed before an action."""
+        if self.lower_state_input_schema != 'causal_forward_v4':
+            raise ValueError(
+                'multi-step value requires causal_forward_v4 state input')
+        state = np.asarray(raw_state, dtype=np.float64).reshape(-1)
+        if state.size < 8 or float(state[5]) < 0.5:
+            raise ValueError(
+                'multi-step value requires an exact arrival-event state')
+        target = max(float(state[7]), 1.0)
+        deviation = (float(state[4]) - target) / target
+        return float(min(deviation * deviation, 1.0))
+
     def _record_lower_transition(
             self, *, key, raw_state, raw_next_state, action, reward, cost,
             previous_action, transition_done, learned_training, bus=None,
@@ -6620,6 +6704,16 @@ class TransitDuetV2Runner:
                 transition_done,
                 global_tid,
             )
+            if self.lower_trainer.regularity_multistep_value_enabled:
+                self.lower_trainer.multistep_regularity_objective.observe(
+                    state=state,
+                    action=action,
+                    outcome_cost=float(cost),
+                    baseline_cost=self._lower_decision_arrival_cost(
+                        raw_state),
+                    stream_id=global_tid,
+                    done=transition_done,
+                )
         return shaped_reward, total_cost, act_val
 
     def _fixed_headway_callback(self, s_upper_v1, trip):
@@ -8673,6 +8767,10 @@ class TransitDuetV2Runner:
                         self._ep_lower_pending_actions_dropped += int(
                             event.pending_action_dropped)
 
+        if (learned_training
+                and self.lower_trainer.regularity_multistep_value_enabled):
+            self.lower_trainer.multistep_regularity_objective.end_episode()
+
         env_time = time.time() - t0
 
         # ── Finalize trip holdings ──
@@ -9475,6 +9573,12 @@ class TransitDuetV2Runner:
         for tid in self.holding_feedback._trip_actions:
             hold_pens.append(self.holding_feedback.holding_penalty(tid))
         hp_stat = _stat(hold_pens)
+        multistep_value = (
+            self.lower_trainer.multistep_regularity_objective)
+        multistep_telemetry = (
+            multistep_value.telemetry()
+            if self.lower_trainer.regularity_multistep_value_enabled
+            else {})
 
         row = {
             'ep': ep, 'stage': stage,
@@ -9888,6 +9992,73 @@ class TransitDuetV2Runner:
                 'regularity_policy_penalty', 0.),
             'lower_regularity_policy_augmented_penalty': lower_m.get(
                 'regularity_policy_augmented_penalty', 0.),
+            'lower_multistep_value_enabled': int(
+                self.lower_trainer.regularity_multistep_value_enabled),
+            'lower_multistep_value_mode': (
+                multistep_value.MODE if multistep_value is not None
+                else 'disabled'),
+            'lower_multistep_value_horizon_steps': int(
+                multistep_telemetry.get(
+                    'multistep_value_horizon_steps', 0)),
+            'lower_multistep_value_discount': float(
+                multistep_telemetry.get(
+                    'multistep_value_discount', 0.0)),
+            'lower_multistep_value_ucb_beta': float(
+                multistep_telemetry.get(
+                    'multistep_value_ucb_beta', 0.0)),
+            'lower_multistep_value_ready': int(
+                multistep_telemetry.get(
+                    'multistep_value_ready', 0.0)),
+            'lower_multistep_value_replay_size': int(
+                multistep_telemetry.get(
+                    'multistep_value_replay_size', 0.0)),
+            'lower_multistep_value_targets_emitted': int(
+                multistep_telemetry.get(
+                    'multistep_value_targets_emitted', 0.0)),
+            'lower_multistep_value_terminal_tails_discarded': int(
+                multistep_telemetry.get(
+                    'multistep_value_terminal_tails_discarded', 0.0)),
+            'lower_multistep_value_episode_tails_discarded': int(
+                multistep_telemetry.get(
+                    'multistep_value_episode_tails_discarded', 0.0)),
+            'lower_multistep_value_critic_updates': int(
+                multistep_telemetry.get(
+                    'multistep_value_critic_updates', 0.0)),
+            'lower_multistep_value_critic_loss': float(
+                multistep_telemetry.get(
+                    'multistep_value_critic_loss', 0.0)),
+            'lower_multistep_value_target_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_target_mean', 0.0)),
+            'lower_multistep_value_target_std': float(
+                multistep_telemetry.get(
+                    'multistep_value_target_std', 0.0)),
+            'lower_multistep_value_prediction_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_prediction_mean', 0.0)),
+            'lower_multistep_value_prediction_std': float(
+                multistep_telemetry.get(
+                    'multistep_value_prediction_std', 0.0)),
+            'lower_multistep_value_grad_norm': float(
+                multistep_telemetry.get(
+                    'multistep_value_grad_norm', 0.0)),
+            'lower_multistep_value_action_span_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_action_span_mean', 0.0)),
+            'lower_multistep_value_advantage_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_advantage_mean', 0.0)),
+            'lower_multistep_value_advantage_std_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_advantage_std_mean', 0.0)),
+            'lower_multistep_value_positive_regret_mean': float(
+                multistep_telemetry.get(
+                    'multistep_value_positive_regret_mean', 0.0)),
+            'lower_multistep_value_positive_regret_max': float(
+                multistep_telemetry.get(
+                    'multistep_value_positive_regret_max', 0.0)),
+            'lower_multistep_value_frozen': float(
+                lower_critic_frozen),
             'lower_regularity_projection_enabled': int(
                 self.lower_trainer.regularity_projection_enabled),
             'lower_regularity_projection_mode': str(
@@ -11287,6 +11458,9 @@ class TransitDuetV2Runner:
             self.upper_trainer.q_net,
             self.upper_trainer.target_q_net,
         ]
+        if self.lower_trainer.regularity_multistep_value_enabled:
+            modules.append(
+                self.lower_trainer.multistep_regularity_objective.critic)
         for module in modules:
             for name, tensor in sorted(module.state_dict().items()):
                 digest.update(name.encode('utf-8'))

@@ -1,0 +1,11 @@
+_extends: F_freqduet_protocol_v6_v27_msvalue_h2_u000_r0010_hiro.yaml
+_name: F_freqduet_protocol_v6_v27_msvalue_h4_u050_r0010_hiro
+
+protocol:
+  role: exploratory_causal_multistep_arrival_value_h4_ucb050_v27
+
+lower:
+  causal_regularity_policy:
+    multi_step_value:
+      horizon_steps: 4
+      ucb_beta: 0.5
