@@ -2991,3 +2991,42 @@ The configs, seeds, two-episode horizon, forecast and sequential thresholds,
 and deterministic branch rule remain unchanged. The corrected rerun is a
 measurement repair, not an independent confirmation or an opportunity to
 retune the gate.
+
+### Engineering-v25 corrected follower-forecast outcome (2026-09-08)
+
+Server regression task `t90046` passed 34 focused recorder, bus-lifecycle,
+audit, ETA, holding, and lower-lifecycle tests and the exact four-arm V6 config
+validator. The corrected immutable source is commit `a0130e20db`. Tasks
+`t90047--t90050` then reran the unchanged four configs and seeds on
+`node001--node004`; node-side task `t90053` aggregated and applied audit schema
+`freqduet-v25-follower-forecast-audit-v2`. Every shard completed without a
+retry. All strict source, manifest, frozen-policy, CRN, config, seed, and
+16-rollout checks pass.
+
+All 60,114 registered forecasts resolve to the same follower's action-ready
+event, exact executed action, and final departure. The action- and departure-
+resolution rates are both `1.0`. Mean follower action is `9.8166 s` and the
+positive-action rate is `0.93820`, above both locked sequential thresholds;
+mean action-execution timing residual is `1.0618 s`, isolating the simulator
+tick from the physical action. Pooled target-action MAE is `4.0945 s`, while
+pooled false-positive plus false-negative rate is `0.08545`; neither exceeds
+the locked forecast threshold. The preregistered diagnosis is therefore
+`sequential_holding_primary`.
+
+The policy-specific rows expose relevant heterogeneity. V24 reverse-KL
+four-step has target-action MAE `5.5528 s` and hold-need sign error `0.11773`,
+both material under the same thresholds, despite pooled forecast error being
+non-material. Its exact follower action mean/rate are `7.8402 s/0.78402`.
+V13 is `3.5259 s/0.07255` for forecast MAE/sign error and emits a deterministic
+`10 s` follower action in these checkpoint-1 rollouts. Thus the primary gate
+does not authorize a global forecast-calibration-only successor, but neither
+does it permit V24-specific forecast bias to be hidden by pooling.
+
+This remains mechanism evidence, not an effect result. In particular,
+checkpoint-1 action frequencies are not a proxy for the mature 40-episode
+policies used in the V24 outcome gate. Before defining a new objective, the
+same behavior-neutral telemetry must be applied read-only to retained mature
+V13/V23/V24 formal checkpoints, if those server artifacts still exist. If they
+do not, a fresh matched mature diagnostic must be run. The successor may then
+test a compact causal delayed-control state/objective and a separately
+ablatable forecast calibration; it may not resume V23/V24 target tuning.
