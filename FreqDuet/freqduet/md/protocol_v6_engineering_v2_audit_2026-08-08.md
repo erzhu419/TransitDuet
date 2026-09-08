@@ -2868,3 +2868,46 @@ apples-to-apples late-training post-update reverse-KL ratio against a freshly
 rerun matched V23 control. Local configured KL remains fail-closed
 nonincreasing. No outcome budget, effect threshold, seed, candidate, target,
 or candidate priority changed in this pre-effect amendment.
+
+### Engineering-v24 formal actor-distillation outcome (2026-09-08)
+
+The registered matrix completed all 44 one-seed shards (`t89865--t89908`) on
+`node001--node006` from clean source commit `b59f478597`. Task `t89909`
+waited for all 44 frozen-evaluation manifests, aggregated the exact seven
+controls and four V24 candidates, and ran the locked gate on `node001`. The
+aggregate verifies four fresh training seeds, four common-random-number
+evaluation seeds, 40 training episodes, 176 unique frozen rollouts, exact
+configuration and seed sets, clean source provenance, frozen policies, and the
+V13 reference. No shard failed or retried, and no checkpoint or full shard log
+was synchronized locally.
+
+The locked result is `no_pass`; no V24 candidate is eligible for confirmation.
+The factorial does establish that additional distillation can repair the V23
+actor-transfer defect. Reverse-KL four-step passes every registered training
+check: its late actor-to-teacher action-gap ratio is `0.6242`, reverse-KL ratio
+is `0.5412`, and its maximum seed-mean actor regularity/passenger costs are
+`0.04544/0.07439`. Forward-KL four-step and eight-step reduce the action gap
+further to `0.4503` and `0.2386` of V23, respectively. Their remaining maximum
+seed-mean regularity costs are `0.06325` and `0.05453`, while their passenger
+costs are within `0.08`.
+
+Stronger teacher transfer does not improve the frozen control objective.
+Reverse-KL four-step worsens headway CV by `+0.02731` relative to scalar V13
+and by `+0.02149` relative to V23. Forward-KL four-step is the only row that
+improves V23 CV (`-0.00142`), but it still worsens V13 CV by `+0.00439`, adds
+`0.10397 min` journey, and increases mean action, holding vehicle-seconds, and
+denied dispatch. Forward-KL eight-step transfers more completely but reverses
+the V23 CV gain (`+0.00403`). Every candidate fails frozen regularity or the
+registered outcome comparisons; none beats `noguard` on CV.
+
+V24 therefore rules out incomplete actor fitting as the remaining primary
+bottleneck. The exact projected teacher optimizes an action-time, one-step
+two-sided departure-gap surrogate, whereas the paper outcome is downstream
+arrival-headway regularity under repeated station control. Fitting that teacher
+more closely can increase holding while worsening network CV. A successor must
+not tune V23/V24 projection targets or add more distillation steps. Before a new
+effect candidate, it must measure the causal AVL follower-gap forecast against
+the eventual matched departure and distinguish forecast error from delayed
+multi-stop over-correction. The successor retains sampled-action execution,
+historical frequency inputs, the seven executable actions, and no post-policy
+guard.
