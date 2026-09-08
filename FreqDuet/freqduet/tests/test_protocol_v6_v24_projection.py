@@ -4,6 +4,10 @@ import unittest
 
 from runner_v3 import DiagnosticLog, TransitDuetV2Runner, load_config
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config
+from scripts.validate_freqduet_protocol_v6_configs import (
+    PROJECTION_CONFIGS,
+    validate,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +24,15 @@ CONFIGS = {
 
 
 class ProtocolV6V24ProjectionConfigTest(unittest.TestCase):
+    def test_v23_and_v24_are_registered_as_experimental_configs(self):
+        confirmed_main = "F_freqduet_protocol_v6_confirmed_main_hiro"
+        matrix = [confirmed_main, *PROJECTION_CONFIGS]
+        with self.assertRaisesRegex(ValueError, "unregistered"):
+            validate(matrix)
+        result = validate(matrix, allow_experimental=True)
+        self.assertEqual(
+            result["experimental_configs"], sorted(PROJECTION_CONFIGS))
+
     def test_resolved_configs_lock_v24_distillation_factorial(self):
         for config_name, (distillation, steps) in CONFIGS.items():
             with self.subTest(config=config_name):
@@ -68,7 +81,11 @@ class ProtocolV6V24ProjectionConfigTest(unittest.TestCase):
             "lower_regularity_projection_actor_post_regularity_cost",
             "lower_regularity_projection_actor_post_passenger_cost",
             "lower_regularity_projection_actor_post_constraints_met",
+            "lower_regularity_projection_actor_reverse_kl_episode_mean",
+            "lower_regularity_projection_actor_forward_kl_episode_mean",
             "lower_regularity_projection_actor_post_regularity_cost_episode_max",
+            "lower_regularity_projection_target_action_change_abs_mean_s_episode_mean",
+            "lower_regularity_projection_actor_post_target_action_change_abs_mean_s_episode_mean",
         ):
             self.assertIn(field, DiagnosticLog.HEADER)
 

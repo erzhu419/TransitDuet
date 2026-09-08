@@ -2775,3 +2775,72 @@ learned actor itself and report post-update actor costs; changing V23's
 outcome is not permitted. The historical frequency state, compact causal lower
 target, seven executable actions, aggregate-gain semantics, passenger cost,
 and zero post-policy execution adjustment remain part of the successor design.
+
+### Engineering-v24 projected-actor distillation preregistration (2026-09-08)
+
+V24 addresses only the actor-to-teacher transfer defect established by the
+formal V23 audit. It does not change the harmonic historical prior, compact
+causal lower state, aggregate attainable-gain cost, APC person-delay cost,
+zero-hold-advantage critic, seven executable actions
+`[0,5,10,15,20,30,45] s`, or zero post-policy execution adjustment. The exact
+joint projection, support floor `1e-12`, solver tolerance `1e-8`, 200-iteration
+limit, replay targets `0.036/0.075`, and frozen budgets `0.05/0.08` remain
+immutable.
+
+The registered factorial contains exactly four actor-distillation candidates:
+
+* `F_freqduet_protocol_v6_v24_jointproj_fkl_s1_hiro`: one forward-KL step,
+  isolating KL direction from update count;
+* `F_freqduet_protocol_v6_v24_jointproj_rkl_s4_hiro`: four reverse-KL steps,
+  isolating update count from KL direction;
+* `F_freqduet_protocol_v6_v24_jointproj_fkl_s4_hiro`: four forward-KL steps,
+  testing the combined repair; and
+* `F_freqduet_protocol_v6_v24_jointproj_fkl_s8_hiro`: eight forward-KL steps,
+  testing whether stronger fitting is necessary or harmful.
+
+Only causal-valid replay rows receive additional distillation steps. The first
+actor step retains the ordinary safe-SAC loss on invalid rows; subsequent steps
+optimize only the detached exact teacher on valid rows and do not repeat SAC on
+invalid rows. Every episode records all actor updates, with matched pre/post
+forward and reverse KL, actor regularity/passenger costs, and absolute expected-
+action distance to the projected teacher. A successful teacher projection is
+not evidence that the learned actor satisfies the mechanism gate.
+
+The implementation smoke uses training seed `29903`, frozen evaluation seed
+`62903`, two episodes, and all four candidates. It is non-effect evidence. It
+passes only if the exact configuration and source provenance are complete,
+every applied teacher projection converges within both targets, every pre/post
+actor diagnostic is finite, the episode-mean configured KL is lower after its
+registered steps than before them in every episode where projection is
+observed, the projection is observed for every candidate, all soft dual and
+augmented-penalty terms remain zero, and execution adjustment remains exactly
+zero. Warm-up frozen outcomes cannot select a candidate.
+
+The formal exploratory screen uses fresh training seeds
+`29013,29031,29053,29077`, frozen common-random-number evaluation seeds
+`62017,62041,62059,62083`, 40 episodes, and checkpoint 39. Alongside the four
+V24 candidates it reruns unchanged hard main, confirmed main, `noguard`, scalar
+V13, V19 zero-hold-advantage, V20 passenger-budget `0.08`, and V23 exact
+projection controls. No historical result is substituted for a matched arm.
+
+For each V24 candidate, the actor-transfer gate is evaluated over episodes
+30--39. Each train seed's mean post-update actor regularity and passenger costs
+must be at most `0.05` and `0.08`. Across all four seeds and ten late episodes,
+the mean post/pre ratio for the configured KL must be at most `0.75`, and the
+mean absolute actor-to-teacher action gap must be at most `0.75` of the matched
+V23 value. All exact teachers must still meet `0.036/0.075` within `1e-8`.
+
+The frozen outcome gate retains every V23 requirement: maximum regularity and
+passenger costs `<=0.05/0.08`; at least `0.05 min` journey and `0.001` CV
+improvement over scalar V13 and V19 without increasing lower action, holding
+vehicle-seconds, or denied dispatch; at least `0.020` CV recovery over V20 with
+no more than `+0.20 min` journey; and the existing no-harm margins against
+confirmed main and `noguard`. In addition, V24 must improve CV over matched V23
+by at least `0.001` with no more than `+0.20 min` journey.
+
+Candidate selection is deterministic among complete passes, in increasing
+mechanism complexity: forward-KL one-step, reverse-KL four-step, forward-KL
+four-step, then forward-KL eight-step. A 40-episode pass is exploratory only and
+requires a fresh 200-episode confirmation. A no-pass rejects the registered
+factorial; it does not permit post-outcome changes to targets, thresholds,
+support, seeds, or candidate priority.

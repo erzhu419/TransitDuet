@@ -117,6 +117,39 @@ V22_GAIN_FLOOR_FACTORIAL_EXPECTED = {
 }
 V22_GAIN_FLOOR_FACTORIAL_CONFIGS = list(
     V22_GAIN_FLOOR_FACTORIAL_EXPECTED)
+PROJECTION_CONFIG_EXPECTED = {
+    "F_freqduet_protocol_v6_v23_jointproj_r036_p075_hiro": (
+        "analytic_two_sided_hf_aggregate_gain_projection_v10",
+        "joint_kl_soft_policy_target_v1",
+        "reverse_kl_v1",
+        1,
+    ),
+    "F_freqduet_protocol_v6_v24_jointproj_fkl_s1_hiro": (
+        "analytic_two_sided_hf_aggregate_gain_projection_v11",
+        "joint_kl_soft_policy_distillation_v2",
+        "forward_kl_v2",
+        1,
+    ),
+    "F_freqduet_protocol_v6_v24_jointproj_rkl_s4_hiro": (
+        "analytic_two_sided_hf_aggregate_gain_projection_v11",
+        "joint_kl_soft_policy_distillation_v2",
+        "reverse_kl_v1",
+        4,
+    ),
+    "F_freqduet_protocol_v6_v24_jointproj_fkl_s4_hiro": (
+        "analytic_two_sided_hf_aggregate_gain_projection_v11",
+        "joint_kl_soft_policy_distillation_v2",
+        "forward_kl_v2",
+        4,
+    ),
+    "F_freqduet_protocol_v6_v24_jointproj_fkl_s8_hiro": (
+        "analytic_two_sided_hf_aggregate_gain_projection_v11",
+        "joint_kl_soft_policy_distillation_v2",
+        "forward_kl_v2",
+        8,
+    ),
+}
+PROJECTION_CONFIGS = list(PROJECTION_CONFIG_EXPECTED)
 ALL_GAIN_FLOOR_CONFIGS = (
     GAIN_FLOOR_CONFIGS + V22_GAIN_FLOOR_FACTORIAL_CONFIGS)
 ALL_GAIN_FLOOR_PASSENGER_CONFIGS = (
@@ -204,6 +237,7 @@ EXPERIMENTAL_CONFIGS = [
     *TARGET_PRESERVING_GAIN_CONFIGS,
     *HF_OPPORTUNITY_GAIN_CONFIGS,
     *ALL_GAIN_FLOOR_CONFIGS,
+    *PROJECTION_CONFIGS,
 ]
 
 
@@ -247,6 +281,14 @@ def validate(
         regularity_policy = lower.get(
             "causal_regularity_policy", {}) or {}
         lower_context = (frequency.get("lower_context", {}) or {})
+        if name in PROJECTION_CONFIGS:
+            if lower.get("discrete_critic") != "zero_hold_advantage":
+                raise ValueError(
+                    f"{name}: projected policy requires zero-hold advantage")
+            if [float(value) for value in lower.get("action_bins", [])] != [
+                    0.0, 5.0, 10.0, 15.0, 20.0, 30.0, 45.0]:
+                raise ValueError(
+                    f"{name}: projected policy action support is not locked")
         if name in DISCRETE_CRITIC_CONFIGS:
             expected_discrete_critic = (
                 "zero_hold_advantage" if "_qadv0_" in name else "indexed")
@@ -340,7 +382,9 @@ def validate(
                 raise ValueError(
                     f"{name}: regularity policy uses non-causal evidence")
             expected_policy_mode = (
-                "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
+                PROJECTION_CONFIG_EXPECTED[name][0]
+                if name in PROJECTION_CONFIG_EXPECTED
+                else "analytic_two_sided_hf_aggregate_gain_floor_dual_v9"
                 if (name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED
                     and V22_GAIN_FLOOR_FACTORIAL_EXPECTED[name][0]
                     == "aggregate")
@@ -374,7 +418,10 @@ def validate(
             passenger = regularity_policy.get(
                 "passenger_holding_constraint", {}) or {}
             passenger_enabled = bool(passenger.get("enable"))
-            if passenger_enabled != (name in PASSENGER_HOLDING_CONFIGS):
+            expected_passenger_enabled = (
+                name in PASSENGER_HOLDING_CONFIGS
+                or name in PROJECTION_CONFIGS)
+            if passenger_enabled != expected_passenger_enabled:
                 raise ValueError(
                     f"{name}: passenger holding constraint registration "
                     "mismatch")
@@ -391,7 +438,7 @@ def validate(
                     raise ValueError(
                         f"{name}: passenger holding constraint cannot use a "
                         "gated APC load")
-                expected_budget = next(
+                expected_budget = 0.08 if name in PROJECTION_CONFIGS else next(
                     value for marker, value in (
                         ("_b040_", 0.04),
                         ("_b060_", 0.06),
@@ -417,6 +464,11 @@ def validate(
                         "dual_update_mode": dual_update_mode,
                         "augmented_lagrangian_rho": augmented_rho,
                     })
+                elif name in PROJECTION_CONFIGS:
+                    expected_passenger_contract.update({
+                        "dual_update_mode": "exact_projection_v1",
+                        "augmented_lagrangian_rho": 0.0,
+                    })
                 observed_passenger_contract = {
                     key: passenger.get(key)
                     for key in expected_passenger_contract
@@ -425,7 +477,10 @@ def validate(
                     raise ValueError(
                         f"{name}: passenger holding contract is not locked")
                 expected_regularity_limit = (
-                    0.05 if name in ALL_GAIN_FLOOR_CONFIGS else 0.00025)
+                    0.05
+                    if (name in ALL_GAIN_FLOOR_CONFIGS
+                        or name in PROJECTION_CONFIGS)
+                    else 0.00025)
                 if (float(regularity_policy.get("cost_limit", -1.0))
                         != expected_regularity_limit
                         or float(regularity_policy.get(
@@ -435,11 +490,20 @@ def validate(
             gain_floor = regularity_policy.get(
                 "regularity_gain_floor", {}) or {}
             gain_floor_enabled = bool(gain_floor.get("enable"))
-            if gain_floor_enabled != (name in ALL_GAIN_FLOOR_CONFIGS):
+            expected_gain_floor_enabled = (
+                name in ALL_GAIN_FLOOR_CONFIGS
+                or name in PROJECTION_CONFIGS)
+            if gain_floor_enabled != expected_gain_floor_enabled:
                 raise ValueError(
                     f"{name}: regularity gain-floor registration mismatch")
             if gain_floor_enabled:
-                if name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED:
+                if name in PROJECTION_CONFIGS:
+                    dual_update_mode = "exact_projection_v1"
+                    augmented_rho = 0.0
+                    expected_base, expected_increment = 0.30, 0.30
+                    expected_floor_mode = (
+                        "causal_hf_aggregate_gain_floor_v2")
+                elif name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED:
                     allocation, dual_update_mode, augmented_rho = (
                         V22_GAIN_FLOOR_FACTORIAL_EXPECTED[name])
                     expected_base, expected_increment = 0.30, 0.30
@@ -479,7 +543,8 @@ def validate(
                             "initial_lambda", -1.0)) != 0.01):
                     raise ValueError(
                         f"{name}: regularity gain-floor dual is not locked")
-                if name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED:
+                if (name in V22_GAIN_FLOOR_FACTORIAL_EXPECTED
+                        or name in PROJECTION_CONFIGS):
                     expected_optimizer_contract = {
                         "dual_update_mode": dual_update_mode,
                         "augmented_lagrangian_rho": augmented_rho,
@@ -491,7 +556,43 @@ def validate(
                     if (observed_optimizer_contract
                             != expected_optimizer_contract):
                         raise ValueError(
-                            f"{name}: V22 optimizer contract is not locked")
+                            f"{name}: gain-floor optimizer contract is not locked")
+            if name in PROJECTION_CONFIGS:
+                (_, expected_projection_mode, expected_distillation,
+                 expected_steps) = PROJECTION_CONFIG_EXPECTED[name]
+                projection = regularity_policy.get(
+                    "categorical_projection", {}) or {}
+                observed_projection_contract = {
+                    "enable": projection.get("enable"),
+                    "mode": projection.get("mode"),
+                    "distillation": projection.get(
+                        "distillation", "reverse_kl_v1"),
+                    "distillation_steps": int(projection.get(
+                        "distillation_steps", 1)),
+                    "regularity_target": float(projection.get(
+                        "regularity_target", -1.0)),
+                    "passenger_target": float(projection.get(
+                        "passenger_target", -1.0)),
+                    "tolerance": float(projection.get("tolerance", -1.0)),
+                    "max_iterations": int(projection.get(
+                        "max_iterations", -1)),
+                    "support_floor": float(projection.get(
+                        "support_floor", -1.0)),
+                }
+                expected_projection_contract = {
+                    "enable": True,
+                    "mode": expected_projection_mode,
+                    "distillation": expected_distillation,
+                    "distillation_steps": expected_steps,
+                    "regularity_target": 0.036,
+                    "passenger_target": 0.075,
+                    "tolerance": 1e-8,
+                    "max_iterations": 200,
+                    "support_floor": 1e-12,
+                }
+                if observed_projection_contract != expected_projection_contract:
+                    raise ValueError(
+                        f"{name}: categorical projection contract is not locked")
             gain_configs = (
                 CAPACITY_GAIN_CONFIGS
                 + EFFICIENCY_GAIN_CONFIGS

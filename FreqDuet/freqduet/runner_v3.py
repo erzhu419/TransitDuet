@@ -351,6 +351,10 @@ class DiagnosticLog:
         'lower_regularity_projection_actor_post_action_mean_s',
         'lower_regularity_projection_actor_post_target_action_change_mean_s',
         'lower_regularity_projection_actor_post_constraints_met',
+        'lower_regularity_projection_actor_reverse_kl_episode_mean',
+        'lower_regularity_projection_actor_reverse_kl_episode_max',
+        'lower_regularity_projection_actor_forward_kl_episode_mean',
+        'lower_regularity_projection_actor_forward_kl_episode_max',
         'lower_regularity_projection_actor_post_reverse_kl_episode_mean',
         'lower_regularity_projection_actor_post_reverse_kl_episode_max',
         'lower_regularity_projection_actor_post_forward_kl_episode_mean',
@@ -361,6 +365,8 @@ class DiagnosticLog:
         'lower_regularity_projection_actor_post_passenger_cost_episode_max',
         'lower_regularity_projection_actor_post_target_action_change_mean_s_episode_mean',
         'lower_regularity_projection_actor_post_constraints_met_episode_mean',
+        'lower_regularity_projection_target_action_change_abs_mean_s_episode_mean',
+        'lower_regularity_projection_actor_post_target_action_change_abs_mean_s_episode_mean',
         'lower_regularity_projection_base_action_mean_s',
         'lower_regularity_projection_target_action_mean_s',
         'lower_regularity_projection_target_action_change_mean_s',
@@ -8877,6 +8883,8 @@ class TransitDuetV2Runner:
                     lower_projection_updates.append(lower_m)
         if lower_projection_updates:
             projection_episode_metrics = (
+                'regularity_projection_actor_reverse_kl',
+                'regularity_projection_actor_forward_kl',
                 'regularity_projection_actor_post_reverse_kl',
                 'regularity_projection_actor_post_forward_kl',
                 'regularity_projection_actor_post_regularity_cost',
@@ -8891,11 +8899,26 @@ class TransitDuetV2Runner:
                 ], dtype=float)
                 lower_m[f'{metric}_episode_mean'] = float(values.mean())
                 if metric in {
+                        'regularity_projection_actor_reverse_kl',
+                        'regularity_projection_actor_forward_kl',
                         'regularity_projection_actor_post_reverse_kl',
                         'regularity_projection_actor_post_forward_kl',
                         'regularity_projection_actor_post_regularity_cost',
                         'regularity_projection_actor_post_passenger_cost'}:
                     lower_m[f'{metric}_episode_max'] = float(values.max())
+            for source, target in (
+                    (
+                        'regularity_projection_target_action_change_mean_s',
+                        'regularity_projection_target_action_change_abs_mean_s_episode_mean',
+                    ),
+                    (
+                        'regularity_projection_actor_post_target_action_change_mean_s',
+                        'regularity_projection_actor_post_target_action_change_abs_mean_s_episode_mean',
+                    )):
+                lower_m[target] = float(np.mean([
+                    abs(float(update.get(source, 0.0)))
+                    for update in lower_projection_updates
+                ]))
         lower_m['lower_policy_frozen'] = 1.0 if lower_policy_frozen else 0.0
         lower_m['lower_critic_frozen'] = 1.0 if lower_critic_frozen else 0.0
 
@@ -9639,6 +9662,22 @@ class TransitDuetV2Runner:
                     0.0)),
             'lower_regularity_projection_actor_post_constraints_met': lower_m.get(
                 'regularity_projection_actor_post_constraints_met', 0.0),
+            'lower_regularity_projection_actor_reverse_kl_episode_mean': (
+                lower_m.get(
+                    'regularity_projection_actor_reverse_kl_episode_mean',
+                    0.0)),
+            'lower_regularity_projection_actor_reverse_kl_episode_max': (
+                lower_m.get(
+                    'regularity_projection_actor_reverse_kl_episode_max',
+                    0.0)),
+            'lower_regularity_projection_actor_forward_kl_episode_mean': (
+                lower_m.get(
+                    'regularity_projection_actor_forward_kl_episode_mean',
+                    0.0)),
+            'lower_regularity_projection_actor_forward_kl_episode_max': (
+                lower_m.get(
+                    'regularity_projection_actor_forward_kl_episode_max',
+                    0.0)),
             'lower_regularity_projection_actor_post_reverse_kl_episode_mean': (
                 lower_m.get(
                     'regularity_projection_actor_post_reverse_kl_episode_mean',
@@ -9678,6 +9717,14 @@ class TransitDuetV2Runner:
             'lower_regularity_projection_actor_post_constraints_met_episode_mean': (
                 lower_m.get(
                     'regularity_projection_actor_post_constraints_met_episode_mean',
+                    0.0)),
+            'lower_regularity_projection_target_action_change_abs_mean_s_episode_mean': (
+                lower_m.get(
+                    'regularity_projection_target_action_change_abs_mean_s_episode_mean',
+                    0.0)),
+            'lower_regularity_projection_actor_post_target_action_change_abs_mean_s_episode_mean': (
+                lower_m.get(
+                    'regularity_projection_actor_post_target_action_change_abs_mean_s_episode_mean',
                     0.0)),
             'lower_regularity_projection_base_action_mean_s': lower_m.get(
                 'regularity_projection_base_action_mean_s', 0.0),

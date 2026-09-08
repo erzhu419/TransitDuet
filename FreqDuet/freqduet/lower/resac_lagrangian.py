@@ -1705,7 +1705,7 @@ class RESACLagrangianTrainer:
     def _regularity_projected_soft_policy_target(
             self, state, q_lcb, safety_cost_q, sample_weights,
             safety_lambda):
-        """Return the exact V23 constrained target on causal-valid rows."""
+        """Return the exact constrained target on causal-valid rows."""
         if not self.regularity_projection_enabled:
             raise RuntimeError('categorical policy projection is disabled')
         valid = self._regularity_evidence_valid(state).bool()
@@ -1766,7 +1766,7 @@ class RESACLagrangianTrainer:
                 or maximum_violation > self.regularity_projection_tolerance):
             costs = projection['expected_costs'].detach().cpu().tolist()
             raise RuntimeError(
-                'V23 categorical projection failed its locked gate: '
+                'categorical projection failed its locked gate: '
                 f"converged={projection['converged']} costs={costs} "
                 f"iterations={projection['iterations']}")
         projection.update({
