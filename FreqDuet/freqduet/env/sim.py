@@ -156,6 +156,7 @@ class env_bus(object):
         self.frequency_observation_source = 'latent_arrivals'
         self.frequency_tracker = None
         self.frequency_logger = None
+        self.follower_target_calibrator = None
         self.frequency_logging_enabled = False
         self.frequency_logger_cfg = {}
         self.lower_context_enabled = False
@@ -836,6 +837,8 @@ class env_bus(object):
                           causal_holding_action_scale_s=getattr(
                               self, 'lower_causal_holding_action_scale_s',
                               60.0),
+                          follower_target_calibrator=(
+                              self.follower_target_calibrator),
                           headway_recorder=(
                               self.headway_events
                               if self.headway_state_mode == 'arrival_event'

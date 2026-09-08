@@ -229,6 +229,13 @@ class HeadwayEventRecorder:
         action_s: float,
         action_cap_s: float,
         source: str | None,
+        base_predicted_follower_gap_s: float | None = None,
+        calibration_requested_adjustment_s: float = 0.0,
+        calibration_effective_adjustment_s: float = 0.0,
+        calibration_features: Iterable[float] | None = None,
+        calibration_active: bool = False,
+        calibration_history_episodes: int = 0,
+        calibration_mode: str = "disabled",
     ) -> bool:
         """Register one causal AVL forecast for later departure calibration."""
         self._follower_forecast_decisions += 1
@@ -251,14 +258,42 @@ class HeadwayEventRecorder:
         decision, predicted_gap, forward_gap, action, action_cap = (
             float(value) for value in numeric
         )
+        base_predicted_gap = (
+            predicted_gap if base_predicted_follower_gap_s is None
+            else float(base_predicted_follower_gap_s)
+        )
+        requested_adjustment = float(calibration_requested_adjustment_s)
+        effective_adjustment = float(calibration_effective_adjustment_s)
         if (
             not np.isfinite(np.asarray(
-                [decision, predicted_gap, forward_gap, action, action_cap]
+                [
+                    decision,
+                    predicted_gap,
+                    base_predicted_gap,
+                    forward_gap,
+                    action,
+                    action_cap,
+                    requested_adjustment,
+                    effective_adjustment,
+                ]
             )).all()
-            or min(decision, predicted_gap, forward_gap, action) < 0.0
+            or min(
+                decision,
+                predicted_gap,
+                base_predicted_gap,
+                forward_gap,
+                action,
+            ) < 0.0
             or action_cap <= 0.0
         ):
             return False
+
+        feature_values = None
+        if calibration_features is not None:
+            candidate = np.asarray(
+                list(calibration_features), dtype=np.float64).reshape(-1)
+            if candidate.size and np.isfinite(candidate).all():
+                feature_values = tuple(float(value) for value in candidate)
 
         row: dict[str, Any] = {
             "station_id": int(station_id),
@@ -267,10 +302,18 @@ class HeadwayEventRecorder:
             "current_trip_id": int(current_trip_id),
             "follower_trip_id": int(follower_trip_id),
             "predicted_follower_gap_s": predicted_gap,
+            "base_predicted_follower_gap_s": base_predicted_gap,
             "forward_departure_gap_s": forward_gap,
             "action_s": action,
             "action_cap_s": action_cap,
             "source": source_value,
+            "calibration_requested_adjustment_s": requested_adjustment,
+            "calibration_effective_adjustment_s": effective_adjustment,
+            "calibration_features": feature_values,
+            "calibration_active": bool(calibration_active),
+            "calibration_history_episodes": int(
+                calibration_history_episodes),
+            "calibration_mode": str(calibration_mode),
             "current_departure_time_s": None,
             "follower_action_ready_time_s": None,
             "follower_action_s": None,
@@ -322,6 +365,14 @@ class HeadwayEventRecorder:
             0.0,
             row["action_cap_s"],
         ))
+        base_predicted_target = float(np.clip(
+            0.5 * (
+                row["base_predicted_follower_gap_s"]
+                - row["forward_departure_gap_s"]
+            ),
+            0.0,
+            row["action_cap_s"],
+        ))
         realized_target = float(np.clip(
             0.5 * (
                 actual_raw_gap - row["forward_departure_gap_s"]
@@ -333,14 +384,21 @@ class HeadwayEventRecorder:
             "actual_follower_gap_s": actual_raw_gap,
             "raw_gap_prediction_error_s": (
                 row["predicted_follower_gap_s"] - actual_raw_gap),
+            "base_gap_prediction_error_s": (
+                row["base_predicted_follower_gap_s"] - actual_raw_gap),
             "predicted_post_hold_gap_s": predicted_post_hold_gap,
             "actual_post_hold_gap_s": actual_post_hold_gap,
             "post_hold_gap_prediction_error_s": (
                 predicted_post_hold_gap - actual_post_hold_gap),
             "predicted_target_action_s": predicted_target,
+            "base_predicted_target_action_s": base_predicted_target,
             "realized_target_action_s": realized_target,
             "target_action_prediction_error_s": (
                 predicted_target - realized_target),
+            "base_target_action_prediction_error_s": (
+                base_predicted_target - realized_target),
+            "calibration_target_adjustment_s": (
+                predicted_target - base_predicted_target),
             "departure_timing_error_s": (
                 float(current_departure)
                 - row["decision_time_s"]
@@ -349,6 +407,10 @@ class HeadwayEventRecorder:
                 predicted_target > 1e-9 and realized_target <= 1e-9),
             "hold_need_false_negative": float(
                 predicted_target <= 1e-9 and realized_target > 1e-9),
+            "base_hold_need_false_positive": float(
+                base_predicted_target > 1e-9 and realized_target <= 1e-9),
+            "base_hold_need_false_negative": float(
+                base_predicted_target <= 1e-9 and realized_target > 1e-9),
             "resolved": True,
         })
         self._resolved_follower_forecasts.append(row)
@@ -371,6 +433,14 @@ class HeadwayEventRecorder:
     ) -> dict[str, float | int] | None:
         event = self._last_departure.get((int(station_id), bool(direction)))
         return None if event is None else dict(event)
+
+    def follower_forecast_calibration_samples(self) -> list[dict[str, Any]]:
+        """Return completed matched rows for a post-episode history update."""
+        return [
+            dict(row)
+            for row in self._resolved_follower_forecasts
+            if row.get("calibration_features") is not None
+        ]
 
     def summary(self) -> dict[str, float | int]:
         values = np.asarray(self.headways_s, dtype=np.float64)
@@ -422,15 +492,26 @@ class HeadwayEventRecorder:
         }
         metric_names = (
             "predicted_follower_gap_s",
+            "base_predicted_follower_gap_s",
             "actual_follower_gap_s",
             "raw_gap_prediction_error_s",
+            "base_gap_prediction_error_s",
             "post_hold_gap_prediction_error_s",
             "predicted_target_action_s",
+            "base_predicted_target_action_s",
             "realized_target_action_s",
             "target_action_prediction_error_s",
+            "base_target_action_prediction_error_s",
+            "calibration_requested_adjustment_s",
+            "calibration_effective_adjustment_s",
+            "calibration_target_adjustment_s",
+            "calibration_active",
+            "calibration_history_episodes",
             "departure_timing_error_s",
             "hold_need_false_positive",
             "hold_need_false_negative",
+            "base_hold_need_false_positive",
+            "base_hold_need_false_negative",
         )
         if not resolved:
             for name in metric_names:
@@ -439,7 +520,12 @@ class HeadwayEventRecorder:
                 "follower_forecast_raw_gap_prediction_mae_s": 0.0,
                 "follower_forecast_raw_gap_prediction_rmse_s": 0.0,
                 "follower_forecast_raw_gap_prediction_p90_abs_s": 0.0,
+                "follower_forecast_base_gap_prediction_mae_s": 0.0,
+                "follower_forecast_base_gap_prediction_rmse_s": 0.0,
                 "follower_forecast_target_action_prediction_mae_s": 0.0,
+                "follower_forecast_base_target_action_prediction_mae_s": 0.0,
+                "follower_forecast_calibration_requested_adjustment_abs_mean_s": 0.0,
+                "follower_forecast_calibration_target_adjustment_abs_mean_s": 0.0,
                 "follower_forecast_follower_future_hold_s_mean": 0.0,
                 "follower_forecast_follower_future_hold_positive_rate": 0.0,
                 "follower_forecast_follower_action_execution_error_s_mean": 0.0,
@@ -456,7 +542,9 @@ class HeadwayEventRecorder:
         for name, array in arrays.items():
             result[f"follower_forecast_{name}_mean"] = float(array.mean())
         raw_error = arrays["raw_gap_prediction_error_s"]
+        base_gap_error = arrays["base_gap_prediction_error_s"]
         target_error = arrays["target_action_prediction_error_s"]
+        base_target_error = arrays["base_target_action_prediction_error_s"]
         result.update({
             "follower_forecast_raw_gap_prediction_mae_s": float(
                 np.abs(raw_error).mean()),
@@ -464,8 +552,19 @@ class HeadwayEventRecorder:
                 np.sqrt(np.mean(raw_error ** 2))),
             "follower_forecast_raw_gap_prediction_p90_abs_s": float(
                 np.quantile(np.abs(raw_error), 0.9)),
+            "follower_forecast_base_gap_prediction_mae_s": float(
+                np.abs(base_gap_error).mean()),
+            "follower_forecast_base_gap_prediction_rmse_s": float(
+                np.sqrt(np.mean(base_gap_error ** 2))),
             "follower_forecast_target_action_prediction_mae_s": float(
                 np.abs(target_error).mean()),
+            "follower_forecast_base_target_action_prediction_mae_s": float(
+                np.abs(base_target_error).mean()),
+            "follower_forecast_calibration_requested_adjustment_abs_mean_s": float(
+                np.abs(arrays[
+                    "calibration_requested_adjustment_s"]).mean()),
+            "follower_forecast_calibration_target_adjustment_abs_mean_s": float(
+                np.abs(arrays["calibration_target_adjustment_s"]).mean()),
         })
         future_holds = np.asarray(
             [row["follower_future_hold_s"] for row in action_resolved_rows],

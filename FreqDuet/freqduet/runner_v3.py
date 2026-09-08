@@ -86,6 +86,7 @@ from lower.observation_contract import LowerObservationContract
 from lower.state_encoder import PhysicalLowerStateEncoder
 from lower.holding_externality import LoadWeightedHoldingPenalty
 from lower.causal_holding_guard import CausalHoldingActionGuard
+from lower.causal_follower_eta import HistoricalFollowerTargetCalibrator
 from lower.causal_departure_regularity import (
     CausalDepartureRegularityCost,
     DepartureRegularityContext,
@@ -264,6 +265,55 @@ class DiagnosticLog:
         'terminal_actual_dispatch_gap_mean_s',
         'terminal_dispatch_execution_error_mean_s',
         'terminal_dispatch_execution_error_abs_mean_s',
+        'follower_forecast_decision_count',
+        'follower_forecast_registered_count',
+        'follower_forecast_resolved_count',
+        'follower_forecast_action_resolved_count',
+        'follower_forecast_departure_resolved_count',
+        'follower_forecast_valid_rate',
+        'follower_forecast_resolution_rate',
+        'follower_forecast_predicted_follower_gap_s_mean',
+        'follower_forecast_actual_follower_gap_s_mean',
+        'follower_forecast_raw_gap_prediction_error_s_mean',
+        'follower_forecast_raw_gap_prediction_mae_s',
+        'follower_forecast_raw_gap_prediction_rmse_s',
+        'follower_forecast_raw_gap_prediction_p90_abs_s',
+        'follower_forecast_post_hold_gap_prediction_error_s_mean',
+        'follower_forecast_predicted_target_action_s_mean',
+        'follower_forecast_realized_target_action_s_mean',
+        'follower_forecast_target_action_prediction_error_s_mean',
+        'follower_forecast_target_action_prediction_mae_s',
+        'follower_forecast_departure_timing_error_s_mean',
+        'follower_forecast_hold_need_false_positive_mean',
+        'follower_forecast_hold_need_false_negative_mean',
+        'follower_forecast_follower_future_hold_s_mean',
+        'follower_forecast_follower_future_hold_positive_rate',
+        'follower_forecast_follower_action_execution_error_s_mean',
+        'follower_forecast_base_predicted_follower_gap_s_mean',
+        'follower_forecast_base_gap_prediction_error_s_mean',
+        'follower_forecast_base_gap_prediction_mae_s',
+        'follower_forecast_base_gap_prediction_rmse_s',
+        'follower_forecast_base_predicted_target_action_s_mean',
+        'follower_forecast_base_target_action_prediction_error_s_mean',
+        'follower_forecast_base_target_action_prediction_mae_s',
+        'follower_forecast_base_hold_need_false_positive_mean',
+        'follower_forecast_base_hold_need_false_negative_mean',
+        'follower_forecast_calibration_requested_adjustment_s_mean',
+        'follower_forecast_calibration_requested_adjustment_abs_mean_s',
+        'follower_forecast_calibration_effective_adjustment_s_mean',
+        'follower_forecast_calibration_target_adjustment_s_mean',
+        'follower_forecast_calibration_target_adjustment_abs_mean_s',
+        'follower_forecast_calibration_active_mean',
+        'follower_forecast_calibration_history_episodes_mean',
+        'follower_target_calibration_enabled',
+        'follower_target_calibration_mode',
+        'follower_target_calibration_active',
+        'follower_target_calibration_history_episodes',
+        'follower_target_calibration_history_samples',
+        'follower_target_calibration_coefficient_norm',
+        'follower_target_calibration_intercept_s',
+        'follower_target_calibration_episode_samples',
+        'follower_target_calibration_episode_updated',
         'invalid_headway_decisions_masked',
         'lower_observation_contract', 'headway_reward_mode',
         'frequency_observation_source', 'lower_observation_ledger_hash',
@@ -2155,6 +2205,9 @@ class TransitDuetV2Runner:
         )
         self.lower_causal_holding_guard = CausalHoldingActionGuard.from_config(
             lower_cfg.get('causal_holding_guard', {}))
+        self.follower_target_calibrator = (
+            HistoricalFollowerTargetCalibrator.from_config(
+                lower_cfg.get('follower_forecast_calibration', {})))
         self.lower_departure_regularity = (
             CausalDepartureRegularityCost.from_config(
                 lower_cfg.get('causal_departure_regularity', {})))
@@ -2182,6 +2235,19 @@ class TransitDuetV2Runner:
                 int(self.env._base_state_dim)
                 + self.env.lower_context_features.index(feature))
         self.env.lower_causal_holding_guard = self.lower_causal_holding_guard
+        if self.follower_target_calibrator.enabled:
+            if self.lower_state_input_schema != 'causal_forward_v4':
+                raise ValueError(
+                    'follower forecast calibration requires '
+                    'lower causal_forward_v4 state input')
+            if self.lower_headway_state_mode != 'arrival_event':
+                raise ValueError(
+                    'follower forecast calibration requires arrival events')
+            if self.lower_observation_contract != 'deployable_apc_avl_v4':
+                raise ValueError(
+                    'follower forecast calibration requires the deployable '
+                    'APC/AVL observation contract')
+        self.env.follower_target_calibrator = self.follower_target_calibrator
         self.env.lower_causal_holding_action_scale_s = (
             float(np.max(self.lower_action_bins))
             if self.lower_action_bins is not None
@@ -6023,12 +6089,31 @@ class TransitDuetV2Runner:
                 bus, 'pre_action_follower_trip_id', None),
             predicted_follower_gap_s=getattr(
                 bus, 'pre_action_follower_departure_gap', None),
+            base_predicted_follower_gap_s=getattr(
+                bus, 'pre_action_follower_base_departure_gap', None),
             forward_departure_gap_s=getattr(
                 bus, 'pre_action_forward_headway', None),
             action_s=self._lower_action_scalar(action),
             action_cap_s=float(
                 self.env.lower_causal_holding_action_scale_s),
             source=getattr(bus, 'pre_action_follower_source', None),
+            calibration_requested_adjustment_s=getattr(
+                bus,
+                'pre_action_follower_calibration_requested_adjustment_s',
+                0.0),
+            calibration_effective_adjustment_s=getattr(
+                bus,
+                'pre_action_follower_calibration_effective_adjustment_s',
+                0.0),
+            calibration_features=getattr(
+                bus, 'pre_action_follower_calibration_features', None),
+            calibration_active=getattr(
+                bus, 'pre_action_follower_calibration_active', False),
+            calibration_history_episodes=getattr(
+                bus,
+                'pre_action_follower_calibration_history_episodes',
+                0),
+            calibration_mode=self.follower_target_calibrator.mode,
         )
 
     def _capture_lower_action_context(self, bus_id, bus):
@@ -8612,6 +8697,18 @@ class TransitDuetV2Runner:
         #   δ_t → dispatch timing → gap to neighbors → gap deviation = credit
         z = self.env.measurement_vector
         env_details = self.env.measurement_details
+        follower_calibration_update = {
+            **self.follower_target_calibrator.diagnostics(),
+            'episode_samples_accepted': 0,
+            'episode_updated': 0,
+        }
+        if training and self.follower_target_calibrator.enabled:
+            follower_calibration_update = (
+                self.follower_target_calibrator.update_episode(
+                    self.env.headway_events
+                    .follower_forecast_calibration_samples(),
+                    episode=int(ep),
+                ))
         N_fleet = self._current_N_fleet  # v2k: use episode's sampled budget
         episode_overshoot = max(0.0, float(z[1]) - float(N_fleet))
         service_cost_by_wait = service_cost_views(
@@ -9565,6 +9662,86 @@ class TransitDuetV2Runner:
                 float(env_details.get(
                     'follower_forecast_follower_action_execution_error_s_mean',
                     0.0)), 6),
+            'follower_forecast_base_predicted_follower_gap_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_base_predicted_follower_gap_s_mean',
+                    0.0)), 6),
+            'follower_forecast_base_gap_prediction_error_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_base_gap_prediction_error_s_mean',
+                    0.0)), 6),
+            'follower_forecast_base_gap_prediction_mae_s': round(float(
+                env_details.get(
+                    'follower_forecast_base_gap_prediction_mae_s', 0.0)), 6),
+            'follower_forecast_base_gap_prediction_rmse_s': round(float(
+                env_details.get(
+                    'follower_forecast_base_gap_prediction_rmse_s', 0.0)), 6),
+            'follower_forecast_base_predicted_target_action_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_base_predicted_target_action_s_mean',
+                    0.0)), 6),
+            'follower_forecast_base_target_action_prediction_error_s_mean': (
+                round(float(env_details.get(
+                    'follower_forecast_base_target_action_prediction_error_s_mean',
+                    0.0)), 6)),
+            'follower_forecast_base_target_action_prediction_mae_s': round(
+                float(env_details.get(
+                    'follower_forecast_base_target_action_prediction_mae_s',
+                    0.0)), 6),
+            'follower_forecast_base_hold_need_false_positive_mean': round(
+                float(env_details.get(
+                    'follower_forecast_base_hold_need_false_positive_mean',
+                    0.0)), 8),
+            'follower_forecast_base_hold_need_false_negative_mean': round(
+                float(env_details.get(
+                    'follower_forecast_base_hold_need_false_negative_mean',
+                    0.0)), 8),
+            'follower_forecast_calibration_requested_adjustment_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_calibration_requested_adjustment_s_mean',
+                    0.0)), 6),
+            'follower_forecast_calibration_requested_adjustment_abs_mean_s': (
+                round(float(env_details.get(
+                    'follower_forecast_calibration_requested_adjustment_abs_mean_s',
+                    0.0)), 6)),
+            'follower_forecast_calibration_effective_adjustment_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_calibration_effective_adjustment_s_mean',
+                    0.0)), 6),
+            'follower_forecast_calibration_target_adjustment_s_mean': round(
+                float(env_details.get(
+                    'follower_forecast_calibration_target_adjustment_s_mean',
+                    0.0)), 6),
+            'follower_forecast_calibration_target_adjustment_abs_mean_s': (
+                round(float(env_details.get(
+                    'follower_forecast_calibration_target_adjustment_abs_mean_s',
+                    0.0)), 6)),
+            'follower_forecast_calibration_active_mean': round(float(
+                env_details.get(
+                    'follower_forecast_calibration_active_mean', 0.0)), 8),
+            'follower_forecast_calibration_history_episodes_mean': round(
+                float(env_details.get(
+                    'follower_forecast_calibration_history_episodes_mean',
+                    0.0)), 6),
+            'follower_target_calibration_enabled': int(
+                follower_calibration_update.get('enabled', 0)),
+            'follower_target_calibration_mode': str(
+                self.follower_target_calibrator.mode),
+            'follower_target_calibration_active': int(
+                follower_calibration_update.get('active', 0)),
+            'follower_target_calibration_history_episodes': int(
+                follower_calibration_update.get('history_episodes', 0)),
+            'follower_target_calibration_history_samples': int(
+                follower_calibration_update.get('history_samples', 0)),
+            'follower_target_calibration_coefficient_norm': round(float(
+                follower_calibration_update.get('coefficient_norm', 0.0)), 8),
+            'follower_target_calibration_intercept_s': round(float(
+                follower_calibration_update.get('intercept_s', 0.0)), 8),
+            'follower_target_calibration_episode_samples': int(
+                follower_calibration_update.get(
+                    'episode_samples_accepted', 0)),
+            'follower_target_calibration_episode_updated': int(
+                follower_calibration_update.get('episode_updated', 0)),
             'invalid_headway_decisions_masked': int(
                 env_details.get('invalid_headway_decisions_masked', 0)),
             'lower_observation_contract': str(
@@ -10880,6 +11057,8 @@ class TransitDuetV2Runner:
                 'history_summary': copy.deepcopy(
                     self.env.lower_context_gate_history_summary),
             },
+            'follower_target_calibrator': (
+                self.follower_target_calibrator.state_dict()),
             'adaptive_selectors': adaptive,
         }
 
@@ -10925,6 +11104,14 @@ class TransitDuetV2Runner:
             'history_last_episode')
         self.env.lower_context_gate_history_summary = copy.deepcopy(
             gate.get('history_summary', {}))
+        follower_calibration = state.get('follower_target_calibrator')
+        if follower_calibration is None:
+            if self.follower_target_calibrator.enabled:
+                raise ValueError(
+                    'enabled follower calibration requires checkpoint state')
+        else:
+            self.follower_target_calibrator.load_state_dict(
+                follower_calibration)
         for name, value in (state.get('adaptive_selectors', {}) or {}).items():
             if hasattr(self, name):
                 setattr(self, name, copy.deepcopy(value))

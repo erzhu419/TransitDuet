@@ -2,6 +2,7 @@ import unittest
 
 from lower.causal_follower_eta import (
     AVLVehicleSnapshot,
+    HistoricalFollowerTargetCalibrator,
     estimate_follower_departure_gap,
 )
 
@@ -94,6 +95,119 @@ class CausalFollowerEtaTest(unittest.TestCase):
         self.assertFalse(estimate.valid)
         self.assertIsNone(estimate.departure_gap_s)
         self.assertEqual(estimate.source, "no_same_direction_avl_follower")
+
+
+class HistoricalFollowerTargetCalibratorTest(unittest.TestCase):
+    @staticmethod
+    def prediction(calibrator):
+        return calibrator.calibrate(
+            base_departure_gap_s=200.0,
+            forward_departure_gap_s=100.0,
+            target_headway_s=180.0,
+            action_cap_s=60.0,
+            eta_s=180.0,
+            spatial_gap_m=900.0,
+            speed_mps=5.0,
+            service_dwell_s=20.0,
+            route_progress=0.4,
+            station_phase=0.5,
+            current_time_s=7200.0,
+            direction=True,
+            source="same_time_avl_journey_speed_eta",
+        )
+
+    @staticmethod
+    def rows(prediction, residual, count=2):
+        return [
+            {
+                "calibration_features": prediction.features,
+                "base_predicted_target_action_s": (
+                    prediction.base_target_action_s),
+                "realized_target_action_s": (
+                    prediction.base_target_action_s + residual),
+            }
+            for _ in range(count)
+        ]
+
+    def test_disabled_calibration_is_exact_identity(self):
+        calibrator = HistoricalFollowerTargetCalibrator(enabled=False)
+        result = self.prediction(calibrator)
+
+        self.assertFalse(result.active)
+        self.assertEqual(result.base_departure_gap_s, 200.0)
+        self.assertEqual(result.calibrated_departure_gap_s, 200.0)
+        self.assertEqual(result.requested_adjustment_s, 0.0)
+        self.assertEqual(result.effective_target_adjustment_s, 0.0)
+
+    def test_completed_days_activate_bias_without_same_day_leakage(self):
+        calibrator = HistoricalFollowerTargetCalibrator(
+            enabled=True,
+            mode="historical_target_bias_v1",
+            min_history_episodes=2,
+            min_samples_per_episode=2,
+            history_alpha=1.0,
+            ridge=0.0,
+            adjustment_cap_s=10.0,
+        )
+        initial = self.prediction(calibrator)
+        self.assertFalse(initial.active)
+
+        first_update = calibrator.update_episode(
+            self.rows(initial, residual=-8.0), episode=0)
+        self.assertEqual(first_update["episode_updated"], 1)
+        self.assertFalse(self.prediction(calibrator).active)
+
+        second_input = self.prediction(calibrator)
+        calibrator.update_episode(
+            self.rows(second_input, residual=-8.0), episode=1)
+        active = self.prediction(calibrator)
+        self.assertTrue(active.active)
+        self.assertAlmostEqual(active.requested_adjustment_s, -8.0)
+        self.assertAlmostEqual(active.calibrated_departure_gap_s, 184.0)
+        self.assertAlmostEqual(active.calibrated_target_action_s, 42.0)
+
+    def test_context_features_are_finite_and_adjustment_is_bounded(self):
+        calibrator = HistoricalFollowerTargetCalibrator(
+            enabled=True,
+            mode="historical_target_ridge_v1",
+            min_history_episodes=1,
+            min_samples_per_episode=1,
+            adjustment_cap_s=3.0,
+        )
+        initial = self.prediction(calibrator)
+        self.assertEqual(
+            len(initial.features), len(calibrator.feature_names))
+        calibrator.update_episode(
+            self.rows(initial, residual=30.0, count=1), episode=0)
+        active = self.prediction(calibrator)
+        self.assertTrue(active.active)
+        self.assertLessEqual(abs(active.requested_adjustment_s), 3.0)
+        self.assertLessEqual(
+            abs(active.calibrated_departure_gap_s - 200.0), 6.0)
+
+    def test_state_round_trip_preserves_prediction_and_update_order(self):
+        source = HistoricalFollowerTargetCalibrator(
+            enabled=True,
+            mode="historical_target_bias_v1",
+            min_history_episodes=1,
+            min_samples_per_episode=1,
+        )
+        initial = self.prediction(source)
+        source.update_episode(
+            self.rows(initial, residual=-4.0, count=1), episode=3)
+
+        restored = HistoricalFollowerTargetCalibrator(
+            enabled=True,
+            mode="historical_target_bias_v1",
+            min_history_episodes=1,
+            min_samples_per_episode=1,
+        )
+        restored.load_state_dict(source.state_dict())
+        self.assertEqual(
+            self.prediction(source), self.prediction(restored))
+        with self.assertRaisesRegex(ValueError, "monotonically"):
+            restored.update_episode(
+                self.rows(initial, residual=-4.0, count=1), episode=3)
 
 
 if __name__ == "__main__":

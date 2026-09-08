@@ -75,12 +75,20 @@ class Bus(object):
         self.pre_action_forward_headway_source = "unavailable"
         self.pre_action_time_s = None
         self.pre_action_follower_departure_gap = None
+        self.pre_action_follower_base_departure_gap = None
         self.pre_action_follower_eta = None
         self.pre_action_follower_spatial_gap = None
         self.pre_action_follower_speed = None
         self.pre_action_follower_bus_id = None
         self.pre_action_follower_trip_id = None
         self.pre_action_follower_source = "unavailable"
+        self.pre_action_follower_base_target_action_s = None
+        self.pre_action_follower_calibrated_target_action_s = None
+        self.pre_action_follower_calibration_requested_adjustment_s = 0.0
+        self.pre_action_follower_calibration_effective_adjustment_s = 0.0
+        self.pre_action_follower_calibration_features = None
+        self.pre_action_follower_calibration_active = False
+        self.pre_action_follower_calibration_history_episodes = 0
         self._lower_state_input_schema = "legacy_headway_deviation"
         self._lower_observation_contract = "latent_oracle_legacy"
         self._headway_reward_mode = "symmetric_legacy"
@@ -264,6 +272,7 @@ class Bus(object):
               lower_fleet_utilization=0.0,
               causal_holding_guard=None,
               causal_holding_action_scale_s=60.0,
+              follower_target_calibrator=None,
               headway_recorder=None,
               lower_state_input_schema="legacy_headway_deviation",
               lower_observation_contract="latent_oracle_legacy",
@@ -285,6 +294,7 @@ class Bus(object):
         self._causal_holding_guard = causal_holding_guard
         self._causal_holding_action_scale_s = max(
             float(causal_holding_action_scale_s), 1e-6)
+        self._follower_target_calibrator = follower_target_calibrator
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -802,12 +812,20 @@ class Bus(object):
         if not all(hasattr(self, name) for name in (
                 'bus_id', 'direction', 'absolute_distance')):
             self.pre_action_follower_departure_gap = None
+            self.pre_action_follower_base_departure_gap = None
             self.pre_action_follower_eta = None
             self.pre_action_follower_spatial_gap = None
             self.pre_action_follower_speed = None
             self.pre_action_follower_bus_id = None
             self.pre_action_follower_trip_id = None
             self.pre_action_follower_source = "current_avl_unavailable"
+            self.pre_action_follower_base_target_action_s = None
+            self.pre_action_follower_calibrated_target_action_s = None
+            self.pre_action_follower_calibration_requested_adjustment_s = 0.0
+            self.pre_action_follower_calibration_effective_adjustment_s = 0.0
+            self.pre_action_follower_calibration_features = None
+            self.pre_action_follower_calibration_active = False
+            self.pre_action_follower_calibration_history_episodes = 0
             return
         snapshots = []
         for bus in bus_all:
@@ -835,6 +853,7 @@ class Bus(object):
                 self, 'last_service_dwell_s', 0.0)),
             vehicles=snapshots,
         )
+        self.pre_action_follower_base_departure_gap = estimate.departure_gap_s
         self.pre_action_follower_departure_gap = estimate.departure_gap_s
         self.pre_action_follower_eta = estimate.eta_s
         self.pre_action_follower_spatial_gap = estimate.spatial_gap_m
@@ -849,6 +868,52 @@ class Bus(object):
         self.pre_action_follower_trip_id = (
             int(getattr(follower, 'trip_id')) if follower is not None else None)
         self.pre_action_follower_source = estimate.source
+        self.pre_action_follower_base_target_action_s = None
+        self.pre_action_follower_calibrated_target_action_s = None
+        self.pre_action_follower_calibration_requested_adjustment_s = 0.0
+        self.pre_action_follower_calibration_effective_adjustment_s = 0.0
+        self.pre_action_follower_calibration_features = None
+        self.pre_action_follower_calibration_active = False
+        self.pre_action_follower_calibration_history_episodes = 0
+
+        calibrator = getattr(self, '_follower_target_calibrator', None)
+        if calibrator is None or not estimate.valid:
+            return
+        route_len = max(
+            float(sum(route.distance for route in self.effective_route)), 1.0)
+        station_count = max(len(self.effective_station) - 1, 1)
+        calibration = calibrator.calibrate(
+            base_departure_gap_s=estimate.departure_gap_s,
+            forward_departure_gap_s=self.pre_action_forward_headway,
+            target_headway_s=float(self._target_headway),
+            action_cap_s=float(self._causal_holding_action_scale_s),
+            eta_s=estimate.eta_s,
+            spatial_gap_m=estimate.spatial_gap_m,
+            speed_mps=estimate.speed_mps,
+            service_dwell_s=float(getattr(
+                self, 'last_service_dwell_s', 0.0)),
+            route_progress=float(self.travel_distance) / route_len,
+            station_phase=(
+                float(self.effective_station.index(self.last_station))
+                / station_count),
+            current_time_s=float(current_time),
+            direction=bool(self.direction),
+            source=estimate.source,
+        )
+        self.pre_action_follower_departure_gap = (
+            calibration.calibrated_departure_gap_s)
+        self.pre_action_follower_base_target_action_s = (
+            calibration.base_target_action_s)
+        self.pre_action_follower_calibrated_target_action_s = (
+            calibration.calibrated_target_action_s)
+        self.pre_action_follower_calibration_requested_adjustment_s = float(
+            calibration.requested_adjustment_s)
+        self.pre_action_follower_calibration_effective_adjustment_s = float(
+            calibration.effective_target_adjustment_s)
+        self.pre_action_follower_calibration_features = calibration.features
+        self.pre_action_follower_calibration_active = bool(calibration.active)
+        self.pre_action_follower_calibration_history_episodes = int(
+            calibration.history_episodes)
 
     def arrive_station(self, current_time, bus_all, debug):
         # Because we have to use the self.holding_time later, so we exchange passenger first when arrived a station
@@ -953,12 +1018,20 @@ class Bus(object):
         self.pre_action_forward_headway_source = "unavailable"
         self.pre_action_time_s = None
         self.pre_action_follower_departure_gap = None
+        self.pre_action_follower_base_departure_gap = None
         self.pre_action_follower_eta = None
         self.pre_action_follower_spatial_gap = None
         self.pre_action_follower_speed = None
         self.pre_action_follower_bus_id = None
         self.pre_action_follower_trip_id = None
         self.pre_action_follower_source = "unavailable"
+        self.pre_action_follower_base_target_action_s = None
+        self.pre_action_follower_calibrated_target_action_s = None
+        self.pre_action_follower_calibration_requested_adjustment_s = 0.0
+        self.pre_action_follower_calibration_effective_adjustment_s = 0.0
+        self.pre_action_follower_calibration_features = None
+        self.pre_action_follower_calibration_active = False
+        self.pre_action_follower_calibration_history_episodes = 0
 
         self.last_station_dis = 0.
         self.next_station_dis = self.current_route.distance

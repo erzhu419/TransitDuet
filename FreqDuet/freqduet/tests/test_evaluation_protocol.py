@@ -175,6 +175,57 @@ class MeasurementTest(unittest.TestCase):
             1.0,
         )
 
+    def test_follower_calibration_reports_paired_base_error_and_samples(self):
+        recorder = HeadwayEventRecorder()
+        recorder.record_follower_departure_forecast(
+            station_id=3,
+            direction=True,
+            decision_time_s=100.0,
+            current_trip_id=10,
+            follower_trip_id=12,
+            predicted_follower_gap_s=200.0,
+            base_predicted_follower_gap_s=220.0,
+            forward_departure_gap_s=100.0,
+            action_s=10.0,
+            action_cap_s=60.0,
+            source="same_time_avl_journey_speed_eta",
+            calibration_requested_adjustment_s=-10.0,
+            calibration_effective_adjustment_s=-10.0,
+            calibration_features=(1.0, 0.5),
+            calibration_active=True,
+            calibration_history_episodes=7,
+            calibration_mode="historical_target_ridge_v1",
+        )
+        recorder.record_departure(3, True, 111.0, trip_id=10)
+        recorder.record_action_ready(3, True, 280.0, trip_id=12)
+
+        summary = recorder.summary()
+        self.assertAlmostEqual(
+            summary["follower_forecast_raw_gap_prediction_mae_s"], 20.0)
+        self.assertAlmostEqual(
+            summary["follower_forecast_base_gap_prediction_mae_s"], 40.0)
+        self.assertAlmostEqual(
+            summary["follower_forecast_target_action_prediction_mae_s"],
+            10.0,
+        )
+        self.assertAlmostEqual(
+            summary[
+                "follower_forecast_base_target_action_prediction_mae_s"],
+            20.0,
+        )
+        self.assertEqual(
+            summary["follower_forecast_calibration_active_mean"], 1.0)
+        self.assertEqual(
+            summary[
+                "follower_forecast_calibration_target_adjustment_s_mean"],
+            -10.0,
+        )
+        samples = recorder.follower_forecast_calibration_samples()
+        self.assertEqual(len(samples), 1)
+        self.assertEqual(samples[0]["calibration_features"], (1.0, 0.5))
+        self.assertEqual(samples[0]["base_predicted_target_action_s"], 60.0)
+        self.assertEqual(samples[0]["realized_target_action_s"], 40.0)
+
     def test_invalid_follower_forecast_is_counted_but_not_registered(self):
         recorder = HeadwayEventRecorder()
         registered = recorder.record_follower_departure_forecast(
