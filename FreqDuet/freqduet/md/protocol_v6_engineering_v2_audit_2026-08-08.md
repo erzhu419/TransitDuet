@@ -2911,3 +2911,48 @@ the eventual matched departure and distinguish forecast error from delayed
 multi-stop over-correction. The successor retains sampled-action execution,
 historical frequency inputs, the seven executable actions, and no post-policy
 guard.
+
+### Engineering-v25 causal follower-forecast audit preregistration (2026-09-08)
+
+V25 begins with a behavior-neutral measurement gate rather than another policy
+candidate. V24 showed that closer transfer to the exact one-step teacher can
+worsen downstream arrival-headway CV. Two distinct causal mechanisms can
+produce that mismatch: the same-time AVL forecast may be wrong at the
+follower's eventual action-ready time, or the forecast may be accurate but the
+follower may subsequently take another holding action and propagate a delayed
+multi-stop correction. The existing estimator predicts action-ready time after
+mandatory service dwell; it does not predict that future discretionary hold.
+
+The diagnostic reruns exactly `noguard`, scalar V13, and V24 reverse-KL
+four-step. It uses training seed `30003`, common frozen evaluation seeds
+`63011,63029,63047,63071`, two training episodes, checkpoint 1, and V13 as the
+reference. This is exploratory mechanism evidence only. No candidate is
+selected and no performance comparison from these warm-up runs may support a
+paper claim. The aggregate must verify clean identified source, exact config
+and seed sets, 12 unique frozen rollouts, common random numbers, frozen upper
+and lower policies, and nonzero registered, action-ready-resolved, and final-
+departure-resolved forecast events.
+
+For every causal-valid lower decision, telemetry freezes the predicted
+follower action-ready gap, the current forward departure gap, and the final
+executed current action. It later matches the current bus's departure, the
+same follower trip's action-ready event, and that follower's final departure
+at the same stop and direction. The primary forecast diagnostics are pooled
+target-action MAE and hold-need sign error. The sequential-control diagnostics
+are the follower's subsequent discretionary holding time and its positive
+rate. Means and MAE are pooled by their exact event counts; raw-gap RMSE is
+combined from rollout second moments. Rollout P90 values are retained as trace
+telemetry but are not reported as a fictitious pooled quantile.
+
+Thresholds are locked before any diagnostic rollout is submitted. Forecast
+error is material when pooled target-action MAE exceeds `5 s` or the sum of
+hold-need false-positive and false-negative rates exceeds `0.10`. Sequential
+holding is material only when its pooled mean exceeds `5 s` and its positive
+rate exceeds `0.25`. The four deterministic diagnoses are: both mechanisms,
+forecast error primary, sequential holding primary, or local-surrogate
+mismatch beyond forecast. They authorize, respectively, calibrated forecast
+plus delayed-control treatment, historical causal forecast calibration alone,
+a refractory/remaining-correction state and objective alone, or abandonment
+of the one-step surrogate in favor of a causal multi-step value target. The
+thresholds, configs, seeds, and branch decision cannot be changed after seeing
+the runs.
