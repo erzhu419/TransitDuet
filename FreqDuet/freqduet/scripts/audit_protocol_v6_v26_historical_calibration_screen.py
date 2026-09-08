@@ -310,6 +310,7 @@ def main() -> None:
     print(payload)
     if args.require_selection and result["selected_for_confirmation"] is None:
         raise SystemExit("V26 screen selected no confirmation candidate")
+    print("DONE V26 historical-calibration screen gate")
 
 
 if __name__ == "__main__":

@@ -113,6 +113,7 @@ def main() -> None:
     print(payload)
     if args.require_pass and not result["formal_screen_authorized"]:
         raise SystemExit("V26 smoke did not authorize the formal screen")
+    print("DONE V26 historical-calibration smoke gate")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,10 @@
+from contextlib import redirect_stdout
+from io import StringIO
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -17,6 +20,7 @@ from scripts.audit_protocol_v6_v26_historical_calibration_screen import (
     TRAIN_EPISODES as SCREEN_TRAIN_EPISODES,
     TRAIN_SEEDS as SCREEN_TRAIN_SEEDS,
     evaluate_v26_historical_calibration_screen,
+    main as screen_main,
 )
 from scripts.audit_protocol_v6_v26_historical_calibration_smoke import (
     CONFIGS as SMOKE_CONFIGS,
@@ -24,6 +28,7 @@ from scripts.audit_protocol_v6_v26_historical_calibration_smoke import (
     TRAIN_EPISODES as SMOKE_TRAIN_EPISODES,
     TRAIN_SEEDS as SMOKE_TRAIN_SEEDS,
     evaluate_v26_historical_calibration_smoke,
+    main as smoke_main,
 )
 
 
@@ -204,6 +209,25 @@ class ProtocolV6V26HistoricalCalibrationGateTest(unittest.TestCase):
         self.assertTrue(result["formal_screen_authorized"])
         self.assertFalse(result["effect_evidence"])
 
+    def test_smoke_cli_prints_scheduler_success_marker(self):
+        with TemporaryDirectory() as tmp:
+            aggregate, logs = self._write_fixture(
+                Path(tmp),
+                configs=SMOKE_CONFIGS,
+                train_seeds=SMOKE_TRAIN_SEEDS,
+                eval_seeds=SMOKE_EVAL_SEEDS,
+                train_episodes=SMOKE_TRAIN_EPISODES,
+            )
+            stdout = StringIO()
+            with patch("sys.argv", [
+                    "v26-smoke", str(aggregate),
+                    "--logs-root", str(logs), "--require-pass"]), \
+                    redirect_stdout(stdout):
+                smoke_main()
+
+        self.assertTrue(stdout.getvalue().rstrip().endswith(
+            "DONE V26 historical-calibration smoke gate"))
+
     def test_same_day_activation_blocks_the_smoke(self):
         with TemporaryDirectory() as tmp:
             aggregate, logs = self._write_fixture(
@@ -243,6 +267,25 @@ class ProtocolV6V26HistoricalCalibrationGateTest(unittest.TestCase):
         self.assertEqual(result["status"], "exploratory_candidate_selected")
         self.assertEqual(result["selected_for_confirmation"], PRIORITY[0])
         self.assertFalse(result["claim_eligible"])
+
+    def test_screen_cli_prints_scheduler_success_marker(self):
+        with TemporaryDirectory() as tmp:
+            aggregate, logs = self._write_fixture(
+                Path(tmp),
+                configs=SCREEN_CONFIGS,
+                train_seeds=SCREEN_TRAIN_SEEDS,
+                eval_seeds=SCREEN_EVAL_SEEDS,
+                train_episodes=SCREEN_TRAIN_EPISODES,
+            )
+            stdout = StringIO()
+            with patch("sys.argv", [
+                    "v26-screen", str(aggregate),
+                    "--logs-root", str(logs), "--require-selection"]), \
+                    redirect_stdout(stdout):
+                screen_main()
+
+        self.assertTrue(stdout.getvalue().rstrip().endswith(
+            "DONE V26 historical-calibration screen gate"))
 
     def test_forecast_failure_falls_through_to_next_priority(self):
         with TemporaryDirectory() as tmp:
