@@ -93,8 +93,11 @@ class FollowerForecastCalibrationAuditTest(unittest.TestCase):
         self.assertFalse(result["effect_evidence"])
         self.assertEqual(
             result["diagnosis"], "local_surrogate_mismatch_beyond_forecast")
+        rollout_count = len(CONFIGS) * len(TRAIN_SEEDS) * len(EVAL_SEEDS)
         self.assertEqual(
-            result["pooled"]["follower_forecast_resolved_count"], 840)
+            result["pooled"]["follower_forecast_resolved_count"],
+            70 * rollout_count,
+        )
         self.assertAlmostEqual(result["pooled"]["resolution_rate"], 0.875)
 
     def test_pooled_rmse_combines_squared_error_moments(self):
@@ -107,7 +110,10 @@ class FollowerForecastCalibrationAuditTest(unittest.TestCase):
             frame.loc[0, column] = 4.0
             frame.to_csv(path, index=False)
             result = audit_follower_forecast_calibration(root)
-        expected = ((11.0 * 3.0 ** 2 + 4.0 ** 2) / 12.0) ** 0.5
+        rollout_count = len(CONFIGS) * len(TRAIN_SEEDS) * len(EVAL_SEEDS)
+        expected = (
+            ((rollout_count - 1) * 3.0 ** 2 + 4.0 ** 2) / rollout_count
+        ) ** 0.5
         self.assertAlmostEqual(result["pooled"][column], expected)
 
     def test_material_forecast_error_and_future_hold_are_separated(self):
