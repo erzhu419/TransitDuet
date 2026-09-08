@@ -3207,3 +3207,10 @@ for an independent fresh-seed confirmation. The screen itself has
 `claim_eligible=false`. If no candidate passes, V26 is not promoted and these
 outcomes may not be used to loosen thresholds, reorder candidates, or resume
 V23/V24 projection tuning.
+
+Before any V26 smoke or effect rollout, server regression `t90135` exposed a
+validator-registration omission: the candidates were registered as historical
+calibrators but not also in the inherited V13 zero-hold-regret/discrete-critic
+sets. The validator rejected them before training. This registration is fixed
+without changing a config, seed, threshold, priority, or algorithm contract;
+the full regression is rerun from a new clean commit.

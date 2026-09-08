@@ -178,7 +178,11 @@ ZERO_HOLD_REGRET_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adregret_l{initial}_e25_r{limit}_hiro"
     for initial in ("001", "005")
     for limit in ("00025", "0005", "0010")
-] + DISCRETE_CRITIC_ZERO_HOLD_CONFIGS + PASSENGER_HOLDING_SCALAR_CONFIGS
+] + (
+    DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
+    + PASSENGER_HOLDING_SCALAR_CONFIGS
+    + V26_FOLLOWER_CALIBRATION_CONFIGS
+)
 DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS = [
     "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qidx_hiro",
     "F_freqduet_protocol_v6_w2adcapgain_l001_e25_r00025_w0020_x1_qadv0_hiro",
@@ -192,6 +196,7 @@ DISCRETE_CRITIC_CONFIGS = (
     DISCRETE_CRITIC_ZERO_HOLD_CONFIGS
     + DISCRETE_CRITIC_CAPACITY_GAIN_CONFIGS
     + ALL_GAIN_FLOOR_CONFIGS
+    + V26_FOLLOWER_CALIBRATION_CONFIGS
 )
 EFFICIENCY_GAIN_CONFIGS = [
     f"F_freqduet_protocol_v6_w2adeffgain_l001_e25_r00025_w{weight}_b{penalty}_hiro"
@@ -333,7 +338,10 @@ def validate(
                     f"{name}: projected policy action support is not locked")
         if name in DISCRETE_CRITIC_CONFIGS:
             expected_discrete_critic = (
-                "zero_hold_advantage" if "_qadv0_" in name else "indexed")
+                "zero_hold_advantage"
+                if ("_qadv0_" in name
+                    or name in V26_FOLLOWER_CALIBRATION_CONFIGS)
+                else "indexed")
             if lower.get("discrete_critic") != expected_discrete_critic:
                 raise ValueError(
                     f"{name}: lower discrete critic contract is not locked")
