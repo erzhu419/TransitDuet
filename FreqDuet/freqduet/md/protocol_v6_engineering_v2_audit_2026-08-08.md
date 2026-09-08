@@ -3083,3 +3083,43 @@ factor. If no general sequential mechanism and no forecast error remains, the
 one-step surrogate is abandoned in favor of a causal multi-step value target.
 No mature result may be used to retune V23/V24 projection targets, thresholds,
 seed counts, or this branch rule.
+
+### Engineering-v25 mature-checkpoint audit outcome (2026-09-08)
+
+Exact-source server task `t90077` passed all eight focused mature-audit and
+corrected-recorder tests on `node006`. The apparent failures of predecessor
+tasks `t90068` and `t90069` were scheduler classification only: their logs show
+all tests passing and the expected manifest, but the short commands lacked a
+recognized `DONE` marker. Probe `t90074` then completed normally and confirmed
+the original run's clean commit exactly. No failed task produced or selected a
+rollout result.
+
+Tasks `t90078--t90089` evaluated all 12 retained checkpoint-39 policies on
+`node001--node006`, two tasks per node. All completed with zero retries. For
+every checkpoint, the replay matched every original non-runtime evaluation
+cell within `1e-9`, establishing that the corrected follower telemetry did not
+change the frozen policy behavior. Node-side aggregate task `t90092` then
+verified 48 unique CRN rollouts, clean dual-source provenance, exact config and
+seed sets, frozen policies, and complete action/final-departure resolution for
+all 207,349 registered forecasts. The locked schema result is
+`freqduet-v25-mature-follower-forecast-audit-v1` with status
+`mechanical_pass`; it remains mechanism evidence rather than confirmation.
+
+Unlike checkpoint 1, every mature configuration has material forecast error.
+Target-action MAE is `8.7838 s` for scalar V13, `8.0767 s` for V23, and
+`7.7258 s` for V24; their pooled false-positive plus false-negative rates are
+`0.17003`, `0.15745`, and `0.15141`. Pooled across all policies, target-action
+MAE is `8.1951 s`, sign error is `0.15962`, and the same-time raw-gap estimate
+has positive bias `18.2741 s` and MAE `66.6777 s`.
+
+Sequential holding is stable for V23 and V24: all four checkpoint seeds cross
+both thresholds, with configuration means `6.0184 s/0.47110` and
+`6.1578 s/0.54206`. V13 crosses the pooled thresholds only narrowly at
+`5.9981 s/0.26292`, while only two of four checkpoint seeds cross both; it
+therefore fails the registered stability rule. The deterministic diagnosis is
+`forecast_error_without_general_sequential_holding`. A global delayed-control
+state/objective is not authorized. A historical causal forecast-calibration
+factor is authorized as a separate ablation for all three mature policies. The
+next version must correct the forecast from information available strictly
+before the current action and must not alter sampled-action execution, add a
+post-policy guard, or resume projection-target tuning.
