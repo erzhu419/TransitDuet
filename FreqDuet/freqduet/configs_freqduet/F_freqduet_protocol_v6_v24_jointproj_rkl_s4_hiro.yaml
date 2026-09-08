@@ -1,0 +1,13 @@
+_extends: F_freqduet_protocol_v6_v23_jointproj_r036_p075_hiro.yaml
+_name: F_freqduet_protocol_v6_v24_jointproj_rkl_s4_hiro
+
+protocol:
+  role: exploratory_compact_w2_exact_joint_projection_reverse_kl_multistep_v24
+
+lower:
+  causal_regularity_policy:
+    mode: analytic_two_sided_hf_aggregate_gain_projection_v11
+    categorical_projection:
+      mode: joint_kl_soft_policy_distillation_v2
+      distillation: reverse_kl_v1
+      distillation_steps: 4

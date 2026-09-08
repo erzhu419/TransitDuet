@@ -649,6 +649,8 @@ class RESACLagrangianTrainer:
         self.regularity_projection_tolerance = 1e-8
         self.regularity_projection_max_iterations = 200
         self.regularity_projection_support_floor = 1e-12
+        self.regularity_projection_distillation = 'reverse_kl_v1'
+        self.regularity_projection_distillation_steps = 1
         if self.regularity_policy_enabled:
             mode = str(regularity_cfg.get(
                 'mode', 'analytic_two_sided_target_dual_v1')).strip().lower()
@@ -662,11 +664,17 @@ class RESACLagrangianTrainer:
                     'analytic_two_sided_hf_opportunity_gain_regret_dual_v7',
                     'analytic_two_sided_hf_gain_floor_dual_v8',
                     'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
-                    'analytic_two_sided_hf_aggregate_gain_projection_v10'}:
+                    'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                    'analytic_two_sided_hf_aggregate_gain_projection_v11'}:
                 raise ValueError('unknown causal regularity policy objective')
             self.regularity_policy_mode = mode
-            exact_projection_mode = (
-                mode == 'analytic_two_sided_hf_aggregate_gain_projection_v10')
+            exact_projection_modes = {
+                'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                'analytic_two_sided_hf_aggregate_gain_projection_v11',
+            }
+            exact_projection_mode = mode in exact_projection_modes
+            convergent_distillation_mode = (
+                mode == 'analytic_two_sided_hf_aggregate_gain_projection_v11')
             zero_hold_regret_modes = {
                 'analytic_two_sided_zero_hold_regret_dual_v2',
                 'analytic_two_sided_capacity_gain_regret_dual_v3',
@@ -680,7 +688,8 @@ class RESACLagrangianTrainer:
                     'hf_relative_gain_shortfall_v3')
             elif mode in {
                     'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
-                    'analytic_two_sided_hf_aggregate_gain_projection_v10'}:
+                    'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                    'analytic_two_sided_hf_aggregate_gain_projection_v11'}:
                 self.regularity_constraint_cost_mode = (
                     'hf_aggregate_gain_shortfall_v4')
             elif mode in zero_hold_regret_modes:
@@ -1065,6 +1074,7 @@ class RESACLagrangianTrainer:
                 'analytic_two_sided_hf_gain_floor_dual_v8',
                 'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
                 'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                'analytic_two_sided_hf_aggregate_gain_projection_v11',
             }
             if gain_floor_enabled != gain_floor_mode_enabled:
                 raise ValueError(
@@ -1079,6 +1089,7 @@ class RESACLagrangianTrainer:
                     if mode in {
                         'analytic_two_sided_hf_aggregate_gain_floor_dual_v9',
                         'analytic_two_sided_hf_aggregate_gain_projection_v10',
+                        'analytic_two_sided_hf_aggregate_gain_projection_v11',
                     }
                     else 'causal_hf_relative_gain_floor_v1')
                 if gain_floor_mode != expected_gain_floor_mode:
@@ -1320,11 +1331,16 @@ class RESACLagrangianTrainer:
                     raise ValueError(
                         'exact joint projection requires the passenger holding '
                         'constraint')
+                expected_projection_mode = (
+                    'joint_kl_soft_policy_distillation_v2'
+                    if convergent_distillation_mode
+                    else 'joint_kl_soft_policy_target_v1')
                 projection_mode = str(projection_cfg.get(
-                    'mode', 'joint_kl_soft_policy_target_v1'
-                )).strip().lower()
-                if projection_mode != 'joint_kl_soft_policy_target_v1':
-                    raise ValueError('unknown categorical projection mode')
+                    'mode', expected_projection_mode)).strip().lower()
+                if projection_mode != expected_projection_mode:
+                    raise ValueError(
+                        'regularity objective and categorical projection '
+                        'modes disagree')
                 regularity_target = float(
                     projection_cfg.get('regularity_target', 0.036))
                 passenger_target = float(
@@ -1335,6 +1351,27 @@ class RESACLagrangianTrainer:
                     projection_cfg.get('max_iterations', 200))
                 projection_support_floor = float(
                     projection_cfg.get('support_floor', 1e-12))
+                projection_distillation = str(projection_cfg.get(
+                    'distillation',
+                    ('forward_kl_v2' if convergent_distillation_mode
+                     else 'reverse_kl_v1'),
+                )).strip().lower()
+                projection_distillation_steps = int(projection_cfg.get(
+                    'distillation_steps',
+                    4 if convergent_distillation_mode else 1,
+                ))
+                if convergent_distillation_mode:
+                    if projection_distillation not in {
+                            'reverse_kl_v1', 'forward_kl_v2'}:
+                        raise ValueError(
+                            'unknown V24 categorical distillation objective')
+                    if projection_distillation_steps not in {1, 4, 8}:
+                        raise ValueError(
+                            'V24 distillation_steps must be one of 1, 4, or 8')
+                elif (projection_distillation != 'reverse_kl_v1'
+                      or projection_distillation_steps != 1):
+                    raise ValueError(
+                        'V23 projection requires one reverse-KL actor step')
                 if not np.isclose(
                         regularity_target, 0.036, rtol=0.0, atol=1e-12):
                     raise ValueError(
@@ -1384,6 +1421,10 @@ class RESACLagrangianTrainer:
                     projection_max_iterations)
                 self.regularity_projection_support_floor = (
                     projection_support_floor)
+                self.regularity_projection_distillation = (
+                    projection_distillation)
+                self.regularity_projection_distillation_steps = (
+                    projection_distillation_steps)
                 self.regularity_projection_contract = {
                     'enabled': True,
                     'mode': projection_mode,
@@ -1393,7 +1434,8 @@ class RESACLagrangianTrainer:
                     'max_iterations': projection_max_iterations,
                     'support_floor': projection_support_floor,
                     'base_policy': 'pessimistic_safe_soft_policy_v1',
-                    'distillation': 'reverse_kl_v1',
+                    'distillation': projection_distillation,
+                    'distillation_steps': projection_distillation_steps,
                     'validity': 'compact_causal_target_v7',
                     'execution_adjustment': 'none',
                 }
@@ -1631,6 +1673,34 @@ class RESACLagrangianTrainer:
             self._regularity_passenger_holding_action_terms(state))
         expected_cost = (action_probs * action_costs).sum(dim=-1)
         return expected_cost, valid, load, action_costs
+
+    @staticmethod
+    def _categorical_distillation_divergences(
+            actor_probabilities, target_probabilities, feasible_actions):
+        """Return per-state reverse and forward KL to a detached teacher."""
+        actor_probabilities = actor_probabilities.to(dtype=torch.float64)
+        target_probabilities = target_probabilities.to(dtype=torch.float64)
+        actor_log_probabilities = torch.where(
+            feasible_actions,
+            actor_probabilities.clamp_min(1e-300).log(),
+            torch.zeros_like(actor_probabilities),
+        )
+        target_log_probabilities = torch.where(
+            feasible_actions,
+            target_probabilities.clamp_min(1e-300).log(),
+            torch.zeros_like(target_probabilities),
+        )
+        reverse_kl = torch.sum(
+            actor_probabilities * (
+                actor_log_probabilities - target_log_probabilities),
+            dim=-1,
+        )
+        forward_kl = torch.sum(
+            target_probabilities * (
+                target_log_probabilities - actor_log_probabilities),
+            dim=-1,
+        )
+        return reverse_kl, forward_kl
 
     def _regularity_projected_soft_policy_target(
             self, state, q_lcb, safety_cost_q, sample_weights,
@@ -2083,6 +2153,15 @@ class RESACLagrangianTrainer:
             'regularity_projection_target_kl_from_soft': 0.0,
             'regularity_projection_target_entropy': 0.0,
             'regularity_projection_actor_reverse_kl': 0.0,
+            'regularity_projection_actor_forward_kl': 0.0,
+            'regularity_projection_actor_distillation_steps': 0.0,
+            'regularity_projection_actor_post_reverse_kl': 0.0,
+            'regularity_projection_actor_post_forward_kl': 0.0,
+            'regularity_projection_actor_post_regularity_cost': 0.0,
+            'regularity_projection_actor_post_passenger_cost': 0.0,
+            'regularity_projection_actor_post_action_mean_s': 0.0,
+            'regularity_projection_actor_post_target_action_change_mean_s': 0.0,
+            'regularity_projection_actor_post_constraints_met': 0.0,
             'regularity_projection_base_action_mean_s': 0.0,
             'regularity_projection_target_action_mean_s': 0.0,
             'regularity_projection_target_action_change_mean_s': 0.0,
@@ -2414,27 +2493,22 @@ class RESACLagrangianTrainer:
                             feasible_actions = (
                                 self.policy_net.feasible_action_mask(state)
                                 .index_select(0, indices))
-                            actor_log_probabilities = torch.where(
-                                feasible_actions,
-                                actor_probabilities.clamp_min(1e-300).log(),
-                                torch.zeros_like(actor_probabilities),
-                            )
-                            target_log_probabilities = torch.where(
-                                feasible_actions,
-                                target_probabilities.clamp_min(1e-300).log(),
-                                torch.zeros_like(target_probabilities),
-                            )
-                            actor_reverse_kl = torch.sum(
-                                actor_probabilities * (
-                                    actor_log_probabilities
-                                    - target_log_probabilities),
-                                dim=-1,
-                            )
+                            actor_reverse_kl, actor_forward_kl = (
+                                self._categorical_distillation_divergences(
+                                    actor_probabilities,
+                                    target_probabilities,
+                                    feasible_actions,
+                                ))
+                            if (self.regularity_projection_distillation
+                                    == 'forward_kl_v2'):
+                                actor_distillation_kl = actor_forward_kl
+                            else:
+                                actor_distillation_kl = actor_reverse_kl
                             projection_policy_terms = (
                                 self._entropy_alpha_for_state(state)
                                 .index_select(0, indices)
                                 .to(dtype=torch.float64)
-                                * actor_reverse_kl)
+                                * actor_distillation_kl)
                             constrained_terms = policy_terms.to(
                                 dtype=torch.float64).scatter(
                                     0, indices, projection_policy_terms)
@@ -2497,6 +2571,13 @@ class RESACLagrangianTrainer:
                                     torch.dot(
                                         normalized_weights,
                                         actor_reverse_kl).item()),
+                                'regularity_projection_actor_forward_kl': (
+                                    torch.dot(
+                                        normalized_weights,
+                                        actor_forward_kl).item()),
+                                'regularity_projection_actor_distillation_steps': (
+                                    float(
+                                        self.regularity_projection_distillation_steps)),
                                 'regularity_projection_base_action_mean_s': (
                                     torch.dot(
                                         normalized_weights,
@@ -2517,6 +2598,99 @@ class RESACLagrangianTrainer:
             policy_loss.backward()
             pi_grad_norm = torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 5.0)
             self.policy_optimizer.step()
+
+            if regularity_projection_metrics is not None:
+                for _ in range(
+                        1, self.regularity_projection_distillation_steps):
+                    step_probs, _, _ = (
+                        self.policy_net.dist_info(state))
+                    step_actor_probabilities = step_probs.index_select(
+                        0, indices).to(dtype=torch.float64)
+                    step_reverse_kl, step_forward_kl = (
+                        self._categorical_distillation_divergences(
+                            step_actor_probabilities,
+                            target_probabilities,
+                            feasible_actions,
+                        ))
+                    if (self.regularity_projection_distillation
+                            == 'forward_kl_v2'):
+                        step_distillation_kl = step_forward_kl
+                    else:
+                        step_distillation_kl = step_reverse_kl
+                    step_projection_terms = (
+                        self._entropy_alpha_for_state(state)
+                        .index_select(0, indices)
+                        .to(dtype=torch.float64)
+                        * step_distillation_kl)
+                    policy_loss = torch.dot(
+                        step_projection_terms,
+                        projection['valid_weights'].to(dtype=torch.float64),
+                    ) / float(w.numel())
+                    self.policy_optimizer.zero_grad()
+                    policy_loss.backward()
+                    step_grad_norm = torch.nn.utils.clip_grad_norm_(
+                        self.policy_net.parameters(), 5.0)
+                    self.policy_optimizer.step()
+                    pi_grad_norm = max(
+                        float(pi_grad_norm), float(step_grad_norm))
+
+                with torch.no_grad():
+                    post_probs, post_log_probs, _ = (
+                        self.policy_net.dist_info(state))
+                    post_actor_probabilities = post_probs.index_select(
+                        0, indices).to(dtype=torch.float64)
+                    post_reverse_kl, post_forward_kl = (
+                        self._categorical_distillation_divergences(
+                            post_actor_probabilities,
+                            target_probabilities,
+                            feasible_actions,
+                        ))
+                    post_state_costs = torch.einsum(
+                        'ba,cba->cb',
+                        post_actor_probabilities,
+                        projection_costs,
+                    )
+                    post_costs = torch.einsum(
+                        'b,cb->c', normalized_weights, post_state_costs)
+                    post_actions = torch.einsum(
+                        'ba,a->b', post_actor_probabilities, actions)
+                    post_constraints_met = bool(
+                        (post_costs[0]
+                         <= self.regularity_projection_regularity_target
+                         + self.regularity_projection_tolerance).item()
+                        and (post_costs[1]
+                             <= self.regularity_projection_passenger_target
+                             + self.regularity_projection_tolerance).item())
+                    regularity_projection_metrics.update({
+                        'regularity_projection_actor_post_reverse_kl': (
+                            torch.dot(
+                                normalized_weights,
+                                post_reverse_kl).item()),
+                        'regularity_projection_actor_post_forward_kl': (
+                            torch.dot(
+                                normalized_weights,
+                                post_forward_kl).item()),
+                        'regularity_projection_actor_post_regularity_cost': (
+                            post_costs[0].item()),
+                        'regularity_projection_actor_post_passenger_cost': (
+                            post_costs[1].item()),
+                        'regularity_projection_actor_post_action_mean_s': (
+                            torch.dot(
+                                normalized_weights, post_actions).item()),
+                        'regularity_projection_actor_post_target_action_change_mean_s': (
+                            torch.dot(
+                                normalized_weights,
+                                target_actions - post_actions).item()),
+                        'regularity_projection_actor_post_constraints_met': (
+                            float(post_constraints_met)),
+                    })
+                    if (self.regularity_projection_distillation
+                            != 'reverse_kl_v1'
+                            or self.regularity_projection_distillation_steps
+                            > 1):
+                        entropy_log_prob = (
+                            post_probs * post_log_probs).sum(
+                                dim=-1, keepdim=True)
 
             # ──── Alpha update ────
             if self.auto_entropy:

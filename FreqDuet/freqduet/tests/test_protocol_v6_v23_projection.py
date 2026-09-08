@@ -62,6 +62,7 @@ class ProtocolV6V23ProjectionConfigTest(unittest.TestCase):
             "pessimistic_safe_soft_policy_v1",
         )
         self.assertEqual(projection["distillation"], "reverse_kl_v1")
+        self.assertEqual(projection["distillation_steps"], 1)
         self.assertEqual(projection["execution_adjustment"], "none")
         self.assertFalse(runner.lower_causal_holding_guard.enabled)
         self.assertIn(
