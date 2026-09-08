@@ -355,6 +355,22 @@ Forbidden: V20 validates heldout reward preservation, selects a guarded
 consistency policy, supports leakage no-tradeoff, supplies confirmatory
 evidence, or warrants coefficient tuning on the retired v20 roots.
 
+### mujoco_v21_reward_selective_feasible_action_preflight
+
+All 48 frozen v21 cells completed with valid terminal-reserve certificates and
+active unit-mean selective weights. Positive reward-advantage weighting failed
+the registered reward floor, correction-noninferiority, and physical-burden
+gates. It won reward in only 5 of 12 environment-by-root pairs and increased
+pooled component and total correction relative to matched uniform consistency.
+The unchanged uniform control improved mean reward and reduced both correction
+summaries versus zero-consistency reserve in all three environments, but that
+four-root post-outcome diagnostic authorizes only a fresh-root confirmation.
+
+Forbidden: V21 validates reward-selective consistency, promotes the uniform
+control, supplies confirmatory or manuscript evidence, supports leakage
+no-tradeoff, or warrants tuning any selective-weight parameter on the retired
+v21 roots.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
