@@ -24,16 +24,20 @@ from typing import Any
 
 import numpy as np
 
-from audit_freqduet_snapshot_counterfactual import (
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.audit_freqduet_snapshot_counterfactual import (
     build_context_row,
     parse_csv,
     resolve_config,
     set_worker_threads,
 )
-from run_freqduet_protocol_v2_matrix import git_provenance
+from scripts.run_freqduet_protocol_v2_matrix import git_provenance
 
 
-ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_VERSION = "freqduet-v28-exact-prefix-counterfactual-v1"
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 RUNTIME_ROW_FIELDS = {"wall_env_s", "wall_train_s"}
