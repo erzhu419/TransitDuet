@@ -3219,3 +3219,57 @@ critic default as `continuous_action`; the final test correction no longer
 requires an absent optional YAML key. No config, seed, threshold, priority, or
 algorithm contract changed, and no failed preflight produced a training or
 effect result.
+
+### Engineering-v26 historical follower calibration outcome (2026-09-08)
+
+The non-effect smoke completed on the frozen clean source commit
+`0ac8f00c2020`. It verified the registered five-day activation boundary,
+completed-day-only updates, immutable same-tick AVL snapshots, exact
+checkpoint/freeze behavior, active bounded corrections, complete forecast
+resolution, and disabled-control identity. The smoke result is
+`mechanical_pass` with `effect_evidence=false`. Its audit command exited zero
+and wrote the expected JSON, but the scheduler initially classified the short
+process as failed because the CLI emitted no `DONE` marker. The separate
+completion-marker repair is commit `f0853492e5`; server task `t90190` passed
+all seven focused gate tests, and the repair does not alter the frozen V26
+experiment source or any scientific result.
+
+Formal shards `t90154--t90185` completed the preregistered eight-config,
+four-training-seed, four-common-evaluation-seed matrix. Node-side task
+`t90207` waited for all 32 nonempty evaluation manifests, aggregated 128 unique
+frozen rollouts, and applied gate
+`freqduet-v26-historical-calibration-screen-v1`. Every source, manifest,
+scenario-tape, frozen-policy, control-identity, training-horizon, configuration,
+seed, coverage, activation, and cap check passes. The gate result is `no_pass`;
+`selected_for_confirmation` is null and no V26 candidate is promoted.
+
+The contextual calibrator itself works consistently. With alpha `0.10` and a
+`10 s` cap, pooled target-action MAE improves by `0.64050 s` and hold-need
+sign error improves by `0.01036`; the MAE improvement is `0.55441--0.82482 s`
+in all four training seeds. Alpha `0.20` with a `10 s` cap improves MAE by
+`0.63534 s` and sign error by `0.01179`; alpha `0.20` with a `20 s` cap
+improves MAE by `0.75694 s` and sign error by `0.01079`, again satisfying all
+registered forecast gates in every seed. The intercept-only candidate improves
+MAE by only `0.12835 s` and fails both MAE thresholds.
+
+Better one-step forecasts do not improve downstream regularity. The mildest
+contextual candidate, alpha `0.10` with a `10 s` cap, is closest to neutral but
+has paired headway-CV delta `+0.00124` versus V13; only two of four training
+seeds improve (`-0.01238`, `-0.00055`, `+0.00468`, `+0.01320`). It passes all
+registered journey, service-cost, unserved-rate, and lower-action
+noninferiority checks, but fails both CV gates. Alpha `0.20` with `10 s` and
+`20 s` caps worsens CV by `+0.00683` and `+0.00931`, respectively, improves in
+only one seed each, and also exceeds the service-cost margin. Intercept-only
+worsens CV by `+0.00774` in every seed and exceeds the service-cost margin.
+
+V26 therefore separates prediction validity from control validity. Historical
+causal calibration removes a measurable part of mature follower forecast
+error, but feeding that more accurate estimate into the existing one-step
+two-sided target does not improve multi-stop arrival-headway CV. The remaining
+bottleneck is the local-surrogate mismatch established in V24, not insufficient
+calibration strength. Per the registered branch rule, no V26 threshold may be
+loosened and no V23/V24 projection or V26 cap/alpha tuning may resume. The next
+effect candidate must replace the one-step action target with a causal
+multi-step value target while retaining historical frequency inputs, seven
+executable sampled actions, frozen-evaluation semantics, and no post-policy
+guard.
