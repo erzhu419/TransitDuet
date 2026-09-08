@@ -271,6 +271,8 @@ def evaluate_checkpoint(
         "eval_seeds": EVAL_SEEDS,
         "output": str(destination),
     }, sort_keys=True))
+    print(
+        f"DONE mature follower forecast {config} seed={int(train_seed)}")
     return destination
 
 
@@ -514,6 +516,7 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(payload + "\n")
     print(payload)
+    print("DONE mature follower forecast aggregate")
 
 
 if __name__ == "__main__":
