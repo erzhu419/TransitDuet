@@ -2923,13 +2923,14 @@ follower may subsequently take another holding action and propagate a delayed
 multi-stop correction. The existing estimator predicts action-ready time after
 mandatory service dwell; it does not predict that future discretionary hold.
 
-The diagnostic reruns exactly `noguard`, scalar V13, and V24 reverse-KL
-four-step. It uses training seed `30003`, common frozen evaluation seeds
+The diagnostic reruns exactly confirmed main, `noguard`, scalar V13, and V24
+reverse-KL four-step. Confirmed main is the required promoted-main protocol
+anchor and is not an outcome-selected addition. It uses training seed `30003`, common frozen evaluation seeds
 `63011,63029,63047,63071`, two training episodes, checkpoint 1, and V13 as the
 reference. This is exploratory mechanism evidence only. No candidate is
 selected and no performance comparison from these warm-up runs may support a
 paper claim. The aggregate must verify clean identified source, exact config
-and seed sets, 12 unique frozen rollouts, common random numbers, frozen upper
+and seed sets, 16 unique frozen rollouts, common random numbers, frozen upper
 and lower policies, and nonzero registered, action-ready-resolved, and final-
 departure-resolved forecast events.
 
@@ -2956,3 +2957,8 @@ a refractory/remaining-correction state and objective alone, or abandonment
 of the one-step surrogate in favor of a causal multi-step value target. The
 thresholds, configs, seeds, and branch decision cannot be changed after seeing
 the runs.
+
+The initial three-arm submission attempt was rejected locally by the V6
+preflight before any scheduler task or rollout existed because it omitted the
+required historical/promoted main. This four-arm correction was committed
+before effect data and is the only preflight amendment.

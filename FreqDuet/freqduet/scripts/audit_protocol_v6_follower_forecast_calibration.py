@@ -12,9 +12,10 @@ import pandas as pd
 
 
 NOGUARD = "F_freqduet_protocol_v6_noguard_hiro"
+CONFIRMED_MAIN = "F_freqduet_protocol_v6_confirmed_main_hiro"
 V13_ANCHOR = "F_freqduet_protocol_v6_w2adregret_l001_e25_r00025_hiro"
 V24_RKL4 = "F_freqduet_protocol_v6_v24_jointproj_rkl_s4_hiro"
-CONFIGS = [NOGUARD, V13_ANCHOR, V24_RKL4]
+CONFIGS = [CONFIRMED_MAIN, NOGUARD, V13_ANCHOR, V24_RKL4]
 TRAIN_SEEDS = [30003]
 EVAL_SEEDS = [63011, 63029, 63047, 63071]
 TRAIN_EPISODES = 2
