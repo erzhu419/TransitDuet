@@ -7811,6 +7811,45 @@ class TransitDuetV2Runner:
         loss.backward()
         self.reach_optimizer.step()
 
+    def _apply_offline_upper_action_intervention(
+            self, action_vec, write_terminal_dispatch, s_upper, trip,
+            decision_time_s):
+        """Apply an analysis-only intervention after every online selector."""
+        hook = getattr(self, '_offline_upper_action_intervention', None)
+        action = np.asarray(action_vec, dtype=np.float32).reshape(-1)
+        if hook is None:
+            return action, bool(write_terminal_dispatch)
+        result = hook(
+            action_vec=action.copy(),
+            write_terminal_dispatch=bool(write_terminal_dispatch),
+            s_upper=np.asarray(s_upper, dtype=np.float32).reshape(-1).copy(),
+            trip=trip,
+            decision_time_s=float(decision_time_s),
+        )
+        if result is None:
+            return action, bool(write_terminal_dispatch)
+        if not isinstance(result, dict):
+            raise TypeError(
+                'offline upper action intervention must return a dict or None')
+        candidate = np.asarray(
+            result.get('action_vec', action), dtype=np.float32).reshape(-1)
+        if candidate.size != int(self.upper_action_dim):
+            raise ValueError(
+                'offline upper action intervention returned wrong action size: '
+                f'{candidate.size} != {self.upper_action_dim}')
+        if not np.isfinite(candidate).all():
+            raise ValueError(
+                'offline upper action intervention returned non-finite action')
+        if (np.any(candidate < self.upper_action_low - 1e-6)
+                or np.any(candidate > self.upper_action_high + 1e-6)):
+            raise ValueError(
+                'offline upper action intervention returned out-of-range action')
+        return (
+            candidate.astype(np.float32),
+            bool(result.get(
+                'write_terminal_dispatch', write_terminal_dispatch)),
+        )
+
     def _upper_callback_v2(self, s_upper_v1, trip):
         """Per-dispatch decision: output δ_t, store (s, a, trip_id, s') without reward.
         Reward is backfilled at episode end via hindsight credit assignment."""
@@ -8064,6 +8103,14 @@ class TransitDuetV2Runner:
                     snapshot_write_terminal_dispatch = bool(
                         float(snapshot_selector_info.get(
                             'terminal_dispatch', 0.0)) > 0.5)
+            action_vec, snapshot_write_terminal_dispatch = (
+                self._apply_offline_upper_action_intervention(
+                    action_vec=action_vec,
+                    write_terminal_dispatch=snapshot_write_terminal_dispatch,
+                    s_upper=s_upper,
+                    trip=trip,
+                    decision_time_s=decision_time_s,
+                ))
             self._active_timetable_plans[planner_key] = {
                 'origin': plan_origin_launch,
                 'plan_id': int(plan_id),

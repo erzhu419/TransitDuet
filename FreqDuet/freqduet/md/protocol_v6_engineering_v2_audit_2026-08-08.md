@@ -3429,3 +3429,56 @@ calibration, or one-step-surrogate retuning. The next effect mechanism must use
 matched simulator counterfactual branches at a common causal decision snapshot,
 preferably at the executable terminal/first-stop layer, or leave that full
 Phase-4 value policy outside the paper scope.
+
+### Engineering-v28 matched prefix-replay preregistration (2026-09-09)
+
+V28 addresses the identification failure above; it does not retune V27. The
+unit of intervention is one genuine upper planning decision under an unchanged
+frozen checkpoint. Each branch starts from the same resolved configuration,
+checkpoint, evaluation episode, scenario seed, and global/isolated random
+streams. It replays the complete episode prefix with the normal upper and lower
+controllers, changes one post-selector upper action at the registered decision,
+and then resumes the same controllers to the natural episode end. This retains
+the pending lower action, lifecycle feedback, active timetable plan, historical
+upper state, and future upper replanning that the older environment-deepcopy
+audit reset or replaced with a no-op.
+
+The causal-prefix gate is fail-closed. Before an action label is admissible, two
+unchanged actor runs must have identical non-runtime episode outputs. Every
+candidate must also match the reference at the intervention point on decision
+identity and time, the complete causal upper input, the pre-intervention actor
+action, terminal-dispatch semantics, every recorded lower state/action/previous-
+action event in the prefix, and the global plus named isolated RNG states. The
+loaded policy/deployment checkpoint identity must also match. Failure of any
+item invalidates the job and no label CSV is written.
+
+The first tool-validity smoke uses the frozen scalar V13 episode-39 checkpoint,
+one held-out scenario seed, one early mature upper decision, actor-relative
+offsets `[-20, 0, +20]` seconds on the first same-direction Bernstein
+coefficient, and the existing executable terminal schedule. This perturbs the
+near-term release plan while leaving the rolling zero-sum timetable projection
+to make the compensating future adjustment. The zero offset is an explicit
+intervention-path identity control. The smoke is mechanical only: it may
+establish exact replay and nonzero action response, but it cannot select an
+action or support an effect claim.
+
+Only after that gate passes may the exploratory label screen use the four frozen
+training seeds and four frozen evaluation seeds from V27, multiple preregistered
+upper decisions spanning the service day, and actor-relative offsets
+`[-30, -15, 0, +15, +30]` seconds on that same-direction first coefficient.
+Its target is the paired change from the unchanged actor in the standard
+restricted service cost, with restricted
+journey, headway CV, fleet overshoot, holding, and completion retained as
+separate outcomes. Candidate generation preserves the existing seven-action
+lower policy, harmonic historical prior, sampled execution semantics, and
+executable terminal mode.
+
+Any fitted value model must use only the causal upper input available at that
+decision and the candidate action. Configuration/domain names, seed identity,
+future trace statistics, and outcome-derived features are prohibited. Model
+selection is training-seed-held-out; a later online screen must use untouched
+scenario seeds. Offline oracle headroom or cross-validation gain alone cannot
+promote the module. If exact prefix replay fails, or if a deployable model does
+not improve over its actor baseline without worsening CV/service cost, V28 is a
+recorded negative result and the learned Phase-4 value layer remains out of the
+paper mainline.
