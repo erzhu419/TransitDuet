@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import gc
 import json
 import random
 import re
@@ -354,7 +355,7 @@ def run_branch(
             target_identity, target_context, actor_action, executed_action,
             target_rng)):
         raise RuntimeError("target capture is incomplete")
-    return BranchResult(
+    result = BranchResult(
         label=str(branch_label),
         candidate_offset_s=(
             None if candidate_offset_s is None else float(candidate_offset_s)),
@@ -370,6 +371,11 @@ def run_branch(
         policy_digest=policy_digest,
         episode_row=episode_row,
     )
+    runner._offline_upper_action_intervention = None
+    runner._lower_action_for_agent = original_lower
+    del runner
+    gc.collect()
+    return result
 
 
 def assert_prefix_equal(reference: BranchResult, candidate: BranchResult) -> None:
