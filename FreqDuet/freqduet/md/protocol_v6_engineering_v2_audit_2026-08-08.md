@@ -2812,9 +2812,10 @@ passes only if the exact configuration and source provenance are complete,
 every applied teacher projection converges within both targets, every pre/post
 actor diagnostic is finite, the episode-mean configured KL is lower after its
 registered steps than before them in every episode where projection is
-observed, the projection is observed for every candidate, all soft dual and
-augmented-penalty terms remain zero, and execution adjustment remains exactly
-zero. Warm-up frozen outcomes cannot select a candidate.
+observed (or both are numerically zero within `1e-10`), the projection is
+observed for every candidate, all soft dual and augmented-penalty terms remain
+zero, and execution adjustment remains exactly zero. Warm-up frozen outcomes
+cannot select a candidate.
 
 The formal exploratory screen uses fresh training seeds
 `29013,29031,29053,29077`, frozen common-random-number evaluation seeds
