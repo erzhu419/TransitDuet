@@ -3030,3 +3030,56 @@ V13/V23/V24 formal checkpoints, if those server artifacts still exist. If they
 do not, a fresh matched mature diagnostic must be run. The successor may then
 test a compact causal delayed-control state/objective and a separately
 ablatable forecast calibration; it may not resume V23/V24 target tuning.
+
+### Engineering-v25 mature-checkpoint audit preregistration (2026-09-08)
+
+The server-side inventory task `t90057` found all 12 required checkpoint-39
+triples from the V24 formal matrix. No checkpoint is copied locally. The
+mature audit therefore evaluates the retained policies read-only rather than
+retraining them. Its exact policy set is scalar V13, V23 exact projection, and
+V24 reverse-KL four-step; its training seeds are
+`29013,29031,29053,29077`, and its common scenario seeds are
+`62017,62041,62059,62083`. These are the original V24 formal evaluation seeds,
+so the resulting 48 rollouts connect mechanism telemetry to the locked outcome
+matrix but are neither fresh confirmation nor new effect evidence.
+
+Checkpoint provenance is fixed to the clean V24 formal source commit
+`b59f478597445b88ea61c459d7a2647594651fe3`, 40 training episodes, and
+checkpoint 39. Telemetry provenance is the clean commit containing the
+corrected exact-action recorder and this registered audit. Before evaluating a
+checkpoint, the evaluator must match its protocol, config name, training seed,
+resolved-config fingerprint, episode, original run manifest, and original
+frozen-evaluation seed set. The current resolved configs must match the
+checkpoint metadata. After each replay, every column in the original frozen
+evaluation except `wall_env_s` and `wall_train_s` must equal the newly measured
+value within `1e-9`; any behavioral difference rejects that replay. This is a
+direct behavior-neutrality check, not a replacement for checkpoint identity.
+
+The aggregate requires exactly one row for every config, training seed, and
+scenario seed; one common scenario tape per scenario seed; frozen lower policy,
+lower critic, and upper policy flags; and nonzero forecasts whose action and
+departure resolution counts both equal their resolved counts. Means and rates
+retain the corrected event-count weighting and pooled RMSE retains exact second-
+moment aggregation. The checkpoint source, telemetry source, config
+fingerprints, and behavior-invariance checks must pass for all 12 policies.
+
+The material thresholds remain unchanged from the checkpoint-1 audit: target-
+action MAE above `5 s` or hold-sign error above `0.10` marks forecast error;
+mean follower action above `5 s` together with positive-action rate above
+`0.25` marks sequential holding. To prevent one mature checkpoint from driving
+the branch, sequential holding is stable for a configuration only if its pooled
+configuration crosses both thresholds and at least three of its four training-
+seed checkpoints cross both thresholds. A delayed-control state/objective is
+authorized only if all three configurations have stable sequential holding.
+A separately ablatable forecast-calibration factor is authorized for exactly
+the configurations crossing the forecast threshold.
+
+The deterministic labels are: all-config stable sequential holding with
+all-config forecast error; all-config stable sequential holding with policy-
+specific forecast error; sequential holding alone; forecast error without
+general sequential holding; or local-surrogate mismatch beyond both measured
+mechanisms. Only the first three labels authorize a general delayed-control
+factor. If no general sequential mechanism and no forecast error remains, the
+one-step surrogate is abandoned in favor of a causal multi-step value target.
+No mature result may be used to retune V23/V24 projection targets, thresholds,
+seed counts, or this branch rule.
