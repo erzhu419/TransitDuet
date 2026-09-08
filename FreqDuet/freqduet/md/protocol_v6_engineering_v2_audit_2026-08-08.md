@@ -3208,9 +3208,13 @@ for an independent fresh-seed confirmation. The screen itself has
 outcomes may not be used to loosen thresholds, reorder candidates, or resume
 V23/V24 projection tuning.
 
-Before any V26 smoke or effect rollout, server regression `t90135` exposed a
-validator-registration omission: the candidates were registered as historical
-calibrators but not also in the inherited V13 zero-hold-regret/discrete-critic
-sets. The validator rejected them before training. This registration is fixed
-without changing a config, seed, threshold, priority, or algorithm contract;
-the full regression is rerun from a new clean commit.
+Before any V26 smoke or effect rollout, server regressions `t90135` and
+`t90137` exposed validator-registration omissions. The candidates were first
+missing from the inherited V13 zero-hold-regret objective set; a first repair
+then incorrectly classified that objective label as the separate
+`zero_hold_advantage` critic variant. V13 actually combines seven discrete
+executed actions with the continuous-action critic. The final registration
+therefore adds V26 only to the V13 objective set and explicitly tests that the
+critic remains `continuous_action`. No config, seed, threshold, priority, or
+algorithm contract changed, and neither failed preflight produced a training
+or effect result.

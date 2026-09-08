@@ -51,6 +51,10 @@ class ProtocolV6V26FollowerCalibrationConfigTest(unittest.TestCase):
                     config["lower"]["causal_regularity_policy"]["mode"],
                     "analytic_two_sided_zero_hold_regret_dual_v2",
                 )
+                self.assertEqual(
+                    config["lower"]["discrete_critic"],
+                    "continuous_action",
+                )
                 self.assertFalse(
                     config["lower"]["causal_holding_guard"]["enable"])
 
