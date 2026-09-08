@@ -78,6 +78,11 @@ class ProtocolV6V24DistillationSmokeTest(unittest.TestCase):
         logs = root / "logs"
         aggregate.mkdir()
         logs.mkdir()
+        git_record = {
+            "commit": "a" * 40,
+            "branch": "codex/freqduet-v6-causal-protocol",
+            "tracked_dirty": False,
+        }
         manifest = {
             "strict_complete": True,
             "run_manifests_verified": True,
@@ -90,7 +95,8 @@ class ProtocolV6V24DistillationSmokeTest(unittest.TestCase):
             "train_episodes": TRAIN_EPISODES,
             "checkpoint_ep": TRAIN_EPISODES - 1,
             "reference": CANDIDATES[0],
-            "run_git_provenance": {"tracked_dirty": False},
+            "run_git_provenance": git_record,
+            "git": git_record,
             "expected_rollouts": len(CANDIDATES),
         }
         (aggregate / "matrix_manifest.json").write_text(json.dumps(manifest))
