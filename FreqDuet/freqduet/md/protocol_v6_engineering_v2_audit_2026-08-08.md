@@ -3337,3 +3337,95 @@ cost. The corrected deployment contract stores and validates readiness plus
 non-model training counters, while frozen actions still use only the decision
 state and learned critic. A fresh server regression and smoke are required from
 the corrected source revision.
+
+### Engineering-v27 corrected mechanical-smoke outcome (2026-09-09)
+
+The corrected implementation is commit `f7517dbde1`; the fail-closed smoke and
+formal-screen audit layer is commit `2dfe51e04c`. Immutable-source regression
+task `t90325` verified the latter revision and passed all 95 registered tests on
+`node003`. The six-arm checkpoint-7 smoke matrix then completed as task
+`t90327`, and independent node-side gate task `t90330` returned
+`mechanical_pass` with `formal_screen_authorized=true` and
+`effect_evidence=false`. No smoke result is used as an outcome estimate.
+
+All four candidates passed the registered source, manifest, CRN, frozen-policy,
+causal-state, exact-action, reward-critic, no-calibration, and zero-execution-
+adjustment checks. At episode 7, the `H=2` candidate had 39,520 replay labels,
+2,080 discarded terminal tails, and 240 critic updates. Both `H=4` candidates
+had 35,360 labels, 6,240 discarded tails, and 240 updates; the `H=6` candidate
+had 31,200 labels, 10,400 discarded tails, and 240 updates. Every candidate was
+training-ready, exceeded the 512-label and 30-update minima, retained finite
+nonzero targets, loss, and action-value span, and restored the trained value
+objective into frozen evaluation without replay-state dependence.
+
+The smoke therefore authorizes only the preregistered 40-episode exploratory
+screen. Initial formal shards `t90332--t90363` completed the eight locked
+controls/candidates, four training seeds, and four common frozen evaluation
+seeds on `node001--node006`, but node-side aggregate `t90367` rejected all of
+them before calculating an outcome table. The scheduler command scoped
+`FREQDUET_SOURCE_COMMIT`, branch, and clean-state variables only to its first
+source-probe process instead of exporting them to the training process. The run
+manifests consequently contain the correct model, analysis, configuration, and
+scenario fingerprints but record Git provenance as `unavailable`/unknown. No
+effect value from this inadmissible matrix was inspected, and its manifests are
+not amended retrospectively.
+
+Server preflight `t90374` verified the corrected shell-level export as full
+commit `2dfe51e04c82823bf8120930bfd7cf9316881c44`, branch
+`codex/freqduet-v6-causal-protocol`, and `tracked_dirty=false`. Replacement
+formal shards `t90375--t90406` rerun the unchanged source, configs, seeds,
+40-episode horizon, and frozen-evaluation protocol into a new server directory.
+Their outcome must be aggregated and adjudicated by the registered V27 gate
+before any candidate is selected or the observational finite-horizon family is
+rejected.
+
+### Engineering-v27 causal multi-step arrival-value outcome (2026-09-09)
+
+Replacement shards `t90375--t90406` completed with 32/32 scheduler `done`
+states and 32 exact per-shard completion markers. Early node-side probe `t90408`
+confirmed that the actual training manifest records full source commit
+`2dfe51e04c82823bf8120930bfd7cf9316881c44` and
+`tracked_dirty=false`. Node-side aggregate `t90409` then accepted all 128
+unique frozen rollouts. Independent gate task `t90410` passed every registered
+source, manifest, clean-Git, analysis-fingerprint, configuration, seed,
+checkpoint, scenario-tape, CRN, and frozen-policy check and returned `no_pass`.
+No candidate is selected for confirmation and `claim_eligible` remains false.
+
+The value objective trained fully rather than silently switching off. Every
+candidate completed 1,200 critic updates in every training seed and was ready
+through all 160 registered training rows. Final complete-label counts per seed
+were 197,600 for `H=2`, 176,800 for `H=4`, and 156,000 for `H=6`; the
+corresponding discarded same-trip/day tails were 10,400, 31,200, and 52,000.
+All candidates had finite nonzero target variance, loss, gradient, and
+categorical action-value span, and the learned value critic remained active but
+frozen during evaluation.
+
+The paired outcome against scalar V13 is uniformly adverse on the registered
+regularity objective:
+
+| candidate | journey delta (min) | headway-CV delta | service-cost delta | mean holding vehicle-s |
+|---|---:|---:|---:|---:|
+| `H2/UCB0` | -0.24473 | +0.07564 | +0.08164 | 16,618.13 |
+| `H4/UCB0` | -0.16591 | +0.05311 | +0.05833 | 21,251.25 |
+| `H4/UCB0.5` | -0.42120 | +0.15919 | +0.17279 | 482.81 |
+| `H6/UCB0.5` | -0.39192 | +0.13991 | +0.15245 | 3,327.19 |
+
+V13 mean holding is 33,387.19 vehicle-s. Thus the apparent journey improvement
+comes with a large reduction in holding, but it is not an efficient regularity
+gain: every candidate misses the required `-0.002` CV improvement and the
+`+0.003` service-cost noninferiority margin. `H4/UCB0` improves CV in only one
+of four training-seed blocks; the other candidates improve in none. All four
+also fail CV noninferiority to V19, despite improving journey and using less
+holding than that control. UCB makes the collapse especially severe rather than
+providing useful conservative action selection.
+
+This closes the observational finite-horizon value family. Complete future
+arrival labels can train a numerically active predictor, but conditioning those
+labels on actions selected by the evolving behavior policy does not identify
+the counterfactual effect of holding. The actor consequently suppresses useful
+holding and trades away headway regularity. Per the preregistered branch rule,
+there is no 200-episode confirmation and no budget, horizon, UCB, V26
+calibration, or one-step-surrogate retuning. The next effect mechanism must use
+matched simulator counterfactual branches at a common causal decision snapshot,
+preferably at the executable terminal/first-stop layer, or leave that full
+Phase-4 value policy outside the paper scope.
