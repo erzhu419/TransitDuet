@@ -8,14 +8,14 @@ The June curation bundle is retained as a historical package. The current
 paper-facing source is the Protocol V6 current-best evidence bundle. It must
 show the successful V8 confirmation and failed V9 long-training gate together.
 
-## Required V6 Main Tables
+## Final V6 Tables
 
 | Table | Required contents | Claim gate |
 | --- | --- | --- |
-| 1. V8 confirmed effect | confirmed main versus the Protocol V6 reference config; journey, wait, in-vehicle time, headway CV, holding, denial, unserved, and service cost | Six training x four untouched evaluation seeds; both configs have the legacy holding guard disabled |
-| 2. V9 long-training robustness | Same metrics and controller at 200 episodes, with gate status shown | Eight training x eight evaluation seeds; negative result visible |
-| 3. V9 external trade-off | confirmed main versus fixed headway, rule holding, and rule MPC | Same source/scenario contract and paired intervals |
-| 4. Evidence decisions | Experiment stage, seed counts, gate decision, and claim eligibility | Prevents V8/V9 or historical V1 pooling |
+| Main Table 1. Confirmation and robustness | V8 and V9 current-policy differences versus the Protocol V6 reference for journey, wait, in-vehicle time, headway CV, holding, denial, unserved, and service cost | V8 and V9 remain separate columns; the failed V9 decision is stated in text and table note |
+| Main Table 2. External trade-off | FreqDuet versus fixed headway, rule holding, and rule MPC for journey, headway CV, denied trips, and service cost | Source-identical V9 comparison with paired intervals |
+| Supplementary Table S1. Full external outcomes | Means, paired differences, intervals, and Holm-adjusted tests for every packaged external outcome | Prevents selective reporting of the fixed-headway passenger/fleet burden |
+| Supplementary decision ledger | Experiment stage, seed counts, gate decision, and claim eligibility | Prevents V8/V9 or historical V1 pooling |
 
 The old composite can appear only in an appendix sensitivity table.
 

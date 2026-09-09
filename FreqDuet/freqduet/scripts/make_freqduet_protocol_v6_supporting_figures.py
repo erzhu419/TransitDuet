@@ -154,7 +154,13 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
         "protocol.version": PROTOCOL,
         "env.fleet_inventory_mode": "fixed_pool",
         "env.observation_contract": "deployable_apc_avl_v4",
+        "env.service_start_hour": 6,
+        "env.service_end_hour": 19,
+        "env.clearance_time_s": 14400,
         "upper.fleet_mode": "fixed",
+        "upper.N_fleet": 12,
+        "upper.algorithm_id": "pessimistic_ensemble_sac_v4",
+        "upper.ensemble_size": 10,
         "upper.timetable_planner.enable": True,
         "upper.timetable_planner.terminal_schedule_mode": "exact_headway_curve",
         "upper.timetable_planner.terminal_dispatch": True,
@@ -166,11 +172,16 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
         "frequency.use_historical_prior": True,
         "frequency.bin_sec": 60.0,
         "frequency.fourier_K": 4,
+        "frequency.harmonic_forgetting": 0.9995,
+        "frequency.harmonic_prior_var": 0.01,
+        "frequency.harmonic_ridge": 0.01,
         "frequency.forecast_horizon_s": 1800.0,
         "frequency.upper_mode": "low",
         "frequency.lower_mode": "high",
         "frequency.promotion.enable": False,
         "leakage.enable": False,
+        "lower.algorithm_id": "pessimistic_ensemble_sac_lagrangian_v4",
+        "lower.ensemble_size": 10,
         "lower.causal_holding_guard.enable": False,
         "lower.causal_departure_regularity.enable": True,
         "lower.causal_departure_regularity.evidence_mode": (
@@ -179,6 +190,15 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
         "lower.causal_departure_regularity.objective_mode": (
             "avl_two_sided_incremental_reward"
         ),
+        "lower.causal_departure_regularity.reward_weight": 2.0,
+        "lower.causal_departure_regularity.tolerance_fraction": 0.02,
+        "lower.causal_departure_regularity.cost_cap": 0.25,
+        "objective.wait_metric": "restricted",
+        "objective.weights.wait": 1.0,
+        "objective.weights.fleet": 1.0,
+        "objective.weights.headway": 1.0,
+        "objective.weights.unserved": 5.0,
+        "objective.weights.incomplete_service": 5.0,
     }
     observed = {path: nested(config, path) for path in expected}
     mismatches = {
@@ -210,10 +230,21 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "paper_controller": PAPER_CONTROLLER,
         "protocol": PROTOCOL,
+        "service_start_hour": int(nested(config, "env.service_start_hour")),
+        "service_end_hour": int(nested(config, "env.service_end_hour")),
+        "clearance_time_s": float(nested(config, "env.clearance_time_s")),
+        "fleet_size": int(nested(config, "upper.N_fleet")),
         "historical_prior": True,
         "frequency_method": nested(config, "frequency.method"),
         "harmonic_period_s": float(nested(config, "frequency.harmonic_period_s")),
         "fourier_k": int(nested(config, "frequency.fourier_K")),
+        "harmonic_forgetting": float(
+            nested(config, "frequency.harmonic_forgetting")
+        ),
+        "harmonic_prior_var": float(
+            nested(config, "frequency.harmonic_prior_var")
+        ),
+        "harmonic_ridge": float(nested(config, "frequency.harmonic_ridge")),
         "bin_sec": float(nested(config, "frequency.bin_sec")),
         "forecast_horizon_s": float(
             nested(config, "frequency.forecast_horizon_s")
@@ -229,6 +260,18 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
         "headway_budget_mode": nested(
             config, "upper.timetable_planner.headway_budget_mode"
         ),
+        "upper_delta_min_s": float(
+            nested(config, "upper.timetable_planner.delta_min_s")
+        ),
+        "upper_delta_max_s": float(
+            nested(config, "upper.timetable_planner.delta_max_s")
+        ),
+        "terminal_shift_min_s": float(
+            nested(config, "upper.timetable_planner.terminal_shift_min_s")
+        ),
+        "terminal_shift_max_s": float(
+            nested(config, "upper.timetable_planner.terminal_shift_max_s")
+        ),
         "terminal_dispatch": True,
         "action_bins_s": action_bins,
         "uses_last_action_feature": bool(
@@ -243,6 +286,42 @@ def validate_method_contract(config: Mapping[str, Any]) -> dict[str, Any]:
         ),
         "regularity_tolerance_fraction": float(
             nested(config, "lower.causal_departure_regularity.tolerance_fraction")
+        ),
+        "regularity_cost_cap": float(
+            nested(config, "lower.causal_departure_regularity.cost_cap")
+        ),
+        "objective_wait_metric": nested(config, "objective.wait_metric"),
+        "service_cost_weights": {
+            name: float(nested(config, f"objective.weights.{name}"))
+            for name in (
+                "wait",
+                "fleet",
+                "headway",
+                "unserved",
+                "incomplete_service",
+            )
+        },
+        "upper_algorithm": nested(config, "upper.algorithm_id"),
+        "upper_hidden_dim": int(nested(config, "upper.hidden_dim")),
+        "upper_ensemble_size": int(nested(config, "upper.ensemble_size")),
+        "upper_learning_rate": float(nested(config, "upper.lr")),
+        "upper_discount": float(nested(config, "upper.gamma")),
+        "upper_batch_size": int(nested(config, "upper.batch_size")),
+        "upper_updates_per_episode": int(
+            nested(config, "upper.updates_per_episode")
+        ),
+        "lower_algorithm": nested(config, "lower.algorithm_id"),
+        "lower_hidden_dim": int(nested(config, "lower.hidden_dim")),
+        "lower_ensemble_size": int(nested(config, "lower.ensemble_size")),
+        "lower_learning_rate": float(nested(config, "lower.lr")),
+        "lower_dual_learning_rate": float(nested(config, "lower.lambda_lr")),
+        "lower_discount": float(nested(config, "lower.gamma")),
+        "lower_batch_size": int(nested(config, "lower.batch_size")),
+        "lower_updates_per_episode": int(
+            nested(config, "lower.updates_per_episode")
+        ),
+        "upper_warmup_episodes": int(
+            nested(config, "coupling.upper_warmup_eps")
         ),
         "legacy_holding_guard_enabled": False,
         "promotion_enabled": False,

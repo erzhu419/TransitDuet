@@ -63,6 +63,7 @@ The paper-facing code paths and source commits are listed in
 - `scripts/run_freqduet_external_baselines.py`
 - `scripts/compare_freqduet_external_frozen.py`
 - `scripts/build_freqduet_protocol_v6_evidence_package.py`
+- `scripts/assemble_freqduet_protocol_v6_manuscript.py`
 
 The current builder includes the exact verified config inheritance chains for
 the confirmed controller and matched no-guard comparator. Historical
@@ -72,12 +73,14 @@ Protocol V6 effect tables.
 
 ## Repository Actions Before Submission
 
-1. Resolve the manuscript-level decision created by the failed V9
-   long-training gate, then freeze the final claims and package version.
+1. Select a journal and explicitly retain the V8-positive/V9-negative scope;
+   the current assembly keeps the failed V9 gate visible and does not clear the
+   submission hold.
 
-2. Assemble the final figure panels from Protocol V6 source tables and add the
-   final environment specification; the current evidence bundle already
-   contains a README, file manifest, source CSV/JSON files, and exact configs.
+2. Bind the completed five-figure Protocol V6 package and the generated
+   Methods/Results/Supplementary sources to the selected journal template. The
+   evidence bundle already contains editable figure exports, captions, source
+   CSV/JSON files, exact configs, and QA notes.
 
 3. Deposit the frozen release in a durable repository and replace
    `[repository DOI]` with its persistent identifier.
@@ -97,7 +100,8 @@ Protocol V6 effect tables.
 | File manifest | Present | The Protocol V6 builder writes `package_manifest.json`. |
 | Current result source data | Present | V8/V9 seed-level CSV and decision JSON artifacts are tracked and packaged. |
 | Current result figure source data | Present | Figures 2 and 3 use the normalized V8/V9 tables and include editable exports and QA notes. |
-| Complete final figure package | Pending | Rebind or redraw the method, mechanism, and realism panels to the final V6 scope. |
+| Complete final figure package | Present | Figures 1-5 are bound to the resolved V6 method and current evidence tables, with SVG/PDF/TIFF/PNG exports and QA notes. |
+| Methods/results manuscript assembly | Present | `FreqDuet/paper/protocol_v6` is generated from the frozen evidence package and preserves the V9 hold. |
 | Exact configs | Present | The builder verifies and copies the relevant inheritance chains. |
 | Scripts | Source-bound | Exact source commits and canonical entry points are recorded; final release archive is pending. |
 | External public data provenance | Present | README files and source coverage CSVs document public endpoints. |

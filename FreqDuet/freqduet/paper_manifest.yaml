@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-09-10-protocol-v6-current-best-balanced-realism
+version: 2026-09-10-protocol-v6-current-best-manuscript-v1
 submission_status: hold_pending_protocol_v6
 active_protocol: freqduet-eval-v6
 active_source_commit: 673355cae10640b2737b6d51d541a9685059c342
@@ -89,6 +89,11 @@ current_best_evidence:
       - fig3_protocol_v6_external_tradeoff
       - fig4_protocol_v6_physical_outcomes
       - fig5_protocol_v6_external_realism
+    manuscript_assembly:
+      script: scripts/assemble_freqduet_protocol_v6_manuscript.py
+      out_dir: ../paper/protocol_v6
+      contents: [methods, results, main_tables, supplementary, figure_captions]
+      status: draft_bound_to_v8_positive_v9_negative
 
 historical_reproduction:
   version: 2026-06-26-historical

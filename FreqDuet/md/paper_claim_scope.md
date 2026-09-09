@@ -48,6 +48,9 @@ holding guard, promotion mechanism, and leakage penalty are disabled.
 - Long-run confirmation of the V8 regularity effect.
 - Passenger-journey superiority or statistical equivalence to fixed headway.
 - Universal superiority of frequency separation over every internal control.
+- An isolated causal effect of frequency separation versus same-stage NoFreq,
+  RawHistory, or AllFreq controls; those arms are absent from the current
+  confirmatory package.
 - Generalization across completed route-family or service-day policy matrices.
 - Real-world deployed wait-time or journey-time improvement.
 - Complete same-day AFC/APC/AVL/OD field calibration.

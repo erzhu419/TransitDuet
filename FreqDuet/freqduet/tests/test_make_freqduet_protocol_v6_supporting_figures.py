@@ -122,6 +122,13 @@ class ProtocolV6SupportingFiguresTest(unittest.TestCase):
         self.assertFalse(contract["legacy_holding_guard_enabled"])
         self.assertEqual(contract["regularity_objective"],
                          "avl_two_sided_incremental_reward")
+        self.assertEqual(contract["fleet_size"], 12)
+        self.assertEqual(contract["harmonic_forgetting"], 0.9995)
+        self.assertEqual(contract["upper_ensemble_size"], 10)
+        self.assertEqual(contract["lower_ensemble_size"], 10)
+        self.assertEqual(contract["regularity_cost_cap"], 0.25)
+        self.assertEqual(contract["objective_wait_metric"], "restricted")
+        self.assertEqual(contract["service_cost_weights"]["unserved"], 5.0)
         self.assertTrue(
             (figures / "source_data" / "figure4_physical_outcomes.csv").is_file()
         )

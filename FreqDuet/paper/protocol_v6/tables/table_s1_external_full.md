@@ -1,0 +1,26 @@
+| Baseline | Outcome | FreqDuet mean | Baseline mean | Delta [95% CI] | Holm p |
+| --- | --- | --- | --- | --- | --- |
+| Fixed headway | Restricted passenger journey (min) | +20.349 | +17.879 | +2.470 [+1.874, +3.188] | 0.023 |
+| Fixed headway | Restricted passenger wait (min) | +8.009 | +7.001 | +1.009 [+0.439, +1.704] | 0.023 |
+| Fixed headway | Restricted in-vehicle time (min) | +12.340 | +10.878 | +1.461 [+1.367, +1.542] | 0.023 |
+| Fixed headway | Headway coefficient of variation | +0.213 | +0.432 | -0.219 [-0.238, -0.198] | 0.023 |
+| Fixed headway | Unserved passengers (percentage points) | +0.14 | +0.21 | -0.07 [-0.20, -0.00] | 0.023 |
+| Fixed headway | Realized holding (s/launched trip) | +286.8 | +0.0 | +286.8 [+269.7, +302.0] | 0.023 |
+| Fixed headway | Trips denied at least once (percentage points) | +85.85 | +21.76 | +64.10 [+61.97, +66.03] | 0.023 |
+| Fixed headway | Restricted service cost | +1.021 | +1.143 | -0.122 [-0.180, -0.050] | 0.023 |
+| Rule holding | Restricted passenger journey (min) | +20.349 | +23.573 | -3.224 [-4.727, -1.885] | 0.023 |
+| Rule holding | Restricted passenger wait (min) | +8.009 | +10.799 | -2.790 [-4.208, -1.519] | 0.023 |
+| Rule holding | Restricted in-vehicle time (min) | +12.340 | +12.774 | -0.434 [-0.544, -0.335] | 0.023 |
+| Rule holding | Headway coefficient of variation | +0.213 | +0.286 | -0.073 [-0.082, -0.062] | 0.023 |
+| Rule holding | Unserved passengers (percentage points) | +0.14 | +0.13 | +0.01 [+0.00, +0.03] | 0.023 |
+| Rule holding | Realized holding (s/launched trip) | +286.8 | +360.2 | -73.3 [-91.2, -57.3] | 0.023 |
+| Rule holding | Trips denied at least once (percentage points) | +85.85 | +89.03 | -3.17 [-5.42, -1.90] | 0.023 |
+| Rule holding | Restricted service cost | +1.021 | +1.372 | -0.351 [-0.496, -0.221] | 0.023 |
+| Rule MPC | Restricted passenger journey (min) | +20.349 | +46.860 | -26.511 [-31.003, -21.628] | 0.023 |
+| Rule MPC | Restricted passenger wait (min) | +8.009 | +33.527 | -25.517 [-29.945, -20.699] | 0.023 |
+| Rule MPC | Restricted in-vehicle time (min) | +12.340 | +13.333 | -0.994 [-1.116, -0.881] | 0.023 |
+| Rule MPC | Headway coefficient of variation | +0.213 | +0.207 | +0.006 [-0.006, +0.020] | 0.023 |
+| Rule MPC | Unserved passengers (percentage points) | +0.14 | +0.05 | +0.09 [+0.00, +0.27] | 0.023 |
+| Rule MPC | Realized holding (s/launched trip) | +286.8 | +409.6 | -122.7 [-139.7, -107.3] | 0.023 |
+| Rule MPC | Trips denied at least once (percentage points) | +85.85 | +24.33 | +61.52 [+59.09, +63.77] | 0.023 |
+| Rule MPC | Restricted service cost | +1.021 | +3.562 | -2.541 [-2.984, -2.060] | 0.023 |

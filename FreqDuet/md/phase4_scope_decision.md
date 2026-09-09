@@ -34,12 +34,14 @@ The paper should therefore claim bounded executable terminal-dispatch
 timetable control, while making clear that a learned first-stop/terminal value
 policy is not yet promoted.
 
-2026-06-26 scope update: the final paper evidence should use the conservative
-60-seed wording. Paper-main V1 is statistically tied with strong fixed-headway
-and significantly better than rule-holding/rule-MPC, but learned
-first-stop/terminal launch value control is still not validated. Do not use
-Phase 4 language to imply real terminal launch deployment or same-day field
-calibration.
+2026-09-10 Protocol V6 update: the current paper evidence is V8/V9, not the
+historical V1 composite package. The V9 source-identical comparison shows lower
+headway CV and restricted service cost than fixed headway, but higher passenger
+journey time and a substantially higher fleet-denial burden. FreqDuet improves
+journey relative to rule holding and rule MPC. Learned first-stop/terminal
+launch value control is still not validated. Do not use Phase 4 language to
+imply real terminal deployment, passenger-time superiority to fixed headway,
+or same-day field calibration.
 
 ## Why Not Promote A Heuristic Terminal-Value Patch
 

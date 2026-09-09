@@ -10,6 +10,20 @@
 > gate is not confirmed, or obtain a genuinely new independent confirmation.
 > The historical V1/composite package cannot replace current V6 evidence.
 
+> **2026-09-10 manuscript assembly:** the frozen Protocol V6 package now
+> generates a source-bound English Abstract, Methods, Results, two main tables,
+> full external-baseline supplement, ordered Figure 1-5 captions, and a
+> machine-readable assembly manifest under `FreqDuet/paper/protocol_v6`.
+> Server tasks `t92109`, `t92117`, and `t92119` verified the assembler,
+> expanded method contract, controller-roster guard, and final ordered build.
+> This closes manuscript assembly, not the scientific hold: V9 remains
+> `longtrain_not_confirmed`, the
+> current package lacks a same-stage NoFreq/RawHistory/AllFreq confirmation,
+> and the public-data audit is not matched route/day policy calibration. The
+> remaining editorial work is Introduction/Related Work with verified
+> citations and placement in the selected journal template; it must preserve
+> these empirical boundaries.
+
 > **2026-08-08 historical submission hold:** this backlog records the historical V1-V4
 > development path. The legacy composite-based paper package is not the active
 > submission result after the corrected V4 passenger-journey audit failed.
