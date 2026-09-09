@@ -3584,3 +3584,51 @@ only as development data, and adjudicate once on fresh policy/scenario/decision
 contexts. Until such independent evidence exists, the correct conclusion is:
 matched counterfactual labels reveal actionable heterogeneity, but this causal
 ridge selector does not add value over the best global intervention.
+
+### Engineering-v29 quadratic treatment development D1 (2026-09-09)
+
+V29 is a new development branch; it does not reopen or alter the failed V28
+gate. Commit `950c346bc6f54d6943b47e440737b58e118eebe7` adds a zero-baseline
+signed-quadratic treatment-effect ridge. Its positive and negative executed
+action changes have separate linear and squared terms, and every treatment
+term interacts with the 23-dimensional causal upper state plus the unchanged
+actor action. No intercept is fitted, so the actor's predicted treatment
+effect is structurally and exactly zero. Server task `t90990` passed all 21
+focused model, prefix-replay, matrix, and provenance tests on `node001`,
+including a direct synthetic test that the response can rank `+15 s` ahead of
+both the actor and `+30 s`.
+
+The exact D1 model was developed once on the unchanged V28 strict aggregate by
+server task `t90999`; compact server-side probe `t91003` reported
+`development_no_pass`. The 100-feature nested model selected the actor in 47
+contexts, `-30 s` in 6, `+15 s` in 2, and `+30 s` in 73. Its restricted service
+cost delta versus actor was `-0.00024577`, 95% block-bootstrap CI
+`[-0.00052231,+0.00002283]`. All four held-out training-seed means were
+negative, and the registered journey, headway-CV, fleet, completion, and
+unserved checks passed. It nevertheless failed the crossed-zero primary CI,
+the minimum 5% interior-action fraction, and both comparisons with the fixed
+global `+30 s` intervention. The paired service-cost difference relative to
+`+30 s` was `+0.00001278`, CI `[-0.00012698,+0.00020805]`. D1 is retained as a
+development negative result and cannot enter fresh-context confirmation.
+
+D1's selected ridge penalty varied from `0.1` to `100` across outer folds and
+used only 2 interior actions despite the V28 oracle selecting 46. This is a
+specific capacity mismatch: 100 correlated response coefficients are being
+estimated from 128 independent contexts. V29-D2 therefore changes the model
+structure, not the outcome gate. It keeps the same four signed-quadratic basis
+terms and replaces all raw-state interactions with fold-local principal
+components of the causal state plus actor action. Candidate ranks are frozen as
+`[0,1,2,4]`, giving 4, 8, 12, or 20 response features. Projection mean, scale,
+and components must be fitted only on unique actor contexts in the applicable
+training fold; held-out contexts cannot influence preprocessing. Rank, the
+unchanged D1 ridge grid `[0.1,1,10,100,1000]`, and unchanged D1 margins
+`[0,0.0001,0.00025,0.0005]` are selected inside nested training-seed folds.
+
+The D1 effect and no-harm gate is reused verbatim. D2 must select an interior
+action in at least 5% of contexts, cross zero against actor, improve in at least
+three training seeds, and have both negative paired mean and paired CI upper
+bound against global `+30 s`, while retaining every journey, headway-CV, fleet,
+completion, and unserved limit. D2 remains development-only even if it passes.
+Only a pass may freeze one exact model for a single confirmation on entirely
+new policy seeds, scenario seeds, decision indices, evaluation episode, and
+replay seed.
