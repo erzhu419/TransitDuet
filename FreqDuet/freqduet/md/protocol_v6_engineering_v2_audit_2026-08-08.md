@@ -3671,3 +3671,70 @@ evaluation episode `300000`, and replay seed `30029`. It is disjoint from V28
 and V30 discovery policy/scenario/decision contexts. Confirmation is run only
 if the unchanged V30 discovery gate passes; otherwise V30 closes as a negative
 result without a new gate search.
+
+### Engineering-v30 expanded-observation outcome (2026-09-09)
+
+All 448 registered V30 contexts completed as scheduler tasks `t91181--t91628`
+on `node001--node006`, giving 3,136 complete episode branches. Strict
+aggregation task `t91693` accepted the entire frozen Cartesian roster. Server
+regression task `t91161` passed all 28 focused tests before the matrix was
+opened; an earlier `pytest` launcher failure was only a missing executable in
+the isolated environment and did not run code. The immutable source and
+aggregation commit is `9c3f15bfca9c0c8a593c88cd8aeb98bba2328622`.
+
+The preregistered V30 gate task `t91700` returned `development_no_pass`. The
+12-feature model selected the actor in 50 contexts, `-30 s` in 52, `-15 s` in
+11, `+15 s` in 98, and `+30 s` in 237, so it did recover a substantial 24.33%
+interior-action fraction. Its restricted service-cost delta versus actor was
+`-0.00010091`, 95% block-bootstrap CI `[-0.00042186,+0.00020306]`. Relative to
+global `+30 s`, its paired difference was `+0.00017090`, CI
+`[-0.00006955,+0.00054438]`. It also had small positive mean headway-CV and
+unserved-passenger deltas. The registered effect, comparator, headway, and
+unserved checks therefore failed; the frozen V30 confirmation roster remains
+unused and V30 is closed as a negative result.
+
+This is not evidence that the intervention space lacks useful actions. The
+outcome-aware joint-safe oracle probe `t91725`, restricted independently in
+each context to candidates whose realized headway-CV and unserved deltas are
+both nonpositive, achieved restricted service-cost delta `-0.00151123`, CI
+`[-0.00200664,-0.00109977]`, headway-CV delta `-0.00090960`, and unserved delta
+`-0.000000096`. It used all five actions. Thus V30 exposed a model-selection
+failure: a single service head makes harmful overrides away from the strong
+`+30 s` default, while a jointly safe heterogeneous choice is structurally
+available. The oracle remains development evidence and is not deployable.
+
+### Engineering-v31 pairwise multi-head preregistration (2026-09-09)
+
+V31 changes the learning problem rather than relaxing the V30 gate. It keeps
+the unchanged harmonic prior, seven-bin sampled lower action, executable
+terminal semantics, candidate offsets, outcomes, and effect/no-harm limits.
+The default is global `+30 s`. The service head is trained on matched
+candidate-minus-`+30 s` action features and outcomes within each causal
+context, making the default exactly zero and removing context-level nuisance.
+Separate absolute actor-relative heads estimate headway-CV and unserved risk;
+the actor is structurally zero for both. Candidate selection occurs inside the
+value planner: override `+30 s` only for a predicted-safe action with a
+predicted service gain above the frozen margin; use the actor only when the
+default is predicted unsafe and no improving safe candidate exists. This is
+not a post-policy action guard.
+
+The causal context is the 23-dimensional `s_upper`, the two pre-action V30
+summaries, and the unchanged actor action. Scheduler schema audit `t91749`
+confirmed all fields in the strict aggregate. Fold-local PCA ranks
+`[0,1,2,4,8]` yield at most 36 signed-quadratic treatment features. A common
+ridge penalty from `[0.1,1,10,100,1000]` and service margin from
+`[0,0.0001,0.00025,0.0005]` are selected by inner policy-seed holdout only when
+the resulting held-out choices beat `+30 s` in mean service cost, have
+nonpositive mean headway and unserved deltas, and retain at least 5% default
+overrides and 5% interior actions. If no configuration is feasible, that fold
+uses the unchanged actor and the outer gate fails closed. The original V30
+outer effect and no-harm gate is reused unchanged.
+
+V30 labels are development data only. Before fitting V31, its one permitted
+confirmation roster is frozen to newly trained policy seeds
+`35013,35031,35057,35081`, scenario seeds `70011,70029,70047,70071`, decision
+indices `6,18,30,42,54,66,78,86`, evaluation episode `400000`, and replay seed
+`31001`. Exact searches of source, documents, and scheduler run identities
+found no prior use of this roster. No confirmation may run unless the unchanged
+nested V31 development gate passes; a failure closes V31 without searching a
+new threshold or confirmation roster.
