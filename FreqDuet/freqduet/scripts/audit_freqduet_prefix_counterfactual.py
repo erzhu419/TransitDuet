@@ -441,9 +441,10 @@ def validate_source(expected_commit: str | None = None) -> dict[str, Any]:
     provenance = git_provenance()
     commit = str(provenance.get("commit", "")).strip().lower()
     if not COMMIT_RE.fullmatch(commit):
-        raise RuntimeError(f"V28 requires an identified full source commit: {commit!r}")
+        raise RuntimeError(
+            f"prefix audit requires an identified full source commit: {commit!r}")
     if provenance.get("tracked_dirty") is not False:
-        raise RuntimeError("V28 requires a clean tracked source snapshot")
+        raise RuntimeError("prefix audit requires a clean tracked source snapshot")
     if expected_commit and commit != str(expected_commit).strip().lower():
         raise RuntimeError(
             f"source commit {commit} != expected {expected_commit}")
@@ -453,11 +454,14 @@ def validate_source(expected_commit: str | None = None) -> dict[str, Any]:
 def run_audit(args) -> tuple[Path, dict[str, Any]]:
     set_worker_threads(args.worker_threads)
     source = validate_source(args.expected_source_commit)
+    protocol_version = str(args.protocol_version).strip()
+    if not protocol_version:
+        raise RuntimeError("prefix audit requires a nonempty protocol version")
     cfg_path = resolve_config(args.config).resolve()
     checkpoint_dir = Path(args.checkpoint_dir).resolve()
     offsets = parse_csv(args.offsets_s, float)
     if 0.0 not in offsets:
-        raise RuntimeError("V28 requires a zero-offset identity candidate")
+        raise RuntimeError("prefix audit requires a zero-offset identity candidate")
     if int(args.decision_index) < 1:
         raise RuntimeError("decision-index is one-based and must be positive")
 
@@ -467,7 +471,7 @@ def run_audit(args) -> tuple[Path, dict[str, Any]]:
             "prefix_counterfactual_meta.json"):
         if (out_dir / filename).exists():
             raise FileExistsError(
-                f"refusing to mix V28 evidence in existing output: {out_dir}")
+                f"refusing to mix prefix evidence in existing output: {out_dir}")
     branch_log_root = out_dir / "branch_logs"
     started = time.time()
     common = {
@@ -527,7 +531,7 @@ def run_audit(args) -> tuple[Path, dict[str, Any]]:
     csv_path = out_dir / "prefix_counterfactual_labels.csv"
     write_csv(csv_path, rows)
     meta = {
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": protocol_version,
         "status": "mechanical_pass",
         "effect_evidence": False,
         "source": source,
@@ -568,6 +572,7 @@ def run_audit(args) -> tuple[Path, dict[str, Any]]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--protocol-version", default=PROTOCOL_VERSION)
     parser.add_argument("--config", required=True)
     parser.add_argument("--train-seed", type=int, required=True)
     parser.add_argument("--checkpoint-dir", required=True)
@@ -591,7 +596,7 @@ def main() -> int:
     except Exception as exc:
         out_dir.mkdir(parents=True, exist_ok=True)
         invalid = {
-            "protocol_version": PROTOCOL_VERSION,
+            "protocol_version": str(args.protocol_version).strip(),
             "status": "invalid",
             "error": f"{type(exc).__name__}: {exc}",
             "labels_written": False,
@@ -600,7 +605,8 @@ def main() -> int:
             json.dumps(invalid, indent=2, sort_keys=True) + "\n")
         raise
     print(
-        f"DONE V28 prefix gate={meta['status']} rows={meta['rows']} "
+        f"DONE prefix protocol={meta['protocol_version']} "
+        f"gate={meta['status']} rows={meta['rows']} "
         f"labels={csv_path}",
         flush=True,
     )

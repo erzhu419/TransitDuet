@@ -3632,3 +3632,42 @@ completion, and unserved limit. D2 remains development-only even if it passes.
 Only a pass may freeze one exact model for a single confirmation on entirely
 new policy seeds, scenario seeds, decision indices, evaluation episode, and
 replay seed.
+
+Server task `t91013` passed all 24 focused D2 tests. Development task `t91017`
+and compact probe `t91019` then returned `development_no_pass` on the unchanged
+V28 labels. D2 increased the interior-action fraction to `10.15625%` and passed
+all engineering and no-harm checks, but its restricted-service-cost delta was
+`-0.00016714`, CI `[-0.00046272,+0.00011985]`. Relative to fixed global `+30 s`,
+the paired mean was `+0.00009141`, CI `[-0.00004407,+0.00025472]`. Thus reducing
+capacity fixed the interior-action failure but did not identify a response that
+beats the global intervention. D2 remains a negative development result and no
+V29 confirmation is authorized.
+
+### Engineering-v30 expanded-observation preregistration (2026-09-09)
+
+V30 tests the narrower remaining hypothesis that the causal upper state omits
+two live system summaries needed to distinguish useful interventions:
+`waiting_total_pre` and `headway_cv_active_pre`. Both are measured immediately
+before the upper action and were already emitted by the V28 label collector;
+V30 changes neither simulator dynamics, action candidates, harmonic prior,
+lower action bins, sampled execution, terminal dispatch, outcome, nor gate.
+The model has exactly 12 terms: four signed quadratic treatment terms and their
+interactions with only these two fold-standardized fields. The actor treatment
+remains structurally zero. Ridge penalties `[0.1,1,10,100,1000]`, margins
+`[0,0.0001,0.00025,0.0005]`, and every D2 effect/no-harm threshold are frozen.
+
+Discovery reuses only the four existing policy checkpoints
+`31013,31031,31057,31081`; its contexts are new. The Cartesian roster is eight
+scenario seeds `68011,68029,68047,68071,68101,68129,68147,68171` by fourteen
+decision indices `2,8,14,20,26,32,38,44,50,56,62,68,74,82`, for 448 contexts
+and 3,136 complete episode branches. Evaluation episode is `200000`, replay
+seed is `30001`, and offsets remain `[-30,-15,0,+15,+30]` seconds. This is a
+new development dataset, not a V29 confirmation.
+
+Before opening discovery labels, the one permitted confirmation roster is
+frozen to newly trained policy seeds `34013,34031,34057,34081`, scenario seeds
+`69011,69029,69047,69071`, decision indices `10,22,34,46,58,70,80,83`,
+evaluation episode `300000`, and replay seed `30029`. It is disjoint from V28
+and V30 discovery policy/scenario/decision contexts. Confirmation is run only
+if the unchanged V30 discovery gate passes; otherwise V30 closes as a negative
+result without a new gate search.

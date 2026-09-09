@@ -7,7 +7,10 @@ import argparse
 import json
 import re
 import sys
+from dataclasses import dataclass
+from itertools import product
 from pathlib import Path
+from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -32,7 +35,6 @@ from scripts.audit_protocol_v6_v28_prefix_common import (
     REPLAY_SEED,
     TRAIN_SEEDS,
     checkpoint_dir,
-    expected_jobs,
 )
 from scripts.run_freqduet_protocol_v2_matrix import git_provenance
 
@@ -43,6 +45,44 @@ CONTEXT_KEYS = JOB_KEYS + ["eval_episode"]
 LABEL_CONTEXT_KEYS = [
     "train_seed", "scenario_seed", "dispatch_index", "eval_episode",
 ]
+
+
+@dataclass(frozen=True)
+class PrefixMatrixContract:
+    """Exact roster and schema accepted by one prefix-label matrix."""
+
+    label_protocol_version: str
+    matrix_protocol_version: str
+    config: str
+    train_seeds: tuple[int, ...]
+    eval_seeds: tuple[int, ...]
+    decision_indices: tuple[int, ...]
+    offsets_s: tuple[float, ...]
+    checkpoint_ep: int
+    eval_episode: int
+    replay_seed: int
+    checkpoint_dir_for_seed: Callable[[int], Path]
+    required_context_columns: tuple[str, ...] = ()
+
+    def expected_jobs(self) -> list[tuple[int, int, int]]:
+        return list(product(
+            self.train_seeds, self.eval_seeds, self.decision_indices
+        ))
+
+
+V28_CONTRACT = PrefixMatrixContract(
+    label_protocol_version=PROTOCOL_VERSION,
+    matrix_protocol_version=MATRIX_PROTOCOL_VERSION,
+    config=CONFIG,
+    train_seeds=tuple(TRAIN_SEEDS),
+    eval_seeds=tuple(EVAL_SEEDS),
+    decision_indices=tuple(DECISION_INDICES),
+    offsets_s=tuple(OFFSETS_S),
+    checkpoint_ep=CHECKPOINT_EP,
+    eval_episode=EVAL_EPISODE,
+    replay_seed=REPLAY_SEED,
+    checkpoint_dir_for_seed=checkpoint_dir,
+)
 
 
 def bootstrap_ci(values: np.ndarray, *, seed: int, n_boot: int = 10000) -> tuple[float, float]:
@@ -96,8 +136,9 @@ def _validate_job(
     labels: pd.DataFrame,
     *,
     expected_commit: str | None,
+    contract: PrefixMatrixContract = V28_CONTRACT,
 ) -> tuple[tuple[int, int, int], pd.DataFrame, str]:
-    _require(meta.get("protocol_version") == PROTOCOL_VERSION,
+    _require(meta.get("protocol_version") == contract.label_protocol_version,
              f"{meta_path}: wrong protocol")
     _require(meta.get("status") == "mechanical_pass", f"{meta_path}: not a pass")
     _require(meta.get("effect_evidence") is False,
@@ -114,21 +155,27 @@ def _validate_job(
     eval_seed = int(meta.get("scenario_seed"))
     decision_index = int(meta.get("decision_index"))
     key = (train_seed, eval_seed, decision_index)
-    _require(train_seed in TRAIN_SEEDS, f"{meta_path}: unregistered train seed")
-    _require(eval_seed in EVAL_SEEDS, f"{meta_path}: unregistered eval seed")
-    _require(decision_index in DECISION_INDICES,
+    _require(train_seed in contract.train_seeds,
+             f"{meta_path}: unregistered train seed")
+    _require(eval_seed in contract.eval_seeds,
+             f"{meta_path}: unregistered eval seed")
+    _require(decision_index in contract.decision_indices,
              f"{meta_path}: unregistered decision index")
-    _require(int(meta.get("checkpoint_ep")) == CHECKPOINT_EP,
+    _require(int(meta.get("checkpoint_ep")) == contract.checkpoint_ep,
              f"{meta_path}: wrong checkpoint episode")
-    _require(int(meta.get("eval_episode")) == EVAL_EPISODE,
+    _require(int(meta.get("eval_episode")) == contract.eval_episode,
              f"{meta_path}: wrong evaluation episode")
-    _require(int(meta.get("replay_seed")) == REPLAY_SEED,
+    _require(int(meta.get("replay_seed")) == contract.replay_seed,
              f"{meta_path}: wrong replay seed")
-    _require([float(x) for x in meta.get("offsets_s", [])] == OFFSETS_S,
+    _require(
+        [float(x) for x in meta.get("offsets_s", [])]
+        == list(contract.offsets_s),
              f"{meta_path}: wrong candidate offsets")
-    _require(Path(str(meta.get("config", ""))).stem == CONFIG,
+    _require(Path(str(meta.get("config", ""))).stem == contract.config,
              f"{meta_path}: wrong config")
-    _require(Path(str(meta.get("checkpoint_dir", ""))) == checkpoint_dir(train_seed),
+    _require(
+        Path(str(meta.get("checkpoint_dir", "")))
+        == contract.checkpoint_dir_for_seed(train_seed),
              f"{meta_path}: wrong checkpoint directory")
     _require(meta.get("candidate_parameterization") ==
              "same_direction_first_bernstein_knot_v1",
@@ -144,6 +191,7 @@ def _validate_job(
     required_columns = set(LABEL_CONTEXT_KEYS + [
         "candidate_method", "candidate_offset_s", "candidate_action_linf_delta_s",
         "actor_action_json", "candidate_action_json", *OUTCOME_DELTAS.values(),
+        *contract.required_context_columns,
     ])
     missing = sorted(required_columns - set(labels.columns))
     _require(not missing, f"{meta_path}: label columns missing {missing}")
@@ -157,7 +205,7 @@ def _validate_job(
         ("train_seed", train_seed),
         ("scenario_seed", eval_seed),
         ("dispatch_index", decision_index),
-        ("eval_episode", EVAL_EPISODE),
+        ("eval_episode", contract.eval_episode),
     ):
         values = pd.to_numeric(labels[column], errors="coerce")
         _require(values.notna().all() and values.eq(expected).all(),
@@ -166,6 +214,12 @@ def _validate_job(
         values = pd.to_numeric(labels[column], errors="coerce")
         _require(np.isfinite(values.to_numpy(dtype=np.float64)).all(),
                  f"{meta_path}: non-finite {column}")
+    for column in contract.required_context_columns:
+        values = pd.to_numeric(labels[column], errors="coerce")
+        _require(np.isfinite(values.to_numpy(dtype=np.float64)).all(),
+                 f"{meta_path}: non-finite causal context {column}")
+        _require(values.nunique(dropna=False) == 1,
+                 f"{meta_path}: causal context changed across branches: {column}")
     identity = labels[labels["candidate_method"].isin(
         ["actor", "actor_firstknot_0"])]
     for column in OUTCOME_DELTAS.values():
@@ -258,12 +312,13 @@ def aggregate(
     out_dir: Path,
     *,
     expected_commit: str | None = None,
+    contract: PrefixMatrixContract = V28_CONTRACT,
 ) -> dict[str, object]:
     jobs_root = Path(jobs_root).resolve()
     out_dir = Path(out_dir).resolve()
     analysis_commit = _analysis_commit()
     meta_files = sorted(jobs_root.rglob("prefix_counterfactual_meta.json"))
-    expected = set(expected_jobs())
+    expected = set(contract.expected_jobs())
     _require(len(meta_files) == len(expected),
              f"expected {len(expected)} job metadata files, found {len(meta_files)}")
 
@@ -273,7 +328,11 @@ def aggregate(
     for meta_path in meta_files:
         meta, labels = _load_job(meta_path)
         key, validated, commit = _validate_job(
-            meta_path, meta, labels, expected_commit=expected_commit
+            meta_path,
+            meta,
+            labels,
+            expected_commit=expected_commit,
+            contract=contract,
         )
         _require(key not in observed,
                  f"duplicate matrix job {key}: {observed.get(key)} and {meta_path}")
@@ -315,22 +374,23 @@ def aggregate(
         json.dumps(oracle_summary, indent=2, sort_keys=True) + "\n"
     )
     manifest: dict[str, object] = {
-        "protocol_version": MATRIX_PROTOCOL_VERSION,
-        "label_protocol_version": PROTOCOL_VERSION,
+        "protocol_version": contract.matrix_protocol_version,
+        "label_protocol_version": contract.label_protocol_version,
         "status": "strict_complete",
         "strict_complete": True,
         "effect_evidence": "exploratory_labels_only",
         "source_commit": next(iter(commits)),
         "rollout_source_commit": next(iter(commits)),
         "aggregation_source_commit": analysis_commit,
-        "config": CONFIG,
-        "train_seeds": TRAIN_SEEDS,
-        "eval_seeds": EVAL_SEEDS,
-        "decision_indices": DECISION_INDICES,
-        "offsets_s": OFFSETS_S,
-        "checkpoint_ep": CHECKPOINT_EP,
-        "eval_episode": EVAL_EPISODE,
-        "replay_seed": REPLAY_SEED,
+        "config": contract.config,
+        "train_seeds": list(contract.train_seeds),
+        "eval_seeds": list(contract.eval_seeds),
+        "decision_indices": list(contract.decision_indices),
+        "offsets_s": list(contract.offsets_s),
+        "checkpoint_ep": contract.checkpoint_ep,
+        "eval_episode": contract.eval_episode,
+        "replay_seed": contract.replay_seed,
+        "required_context_columns": list(contract.required_context_columns),
         "jobs": len(observed),
         "rows": len(labels),
         "contexts": len(expected),
@@ -338,7 +398,7 @@ def aggregate(
             str(seed): str(labels.loc[
                 labels["train_seed"].eq(seed), "policy_digest"
             ].iloc[0])
-            for seed in TRAIN_SEEDS
+            for seed in contract.train_seeds
         },
         "checks": {
             "exact_cartesian_roster": True,
