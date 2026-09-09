@@ -20,18 +20,37 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_AFC = ROOT / "data" / "external_afc_apc" / "public_afc_mta" / "hourly_ridership.csv"
-DEFAULT_APC = ROOT / "data" / "external_afc_apc" / "public_apc_halifax" / "route_boardings.csv"
+BALANCED_CACHE_ROOT = (
+    ROOT / "data" / "external_afc_apc" / "balanced_profile_cache_v1"
+)
+DEFAULT_AFC = (
+    BALANCED_CACHE_ROOT / "mta_complete_station_day_2024-10-01.csv"
+)
+DEFAULT_APC = (
+    BALANCED_CACHE_ROOT
+    / "halifax_complete_route_days_2026-01-01_2026-01-07.csv"
+)
 DEFAULT_OD = ROOT / "env" / "data" / "passenger_OD.xlsx"
 DEFAULT_OUT = ROOT / "results_freqduet" / "real_afc_apc_profile_audit" / "v1"
+
+AGGREGATE_COLUMNS = {
+    "hour_bin",
+    "demand",
+    "series_count",
+    "profile_units",
+    "source_rows",
+    "first_time",
+    "last_time",
+    "aggregation_scope",
+}
 
 SOURCE_METADATA = {
     "public_afc_mta": {
         "agency": "MTA / New York State Open Data",
         "source_url": "https://data.ny.gov/resource/wujg-7c2s.json",
         "observation": "station-complex hourly entries",
-        "source_kind": "public AFC station-entry count profile",
-        "boundary": "AFC station entries only; not OD geometry, onboard load, alighting, or field deployment outcomes.",
+        "source_kind": "complete-day subset of a bounded public AFC cache",
+        "boundary": "Thirty-nine complete station-complex days from a bounded cache; not a network population estimate, OD geometry, onboard load, alighting, or field deployment outcome.",
     },
     "public_apc_halifax": {
         "agency": "Halifax Transit Open Data",
@@ -40,8 +59,8 @@ SOURCE_METADATA = {
             "Transit_Automated_Passenger_Counts/FeatureServer/0/query"
         ),
         "observation": "route half-hour boardings",
-        "source_kind": "public APC route-boarding count profile",
-        "boundary": "APC route boardings only; not full OD geometry, onboard occupancy, alighting, or field deployment outcomes.",
+        "source_kind": "complete-route subset of a bounded public APC cache",
+        "boundary": "Seven complete cached routes across 37 route-days; not a network population estimate, full OD geometry, onboard occupancy, alighting, or field deployment outcome.",
     },
     "freqduet_od": {
         "agency": "FreqDuet local corridor input table",
@@ -90,6 +109,10 @@ def _coverage_row(
     last_time: str,
 ) -> dict:
     meta = SOURCE_METADATA[source]
+    try:
+        local_file = str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        local_file = str(path.resolve())
     peak = profile.sort_values("demand", ascending=False).head(1)
     peak_hour = float(peak["hour_bin"].iloc[0]) if not peak.empty else math.nan
     peak_value = float(peak["demand"].iloc[0]) if not peak.empty else math.nan
@@ -98,9 +121,13 @@ def _coverage_row(
         "agency": meta["agency"],
         "source_kind": meta["source_kind"],
         "source_url": meta["source_url"],
-        "local_file": str(path.relative_to(ROOT)),
+        "local_file": local_file,
         "rows": int(len(df)),
         "series_count": int(series_count),
+        "profile_units": int(series_count),
+        "aggregate_bins": int(len(profile)),
+        "aggregation_scope": "raw cache rows",
+        "coverage_basis": "raw input",
         "time_bins": int(profile["hour_bin"].nunique()),
         "first_time": first_time,
         "last_time": last_time,
@@ -112,8 +139,49 @@ def _coverage_row(
     }
 
 
+def _load_official_aggregate(
+    path: Path,
+    source: str,
+    df: pd.DataFrame,
+) -> tuple[pd.DataFrame, dict]:
+    missing = AGGREGATE_COLUMNS - set(df.columns)
+    if missing:
+        raise ValueError(f"{path} is missing aggregate columns: {sorted(missing)}")
+    work = df.copy()
+    work["hour_bin"] = pd.to_numeric(work["hour_bin"], errors="coerce")
+    if source == "public_apc_halifax":
+        work["hour_bin"] = work["hour_bin"] % 24.0
+    work["demand"] = pd.to_numeric(work["demand"], errors="coerce")
+    if work[["hour_bin", "demand"]].isna().any().any():
+        raise ValueError(f"{path} contains nonnumeric aggregate values")
+    profile = work.groupby("hour_bin", as_index=False)["demand"].sum()
+    profile = _normalise_profile(profile)
+    profile["source"] = source
+    coverage = _coverage_row(
+        source,
+        path,
+        work,
+        profile,
+        int(pd.to_numeric(work["series_count"]).max()),
+        str(work["first_time"].iloc[0]),
+        str(work["last_time"].iloc[0]),
+    )
+    coverage.update({
+        "rows": int(pd.to_numeric(work["source_rows"]).sum()),
+        "aggregate_bins": int(len(work)),
+        "profile_units": int(pd.to_numeric(work["profile_units"]).max()),
+        "aggregation_scope": "; ".join(
+            sorted(set(work["aggregation_scope"].astype(str)))
+        ),
+        "coverage_basis": "balanced derived cache",
+    })
+    return profile, coverage
+
+
 def load_afc(path: Path) -> tuple[pd.DataFrame, dict]:
     df = pd.read_csv(path)
+    if AGGREGATE_COLUMNS.issubset(df.columns):
+        return _load_official_aggregate(path, "public_afc_mta", df)
     required = {"transit_timestamp", "station_complex_id", "station_complex", "ridership"}
     missing = required - set(df.columns)
     if missing:
@@ -142,6 +210,8 @@ def load_afc(path: Path) -> tuple[pd.DataFrame, dict]:
 
 def load_apc(path: Path) -> tuple[pd.DataFrame, dict]:
     df = pd.read_csv(path)
+    if AGGREGATE_COLUMNS.issubset(df.columns):
+        return _load_official_aggregate(path, "public_apc_halifax", df)
     required = {
         "Route_Number",
         "Route_Name",
@@ -153,7 +223,9 @@ def load_apc(path: Path) -> tuple[pd.DataFrame, dict]:
     if missing:
         raise ValueError(f"{path} is missing APC columns: {sorted(missing)}")
     df["Ridership_Total"] = pd.to_numeric(df["Ridership_Total"], errors="coerce").fillna(0.0)
-    df["Route_Hour"] = pd.to_numeric(df["Route_Hour"], errors="coerce")
+    df["Route_Hour"] = (
+        pd.to_numeric(df["Route_Hour"], errors="coerce") % 24.0
+    )
     df["Route_Date_dt"] = pd.to_datetime(df["Route_Date"], unit="ms", errors="coerce")
     profile = (
         df.groupby("Route_Hour", as_index=False)["Ridership_Total"]

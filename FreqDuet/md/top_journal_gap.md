@@ -1,21 +1,24 @@
 # FreqDuet Top-Journal Gap Backlog
 
-> **2026-09-10 current-best closure:** algorithm selection is now frozen at
+> **2026-09-10 current-best closure:** algorithm selection is frozen at
 > `F_freqduet_protocol_v6_confirmed_main_hiro`. V8 supplies a successful
 > independent 40-episode confirmation; V9 is a mandatory negative 200-episode
-> robustness result. V28-V32 did not pass development gates. The remaining
-> work is paper assembly and an explicit editorial decision on whether a paper
-> with a failed long-training gate is acceptable; the historical V1/composite
-> package cannot replace current V6 evidence.
+> robustness result. V28-V32 did not pass development gates. The current V6
+> package now contains the five planned main figures, source data, captions,
+> exact method/config lineage, and machine-readable QA. The remaining hard gap
+> is scientific rather than packaging: either accept a paper whose long-training
+> gate is not confirmed, or obtain a genuinely new independent confirmation.
+> The historical V1/composite package cannot replace current V6 evidence.
 
-> **2026-08-08 submission hold:** this backlog records the historical V1-V4
+> **2026-08-08 historical submission hold:** this backlog records the historical V1-V4
 > development path. The legacy composite-based paper package is not the active
 > submission result after the corrected V4 passenger-journey audit failed.
-> Protocol V5 in `protocol_v5_journey_feasible_contract_2026-08-08.md` is the
-> only active method/evidence track; old completed items remain provenance and
-> negative-result evidence, not proof that the V5 submission gap is closed.
+> At that date, Protocol V5 in
+> `protocol_v5_journey_feasible_contract_2026-08-08.md` became the active
+> method/evidence track. It is now superseded by the Protocol V6 status above;
+> old completed items remain provenance and negative-result evidence.
 
-Last updated: 2026-06-26 CST
+Last updated: 2026-09-10 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -23,7 +26,52 @@ backlog after `dev_manual.md` and `GPT.md`: every item below needs either a
 completed implementation/experiment, a documented negative result, or an
 explicit paper-scope decision.
 
-## Current Status
+## Active Protocol V6 Status
+
+The authoritative paper bundle is
+`FreqDuet/freqduet/results_freqduet/paper_package/protocol_v6_current_best`.
+Its current non-text package contains:
+
+- Figure 1: exact current method and action semantics;
+- Figure 2: V8 confirmation and V9 robustness result against the named
+  Protocol V6 reference;
+- Figure 3: external service-performance trade-off;
+- Figure 4: paired physical holding, waiting, and overshoot outcomes;
+- Figure 5: data-only external realism evidence from balanced complete subsets
+  of the tracked MTA AFC and Halifax APC caches plus the FreqDuet OD source;
+- editable SVG, PDF, TIFF, review PNG, captions, source CSV/JSON, and manifests.
+
+The current policy is a combined-policy contrast, not an isolated holding-guard
+ablation. It adds compact APC/AVL state and the two-sided incremental regularity
+objective to the named V6 reference. Both policies have the legacy causal
+holding guard disabled; the current policy also has promotion and leakage
+penalty disabled. The exact enabled/disabled contract is resolved from packaged
+YAML lineage and recorded in Figure 1 source data.
+
+Current evidence decision:
+
+- V8, 40 episodes: confirmed headway-CV benefit with no detected journey-time
+  harm under the preregistered gate;
+- V9, 200 episodes: passenger journey improves, but headway-CV uncertainty
+  crosses zero, so the long-training gate is not confirmed;
+- external comparison: competitive service cost and headway regularity against
+  fixed-headway, but worse passenger journey time; better journey time than the
+  weaker rule-holding and rule-MPC baselines;
+- external AFC/APC/OD material supports realism only, not same-day field
+  calibration or real-world treatment-effect claims.
+
+`submission_ready` therefore remains `false`. Figures and reproducibility
+artifacts are complete for the frozen result; the unresolved editorial choice
+is whether this bounded evidence is sufficient for the target venue. A stronger
+claim requires new evidence, not reinterpretation of V1 or further tuning on
+V8/V9.
+
+## Historical V1-V4 Status (Superseded)
+
+Everything below this heading is retained as development provenance and a
+negative-results record. Its old `current`, `main`, promotion, leakage, 60-seed,
+and composite-package statements are not the active Protocol V6 submission
+claim.
 
 FreqDuet is now a paper-package-ready simulation study rather than only a
 working prototype. The current promoted line includes:

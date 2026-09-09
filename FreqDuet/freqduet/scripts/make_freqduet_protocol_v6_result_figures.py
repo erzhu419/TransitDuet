@@ -236,11 +236,15 @@ def confirmation_figure(
     ]
     phase_colors = [TEAL, AMBER]
     metrics = (
-        ("headway_cv", "Headway regularity", "FreqDuet - no guard (headway CV)"),
+        (
+            "headway_cv",
+            "Headway regularity",
+            "Current policy - protocol reference (headway CV)",
+        ),
         (
             "passenger_journey_min",
             "Passenger journey",
-            "FreqDuet - no guard (min)",
+            "Current policy - protocol reference (min)",
         ),
     )
     for index, (ax, (metric, title, xlabel)) in enumerate(zip(axes, metrics)):
@@ -311,9 +315,13 @@ def write_notes(out_dir: Path) -> None:
 
 ## Figure 2 | Independent confirmation and long-training robustness
 
-Points show paired mean differences between FreqDuet and the same-semantics
-no-guard controller; bars show 95% crossed-bootstrap confidence intervals over
-training and evaluation seeds. Lower values favor FreqDuet. V8 contains 24
+Points show paired mean differences between the current policy and the
+Protocol V6 reference config named `F_freqduet_protocol_v6_noguard_hiro`; bars
+show 95% crossed-bootstrap confidence intervals over training and evaluation
+seeds. Both configurations disable the legacy causal holding guard. The
+current policy additionally uses compact APC/AVL context and the two-sided
+departure-regularity objective, so this is a combined-policy comparison rather
+than an isolated guard effect. Lower values favor the current policy. V8 contains 24
 paired rollouts (six training seeds by four untouched evaluation seeds) and
 passed the registered confirmation gate. V9 contains 64 paired rollouts (eight
 by eight); its passenger-journey interval favored FreqDuet, but the headway-CV
@@ -336,7 +344,8 @@ encoded as significance symbols in the figure.
 - Core conclusion: V8 confirms a short-horizon regularity effect with journey
   no-harm; V9 does not confirm the long-training gate; the external comparison
   is a service-regularity versus passenger-journey trade-off.
-- Evidence chain: Figure 2 keeps V8 and V9 separate; Figure 3 uses only the
+- Evidence chain: Figure 2 keeps V8 and V9 separate and labels the historical
+  `noguard` config as the protocol reference; Figure 3 uses only the
   source-identical V9 external comparison.
 - Archetype: quantitative grid with the confirmation panel as the primary
   evidence and external comparisons as validation.
@@ -348,7 +357,8 @@ encoded as significance symbols in the figure.
   `tables/table2_v9_longtrain.csv`, and
   `tables/table3_v9_external_baselines.csv`.
 - Integrity: no pooled V8/V9 estimate, no hidden V9 failure, no transformed
-  endpoint, and no significance symbol substituted for the registered gate.
+  endpoint, no legacy-guard effect claim, and no significance symbol
+  substituted for the registered gate.
 - Exports: editable-text SVG, TrueType-text PDF, 600 dpi LZW TIFF, and 300 dpi
   PNG review render.
 """)

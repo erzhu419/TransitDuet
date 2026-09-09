@@ -1,0 +1,41 @@
+{
+  "claim_boundary": "Complete subsets of bounded public cache files for descriptive demand-shape realism only; not population estimates, matched field calibration, or policy-effect evidence.",
+  "manifest_version": "freqduet-balanced-external-profile-cache-v1",
+  "sources": {
+    "public_afc_mta": {
+      "excluded_rows": 64,
+      "output_file": "mta_complete_station_day_2024-10-01.csv",
+      "raw_rows": 1000,
+      "selected_source_rows": 936,
+      "selected_station_complexes": 39,
+      "selection": "station complex has exactly one observation for each hour 0-23",
+      "service_day": "2024-10-01",
+      "source_file": "data/external_afc_apc/public_afc_mta/hourly_ridership.csv"
+    },
+    "public_apc_halifax": {
+      "excluded_incomplete_routes": [
+        "136"
+      ],
+      "excluded_rows": 21,
+      "output_file": "halifax_complete_route_days_2026-01-01_2026-01-07.csv",
+      "raw_rows": 1000,
+      "selected_route_days": 37,
+      "selected_routes": [
+        "1",
+        "10A",
+        "10B",
+        "10C",
+        "123",
+        "127",
+        "135"
+      ],
+      "selected_source_rows": 979,
+      "selection": "all observed days for routes 1, 10B, and 10C; all weekdays for routes 10A, 123, 127, and 135",
+      "service_days": [
+        "2026-01-01",
+        "2026-01-07"
+      ],
+      "source_file": "data/external_afc_apc/public_apc_halifax/route_boardings.csv"
+    }
+  }
+}

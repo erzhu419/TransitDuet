@@ -278,6 +278,8 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
         self.assertEqual(status["v9_longtrain_status"], "longtrain_not_confirmed")
         results = (out / "manuscript" / "current_best_results.md").read_text()
         self.assertIn("does not outperform fixed headway", results)
+        self.assertIn("combined-policy comparison", results)
+        self.assertIn("configurations disable the legacy", results)
         self.assertIn("must not be relabelled as submission-ready", results)
         self.assertTrue((out / "source_artifacts" / "v8" / "frozen_per_eval.csv").is_file())
         self.assertTrue((out / "README.md").is_file())

@@ -519,8 +519,10 @@ confirmation and the failed V9 long-training gate together.
 
 ## Scientific Status
 
-- V8 confirms lower headway CV than the matched no-guard controller with the
-  registered passenger-journey no-harm condition.
+- V8 confirms lower headway CV than the Protocol V6 reference config named
+  `{NOGUARD_REFERENCE}`, with the registered passenger-journey no-harm
+  condition. Both policies disable the legacy holding guard; the confirmed
+  policy adds compact APC/AVL context and a two-sided regularity objective.
 - V9 does not confirm the preregistered long-training headway effect and is a
   mandatory negative robustness result.
 - The V9 external comparison supports a service-regularity trade-off: FreqDuet
@@ -535,7 +537,7 @@ confirmation and the failed V9 long-training gate together.
 - `manuscript/`: a concise results narrative with the claim boundary.
 - `source_artifacts/`: the small immutable JSON/CSV evidence inputs.
 - `configs/`: the exact verified YAML inheritance chains for the evaluated
-  controller and matched no-guard control.
+  controller and protocol reference.
 - `evidence_status.json` and `package_manifest.json`: machine-readable status
   and inventory.
 
@@ -577,18 +579,23 @@ The canonical controller is `{PAPER_CONTROLLER}`, a naming alias of the V8
 confirmed compact-AVL weight-two policy. In the preregistered 40-episode
 independent confirmation (six training seeds crossed with four untouched
 evaluation seeds; 24 paired rollouts), it reduced headway CV relative to the
-same-semantics no-guard controller by {fmt(v8_cv['delta_candidate_minus_reference'])}
+Protocol V6 reference config named `{NOGUARD_REFERENCE}` by
+{fmt(v8_cv['delta_candidate_minus_reference'])}
 (95% CI [{fmt(v8_cv['ci95_low'])}, {fmt(v8_cv['ci95_high'])}]). Restricted
 passenger journey time changed by {fmt(v8_journey['delta_candidate_minus_reference'])}
 min (95% CI [{fmt(v8_journey['ci95_low'])},
 {fmt(v8_journey['ci95_high'])}]), satisfying the registered journey no-harm
-criterion but not establishing a significant journey-time reduction.
+criterion but not establishing a significant journey-time reduction. Both
+configurations disable the legacy causal holding guard; the confirmed policy
+adds compact APC/AVL context and the two-sided departure-regularity objective.
+The paired contrast is therefore a combined-policy comparison, not an isolated
+guard effect.
 
 ## Long-Training Robustness
 
 In the independent 200-episode V9 matrix (eight training seeds crossed with
 eight evaluation seeds; 64 paired rollouts), the same controller improved
-restricted journey time versus no guard by
+restricted journey time versus the same protocol reference by
 {fmt(v9_journey['delta_candidate_minus_reference'])} min (95% CI
 [{fmt(v9_journey['ci95_low'])}, {fmt(v9_journey['ci95_high'])}]). Its headway-CV
 delta was {fmt(v9_cv['delta_candidate_minus_reference'])} (95% CI
@@ -722,7 +729,7 @@ def build_package(
     v9_commit = v9_matrix["run_git_provenance"]["commit"]
     write_readme(out_dir / "README.md", v8_commit, v9_commit)
     status = {
-        "package_version": "freqduet-protocol-v6-current-best-evidence-v2",
+        "package_version": "freqduet-protocol-v6-current-best-evidence-v3",
         "submission_ready": False,
         "submission_blocker": "v9_longtrain_not_confirmed",
         "protocol": PROTOCOL,

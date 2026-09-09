@@ -22,15 +22,19 @@ its composite endpoint are historical controls, not headline evidence.
 ## Supported Method Statement
 
 FreqDuet V6 assigns causal low-frequency demand state to executable upper-level
-headway planning and high-frequency residual state to arrival-event holding,
-while enforcing a fixed fleet, a zero-total headway budget, causal holding
-feasibility, and passenger-journey credit.
+headway planning and high-frequency residual plus compact APC/AVL state to
+arrival-event holding. The current controller uses a fixed fleet, a rolling
+zero-total headway budget, a discrete holding alphabet, and a two-sided
+departure-regularity reward computed from pre-action evidence. Its legacy
+holding guard, promotion mechanism, and leakage penalty are disabled.
 
 ## Supported Result Claims
 
-- V8 confirms a headway-CV reduction against the matched no-guard controller,
-  with the registered passenger-journey no-harm condition satisfied.
-- In V9, the same controller improves passenger journey relative to no guard,
+- V8 confirms a headway-CV reduction against the Protocol V6 reference config,
+  with the registered passenger-journey no-harm condition satisfied. The
+  contrast bundles compact APC/AVL context and the two-sided regularity
+  objective; it is not an isolated legacy-guard effect.
+- In V9, the same controller improves passenger journey relative to that reference,
   but its preregistered long-run headway effect is not confirmed.
 - Under the V9 external comparison, FreqDuet is more regular and has lower
   restricted service cost than fixed headway, but fixed headway has materially

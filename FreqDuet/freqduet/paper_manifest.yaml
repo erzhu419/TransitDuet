@@ -4,7 +4,7 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-09-10-protocol-v6-current-best-closure
+version: 2026-09-10-protocol-v6-current-best-balanced-realism
 submission_status: hold_pending_protocol_v6
 active_protocol: freqduet-eval-v6
 active_source_commit: 673355cae10640b2737b6d51d541a9685059c342
@@ -45,8 +45,10 @@ current_best_evidence:
   controller: F_freqduet_protocol_v6_confirmed_main_hiro
   confirmed_source_config: F_freqduet_protocol_v6_avlcompact_w2_hiro
   interpretation: >
-    V8 independently confirms a headway-regularity gain versus the matched
-    no-guard controller with journey no-harm. V9 retains a favorable journey
+    V8 independently confirms a headway-regularity gain versus the Protocol V6
+    reference config with journey no-harm. Both policies disable the legacy
+    holding guard; the current policy adds compact APC/AVL context and a
+    two-sided regularity objective. V9 retains a favorable journey
     direction but fails the registered long-training headway gate. The valid
     V9 external comparison shows lower service cost and headway CV than fixed
     headway but materially higher passenger journey time. This is the current
@@ -73,6 +75,20 @@ current_best_evidence:
     status: buildable_draft_evidence
     script: scripts/build_freqduet_protocol_v6_evidence_package.py
     out_dir: results_freqduet/paper_package/protocol_v6_current_best
+    result_figure_script: scripts/make_freqduet_protocol_v6_result_figures.py
+    supporting_figure_script: scripts/make_freqduet_protocol_v6_supporting_figures.py
+    realism_cache:
+      derivation_script: scripts/derive_freqduet_external_profile_balanced_cache.py
+      manifest: data/external_afc_apc/balanced_profile_cache_v1/derivation_manifest.json
+      mta_subset: 39_complete_station_complex_days
+      halifax_subset: 7_routes_37_route_days
+      claim_boundary: bounded_cache_shape_audit_not_population_estimate
+    figures:
+      - fig1_protocol_v6_method
+      - fig2_protocol_v6_confirmation_robustness
+      - fig3_protocol_v6_external_tradeoff
+      - fig4_protocol_v6_physical_outcomes
+      - fig5_protocol_v6_external_realism
 
 historical_reproduction:
   version: 2026-06-26-historical

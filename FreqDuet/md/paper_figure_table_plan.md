@@ -12,7 +12,7 @@ show the successful V8 confirmation and failed V9 long-training gate together.
 
 | Table | Required contents | Claim gate |
 | --- | --- | --- |
-| 1. V8 confirmed effect | confirmed main versus no guard; journey, wait, in-vehicle time, headway CV, holding, denial, unserved, and service cost | Six training x four untouched evaluation seeds |
+| 1. V8 confirmed effect | confirmed main versus the Protocol V6 reference config; journey, wait, in-vehicle time, headway CV, holding, denial, unserved, and service cost | Six training x four untouched evaluation seeds; both configs have the legacy holding guard disabled |
 | 2. V9 long-training robustness | Same metrics and controller at 200 episodes, with gate status shown | Eight training x eight evaluation seeds; negative result visible |
 | 3. V9 external trade-off | confirmed main versus fixed headway, rule holding, and rule MPC | Same source/scenario contract and paired intervals |
 | 4. Evidence decisions | Experiment stage, seed counts, gate decision, and claim eligibility | Prevents V8/V9 or historical V1 pooling |
@@ -23,11 +23,11 @@ The old composite can appear only in an appendix sensitivity table.
 
 | Figure | Panels | Evidence |
 | --- | --- | --- |
-| 1. Method | causal decomposer, LF upper state, HF lower state, exact headway planner, holding guard, passenger-journey credit | Source-bound architecture diagram |
-| 2. Main result | V8 and V9 paired journey/headway-CV deltas versus no guard | `fig2_protocol_v6_confirmation_robustness`; stages remain separate and V9 is marked not confirmed |
+| 1. Method | historical harmonic prior, causal LF/HF split, LF upper state, HF plus compact APC/AVL lower state, executable headway planner, discrete holding, and frozen pre-action two-sided regularity reward | `fig1_protocol_v6_method`; source-bound to the packaged resolved config; legacy holding guard, promotion, and leakage are shown as disabled |
+| 2. Main result | V8 and V9 paired journey/headway-CV deltas versus the Protocol V6 reference | `fig2_protocol_v6_confirmation_robustness`; stages remain separate, V9 is marked not confirmed, and the contrast is not called a legacy-guard effect |
 | 3. Robustness and baselines | Fixed/rule/MPC journey, headway-CV, and service-cost trade-offs | `fig3_protocol_v6_external_tradeoff`; source-identical V9 comparison only |
-| 4. Causal/physical audit | plan budget, effective launch shifts, holding passenger-min, denied-trip/readiness outcomes | Protocol V6 traces only |
-| 5. Generalization/realism | held-out perturbations plus clearly separated AFC/APC/AVL realism panels | No field-effect overclaim |
+| 4. Causal/physical audit | vehicle holding, passenger holding, denied-trip rate, and terminal execution error | `fig4_protocol_v6_physical_outcomes`; paired V8/V9 full-policy effects, not an isolated-module claim |
+| 5. Generalization/realism | separately normalized FreqDuet OD plus balanced complete subsets of the bounded public MTA AFC and Halifax APC caches | `fig5_protocol_v6_external_realism`; descriptive unmatched-source realism audit only, not a population estimate |
 
 ## Appendix Requirements
 

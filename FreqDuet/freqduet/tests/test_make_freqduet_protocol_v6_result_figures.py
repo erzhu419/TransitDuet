@@ -109,6 +109,9 @@ class ProtocolV6ResultFiguresTest(unittest.TestCase):
         self.assertIn(
             "figures/figure_manifest.json", package_manifest["files"]
         )
+        captions = (figures / "captions.md").read_text()
+        self.assertIn("Both configurations disable the legacy", captions)
+        self.assertIn("combined-policy comparison", captions)
 
     def test_rejects_hidden_v9_failure(self) -> None:
         decisions = self.package / "tables" / "table4_evidence_decisions.csv"
