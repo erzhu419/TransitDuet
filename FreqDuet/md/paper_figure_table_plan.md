@@ -24,8 +24,8 @@ The old composite can appear only in an appendix sensitivity table.
 | Figure | Panels | Evidence |
 | --- | --- | --- |
 | 1. Method | causal decomposer, LF upper state, HF lower state, exact headway planner, holding guard, passenger-journey credit | Source-bound architecture diagram |
-| 2. Main result | V8 paired journey and headway-CV deltas versus no guard | V8 independent confirmation only |
-| 3. Robustness and baselines | V9 long-training result beside fixed/rule/MPC trade-offs | V9, visibly marked as failed long-training gate |
+| 2. Main result | V8 and V9 paired journey/headway-CV deltas versus no guard | `fig2_protocol_v6_confirmation_robustness`; stages remain separate and V9 is marked not confirmed |
+| 3. Robustness and baselines | Fixed/rule/MPC journey, headway-CV, and service-cost trade-offs | `fig3_protocol_v6_external_tradeoff`; source-identical V9 comparison only |
 | 4. Causal/physical audit | plan budget, effective launch shifts, holding passenger-min, denied-trip/readiness outcomes | Protocol V6 traces only |
 | 5. Generalization/realism | held-out perturbations plus clearly separated AFC/APC/AVL realism panels | No field-effect overclaim |
 

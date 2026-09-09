@@ -627,6 +627,24 @@ not confirm; it must not be relabelled as submission-ready.
     path.write_text(text)
 
 
+def refresh_package_manifest(out_dir: Path) -> dict[str, Any]:
+    status = read_json(out_dir / "evidence_status.json")
+    files = sorted(
+        str(path.relative_to(out_dir))
+        for path in out_dir.rglob("*")
+        if path.is_file() and path.name != "package_manifest.json"
+    )
+    package_manifest = {
+        **status,
+        "payload_file_count": len(files),
+        "files": files,
+    }
+    (out_dir / "package_manifest.json").write_text(
+        json.dumps(package_manifest, indent=2, sort_keys=True) + "\n"
+    )
+    return package_manifest
+
+
 def build_package(
     v8_dir: Path,
     v9_dir: Path,
@@ -723,20 +741,7 @@ def build_package(
     (out_dir / "evidence_status.json").write_text(
         json.dumps(status, indent=2, sort_keys=True) + "\n"
     )
-    files = sorted(
-        str(path.relative_to(out_dir))
-        for path in out_dir.rglob("*")
-        if path.is_file()
-    )
-    package_manifest = {
-        **status,
-        "payload_file_count": len(files),
-        "files": files,
-    }
-    (out_dir / "package_manifest.json").write_text(
-        json.dumps(package_manifest, indent=2, sort_keys=True) + "\n"
-    )
-    return package_manifest
+    return refresh_package_manifest(out_dir)
 
 
 def main() -> None:

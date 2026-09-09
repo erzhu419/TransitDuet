@@ -4027,6 +4027,7 @@ paper_scripts:
   - scripts/download_mta_bus_time_offline_cache.py
   - scripts/build_freqduet_paper_package.py
   - scripts/build_freqduet_protocol_v6_evidence_package.py
+  - scripts/make_freqduet_protocol_v6_result_figures.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
   - scripts/submit_freqduet_broad_generalization_scheduleurm.py
@@ -4087,6 +4088,17 @@ paper_packages:
       - tables/table4_evidence_decisions.csv
       - manuscript/current_best_results.md
       - configs/config_snapshot_manifest.json
+      - figures/figure_manifest.json
+      - figures/captions.md
+      - figures/figure_qa.md
+      - figures/fig2_protocol_v6_confirmation_robustness.svg
+      - figures/fig2_protocol_v6_confirmation_robustness.pdf
+      - figures/fig2_protocol_v6_confirmation_robustness.tiff
+      - figures/fig2_protocol_v6_confirmation_robustness.png
+      - figures/fig3_protocol_v6_external_tradeoff.svg
+      - figures/fig3_protocol_v6_external_tradeoff.pdf
+      - figures/fig3_protocol_v6_external_tradeoff.tiff
+      - figures/fig3_protocol_v6_external_tradeoff.png
 
   historical_composite_v1:
     status: historical_60seed_composite_not_current_effect_evidence

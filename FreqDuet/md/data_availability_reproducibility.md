@@ -96,7 +96,8 @@ Protocol V6 effect tables.
 | Persistent identifier | Pending | Deposit only after the final manuscript scope is frozen. |
 | File manifest | Present | The Protocol V6 builder writes `package_manifest.json`. |
 | Current result source data | Present | V8/V9 seed-level CSV and decision JSON artifacts are tracked and packaged. |
-| Final figure source data | Pending | Build final Protocol V6 panels from the normalized tables. |
+| Current result figure source data | Present | Figures 2 and 3 use the normalized V8/V9 tables and include editable exports and QA notes. |
+| Complete final figure package | Pending | Rebind or redraw the method, mechanism, and realism panels to the final V6 scope. |
 | Exact configs | Present | The builder verifies and copies the relevant inheritance chains. |
 | Scripts | Source-bound | Exact source commits and canonical entry points are recorded; final release archive is pending. |
 | External public data provenance | Present | README files and source coverage CSVs document public endpoints. |
