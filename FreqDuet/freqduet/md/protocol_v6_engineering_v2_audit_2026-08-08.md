@@ -3482,3 +3482,45 @@ promote the module. If exact prefix replay fails, or if a deployable model does
 not improve over its actor baseline without worsening CV/service cost, V28 is a
 recorded negative result and the learned Phase-4 value layer remains out of the
 paper mainline.
+
+The mechanical smoke was executed from clean source
+`6c05dba9525c0a949a38d916ba00633f6b09af36` as scheduler task `t90425` on
+`node003`. It completed all seven full-episode branches in 799.7 seconds of
+recorded audit time with `mechanical_pass`: actor-repeat prefix and episode
+identity, every candidate prefix, zero-offset episode identity, policy
+checkpoint, global and isolated
+RNG state, terminal-dispatch preservation, and nonzero action response all
+passed exactly. The smoke remains tool-validity evidence only; its outcome
+deltas are not inspected for action selection or effect claims.
+
+Before opening the exploratory labels, scheduler task `t90443` read only the
+existing V27 aggregate and established that every one of its 128 frozen
+evaluation rows contains exactly 88 genuine upper planning decisions. The V28
+exploratory roster is therefore frozen as the Cartesian product of training
+seeds `31013,31031,31057,31081`, held-out scenario seeds
+`65011,65029,65047,65071`, and decision indices
+`4,16,28,40,52,64,76,84`. These eight indices span the service day while
+excluding the final four decisions with little remaining outcome horizon. Each
+of the 128 contexts runs an unchanged actor reference, an unchanged repeat, and
+actor-relative first-knot offsets `[-30,-15,0,+15,+30]`; this is 896 complete
+episode branches and 768 retained label rows. No decision index, offset,
+checkpoint, seed, target, or model family may change after opening the labels.
+
+The deployable model is a ridge regressor using only the causal `s_upper`, actor
+action, candidate action, their difference, and state-action interactions. The
+identity duplicate `actor_firstknot_0` is retained for the mechanical aggregate
+and removed before fitting. Model assessment holds out one training seed at a
+time. Within each outer fold, ridge penalties `[0.1,1,10,100]` and predicted
+improvement margins `[0,0.0005,0.001,0.002]` are selected using only the three
+outer-training seeds. Configuration/domain names, seed identity, future trace
+statistics, and outcome-derived features are prohibited.
+
+The offline gate can only authorize a separately frozen untouched-scenario
+online screen. It requires a block-bootstrap upper confidence limit below zero
+for restricted service cost, negative mean delta in at least three of four
+held-out training-seed folds, improvement over a global action-mean selector,
+and at least 5% non-actor selections. No-harm limits are journey-time CI high at
+most `+0.10` minutes, headway-CV mean at most zero and CI high at most `+0.003`,
+fleet-overshoot CI high at most `+0.25`, no completion reduction, and no
+unserved-passenger increase. Failure is retained as a V28 negative result; no
+post hoc roster, model-family, or threshold search follows it.
