@@ -3738,3 +3738,55 @@ indices `6,18,30,42,54,66,78,86`, evaluation episode `400000`, and replay seed
 found no prior use of this roster. No confirmation may run unless the unchanged
 nested V31 development gate passes; a failure closes V31 without searching a
 new threshold or confirmation roster.
+
+### Engineering-v31 pairwise multi-head outcome (2026-09-09)
+
+Server task `t91765` passed all 28 focused V28--V31 tests from immutable commit
+`aacdd24cf3aa577ace8a1682033e97650321aad0`. The preregistered development task
+`t91777` then completed on `node001` and returned `development_no_pass`. Two of
+four outer folds had no inner configuration satisfying the registered joint
+criteria and therefore failed closed to the actor; the selected feature
+dimensions were `[0,20,0,8]`. Across all 448 contexts, V31 selected the actor
+367 times, `-30 s` 5 times, `-15 s` 21 times, `+15 s` 45 times, and `+30 s` 10
+times. The full-data inner procedure also had no feasible configuration.
+
+V31 preserved safety but lost the strong default. Restricted service-cost
+delta versus actor was `-0.00006890`, CI
+`[-0.00031748,+0.00008431]`; its paired difference versus global `+30 s` was
+`+0.00020291`, CI `[-0.00013393,+0.00061308]`. Only one of four policy-seed
+folds improved materially, while two actor-fallback folds were exactly zero.
+The unserved delta was exactly zero and the remaining no-harm checks passed.
+The failed checks were outer/final selector feasibility, crossed-zero service
+effect, three-seed directional consistency, and both `+30 s` comparisons. V31
+is closed and its confirmation roster is unused.
+
+The failure identifies an avoidable duplication in the V31 formulation.
+`service_cost_restricted` already combines normalized restricted wait, fleet
+overshoot, headway CV, five-times unserved rate, and five-times incomplete
+service. V31 learned that reliability-aware composite outcome and then imposed
+separate pointwise zero-sign headway/unserved predictions. At the observed
+near-zero risk scale, this second layer rejected the default and caused 81.9%
+actor fallback. The aggregate outer safety gate was not the problem.
+
+### Engineering-v32 pairwise composite preregistration (2026-09-09)
+
+V32 retains the V31 matched candidate-minus-`+30 s` service target, full causal
+context, fold-local PCA ranks `[0,1,2,4,8]`, ridge grid, service-margin grid,
+and exact `+30 s` default. It removes the two pointwise risk heads. Reliability
+is represented once by the registered composite service outcome; inner
+policy-seed holdout still requires negative paired service difference versus
+`+30 s`, nonpositive aggregate headway and unserved deltas versus actor, at
+least 5% default overrides, and at least 5% interior actions. If no inner
+configuration is feasible, the fold retains `+30 s`. The complete V30/V31
+outer effect and no-harm gate remains unchanged. Thus V32 changes hard
+per-context rejection into a soft reliability objective without relaxing the
+scientific acceptance criteria or adding a post-policy guard.
+
+V30 remains the designated development dataset. Before V32 is fitted, a new
+single-use confirmation roster is frozen to policy seeds
+`36013,36031,36057,36081`, scenario seeds `71011,71029,71047,71071`, decision
+indices `12,24,36,48,60,72,81,87`, evaluation episode `500000`, and replay seed
+`32001`. Policy, scenario, and combined decision contexts are disjoint from all
+V28--V31 rosters, and exact source/scheduler searches found no use of these new
+policy or scenario seeds. Confirmation is authorized only by an unchanged V32
+development pass.
