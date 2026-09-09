@@ -3524,3 +3524,63 @@ most `+0.10` minutes, headway-CV mean at most zero and CI high at most `+0.003`,
 fleet-overshoot CI high at most `+0.25`, no completion reduction, and no
 unserved-passenger increase. Failure is retained as a V28 negative result; no
 post hoc roster, model-family, or threshold search follows it.
+
+### Engineering-v28 matched prefix-replay outcome (2026-09-09)
+
+All 128 registered context jobs completed on `node001--node006`; their task
+identifiers are interleaved from `t90764` through `t90898`. The immutable
+rollout source is
+`db2b81cc5e89f8cd3386a793a6f3d5b13ba61219`. Strict server-side aggregation
+task `t90943` accepted the exact 4-training-seed by 4-scenario-seed by
+8-decision Cartesian roster, all mechanical checks, one policy digest per
+training seed, both identity branches, finite outcomes, executable terminal
+dispatch, and monotone decision times. The accepted matrix contains 128 causal
+contexts and 768 retained rows. No result CSV or checkpoint was copied to the
+local workspace.
+
+The first aggregation attempt (`t90916`, with automatic retries `t90918` and
+`t90919`) failed before effect estimation because the generated label schema
+names the causal event `dispatch_index`, while the new aggregate expected the
+metadata name `decision_index`. The correction explicitly validates equality
+between those fields and adds the canonical model column only after validation;
+it does not alter any rollout or label. The corrected aggregation and fit code
+is clean commit `2d9bf98282e304985724f70fd6e4d2831648dced`, separately recorded
+from the rollout source in the matrix and model artifacts. Server regression
+task `t90937` passed all 46 focused prefix, configuration, and exact-resume
+tests before aggregation.
+
+The preregistered nested causal ridge gate returned `no_pass`. Its selected
+policy improves restricted service cost relative to the unchanged actor by
+`-0.00025821` on average across the 16 training-seed/scenario blocks, with
+95% block-bootstrap CI `[-0.00052092,-0.00000319]`. All four held-out
+training-seed means are negative (`-0.00029278`, `-0.00019606`,
+`-0.00026194`, and `-0.00028206`), and the model overrides the actor in
+63.28% of the 128 contexts. Journey time, headway CV, fleet overshoot,
+completion, and unserved-passenger checks all satisfy their registered no-harm
+limits.
+
+The sole failed gate is `beats_global_action_mean`. Training-seed-held-out
+global selection chooses `actor_firstknot_p30` in every context and has mean
+restricted-service-cost delta `-0.00025855`, only `0.00000034` lower than the
+nested model. Its CI `[-0.00056270,+0.00004453]` crosses zero, whereas the
+nested model's CI does not, but the registered comparison is the mean and is
+therefore failed exactly as written. V28 does not authorize an untouched-seed
+online screen and is not promoted into the controller or paper mainline.
+
+The exploratory oracle remains useful only as development evidence. Selecting
+the realized best candidate at each context gives mean restricted-service-cost
+delta `-0.00093427`, CI `[-0.00119096,-0.00069433]`, with simultaneous mean
+improvements in journey time, headway CV, and holding and no fleet, completion,
+or unserved-passenger change. It selects both interior offsets (`-15` in 15
+contexts and `+15` in 31) as well as both extremes. The current ridge response
+is piecewise linear in signed action magnitude and selects only the actor,
+`-30`, or `+30`; it cannot represent this observed interior action structure
+well enough to beat the global `+30` rule.
+
+Any successor is a new development branch, not a V28 retune. A defensible V29
+would add a preregistered low-capacity nonlinear signed-magnitude response (for
+example quadratic action-response and causal state interaction terms), use V28
+only as development data, and adjudicate once on fresh policy/scenario/decision
+contexts. Until such independent evidence exists, the correct conclusion is:
+matched counterfactual labels reveal actionable heterogeneity, but this causal
+ridge selector does not add value over the best global intervention.
