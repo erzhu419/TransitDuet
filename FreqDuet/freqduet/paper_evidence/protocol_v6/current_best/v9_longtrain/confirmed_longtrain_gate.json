@@ -1,0 +1,172 @@
+{
+  "base_confirmation_result": {
+    "audit_stage": "confirmation",
+    "candidate_results": [
+      {
+        "candidate": "F_freqduet_protocol_v6_confirmed_main_hiro",
+        "denied_dispatch_delta_vs_reference": -75868.078125,
+        "evidence_coverage_min": 1.0,
+        "execution_adjustment_abs_max_s": 0.0,
+        "follower_coverage_min": 0.83634615,
+        "gates": {
+          "denied_dispatch_gain_preserved": true,
+          "evidence_reported_every_rollout": true,
+          "follower_coverage_every_rollout": true,
+          "headway_cv_improvement": false,
+          "headway_cv_improves_over_matched_context": false,
+          "holding_gain_preserved": true,
+          "journey_better_than_hard_main": true,
+          "journey_within_matched_context_margin": true,
+          "journey_within_reference_margin": true,
+          "matched_context_pairs_complete": true,
+          "paired_rollouts_complete": true,
+          "zero_execution_adjustment": true
+        },
+        "headway_cv_delta_ci_high": 0.0057246484374999,
+        "headway_cv_delta_ci_low": -0.0278480859375,
+        "headway_cv_delta_vs_reference": -0.00910625,
+        "holding_delta_vs_reference_vehicle_s": -9862.890625,
+        "journey_delta_ci_high": -0.5363549015625004,
+        "journey_delta_ci_low": -2.2044371367187496,
+        "journey_delta_vs_reference_min": -1.2423815781249998,
+        "matched_context_deltas": {
+          "headway_cv_delta": -0.007765625000000001,
+          "journey_delta_min": -0.7689948437499997,
+          "n_pairs": 64,
+          "reference": "F_freqduet_protocol_v6_avlcompact_hiro"
+        },
+        "n_rollouts": 64,
+        "passes": false,
+        "regularity_loss_improvement_mean": 0.0065518409375,
+        "regularity_loss_improvement_min": 0.005532209999999996
+      }
+    ],
+    "denied_dispatch_reversal_limit": 224408.5625,
+    "expected_candidate_rollouts": 64,
+    "gate_version": "freqduet-v6-incremental-selection-v3",
+    "holding_reversal_limit": 85010.703125,
+    "input_artifacts": {
+      "manifest": {
+        "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/matrix_manifest.json",
+        "sha256": "272abd5aa35ccf3202803fa29605b81ed416c3217cfca67ba6f39e4a6ba9af04",
+        "size_bytes": 84765
+      },
+      "paired": {
+        "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/frozen_paired_deltas.csv",
+        "sha256": "070719eb5f2da9dfc964dfec2033bcbc89bd790b9963c9ada4fbc0789f2b1f0b",
+        "size_bytes": 25133
+      },
+      "per_eval": {
+        "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/frozen_per_eval.csv",
+        "sha256": "60ef82f3a650fa72faac4af4df0a9d56fa37e87d6ec8cc2bc2c1cdfac0adbc5f",
+        "size_bytes": 734061
+      },
+      "summary": {
+        "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/frozen_summary.csv",
+        "sha256": "dfcc293ad15b75a0336fd31f5972e2a1dd68e3bb7af7960db26a3d0bfc4eeea9",
+        "size_bytes": 12081
+      }
+    },
+    "main": "F_freqduet_protocol_v6_main_hiro",
+    "main_values": {
+      "denied_dispatch": 221876.03125,
+      "headway_cv": 0.193896875,
+      "holding": 83094.765625,
+      "journey": 21.370276500000003
+    },
+    "matched_context": "F_freqduet_protocol_v6_avlcompact_hiro",
+    "matrix_provenance": {
+      "launch_analysis_sha256": "47b7745bc4ede91944f14be83189e4a422efcbf5d5766e434f20be2cec9ff46b",
+      "protocol_version": "freqduet-eval-v6",
+      "run_git_provenance": {
+        "commit": "673355cae10640b2737b6d51d541a9685059c342",
+        "tracked_dirty": false
+      },
+      "scenario_contract_sha256": "45f381a5d79c0cc5ab3e8257c2cf870af62bf076d46563c348eb1194bc116f17",
+      "source_fingerprint_sha256": "d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada"
+    },
+    "passing_candidates": [],
+    "reference": "F_freqduet_protocol_v6_noguard_hiro",
+    "reference_values": {
+      "denied_dispatch": 224408.5625,
+      "headway_cv": 0.222178125,
+      "holding": 85010.703125,
+      "journey": 21.591539515625
+    },
+    "selected_candidate": null,
+    "status": "no_pass",
+    "strict_checks": {
+      "common_random_numbers_verified": true,
+      "confirmation_label_matches_stage": true,
+      "expected_rollout_count": true,
+      "expected_stage": true,
+      "run_manifests_verified": true,
+      "strict_complete": true,
+      "unique_rollout_keys": true
+    },
+    "thresholds": {
+      "max_gain_reversal_fraction": 0.1,
+      "max_journey_regression_min": 0.15,
+      "max_journey_regression_vs_context_min": 0.15,
+      "min_follower_coverage": 0.5,
+      "min_headway_cv_improvement": 0.02,
+      "min_headway_cv_improvement_vs_context": 0.01
+    }
+  },
+  "candidate": "F_freqduet_protocol_v6_confirmed_main_hiro",
+  "gate_version": "freqduet-v6-confirmed-longtrain-v1",
+  "headway_cv_delta_by_train_seed": {
+    "12011": -0.027900000000000005,
+    "12037": -0.005112500000000006,
+    "12049": -0.008912499999999997,
+    "12071": -0.006150000000000003,
+    "12097": -0.011737499999999998,
+    "12109": -0.010862500000000008,
+    "12143": 0.004525000000000008,
+    "12161": -0.0067000000000000046
+  },
+  "headway_cv_negative_train_seed_fraction": 0.875,
+  "input_artifacts": {
+    "manifest": {
+      "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/matrix_manifest.json",
+      "sha256": "272abd5aa35ccf3202803fa29605b81ed416c3217cfca67ba6f39e4a6ba9af04"
+    },
+    "per_eval": {
+      "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v9-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_confirmed_main_ep200_s8_e8_v9/combined_summary/frozen_per_eval.csv",
+      "sha256": "60ef82f3a650fa72faac4af4df0a9d56fa37e87d6ec8cc2bc2c1cdfac0adbc5f"
+    }
+  },
+  "lineage_checks": {
+    "eval_seeds_disjoint_from_parent": true,
+    "exact_configs": true,
+    "exact_eval_seeds": true,
+    "exact_train_seeds": true,
+    "expected_rollout_count": true,
+    "longtrain_200_episodes": true,
+    "longtrain_is_independent_confirmation": true,
+    "longtrain_source_is_clean": true,
+    "model_source_fingerprint_unchanged": true,
+    "parent_gate_hash_locked": true,
+    "parent_primary_confirmed": true,
+    "scenario_contract_unchanged": true,
+    "train_seeds_disjoint_from_parent": true
+  },
+  "longtrain_claim_eligible": false,
+  "longtrain_gates": {
+    "base_confirmation_gate_passes": false,
+    "headway_cv_ci_excludes_zero": false,
+    "headway_cv_direction_consistent": true,
+    "journey_ci_is_noninferior": true
+  },
+  "matched_context": "F_freqduet_protocol_v6_avlcompact_hiro",
+  "parent_gate": {
+    "path": "/home/erzhu419/mine_code/FreqDuet-v6-engineering-v8-snapshot/FreqDuet/freqduet/results_freqduet/protocol_v6_compact_primary_confirm_ep40_s6_e4_v8/combined_summary/confirmation_gate.json",
+    "sha256": "a72da292c10a990552db8291a43f92c0c80097217db30153ecfbdee5a1ae8cd6"
+  },
+  "reference": "F_freqduet_protocol_v6_noguard_hiro",
+  "status": "longtrain_not_confirmed",
+  "thresholds": {
+    "max_journey_ci_high_min": 0.15,
+    "min_negative_train_seed_fraction": 0.75
+  }
+}

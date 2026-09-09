@@ -1,6 +1,6 @@
 # FreqDuet Data Availability And Reproducibility Note
 
-Last updated: 2026-06-26 CST
+Last updated: 2026-09-10 CST
 
 This note is written as a paper-facing Data Availability and reproducibility
 draft. It separates generated FreqDuet artifacts, reused public data, local
@@ -8,13 +8,21 @@ external caches, and unsupported field-deployment claims.
 
 ## Data Availability
 
-The seed-level simulation outputs, paired-delta tables, figure source data,
-configuration snapshots, scripts, manifest files, and negative-result appendix
-supporting the current FreqDuet paper package are assembled under
-`results_freqduet/paper_package/current`. Before submission, this package
-should be deposited in a durable repository such as Zenodo, Dryad, Figshare, or
-an institutional repository, and the placeholder `[repository DOI]` should be
-replaced with the assigned persistent identifier.
+The small immutable V8 confirmation, V9 long-training, and V9 external-baseline
+artifacts supporting the current result are tracked under
+`freqduet/paper_evidence/protocol_v6/current_best`. Running
+`scripts/build_freqduet_protocol_v6_evidence_package.py` validates their
+protocol, source/scenario identity, common-random-number status, artifact
+bindings, and config fingerprints, then assembles the paper-facing draft under
+`results_freqduet/paper_package/protocol_v6_current_best`.
+
+That draft package records `submission_ready: false`: V8 independently confirms
+the 40-episode headway-regularity effect with passenger-journey no-harm, while
+V9 fails the registered 200-episode long-training headway gate. The older
+`results_freqduet/paper_package/current` directory is the historical V1
+composite package and is not current effect evidence. A final release should be
+deposited in a durable repository and assigned a persistent identifier only
+after the manuscript scope and final figure package are fixed.
 
 Public datasets reused in the realism audits were obtained from the following
 sources. MTA hourly station-entry AFC profiles were downloaded from the New
@@ -47,54 +55,50 @@ matrix or field validation.
 
 ## Code Availability
 
-The paper-facing code paths are listed in `paper_manifest.yaml` and copied into
-`results_freqduet/paper_package/current/scripts`. The canonical entry points are:
+The paper-facing code paths and source commits are listed in
+`paper_manifest.yaml`. The canonical Protocol V6 evidence entry points are:
 
-- `scripts/run_freqduet_ablation.py`
+- `scripts/run_freqduet_protocol_v2_matrix.py`
+- `scripts/decide_freqduet_protocol_v6_screen.py`
 - `scripts/run_freqduet_external_baselines.py`
-- `scripts/summarize_freqduet_paper_matrix.py`
-- `scripts/summarize_freqduet_broad_generalization.py`
-- `scripts/compare_freqduet_external_baseline.py`
-- `scripts/make_freqduet_decomposer_figures.py`
-- `scripts/make_freqduet_mechanism_figures.py`
-- `scripts/audit_external_afc_apc_profiles.py`
-- `scripts/audit_external_od_onboard_truth.py`
-- `scripts/audit_mbta_same_network_calibration.py`
-- `scripts/audit_route_day_heldout_readiness.py`
-- `scripts/curate_freqduet_paper_panels.py`
-- `scripts/build_freqduet_paper_package.py`
+- `scripts/compare_freqduet_external_frozen.py`
+- `scripts/build_freqduet_protocol_v6_evidence_package.py`
 
-The paper package also includes exact config snapshots for the canonical
-ablation, broad generalization, paper-main, and trace diagnostics.
+The current builder includes the exact verified config inheritance chains for
+the confirmed controller and matched no-guard comparator. Historical
+mechanism, figure, realism-audit, and composite-package scripts remain listed
+in the manifest, but their outputs are not silently promoted into the current
+Protocol V6 effect tables.
 
 ## Repository Actions Before Submission
 
-1. Deposit `results_freqduet/paper_package/current` as a versioned release with
-   a persistent DOI.
+1. Resolve the manuscript-level decision created by the failed V9
+   long-training gate, then freeze the final claims and package version.
 
-2. Include a README and file manifest from the paper package. The package
-   already contains `package_manifest.json`, `paper_manifest.yaml`, curated
-   panel manifests, source-data CSVs, scripts, and config snapshots.
+2. Assemble the final figure panels from Protocol V6 source tables and add the
+   final environment specification; the current evidence bundle already
+   contains a README, file manifest, source CSV/JSON files, and exact configs.
 
-3. If the target journal requires raw external data redistribution, verify the
+3. Deposit the frozen release in a durable repository and replace
+   `[repository DOI]` with its persistent identifier.
+
+4. If the target journal requires raw external data redistribution, verify the
    licence for each public source. Otherwise cite the original public sources
    and deposit only the derived FreqDuet audit tables plus processing scripts.
 
-4. Keep MTA API credentials out of all archives. Only the redacted offline
+5. Keep MTA API credentials out of all archives. Only the redacted offline
    cache manifests and parsed CSVs should be deposited.
-
-5. Record software/environment details for the final run environment if the
-   journal requests a full computational reproducibility package.
 
 ## FAIR And Risk Audit
 
 | Item | Status | Action |
 | --- | --- | --- |
-| Persistent identifier | Pending | Deposit paper package and replace `[repository DOI]`. |
-| File manifest | Present | `package_manifest.json` and curation manifests exist. |
-| Figure source data | Present | Copied under package figure `source_data/` directories. |
-| Exact configs | Present | Copied under package `configs/`. |
-| Scripts | Present | Copied under package `scripts/`. |
+| Persistent identifier | Pending | Deposit only after the final manuscript scope is frozen. |
+| File manifest | Present | The Protocol V6 builder writes `package_manifest.json`. |
+| Current result source data | Present | V8/V9 seed-level CSV and decision JSON artifacts are tracked and packaged. |
+| Final figure source data | Pending | Build final Protocol V6 panels from the normalized tables. |
+| Exact configs | Present | The builder verifies and copies the relevant inheritance chains. |
+| Scripts | Source-bound | Exact source commits and canonical entry points are recorded; final release archive is pending. |
 | External public data provenance | Present | README files and source coverage CSVs document public endpoints. |
 | MTA API key exposure | Controlled | Key is redacted and not written to disk. |
 | Large third-party raw MBTA file | Local external cache | Deposit derived tables or cite source; do not silently redistribute if licence is unclear. |
@@ -109,3 +113,5 @@ ablation, broad generalization, paper-main, and trace diagnostics.
 - Confirm whether the large MBTA raw CSV should be redistributed, cited only,
   or represented by derived tables plus processing scripts.
 - Confirm whether a separate Code Availability section is required.
+- Confirm whether the transparent V8-positive/V9-negative result scope is
+  suitable for the selected journal before labelling any package final.

@@ -1,5 +1,13 @@
 # FreqDuet Top-Journal Gap Backlog
 
+> **2026-09-10 current-best closure:** algorithm selection is now frozen at
+> `F_freqduet_protocol_v6_confirmed_main_hiro`. V8 supplies a successful
+> independent 40-episode confirmation; V9 is a mandatory negative 200-episode
+> robustness result. V28-V32 did not pass development gates. The remaining
+> work is paper assembly and an explicit editorial decision on whether a paper
+> with a failed long-training gate is acceptable; the historical V1/composite
+> package cannot replace current V6 evidence.
+
 > **2026-08-08 submission hold:** this backlog records the historical V1-V4
 > development path. The legacy composite-based paper package is not the active
 > submission result after the corrected V4 passenger-journey audit failed.

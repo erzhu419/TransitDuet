@@ -1,73 +1,42 @@
 # FreqDuet Paper Effect Status
 
-Last updated: 2026-08-08 CST
+Last updated: 2026-09-10 CST
+
+## Current Result
+
+The current best physically and causally valid controller is
+`F_freqduet_protocol_v6_confirmed_main_hiro`. It is an exact naming alias of the
+compact-AVL, two-sided regularity, weight-two policy confirmed in V8. V28-V32
+did not pass their development gates and do not alter this controller.
+
+V8 independently confirmed the 40-episode primary result on six training seeds
+crossed with four untouched evaluation seeds. Relative to the same-semantics
+no-guard controller, headway CV changed by `-0.02231`, 95% CI
+`[-0.03805,-0.00750]`. Restricted passenger journey changed by `-0.26266 min`,
+95% CI `[-0.83661,+0.17494]`, satisfying the registered no-harm criterion but
+not establishing a significant journey reduction.
+
+## Required Negative Result
+
+The independent 200-episode V9 matrix did not confirm the registered long-run
+headway effect. Journey versus no guard improved by `-1.24238 min`, 95% CI
+`[-2.20444,-0.53635]`, but headway CV changed by only `-0.00911`, 95% CI
+`[-0.02785,+0.00572]`. The gate status is `longtrain_not_confirmed`.
+
+The source-identical V9 external comparison is a trade-off result. Relative to
+fixed headway, FreqDuet reduced restricted service cost by `-0.12194` and
+headway CV by `-0.21928`, but increased restricted passenger journey by
+`+2.47025 min`, 95% CI `[+1.87431,+3.18799]`. It reduced journey time relative
+to rule holding by `-3.22404 min` and rule MPC by `-26.51111 min`.
 
 ## Submission Status
 
-**HOLD.** The June paper package is historical evidence from the legacy
-service-cost objective. It is not the active submission result.
+**HOLD.** The evidence is suitable for drafting a transparent result section,
+but the registered 200-episode gate failed. The manuscript may report the V8
+confirmed effect together with the V9 robustness failure; it may not describe
+the controller as long-run confirmed or as outperforming fixed headway on
+passenger journey time.
 
-The corrected V4 crossed experiment showed that the old learned controller can
-look competitive under the service-cost composite while producing excessive
-holding, readiness delay, and denied trips. That protocol therefore failed the
-passenger-journey claim. The locked result and its evidence path are documented
-in `protocol_v4_selection_outcome_2026-08-08.md`.
-
-Protocol V5 is the only active candidate. Its primary endpoint is
-`restricted_total_journey_horizon_min`; fixed fleet, exact timetable execution,
-causal holding feasibility, passenger-weighted holding cost, and normalized
-safety endpoints are mandatory parts of the comparison.
-
-## Current Evidence State
-
-### Historical evidence, not submission evidence
-
-- The old paper-main was statistically close to fixed-headway under the legacy
-  composite and better than rule-holding/rule-MPC on that same composite.
-- The old mechanism and decomposer packages remain useful diagnostics.
-- The MBTA/MTA/Halifax caches remain valid external realism evidence within
-  their documented data boundaries.
-
-These facts do not establish passenger-journey benefit under the corrected
-physical protocol.
-
-### Active V5 evidence
-
-- Source commit: `f2a5ae8e183c48ca2e15295e854913736ca88857`.
-- Frozen tag: `freqduet-v5-dev-screen-v1`.
-- Development screen: 11 configs x 8 training seeds x 4 frozen evaluation
-  seeds, 80 training episodes.
-- External comparator screen: fixed-headway, rule-holding, and rule-MPC on the
-  same four frozen scenario tapes.
-- Untouched confirmation seeds remain sealed until the preregistered V5
-  decision is made.
-
-No V5 effect claim is valid until the development matrix is complete, strictly
-aggregated, and passed through `decide_freqduet_protocol_v5_screen.py`.
-
-## Claim Gate
-
-The paper can move off hold only if all of the following are true:
-
-1. The V5 source and scenario manifests pass strict provenance checks.
-2. The main policy satisfies the physical and safety invariants.
-3. The frequency controls and layer-allocation controls meet the locked effect
-   and confidence-interval rules, or the paper claim is narrowed accordingly.
-4. The selected policy is confirmed on untouched 200-episode seeds and the
-   held-out generalization matrix.
-5. Learned-versus-external comparisons use the same scenario tapes and the V5
-   passenger-journey endpoint.
-
-## Currently Safe Wording
-
-FreqDuet V5 is a preregistered, journey-feasible frequency-separated
-hierarchical controller under evaluation. Earlier composite-based results are
-reported as historical diagnostics and do not support a current performance
-claim.
-
-## Currently Unsafe Wording
-
-Do not state that FreqDuet matches or exceeds fixed-headway under the corrected
-passenger-journey protocol, that every frequency module is effective, or that
-field benefit has been demonstrated. Those claims require the pending V5
-confirmation package.
+The June V1/composite package remains historical. Its known-domain action
+selection and pre-audit physical protocol cannot be used as current headline
+evidence.

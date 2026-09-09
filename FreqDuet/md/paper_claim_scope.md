@@ -1,75 +1,68 @@
 # FreqDuet Paper Claim Scope
 
-Last updated: 2026-08-08 CST
+Last updated: 2026-09-10 CST
 
 ## Active Scope
 
-The manuscript is on submission hold while Protocol V5 is evaluated. The old
-paper-main V1 and its composite endpoint are historical controls, not the
-current method or headline evidence.
+The active method is Protocol V6. The canonical controller is
+`F_freqduet_protocol_v6_confirmed_main_hiro`; V8 is its successful independent
+40-episode confirmation and V9 is its failed 200-episode robustness gate. Both
+must appear together in any current paper account. The old paper-main V1 and
+its composite endpoint are historical controls, not headline evidence.
 
 | Canonical term | Meaning |
 | --- | --- |
-| FreqDuet V5 | Journey-feasible frequency-separated HRL at commit `f2a5ae8e18`. |
+| FreqDuet V6 | Journey-feasible frequency-separated HRL with executable timetable, causal APC/AVL state, fixed fleet, and coherent sampled holding actions. |
 | primary endpoint | `restricted_total_journey_horizon_min`; lower is better. |
-| strong fixed-headway | Exact V5 fixed-headway comparator on shared scenario tapes. |
-| physical safety | Holding exposure, denied-trip rate, readiness delay, launch/completion rates, unserved rate, and fleet/headway constraints. |
+| current best controller | `F_freqduet_protocol_v6_confirmed_main_hiro`, confirmed at 40 episodes in V8. |
+| strong fixed-headway | Exact V6 fixed-headway comparator on shared scenario tapes. |
 | historical V1/V4 evidence | Legacy service-cost experiments retained for diagnosis and negative-results reporting. |
 | external realism audit | Public AFC/APC/OD/load/AVL evidence; not a field-effect estimate. |
 
-## Provisional Method Statement
+## Supported Method Statement
 
-FreqDuet V5 assigns causal low-frequency demand state to executable upper-level
+FreqDuet V6 assigns causal low-frequency demand state to executable upper-level
 headway planning and high-frequency residual state to arrival-event holding,
 while enforcing a fixed fleet, a zero-total headway budget, causal holding
 feasibility, and passenger-journey credit.
 
-This is a method description only. It is not yet a performance claim.
+## Supported Result Claims
 
-## Claims Allowed Before V5 Confirmation
+- V8 confirms a headway-CV reduction against the matched no-guard controller,
+  with the registered passenger-journey no-harm condition satisfied.
+- In V9, the same controller improves passenger journey relative to no guard,
+  but its preregistered long-run headway effect is not confirmed.
+- Under the V9 external comparison, FreqDuet is more regular and has lower
+  restricted service cost than fixed headway, but fixed headway has materially
+  lower passenger journey time.
+- FreqDuet improves passenger journey relative to rule holding and rule MPC in
+  that V9 comparison.
+- Public external data support simulator-realism audits, not field efficacy.
 
-1. The V5 implementation has a frozen source/config/seed contract and a
-   crossed common-random-number evaluation protocol.
-2. The harmonic decomposer, causal state interfaces, exact timetable planner,
-   holding guard, and passenger-journey diagnostics are implemented and tested.
-3. The corrected V4 experiment is a documented negative result showing why the
-   old service-cost claim was insufficient.
-4. Public external data support simulator-realism and route/day protocol audits
-   within the existing data-availability boundaries.
+## Claims Not Established
 
-## Claims Requiring Completed V5 Evidence
-
-- Frequency features outperform no-frequency and dimension-matched raw history.
-- LF-to-upper and HF-to-lower allocation outperforms all-frequency or one-layer
-  controls.
-- V5 matches or outperforms fixed-headway on passenger journey time.
-- The causal guard, load-weighted holding cost, headway budget, and complete
-  upper credit each have a positive effect.
-- The selected policy generalizes across untouched seeds, perturbation
-  families, route families, and service days.
-
-## Claims Not Supported By This Project
-
+- Long-run confirmation of the V8 regularity effect.
+- Passenger-journey superiority or statistical equivalence to fixed headway.
+- Universal superiority of frequency separation over every internal control.
+- Generalization across completed route-family or service-day policy matrices.
 - Real-world deployed wait-time or journey-time improvement.
 - Complete same-day AFC/APC/AVL/OD field calibration.
 - MTA Bus Time as APC or onboard-load data.
 - Results from FreqHRL or TransitHRL as FreqDuet evidence.
-- The closest preserved TransitDuet-family control as an unmodified checkout of
-  the original TransitDuet repository.
 
 ## Evidence Map
 
 | Evidence | Current interpretation |
 | --- | --- |
-| `protocol_v4_selection_outcome_2026-08-08.md` | Corrected negative result; invalidates the old headline effect claim. |
-| `protocol_v5_journey_feasible_contract_2026-08-08.md` | Active preregistered method and decision contract. |
-| V5 development-screen aggregate | Pending; determines whether frequency and allocation claims survive. |
-| V5 untouched 200ep confirmation | Sealed and pending. |
-| V5 external-baseline comparison | Pending learned rows; external comparator rows are collected. |
+| `protocol_v6_locked_contract_2026-08-08.md` | Active physical, causal, endpoint, and submission contract. |
+| V8 confirmation gate | Successful independent 40-episode effect evidence for compact weight two. |
+| V9 long-training gate | `longtrain_not_confirmed`; mandatory robustness result. |
+| V9 learned-versus-external table | Valid fixed/rule/MPC trade-off comparison under V6. |
+| V28-V32 records | Negative development appendix; no controller promotion. |
 | External AFC/APC/AVL audits | Realism support only, within documented source limits. |
 
 ## Writing Rule
 
 Every result sentence must name or unambiguously inherit the protocol, endpoint,
-comparator, seed level, and uncertainty statement. Legacy composite numbers
-must be labelled historical and cannot be mixed into V5 tables.
+comparator, seed level, and uncertainty statement. V8 and V9 may not be pooled,
+and legacy composite numbers must be labelled historical.

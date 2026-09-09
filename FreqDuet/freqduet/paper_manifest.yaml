@@ -4,11 +4,14 @@
 # result directories. Candidate repairs stay here after promotion so historical
 # comparisons remain reproducible.
 
-version: 2026-08-08-protocol-v6-development
+version: 2026-09-10-protocol-v6-current-best-closure
 submission_status: hold_pending_protocol_v6
 active_protocol: freqduet-eval-v6
-active_source_commit: 95f406a49fabd075014ee6eeb33d3309d2f0c475
+active_source_commit: 673355cae10640b2737b6d51d541a9685059c342
 active_contract: ../md/protocol_v6_locked_contract_2026-08-08.md
+active_controller: F_freqduet_protocol_v6_confirmed_main_hiro
+active_behavior_source_fingerprint: d69b94df107c3f675843126457ee14b940f73c057cea6e28e6fd7134769beada
+submission_blocker: v9_longtrain_not_confirmed
 active_metrics:
   primary: restricted_total_journey_horizon_min
   safety:
@@ -27,7 +30,7 @@ active_metrics:
     - trip_completion_rate
 
 development:
-  status: pending_engineering_screen
+  status: completed_and_superseded_by_v8_confirmation
   stage: development
   source_commit: 95f406a49fabd075014ee6eeb33d3309d2f0c475
   run_name: protocol_v6_engineering_ep40_s4_e4_v2
@@ -35,7 +38,41 @@ development:
   train_seeds: [503, 521, 541, 557]
   eval_seeds: [41011, 41017, 41023, 41039]
   config_contract: ../md/protocol_v6_locked_contract_2026-08-08.md
-  decision_status: no_effectiveness_claim_before_locked_decision
+  decision_status: historical_initial_v6_screen
+
+current_best_evidence:
+  status: v8_confirmed_v9_longtrain_not_confirmed
+  controller: F_freqduet_protocol_v6_confirmed_main_hiro
+  confirmed_source_config: F_freqduet_protocol_v6_avlcompact_w2_hiro
+  interpretation: >
+    V8 independently confirms a headway-regularity gain versus the matched
+    no-guard controller with journey no-harm. V9 retains a favorable journey
+    direction but fails the registered long-training headway gate. The valid
+    V9 external comparison shows lower service cost and headway CV than fixed
+    headway but materially higher passenger journey time. This is the current
+    best evidence package, not a submission-ready superiority claim.
+  v8_confirmation:
+    source_commit: 54f4a8e66763059274b2d6d5c9f4b2bc5e7ad92a
+    train_episodes: 40
+    train_seeds: [809, 827, 853, 877, 907, 929]
+    eval_seeds: [44011, 44017, 44023, 44029]
+    gate_status: primary_confirmed
+    source_dir: paper_evidence/protocol_v6/current_best/v8_confirmation
+  v9_longtrain:
+    source_commit: 673355cae10640b2737b6d51d541a9685059c342
+    train_episodes: 200
+    train_seeds: [12011, 12037, 12049, 12071, 12097, 12109, 12143, 12161]
+    eval_seeds: [45007, 45013, 45053, 45061, 45077, 45119, 45131, 45137]
+    gate_status: longtrain_not_confirmed
+    source_dir: paper_evidence/protocol_v6/current_best/v9_longtrain
+  external_comparison:
+    status: complete_source_identical_v9
+    methods: [fixed_headway, rule_holding, rule_mpc]
+    source_dir: paper_evidence/protocol_v6/current_best/v9_external
+  package:
+    status: buildable_draft_evidence
+    script: scripts/build_freqduet_protocol_v6_evidence_package.py
+    out_dir: results_freqduet/paper_package/protocol_v6_current_best
 
 historical_reproduction:
   version: 2026-06-26-historical
@@ -3952,7 +3989,7 @@ manuscript_notes:
     path: ../md/paper_claim_scope.md
     purpose: safe top-journal claim language and terminology ledger
   data_availability_reproducibility:
-    status: drafted_data_availability_and_reproducibility_plan
+    status: updated_for_protocol_v6_current_best_evidence
     path: ../md/data_availability_reproducibility.md
     purpose: paper-ready Data Availability, repository actions, and FAIR risk flags
   paper_figure_table_plan:
@@ -3989,6 +4026,7 @@ paper_scripts:
   - scripts/curate_freqduet_paper_panels.py
   - scripts/download_mta_bus_time_offline_cache.py
   - scripts/build_freqduet_paper_package.py
+  - scripts/build_freqduet_protocol_v6_evidence_package.py
   - scripts/submit_freqduet_config_matrix_scheduleurm.py
   - scripts/sync_freqduet_config_matrix_scheduleurm.py
   - scripts/submit_freqduet_broad_generalization_scheduleurm.py
@@ -3996,9 +4034,9 @@ paper_scripts:
   - scripts/audit_demand_trace.py
 
 paper_curation:
-  current:
-    status: generated_zero_missing
-    required: true
+  historical_composite_v1:
+    status: historical_generated_zero_missing_not_current_effect_evidence
+    required: false
     script: scripts/curate_freqduet_paper_panels.py
     out_dir: results_freqduet/paper_curation/current
     command: >
@@ -4028,8 +4066,31 @@ paper_curation:
       - supplementary_figures/edfig1_action_state_spectrum.png
 
 paper_packages:
-  current:
-    status: generated_current_60seed_canonical_trace_aligned_with_external_truth_route_day_protocol_and_curation
+  protocol_v6_current_best:
+    status: buildable_draft_v8_confirmed_v9_longtrain_not_confirmed
+    required: true
+    submission_ready: false
+    submission_blocker: v9_longtrain_not_confirmed
+    script: scripts/build_freqduet_protocol_v6_evidence_package.py
+    evidence_root: paper_evidence/protocol_v6/current_best
+    out_dir: results_freqduet/paper_package/protocol_v6_current_best
+    command: >
+      python3 scripts/build_freqduet_protocol_v6_evidence_package.py
+      --out-dir results_freqduet/paper_package/protocol_v6_current_best
+    outputs:
+      - README.md
+      - evidence_status.json
+      - package_manifest.json
+      - tables/table1_v8_confirmation.csv
+      - tables/table2_v9_longtrain.csv
+      - tables/table3_v9_external_baselines.csv
+      - tables/table4_evidence_decisions.csv
+      - manuscript/current_best_results.md
+      - configs/config_snapshot_manifest.json
+
+  historical_composite_v1:
+    status: historical_60seed_composite_not_current_effect_evidence
+    required: false
     script: scripts/build_freqduet_paper_package.py
     out_dir: results_freqduet/paper_package/current
     command: >
