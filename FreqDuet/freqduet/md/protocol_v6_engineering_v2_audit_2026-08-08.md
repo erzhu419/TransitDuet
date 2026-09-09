@@ -3790,3 +3790,42 @@ indices `12,24,36,48,60,72,81,87`, evaluation episode `500000`, and replay seed
 V28--V31 rosters, and exact source/scheduler searches found no use of these new
 policy or scenario seeds. Confirmation is authorized only by an unchanged V32
 development pass.
+
+### Engineering-v32 pairwise composite outcome and branch closure (2026-09-09)
+
+Immutable-source server regression task `t91818` passed the focused V28--V32
+suite from commit `199fb6295262bba8f2efae923247f4916399574f`. The sole V32
+development task `t91819` completed on `node002` and returned
+`development_no_pass`. Three outer folds had no feasible inner configuration
+and retained global `+30 s`; only the fold holding out policy seed `31031`
+enabled a rank-zero model (`alpha=10`, margin `0.0001`) and selected `+15 s` in
+all 112 of that seed's contexts. Overall counts were therefore 336 `+30 s` and
+112 `+15 s`. Inner feasible-grid counts by outer fold were `[0,24,0,0]`, and
+the full-data selector had no feasible configuration.
+
+Restricted service-cost delta versus actor was `-0.00011340`, CI
+`[-0.00043826,+0.00018671]`. The paired difference versus global `+30 s` was
+`+0.00015841`, CI `[-0.00002109,+0.00046083]`. Mean headway-CV delta was
+`+0.00003661`, CI `[-0.00015134,+0.00023617]`, and mean unserved-rate delta was
+`+0.000000208`, CI `[-0.000000185,+0.000000612]`. The journey delta was small
+and favorable, but the selector failed outer/final feasibility, crossed-zero
+service effect, both `+30 s` comparisons, headway noninferiority, and unserved
+nonincrease. The V32 confirmation roster remains unused.
+
+V32 demonstrates that V31's pointwise risk rejection was not the sole
+bottleneck. Once that rejection is removed, the learned action ordering still
+does not transfer across policy seeds: one seed receives a uniform interior
+action while the other folds cannot justify any heterogeneous override. The
+V27 observational value family and V28--V32 matched-prefix ridge families are
+therefore closed. Rank, margin, risk-head, and first-knot fallback variants may
+not be reopened from these outcomes.
+
+The promoted paper controller is unchanged. It already contains the separately
+developed rollout-trained snapshot selector at the executable terminal/
+first-stop layer and its confirmed target-preservation logic. A materially new
+successor would require online receding counterfactual rollouts or a larger
+independent multi-policy intervention dataset, with a new computational and
+confirmation protocol. That is a new study rather than a justified pre-submit
+repair. The current engineering decision is to retain V28--V32 as negative
+appendix evidence and return to manuscript, figure, and reproducibility
+closure without modifying the promoted algorithm.
