@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,17 +28,29 @@ from scripts.audit_protocol_v6_v28_prefix_common import (
     PRIMARY_DELTA,
     TRAIN_SEEDS,
 )
+from scripts.run_freqduet_protocol_v2_matrix import git_provenance
 
 
 CONTEXT_KEYS = ["train_seed", "scenario_seed", "decision_index", "eval_episode"]
 MODEL_METHODS = [method for method in EXPECTED_METHODS if method != "actor_firstknot_0"]
 ALPHAS = [0.1, 1.0, 10.0, 100.0]
 GUARD_MARGINS = [0.0, 0.0005, 0.001, 0.002]
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise RuntimeError(message)
+
+
+def _fit_source_commit() -> str:
+    source = git_provenance()
+    commit = str(source.get("commit", "")).lower()
+    _require(bool(COMMIT_RE.fullmatch(commit)),
+             f"invalid fitter source commit {commit!r}")
+    _require(source.get("tracked_dirty") is False,
+             "fitter source snapshot is tracked-dirty")
+    return commit
 
 
 def _array(text: str, label: str) -> np.ndarray:
@@ -327,6 +340,8 @@ def final_model(
     labels: pd.DataFrame,
     x: np.ndarray,
     feature_names: list[str],
+    *,
+    fit_source_commit: str,
 ) -> dict[str, object]:
     alpha, margin, grid = choose_hyperparameters(labels, x, TRAIN_SEEDS)
     model = fit_ridge(
@@ -334,6 +349,7 @@ def final_model(
     )
     return {
         "protocol_version": MODEL_PROTOCOL_VERSION,
+        "fit_source_commit": fit_source_commit,
         "feature_contract": "causal_s_upper_plus_candidate_action_v1",
         "target": PRIMARY_DELTA,
         "candidate_methods": MODEL_METHODS,
@@ -348,6 +364,7 @@ def final_model(
 
 
 def fit(aggregate_dir: Path, out_dir: Path) -> dict[str, object]:
+    fit_source_commit = _fit_source_commit()
     manifest, labels, state_cols = load_labels(aggregate_dir)
     x, feature_names = build_features(labels, state_cols)
     selected, folds = nested_predictions(labels, x)
@@ -390,6 +407,9 @@ def fit(aggregate_dir: Path, out_dir: Path) -> dict[str, object]:
         "status": "eligible_for_untouched_online_screen" if eligible else "no_pass",
         "claim_eligible": False,
         "source_commit": manifest.get("source_commit"),
+        "rollout_source_commit": manifest.get("rollout_source_commit"),
+        "aggregation_source_commit": manifest.get("aggregation_source_commit"),
+        "fit_source_commit": fit_source_commit,
         "feature_contract": "causal_s_upper_plus_candidate_action_v1",
         "prohibited_features": [
             "domain", "config", "seed identity", "future trace", "outcome-derived"
@@ -407,7 +427,12 @@ def fit(aggregate_dir: Path, out_dir: Path) -> dict[str, object]:
             "offline cross-validation cannot promote the controller."
         ),
     }
-    model = final_model(labels, x, feature_names)
+    model = final_model(
+        labels,
+        x,
+        feature_names,
+        fit_source_commit=fit_source_commit,
+    )
 
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)

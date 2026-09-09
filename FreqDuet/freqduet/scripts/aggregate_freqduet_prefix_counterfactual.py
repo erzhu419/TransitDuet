@@ -34,6 +34,7 @@ from scripts.audit_protocol_v6_v28_prefix_common import (
     checkpoint_dir,
     expected_jobs,
 )
+from scripts.run_freqduet_protocol_v2_matrix import git_provenance
 
 
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -68,6 +69,16 @@ def _source_commit(meta: dict) -> str:
     commit = str(source.get("commit", "")).lower()
     _require(bool(COMMIT_RE.fullmatch(commit)), f"invalid source commit {commit!r}")
     _require(source.get("tracked_dirty") is False, "source snapshot is tracked-dirty")
+    return commit
+
+
+def _analysis_commit() -> str:
+    source = git_provenance()
+    commit = str(source.get("commit", "")).lower()
+    _require(bool(COMMIT_RE.fullmatch(commit)),
+             f"invalid aggregation source commit {commit!r}")
+    _require(source.get("tracked_dirty") is False,
+             "aggregation source snapshot is tracked-dirty")
     return commit
 
 
@@ -250,6 +261,7 @@ def aggregate(
 ) -> dict[str, object]:
     jobs_root = Path(jobs_root).resolve()
     out_dir = Path(out_dir).resolve()
+    analysis_commit = _analysis_commit()
     meta_files = sorted(jobs_root.rglob("prefix_counterfactual_meta.json"))
     expected = set(expected_jobs())
     _require(len(meta_files) == len(expected),
@@ -309,6 +321,8 @@ def aggregate(
         "strict_complete": True,
         "effect_evidence": "exploratory_labels_only",
         "source_commit": next(iter(commits)),
+        "rollout_source_commit": next(iter(commits)),
+        "aggregation_source_commit": analysis_commit,
         "config": CONFIG,
         "train_seeds": TRAIN_SEEDS,
         "eval_seeds": EVAL_SEEDS,
