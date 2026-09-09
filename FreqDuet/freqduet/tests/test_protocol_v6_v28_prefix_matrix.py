@@ -40,7 +40,7 @@ def labels_for_job() -> pd.DataFrame:
         row = {
             "train_seed": TRAIN_SEEDS[0],
             "scenario_seed": EVAL_SEEDS[0],
-            "decision_index": DECISION_INDICES[0],
+            "dispatch_index": DECISION_INDICES[0],
             "eval_episode": EVAL_EPISODE,
             "candidate_method": method,
             "candidate_offset_s": offset,
@@ -58,6 +58,12 @@ def labels_for_job() -> pd.DataFrame:
             row[column] = 0.0 if identity else offset / 1000.0
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def aggregated_labels_for_job() -> pd.DataFrame:
+    labels = labels_for_job()
+    labels["decision_index"] = labels["dispatch_index"]
+    return labels
 
 
 def meta_for_job() -> dict:
@@ -111,6 +117,7 @@ class V28RosterTest(unittest.TestCase):
         self.assertEqual(key, (TRAIN_SEEDS[0], EVAL_SEEDS[0], DECISION_INDICES[0]))
         self.assertEqual(commit, COMMIT)
         self.assertEqual(len(validated), len(EXPECTED_METHODS))
+        self.assertTrue(validated["decision_index"].eq(DECISION_INDICES[0]).all())
 
     def test_invalid_identity_delta_fails_closed(self):
         labels = labels_for_job()
@@ -129,7 +136,7 @@ class V28RosterTest(unittest.TestCase):
 
 class V28ModelTest(unittest.TestCase):
     def test_features_use_only_state_and_actions(self):
-        labels = labels_for_job()
+        labels = aggregated_labels_for_job()
         labels["actor_action"] = [
             np.asarray(json.loads(value), dtype=np.float64)
             for value in labels["actor_action_json"]
@@ -150,13 +157,13 @@ class V28ModelTest(unittest.TestCase):
         ))
 
     def test_prediction_guard_keeps_actor_without_margin(self):
-        labels = labels_for_job()
+        labels = aggregated_labels_for_job()
         predictions = np.asarray([0.0, -0.01, -0.005, 0.0, 0.002, 0.003])
         chosen = select_rows(labels, predictions, guard_margin=0.02)
         self.assertEqual(chosen.loc[0, "candidate_method"], "actor")
 
     def test_prediction_guard_allows_material_candidate(self):
-        labels = labels_for_job()
+        labels = aggregated_labels_for_job()
         predictions = np.asarray([0.0, -0.03, -0.005, 0.0, 0.002, 0.003])
         chosen = select_rows(labels, predictions, guard_margin=0.02)
         self.assertEqual(chosen.loc[0, "candidate_method"], "actor_firstknot_m30")

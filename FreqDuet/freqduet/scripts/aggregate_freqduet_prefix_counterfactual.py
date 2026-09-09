@@ -39,6 +39,9 @@ from scripts.audit_protocol_v6_v28_prefix_common import (
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 JOB_KEYS = ["train_seed", "scenario_seed", "decision_index"]
 CONTEXT_KEYS = JOB_KEYS + ["eval_episode"]
+LABEL_CONTEXT_KEYS = [
+    "train_seed", "scenario_seed", "dispatch_index", "eval_episode",
+]
 
 
 def bootstrap_ci(values: np.ndarray, *, seed: int, n_boot: int = 10000) -> tuple[float, float]:
@@ -127,7 +130,7 @@ def _validate_job(
     _require(target.get("write_terminal_dispatch") is True,
              f"{meta_path}: target is not executable terminal dispatch")
 
-    required_columns = set(CONTEXT_KEYS + [
+    required_columns = set(LABEL_CONTEXT_KEYS + [
         "candidate_method", "candidate_offset_s", "candidate_action_linf_delta_s",
         "actor_action_json", "candidate_action_json", *OUTCOME_DELTAS.values(),
     ])
@@ -142,7 +145,7 @@ def _validate_job(
     for column, expected in (
         ("train_seed", train_seed),
         ("scenario_seed", eval_seed),
-        ("decision_index", decision_index),
+        ("dispatch_index", decision_index),
         ("eval_episode", EVAL_EPISODE),
     ):
         values = pd.to_numeric(labels[column], errors="coerce")
@@ -168,6 +171,7 @@ def _validate_job(
              f"{meta_path}: no nonzero action response")
 
     out = labels.copy()
+    out["decision_index"] = decision_index
     out["source_commit"] = commit
     out["policy_digest"] = str(meta.get("policy_digest", ""))
     out["job_dir"] = str(meta_path.parent)
@@ -368,4 +372,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
