@@ -3907,3 +3907,23 @@ candidate or a modified threshold.
 - Every task used the isolated `freqduet-cpu-py310` environment. Partial logs and
   checkpoints from this invalid run may be deleted; they must not be aggregated
   or used for candidate selection.
+
+### Engineering-v33-v2 development dispatch (2026-09-11)
+
+- Immutable source: commit
+  `955352a9afb446ff3699c396936352a82983c8fb` in detached worktree
+  `FreqDuet-v33-lower-955352a9af-snapshot`.
+- Server regression: scheduler task `t92522` completed on `node001`; all 77
+  V33 gate, config-lineage, matrix-export, submitter, and provenance tests
+  passed in the isolated `freqduet-cpu-py310` environment. The node-provided
+  `git-gcc8/2.24.0` module was loaded only for Git-dependent tests.
+- Development tasks `t92523` through `t92526` are pinned respectively to
+  `node001` through `node004`. Four scheduler shards cover all 28 registered
+  config/train-seed jobs with eight workers per full shard and four workers in
+  the final shard.
+- Checkpoints, diagnostics, and training logs remain on compute nodes. Each
+  completed shard exports only its run manifest, frozen evaluation CSV, and
+  evaluation manifest for strict aggregation.
+- This record establishes launch provenance only. V33-v2 remains scientifically
+  unresolved until all four shards complete, the server-side aggregate passes,
+  and the preregistered development gate authorizes exactly one candidate.
