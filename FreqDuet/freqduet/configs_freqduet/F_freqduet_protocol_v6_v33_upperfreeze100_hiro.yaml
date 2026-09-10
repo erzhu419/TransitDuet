@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v6_confirmed_main_hiro.yaml
+_name: F_freqduet_protocol_v6_v33_upperfreeze100_hiro
+
+protocol:
+  role: exploratory_v33_upper_policy_freeze_ep100
+
+training:
+  longtrain_stability:
+    freeze_upper_after_ep: 100

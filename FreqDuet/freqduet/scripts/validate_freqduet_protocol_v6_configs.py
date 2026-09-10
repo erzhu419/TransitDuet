@@ -169,6 +169,26 @@ V27_MULTISTEP_VALUE_EXPECTED = {
     "F_freqduet_protocol_v6_v27_msvalue_h6_u050_r0010_hiro": (6, 0.5),
 }
 V27_MULTISTEP_VALUE_CONFIGS = list(V27_MULTISTEP_VALUE_EXPECTED)
+V33_TIMESCALE_STABILITY_EXPECTED = {
+    "F_freqduet_protocol_v6_v33_lowerfreeze100_hiro": {
+        "freeze_lower_policy_after_ep": 100,
+    },
+    "F_freqduet_protocol_v6_v33_lowerfreeze80_hiro": {
+        "freeze_lower_policy_after_ep": 80,
+    },
+    "F_freqduet_protocol_v6_v33_lowerfreeze40_hiro": {
+        "freeze_lower_policy_after_ep": 40,
+    },
+    "F_freqduet_protocol_v6_v33_upperfreeze100_hiro": {
+        "freeze_upper_after_ep": 100,
+    },
+    "F_freqduet_protocol_v6_v33_bothfreeze100_hiro": {
+        "freeze_lower_policy_after_ep": 100,
+        "freeze_upper_after_ep": 100,
+    },
+}
+V33_TIMESCALE_STABILITY_CONFIGS = list(
+    V33_TIMESCALE_STABILITY_EXPECTED)
 ALL_GAIN_FLOOR_CONFIGS = (
     GAIN_FLOOR_CONFIGS + V22_GAIN_FLOOR_FACTORIAL_CONFIGS)
 ALL_GAIN_FLOOR_PASSENGER_CONFIGS = (
@@ -263,6 +283,7 @@ EXPERIMENTAL_CONFIGS = [
     *PROJECTION_CONFIGS,
     *V26_FOLLOWER_CALIBRATION_CONFIGS,
     *V27_MULTISTEP_VALUE_CONFIGS,
+    *V33_TIMESCALE_STABILITY_CONFIGS,
 ]
 
 
@@ -308,6 +329,19 @@ def validate(
         follower_calibration = lower.get(
             "follower_forecast_calibration", {}) or {}
         lower_context = (frequency.get("lower_context", {}) or {})
+        stability = (config.get("training", {}) or {}).get(
+            "longtrain_stability", {}) or {}
+        if name in V33_TIMESCALE_STABILITY_EXPECTED:
+            if stability != V33_TIMESCALE_STABILITY_EXPECTED[name]:
+                raise ValueError(
+                    f"{name}: V33 timescale schedule is not locked")
+            if not str(protocol.get("role", "")).startswith(
+                    "exploratory_v33_"):
+                raise ValueError(
+                    f"{name}: V33 role is not explicit")
+            if "freeze_lower_critic_after_ep" in stability:
+                raise ValueError(
+                    f"{name}: V33 lower critic must keep training")
         if name in V26_FOLLOWER_CALIBRATION_EXPECTED:
             expected_mode, expected_alpha, expected_ridge, expected_cap = (
                 V26_FOLLOWER_CALIBRATION_EXPECTED[name])

@@ -1,0 +1,9 @@
+_extends: F_freqduet_protocol_v6_confirmed_main_hiro.yaml
+_name: F_freqduet_protocol_v6_v33_lowerfreeze40_hiro
+
+protocol:
+  role: exploratory_v33_lower_policy_freeze_ep40
+
+training:
+  longtrain_stability:
+    freeze_lower_policy_after_ep: 40

@@ -13,6 +13,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 SCHEDULER = Path("/home/erzhu419/mine_code/scheduleurm/skill/scheduler.py")
 LOCAL_WORKSPACE_ROOT = Path("/home/erzhu419/mine_code")
 REMOTE_WORKSPACE_ROOT = Path("/home/zhengliang01/scheduleurm_work")
@@ -198,7 +200,15 @@ def main() -> None:
     parser.add_argument(
         "--allow-experimental-configs",
         action="store_true",
-        help="Allow registered V6 exploratory configs; requires --stage exploratory.",
+        help=(
+            "Allow registered V6 experimental configs. Exploratory matrices "
+            "need no gate; V33 confirmation requires --v33-development-gate."),
+    )
+    parser.add_argument(
+        "--v33-development-gate",
+        type=Path,
+        default=None,
+        help="Passed V33 development gate authorizing one confirmation config.",
     )
     args = parser.parse_args()
 
@@ -232,9 +242,26 @@ def main() -> None:
     if protocol_label(configs) == "protocol-v6" and set(train_seeds) & set(
             eval_seeds):
         parser.error("V6 train and evaluation seed sets must be disjoint")
-    if args.allow_experimental_configs and args.stage != "exploratory":
+    if args.v33_development_gate is not None:
+        if not args.allow_experimental_configs or args.stage != "confirmation":
+            parser.error(
+                "--v33-development-gate requires experimental confirmation")
+        try:
+            from scripts.audit_protocol_v6_v33_timescale_screen import (
+                confirmation_configs,
+                validate_development_authorization,
+            )
+            gate = json.loads(args.v33_development_gate.read_text())
+            selected = validate_development_authorization(gate)
+        except (FileNotFoundError, json.JSONDecodeError, ValueError) as exc:
+            parser.error(f"invalid V33 development gate: {exc}")
+        expected_confirmation_configs = confirmation_configs(selected)
+        if configs != expected_confirmation_configs:
+            parser.error(
+                "V33 confirmation configs do not match the authorized matrix")
+    elif args.allow_experimental_configs and args.stage != "exploratory":
         parser.error(
-            "--allow-experimental-configs requires --stage exploratory")
+            "experimental confirmation requires --v33-development-gate")
     total = len(configs) * len(train_seeds)
     shards = ranges(total, args.shard_size)
     result_base = f"results_freqduet/{args.run_name}"
