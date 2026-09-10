@@ -387,6 +387,22 @@ cross-domain superiority, or final Freq-HRL manuscript support. The v21/v22
 roots cannot be reused to tune coefficients, schedules, thresholds, burden
 limits, or checkpoint selection.
 
+### mujoco_v23_causal_upper_projection_target_development
+
+Protocol frozen before execution. V23 tests whether replacing the hindsight
+macro-mean upper consistency label with the first same-observation projected
+target improves the reward-correction tradeoff. A lower-only consistency arm
+isolates upper-objective interference. The 48-cell development matrix uses 20
+fresh role roots and unchanged v22 coefficients, budgets, training horizon,
+checkpoint window, and terminal-reserve projector.
+
+Current status: prepared, not scientifically evaluated. No v23 task or result
+existed when this protocol was frozen.
+
+Forbidden: V23 preparation or execution status validates causal upper-target
+learning, reward preservation, correction reduction, leakage no-tradeoff,
+fresh-seed confirmation, or final Freq-HRL manuscript support.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
