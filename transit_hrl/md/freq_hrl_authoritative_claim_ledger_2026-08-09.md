@@ -371,6 +371,22 @@ control, supplies confirmatory or manuscript evidence, supports leakage
 no-tradeoff, or warrants tuning any selective-weight parameter on the retired
 v21 roots.
 
+### mujoco_v22_uniform_terminal_reserve_confirmation
+
+All 288 fresh-root v22 cells completed successfully. Uniform consistency
+reduced component correction by 28.55% [23.62%, 32.55%] and total correction by
+43.65% [38.18%, 48.20%] in the pooled paired analysis, while pooled reward
+noninferiority passed at -0.50% [-4.28%, +3.59%]. The joint confirmation failed:
+environment-wise reward noninferiority failed in HalfCheetah and Hopper, both
+projected arms missed the registered projection-convergence requirement, and
+Hopper exceeded the total-correction burden cap.
+
+Forbidden: V22 validates reward-preserving terminal-reserve consistency,
+reward superiority, projected-control validity, leakage no-tradeoff,
+cross-domain superiority, or final Freq-HRL manuscript support. The v21/v22
+roots cannot be reused to tune coefficients, schedules, thresholds, burden
+limits, or checkpoint selection.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
