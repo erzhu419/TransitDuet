@@ -24,16 +24,21 @@
 > specification, and initial source build. Tasks `t92236`, `t92336`, and
 > `t92369` then bounded the V8 figure label, removed the stale Figure 1
 > "confirmed configuration" wording, embedded full evidence-bearing captions
-> for all five figures, and passed the final v4 source assembly. A flat anonymous
-> TRC working bundle uses Elsevier `elsarticle`; isolated toolchain task `t92181`
-> is queued on `jtl110gpu2`, so server-side PDF compilation and visual QA remain
-> the final operational formatting check. This closes substantive manuscript
-> assembly, not the scientific hold: V9 remains
+> for all five figures, and passed the final v4 source assembly. The queued
+> toolchain task `t92181` was superseded after remaining capacity-blocked. An
+> isolated user-prefix toolchain on `jtl110gpu2` (Pandoc 3.11 and Tectonic
+> 0.17.0) now builds the flat anonymous Elsevier `elsarticle` bundle entirely
+> on the server. The final outputs are a 24-page manuscript and a 4-page
+> Supplementary Material PDF. Server assembly tests pass 4/4; citations and
+> references resolve; no float, vertical-box, or page-boundary overflow remains.
+> All 28 pages were rendered server-side, scanned for blank/cropped pages, and
+> reviewed through contact sheets and 144-dpi key-page renders. This closes PDF
+> compilation and visual QA, not the scientific hold: V9 remains
 > `longtrain_not_confirmed`, the
 > current package lacks a same-stage NoFreq/RawHistory/AllFreq confirmation,
 > and the public-data audit is not matched route/day policy calibration. The
-> remaining pre-submission work is author metadata, final language/layout review,
-> archival data/code deposition, and the journal-portal files; none can erase
+> remaining pre-submission work is author metadata, final language copyediting,
+> archival data/code deposition, and journal-portal files; none can erase
 > these empirical boundaries.
 
 > **2026-08-08 historical submission hold:** this backlog records the historical V1-V4
@@ -44,7 +49,7 @@
 > method/evidence track. It is now superseded by the Protocol V6 status above;
 > old completed items remain provenance and negative-result evidence.
 
-Last updated: 2026-09-10 CST
+Last updated: 2026-09-11 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution

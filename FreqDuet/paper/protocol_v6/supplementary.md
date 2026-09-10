@@ -7,10 +7,10 @@ long-training gate. They use disjoint training and evaluation seeds and are not
 pooled. The V8 decision label records its preregistered effect/no-harm gate; it
 does not imply a familywise-significant result at 0.05.
 
-| Phase | Controller | Train seeds | Eval seeds | Pairs | Decision | Eligible |
-| --- | --- | --- | --- | --- | --- | --- |
-| v8_independent_confirmation_ep40 | F_freqduet_protocol_v6_confirmed_main_hiro | 6 | 4 | 24 | primary_confirmed | True |
-| v9_independent_longtrain_ep200 | F_freqduet_protocol_v6_confirmed_main_hiro | 8 | 8 | 64 | longtrain_not_confirmed | False |
+| Phase | Train x eval | Pairs | Registered decision | Claim eligible |
+| --- | --- | --- | --- | --- |
+| V8 (40 ep) | 6 x 4 | 24 | Gate passed | Yes |
+| V9 (200 ep) | 8 x 8 | 64 | Not confirmed | No |
 
 The term `confirmed_main` identifies the V8-selected configuration; it does not
 mean that V9 passed. The machine-readable package remains
@@ -20,37 +20,37 @@ mean that V9 passed. The machine-readable package remains
 
 The current controller resolves through the following inheritance chain:
 
-1. `config_v2.yaml`
-2. `configs_freqduet/F_freqduet_harmonic_hiro.yaml`
-3. `configs_freqduet/F_freqduet_timetable_hiro.yaml`
-4. `configs_freqduet/F_freqduet_terminal_hiro.yaml`
-5. `configs_freqduet/F_freqduet_terminal_waitattr_hiro.yaml`
-6. `configs_freqduet/F_freqduet_terminal_spline2dir_waitattr_hiro.yaml`
-7. `configs_freqduet/F_freqduet_terminal_aligned_nopromotion_hiro.yaml`
-8. `configs_freqduet/F_freqduet_terminal_lowerhf_poswait_hiro.yaml`
-9. `configs_freqduet/F_freqduet_terminal_lowerhf_localcap10_w06_hiro.yaml`
-10. `configs_freqduet/F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml`
-11. `configs_freqduet/F_freqduet_terminal_energydenoise_hold45_hiro.yaml`
-12. `configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_hiro.yaml`
-13. `configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_strictprom_hiro.yaml`
-14. `configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_hiro.yaml`
-15. `configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml`
-16. `configs_freqduet/F_freqduet_protocol_v2_main_hiro.yaml`
-17. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_hiro.yaml`
-18. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_markov_hiro.yaml`
-19. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_markov_smdp_hiro.yaml`
-20. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_nophys_hiro.yaml`
-21. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_hiro.yaml`
-22. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml`
-23. `configs_freqduet/F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml`
-24. `configs_freqduet/F_freqduet_protocol_v3_compact_b30_hiro.yaml`
-25. `configs_freqduet/F_freqduet_protocol_v4_main_hiro.yaml`
-26. `configs_freqduet/F_freqduet_protocol_v5_main_hiro.yaml`
-27. `configs_freqduet/F_freqduet_protocol_v6_main_hiro.yaml`
-28. `configs_freqduet/F_freqduet_protocol_v6_noguard_hiro.yaml`
-29. `configs_freqduet/F_freqduet_protocol_v6_avlcompact_hiro.yaml`
-30. `configs_freqduet/F_freqduet_protocol_v6_avlcompact_w2_hiro.yaml`
-31. `configs_freqduet/F_freqduet_protocol_v6_confirmed_main_hiro.yaml`
+1. \path{config_v2.yaml}
+2. \path{configs_freqduet/F_freqduet_harmonic_hiro.yaml}
+3. \path{configs_freqduet/F_freqduet_timetable_hiro.yaml}
+4. \path{configs_freqduet/F_freqduet_terminal_hiro.yaml}
+5. \path{configs_freqduet/F_freqduet_terminal_waitattr_hiro.yaml}
+6. \path{configs_freqduet/F_freqduet_terminal_spline2dir_waitattr_hiro.yaml}
+7. \path{configs_freqduet/F_freqduet_terminal_aligned_nopromotion_hiro.yaml}
+8. \path{configs_freqduet/F_freqduet_terminal_lowerhf_poswait_hiro.yaml}
+9. \path{configs_freqduet/F_freqduet_terminal_lowerhf_localcap10_w06_hiro.yaml}
+10. \path{configs_freqduet/F_freqduet_terminal_promotion_localcap10_w06_hiro.yaml}
+11. \path{configs_freqduet/F_freqduet_terminal_energydenoise_hold45_hiro.yaml}
+12. \path{configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_hiro.yaml}
+13. \path{configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_strictprom_hiro.yaml}
+14. \path{configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_hiro.yaml}
+15. \path{configs_freqduet/F_freqduet_terminal_energydenoise_hold45_holdpen03_adaptstrict_local_hiro.yaml}
+16. \path{configs_freqduet/F_freqduet_protocol_v2_main_hiro.yaml}
+17. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_hiro.yaml}
+18. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_markov_hiro.yaml}
+19. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_markov_smdp_hiro.yaml}
+20. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_nophys_hiro.yaml}
+21. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_hiro.yaml}
+22. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_rebuild_strict_hiro.yaml}
+23. \path{configs_freqduet/F_freqduet_protocol_v2_uppercompact_strict_intervaladd_hiro.yaml}
+24. \path{configs_freqduet/F_freqduet_protocol_v3_compact_b30_hiro.yaml}
+25. \path{configs_freqduet/F_freqduet_protocol_v4_main_hiro.yaml}
+26. \path{configs_freqduet/F_freqduet_protocol_v5_main_hiro.yaml}
+27. \path{configs_freqduet/F_freqduet_protocol_v6_main_hiro.yaml}
+28. \path{configs_freqduet/F_freqduet_protocol_v6_noguard_hiro.yaml}
+29. \path{configs_freqduet/F_freqduet_protocol_v6_avlcompact_hiro.yaml}
+30. \path{configs_freqduet/F_freqduet_protocol_v6_avlcompact_w2_hiro.yaml}
+31. \path{configs_freqduet/F_freqduet_protocol_v6_confirmed_main_hiro.yaml}
 
 Key resolved settings are: harmonic historical prior; 60-s causal bins;
 four Fourier harmonics over 14 h; 30-min low-frequency forecast; 15-min upper
@@ -86,9 +86,10 @@ vehicle readiness or the executable scheduled time.
 | Trips denied at least once (percentage points) | +0.48 [-9.21, +8.81] | 1.000 | -1.65 [-3.96, -0.22] | 0.117 |
 | Restricted service cost | -0.040 [-0.079, -0.007] | 0.125 | -0.110 [-0.207, -0.042] | 0.047 |
 
-All entries are current policy minus `F_freqduet_protocol_v6_noguard_hiro`. The V8 row corresponds to
-the source config `F_freqduet_protocol_v6_avlcompact_w2_hiro` and the V9 row to its exact paper alias
-`F_freqduet_protocol_v6_confirmed_main_hiro`. Both arms disable the legacy holding guard. The contrast
+All entries are current policy minus \path{F_freqduet_protocol_v6_noguard_hiro}. The V8 row
+corresponds to the source config \path{F_freqduet_protocol_v6_avlcompact_w2_hiro} and the V9 row
+to its exact paper alias \path{F_freqduet_protocol_v6_confirmed_main_hiro}. Both arms disable the
+legacy holding guard. The contrast
 combines compact APC/AVL context with the incremental regularity objective.
 
 ## S5. Complete V9 external-baseline outcomes

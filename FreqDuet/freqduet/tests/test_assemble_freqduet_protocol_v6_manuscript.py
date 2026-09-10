@@ -209,10 +209,14 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         discussion = (self.out / "discussion.md").read_text()
         manuscript = (self.out / "manuscript.md").read_text()
         supplement = (self.out / "supplementary.md").read_text()
+        self.assertIn(
+            "| V9 (200 ep) | 8 x 8 | 64 | Not confirmed | No |",
+            supplement,
+        )
         methods_flat = " ".join(methods.split())
         manuscript_flat = " ".join(manuscript.split())
         self.assertIn("promotion, leakage-penalty", methods)
-        self.assertIn("C_R = W_R / 10", methods)
+        self.assertIn(r"C_R &= \frac{W_R}{10}", methods)
         self.assertIn("does not directly charge holding", methods)
         self.assertIn("[@haarnoja2018soft]", methods)
         self.assertIn("22 physical stops", methods_flat)

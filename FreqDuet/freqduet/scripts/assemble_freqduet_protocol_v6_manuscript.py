@@ -606,7 +606,6 @@ def source_package_label(package_dir: Path) -> str:
 
 def manuscript_methods(method: dict[str, Any], figure_path: str) -> str:
     actions = ", ".join(f"{value:g}" for value in method["action_bins_s"])
-    context = ", ".join(f"`{item}`" for item in method["lower_context_features"])
     cost_weights = method["service_cost_weights"]
     return f"""# Methods
 
@@ -616,9 +615,10 @@ FreqDuet studies whether frequency structure in an exogenous demand stream can
 be aligned with authority in an asynchronous hierarchical controller. The
 upper policy changes an executable target-headway plan at dispatch events; the
 lower policy chooses holding at station-arrival events. One upper decision can
-therefore span many lower decisions. The current paper controller is
-`{PAPER_CONTROLLER}` under `{PROTOCOL}`. It is the exact naming alias of the
-compact APC/AVL, weight-two controller that passed the preregistered V8 gate.
+therefore span many lower decisions. The current paper controller is the
+compact APC/AVL, weight-two configuration that passed the preregistered V8
+gate. Its exact identifier and inheritance chain are reported in
+Supplementary Section S2.
 
 ![Figure 1. Causal frequency-to-authority architecture.]({figure_path})
 
@@ -666,12 +666,12 @@ ridge-regularized prior for `log(1 + arrival rate)` with ridge
 {method['harmonic_prior_var']:g}. Recursive least squares with forgetting
 factor {method['harmonic_forgetting']:g} then updates that prior only after the
 current observation bin closes. With
-basis `phi_k`, coefficients `theta_k`, and pre-update prediction
-`lambda_hat_(k|k-1)`, the high-frequency innovation is
+basis $\\phi_k$, coefficients $\\theta_k$, and pre-update prediction
+$\\widehat{{\\lambda}}_{{k\\mid k-1}}$, the high-frequency innovation is
 
-```text
-r_k = y_k - lambda_hat_(k|k-1).
-```
+$$
+r_k = y_k - \\widehat{{\\lambda}}_{{k\\mid k-1}}.
+$$
 
 The low-frequency state is the updated nonnegative harmonic rate, its slope,
 and its {method['forecast_horizon_s'] / 60:g}-min forecast. The residual and
@@ -685,7 +685,9 @@ The upper policy receives global low-frequency level, slope and forecast,
 together with a scalar high-frequency energy summary and low-frequency OD
 structure summaries. The lower policy receives station-direction residual,
 residual change, local and global residual energy, the previous holding action,
-and compact same-time APC/AVL context: {context}. The scalar energy summary
+and compact same-time APC/AVL context: load, capacity, queue, speed residual,
+shock age, schedule slack, a normalized two-sided holding target, and a
+target-valid indicator. The scalar energy summary
 alerts the upper layer to volatility without giving it the local residual that
 drives holding.
 
@@ -702,7 +704,7 @@ The upper ensemble actor produces a headway adjustment bounded to
 {method['replan_interval_s'] / 60:g} min, the timetable planner maps that action
 to an exact terminal headway curve over a
 {method['planning_horizon_s'] / 60:g}-min horizon. The
-`{method['headway_budget_mode']}` projection conserves the cumulative headway
+rolling zero-sum projection conserves the cumulative headway
 budget over each closed replanning window, preventing hidden phase drift.
 Planned launch times are executable: an actual departure occurs no earlier
 than both vehicle readiness and the scheduled launch time. Planned and actual
@@ -723,13 +725,17 @@ follower gap, `h` the executable target headway, and `a` the sampled hold. A
 hold predicts gaps `g_f + a` and `max(g_b - a, 0)`. For tolerance
 `tau={method['regularity_tolerance_fraction']:.2f}`, define
 
-```text
-q(g,h) = max(|g-h|/h - tau, 0)^2
-L(g_f,g_b,h) = 0.5 * [q(g_f,h) + q(g_b,h)].
-```
+$$
+\\begin{{aligned}}
+q(g,h) &= \\left[\\max\\left(\\frac{{|g-h|}}{{h}}-\\tau,0\\right)\\right]^2, \\\\
+L(g_f,g_b,h) &= \\frac{{1}}{{2}}[q(g_f,h)+q(g_b,h)].
+\\end{{aligned}}
+$$
 
 The lower reward receives
-`{method['regularity_reward_weight']:g} * clip(L_before - L_after, -{method['regularity_cost_cap']:g}, {method['regularity_cost_cap']:g})`.
+${method['regularity_reward_weight']:g}\\,\\operatorname{{clip}}
+(L_{{\\mathrm{{before}}}}-L_{{\\mathrm{{after}}}},
+-{method['regularity_cost_cap']:g},{method['regularity_cost_cap']:g})$.
 All gaps are frozen before the action. Missing predecessor or follower evidence
 adds zero regularity reward and is logged rather than imputed from future
 vehicle states.
@@ -737,13 +743,12 @@ vehicle states.
 ## Learning architecture
 
 Both levels use off-policy soft actor-critic variants
-[@haarnoja2018soft]. The upper
-`{method['upper_algorithm']}` uses a pessimistic
+[@haarnoja2018soft]. The upper policy uses a pessimistic
 {method['upper_ensemble_size']}-critic ensemble, discount
 {method['upper_discount']:g}, a {method['upper_hidden_dim']}-unit hidden
 representation, batch size {method['upper_batch_size']}, and
-{method['upper_updates_per_episode']} updates per episode. The lower
-`{method['lower_algorithm']}` uses a pessimistic
+{method['upper_updates_per_episode']} updates per episode. The lower policy
+uses a pessimistic constrained
 {method['lower_ensemble_size']}-critic ensemble, discount
 {method['lower_discount']:g}, a {method['lower_hidden_dim']}-unit hidden
 representation, batch size {method['lower_batch_size']}, and
@@ -767,22 +772,26 @@ semantics as the learned controller. `fixed_headway` installs a 360-s terminal
 headway in both directions and commands zero intermediate holding.
 `rule_holding` uses the same 360-s terminal schedule and applies
 
-```text
-a = clip(360 - g_f, 0, 60),
-```
+$$
+a = \\operatorname{{clip}}(360-g_f,0,60),
+$$
 
 where `g_f` is the observed forward headway in seconds. `rule_mpc` uses that
 same lower holding law and re-evaluates a 60-candidate time-of-day headway grid
 at dispatch events. Peak candidates are `{{240, 300, 360, 420, 480}}` s,
 off-peak candidates are `{{360, 480, 600, 720}}` s, and transition candidates
-are `{{300, 360, 420}}` s. Given a seeded episode-level demand proxy `d`, with
-`d ~ clip(Normal(1, 0.15), 0.3, 2.0)`, its slot-specific surrogate is
+are `{{300, 360, 420}}` s. Given a seeded episode-level demand proxy $d$, with
+$d\\sim\\operatorname{{clip}}(\\mathcal{{N}}(1,0.15),0.3,2.0)$, its
+slot-specific surrogate is
 
-```text
-H_ideal = clip(360 / d, 240, 600)
-J(H) = H / 2 + 0.001 max(0, H - H_ideal)^2
-       + 5 max(0, 6000 / H - 12)^2.
-```
+$$
+\\begin{{aligned}}
+H_{{\\mathrm{{ideal}}}} &= \\operatorname{{clip}}(360/d,240,600), \\\\
+J(H) &= \\frac{{H}}{{2}}
+ + 0.001\\max(0,H-H_{{\\mathrm{{ideal}}}})^2
+ + 5\\max(0,6000/H-12)^2.
+\\end{{aligned}}
+$$
 
 The minimizing candidate is converted to an exact launch sequence before
 simulation. This rule-MPC is a transparent low-fidelity comparator, not a claim
@@ -803,13 +812,15 @@ headway events. With restricted waiting `W_R` in minutes, peak fleet `F`, fixed
 fleet budget `N`, headway CV `H`, unserved fraction `U`, and trip-completion
 fraction `Q`, the secondary scalar is
 
-```text
-C_R = W_R / 10
-    + max(F - N, 0)^2 / N
-    + H
-    + {cost_weights['unserved']:g} U
-    + {cost_weights['incomplete_service']:g} (1 - Q).
-```
+$$
+\\begin{{aligned}}
+C_R &= \\frac{{W_R}}{{10}}
+ + \\frac{{\\max(F-N,0)^2}}{{N}}
+ + H
+ + {cost_weights['unserved']:g}U
+ + {cost_weights['incomplete_service']:g}(1-Q).
+\\end{{aligned}}
+$$
 
 The evaluated fixed-pool environment makes the overshoot term zero; this
 scalar does not directly charge holding or a delayed-readiness denial that is
@@ -822,7 +833,8 @@ V8 is a preregistered independent 40-episode confirmation with six training
 seeds crossed with four untouched evaluation seeds (24 paired rollouts per
 policy). V9 is a separately preregistered 200-episode robustness test with
 eight new training seeds crossed with eight new evaluation seeds (64 paired
-rollouts per policy). The Protocol V6 reference is `{REFERENCE}`. Both policies
+rollouts per policy). The comparator is the no-guard Protocol V6 reference,
+whose exact identifier is reported in Supplementary Section S4. Both policies
 disable the legacy holding guard; the current policy additionally has compact
 APC/AVL context and the two-sided regularity objective, so their difference is
 a combined-policy contrast.
@@ -891,6 +903,8 @@ passenger-journey benefit.
 
 ![Figure 2. Independent confirmation and long-training robustness.]({figures[2]})
 
+\\Needspace{{8\\baselineskip}}
+
 **Table 1. Current policy minus the Protocol V6 reference.** Values are paired
 mean differences with crossed-bootstrap 95% confidence intervals. Lower is
 better. Holm-adjusted sign-flip p-values use training-seed mean differences.
@@ -938,6 +952,8 @@ produced more regular service than fixed headway, while fixed headway remained
 better for passenger journey and fleet-readiness burden.
 
 ![Figure 3. V9 external-baseline trade-off.]({figures[3]})
+
+\\Needspace{{8\\baselineskip}}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.
@@ -1026,23 +1042,32 @@ def supplementary_text(
 ) -> str:
     method = data["method"]
     decisions = data["decisions"]
+    phase_labels = {
+        "v8_independent_confirmation_ep40": "V8 (40 ep)",
+        "v9_independent_longtrain_ep200": "V9 (200 ep)",
+    }
+    decision_labels = {
+        "primary_confirmed": "Gate passed",
+        "longtrain_not_confirmed": "Not confirmed",
+    }
     decision_rows = [
         [
-            row["phase"],
-            row["controller"],
-            row["train_seeds"],
-            row["evaluation_seeds"],
+            phase_labels[row["phase"]],
+            f'{row["train_seeds"]} x {row["evaluation_seeds"]}',
             row["paired_rollouts"],
-            row["decision"],
-            row["claim_eligible"],
+            decision_labels[row["decision"]],
+            "Yes" if row["claim_eligible"] == "True" else "No",
         ]
         for row in decisions
     ]
     decision_table = markdown_table(
-        ["Phase", "Controller", "Train seeds", "Eval seeds", "Pairs", "Decision", "Eligible"],
+        ["Phase", "Train x eval", "Pairs", "Registered decision", "Claim eligible"],
         decision_rows,
     )
-    lineage = "\n".join(f"{index}. `{item}`" for index, item in enumerate(method["config_lineage"], 1))
+    lineage = "\n".join(
+        f"{index}. \\path{{{item}}}"
+        for index, item in enumerate(method["config_lineage"], 1)
+    )
 
     return f"""# Supplementary Material
 
@@ -1090,9 +1115,10 @@ vehicle readiness or the executable scheduled time.
 
 {main_table}
 
-All entries are current policy minus `{REFERENCE}`. The V8 row corresponds to
-the source config `{SOURCE_CANDIDATE}` and the V9 row to its exact paper alias
-`{PAPER_CONTROLLER}`. Both arms disable the legacy holding guard. The contrast
+All entries are current policy minus \\path{{{REFERENCE}}}. The V8 row
+corresponds to the source config \\path{{{SOURCE_CANDIDATE}}} and the V9 row
+to its exact paper alias \\path{{{PAPER_CONTROLLER}}}. Both arms disable the
+legacy holding guard. The contrast
 combines compact APC/AVL context with the incremental regularity objective.
 
 ## S5. Complete V9 external-baseline outcomes

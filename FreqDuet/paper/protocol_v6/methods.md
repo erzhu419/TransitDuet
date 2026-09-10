@@ -6,9 +6,10 @@ FreqDuet studies whether frequency structure in an exogenous demand stream can
 be aligned with authority in an asynchronous hierarchical controller. The
 upper policy changes an executable target-headway plan at dispatch events; the
 lower policy chooses holding at station-arrival events. One upper decision can
-therefore span many lower decisions. The current paper controller is
-`F_freqduet_protocol_v6_confirmed_main_hiro` under `freqduet-eval-v6`. It is the exact naming alias of the
-compact APC/AVL, weight-two controller that passed the preregistered V8 gate.
+therefore span many lower decisions. The current paper controller is the
+compact APC/AVL, weight-two configuration that passed the preregistered V8
+gate. Its exact identifier and inheritance chain are reported in
+Supplementary Section S2.
 
 ![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](figures/fig1_protocol_v6_method.png){#fig:protocol-v6-1}
 
@@ -56,12 +57,12 @@ ridge-regularized prior for `log(1 + arrival rate)` with ridge
 0.01. Recursive least squares with forgetting
 factor 0.9995 then updates that prior only after the
 current observation bin closes. With
-basis `phi_k`, coefficients `theta_k`, and pre-update prediction
-`lambda_hat_(k|k-1)`, the high-frequency innovation is
+basis $\phi_k$, coefficients $\theta_k$, and pre-update prediction
+$\widehat{\lambda}_{k\mid k-1}$, the high-frequency innovation is
 
-```text
-r_k = y_k - lambda_hat_(k|k-1).
-```
+$$
+r_k = y_k - \widehat{\lambda}_{k\mid k-1}.
+$$
 
 The low-frequency state is the updated nonnegative harmonic rate, its slope,
 and its 30-min forecast. The residual and
@@ -75,7 +76,9 @@ The upper policy receives global low-frequency level, slope and forecast,
 together with a scalar high-frequency energy summary and low-frequency OD
 structure summaries. The lower policy receives station-direction residual,
 residual change, local and global residual energy, the previous holding action,
-and compact same-time APC/AVL context: `load`, `capacity`, `queue`, `speed_residual`, `shock_age`, `schedule_slack`, `regularity_hold_target_norm`, `regularity_hold_target_valid`. The scalar energy summary
+and compact same-time APC/AVL context: load, capacity, queue, speed residual,
+shock age, schedule slack, a normalized two-sided holding target, and a
+target-valid indicator. The scalar energy summary
 alerts the upper layer to volatility without giving it the local residual that
 drives holding.
 
@@ -92,7 +95,7 @@ The upper ensemble actor produces a headway adjustment bounded to
 15 min, the timetable planner maps that action
 to an exact terminal headway curve over a
 45-min horizon. The
-`rolling_zero_sum_delta_v6` projection conserves the cumulative headway
+rolling zero-sum projection conserves the cumulative headway
 budget over each closed replanning window, preventing hidden phase drift.
 Planned launch times are executable: an actual departure occurs no earlier
 than both vehicle readiness and the scheduled launch time. Planned and actual
@@ -113,13 +116,17 @@ follower gap, `h` the executable target headway, and `a` the sampled hold. A
 hold predicts gaps `g_f + a` and `max(g_b - a, 0)`. For tolerance
 `tau=0.02`, define
 
-```text
-q(g,h) = max(|g-h|/h - tau, 0)^2
-L(g_f,g_b,h) = 0.5 * [q(g_f,h) + q(g_b,h)].
-```
+$$
+\begin{aligned}
+q(g,h) &= \left[\max\left(\frac{|g-h|}{h}-\tau,0\right)\right]^2, \\
+L(g_f,g_b,h) &= \frac{1}{2}[q(g_f,h)+q(g_b,h)].
+\end{aligned}
+$$
 
 The lower reward receives
-`2 * clip(L_before - L_after, -0.25, 0.25)`.
+$2\,\operatorname{clip}
+(L_{\mathrm{before}}-L_{\mathrm{after}},
+-0.25,0.25)$.
 All gaps are frozen before the action. Missing predecessor or follower evidence
 adds zero regularity reward and is logged rather than imputed from future
 vehicle states.
@@ -127,13 +134,12 @@ vehicle states.
 ## Learning architecture
 
 Both levels use off-policy soft actor-critic variants
-[@haarnoja2018soft]. The upper
-`pessimistic_ensemble_sac_v4` uses a pessimistic
+[@haarnoja2018soft]. The upper policy uses a pessimistic
 10-critic ensemble, discount
 0.95, a 64-unit hidden
 representation, batch size 64, and
-10 updates per episode. The lower
-`pessimistic_ensemble_sac_lagrangian_v4` uses a pessimistic
+10 updates per episode. The lower policy
+uses a pessimistic constrained
 10-critic ensemble, discount
 0.99, a 64-unit hidden
 representation, batch size 512, and
@@ -157,22 +163,26 @@ semantics as the learned controller. `fixed_headway` installs a 360-s terminal
 headway in both directions and commands zero intermediate holding.
 `rule_holding` uses the same 360-s terminal schedule and applies
 
-```text
-a = clip(360 - g_f, 0, 60),
-```
+$$
+a = \operatorname{clip}(360-g_f,0,60),
+$$
 
 where `g_f` is the observed forward headway in seconds. `rule_mpc` uses that
 same lower holding law and re-evaluates a 60-candidate time-of-day headway grid
 at dispatch events. Peak candidates are `{240, 300, 360, 420, 480}` s,
 off-peak candidates are `{360, 480, 600, 720}` s, and transition candidates
-are `{300, 360, 420}` s. Given a seeded episode-level demand proxy `d`, with
-`d ~ clip(Normal(1, 0.15), 0.3, 2.0)`, its slot-specific surrogate is
+are `{300, 360, 420}` s. Given a seeded episode-level demand proxy $d$, with
+$d\sim\operatorname{clip}(\mathcal{N}(1,0.15),0.3,2.0)$, its
+slot-specific surrogate is
 
-```text
-H_ideal = clip(360 / d, 240, 600)
-J(H) = H / 2 + 0.001 max(0, H - H_ideal)^2
-       + 5 max(0, 6000 / H - 12)^2.
-```
+$$
+\begin{aligned}
+H_{\mathrm{ideal}} &= \operatorname{clip}(360/d,240,600), \\
+J(H) &= \frac{H}{2}
+ + 0.001\max(0,H-H_{\mathrm{ideal}})^2
+ + 5\max(0,6000/H-12)^2.
+\end{aligned}
+$$
 
 The minimizing candidate is converted to an exact launch sequence before
 simulation. This rule-MPC is a transparent low-fidelity comparator, not a claim
@@ -193,13 +203,15 @@ headway events. With restricted waiting `W_R` in minutes, peak fleet `F`, fixed
 fleet budget `N`, headway CV `H`, unserved fraction `U`, and trip-completion
 fraction `Q`, the secondary scalar is
 
-```text
-C_R = W_R / 10
-    + max(F - N, 0)^2 / N
-    + H
-    + 5 U
-    + 5 (1 - Q).
-```
+$$
+\begin{aligned}
+C_R &= \frac{W_R}{10}
+ + \frac{\max(F-N,0)^2}{N}
+ + H
+ + 5U
+ + 5(1-Q).
+\end{aligned}
+$$
 
 The evaluated fixed-pool environment makes the overshoot term zero; this
 scalar does not directly charge holding or a delayed-readiness denial that is
@@ -212,7 +224,8 @@ V8 is a preregistered independent 40-episode confirmation with six training
 seeds crossed with four untouched evaluation seeds (24 paired rollouts per
 policy). V9 is a separately preregistered 200-episode robustness test with
 eight new training seeds crossed with eight new evaluation seeds (64 paired
-rollouts per policy). The Protocol V6 reference is `F_freqduet_protocol_v6_noguard_hiro`. Both policies
+rollouts per policy). The comparator is the no-guard Protocol V6 reference,
+whose exact identifier is reported in Supplementary Section S4. Both policies
 disable the legacy holding guard; the current policy additionally has compact
 APC/AVL context and the two-sided regularity objective, so their difference is
 a combined-policy contrast.
