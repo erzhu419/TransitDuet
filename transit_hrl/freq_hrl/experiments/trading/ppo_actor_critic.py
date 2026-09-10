@@ -1628,7 +1628,12 @@ def smdp_rollout(
         upper_period=int(upper_period),
         min_upper_duration=int(min_upper_duration),
     )
-    builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
+    builder = HierarchicalRolloutBuilder(
+        gamma=float(model.config.gamma),
+        upper_projection_target_aggregation=(
+            model.config.upper_projection_target_aggregation
+        ),
+    )
     promotion_builder = (
         PromotionRolloutBuilder(gamma=float(model.config.gamma))
         if learned_promotion_gate else None

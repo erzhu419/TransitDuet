@@ -40,6 +40,10 @@ PROJECTION_CONSISTENCY_WEIGHTING_MODES = (
     "uniform",
     "exp_reward_advantage",
 )
+UPPER_PROJECTION_TARGET_AGGREGATION_MODES = (
+    "macro_mean",
+    "decision_time",
+)
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
     "violation_l2",
@@ -465,6 +469,7 @@ class SMDPPPOConfig:
     projection_consistency_weighting: str = "uniform"
     projection_consistency_advantage_temperature: float = 1.0
     projection_consistency_advantage_weight_clip: float = 5.0
+    upper_projection_target_aggregation: str = "macro_mean"
     projection_consistency_step_scale: float = 1.0
     projection_consistency_max_backtracks: int = 8
     projection_consistency_reward_tolerance: float = 0.0
@@ -733,10 +738,21 @@ class TemporalDecisionScheduler:
 class HierarchicalRolloutBuilder:
     """Build separate upper and lower trajectories from one episode."""
 
-    def __init__(self, gamma: float) -> None:
+    def __init__(
+        self,
+        gamma: float,
+        *,
+        upper_projection_target_aggregation: str = "macro_mean",
+    ) -> None:
         if not 0.0 < float(gamma) <= 1.0:
             raise ValueError("gamma must be in (0, 1]")
+        aggregation = str(upper_projection_target_aggregation)
+        if aggregation not in UPPER_PROJECTION_TARGET_AGGREGATION_MODES:
+            raise ValueError(
+                "unknown upper projection-target aggregation mode"
+            )
         self.gamma = float(gamma)
+        self.upper_projection_target_aggregation = aggregation
         self._upper: dict[str, list[Any]] = {
             key: [] for key in (
                 "state",
@@ -941,10 +957,15 @@ class HierarchicalRolloutBuilder:
         self._upper["old_value"].append(float(pending["value"]))
         self._upper["cost"].append(float(np.dot(discounts, np.asarray(costs, dtype=np.float64))))
         if pending["projection_target"]:
-            self._upper["projection_target"].append(np.mean(
-                np.asarray(pending["projection_target"], dtype=np.float32),
-                axis=0,
-            ))
+            targets = np.asarray(
+                pending["projection_target"], dtype=np.float32
+            )
+            target = (
+                np.mean(targets, axis=0)
+                if self.upper_projection_target_aggregation == "macro_mean"
+                else targets[0]
+            )
+            self._upper["projection_target"].append(target)
         self._pending_upper = None
 
     @staticmethod
@@ -1358,6 +1379,13 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "projection_consistency_weighting must be uniform or "
                 "exp_reward_advantage"
+            )
+        if (
+            str(config.upper_projection_target_aggregation)
+            not in UPPER_PROJECTION_TARGET_AGGREGATION_MODES
+        ):
+            raise ValueError(
+                "unknown upper projection-target aggregation mode"
             )
         if (
             not np.isfinite(

@@ -122,6 +122,45 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
             batch.lower.projection_target, [[-0.2], [-0.6]]
         )
 
+    def test_decision_time_upper_projection_target_excludes_future_steps(self):
+        builder = HierarchicalRolloutBuilder(
+            gamma=0.95,
+            upper_projection_target_aggregation="decision_time",
+        )
+        builder.begin_upper(
+            state=np.zeros(3, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+        )
+        for index, target in enumerate((0.2, 0.6)):
+            builder.add_lower(
+                state=np.zeros(2, dtype=np.float32),
+                action=np.zeros(1, dtype=np.float32),
+                logp=0.0,
+                value=0.0,
+                reward=0.0,
+                done=index == 1,
+                upper_projection_target=np.asarray(
+                    [target], dtype=np.float32
+                ),
+                lower_projection_target=np.asarray(
+                    [-target], dtype=np.float32
+                ),
+            )
+        batch = builder.build()
+        np.testing.assert_allclose(batch.upper.projection_target, [[0.2]])
+        np.testing.assert_allclose(
+            batch.lower.projection_target, [[-0.2], [-0.6]]
+        )
+
+    def test_unknown_upper_projection_target_aggregation_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "aggregation"):
+            HierarchicalRolloutBuilder(
+                gamma=0.95,
+                upper_projection_target_aggregation="future_mean",
+            )
+
     def test_sparse_promotion_gate_owns_rewards_until_next_decision(self):
         builder = PromotionRolloutBuilder(gamma=0.9)
         builder.begin(

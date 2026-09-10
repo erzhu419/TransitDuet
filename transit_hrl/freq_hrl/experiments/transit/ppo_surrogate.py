@@ -291,7 +291,12 @@ def rollout(
     service_gap = np.zeros(corridors, dtype=np.float64)
     cv_gap = np.zeros(corridors, dtype=np.float64)
     demand_ema = demand[0].copy()
-    builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
+    builder = HierarchicalRolloutBuilder(
+        gamma=float(model.config.gamma),
+        upper_projection_target_aggregation=(
+            model.config.upper_projection_target_aggregation
+        ),
+    )
     rewards: list[float] = []
     upper_credits: list[float] = []
     lower_credits: list[float] = []
