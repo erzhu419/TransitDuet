@@ -3887,3 +3887,20 @@ stages, and disjoint exact seed rosters. It applies the same effect, mechanism,
 CI, and direction thresholds as development. Only a passing confirmation is
 claim-eligible; a failed confirmation cannot be rescued by another V33
 candidate or a modified threshold.
+
+### Engineering-v33 development dispatch (2026-09-11)
+
+- Immutable source: commit
+  `49efda10410940155f79c738a7d52ec5d5da72bb` in detached worktree
+  `FreqDuet-v33-49efda1041-snapshot`.
+- Server regression: scheduler task `t92512` completed on `node001`; all seven
+  focused V33 config, lineage, gate, and submission tests passed.
+- Development tasks: `t92513` through `t92517`, pinned respectively to
+  `node001` through `node005`. The five scheduler shards cover all 36
+  config/train-seed jobs with eight workers per full shard.
+- Every task uses the isolated `freqduet-cpu-py310` environment. Training logs
+  and checkpoints remain on the compute nodes; only shard summaries are
+  configured for synchronization.
+- This record establishes launch provenance only. V33 remains scientifically
+  unresolved until strict aggregation and the preregistered development gate
+  complete; confirmation is not yet authorized.
