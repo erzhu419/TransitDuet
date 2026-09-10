@@ -185,16 +185,6 @@ V33_TIMESCALE_STABILITY_EXPECTED = {
         "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": -1,
     },
-    "F_freqduet_protocol_v6_v33_upperfreeze100_hiro": {
-        "freeze_lower_policy_after_ep": -1,
-        "freeze_lower_critic_after_ep": -1,
-        "freeze_upper_after_ep": 100,
-    },
-    "F_freqduet_protocol_v6_v33_bothfreeze100_hiro": {
-        "freeze_lower_policy_after_ep": 100,
-        "freeze_lower_critic_after_ep": -1,
-        "freeze_upper_after_ep": 100,
-    },
 }
 V33_TIMESCALE_STABILITY_CONFIGS = list(
     V33_TIMESCALE_STABILITY_EXPECTED)

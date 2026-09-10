@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit the frozen V33 timescale development matrix through scheduleurm."""
+"""Submit the frozen V33 lower-actor timescale matrix through scheduleurm."""
 
 from __future__ import annotations
 

@@ -25,18 +25,18 @@ from scripts.audit_protocol_v6_incremental_selection import (  # noqa: E402
 from scripts.run_freqduet_protocol_v2_matrix import resolved_config  # noqa: E402
 
 
-GATE_VERSION = "freqduet-v33-timescale-stability-development-v1"
+GATE_VERSION = "freqduet-v33-timescale-stability-development-v2"
 CONFIRMATION_GATE_VERSION = (
-    "freqduet-v33-timescale-stability-confirmation-v1")
-RUN_NAME = "protocol_v6_v33_timescale_ep200_s4_e4"
-CONFIRMATION_RUN_NAME = "protocol_v6_v33_timescale_confirm_ep200_s8_e8"
+    "freqduet-v33-timescale-stability-confirmation-v2")
+RUN_NAME = "protocol_v6_v33_lower_timescale_ep200_s4_e4"
+CONFIRMATION_RUN_NAME = (
+    "protocol_v6_v33_lower_timescale_confirm_ep200_s8_e8")
 MATCHED_CONTEXT = "F_freqduet_protocol_v6_avlcompact_hiro"
 CURRENT_MAIN = "F_freqduet_protocol_v6_confirmed_main_hiro"
 TRAIN_EPISODES = 200
 CHECKPOINT_EP = 199
 
-# Priority favors the latest lower-only freeze, then earlier lower-only freezes.
-# Upper-only and joint freezes remain causal mechanism controls.
+# Priority favors the latest lower-actor freeze, then earlier freezes.
 CANDIDATE_CONTRACTS = {
     "F_freqduet_protocol_v6_v33_lowerfreeze100_hiro": {
         "freeze_lower_policy_after_ep": 100,
@@ -53,16 +53,6 @@ CANDIDATE_CONTRACTS = {
         "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": -1,
     },
-    "F_freqduet_protocol_v6_v33_upperfreeze100_hiro": {
-        "freeze_lower_policy_after_ep": -1,
-        "freeze_lower_critic_after_ep": -1,
-        "freeze_upper_after_ep": 100,
-    },
-    "F_freqduet_protocol_v6_v33_bothfreeze100_hiro": {
-        "freeze_lower_policy_after_ep": 100,
-        "freeze_lower_critic_after_ep": -1,
-        "freeze_upper_after_ep": 100,
-    },
 }
 CANDIDATES = list(CANDIDATE_CONTRACTS)
 EXPECTED_CONFIGS = [
@@ -73,16 +63,16 @@ EXPECTED_CONFIGS = [
     *CANDIDATES,
 ]
 
-DISCOVERY_TRAIN_SEEDS = [37013, 37031, 37057, 37081]
-DISCOVERY_EVAL_SEEDS = [72011, 72029, 72047, 72071]
+DISCOVERY_TRAIN_SEEDS = [933013, 933031, 933059, 933083]
+DISCOVERY_EVAL_SEEDS = [934011, 934029, 934047, 934071]
 
 # Frozen before the development matrix is opened. Only one selected candidate
 # may use this roster, and only after an unchanged V33 development pass.
 CONFIRMATION_TRAIN_SEEDS = [
-    38013, 38037, 38057, 38081, 38101, 38119, 38143, 38167,
+    935013, 935037, 935063, 935087, 935111, 935133, 935159, 935181,
 ]
 CONFIRMATION_EVAL_SEEDS = [
-    73011, 73029, 73047, 73071, 73101, 73119, 73143, 73167,
+    936011, 936029, 936047, 936071, 936101, 936119, 936143, 936167,
 ]
 
 MAX_JOURNEY_CI_HIGH_MIN = 0.15
@@ -113,8 +103,12 @@ def validate_candidate_contracts() -> dict[str, bool]:
         role = str((candidate.get("protocol", {}) or {}).get("role", ""))
         checks[f"{name}:exact_freeze_schedule"] = (
             stability == expected_stability)
+        checks[f"{name}:lower_actor_freeze_is_registered"] = (
+            int(stability.get("freeze_lower_policy_after_ep", -1)) >= 0)
         checks[f"{name}:lower_critic_keeps_training"] = (
             stability.get("freeze_lower_critic_after_ep") == -1)
+        checks[f"{name}:upper_actor_and_critic_keep_training"] = (
+            stability.get("freeze_upper_after_ep") == -1)
         checks[f"{name}:explicit_exploratory_role"] = (
             role.startswith("exploratory_v33_"))
         checks[f"{name}:only_role_and_schedule_change"] = (

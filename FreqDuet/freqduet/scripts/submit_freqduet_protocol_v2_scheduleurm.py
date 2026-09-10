@@ -415,7 +415,7 @@ def main() -> None:
                 f"expected {len(bulk_specs)}, got {len(submitted_task_ids)}"
             )
 
-    print("\nAggregate after scheduler sync:")
+    print("\nAggregate from synchronized shard records:")
     print(
         "python3 scripts/run_freqduet_protocol_v2_matrix.py --aggregate-only "
         f"--configs {shlex.quote(','.join(configs))} "
@@ -424,8 +424,8 @@ def main() -> None:
         f"--eval-seeds {shlex.quote(','.join(map(str, eval_seeds)))} "
         f"--train-episodes {int(args.train_episodes)} "
         f"--stage {shlex.quote(args.stage)} "
-        f"--logs-dir {result_base}/logs_shards/shard_0000_0000 "
-        f"--aggregate-logs-dirs \"$(find {result_base}/logs_shards -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)\" "
+        f"--logs-dir {result_base}/shard_summaries/shard_0000_0000 "
+        f"--aggregate-logs-dirs \"$(find {result_base}/shard_summaries -mindepth 1 -maxdepth 1 -type d | sort | paste -sd, -)\" "
         f"--out-dir {result_base}/combined_summary")
     if args.dispatch and not args.dry_run:
         if not submitted_task_ids:

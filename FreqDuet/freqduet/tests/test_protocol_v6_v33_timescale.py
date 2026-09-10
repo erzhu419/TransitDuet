@@ -12,6 +12,7 @@ import pandas as pd
 
 from scripts.audit_protocol_v6_v33_timescale_screen import (
     CANDIDATES,
+    CANDIDATE_CONTRACTS,
     CONFIRMATION_EVAL_SEEDS,
     CONFIRMATION_TRAIN_SEEDS,
     CURRENT_MAIN,
@@ -115,8 +116,18 @@ class ProtocolV6V33TimescaleTest(unittest.TestCase):
         )
 
     def test_configs_change_only_role_and_registered_freeze_schedule(self):
+        self.assertEqual(len(CANDIDATES), 3)
         checks = validate_candidate_contracts()
         self.assertTrue(all(checks.values()))
+        for contract in CANDIDATES:
+            self.assertGreaterEqual(
+                int(CANDIDATE_CONTRACTS[contract][
+                    "freeze_lower_policy_after_ep"]), 0)
+            self.assertEqual(
+                CANDIDATE_CONTRACTS[contract][
+                    "freeze_lower_critic_after_ep"], -1)
+            self.assertEqual(
+                CANDIDATE_CONTRACTS[contract]["freeze_upper_after_ep"], -1)
         result = validate(EXPECTED_CONFIGS, allow_experimental=True)
         self.assertEqual(result["status"], "valid")
 

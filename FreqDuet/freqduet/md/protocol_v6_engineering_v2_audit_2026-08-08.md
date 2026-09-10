@@ -3843,22 +3843,22 @@ low-capacity terminal prefix selectors. V33 therefore tests training timescale,
 not another regularity coefficient, action guard, value rank, or gate change.
 
 Every candidate is an exact behavioral child of
-`F_freqduet_protocol_v6_confirmed_main_hiro`. Only actor-update timing changes;
-the harmonic prior, compact causal state, two-sided reward, seven holding
-actions, upper timetable, sampled execution, scenario, and zero-adjustment
-semantics remain identical. The five candidates freeze lower-policy updates at
-episode 40, 80, or 100, freeze upper-policy updates at episode 100, or freeze
-both policies at episode 100. Lower-critic updates continue in every candidate.
-The fixed priority is lower-100, lower-80, lower-40, upper-100, then both-100,
-favoring the latest and least invasive frequency-authority intervention.
+`F_freqduet_protocol_v6_confirmed_main_hiro`. Only lower-actor update timing
+changes; the lower critic, upper actor and critic, harmonic prior, compact
+causal state, two-sided reward, seven holding actions, upper timetable, sampled
+execution, scenario, and zero-adjustment semantics remain identical. The three
+candidates freeze lower-policy updates at episode 40, 80, or 100. The fixed
+priority is lower-100, lower-80, then lower-40, favoring the latest and least
+invasive intervention.
 
-The development matrix is
-`protocol_v6_v33_timescale_ep200_s4_e4`. It contains historical main,
-`noguard`, compact context-only, unfrozen confirmed main, and all five
-candidates. It trains for 200 episodes from four new policy seeds
-`37013,37031,37057,37081` and evaluates checkpoint 199 on four new common
-scenario seeds `72011,72029,72047,72071`, giving 36 training shards and 144
-frozen rollouts. Source search found no prior use of these seeds.
+The corrected development matrix is
+`protocol_v6_v33_lower_timescale_ep200_s4_e4`. It contains historical main,
+`noguard`, compact context-only, unfrozen confirmed main, and all three
+lower-actor candidates. It trains for 200 episodes from four new policy seeds
+`933013,933031,933059,933083` and evaluates checkpoint 199 on four new common
+scenario seeds `934011,934029,934047,934071`, giving 28 training jobs and 112
+frozen rollouts. Source and scheduler-record searches found no prior use of
+these exact seeds.
 
 The fail-closed V33 audit reuses the V8/V9 effect, mechanism, and long-training
 requirements unchanged: headway CV must improve over `noguard` by at least
@@ -3869,38 +3869,41 @@ zero-execution-adjustment gates must all pass. The first passing candidate in
 the fixed priority is selected. Development can authorize confirmation but is
 never claim-eligible.
 
-Before development outcomes are opened, the single-use confirmation roster is
-frozen to policy seeds
-`38013,38037,38057,38081,38101,38119,38143,38167` and scenario seeds
-`73011,73029,73047,73071,73101,73119,73143,73167`, again for 200 episodes and
-checkpoint 199. Only the one preselected schedule may use it. If no development
-candidate passes, V33 closes as a negative diagnosis and neither freeze point
-nor gate may be retuned on these results.
+Before corrected development outcomes are opened, the single-use confirmation
+roster is frozen to policy seeds
+`935013,935037,935063,935087,935111,935133,935159,935181` and scenario seeds
+`936011,936029,936047,936071,936101,936119,936143,936167`, again for 200
+episodes and checkpoint 199. Only the one preselected schedule may use it. If
+no development candidate passes, V33 closes as a negative diagnosis and
+neither freeze point nor gate may be retuned on these results.
 
 The confirmation matrix is preregistered as
-`protocol_v6_v33_timescale_confirm_ep200_s8_e8`. It contains historical main,
-`noguard`, compact context-only, unfrozen confirmed main, and exactly the first
-development candidate selected by the fixed priority. Its audit requires the
-development-manifest digest recorded by the gate, identical model-source,
+`protocol_v6_v33_lower_timescale_confirm_ep200_s8_e8`. It contains historical
+main, `noguard`, compact context-only, unfrozen confirmed main, and exactly the
+first development candidate selected by the fixed priority. Its audit requires
+the development-manifest digest recorded by the gate, identical model-source,
 analysis-source, scenario, and Git commit provenance, clean source on both
 stages, and disjoint exact seed rosters. It applies the same effect, mechanism,
 CI, and direction thresholds as development. Only a passing confirmation is
 claim-eligible; a failed confirmation cannot be rescued by another V33
 candidate or a modified threshold.
 
-### Engineering-v33 development dispatch (2026-09-11)
+### Engineering-v33 invalid dispatch record (2026-09-11)
 
 - Immutable source: commit
   `49efda10410940155f79c738a7d52ec5d5da72bb` in detached worktree
   `FreqDuet-v33-49efda1041-snapshot`.
 - Server regression: scheduler task `t92512` completed on `node001`; all seven
   focused V33 config, lineage, gate, and submission tests passed.
-- Development tasks: `t92513` through `t92517`, pinned respectively to
-  `node001` through `node005`. The five scheduler shards cover all 36
-  config/train-seed jobs with eight workers per full shard.
-- Every task uses the isolated `freqduet-cpu-py310` environment. Training logs
-  and checkpoints remain on the compute nodes; only shard summaries are
-  configured for synchronization.
-- This record establishes launch provenance only. V33 remains scientifically
-  unresolved until strict aggregation and the preregistered development gate
-  complete; confirmation is not yet authorized.
+- Development tasks `t92513` through `t92517` were cancelled before any outcome
+  metric was opened. Static review found that `freeze_upper_after_ep` suppresses
+  the full upper-trainer update, freezing both actor and critic. Because the
+  upper critic contributes HAAR/TPC lower-level shaping, the registered
+  upper-only and joint candidates did not isolate actor-update timing.
+- The cancelled matrix is protocol-invalid and supplies no scientific evidence.
+  Its old seed rosters are retired. The corrected V33-v2 protocol above contains
+  only lower-actor freezes, keeps both critics and the upper actor training, and
+  uses entirely new development and confirmation seeds.
+- Every task used the isolated `freqduet-cpu-py310` environment. Partial logs and
+  checkpoints from this invalid run may be deleted; they must not be aggregated
+  or used for candidate selection.

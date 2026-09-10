@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -16,6 +17,7 @@ from scripts.run_freqduet_protocol_v2_matrix import (
     V6_SAFETY_METRICS,
     analysis_metrics_for_frame,
     config_fingerprint,
+    export_shard_records,
     hierarchical_bootstrap,
     holm_adjusted_pvalues,
     paired_sign_flip_p,
@@ -248,6 +250,46 @@ class ProtocolV2MatrixTest(unittest.TestCase):
                 '"source_fingerprint":{"sha256":"' + "b" * 64 + '"}}')
             with self.assertRaisesRegex(ValueError, "do not match"):
                 validate_run_manifest(path, expected=expected)
+
+    def test_shard_export_contains_only_strict_aggregation_inputs(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "logs" / "candidate_seed7"
+            evaluation = source / "frozen_evaluation"
+            checkpoints = source / "checkpoints"
+            evaluation.mkdir(parents=True)
+            checkpoints.mkdir()
+            (source / "protocol_run_manifest.json").write_text(
+                json.dumps({"manifest_version": "freqduet-run-manifest-v2"}))
+            (evaluation / "evaluation.csv").write_text("eval_seed\n101\n")
+            (evaluation / "evaluation_manifest.json").write_text("{}\n")
+            (source / "diagnostics.csv").write_text("ep\n0\n")
+            (checkpoints / "lower_ep199.pt").write_bytes(b"checkpoint")
+
+            exported = export_shard_records(
+                [("candidate", 7, source)], root / "summary")
+
+            self.assertEqual(exported, [root / "summary/candidate_seed7"])
+            files = {
+                path.relative_to(exported[0]).as_posix()
+                for path in exported[0].rglob("*") if path.is_file()
+            }
+            self.assertEqual(files, {
+                "protocol_run_manifest.json",
+                "frozen_evaluation/evaluation.csv",
+                "frozen_evaluation/evaluation_manifest.json",
+            })
+
+    def test_shard_export_rejects_incomplete_evaluation_record(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "logs" / "candidate_seed7"
+            source.mkdir(parents=True)
+            (source / "protocol_run_manifest.json").write_text("{}\n")
+
+            with self.assertRaisesRegex(RuntimeError, "missing"):
+                export_shard_records(
+                    [("candidate", 7, source)], root / "summary")
 
 
 if __name__ == "__main__":

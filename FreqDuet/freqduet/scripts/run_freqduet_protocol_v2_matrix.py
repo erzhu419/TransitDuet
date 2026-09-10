@@ -253,6 +253,14 @@ SCENARIO_SOURCE_FILES = [
 ]
 MATRIX_STAGES = {"development", "confirmation", "exploratory"}
 
+# Keep scheduler pullback small: aggregation needs only these three files from
+# each training run, while checkpoints and diagnostics stay on the compute node.
+SHARD_EXPORT_FILES = [
+    Path(RUN_MANIFEST_NAME),
+    Path("frozen_evaluation/evaluation.csv"),
+    Path("frozen_evaluation/evaluation_manifest.json"),
+]
+
 
 def parse_csv(value, cast=str):
     return [cast(item.strip()) for item in str(value).split(",") if item.strip()]
@@ -572,6 +580,37 @@ def selected_jobs(
     lo = 0 if start is None else max(0, int(start))
     hi = len(jobs) if end is None else min(len(jobs), int(end))
     return jobs[lo:max(lo, hi)]
+
+
+def export_shard_records(
+    completed_jobs: list[tuple[str, int, Path]],
+    out_dir: Path,
+) -> list[Path]:
+    """Export the minimal validated artifacts needed for strict aggregation."""
+    out_dir = Path(out_dir)
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    destinations: list[Path] = []
+    seen: set[str] = set()
+    for _, _, source_dir in sorted(
+            completed_jobs, key=lambda item: (item[0], item[1])):
+        source_dir = Path(source_dir)
+        if source_dir.name in seen:
+            raise RuntimeError(
+                f"duplicate shard export run directory {source_dir.name}")
+        seen.add(source_dir.name)
+        destination = out_dir / source_dir.name
+        for relative in SHARD_EXPORT_FILES:
+            source = source_dir / relative
+            if not source.is_file():
+                raise RuntimeError(
+                    f"cannot export incomplete shard record: missing {source}")
+            target = destination / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+        destinations.append(destination)
+    return destinations
 
 
 def hierarchical_bootstrap(
@@ -1272,6 +1311,7 @@ def main() -> None:
     if missing_configs:
         raise SystemExit(f"missing configs: {missing_configs}")
     logs_dir = Path(args.logs_dir)
+    completed_jobs: list[tuple[str, int, Path]] = []
     if not args.aggregate_only:
         jobs = selected_jobs(configs, train_seeds, args.job_start, args.job_end)
         with ThreadPoolExecutor(max_workers=max(1, int(args.workers))) as pool:
@@ -1293,7 +1333,18 @@ def main() -> None:
             ]
             for future in as_completed(futures):
                 name, seed, path = future.result()
+                completed_jobs.append((name, seed, path))
                 print(f"DONE {name} train_seed={seed}: {path}")
+
+        if args.job_start is not None or args.job_end is not None:
+            exported = export_shard_records(
+                completed_jobs,
+                Path(args.out_dir),
+            )
+            print(
+                f"DONE shard records: {len(exported)} runs -> "
+                f"{Path(args.out_dir).resolve()}")
+            print("TASK_DONE")
 
     aggregate_logs_dirs = (
         parse_csv(args.aggregate_logs_dirs, Path)

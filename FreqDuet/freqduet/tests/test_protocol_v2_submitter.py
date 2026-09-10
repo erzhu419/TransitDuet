@@ -80,6 +80,11 @@ class ProtocolV2SubmitterTest(unittest.TestCase):
             "/logs_shards/" not in line.split("--result-dir", 1)[-1]
             for line in submit_lines
         ))
+        aggregate_line = next(
+            line for line in result.stdout.splitlines()
+            if "--aggregate-only" in line)
+        self.assertIn("/shard_summaries", aggregate_line)
+        self.assertNotIn("/logs_shards", aggregate_line)
 
     def test_none_result_sync_omits_scheduler_pullback(self):
         result = self.run_submitter("--result-sync", "none")
