@@ -40,18 +40,27 @@ CHECKPOINT_EP = 199
 CANDIDATE_CONTRACTS = {
     "F_freqduet_protocol_v6_v33_lowerfreeze100_hiro": {
         "freeze_lower_policy_after_ep": 100,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_lowerfreeze80_hiro": {
         "freeze_lower_policy_after_ep": 80,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_lowerfreeze40_hiro": {
         "freeze_lower_policy_after_ep": 40,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_upperfreeze100_hiro": {
+        "freeze_lower_policy_after_ep": -1,
+        "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": 100,
     },
     "F_freqduet_protocol_v6_v33_bothfreeze100_hiro": {
         "freeze_lower_policy_after_ep": 100,
+        "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": 100,
     },
 }
@@ -86,6 +95,7 @@ def _load_json(path: Path) -> dict[str, object]:
 
 def _without_timescale_contract(config: dict[str, object]) -> dict[str, object]:
     payload = deepcopy(config)
+    payload.pop("_name", None)
     protocol = payload.get("protocol", {}) or {}
     protocol.pop("role", None)
     training = payload.get("training", {}) or {}
@@ -104,7 +114,7 @@ def validate_candidate_contracts() -> dict[str, bool]:
         checks[f"{name}:exact_freeze_schedule"] = (
             stability == expected_stability)
         checks[f"{name}:lower_critic_keeps_training"] = (
-            "freeze_lower_critic_after_ep" not in stability)
+            stability.get("freeze_lower_critic_after_ep") == -1)
         checks[f"{name}:explicit_exploratory_role"] = (
             role.startswith("exploratory_v33_"))
         checks[f"{name}:only_role_and_schedule_change"] = (

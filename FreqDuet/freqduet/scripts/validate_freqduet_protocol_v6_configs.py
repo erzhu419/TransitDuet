@@ -172,18 +172,27 @@ V27_MULTISTEP_VALUE_CONFIGS = list(V27_MULTISTEP_VALUE_EXPECTED)
 V33_TIMESCALE_STABILITY_EXPECTED = {
     "F_freqduet_protocol_v6_v33_lowerfreeze100_hiro": {
         "freeze_lower_policy_after_ep": 100,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_lowerfreeze80_hiro": {
         "freeze_lower_policy_after_ep": 80,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_lowerfreeze40_hiro": {
         "freeze_lower_policy_after_ep": 40,
+        "freeze_lower_critic_after_ep": -1,
+        "freeze_upper_after_ep": -1,
     },
     "F_freqduet_protocol_v6_v33_upperfreeze100_hiro": {
+        "freeze_lower_policy_after_ep": -1,
+        "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": 100,
     },
     "F_freqduet_protocol_v6_v33_bothfreeze100_hiro": {
         "freeze_lower_policy_after_ep": 100,
+        "freeze_lower_critic_after_ep": -1,
         "freeze_upper_after_ep": 100,
     },
 }
@@ -339,7 +348,7 @@ def validate(
                     "exploratory_v33_"):
                 raise ValueError(
                     f"{name}: V33 role is not explicit")
-            if "freeze_lower_critic_after_ep" in stability:
+            if stability.get("freeze_lower_critic_after_ep") != -1:
                 raise ValueError(
                     f"{name}: V33 lower critic must keep training")
         if name in V26_FOLLOWER_CALIBRATION_EXPECTED:
