@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import shutil
 import sys
 from pathlib import Path
 from typing import Any, Iterable
@@ -231,7 +230,7 @@ def confirmation_figure(
         layout="constrained",
     )
     phase_labels = [
-        "V8, 40 episodes\nconfirmed",
+        "V8, 40 episodes\ngate-positive",
         "V9, 200 episodes\nnot confirmed",
     ]
     phase_colors = [TEAL, AMBER]
@@ -323,10 +322,12 @@ current policy additionally uses compact APC/AVL context and the two-sided
 departure-regularity objective, so this is a combined-policy comparison rather
 than an isolated guard effect. Lower values favor the current policy. V8 contains 24
 paired rollouts (six training seeds by four untouched evaluation seeds) and
-passed the registered confirmation gate. V9 contains 64 paired rollouts (eight
-by eight); its passenger-journey interval favored FreqDuet, but the headway-CV
-effect did not meet the registered magnitude and interval gate, so V9 is
-reported as not confirmed.
+passed the registered effect/no-harm gate. Its Holm-adjusted training-seed
+sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather
+than familywise significant. V9 contains 64 paired rollouts (eight by eight);
+its passenger-journey interval favored FreqDuet, but the headway-CV effect did
+not meet the registered magnitude and interval gate, so V9 is reported as not
+confirmed.
 
 ## Figure 3 | External baseline trade-off under the V9 source contract
 
@@ -341,9 +342,10 @@ encoded as significance symbols in the figure.
 """)
     (out_dir / "figure_qa.md").write_text("""# Protocol V6 Figure QA
 
-- Core conclusion: V8 confirms a short-horizon regularity effect with journey
-  no-harm; V9 does not confirm the long-training gate; the external comparison
-  is a service-regularity versus passenger-journey trade-off.
+- Core conclusion: V8 passes the registered short-horizon effect/no-harm gate,
+  but its Holm-adjusted sign-flip p-value is 0.125; V9 does not confirm the
+  long-training gate; the external comparison is a service-regularity versus
+  passenger-journey trade-off.
 - Evidence chain: Figure 2 keeps V8 and V9 separate and labels the historical
   `noguard` config as the protocol reference; Figure 3 uses only the
   source-identical V9 external comparison.
@@ -381,15 +383,19 @@ def build_figures(
 
     sources = validate_tables(package_dir)
     out_dir = package_dir / "figures"
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
-    out_dir.mkdir(parents=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for stem in (
+        "fig2_protocol_v6_confirmation_robustness",
+        "fig3_protocol_v6_external_tradeoff",
+    ):
+        for extension in DEFAULT_FORMATS:
+            (out_dir / f"{stem}.{extension}").unlink(missing_ok=True)
     configure_matplotlib()
     figure2 = confirmation_figure(sources, out_dir, formats)
     figure3 = external_figure(sources, out_dir, formats)
     write_notes(out_dir)
     manifest = {
-        "manifest_version": "freqduet-protocol-v6-result-figures-v1",
+        "manifest_version": "freqduet-protocol-v6-result-figures-v2",
         "protocol": PROTOCOL,
         "paper_controller": PAPER_CONTROLLER,
         "backend": "python-matplotlib",

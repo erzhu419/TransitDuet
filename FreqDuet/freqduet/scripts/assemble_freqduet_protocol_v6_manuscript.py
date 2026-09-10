@@ -23,11 +23,35 @@ DEFAULT_PACKAGE = (
     ROOT / "results_freqduet" / "paper_package" / "protocol_v6_current_best"
 )
 DEFAULT_OUT = ROOT.parent / "paper" / "protocol_v6"
+EDITORIAL_SOURCE_DIR = ROOT / "paper_sources" / "protocol_v6"
 
 PROTOCOL = "freqduet-eval-v6"
 PAPER_CONTROLLER = "F_freqduet_protocol_v6_confirmed_main_hiro"
 SOURCE_CANDIDATE = "F_freqduet_protocol_v6_avlcompact_w2_hiro"
 REFERENCE = "F_freqduet_protocol_v6_noguard_hiro"
+TITLE = "FreqDuet: Causally Observed Frequency Allocation for Hierarchical Bus Timetable and Holding Control"
+KEYWORDS = (
+    "bus holding",
+    "hierarchical reinforcement learning",
+    "demand decomposition",
+    "causal observation",
+    "headway control",
+    "reproducibility",
+)
+EDITORIAL_FILES = (
+    "introduction.md",
+    "related_work.md",
+    "discussion.md",
+    "conclusion.md",
+    "availability.md",
+    "terminology.md",
+    "literature_verification.md",
+    "journal_target.md",
+    "references.bib",
+    "elsarticle-template.tex",
+    "supplementary-template.tex",
+    "build_trc_submission.sh",
+)
 FIGURE_STEMS = {
     1: "method",
     2: "confirmation_robustness",
@@ -135,6 +159,62 @@ def one_row(rows: Iterable[dict[str, str]], **matches: str) -> dict[str, str]:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def bibliography_keys(bibliography: str) -> set[str]:
+    return set(
+        re.findall(r"^@\w+\s*\{\s*([^,\s]+)", bibliography, re.MULTILINE)
+    )
+
+
+def citation_keys(markdown: str) -> set[str]:
+    return set(
+        re.findall(r"(?<![A-Za-z0-9_])@([A-Za-z0-9_:-]+)", markdown)
+    )
+
+
+def require_resolved_citations(markdown: str, bibliography: str) -> None:
+    missing = sorted(citation_keys(markdown) - bibliography_keys(bibliography))
+    require(not missing, f"missing bibliography keys: {', '.join(missing)}")
+
+
+def read_editorial_sources(source_dir: Path = EDITORIAL_SOURCE_DIR) -> dict[str, str]:
+    sources: dict[str, str] = {}
+    for name in EDITORIAL_FILES:
+        path = source_dir / name
+        require(path.is_file(), f"missing editorial source: {name}")
+        sources[name] = path.read_text()
+
+    expected_headings = {
+        "introduction.md": "# Introduction",
+        "related_work.md": "# Related Work",
+        "discussion.md": "# Discussion",
+        "conclusion.md": "# Conclusions",
+        "availability.md": "# Data and Code Availability",
+    }
+    for name, heading in expected_headings.items():
+        require(sources[name].startswith(heading), f"unexpected heading in {name}")
+
+    require_resolved_citations(
+        "\n".join(
+            sources[name]
+            for name in ("introduction.md", "related_work.md", "discussion.md")
+        ),
+        sources["references.bib"],
+    )
+    require(
+        "The experiments do not establish that this interface caused" in sources["discussion.md"],
+        "frequency-claim boundary is missing from Discussion",
+    )
+    require(
+        "V9 did not confirm" in sources["discussion.md"],
+        "V9 failure is missing from Discussion",
+    )
+    require(
+        "fixed headway remained better" in sources["conclusion.md"],
+        "fixed-headway trade-off is missing from Conclusions",
+    )
+    return sources
 
 
 def validate_package(package_dir: Path) -> dict[str, Any]:
@@ -246,6 +326,7 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
         "fig5_protocol_v6_external_realism",
     ):
         require((package_dir / "figures" / f"{stem}.png").is_file(), f"missing figure: {stem}.png")
+        require((package_dir / "figures" / f"{stem}.pdf").is_file(), f"missing figure: {stem}.pdf")
 
     return {
         "status": status,
@@ -405,6 +486,116 @@ def copy_figure_previews(package_dir: Path, out_dir: Path) -> list[str]:
     return relative_paths
 
 
+def copy_submission_figures(package_dir: Path, submission_dir: Path) -> list[str]:
+    relative_paths = []
+    for index, stem in FIGURE_STEMS.items():
+        filename = f"fig{index}_protocol_v6_{stem}.pdf"
+        source = package_dir / "figures" / filename
+        require(source.is_file(), f"missing publication figure: {filename}")
+        target = submission_dir / filename
+        shutil.copyfile(source, target)
+        relative_paths.append((Path("trc_submission") / filename).as_posix())
+    return relative_paths
+
+
+def submission_markdown(parts: Iterable[str]) -> str:
+    manuscript = "\n\n".join(part.strip() for part in parts) + "\n"
+    for index, stem in FIGURE_STEMS.items():
+        manuscript = manuscript.replace(
+            f"figures/fig{index}_protocol_v6_{stem}.png",
+            f"fig{index}_protocol_v6_{stem}.pdf",
+        )
+    return manuscript
+
+
+def metadata_yaml(data: dict[str, Any]) -> str:
+    abstract = abstract_body(data).strip()
+    abstract_lines = "\n".join(f"  {line}" if line else "" for line in abstract.splitlines())
+    keywords = "\n".join(f"  - {json.dumps(keyword)}" for keyword in KEYWORDS)
+    return f"title: {json.dumps(TITLE)}\nabstract: |\n{abstract_lines}\nkeywords:\n{keywords}\n"
+
+
+def highlights_text() -> str:
+    highlights = (
+        "A causal demand filter assigns slow and fast signals to different bus controls.",
+        "The controller passed a preregistered short-training regularity gate.",
+        "Long training did not retain the registered regularity gain.",
+        "Fixed headway gave shorter journeys and fewer fleet readiness delays.",
+    )
+    require(all(len(item) <= 85 for item in highlights), "Elsevier highlight exceeds 85 characters")
+    return "\n".join(f"- {item}" for item in highlights) + "\n"
+
+
+def trc_readme_text() -> str:
+    return """# Anonymous TRC Working Bundle
+
+This flat directory is generated from the frozen Protocol V6 evidence package.
+On a server with the isolated paper toolchain, run:
+
+```bash
+./build.sh
+```
+
+The command writes `manuscript.tex`, `manuscript.pdf`, `supplementary.tex`, and
+`supplementary.pdf`. A successful build means that the prose, citations,
+tables, and figure paths compile. It does not override the failed V9
+long-training gate. Before submission, replace anonymous metadata and re-check
+the current TRC submission portal requirements.
+`highlights.txt` is the source text for four Elsevier-length bullets; convert it
+to the portal's required upload format at final submission.
+"""
+
+
+def write_submission_bundle(
+    package_dir: Path,
+    out_dir: Path,
+    data: dict[str, Any],
+    sources: dict[str, str],
+    manuscript_body: str,
+    supplementary: str,
+) -> list[str]:
+    submission_dir = out_dir / "trc_submission"
+    submission_dir.mkdir(parents=True, exist_ok=True)
+    for stale in (
+        "manuscript.tex",
+        "manuscript.pdf",
+        "manuscript.log",
+        "manuscript.aux",
+        "manuscript.bbl",
+        "manuscript.blg",
+        "supplementary.tex",
+        "supplementary.pdf",
+        "supplementary.log",
+        "supplementary.aux",
+    ):
+        (submission_dir / stale).unlink(missing_ok=True)
+
+    supplementary_prefix = "# Supplementary Material\n\n"
+    require(
+        supplementary.startswith(supplementary_prefix),
+        "supplementary title is missing",
+    )
+    files = {
+        "manuscript_body.md": manuscript_body,
+        "supplementary_body.md": supplementary[len(supplementary_prefix):],
+        "metadata.yaml": metadata_yaml(data),
+        "references.bib": sources["references.bib"],
+        "elsarticle-template.tex": sources["elsarticle-template.tex"],
+        "supplementary-template.tex": sources["supplementary-template.tex"],
+        "build.sh": sources["build_trc_submission.sh"],
+        "README.md": trc_readme_text(),
+        "highlights.txt": highlights_text(),
+    }
+    outputs = []
+    for name, content in files.items():
+        target = submission_dir / name
+        target.write_text(content)
+        outputs.append((Path("trc_submission") / name).as_posix())
+    (submission_dir / "build.sh").chmod(0o755)
+    outputs.extend(copy_submission_figures(package_dir, submission_dir))
+    return outputs
+
+
 def source_package_label(package_dir: Path) -> str:
     resolved = package_dir.resolve()
     try:
@@ -427,18 +618,42 @@ upper policy changes an executable target-headway plan at dispatch events; the
 lower policy chooses holding at station-arrival events. One upper decision can
 therefore span many lower decisions. The current paper controller is
 `{PAPER_CONTROLLER}` under `{PROTOCOL}`. It is the exact naming alias of the
-compact APC/AVL, weight-two controller selected and independently confirmed in
-V8.
+compact APC/AVL, weight-two controller that passed the preregistered V8 gate.
 
 ![Figure 1. Causal frequency-to-authority architecture.]({figure_path})
 
-The simulated bidirectional service operates from
+## Simulation environment and common random numbers
+
+The simulator advances in 1-s steps on one bidirectional corridor with 22
+physical stops (two terminals and 20 intermediate stops) and 42 directed
+inter-stop links. Each direction is 10.5 km long, comprising 21 links of 500 m.
+The input timetable contains 262 trips, split equally between directions.
+Service operates from
 {method['service_start_hour']:02d}:00 to {method['service_end_hour']:02d}:00
 with a {method['clearance_time_s'] / 3600:g}-hour clearance period, all
-scheduled trips, and a fixed pool of {method['fleet_size']}
-physical vehicles. Passenger arrivals are generated from the local historical
-OD-intensity table. The public AFC/APC data are used only for the separate
-realism audit and do not calibrate the evaluated policy.
+scheduled trips, a fixed pool of {method['fleet_size']} physical vehicles, and
+a capacity of 50 passengers per vehicle.
+
+Passenger demand comes from a 20-origin by 14-hour by 20-destination historical
+OD-intensity table. Every 20 s, the simulator draws an independent Poisson count
+for each active OD cell and assigns each generated passenger a uniform arrival
+time within that window. A passenger remains latent until its assigned arrival
+time has elapsed. Each service-hour intensity is multiplied by a
+`Normal(1, 0.15)` draw clipped to `[0.3, 2.0]`; the historical peak profile is
+also shifted by -1, 0, or +1 hour with probabilities 0.2, 0.6, and 0.2. Segment
+speed limits update every 300 s by adding Gaussian variation with standard
+deviation 1.5 to the corresponding hourly route-history value, clipping the
+draw to `[2, 15]`, and applying the segment maximum. An inherited corridor
+calibration multiplies reverse-direction OD intensities at X13--X15 by 0.4 for
+every policy.
+
+All exogenous draws are supplied by a policy-independent scenario tape keyed by
+evaluation seed and process identity. Passenger counts and arrival times,
+hourly demand multipliers, peak shifts, and fixed-clock route-speed streams
+therefore remain aligned across paired policies even when their action and
+learning call sequences differ. V8 and V9 use identical tapes within each
+policy pair. The public AFC/APC data are used only for the separate realism
+audit and do not calibrate the evaluated policy.
 
 ## Causal harmonic demand decomposition
 
@@ -497,8 +712,9 @@ terminal times are logged separately, and terminal shifts are bounded to
 ## Discrete lower holding and regularity reward
 
 At each eligible station arrival, the lower categorical ensemble policy
-chooses holding from `{{{actions}}}` s. The sampled action is sent to the
-environment without a post-policy projection. The lower state includes the
+chooses holding from `{{{actions}}}` s. Training samples from the policy;
+frozen evaluation uses its deterministic output. The chosen action is sent to
+the environment without a post-policy projection. The lower state includes the
 analytic balancing target derived from a matched predecessor departure and a
 same-time AVL estimate of the following vehicle.
 
@@ -520,7 +736,8 @@ vehicle states.
 
 ## Learning architecture
 
-Both levels use off-policy soft actor-critic variants. The upper
+Both levels use off-policy soft actor-critic variants
+[@haarnoja2018soft]. The upper
 `{method['upper_algorithm']}` uses a pessimistic
 {method['upper_ensemble_size']}-critic ensemble, discount
 {method['upper_discount']:g}, a {method['upper_hidden_dim']}-unit hidden
@@ -532,11 +749,45 @@ representation, batch size {method['upper_batch_size']}, and
 representation, batch size {method['lower_batch_size']}, and
 {method['lower_updates_per_episode']} updates per episode. Both learning rates
 are `{method['upper_learning_rate']:g}`; the lower dual learning rate is
-`{method['lower_dual_learning_rate']:g}`. The upper policy begins after a
+`{method['lower_dual_learning_rate']:g}`. The lower policy's learned constraint
+cost is optimized through a Lagrange multiplier, following the constrained-RL
+formulation [@miryoosefi2019constraints]. The upper policy begins after a
 {method['upper_warmup_episodes']}-episode lower
 warm-up. V8 trains for 40 episodes and evaluates checkpoint 39; V9 trains
 without policy or critic freezing for 200 episodes and evaluates checkpoint
-199.
+199. Both upper and lower actors are deterministic during frozen evaluation,
+and the evaluator rejects any change in deployment state across evaluation
+seeds.
+
+## External comparators
+
+Three non-learned comparators use the same V6 environment, fixed 12-vehicle
+pool, timetable, evaluation seeds, scenario tapes, and exact terminal-release
+semantics as the learned controller. `fixed_headway` installs a 360-s terminal
+headway in both directions and commands zero intermediate holding.
+`rule_holding` uses the same 360-s terminal schedule and applies
+
+```text
+a = clip(360 - g_f, 0, 60),
+```
+
+where `g_f` is the observed forward headway in seconds. `rule_mpc` uses that
+same lower holding law and re-evaluates a 60-candidate time-of-day headway grid
+at dispatch events. Peak candidates are `{{240, 300, 360, 420, 480}}` s,
+off-peak candidates are `{{360, 480, 600, 720}}` s, and transition candidates
+are `{{300, 360, 420}}` s. Given a seeded episode-level demand proxy `d`, with
+`d ~ clip(Normal(1, 0.15), 0.3, 2.0)`, its slot-specific surrogate is
+
+```text
+H_ideal = clip(360 / d, 240, 600)
+J(H) = H / 2 + 0.001 max(0, H - H_ideal)^2
+       + 5 max(0, 6000 / H - 12)^2.
+```
+
+The minimizing candidate is converted to an exact launch sequence before
+simulation. This rule-MPC is a transparent low-fidelity comparator, not a claim
+to represent an optimally tuned or simulator-aware MPC. The fixed-headway
+policy is the strong external comparator in this study.
 
 ## Outcomes
 
@@ -580,7 +831,10 @@ Uncertainty uses a crossed bootstrap over training and evaluation seeds while
 sharing each evaluation-seed resample across paired policies. Two-sided
 sign-flip tests operate on training-seed mean differences, with Holm correction
 within each metric family. Lower values favor FreqDuet for every reported
-outcome. The V8 and V9 estimates are kept separate and are never pooled.
+outcome. For each external comparator, its eight evaluation-seed realizations
+are crossed with the eight V9 learned training seeds, yielding 64 paired rows;
+the crossed analysis retains training seed as the independent policy-training
+unit. The V8 and V9 estimates are kept separate and are never pooled.
 """
 
 
@@ -622,14 +876,18 @@ def manuscript_results(
 
 ## Independent confirmation at 40 episodes
 
-V8 confirmed the registered regularity effect of the complete current policy
+V8 passed the registered effect/no-harm gate for the complete current policy
 (Fig. 2; Table 1). Relative to the Protocol V6 reference, headway CV changed by
-{effect(v8_cv, 'delta_candidate_minus_reference', 'headway_cv')}. Restricted
+{effect(v8_cv, 'delta_candidate_minus_reference', 'headway_cv')}. Its
+crossed-bootstrap interval excluded zero, whereas the Holm-adjusted
+training-seed sign-flip result was
+$p={p_value(v8_cv['paired_signflip_p_holm'])}$. Restricted
 passenger journey changed by
 {effect(v8_journey, 'delta_candidate_minus_reference', 'passenger_journey_min')}
 min. The latter interval crossed zero but satisfied the preregistered journey
-no-harm margin. Thus V8 supports a short-training regularity improvement; it
-does not establish a passenger-journey benefit.
+no-harm margin. Thus V8 is gate-positive under its preregistered criteria; it
+is not a familywise-significant effect at 0.05 and does not establish a
+passenger-journey benefit.
 
 ![Figure 2. Independent confirmation and long-training robustness.]({figures[2]})
 
@@ -717,22 +975,10 @@ plausibility. They are not same-day calibration, route-family policy tests, or
 field-effect estimates.
 
 ![Figure 5. External passenger-count demand-shape audit.]({figures[5]})
-
-## Interpretation
-
-The current evidence establishes one positive and one negative result. A
-compact, causally observable APC/AVL state plus a two-sided local regularity
-reward improved headway regularity at 40 episodes without violating the
-journey no-harm gate. The same registered regularity effect was not robustly
-confirmed after 200 episodes, although passenger journey improved relative to
-the Protocol V6 reference. Moreover, the confirmatory contrast retains the
-same harmonic frequency pathway in both arms. It therefore evaluates the
-complete current controller and does not, by itself, identify the causal effect
-of frequency separation versus no-frequency or raw-history control.
 """
 
 
-def abstract_text(data: dict[str, Any]) -> str:
+def abstract_body(data: dict[str, Any]) -> str:
     v8_cv = one_row(data["v8"], metric="headway_cv")
     v8_journey = one_row(data["v8"], metric="passenger_journey_min")
     v9_cv = one_row(data["v9"], metric="headway_cv")
@@ -740,37 +986,37 @@ def abstract_text(data: dict[str, Any]) -> str:
     fixed_journey = one_row(
         data["external"], baseline="fixed_headway", metric="passenger_journey_min"
     )
-    return f"""# FreqDuet: Causal Frequency Allocation for Hierarchical Bus Timetable and Holding Control
-
-## Abstract
-
-Hierarchical transit controllers act at different temporal and physical scales,
-but commonly expose the same unstructured demand signal to every policy.
-FreqDuet instead estimates demand causally from completed APC bins, sends a
+    return f"""Bus timetable planning and station-level holding operate at
+different temporal and physical scales, creating an information-allocation
+problem for a learned hierarchy.
+FreqDuet estimates demand causally from completed APC bins, sends a
 harmonic low-frequency state to an executable upper headway planner, and sends
 station-local innovations plus compact APC/AVL context to a discrete lower
 holding policy. In an independent 40-episode confirmation with 24 paired
 rollouts, the complete current controller changed headway coefficient of
 variation by {effect(v8_cv, 'delta_candidate_minus_reference', 'headway_cv')}
-relative to a same-protocol reference, while restricted passenger journey
-changed by
+relative to a same-protocol reference. The bootstrap interval excluded zero,
+whereas the Holm-adjusted training-seed sign-flip result was
+$p={p_value(v8_cv['paired_signflip_p_holm'])}$. Restricted passenger journey changed by
 {effect(v8_journey, 'delta_candidate_minus_reference', 'passenger_journey_min')}
 min and satisfied the registered no-harm condition. In a separate 200-episode,
 64-pair robustness test, journey improved by
 {effect(v9_journey, 'delta_candidate_minus_reference', 'passenger_journey_min')}
-min, but the headway effect weakened to
+min (Holm-adjusted $p={p_value(v9_journey['paired_signflip_p_holm'])}$), but the headway effect weakened to
 {effect(v9_cv, 'delta_candidate_minus_reference', 'headway_cv')} and failed the
 registered long-training gate. Against fixed headway, FreqDuet was more regular
 but increased passenger journey by
 {effect(fixed_journey, 'delta_learned_minus_baseline', 'passenger_journey_min')}
-min. The results demonstrate a short-training regularity effect and expose its
-training-horizon and passenger-service limits; they do not establish long-run
-regularity confirmation, fixed-headway passenger superiority, or an isolated
-causal effect of frequency separation.
-
-**Keywords:** bus holding; hierarchical reinforcement learning; demand
-decomposition; causal observation; headway control; reproducibility
+min. The results support a registered gate-positive short-training regularity
+signal and expose its training-horizon and passenger-service limits; they do not establish
+long-run regularity confirmation, passenger-service superiority over fixed
+headway, or an isolated causal effect of frequency separation.
 """
+
+
+def abstract_text(data: dict[str, Any]) -> str:
+    keywords = "; ".join(KEYWORDS)
+    return f"# {TITLE}\n\n## Abstract\n\n{abstract_body(data)}\n\n**Keywords:** {keywords}\n"
 
 
 def supplementary_text(
@@ -802,9 +1048,10 @@ def supplementary_text(
 
 ## S1. Frozen evidence and decision ledger
 
-The current paper package binds the successful V8 confirmation and failed V9
+The current paper package binds the gate-positive V8 decision and failed V9
 long-training gate. They use disjoint training and evaluation seeds and are not
-pooled.
+pooled. The V8 decision label records its preregistered effect/no-harm gate; it
+does not imply a familywise-significant result at 0.05.
 
 {decision_table}
 
@@ -926,11 +1173,20 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 
 ## Contents
 
+- `introduction.md` and `related_work.md`: source-grounded positioning.
 - `methods.md`: current method and evaluation protocol.
 - `results.md`: evidence-bound main results and two main tables.
-- `manuscript.md`: assembled title, abstract, Methods, and Results.
+- `discussion.md` and `conclusion.md`: interpretation and claim boundaries.
+- `availability.md`: evidence, public-data, and archive-status statement.
+- `manuscript.md`: complete assembled article draft.
 - `supplementary.md`: full outcomes, configuration lineage, statistical
   procedure, negative-result boundary, and external-data provenance.
+- `references.bib`: verified working bibliography.
+- `terminology.md`: canonical paper terms and prohibited conflations.
+- `literature_verification.md`: primary-record bibliography audit.
+- `journal_target.md`: target-journal fit and formatting decision.
+- `trc_submission/`: flat anonymous `elsarticle` working bundle with separate
+  manuscript and Supplementary Material builds.
 - `tables/`: standalone Markdown and LaTeX table fragments.
 - `figures/`: portable review PNGs for Figures 1-5; publication-format exports
   remain in the frozen evidence package.
@@ -940,19 +1196,18 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 ## Scientific status
 
 The manuscript uses `{PAPER_CONTROLLER}` as the current best controller. V8
-confirmed its 40-episode headway-regularity effect with passenger-journey
-no-harm. V9 did not confirm the registered 200-episode regularity gate. The V9
+passed its registered 40-episode effect/no-harm gate, although its
+Holm-adjusted training-seed sign-flip result is $p=0.125$. V9 did not confirm
+the registered 200-episode regularity gate. The V9
 fixed-headway comparison is a trade-off, not a passenger-journey superiority
-result. The package therefore remains on submission hold.
-
-The present assembly covers Methods, Results, tables, captions, and
-Supplementary Material. Introduction/Related Work citations, author metadata,
-and a target-journal template remain separate editorial tasks; they must not
-change the empirical wording or the V8/V9 decision.
+result. The evidence status therefore remains `submission_ready: false`; adding
+editorial sections and a journal template does not override that scientific
+decision. Author metadata and the current portal-specific submission fields
+remain pre-submission tasks.
 """
 
 
-def ordered_figure_captions(package_dir: Path) -> str:
+def figure_caption_sections(package_dir: Path) -> dict[int, str]:
     sections: dict[int, str] = {}
     for name in ("supporting_captions.md", "captions.md"):
         source = (package_dir / "figures" / name).read_text()
@@ -965,6 +1220,40 @@ def ordered_figure_captions(package_dir: Path) -> str:
             require(index not in sections, f"duplicate Figure {index} caption")
             sections[index] = match.group(0).strip()
     require(set(sections) == set(range(1, 6)), "expected captions for Figures 1-5")
+    return sections
+
+
+def figure_caption_text(section: str) -> str:
+    heading, body = section.split("\n", maxsplit=1)
+    require(" | " in heading, f"unexpected figure caption heading: {heading}")
+    title = heading.split(" | ", maxsplit=1)[1].strip()
+    description = " ".join(body.split())
+    return f"{title}. {description}"
+
+
+def embed_figure_captions(
+    markdown: str,
+    sections: dict[int, str],
+    indices: Iterable[int],
+) -> str:
+    rendered = markdown
+    for index in indices:
+        caption = figure_caption_text(sections[index]).replace("]", r"\]")
+        pattern = re.compile(
+            rf"!\[Figure {index}\.[^\]]*\]\(([^)]+)\)"
+        )
+        rendered, replacements = pattern.subn(
+            lambda match: (
+                f"![{caption}]({match.group(1)})"
+                f"{{#fig:protocol-v6-{index}}}"
+            ),
+            rendered,
+        )
+        require(replacements == 1, f"expected one Figure {index} placeholder")
+    return rendered
+
+
+def ordered_figure_captions(sections: dict[int, str]) -> str:
     return "# Protocol V6 Figure Captions\n\n" + "\n\n".join(
         sections[index] for index in range(1, 6)
     ) + "\n"
@@ -972,6 +1261,8 @@ def ordered_figure_captions(package_dir: Path) -> str:
 
 def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
     data = validate_package(package_dir)
+    sources = read_editorial_sources()
+    caption_sections = figure_caption_sections(package_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "tables").mkdir(exist_ok=True)
 
@@ -983,32 +1274,73 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
     method_figure = relative_link(
         out_dir / "figures" / "fig1_protocol_v6_method.png", out_dir
     )
-    methods = manuscript_methods(data["method"], method_figure)
-    results = manuscript_results(data, main_md, external_md, out_dir)
+    methods = embed_figure_captions(
+        manuscript_methods(data["method"], method_figure),
+        caption_sections,
+        (1,),
+    )
+    results = embed_figure_captions(
+        manuscript_results(data, main_md, external_md, out_dir),
+        caption_sections,
+        (2, 3, 4, 5),
+    )
     abstract = abstract_text(data)
+    supplementary = supplementary_text(data, external_full_md, main_md)
+    article_sections = (
+        sources["introduction.md"],
+        sources["related_work.md"],
+        methods,
+        results,
+        sources["discussion.md"],
+        sources["conclusion.md"],
+        sources["availability.md"],
+    )
+    article_body = "\n\n".join(section.strip() for section in article_sections) + "\n"
+    require_resolved_citations(article_body, sources["references.bib"])
+    trc_body = submission_markdown(article_sections)
 
     outputs = {
         "README.md": readme_text(),
+        "introduction.md": sources["introduction.md"],
+        "related_work.md": sources["related_work.md"],
         "methods.md": methods,
         "results.md": results,
-        "manuscript.md": abstract + "\n\n" + methods + "\n\n" + results,
-        "supplementary.md": supplementary_text(data, external_full_md, main_md),
+        "discussion.md": sources["discussion.md"],
+        "conclusion.md": sources["conclusion.md"],
+        "availability.md": sources["availability.md"],
+        "manuscript.md": abstract.rstrip() + "\n\n" + article_body,
+        "supplementary.md": supplementary,
+        "references.bib": sources["references.bib"],
+        "terminology.md": sources["terminology.md"],
+        "literature_verification.md": sources["literature_verification.md"],
+        "journal_target.md": sources["journal_target.md"],
         "tables/table1_confirmation_and_robustness.md": main_md + "\n",
         "tables/table1_confirmation_and_robustness.tex": main_tex,
         "tables/table2_external_tradeoff.md": external_md + "\n",
         "tables/table2_external_tradeoff.tex": external_tex,
         "tables/table_s1_external_full.md": external_full_md + "\n",
         "tables/table_s1_external_full.tex": external_full_tex,
-        "figure_captions.md": ordered_figure_captions(package_dir),
+        "figure_captions.md": ordered_figure_captions(caption_sections),
     }
     for relative, content in outputs.items():
         path = out_dir / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
 
+    submission_outputs = write_submission_bundle(
+        package_dir,
+        out_dir,
+        data,
+        sources,
+        trc_body,
+        supplementary,
+    )
+
     manifest = {
-        "assembly_version": "freqduet-protocol-v6-manuscript-v1",
+        "assembly_version": "freqduet-protocol-v6-manuscript-v4",
         "protocol": PROTOCOL,
+        "target_journal": "Transportation Research Part C: Emerging Technologies",
+        "working_template": "elsarticle-preprint-authoryear",
         "paper_controller": PAPER_CONTROLLER,
         "source_candidate": SOURCE_CANDIDATE,
         "reference": REFERENCE,
@@ -1017,7 +1349,7 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
         "submission_ready": False,
         "submission_blocker": "v9_longtrain_not_confirmed",
         "source_package": source_package_label(package_dir),
-        "outputs": sorted([*outputs, *figure_outputs]),
+        "outputs": sorted([*outputs, *figure_outputs, *submission_outputs]),
     }
     (out_dir / "assembly_manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n"

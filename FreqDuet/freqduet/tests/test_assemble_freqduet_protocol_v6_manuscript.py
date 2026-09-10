@@ -186,6 +186,7 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             "fig5_protocol_v6_external_realism",
         ):
             (figures / f"{stem}.png").write_bytes(b"png")
+            (figures / f"{stem}.pdf").write_bytes(b"%PDF-1.4\n")
         (figures / "captions.md").write_text(
             "# Result captions\n\n## Figure 2 | Confirmation\n\nFigure two.\n\n"
             "## Figure 3 | External\n\nFigure three.\n"
@@ -205,21 +206,58 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         self.assertFalse(manifest["submission_ready"])
         methods = (self.out / "methods.md").read_text()
         results = (self.out / "results.md").read_text()
+        discussion = (self.out / "discussion.md").read_text()
+        manuscript = (self.out / "manuscript.md").read_text()
         supplement = (self.out / "supplementary.md").read_text()
+        methods_flat = " ".join(methods.split())
+        manuscript_flat = " ".join(manuscript.split())
         self.assertIn("promotion, leakage-penalty", methods)
         self.assertIn("C_R = W_R / 10", methods)
         self.assertIn("does not directly charge holding", methods)
+        self.assertIn("[@haarnoja2018soft]", methods)
+        self.assertIn("22 physical stops", methods_flat)
+        self.assertIn("Each direction is 10.5 km long", methods_flat)
+        self.assertIn("20-origin by 14-hour by 20-destination", methods_flat)
+        self.assertIn("policy-independent scenario tape", methods_flat)
+        self.assertIn("reverse-direction OD intensities at X13--X15 by 0.4", methods_flat)
+        self.assertIn("## External comparators", methods)
+        self.assertIn("transparent low-fidelity comparator", methods_flat)
+        self.assertIn("Both upper and lower actors are deterministic", methods_flat)
+        self.assertIn("passed the preregistered V8 gate", methods_flat)
         self.assertIn("longtrain_not_confirmed", results)
-        self.assertIn("does not, by itself, identify", results)
+        self.assertIn("gate-positive under its preregistered criteria", results)
+        self.assertIn("not a familywise-significant effect", results)
+        self.assertIn("do not establish that this interface caused", discussion)
+        self.assertIn("V9 did not confirm", discussion)
+        self.assertIn("Holm-adjusted $p=0.047$", discussion)
+        self.assertIn("sign-flip value is not used", discussion)
+        self.assertIn("does not establish superiority", discussion)
+        self.assertIn("was not re-estimated from the external data", discussion)
         self.assertIn("higher denied-trip rate", results)
         self.assertIn("cannot be interpreted as", results)
         self.assertIn("does not contain a same-stage NoFreq", supplement)
-        self.assertIn("## Abstract", (self.out / "manuscript.md").read_text())
+        self.assertIn("## Abstract", manuscript)
+        headings = [
+            "# Introduction",
+            "# Related Work",
+            "# Methods",
+            "# Results",
+            "# Discussion",
+            "# Conclusions",
+            "# Data and Code Availability",
+        ]
+        positions = [manuscript.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("Holm-adjusted training-seed sign-flip", manuscript_flat)
+        self.assertIn("does not establish a familywise-significant effect", manuscript_flat)
         self.assertIn(
             "figures/fig1_protocol_v6_method.png",
             methods,
         )
-        self.assertLess(results.index("Figure 3."), results.index("Figure 4."))
+        self.assertLess(
+            results.index("{#fig:protocol-v6-3}"),
+            results.index("{#fig:protocol-v6-4}"),
+        )
         captions = (self.out / "figure_captions.md").read_text()
         positions = [captions.index(f"## Figure {index} ") for index in range(1, 6)]
         self.assertEqual(positions, sorted(positions))
@@ -232,6 +270,51 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         )
         self.assertTrue((self.out / "tables" / "table1_confirmation_and_robustness.tex").is_file())
         self.assertTrue((self.out / "assembly_manifest.json").is_file())
+        self.assertTrue((self.out / "references.bib").is_file())
+        self.assertIn(
+            "not same-day AFC/APC/AVL",
+            (self.out / "availability.md").read_text(),
+        )
+        self.assertTrue((self.out / "literature_verification.md").is_file())
+        self.assertEqual(
+            manifest["target_journal"],
+            "Transportation Research Part C: Emerging Technologies",
+        )
+        submission = self.out / "trc_submission"
+        self.assertIn(
+            "fig1_protocol_v6_method.pdf",
+            (submission / "manuscript_body.md").read_text(),
+        )
+        submission_body = (submission / "manuscript_body.md").read_text()
+        self.assertIn("![Method. Figure one.]", submission_body)
+        self.assertNotIn("![Figure 1.", submission_body)
+        self.assertNotIn(
+            "figures/fig1_protocol_v6_method.png",
+            (submission / "manuscript_body.md").read_text(),
+        )
+        self.assertIn("long-training gate", (submission / "README.md").read_text())
+        self.assertTrue((submission / "elsarticle-template.tex").is_file())
+        self.assertTrue((submission / "supplementary-template.tex").is_file())
+        self.assertIn(
+            "## S1. Frozen evidence and decision ledger",
+            (submission / "supplementary_body.md").read_text(),
+        )
+        self.assertIn(
+            "supplementary.pdf",
+            (submission / "build.sh").read_text(),
+        )
+        self.assertTrue((submission / "build.sh").stat().st_mode & 0o111)
+        self.assertIn(
+            "passed a preregistered short-training regularity gate",
+            (submission / "highlights.txt").read_text(),
+        )
+        readme = (self.out / "README.md").read_text()
+        self.assertIn("submission_ready: false", readme)
+        self.assertIn("Holm-adjusted training-seed sign-flip result is $p=0.125$", readme)
+        self.assertEqual(
+            manifest["assembly_version"],
+            "freqduet-protocol-v6-manuscript-v4",
+        )
 
     def test_rejects_missing_v9_failure(self) -> None:
         status = json.loads((self.package / "evidence_status.json").read_text())

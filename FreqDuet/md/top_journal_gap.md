@@ -1,9 +1,12 @@
 # FreqDuet Top-Journal Gap Backlog
 
 > **2026-09-10 current-best closure:** algorithm selection is frozen at
-> `F_freqduet_protocol_v6_confirmed_main_hiro`. V8 supplies a successful
-> independent 40-episode confirmation; V9 is a mandatory negative 200-episode
-> robustness result. V28-V32 did not pass development gates. The current V6
+> `F_freqduet_protocol_v6_confirmed_main_hiro`. V8 passed its preregistered
+> 40-episode effect/no-harm gate (crossed-bootstrap headway-CV interval excludes
+> zero), but its Holm-adjusted training-seed sign-flip result is `p=0.125`. V9
+> found a passenger-journey improvement against the same internal reference
+> (`p=0.047` after Holm correction), while failing the registered 200-episode
+> regularity gate. V28-V32 did not pass development gates. The current V6
 > package now contains the five planned main figures, source data, captions,
 > exact method/config lineage, and machine-readable QA. The remaining hard gap
 > is scientific rather than packaging: either accept a paper whose long-training
@@ -11,17 +14,26 @@
 > The historical V1/composite package cannot replace current V6 evidence.
 
 > **2026-09-10 manuscript assembly:** the frozen Protocol V6 package now
-> generates a source-bound English Abstract, Methods, Results, two main tables,
-> full external-baseline supplement, ordered Figure 1-5 captions, and a
+> generates a source-bound full English manuscript: Abstract, Introduction,
+> Related Work, Methods, Results, Discussion, Conclusions, and Data and Code
+> Availability. It includes two main tables, the full external-baseline
+> supplement, ordered Figure 1-5 captions, 22 checked bibliography records, and a
 > machine-readable assembly manifest under `FreqDuet/paper/protocol_v6`.
-> Server tasks `t92109`, `t92117`, and `t92119` verified the assembler,
-> expanded method contract, controller-roster guard, and final ordered build.
-> This closes manuscript assembly, not the scientific hold: V9 remains
+> Server tasks `t92109`, `t92117`, `t92119`, `t92179`, and `t92185` verified the
+> assembler, expanded method contract, controller-roster guard, physical-network
+> specification, and initial source build. Tasks `t92236`, `t92336`, and
+> `t92369` then bounded the V8 figure label, removed the stale Figure 1
+> "confirmed configuration" wording, embedded full evidence-bearing captions
+> for all five figures, and passed the final v4 source assembly. A flat anonymous
+> TRC working bundle uses Elsevier `elsarticle`; isolated toolchain task `t92181`
+> is queued on `jtl110gpu2`, so server-side PDF compilation and visual QA remain
+> the final operational formatting check. This closes substantive manuscript
+> assembly, not the scientific hold: V9 remains
 > `longtrain_not_confirmed`, the
 > current package lacks a same-stage NoFreq/RawHistory/AllFreq confirmation,
 > and the public-data audit is not matched route/day policy calibration. The
-> remaining editorial work is Introduction/Related Work with verified
-> citations and placement in the selected journal template; it must preserve
+> remaining pre-submission work is author metadata, final language/layout review,
+> archival data/code deposition, and the journal-portal files; none can erase
 > these empirical boundaries.
 
 > **2026-08-08 historical submission hold:** this backlog records the historical V1-V4
@@ -64,10 +76,14 @@ YAML lineage and recorded in Figure 1 source data.
 
 Current evidence decision:
 
-- V8, 40 episodes: confirmed headway-CV benefit with no detected journey-time
-  harm under the preregistered gate;
-- V9, 200 episodes: passenger journey improves, but headway-CV uncertainty
-  crosses zero, so the long-training gate is not confirmed;
+- V8, 40 episodes: the crossed-bootstrap headway-CV interval excludes zero and
+  passenger journey meets the preregistered no-harm gate; the Holm-adjusted
+  training-seed sign-flip result is `p=0.125`, so this is not a
+  familywise-significant effect at `0.05`;
+- V9, 200 episodes: passenger journey improves against the internal reference
+  with Holm-adjusted `p=0.047`, but crossed-bootstrap headway-CV uncertainty
+  crosses zero, so the registered long-training regularity gate is not
+  confirmed;
 - external comparison: competitive service cost and headway regularity against
   fixed-headway, but worse passenger journey time; better journey time than the
   weaker rule-holding and rule-MPC baselines;
@@ -1343,7 +1359,7 @@ Done means:
 
 ### 10. Theoretical / Method Framing
 
-Status: `[~]` manuscript framing note drafted; final paper text pending
+Status: `[x]` framing integrated into the full English working manuscript
 
 The method framing is strong, but a top-journal paper needs a tighter
 assumption-and-mechanism explanation.
@@ -1353,7 +1369,16 @@ paper argument as frequency-separated HRL for exogenous time-series control
 rather than generic feature engineering. The note now covers causal filtering,
 LF/HF layer allocation, promotion, leakage/DriftFB, evidence hooks, rival
 explanations, and current limits. It is included in the paper package manifest;
-the remaining work is to turn it into polished manuscript sections.
+at that stage, the remaining work was to turn it into manuscript sections.
+
+2026-09-10 closure: the framing is now integrated across Introduction, Related
+Work, Methods, Discussion, and Conclusions under
+`FreqDuet/paper/protocol_v6`. The text distinguishes causal observation from a
+causal treatment-effect claim, describes the LF/HF authority interface, and
+states that the current bundled contrast does not isolate frequency allocation.
+The bibliography contains 22 checked records, and the working target/format is
+TRC with Elsevier `elsarticle`. Author metadata, final language/layout review,
+and portal submission remain editorial tasks rather than method-framing gaps.
 
 Done means:
 

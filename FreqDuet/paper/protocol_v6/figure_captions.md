@@ -12,7 +12,7 @@ headway budget. Station-local high-frequency innovations and
 compact same-time APC/AVL context enter the lower policy, which selects from
 seven discrete holding actions between 0 and 45 s. The two-sided regularity
 reward uses forward and follower departure gaps frozen before the action. In
-the current confirmed configuration, the legacy holding guard, promotion, and
+the current paper configuration, the legacy holding guard, promotion, and
 leakage penalty are disabled.
 
 ## Figure 2 | Independent confirmation and long-training robustness
@@ -25,10 +25,12 @@ current policy additionally uses compact APC/AVL context and the two-sided
 departure-regularity objective, so this is a combined-policy comparison rather
 than an isolated guard effect. Lower values favor the current policy. V8 contains 24
 paired rollouts (six training seeds by four untouched evaluation seeds) and
-passed the registered confirmation gate. V9 contains 64 paired rollouts (eight
-by eight); its passenger-journey interval favored FreqDuet, but the headway-CV
-effect did not meet the registered magnitude and interval gate, so V9 is
-reported as not confirmed.
+passed the registered effect/no-harm gate. Its Holm-adjusted training-seed
+sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather
+than familywise significant. V9 contains 64 paired rollouts (eight by eight);
+its passenger-journey interval favored FreqDuet, but the headway-CV effect did
+not meet the registered magnitude and interval gate, so V9 is reported as not
+confirmed.
 
 ## Figure 3 | External baseline trade-off under the V9 source contract
 

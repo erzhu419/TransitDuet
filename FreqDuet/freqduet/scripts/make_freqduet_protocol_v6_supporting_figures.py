@@ -861,7 +861,7 @@ headway budget. Station-local high-frequency innovations and
 compact same-time APC/AVL context enter the lower policy, which selects from
 seven discrete holding actions between 0 and 45 s. The two-sided regularity
 reward uses forward and follower departure gaps frozen before the action. In
-the current confirmed configuration, the legacy holding guard, promotion, and
+the current paper configuration, the legacy holding guard, promotion, and
 leakage penalty are disabled.
 
 ## Figure 4 | Paired physical outcomes of the current policy

@@ -135,6 +135,9 @@ class ProtocolV6SupportingFiguresTest(unittest.TestCase):
         self.assertTrue(
             (figures / "source_data" / "figure5_hourly_profiles.csv").is_file()
         )
+        captions = (figures / "supporting_captions.md").read_text()
+        self.assertIn("current paper configuration", captions)
+        self.assertNotIn("current confirmed configuration", captions)
 
     def test_rejects_missing_physical_metric(self) -> None:
         path = (

@@ -8,18 +8,42 @@ upper policy changes an executable target-headway plan at dispatch events; the
 lower policy chooses holding at station-arrival events. One upper decision can
 therefore span many lower decisions. The current paper controller is
 `F_freqduet_protocol_v6_confirmed_main_hiro` under `freqduet-eval-v6`. It is the exact naming alias of the
-compact APC/AVL, weight-two controller selected and independently confirmed in
-V8.
+compact APC/AVL, weight-two controller that passed the preregistered V8 gate.
 
-![Figure 1. Causal frequency-to-authority architecture.](figures/fig1_protocol_v6_method.png)
+![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](figures/fig1_protocol_v6_method.png){#fig:protocol-v6-1}
 
-The simulated bidirectional service operates from
+## Simulation environment and common random numbers
+
+The simulator advances in 1-s steps on one bidirectional corridor with 22
+physical stops (two terminals and 20 intermediate stops) and 42 directed
+inter-stop links. Each direction is 10.5 km long, comprising 21 links of 500 m.
+The input timetable contains 262 trips, split equally between directions.
+Service operates from
 06:00 to 19:00
 with a 4-hour clearance period, all
-scheduled trips, and a fixed pool of 12
-physical vehicles. Passenger arrivals are generated from the local historical
-OD-intensity table. The public AFC/APC data are used only for the separate
-realism audit and do not calibrate the evaluated policy.
+scheduled trips, a fixed pool of 12 physical vehicles, and
+a capacity of 50 passengers per vehicle.
+
+Passenger demand comes from a 20-origin by 14-hour by 20-destination historical
+OD-intensity table. Every 20 s, the simulator draws an independent Poisson count
+for each active OD cell and assigns each generated passenger a uniform arrival
+time within that window. A passenger remains latent until its assigned arrival
+time has elapsed. Each service-hour intensity is multiplied by a
+`Normal(1, 0.15)` draw clipped to `[0.3, 2.0]`; the historical peak profile is
+also shifted by -1, 0, or +1 hour with probabilities 0.2, 0.6, and 0.2. Segment
+speed limits update every 300 s by adding Gaussian variation with standard
+deviation 1.5 to the corresponding hourly route-history value, clipping the
+draw to `[2, 15]`, and applying the segment maximum. An inherited corridor
+calibration multiplies reverse-direction OD intensities at X13--X15 by 0.4 for
+every policy.
+
+All exogenous draws are supplied by a policy-independent scenario tape keyed by
+evaluation seed and process identity. Passenger counts and arrival times,
+hourly demand multipliers, peak shifts, and fixed-clock route-speed streams
+therefore remain aligned across paired policies even when their action and
+learning call sequences differ. V8 and V9 use identical tapes within each
+policy pair. The public AFC/APC data are used only for the separate realism
+audit and do not calibrate the evaluated policy.
 
 ## Causal harmonic demand decomposition
 
@@ -78,8 +102,9 @@ terminal times are logged separately, and terminal shifts are bounded to
 ## Discrete lower holding and regularity reward
 
 At each eligible station arrival, the lower categorical ensemble policy
-chooses holding from `{0, 5, 10, 15, 20, 30, 45}` s. The sampled action is sent to the
-environment without a post-policy projection. The lower state includes the
+chooses holding from `{0, 5, 10, 15, 20, 30, 45}` s. Training samples from the policy;
+frozen evaluation uses its deterministic output. The chosen action is sent to
+the environment without a post-policy projection. The lower state includes the
 analytic balancing target derived from a matched predecessor departure and a
 same-time AVL estimate of the following vehicle.
 
@@ -101,7 +126,8 @@ vehicle states.
 
 ## Learning architecture
 
-Both levels use off-policy soft actor-critic variants. The upper
+Both levels use off-policy soft actor-critic variants
+[@haarnoja2018soft]. The upper
 `pessimistic_ensemble_sac_v4` uses a pessimistic
 10-critic ensemble, discount
 0.95, a 64-unit hidden
@@ -113,11 +139,45 @@ representation, batch size 64, and
 representation, batch size 512, and
 30 updates per episode. Both learning rates
 are `0.0003`; the lower dual learning rate is
-`0.0001`. The upper policy begins after a
+`0.0001`. The lower policy's learned constraint
+cost is optimized through a Lagrange multiplier, following the constrained-RL
+formulation [@miryoosefi2019constraints]. The upper policy begins after a
 30-episode lower
 warm-up. V8 trains for 40 episodes and evaluates checkpoint 39; V9 trains
 without policy or critic freezing for 200 episodes and evaluates checkpoint
-199.
+199. Both upper and lower actors are deterministic during frozen evaluation,
+and the evaluator rejects any change in deployment state across evaluation
+seeds.
+
+## External comparators
+
+Three non-learned comparators use the same V6 environment, fixed 12-vehicle
+pool, timetable, evaluation seeds, scenario tapes, and exact terminal-release
+semantics as the learned controller. `fixed_headway` installs a 360-s terminal
+headway in both directions and commands zero intermediate holding.
+`rule_holding` uses the same 360-s terminal schedule and applies
+
+```text
+a = clip(360 - g_f, 0, 60),
+```
+
+where `g_f` is the observed forward headway in seconds. `rule_mpc` uses that
+same lower holding law and re-evaluates a 60-candidate time-of-day headway grid
+at dispatch events. Peak candidates are `{240, 300, 360, 420, 480}` s,
+off-peak candidates are `{360, 480, 600, 720}` s, and transition candidates
+are `{300, 360, 420}` s. Given a seeded episode-level demand proxy `d`, with
+`d ~ clip(Normal(1, 0.15), 0.3, 2.0)`, its slot-specific surrogate is
+
+```text
+H_ideal = clip(360 / d, 240, 600)
+J(H) = H / 2 + 0.001 max(0, H - H_ideal)^2
+       + 5 max(0, 6000 / H - 12)^2.
+```
+
+The minimizing candidate is converted to an exact launch sequence before
+simulation. This rule-MPC is a transparent low-fidelity comparator, not a claim
+to represent an optimally tuned or simulator-aware MPC. The fixed-headway
+policy is the strong external comparator in this study.
 
 ## Outcomes
 
@@ -161,4 +221,7 @@ Uncertainty uses a crossed bootstrap over training and evaluation seeds while
 sharing each evaluation-seed resample across paired policies. Two-sided
 sign-flip tests operate on training-seed mean differences, with Holm correction
 within each metric family. Lower values favor FreqDuet for every reported
-outcome. The V8 and V9 estimates are kept separate and are never pooled.
+outcome. For each external comparator, its eight evaluation-seed realizations
+are crossed with the eight V9 learned training seeds, yielding 64 paired rows;
+the crossed analysis retains training seed as the independent policy-training
+unit. The V8 and V9 estimates are kept separate and are never pooled.

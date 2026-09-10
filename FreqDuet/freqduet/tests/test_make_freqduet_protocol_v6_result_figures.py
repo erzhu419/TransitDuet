@@ -87,6 +87,9 @@ class ProtocolV6ResultFiguresTest(unittest.TestCase):
             "paper_controller": PAPER_CONTROLLER,
             "submission_ready": False,
         }) + "\n")
+        figures = self.package / "figures"
+        figures.mkdir(parents=True, exist_ok=True)
+        (figures / "fig1_protocol_v6_method.svg").write_text("supporting")
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -112,6 +115,15 @@ class ProtocolV6ResultFiguresTest(unittest.TestCase):
         captions = (figures / "captions.md").read_text()
         self.assertIn("Both configurations disable the legacy", captions)
         self.assertIn("combined-policy comparison", captions)
+        self.assertIn(
+            "gate-positive rather than familywise significant",
+            " ".join(captions.split()),
+        )
+        self.assertIn("gate-positive", (figures / "fig2_protocol_v6_confirmation_robustness.svg").read_text())
+        self.assertEqual(
+            (figures / "fig1_protocol_v6_method.svg").read_text(),
+            "supporting",
+        )
 
     def test_rejects_hidden_v9_failure(self) -> None:
         decisions = self.package / "tables" / "table4_evidence_decisions.csv"

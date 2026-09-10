@@ -1,36 +1,3 @@
-# FreqDuet: Causally Observed Frequency Allocation for Hierarchical Bus Timetable and Holding Control
-
-## Abstract
-
-Bus timetable planning and station-level holding operate at
-different temporal and physical scales, creating an information-allocation
-problem for a learned hierarchy.
-FreqDuet estimates demand causally from completed APC bins, sends a
-harmonic low-frequency state to an executable upper headway planner, and sends
-station-local innovations plus compact APC/AVL context to a discrete lower
-holding policy. In an independent 40-episode confirmation with 24 paired
-rollouts, the complete current controller changed headway coefficient of
-variation by -0.022 [-0.038, -0.008]
-relative to a same-protocol reference. The bootstrap interval excluded zero,
-whereas the Holm-adjusted training-seed sign-flip result was
-$p=0.125$. Restricted passenger journey changed by
--0.263 [-0.837, +0.175]
-min and satisfied the registered no-harm condition. In a separate 200-episode,
-64-pair robustness test, journey improved by
--1.242 [-2.204, -0.536]
-min (Holm-adjusted $p=0.047$), but the headway effect weakened to
--0.009 [-0.028, +0.006] and failed the
-registered long-training gate. Against fixed headway, FreqDuet was more regular
-but increased passenger journey by
-+2.470 [+1.874, +3.188]
-min. The results support a registered gate-positive short-training regularity
-signal and expose its training-horizon and passenger-service limits; they do not establish
-long-run regularity confirmation, passenger-service superiority over fixed
-headway, or an isolated causal effect of frequency separation.
-
-
-**Keywords:** bus holding; hierarchical reinforcement learning; demand decomposition; causal observation; headway control; reproducibility
-
 # Introduction
 
 Frequent bus services are vulnerable to self-reinforcing irregularity. A bus
@@ -200,7 +167,7 @@ therefore span many lower decisions. The current paper controller is
 `F_freqduet_protocol_v6_confirmed_main_hiro` under `freqduet-eval-v6`. It is the exact naming alias of the
 compact APC/AVL, weight-two controller that passed the preregistered V8 gate.
 
-![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](figures/fig1_protocol_v6_method.png){#fig:protocol-v6-1}
+![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](fig1_protocol_v6_method.pdf){#fig:protocol-v6-1}
 
 ## Simulation environment and common random numbers
 
@@ -433,7 +400,7 @@ no-harm margin. Thus V8 is gate-positive under its preregistered criteria; it
 is not a familywise-significant effect at 0.05 and does not establish a
 passenger-journey benefit.
 
-![Independent confirmation and long-training robustness. Points show paired mean differences between the current policy and the Protocol V6 reference config named `F_freqduet_protocol_v6_noguard_hiro`; bars show 95% crossed-bootstrap confidence intervals over training and evaluation seeds. Both configurations disable the legacy causal holding guard. The current policy additionally uses compact APC/AVL context and the two-sided departure-regularity objective, so this is a combined-policy comparison rather than an isolated guard effect. Lower values favor the current policy. V8 contains 24 paired rollouts (six training seeds by four untouched evaluation seeds) and passed the registered effect/no-harm gate. Its Holm-adjusted training-seed sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather than familywise significant. V9 contains 64 paired rollouts (eight by eight); its passenger-journey interval favored FreqDuet, but the headway-CV effect did not meet the registered magnitude and interval gate, so V9 is reported as not confirmed.](figures/fig2_protocol_v6_confirmation_robustness.png){#fig:protocol-v6-2}
+![Independent confirmation and long-training robustness. Points show paired mean differences between the current policy and the Protocol V6 reference config named `F_freqduet_protocol_v6_noguard_hiro`; bars show 95% crossed-bootstrap confidence intervals over training and evaluation seeds. Both configurations disable the legacy causal holding guard. The current policy additionally uses compact APC/AVL context and the two-sided departure-regularity objective, so this is a combined-policy comparison rather than an isolated guard effect. Lower values favor the current policy. V8 contains 24 paired rollouts (six training seeds by four untouched evaluation seeds) and passed the registered effect/no-harm gate. Its Holm-adjusted training-seed sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather than familywise significant. V9 contains 64 paired rollouts (eight by eight); its passenger-journey interval favored FreqDuet, but the headway-CV effect did not meet the registered magnitude and interval gate, so V9 is reported as not confirmed.](fig2_protocol_v6_confirmation_robustness.pdf){#fig:protocol-v6-2}
 
 **Table 1. Current policy minus the Protocol V6 reference.** Values are paired
 mean differences with crossed-bootstrap 95% confidence intervals. Lower is
@@ -490,7 +457,7 @@ superiority: FreqDuet reduced restricted journey relative to the two rules and
 produced more regular service than fixed headway, while fixed headway remained
 better for passenger journey and fleet-readiness burden.
 
-![External baseline trade-off under the V9 source contract. Points show paired mean differences between FreqDuet and each external baseline; bars show 95% crossed-bootstrap confidence intervals over eight training and eight evaluation seeds (64 paired rollouts). Lower values favor FreqDuet. FreqDuet improved regularity and restricted service cost relative to fixed headway but increased passenger journey time. It reduced passenger journey time relative to rule holding and rule MPC. Exact two-sided sign-flip tests and Holm-adjusted values are provided in the source table and are not encoded as significance symbols in the figure.](figures/fig3_protocol_v6_external_tradeoff.png){#fig:protocol-v6-3}
+![External baseline trade-off under the V9 source contract. Points show paired mean differences between FreqDuet and each external baseline; bars show 95% crossed-bootstrap confidence intervals over eight training and eight evaluation seeds (64 paired rollouts). Lower values favor FreqDuet. FreqDuet improved regularity and restricted service cost relative to fixed headway but increased passenger journey time. It reduced passenger journey time relative to rule holding and rule MPC. Exact two-sided sign-flip tests and Holm-adjusted values are provided in the source table and are not encoded as significance symbols in the figure.](fig3_protocol_v6_external_tradeoff.pdf){#fig:protocol-v6-3}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.
@@ -518,7 +485,7 @@ percentage points. All trips were eventually launched and completed in the
 aggregated learned-policy results, so denial records delayed fleet readiness
 rather than permanent trip cancellation.
 
-![Paired physical outcomes of the current policy. Points show mean paired differences between the full current policy and the Protocol V6 reference configuration; bars show 95% crossed-bootstrap confidence intervals. Negative values favor the current policy. V8 contains 24 paired rollouts and V9 contains 64. The current policy differs from the reference by both compact APC/AVL context and the two-sided departure-regularity objective, so these panels describe the combined policy's physical behavior rather than an isolated legacy-guard effect.](figures/fig4_protocol_v6_physical_outcomes.png){#fig:protocol-v6-4}
+![Paired physical outcomes of the current policy. Points show mean paired differences between the full current policy and the Protocol V6 reference configuration; bars show 95% crossed-bootstrap confidence intervals. Negative values favor the current policy. V8 contains 24 paired rollouts and V9 contains 64. The current policy differs from the reference by both compact APC/AVL context and the two-sided departure-regularity objective, so these panels describe the combined policy's physical behavior rather than an isolated legacy-guard effect.](fig4_protocol_v6_physical_outcomes.pdf){#fig:protocol-v6-4}
 
 ## External data support demand-shape realism only
 
@@ -531,7 +498,7 @@ unmatched, these comparisons are descriptive checks of demand-shape
 plausibility. They are not same-day calibration, route-family policy tests, or
 field-effect estimates.
 
-![External passenger-count demand-shape audit. Panel a compares separately normalized hourly demand shapes from the FreqDuet OD input, a complete-day subset of the bounded public MTA AFC cache (936 source rows; 39 station-complex days), and a complete-route subset of the bounded public Halifax APC cache (979 source rows; 7 routes and 37 route-days). Panel b summarizes the corresponding demand-period shares; the FreqDuet input contains 20 origin series. The balanced-cache derivation excludes incomplete pagination fragments. This remains a descriptive audit across unmatched systems and dates, not a population estimate, same-day calibration, field-policy evaluation, or evidence of deployed control benefit.](figures/fig5_protocol_v6_external_realism.png){#fig:protocol-v6-5}
+![External passenger-count demand-shape audit. Panel a compares separately normalized hourly demand shapes from the FreqDuet OD input, a complete-day subset of the bounded public MTA AFC cache (936 source rows; 39 station-complex days), and a complete-route subset of the bounded public Halifax APC cache (979 source rows; 7 routes and 37 route-days). Panel b summarizes the corresponding demand-period shares; the FreqDuet input contains 20 origin series. The balanced-cache derivation excludes incomplete pagination fragments. This remains a descriptive audit across unmatched systems and dates, not a population estimate, same-day calibration, field-policy evaluation, or evidence of deployed control benefit.](fig5_protocol_v6_external_realism.pdf){#fig:protocol-v6-5}
 
 # Discussion
 

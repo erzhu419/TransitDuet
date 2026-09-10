@@ -1,5 +1,3 @@
-# Supplementary Material
-
 ## S1. Frozen evidence and decision ledger
 
 The current paper package binds the gate-positive V8 decision and failed V9

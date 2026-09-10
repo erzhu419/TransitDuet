@@ -1,0 +1,34 @@
+title: "FreqDuet: Causally Observed Frequency Allocation for Hierarchical Bus Timetable and Holding Control"
+abstract: |
+  Bus timetable planning and station-level holding operate at
+  different temporal and physical scales, creating an information-allocation
+  problem for a learned hierarchy.
+  FreqDuet estimates demand causally from completed APC bins, sends a
+  harmonic low-frequency state to an executable upper headway planner, and sends
+  station-local innovations plus compact APC/AVL context to a discrete lower
+  holding policy. In an independent 40-episode confirmation with 24 paired
+  rollouts, the complete current controller changed headway coefficient of
+  variation by -0.022 [-0.038, -0.008]
+  relative to a same-protocol reference. The bootstrap interval excluded zero,
+  whereas the Holm-adjusted training-seed sign-flip result was
+  $p=0.125$. Restricted passenger journey changed by
+  -0.263 [-0.837, +0.175]
+  min and satisfied the registered no-harm condition. In a separate 200-episode,
+  64-pair robustness test, journey improved by
+  -1.242 [-2.204, -0.536]
+  min (Holm-adjusted $p=0.047$), but the headway effect weakened to
+  -0.009 [-0.028, +0.006] and failed the
+  registered long-training gate. Against fixed headway, FreqDuet was more regular
+  but increased passenger journey by
+  +2.470 [+1.874, +3.188]
+  min. The results support a registered gate-positive short-training regularity
+  signal and expose its training-horizon and passenger-service limits; they do not establish
+  long-run regularity confirmation, passenger-service superiority over fixed
+  headway, or an isolated causal effect of frequency separation.
+keywords:
+  - "bus holding"
+  - "hierarchical reinforcement learning"
+  - "demand decomposition"
+  - "causal observation"
+  - "headway control"
+  - "reproducibility"

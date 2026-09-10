@@ -2,16 +2,20 @@
 
 ## Independent confirmation at 40 episodes
 
-V8 confirmed the registered regularity effect of the complete current policy
+V8 passed the registered effect/no-harm gate for the complete current policy
 (Fig. 2; Table 1). Relative to the Protocol V6 reference, headway CV changed by
--0.022 [-0.038, -0.008]. Restricted
+-0.022 [-0.038, -0.008]. Its
+crossed-bootstrap interval excluded zero, whereas the Holm-adjusted
+training-seed sign-flip result was
+$p=0.125$. Restricted
 passenger journey changed by
 -0.263 [-0.837, +0.175]
 min. The latter interval crossed zero but satisfied the preregistered journey
-no-harm margin. Thus V8 supports a short-training regularity improvement; it
-does not establish a passenger-journey benefit.
+no-harm margin. Thus V8 is gate-positive under its preregistered criteria; it
+is not a familywise-significant effect at 0.05 and does not establish a
+passenger-journey benefit.
 
-![Figure 2. Independent confirmation and long-training robustness.](figures/fig2_protocol_v6_confirmation_robustness.png)
+![Independent confirmation and long-training robustness. Points show paired mean differences between the current policy and the Protocol V6 reference config named `F_freqduet_protocol_v6_noguard_hiro`; bars show 95% crossed-bootstrap confidence intervals over training and evaluation seeds. Both configurations disable the legacy causal holding guard. The current policy additionally uses compact APC/AVL context and the two-sided departure-regularity objective, so this is a combined-policy comparison rather than an isolated guard effect. Lower values favor the current policy. V8 contains 24 paired rollouts (six training seeds by four untouched evaluation seeds) and passed the registered effect/no-harm gate. Its Holm-adjusted training-seed sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather than familywise significant. V9 contains 64 paired rollouts (eight by eight); its passenger-journey interval favored FreqDuet, but the headway-CV effect did not meet the registered magnitude and interval gate, so V9 is reported as not confirmed.](figures/fig2_protocol_v6_confirmation_robustness.png){#fig:protocol-v6-2}
 
 **Table 1. Current policy minus the Protocol V6 reference.** Values are paired
 mean differences with crossed-bootstrap 95% confidence intervals. Lower is
@@ -68,7 +72,7 @@ superiority: FreqDuet reduced restricted journey relative to the two rules and
 produced more regular service than fixed headway, while fixed headway remained
 better for passenger journey and fleet-readiness burden.
 
-![Figure 3. V9 external-baseline trade-off.](figures/fig3_protocol_v6_external_tradeoff.png)
+![External baseline trade-off under the V9 source contract. Points show paired mean differences between FreqDuet and each external baseline; bars show 95% crossed-bootstrap confidence intervals over eight training and eight evaluation seeds (64 paired rollouts). Lower values favor FreqDuet. FreqDuet improved regularity and restricted service cost relative to fixed headway but increased passenger journey time. It reduced passenger journey time relative to rule holding and rule MPC. Exact two-sided sign-flip tests and Holm-adjusted values are provided in the source table and are not encoded as significance symbols in the figure.](figures/fig3_protocol_v6_external_tradeoff.png){#fig:protocol-v6-3}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.
@@ -96,7 +100,7 @@ percentage points. All trips were eventually launched and completed in the
 aggregated learned-policy results, so denial records delayed fleet readiness
 rather than permanent trip cancellation.
 
-![Figure 4. Paired physical outcomes.](figures/fig4_protocol_v6_physical_outcomes.png)
+![Paired physical outcomes of the current policy. Points show mean paired differences between the full current policy and the Protocol V6 reference configuration; bars show 95% crossed-bootstrap confidence intervals. Negative values favor the current policy. V8 contains 24 paired rollouts and V9 contains 64. The current policy differs from the reference by both compact APC/AVL context and the two-sided departure-regularity objective, so these panels describe the combined policy's physical behavior rather than an isolated legacy-guard effect.](figures/fig4_protocol_v6_physical_outcomes.png){#fig:protocol-v6-4}
 
 ## External data support demand-shape realism only
 
@@ -109,16 +113,4 @@ unmatched, these comparisons are descriptive checks of demand-shape
 plausibility. They are not same-day calibration, route-family policy tests, or
 field-effect estimates.
 
-![Figure 5. External passenger-count demand-shape audit.](figures/fig5_protocol_v6_external_realism.png)
-
-## Interpretation
-
-The current evidence establishes one positive and one negative result. A
-compact, causally observable APC/AVL state plus a two-sided local regularity
-reward improved headway regularity at 40 episodes without violating the
-journey no-harm gate. The same registered regularity effect was not robustly
-confirmed after 200 episodes, although passenger journey improved relative to
-the Protocol V6 reference. Moreover, the confirmatory contrast retains the
-same harmonic frequency pathway in both arms. It therefore evaluates the
-complete current controller and does not, by itself, identify the causal effect
-of frequency separation versus no-frequency or raw-history control.
+![External passenger-count demand-shape audit. Panel a compares separately normalized hourly demand shapes from the FreqDuet OD input, a complete-day subset of the bounded public MTA AFC cache (936 source rows; 39 station-complex days), and a complete-route subset of the bounded public Halifax APC cache (979 source rows; 7 routes and 37 route-days). Panel b summarizes the corresponding demand-period shares; the FreqDuet input contains 20 origin series. The balanced-cache derivation excludes incomplete pagination fragments. This remains a descriptive audit across unmatched systems and dates, not a population estimate, same-day calibration, field-policy evaluation, or evidence of deployed control benefit.](figures/fig5_protocol_v6_external_realism.png){#fig:protocol-v6-5}
