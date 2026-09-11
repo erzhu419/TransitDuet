@@ -3965,3 +3965,11 @@ these development seeds cannot override the failed independent V9 result or
 authorize repeated sampling. The frozen V33 confirmation roster remains unused.
 V33 is closed without changing the promoted controller; V9 long-training
 regularity remains the paper's explicit robustness limitation.
+
+The five aggregate JSON/CSV artifacts are archived under
+`paper_evidence/protocol_v6/current_best/v33_timescale`. Server task `t92822`
+passed all five evidence-builder tests and rebuilt the real package with V33
+status `no_pass`, `claim_eligible=false`, and
+`confirmation_authorized=false`. After archival, task `t92831` removed the
+completed run's shared heavy `logs_shards`; the compact shard summaries and
+aggregate evidence were retained.
