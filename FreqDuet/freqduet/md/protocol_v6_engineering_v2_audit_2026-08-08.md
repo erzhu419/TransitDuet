@@ -3927,3 +3927,41 @@ candidate or a modified threshold.
 - This record establishes launch provenance only. V33-v2 remains scientifically
   unresolved until all four shards complete, the server-side aggregate passes,
   and the preregistered development gate authorizes exactly one candidate.
+
+### Engineering-v33-v2 development outcome and closure (2026-09-11)
+
+Scheduler tasks `t92523` through `t92526` completed all 28 registered training
+jobs and exported exactly the three small shard artifacts required for strict
+aggregation. Server task `t92814` aggregated the 112 frozen rollouts and ran the
+locked V33-v2 gate. All source, clean-tree, scenario, CRN, run-manifest, seed,
+config-roster, checkpoint, artifact, and candidate-contract checks passed.
+
+The scientific result is `no_pass`; `passing_candidates` is empty,
+`selected_for_confirmation` is null, and `confirmation_authorized` is false.
+Relative to `F_freqduet_protocol_v6_noguard_hiro`, the registered candidates
+produced:
+
+- lower-freeze-100: headway-CV delta `-0.00715`, 95% CI
+  `[-0.04854,+0.02992]`; restricted-journey delta `-1.05011 min`, 95% CI
+  `[-2.36863,-0.30194]`; two of four training-seed CV deltas were negative.
+- lower-freeze-80: headway-CV delta `-0.00447`, 95% CI
+  `[-0.03140,+0.01490]`; restricted-journey delta `-1.49050 min`, 95% CI
+  `[-2.93665,-0.49082]`; two of four training-seed CV deltas were negative.
+- lower-freeze-40: headway-CV delta `-0.01230`, 95% CI
+  `[-0.03841,+0.00785]`; restricted-journey delta `-1.95431 min`, 95% CI
+  `[-3.18987,-1.07659]`; all four training-seed CV deltas were negative.
+
+All three candidates retained the registered journey no-harm and mechanism
+checks. None reached the locked `-0.02` headway-CV magnitude with its interval
+fully below zero; the first two also failed the 75% training-seed direction
+criterion. Lower-actor freezing therefore improves passenger journey time but
+does not restore the preregistered long-training regularity effect.
+
+The unfrozen current controller passed the incremental gate on this exploratory
+four-by-four roster (headway-CV delta `-0.02102`, 95% CI
+`[-0.04504,-0.00309]`; journey delta `-0.42191 min`, 95% CI
+`[-1.08337,-0.00717]`). It was a control, not a registered V33 candidate, and
+these development seeds cannot override the failed independent V9 result or
+authorize repeated sampling. The frozen V33 confirmation roster remains unused.
+V33 is closed without changing the promoted controller; V9 long-training
+regularity remains the paper's explicit robustness limitation.

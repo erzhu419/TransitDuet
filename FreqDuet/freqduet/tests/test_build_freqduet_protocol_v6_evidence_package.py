@@ -14,6 +14,16 @@ from scripts.build_freqduet_protocol_v6_evidence_package import (
     V9_EVAL_SEEDS,
     V9_SOURCE_COMMIT,
     V9_TRAIN_SEEDS,
+    V33_CANDIDATE_CONTRACTS,
+    V33_CANDIDATES,
+    V33_CONFIGS,
+    V33_CONFIRM_EVAL_SEEDS,
+    V33_CONFIRM_TRAIN_SEEDS,
+    V33_EVAL_SEEDS,
+    V33_GATE_VERSION,
+    V33_RUN_NAME,
+    V33_SOURCE_COMMIT,
+    V33_TRAIN_SEEDS,
     build_package,
     config_fingerprint,
     sha256_file,
@@ -34,7 +44,7 @@ def write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload) + "\n")
 
 
-def write_pair_csv(path: Path, candidate: str, n_pairs: int) -> None:
+def pair_row(candidate: str, n_pairs: int) -> dict[str, str]:
     row = {
         "candidate": candidate,
         "reference": NOGUARD_REFERENCE,
@@ -46,10 +56,18 @@ def write_pair_csv(path: Path, candidate: str, n_pairs: int) -> None:
         row[f"delta_{metric}_ci_high"] = "0.001"
         row[f"delta_{metric}_signflip_p"] = "0.03125"
         row[f"delta_{metric}_signflip_p_holm"] = "0.0625"
+    return row
+
+
+def write_pair_csv(path: Path, candidate: str, n_pairs: int) -> None:
+    write_pair_rows(path, [pair_row(candidate, n_pairs)])
+
+
+def write_pair_rows(path: Path, rows: list[dict[str, str]]) -> None:
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(row))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
-        writer.writerow(row)
+        writer.writerows(rows)
 
 
 def write_external_csv(path: Path) -> None:
@@ -81,9 +99,10 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.v8 = self.root / "v8"
         self.v9 = self.root / "v9"
+        self.v33 = self.root / "v33"
         self.external = self.root / "external"
         self.config_root = self.root / "config_root"
-        for path in (self.v8, self.v9, self.external):
+        for path in (self.v8, self.v9, self.v33, self.external):
             path.mkdir()
         configs = self.config_root / "configs_freqduet"
         configs.mkdir(parents=True)
@@ -97,6 +116,10 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
                 "F_freqduet_protocol_v6_avlcompact_hiro.yaml",
             ),
             (PAPER_CONTROLLER, f"{CONFIRMED_SOURCE_CONFIG}.yaml"),
+            *(
+                (candidate, f"{PAPER_CONTROLLER}.yaml")
+                for candidate in V33_CANDIDATES
+            ),
         )
         for name, parent in config_chain:
             (configs / f"{name}.yaml").write_text(
@@ -125,11 +148,16 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
             },
         })
         write_pair_csv(self.v9 / "frozen_paired_deltas.csv", PAPER_CONTROLLER, 64)
+        write_pair_rows(
+            self.v33 / "frozen_paired_deltas.csv",
+            [pair_row(candidate, 16) for candidate in V33_CANDIDATES],
+        )
         write_external_csv(self.external / "learned_vs_external_summary.csv")
 
         for directory, names in (
             (self.v8, ("frozen_per_eval.csv", "frozen_summary.csv")),
             (self.v9, ("frozen_per_eval.csv", "frozen_summary.csv")),
+            (self.v33, ("frozen_per_eval.csv", "frozen_summary.csv")),
             (self.external, (
                 "learned_vs_external_per_pair.csv",
                 "external_baselines_per_seed.csv",
@@ -165,6 +193,10 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
         controller_fingerprint = config_fingerprint(
             PAPER_CONTROLLER, self.config_root
         )
+        v33_fingerprints = {
+            candidate: config_fingerprint(candidate, self.config_root)
+            for candidate in V33_CANDIDATES
+        }
         scenario_sha = "c" * 64
         source_sha = "d" * 64
         write_json(self.v8 / "matrix_manifest.json", {
@@ -229,6 +261,88 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
             },
             "artifacts": artifact_records(self.v9),
         })
+        write_json(self.v33 / "matrix_manifest.json", {
+            "manifest_version": "freqduet-matrix-manifest-v2",
+            "protocol_version": "freqduet-eval-v6",
+            "stage": "exploratory",
+            "independent_confirmation": False,
+            "reference": NOGUARD_REFERENCE,
+            "strict_complete": True,
+            "common_random_numbers_verified": True,
+            "run_manifests_verified": True,
+            "run_git_provenance": {
+                "commit": V33_SOURCE_COMMIT,
+                "tracked_dirty": False,
+            },
+            "train_episodes": 200,
+            "checkpoint_ep": 199,
+            "train_seeds": list(V33_TRAIN_SEEDS),
+            "eval_seeds": list(V33_EVAL_SEEDS),
+            "configs": list(V33_CONFIGS),
+            "expected_rollouts": 112,
+            "config_fingerprints": {
+                "F_freqduet_protocol_v6_main_hiro": main_fingerprint,
+                NOGUARD_REFERENCE: noguard_fingerprint,
+                "F_freqduet_protocol_v6_avlcompact_hiro": avl_fingerprint,
+                PAPER_CONTROLLER: controller_fingerprint,
+                **v33_fingerprints,
+            },
+            "artifacts": artifact_records(self.v33),
+        })
+        write_json(self.v33 / "v33_timescale_gate.json", {
+            "gate_version": V33_GATE_VERSION,
+            "status": "no_pass",
+            "claim_eligible": False,
+            "confirmation_authorized": False,
+            "selected_for_confirmation": None,
+            "passing_candidates": [],
+            "candidate_priority": list(V33_CANDIDATES),
+            "candidate_contracts": V33_CANDIDATE_CONTRACTS,
+            "candidate_results": [
+                {
+                    "candidate": candidate,
+                    "passes": False,
+                }
+                for candidate in V33_CANDIDATES
+            ],
+            "strict_checks": {"strict_complete": True},
+            "contract_checks": {"candidate_contracts_match": True},
+            "development_design": {
+                "checkpoint_ep": 199,
+                "configs": list(V33_CONFIGS),
+                "eval_seeds": list(V33_EVAL_SEEDS),
+                "run_name": V33_RUN_NAME,
+                "train_episodes": 200,
+                "train_seeds": list(V33_TRAIN_SEEDS),
+            },
+            "confirmation_design": {
+                "checkpoint_ep": 199,
+                "eval_seeds": list(V33_CONFIRM_EVAL_SEEDS),
+                "single_use": True,
+                "train_episodes": 200,
+                "train_seeds": list(V33_CONFIRM_TRAIN_SEEDS),
+            },
+            "thresholds": {
+                "base_gate": "unchanged V8 effect and mechanism thresholds",
+                "max_journey_ci_high_min": 0.15,
+                "min_negative_train_seed_fraction": 0.75,
+            },
+            "input_artifacts": {
+                "manifest": {
+                    "sha256": sha256_file(self.v33 / "matrix_manifest.json")
+                },
+                "per_eval": {
+                    "sha256": sha256_file(self.v33 / "frozen_per_eval.csv")
+                },
+            },
+            "unfrozen_control_result": {
+                "candidate_results": [{
+                    "headway_cv_delta_vs_reference": -0.021,
+                    "headway_cv_delta_ci_low": -0.045,
+                    "headway_cv_delta_ci_high": -0.003,
+                }],
+            },
+        })
         write_json(
             self.external / "learned_vs_external_manifest.json",
             {
@@ -268,7 +382,7 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
     def test_builds_balanced_package_with_failed_longtrain_visible(self) -> None:
         out = self.root / "out"
         manifest = build_package(
-            self.v8, self.v9, self.external, out, self.config_root
+            self.v8, self.v9, self.v33, self.external, out, self.config_root
         )
 
         self.assertFalse(manifest["submission_ready"])
@@ -276,12 +390,21 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
         status = json.loads((out / "evidence_status.json").read_text())
         self.assertEqual(status["v8_confirmation_status"], "unique_pass")
         self.assertEqual(status["v9_longtrain_status"], "longtrain_not_confirmed")
+        self.assertEqual(status["v33_timescale_status"], "no_pass")
+        self.assertFalse(status["v33_confirmation_authorized"])
         results = (out / "manuscript" / "current_best_results.md").read_text()
         self.assertIn("does not outperform fixed headway", results)
         self.assertIn("combined-policy comparison", results)
         self.assertIn("configurations disable the legacy", results)
         self.assertIn("must not be relabelled as submission-ready", results)
+        self.assertIn("V33 status is `no_pass`", results)
         self.assertTrue((out / "source_artifacts" / "v8" / "frozen_per_eval.csv").is_file())
+        self.assertTrue(
+            (out / "source_artifacts" / "v33_timescale" / "v33_timescale_gate.json").is_file()
+        )
+        self.assertTrue(
+            (out / "tables" / "table5_v33_timescale_development.csv").is_file()
+        )
         self.assertTrue((out / "README.md").is_file())
         self.assertTrue(
             (out / "configs" / "config_snapshot_manifest.json").is_file()
@@ -297,6 +420,7 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
             build_package(
                 self.v8,
                 self.v9,
+                self.v33,
                 self.external,
                 self.root / "out",
                 self.config_root,
@@ -316,6 +440,7 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
             build_package(
                 self.v8,
                 self.v9,
+                self.v33,
                 self.external,
                 self.root / "out",
                 self.config_root,
@@ -333,6 +458,23 @@ class ProtocolV6EvidencePackageTest(unittest.TestCase):
             build_package(
                 self.v8,
                 self.v9,
+                self.v33,
+                self.external,
+                self.root / "out",
+                self.config_root,
+            )
+
+    def test_rejects_v33_confirmation_authorization_after_no_pass(self) -> None:
+        path = self.v33 / "v33_timescale_gate.json"
+        gate = json.loads(path.read_text())
+        gate["confirmation_authorized"] = True
+        write_json(path, gate)
+
+        with self.assertRaisesRegex(ValueError, "confirmation was not authorized"):
+            build_package(
+                self.v8,
+                self.v9,
+                self.v33,
                 self.external,
                 self.root / "out",
                 self.config_root,
