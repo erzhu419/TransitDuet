@@ -389,19 +389,18 @@ limits, or checkpoint selection.
 
 ### mujoco_v23_causal_upper_projection_target_development
 
-Protocol frozen before execution. V23 tests whether replacing the hindsight
-macro-mean upper consistency label with the first same-observation projected
-target improves the reward-correction tradeoff. A lower-only consistency arm
-isolates upper-objective interference. The 48-cell development matrix uses 20
-fresh role roots and unchanged v22 coefficients, budgets, training horizon,
-checkpoint window, and terminal-reserve projector.
+All 48 frozen cells completed with valid provenance, heldout paths, capacity,
+certificates, prefix budgets, fallback limits, and consistency-activity audits.
+The full decision-time candidate won reward in only 5/12 paired roots and lost
+11.18% and 9.57% mean reward versus the old macro-mean control in HalfCheetah
+and Hopper. The lower-only arm won 8/12 roots but increased Hopper total
+correction by 65.92% versus the old control. Every arm also missed the strict
+all-cell projection-convergence gate. Neither candidate advanced.
 
-Current status: prepared, not scientifically evaluated. No v23 task or result
-existed when this protocol was frozen.
-
-Forbidden: V23 preparation or execution status validates causal upper-target
-learning, reward preservation, correction reduction, leakage no-tradeoff,
-fresh-seed confirmation, or final Freq-HRL manuscript support.
+Forbidden: V23 validates first-sample causal upper-target learning, reward
+preservation, correction no-tradeoff, leakage no-tradeoff, fresh-seed
+confirmation, or final Freq-HRL manuscript support. V23 roots cannot be reused
+to tune coefficients, thresholds, checkpoint rules, or target aggregation.
 
 ### legacy_c1_c9_matrix_snapshot
 
