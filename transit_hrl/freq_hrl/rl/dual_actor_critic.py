@@ -88,10 +88,18 @@ class GaussianActor(nn.Module):
         return torch.distributions.Normal(mean, std)
 
     def forward(self, state: torch.Tensor, sample: bool = True) -> tuple[torch.Tensor, torch.Tensor]:
+        action, logp, _ = self.forward_with_mean(state, sample=sample)
+        return action, logp
+
+    def forward_with_mean(
+        self,
+        state: torch.Tensor,
+        sample: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         dist = self.distribution(state)
         action = dist.rsample() if sample else dist.mean
         logp = dist.log_prob(action).sum(dim=-1)
-        return action, logp
+        return action, logp, dist.mean
 
     def log_prob_entropy(self, state: torch.Tensor, action: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         dist = self.distribution(state)

@@ -174,6 +174,32 @@ class CausalTerminalReserveProjector:
     ) -> dict[str, Any]:
         """Return one causal action and its terminal-reserve certificate."""
 
+        return self._project(
+            proposed_upper,
+            proposed_lower,
+            commit=True,
+        )
+
+    def preview(
+        self,
+        proposed_upper: Any,
+        proposed_lower: Any,
+    ) -> dict[str, Any]:
+        """Project from the current causal state without advancing it."""
+
+        return self._project(
+            proposed_upper,
+            proposed_lower,
+            commit=False,
+        )
+
+    def _project(
+        self,
+        proposed_upper: Any,
+        proposed_lower: Any,
+        *,
+        commit: bool,
+    ) -> dict[str, Any]:
         self._require_reset()
         upper_proposal = self._action(proposed_upper, "proposed upper")
         lower_proposal = self._action(proposed_lower, "proposed lower")
@@ -298,13 +324,25 @@ class CausalTerminalReserveProjector:
         total = upper + lower
         correction = total - total_proposal
 
-        self._commit(
-            upper,
-            lower,
-            upper_residual=upper_residual,
-            lower_residual=lower_residual,
-        )
-        denominator = float(self._step_count * self._dimension)
+        if commit:
+            self._commit(
+                upper,
+                lower,
+                upper_residual=upper_residual,
+                lower_residual=lower_residual,
+            )
+            upper_energy = self._upper_energy
+            lower_energy = self._lower_energy
+            step_count = self._step_count
+        else:
+            upper_energy = self._upper_energy + float(
+                np.sum(np.square(upper_residual))
+            )
+            lower_energy = self._lower_energy + float(
+                np.sum(np.square(lower_residual))
+            )
+            step_count = self._step_count + 1
+        denominator = float(step_count * self._dimension)
 
         return {
             "upper": upper.copy(),
@@ -325,8 +363,8 @@ class CausalTerminalReserveProjector:
             "recursive_fallback_used": bool(fallback_used),
             "upper_residual": upper_residual.copy(),
             "lower_residual": lower_residual.copy(),
-            "upper_prefix_power": float(self._upper_energy / denominator),
-            "lower_prefix_power": float(self._lower_energy / denominator),
+            "upper_prefix_power": float(upper_energy / denominator),
+            "lower_prefix_power": float(lower_energy / denominator),
             "upper_terminal_reserve_min_margin": float(upper_margin),
             "lower_terminal_reserve_min_margin": float(lower_margin),
             "upper_certificate_prefix_count": int(self.upper_window),

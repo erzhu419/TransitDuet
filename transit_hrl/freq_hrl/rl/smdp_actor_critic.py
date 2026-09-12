@@ -43,6 +43,7 @@ PROJECTION_CONSISTENCY_WEIGHTING_MODES = (
 UPPER_PROJECTION_TARGET_AGGREGATION_MODES = (
     "macro_mean",
     "decision_time",
+    "decision_policy_mean",
 )
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
@@ -2728,17 +2729,22 @@ class FrequencySeparatedActorCriticPPO:
                 f"{self.lower_cost_state_dim}"
             )
         if str(self.config.state_encoder) == "causal_gru":
-            action, logp = self.lower_actor.forward_incremental(
-                tensor, sample=sample
+            action, logp, mean_action = (
+                self.lower_actor.forward_incremental_with_mean(
+                    tensor, sample=sample
+                )
             )
             value = self.lower_value.forward_incremental(tensor)
             cost_value = self.lower_cost_value.forward_incremental(cost_tensor)
         else:
-            action, logp = self.lower_actor(tensor, sample=sample)
+            action, logp, mean_action = self.lower_actor.forward_with_mean(
+                tensor, sample=sample
+            )
             value = self.lower_value(tensor)
             cost_value = self.lower_cost_value(cost_tensor)
         return {
             "action": action.cpu().numpy().reshape(-1),
+            "mean_action": mean_action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
             "value": float(value.item()),
             "cost_value": float(cost_value.item()),

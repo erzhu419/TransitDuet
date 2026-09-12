@@ -669,6 +669,25 @@ def _sampled_summary(rows: list[dict[str, Any]], objective_fn: ObjectiveFn) -> d
             out[f"sampled_{key}_mean"] = float(np.mean([
                 float(row[key]) for row in rows
             ]))
+    policy_mean_count_key = (
+        "terminal_reserve_upper_policy_mean_target_count"
+    )
+    policy_mean_delta_key = (
+        "terminal_reserve_upper_policy_mean_target_delta_rms_mean"
+    )
+    if rows and policy_mean_count_key in rows[0]:
+        target_count = float(sum(
+            float(row[policy_mean_count_key]) for row in rows
+        ))
+        out[f"sampled_{policy_mean_count_key}"] = target_count
+        out[f"sampled_{policy_mean_delta_key}"] = (
+            float(sum(
+                float(row[policy_mean_count_key])
+                * float(row[policy_mean_delta_key])
+                for row in rows
+            ) / target_count)
+            if target_count > 0.0 else 0.0
+        )
     return out
 
 
@@ -1692,6 +1711,31 @@ def train_frequency_separated_ppo(
             "weight_max": max(weight_maxima, default=0.0),
         }
 
+    policy_mean_count_key = (
+        "sampled_terminal_reserve_upper_policy_mean_target_count"
+    )
+    policy_mean_delta_key = (
+        "sampled_terminal_reserve_upper_policy_mean_target_delta_rms_mean"
+    )
+    policy_mean_target_rows = [
+        row for row in history if float(row.get(policy_mean_count_key, 0.0)) > 0.0
+    ]
+    policy_mean_target_count = float(sum(
+        float(row[policy_mean_count_key]) for row in policy_mean_target_rows
+    ))
+    policy_mean_target_training = {
+        "active_iteration_count": float(len(policy_mean_target_rows)),
+        "target_count": policy_mean_target_count,
+        "sampled_target_delta_rms_mean": (
+            float(sum(
+                float(row[policy_mean_count_key])
+                * float(row[policy_mean_delta_key])
+                for row in policy_mean_target_rows
+            ) / policy_mean_target_count)
+            if policy_mean_target_count > 0.0 else 0.0
+        ),
+    }
+
     payload = {
         "policy": policy,
         "trainer": "frequency_separated_smdp_ppo_v2",
@@ -1709,6 +1753,9 @@ def train_frequency_separated_ppo(
             level: projection_consistency_training_summary(level)
             for level in ("upper", "lower")
         },
+        "upper_policy_mean_projection_target_training": (
+            policy_mean_target_training
+        ),
         "projection_consistency_training_schedule": str(
             projection_consistency_training_schedule
         ),

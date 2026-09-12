@@ -6,6 +6,7 @@ import numpy as np
 import torch
 
 from freq_hrl.rl import (
+    CausalGRUGaussianActor,
     FrequencySeparatedActorCriticPPO,
     HierarchicalRolloutBuilder,
     PromotionRolloutBuilder,
@@ -642,6 +643,9 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         np.testing.assert_array_equal(first["action"], second["action"])
         self.assertEqual(first["value"], second["value"])
 
+        np.testing.assert_array_equal(first["action"], first["mean_action"])
+        np.testing.assert_array_equal(second["action"], second["mean_action"])
+
         rng = np.random.default_rng(17)
         builder = HierarchicalRolloutBuilder(gamma=0.99)
         builder.begin_upper(
@@ -665,6 +669,69 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
         self.assertEqual(batch.lower.cost_state.shape, (3, 3))
         metrics = model.update(batch)
         self.assertEqual(metrics["lower_transitions"], 3.0)
+
+    def test_lower_action_reports_policy_mean_without_replacing_sample(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=3,
+            lower_state_dim=2,
+            upper_action_dim=1,
+            lower_action_dim=1,
+            hidden_dim=8,
+        ))
+        state = np.asarray([0.25, -0.5], dtype=np.float32)
+        deterministic = model.act_lower(state, sample=False)
+        torch.manual_seed(7109)
+        sampled = model.act_lower(state, sample=True)
+
+        np.testing.assert_array_equal(
+            deterministic["action"], deterministic["mean_action"]
+        )
+        np.testing.assert_allclose(
+            sampled["mean_action"],
+            deterministic["mean_action"],
+            atol=0.0,
+            rtol=0.0,
+        )
+        self.assertFalse(np.array_equal(
+            sampled["action"], sampled["mean_action"]
+        ))
+
+    def test_causal_gru_mean_output_does_not_advance_cache_twice(self):
+        torch.manual_seed(7121)
+        actor = CausalGRUGaussianActor(
+            state_dim=7,
+            action_dim=2,
+            history_window=3,
+            raw_feature_dim=2,
+            hidden_dim=5,
+            init_log_std=-0.7,
+        )
+        reference = copy.deepcopy(actor)
+        state = torch.as_tensor([
+            [0.1, -0.2, 0.3, 0.4, -0.5, 0.6, 1.0]
+        ], dtype=torch.float32)
+
+        torch.manual_seed(7127)
+        action, logp, mean = actor.forward_incremental_with_mean(
+            state, sample=True
+        )
+        torch.manual_seed(7127)
+        expected_action, expected_logp = reference.forward_incremental(
+            state, sample=True
+        )
+
+        torch.testing.assert_close(action, expected_action)
+        torch.testing.assert_close(logp, expected_logp)
+        torch.testing.assert_close(
+            mean,
+            reference.mean(reference.encoder.forward_incremental(state)),
+        )
+        self.assertEqual(actor.encoder._inference_length, 3)
+        self.assertEqual(reference.encoder._inference_length, 3)
+        torch.testing.assert_close(
+            actor.encoder._inference_hidden,
+            reference.encoder._inference_hidden,
+        )
 
     def test_upper_primal_dual_constraint_updates_and_round_trips(self):
         config = SMDPPPOConfig(

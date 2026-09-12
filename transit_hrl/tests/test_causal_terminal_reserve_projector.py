@@ -126,6 +126,53 @@ def test_policy_context_is_fixed_size_and_contains_only_realized_history():
     assert scalars[4] == pytest.approx(1.0 / 5.0)
 
 
+def test_preview_matches_projection_without_advancing_causal_state():
+    projector = _projector()
+    projector.reset(2)
+    projector.project(np.array([0.3, -0.2]), np.array([0.1, 0.2]))
+    actions_before, scalars_before = projector.policy_context
+
+    proposed_upper = np.array([-0.7, 0.8])
+    proposed_lower = np.array([0.6, -0.5])
+    first_preview = projector.preview(proposed_upper, proposed_lower)
+    second_preview = projector.preview(proposed_upper, proposed_lower)
+    actions_after, scalars_after = projector.policy_context
+
+    for before, after in zip(actions_before, actions_after, strict=True):
+        np.testing.assert_array_equal(before, after)
+    np.testing.assert_array_equal(scalars_before, scalars_after)
+    for key in (
+        "upper",
+        "lower",
+        "total",
+        "total_correction",
+        "upper_residual",
+        "lower_residual",
+    ):
+        np.testing.assert_array_equal(first_preview[key], second_preview[key])
+    assert (
+        first_preview["upper_prefix_power"]
+        == second_preview["upper_prefix_power"]
+    )
+    assert (
+        first_preview["lower_prefix_power"]
+        == second_preview["lower_prefix_power"]
+    )
+
+    committed = projector.project(proposed_upper, proposed_lower)
+    for key in (
+        "upper",
+        "lower",
+        "total",
+        "total_correction",
+        "upper_residual",
+        "lower_residual",
+    ):
+        np.testing.assert_array_equal(first_preview[key], committed[key])
+    assert first_preview["upper_prefix_power"] == committed["upper_prefix_power"]
+    assert first_preview["lower_prefix_power"] == committed["lower_prefix_power"]
+
+
 def test_observe_executed_matches_raw_prefix_audit_without_projection():
     projector = _projector()
     projector.reset(2)

@@ -255,9 +255,21 @@ class CausalGRUGaussianActor(nn.Module):
     def forward(
         self, state: torch.Tensor, sample: bool = True
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        action, logp, _ = self.forward_with_mean(state, sample=sample)
+        return action, logp
+
+    def forward_with_mean(
+        self,
+        state: torch.Tensor,
+        sample: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         distribution = self.distribution(state)
         action = distribution.rsample() if sample else distribution.mean
-        return action, distribution.log_prob(action).sum(dim=-1)
+        return (
+            action,
+            distribution.log_prob(action).sum(dim=-1),
+            distribution.mean,
+        )
 
     def reset_inference_state(self) -> None:
         self.encoder.reset_inference_state()
@@ -265,12 +277,22 @@ class CausalGRUGaussianActor(nn.Module):
     def forward_incremental(
         self, state: torch.Tensor, sample: bool = True
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        action, logp, _ = self.forward_incremental_with_mean(
+            state, sample=sample
+        )
+        return action, logp
+
+    def forward_incremental_with_mean(
+        self,
+        state: torch.Tensor,
+        sample: bool = True,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         features = self.encoder.forward_incremental(state)
         mean = self.mean(features)
         std = torch.exp(self.log_std).clamp(1e-4, 3.0)
         distribution = torch.distributions.Normal(mean, std)
         action = distribution.rsample() if sample else distribution.mean
-        return action, distribution.log_prob(action).sum(dim=-1)
+        return action, distribution.log_prob(action).sum(dim=-1), mean
 
     def log_prob_entropy(
         self, state: torch.Tensor, action: torch.Tensor

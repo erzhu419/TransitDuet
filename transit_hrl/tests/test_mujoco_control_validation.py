@@ -30,6 +30,7 @@ from freq_hrl.experiments.mujoco.control_validation import (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
     _model_parameter_sha256,
     _raw_projection_target,
     _leakage_constraint_cost,
@@ -1445,6 +1446,68 @@ class MujocoControlIntegrationTest(unittest.TestCase):
             "decision_time",
         )
         self.assertEqual(len(rows), 1)
+        self.assertEqual(
+            rows[0]["terminal_reserve_certificate_violation_count"], 0.0
+        )
+
+    def test_v24_training_uses_same_state_policy_mean_upper_target(self):
+        payload, rows, model = train_mujoco_method(
+            method="freq_hrl",
+            env_id="HalfCheetah-v5",
+            disturbance_mode="standard",
+            train_seeds=[2039],
+            selection_seeds=[2053],
+            eval_seeds=[2063],
+            steps=8,
+            episode_horizon=8,
+            iterations=1,
+            optimizer_seed=2069,
+            upper_period=4,
+            hidden_dim=8,
+            ppo_clip_ratio=0.1,
+            upper_projection_consistency_coef=0.1,
+            lower_projection_consistency_coef=0.1,
+            upper_projection_target_aggregation="decision_policy_mean",
+            terminal_reserve_projection=True,
+            lower_lf_rms_budget=0.0475,
+            upper_hf_rms_budget=0.075,
+            checkpoint_smoothing_window=1,
+            checkpoint_min_delta=0.0,
+            checkpoint_evaluation_interval=1,
+            training_disturbance_modes=["standard"],
+            evaluation_disturbance_modes=["standard"],
+            control_protocol_version="auto",
+        )
+
+        self.assertEqual(
+            payload["protocol_version"], MUJOCO_CONTROL_PROTOCOL_VERSION_V24
+        )
+        self.assertEqual(
+            payload["upper_projection_target_aggregation"],
+            "decision_policy_mean",
+        )
+        self.assertEqual(
+            model.config.upper_projection_target_aggregation,
+            "decision_policy_mean",
+        )
+        training_target = payload[
+            "upper_policy_mean_projection_target_training"
+        ]
+        self.assertEqual(training_target["active_iteration_count"], 1.0)
+        self.assertGreater(training_target["target_count"], 0.0)
+        self.assertGreater(
+            training_target["sampled_target_delta_rms_mean"], 0.0
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertGreater(
+            rows[0]["terminal_reserve_upper_policy_mean_target_count"], 0.0
+        )
+        self.assertEqual(
+            rows[0][
+                "terminal_reserve_upper_policy_mean_target_delta_rms_mean"
+            ],
+            0.0,
+        )
         self.assertEqual(
             rows[0]["terminal_reserve_certificate_violation_count"], 0.0
         )

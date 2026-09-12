@@ -99,6 +99,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V21 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V23 = (
     "freq_hrl_mujoco_shared_core_v23_causal_upper_projection_target_training"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V24 = (
+    "freq_hrl_mujoco_shared_core_v24_policy_mean_upper_projection_target_training"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -114,6 +117,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -1669,6 +1673,7 @@ def rollout_hierarchical(
         upper_cost_values: list[float] = []
         lower_cost_values: list[float] = []
         terminal_projection_rows: list[dict[str, Any]] = []
+        upper_policy_mean_target_delta_rms_values: list[float] = []
         terminal_audit_rows: list[dict[str, Any]] = []
         current_episode_return = 0.0
         episode_index = 0
@@ -1884,6 +1889,26 @@ def rollout_hierarchical(
             if terminal_reserve_projection:
                 if terminal_projector is None:
                     raise RuntimeError("terminal-reserve projector is unavailable")
+                if (
+                    upper_decision_now
+                    and model.config.upper_projection_target_aggregation
+                    == "decision_policy_mean"
+                ):
+                    mean_lower_residual = (
+                        float(lower_action_scale)
+                        * np.tanh(np.asarray(
+                            lower_out["mean_action"],
+                            dtype=np.float32,
+                        ))
+                    )
+                    mean_projection_row = terminal_projector.preview(
+                        proposed_upper_action,
+                        mean_lower_residual,
+                    )
+                    upper_projection_target = _raw_projection_target(
+                        np.asarray(mean_projection_row["upper"]),
+                        scale=float(upper_action_scale),
+                    )
                 projection_row = terminal_projector.project(
                     proposed_upper_action,
                     proposed_lower_action,
@@ -1900,10 +1925,19 @@ def rollout_hierarchical(
                     -1.0,
                     1.0,
                 )
-                upper_projection_target = _raw_projection_target(
+                sampled_upper_projection_target = _raw_projection_target(
                     effective_upper_action,
                     scale=float(upper_action_scale),
                 )
+                if upper_projection_target is None:
+                    upper_projection_target = sampled_upper_projection_target
+                else:
+                    upper_policy_mean_target_delta_rms_values.append(
+                        float(np.sqrt(np.mean(np.square(
+                            upper_projection_target
+                            - sampled_upper_projection_target
+                        ))))
+                    )
                 lower_projection_target = _raw_projection_target(
                     lower_residual,
                     scale=float(lower_action_scale),
@@ -2482,6 +2516,15 @@ def rollout_hierarchical(
                     item["lower_terminal_reserve_min_margin"]
                     for item in terminal_projection_rows
                 ])),
+                "terminal_reserve_upper_policy_mean_target_count": float(
+                    len(upper_policy_mean_target_delta_rms_values)
+                ),
+                "terminal_reserve_upper_policy_mean_target_delta_rms_mean": (
+                    float(np.mean(
+                        upper_policy_mean_target_delta_rms_values
+                    ))
+                    if upper_policy_mean_target_delta_rms_values else 0.0
+                ),
             })
         elif terminal_projector is not None:
             if len(terminal_audit_rows) != len(rewards):
@@ -4366,8 +4409,11 @@ def train_mujoco_method(
     uses_v21_reward_selective_consistency = bool(
         str(projection_consistency_weighting) != "uniform"
     )
+    uses_v24_policy_mean_upper_projection_target = bool(
+        str(upper_projection_target_aggregation) == "decision_policy_mean"
+    )
     uses_v23_causal_upper_projection_target = bool(
-        str(upper_projection_target_aggregation) != "macro_mean"
+        str(upper_projection_target_aggregation) == "decision_time"
     )
     uses_v20_consistency_training = bool(
         str(projection_consistency_update_mode) != "scalarized"
@@ -4413,6 +4459,7 @@ def train_mujoco_method(
         uses_v20_consistency_training
         or uses_v21_reward_selective_consistency
         or uses_v23_causal_upper_projection_target
+        or uses_v24_policy_mean_upper_projection_target
     ) and not terminal_reserve_projection:
         raise ValueError(
             "scheduled, guarded, reward-selective, or causal upper-target "
@@ -4651,7 +4698,9 @@ def train_mujoco_method(
             "direct lower action, held upper action, and no promotion"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V23
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V24
+        if uses_v24_policy_mean_upper_projection_target
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V23
         if uses_v23_causal_upper_projection_target
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V21
         if uses_v21_reward_selective_consistency
@@ -4701,9 +4750,19 @@ def train_mujoco_method(
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
     if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V24
+        and selected_protocol_version
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V24}
+    ):
+        raise ValueError("v24 mechanisms cannot use an earlier protocol label")
+    if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V23
         and selected_protocol_version
-        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V23}
+        not in {
+            "auto",
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+        }
     ):
         raise ValueError("v23 mechanisms cannot use an earlier protocol label")
     if (
@@ -4713,6 +4772,7 @@ def train_mujoco_method(
             "auto",
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
         }
     ):
         raise ValueError("v21 mechanisms cannot use an earlier protocol label")
@@ -4724,6 +4784,7 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
         }
     ):
         raise ValueError("v20 mechanisms cannot use an earlier protocol label")
@@ -4733,11 +4794,12 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
         }
         and not terminal_reserve_enabled
     ):
         raise ValueError(
-            "the v20/v21/v23 protocol labels require terminal-reserve context"
+            "the v20/v21/v23/v24 protocol labels require terminal-reserve context"
         )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
@@ -4748,6 +4810,7 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V20,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
         }
     ):
         raise ValueError("v19 mechanisms cannot use an earlier protocol label")
