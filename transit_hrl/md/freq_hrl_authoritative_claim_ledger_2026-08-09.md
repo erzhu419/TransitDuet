@@ -402,6 +402,18 @@ preservation, correction no-tradeoff, leakage no-tradeoff, fresh-seed
 confirmation, or final Freq-HRL manuscript support. V23 roots cannot be reused
 to tune coefficients, thresholds, checkpoint rules, or target aggregation.
 
+### mujoco_v24_policy_mean_upper_projection_target_development
+
+Prepared on revision `8e3b571185a84d0adb00307421a89c0f38a81412` with 20
+fresh roots and a frozen 48-cell scheduleurm matrix. The sole candidate replaces
+the v23 stochastic first-sample upper target with a deterministic lower-policy
+mean projected from the same causal state. No v24 training or heldout result has
+been observed at this ledger state.
+
+Forbidden: V24 preparation or passing unit tests establish performance,
+variance reduction, reward preservation, correction no-tradeoff, confirmation,
+or manuscript support. Only completed frozen cells may adjudicate advancement.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
