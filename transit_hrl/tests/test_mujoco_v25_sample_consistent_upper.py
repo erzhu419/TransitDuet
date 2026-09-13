@@ -18,6 +18,8 @@ class SampleConsistentUpperScreenTest(unittest.TestCase):
                 args = build_parser().parse_args(tokens[tokens.index("--") + 1:] + ["--output-dir", "/tmp/v25-test"])
                 self.assertEqual(args.upper_projection_consistency_objective, cell[1] if cell[1] != spec.ZERO else "raw_mean")
                 self.assertEqual(args.upper_projection_target_aggregation, "decision_time")
+                self.assertGreaterEqual(len(args.train_seeds), len(args.training_disturbance_modes))
+                self.assertGreaterEqual(len(args.selection_seeds), len(args.training_disturbance_modes))
                 job = task_spec("test", cell, preflight=preflight)
                 self.assertIsNone(job["require_node"])
                 self.assertEqual(job["cpu"], 1)

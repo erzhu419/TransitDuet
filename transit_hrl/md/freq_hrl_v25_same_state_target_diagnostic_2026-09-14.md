@@ -66,6 +66,12 @@ screen. The exact seeds, budgets and adoption gates are in
 `scripts/mujoco_v25_sample_consistent_upper_spec.py`. Both baseline rewards and
 physical correction magnitudes remain gates; unlike-unit losses are not.
 
+The first training preflight t93665-t93676 rejected its configuration before
+training: four training conditions require at least four train and selection
+roots. Its registration is retained as r1; r2 supplies one fresh root per
+condition in both roles. The full-development seed set already met this
+requirement. Algorithm source and performance gates are unchanged.
+
 ## Limitations
 
 Action-space gradients include the tanh derivative, so lower gradient variance
