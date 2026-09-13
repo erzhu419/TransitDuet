@@ -172,7 +172,7 @@ def main():
     result["code_revision"] = args.code_revision
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "diagnostics.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print("same-state diagnostic complete", flush=True)
+    print("DONE: same-state diagnostic complete", flush=True)
 
 
 if __name__ == "__main__":

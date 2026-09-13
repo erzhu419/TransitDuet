@@ -33,3 +33,8 @@ scheduleurm on node001-node006, one CPU and 768 MiB per cell. Only aggregate
 JSON is exported. Interpretation is mechanistic: this panel cannot establish
 policy performance, choose reward thresholds, or authorize a confirmation run.
 Any subsequent training comparison needs a fresh frozen development protocol.
+
+Operational preflight t93594 completed in 6.26 seconds with exit code zero.
+Scheduler's short-job classifier did not recognize its custom terminal log
+message. The full panel uses the recognized `DONE` marker; the preflight
+remains an operational record outside the full-panel results.
