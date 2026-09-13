@@ -72,6 +72,18 @@ roots. Its registration is retained as r1; r2 supplies one fresh root per
 condition in both roles. The full-development seed set already met this
 requirement. Algorithm source and performance gates are unchanged.
 
+Corrected preflight r2, t93693-t93704, completed all 12 cells and 60 evaluation
+episodes. The frozen analyzer returned `preflight_valid`: source/parameter and
+path contracts, matched capacity, finite losses, certificates, fallback, and
+prefix budgets passed. Each active arm applied consistency in 4 of 8 iterations
+at both levels; the zero arm applied it in none. Small exports total 746,288
+bytes, including registration and analysis, with no local checkpoints/history.
+
+Full development `mujoco_v25_sample_consistent_upper_development_20260914_r1`
+is submitted as t93706-t93753: 48 cells, 512 iterations each, 1,920 planned
+evaluation episodes. Tasks may use any of node001-node006, one CPU and 1,536 MiB
+each. Results are pending; this is not a performance improvement result.
+
 ## Limitations
 
 Action-space gradients include the tanh derivative, so lower gradient variance
