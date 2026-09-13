@@ -38,3 +38,38 @@ Operational preflight t93594 completed in 6.26 seconds with exit code zero.
 Scheduler's short-job classifier did not recognize its custom terminal log
 message. The full panel uses the recognized `DONE` marker; the preflight
 remains an operational record outside the full-panel results.
+
+## Result and Next Experiment
+
+Full-panel t93601-t93648 completed: 48 JSON exports (874,029 bytes), 144
+snapshots, with unchanged projector history throughout. Source revision is
+`c11756d306e518b65d386e499798a24a50d8622f`; the run is
+`results/mujoco_v25_same_state_target_noise_20260914_r2`.
+
+At prefix lengths 32/64, upper sampling accounts for 97.30%/94.72% of the
+upper raw-target variance summed over cells; lower sampling accounts for only
+0.52%/1.29%. Relative summed gradient variance for raw-sample versus raw-mean
+is 1.380/1.149; action-sample is 0.445/0.364. This does not support a blanket
+claim that simply replacing mean fitting with sample fitting reduces variance.
+At the initial prefix, lower action-sample gradient variance is 26.96 times
+the raw-mean value. Therefore the next training experiment changes upper only.
+
+The identity-projector action-sample gradient is zero. Raw-mean fitting has
+nonzero stochastic gradient even when projection makes no action correction.
+This motivates the fixed-residual objective, not a policy-performance claim.
+
+The next frozen development compares zero consistency, causal raw-mean,
+causal raw-sample (diagnostic only), and causal action-sample (sole candidate).
+It uses 4 new optimizer roots, 3 environments, 512 iterations, and 40 evaluation
+episodes per cell. A separate 12-cell short preflight precedes the 48-cell
+screen. The exact seeds, budgets and adoption gates are in
+`scripts/mujoco_v25_sample_consistent_upper_spec.py`. Both baseline rewards and
+physical correction magnitudes remain gates; unlike-unit losses are not.
+
+## Limitations
+
+Action-space gradients include the tanh derivative, so lower gradient variance
+can reflect rescaling or saturation rather than better learning. These snapshots
+use independent Gaussian proposals, not trained policies with upper/lower state
+coupling. The training comparison retains the shared per-step checkpoint score
+to isolate this loss change, while the development outcome uses episode return.

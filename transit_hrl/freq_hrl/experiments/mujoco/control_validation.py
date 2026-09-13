@@ -55,6 +55,7 @@ from freq_hrl.rl import (
     train_frequency_separated_ppo,
     train_joint_ppo,
 )
+from freq_hrl.rl.smdp_actor_critic import UPPER_PROJECTION_CONSISTENCY_OBJECTIVES
 
 
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
@@ -102,6 +103,9 @@ MUJOCO_CONTROL_PROTOCOL_VERSION_V23 = (
 MUJOCO_CONTROL_PROTOCOL_VERSION_V24 = (
     "freq_hrl_mujoco_shared_core_v24_policy_mean_upper_projection_target_training"
 )
+MUJOCO_CONTROL_PROTOCOL_VERSION_V25 = (
+    "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training"
+)
 MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16,
@@ -118,6 +122,7 @@ MUJOCO_CONTROL_PROTOCOL_VERSIONS = (
     MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
     MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+    MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
 )
 MUJOCO_CONTROL_PROTOCOL_SELECTIONS = (
     "auto",
@@ -1939,6 +1944,10 @@ def rollout_hierarchical(
                             - sampled_upper_projection_target
                         ))))
                     )
+                if model.config.upper_projection_consistency_objective == "action_sample":
+                    upper_projection_target = (
+                        effective_upper_action / float(upper_action_scale)
+                    ).astype(np.float32)
                 lower_projection_target = _raw_projection_target(
                     lower_residual,
                     scale=float(lower_action_scale),
@@ -3325,6 +3334,7 @@ def _hierarchical_model(
     projection_consistency_advantage_temperature: float = 1.0,
     projection_consistency_advantage_weight_clip: float = 5.0,
     upper_projection_target_aggregation: str = "macro_mean",
+    upper_projection_consistency_objective: str = "raw_mean",
     projection_consistency_step_scale: float = 1.0,
     projection_consistency_max_backtracks: int = 8,
     projection_consistency_reward_tolerance: float = 0.0,
@@ -3398,6 +3408,7 @@ def _hierarchical_model(
         upper_projection_target_aggregation=str(
             upper_projection_target_aggregation
         ),
+        upper_projection_consistency_objective=str(upper_projection_consistency_objective),
         projection_consistency_step_scale=float(
             projection_consistency_step_scale
         ),
@@ -4289,6 +4300,7 @@ def train_mujoco_method(
     projection_consistency_advantage_temperature: float = 1.0,
     projection_consistency_advantage_weight_clip: float = 5.0,
     upper_projection_target_aggregation: str = "macro_mean",
+    upper_projection_consistency_objective: str = "raw_mean",
     projection_consistency_step_scale: float = 1.0,
     projection_consistency_max_backtracks: int = 8,
     projection_consistency_reward_tolerance: float = 0.0,
@@ -4410,6 +4422,13 @@ def train_mujoco_method(
     uses_v21_reward_selective_consistency = bool(
         str(projection_consistency_weighting) != "uniform"
     )
+    uses_v25_sample_consistent_upper = upper_projection_consistency_objective != "raw_mean"
+    if upper_projection_consistency_objective not in UPPER_PROJECTION_CONSISTENCY_OBJECTIVES:
+        raise ValueError("unknown upper projection consistency objective")
+    if uses_v25_sample_consistent_upper and (
+        not terminal_reserve_projection or upper_projection_target_aggregation != "decision_time"
+    ):
+        raise ValueError("sample-consistent upper loss requires decision-time terminal projection")
     uses_v24_policy_mean_upper_projection_target = bool(
         str(upper_projection_target_aggregation) == "decision_policy_mean"
     )
@@ -4699,7 +4718,9 @@ def train_mujoco_method(
             "direct lower action, held upper action, and no promotion"
         )
     inferred_protocol_version = (
-        MUJOCO_CONTROL_PROTOCOL_VERSION_V24
+        MUJOCO_CONTROL_PROTOCOL_VERSION_V25
+        if uses_v25_sample_consistent_upper
+        else MUJOCO_CONTROL_PROTOCOL_VERSION_V24
         if uses_v24_policy_mean_upper_projection_target
         else MUJOCO_CONTROL_PROTOCOL_VERSION_V23
         if uses_v23_causal_upper_projection_target
@@ -4751,9 +4772,14 @@ def train_mujoco_method(
     if selected_protocol_version not in MUJOCO_CONTROL_PROTOCOL_SELECTIONS:
         raise ValueError("unknown MuJoCo control protocol version")
     if (
+        inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V25
+        and selected_protocol_version not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V25}
+    ):
+        raise ValueError("v25 mechanisms cannot use an earlier protocol label")
+    if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V24
         and selected_protocol_version
-        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V24}
+        not in {"auto", MUJOCO_CONTROL_PROTOCOL_VERSION_V24, MUJOCO_CONTROL_PROTOCOL_VERSION_V25}
     ):
         raise ValueError("v24 mechanisms cannot use an earlier protocol label")
     if (
@@ -4763,6 +4789,7 @@ def train_mujoco_method(
             "auto",
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
         }
     ):
         raise ValueError("v23 mechanisms cannot use an earlier protocol label")
@@ -4774,6 +4801,7 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
         }
     ):
         raise ValueError("v21 mechanisms cannot use an earlier protocol label")
@@ -4786,6 +4814,7 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
         }
     ):
         raise ValueError("v20 mechanisms cannot use an earlier protocol label")
@@ -4796,11 +4825,12 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
         }
         and not terminal_reserve_enabled
     ):
         raise ValueError(
-            "the v20/v21/v23/v24 protocol labels require terminal-reserve context"
+            "the v20/v21/v23/v24/v25 protocol labels require terminal-reserve context"
         )
     if (
         inferred_protocol_version == MUJOCO_CONTROL_PROTOCOL_VERSION_V19
@@ -4812,6 +4842,7 @@ def train_mujoco_method(
             MUJOCO_CONTROL_PROTOCOL_VERSION_V21,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V23,
             MUJOCO_CONTROL_PROTOCOL_VERSION_V24,
+            MUJOCO_CONTROL_PROTOCOL_VERSION_V25,
         }
     ):
         raise ValueError("v19 mechanisms cannot use an earlier protocol label")
@@ -6065,6 +6096,7 @@ def train_mujoco_method(
             upper_projection_target_aggregation=(
                 upper_projection_target_aggregation
             ),
+            upper_projection_consistency_objective=upper_projection_consistency_objective,
             projection_consistency_step_scale=(
                 projection_consistency_step_scale
             ),
@@ -6658,6 +6690,10 @@ def train_mujoco_method(
         ),
         "upper_projection_target_aggregation": str(
             upper_projection_target_aggregation
+        ),
+        "upper_projection_consistency_objective": upper_projection_consistency_objective,
+        "upper_projection_target_space": (
+            "unit_box_action" if upper_projection_consistency_objective == "action_sample" else "gaussian_raw"
         ),
         "projection_consistency_step_scale": float(
             projection_consistency_step_scale
@@ -7295,6 +7331,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="macro_mean",
     )
     parser.add_argument(
+        "--upper-projection-consistency-objective",
+        choices=UPPER_PROJECTION_CONSISTENCY_OBJECTIVES,
+        default="raw_mean",
+    )
+    parser.add_argument(
         "--projection-consistency-step-scale", type=float, default=1.0
     )
     parser.add_argument(
@@ -7657,6 +7698,7 @@ def main() -> None:
         upper_projection_target_aggregation=(
             args.upper_projection_target_aggregation
         ),
+        upper_projection_consistency_objective=args.upper_projection_consistency_objective,
         projection_consistency_step_scale=(
             args.projection_consistency_step_scale
         ),

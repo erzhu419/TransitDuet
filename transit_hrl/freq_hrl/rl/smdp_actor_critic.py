@@ -45,6 +45,7 @@ UPPER_PROJECTION_TARGET_AGGREGATION_MODES = (
     "decision_time",
     "decision_policy_mean",
 )
+UPPER_PROJECTION_CONSISTENCY_OBJECTIVES = ("raw_mean", "raw_sample", "action_sample")
 DEPLOYMENT_FREQUENCY_PROJECTION_OBJECTIVES = (
     "worst_group",
     "violation_l2",
@@ -54,6 +55,26 @@ CONSTRAINT_DUAL_NORMALIZATION_MODES = (
     "none",
     "ema_abs",
 )
+
+
+def _projection_consistency_error(
+    mean: torch.Tensor,
+    target: torch.Tensor,
+    *,
+    objective: str,
+    sample_offset: torch.Tensor | None = None,
+) -> torch.Tensor:
+    if objective == "raw_mean":
+        prediction = mean
+    elif objective in {"raw_sample", "action_sample"}:
+        if sample_offset is None:
+            raise ValueError("sample-consistent projection requires a frozen sample offset")
+        prediction = mean + sample_offset
+        if objective == "action_sample":
+            prediction = torch.tanh(prediction)
+    else:
+        raise ValueError("unknown projection consistency objective")
+    return torch.mean(torch.square(prediction - target), dim=-1)
 
 
 def _projection_consistency_weights(
@@ -471,6 +492,7 @@ class SMDPPPOConfig:
     projection_consistency_advantage_temperature: float = 1.0
     projection_consistency_advantage_weight_clip: float = 5.0
     upper_projection_target_aggregation: str = "macro_mean"
+    upper_projection_consistency_objective: str = "raw_mean"
     projection_consistency_step_scale: float = 1.0
     projection_consistency_max_backtracks: int = 8
     projection_consistency_reward_tolerance: float = 0.0
@@ -1388,6 +1410,13 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "unknown upper projection-target aggregation mode"
             )
+        if config.upper_projection_consistency_objective not in UPPER_PROJECTION_CONSISTENCY_OBJECTIVES:
+            raise ValueError("unknown upper projection consistency objective")
+        if (
+            config.upper_projection_consistency_objective != "raw_mean"
+            and config.upper_projection_target_aggregation != "decision_time"
+        ):
+            raise ValueError("sample-consistent upper loss requires a decision-time target")
         if (
             not np.isfinite(
                 float(config.projection_consistency_advantage_temperature)
@@ -3052,6 +3081,16 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 f"{level} projection consistency requires projection targets"
             )
+        projection_objective = (
+            cfg.upper_projection_consistency_objective if level == "upper" else "raw_mean"
+        )
+        projection_sample_offset = None
+        if projection_target_t is not None and projection_objective != "raw_mean":
+            # Keep the rollout's stochastic residual fixed through all PPO epochs.
+            with torch.no_grad():
+                projection_sample_offset = (
+                    action - actor.distribution(state).mean
+                ).detach()
         reward_adv, returns = self._gae(
             batch.reward,
             batch.done,
@@ -3206,11 +3245,10 @@ class FrequencySeparatedActorCriticPPO:
                 )
                 if projection_target_t is not None:
                     projection_mean = actor.distribution(state[idx]).mean
-                    projection_squared_error = torch.mean(
-                        torch.square(
-                            projection_mean - projection_target_t[idx]
-                        ),
-                        dim=-1,
+                    projection_squared_error = _projection_consistency_error(
+                        projection_mean, projection_target_t[idx],
+                        objective=projection_objective,
+                        sample_offset=(projection_sample_offset[idx] if projection_sample_offset is not None else None),
                     )
                     projection_consistency_weight = (
                         _projection_consistency_weights(
@@ -3329,12 +3367,10 @@ class FrequencySeparatedActorCriticPPO:
                             current_projection_mean = actor.distribution(
                                 state[idx]
                             ).mean
-                            current_projection_error = torch.mean(
-                                torch.square(
-                                    current_projection_mean
-                                    - projection_target_t[idx]
-                                ),
-                                dim=-1,
+                            current_projection_error = _projection_consistency_error(
+                                current_projection_mean, projection_target_t[idx],
+                                objective=projection_objective,
+                                sample_offset=(projection_sample_offset[idx] if projection_sample_offset is not None else None),
                             )
                             current_projection_loss = (
                                 projection_coefficient
@@ -3482,12 +3518,10 @@ class FrequencySeparatedActorCriticPPO:
                         current_projection_mean = actor.distribution(
                             state[idx]
                         ).mean
-                        current_projection_error = torch.mean(
-                            torch.square(
-                                current_projection_mean
-                                - projection_target_t[idx]
-                            ),
-                            dim=-1,
+                        current_projection_error = _projection_consistency_error(
+                            current_projection_mean, projection_target_t[idx],
+                            objective=projection_objective,
+                            sample_offset=(projection_sample_offset[idx] if projection_sample_offset is not None else None),
                         )
                         return projection_coefficient * torch.mean(
                             projection_consistency_weight
