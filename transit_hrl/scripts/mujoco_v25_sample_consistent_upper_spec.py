@@ -2,7 +2,7 @@
 
 PROTOCOL = "mujoco_v25_sample_consistent_upper_development_v1"
 CORE_PROTOCOL = "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training"
-ALGORITHM_REVISION = "pending_source_commit"
+ALGORITHM_REVISION = "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b"
 ENVIRONMENTS = ("HalfCheetah-v5", "Hopper-v5", "Walker2d-v5")
 TRAIN_MODES = ("standard", "low_frequency", "high_frequency", "mixed")
 EVAL_MODES = (*TRAIN_MODES, "ood_chirp")
