@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-08-31
+Date: 2026-09-14
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -53,6 +53,10 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v18_5_actor_floor_signal_development | mujoco_control | development | actor_floor_signal_stops_debt_feedback_direction | development_only | false |
 | mujoco_v19_terminal_reserve_training_development | mujoco_control | development | terminal_reserve_training_not_supported | development_only | false |
 | mujoco_v20_reward_guarded_reserve_training_development | mujoco_control | development | reward_guarded_reserve_training_not_supported | development_only | false |
+| mujoco_v21_reward_selective_feasible_action_preflight | mujoco_control | development | selective_consistency_not_supported | development_only | false |
+| mujoco_v22_uniform_terminal_reserve_confirmation | mujoco_control | confirmatory | joint_confirmation_not_supported | mixed_or_negative_main_or_si | false |
+| mujoco_v23_causal_upper_projection_target_development | mujoco_control | development | causal_upper_target_not_supported | development_only | false |
+| mujoco_v24_policy_mean_upper_projection_target_development | mujoco_control | development | policy_mean_target_not_supported | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -404,15 +408,24 @@ to tune coefficients, thresholds, checkpoint rules, or target aggregation.
 
 ### mujoco_v24_policy_mean_upper_projection_target_development
 
-Prepared on revision `8e3b571185a84d0adb00307421a89c0f38a81412` with 20
-fresh roots and a frozen 48-cell scheduleurm matrix. The sole candidate replaces
-the v23 stochastic first-sample upper target with a deterministic lower-policy
-mean projected from the same causal state. No v24 training or heldout result has
-been observed at this ledger state.
+All 48 frozen cells completed. The policy-mean candidate won reward in 7/12
+paired roots: mean return changed -8.79%, +24.22%, and -20.05% versus the causal
+first-sample control in HalfCheetah, Hopper, and Walker2d. Upper consistency MSE
+improved only in HalfCheetah; Walker2d component and total correction increased
+38.50% and 34.25%. The candidate failed the frozen advancement rule.
 
-Forbidden: V24 preparation or passing unit tests establish performance,
-variance reduction, reward preservation, correction no-tradeoff, confirmation,
-or manuscript support. Only completed frozen cells may adjudicate advancement.
+Certificates and realized prefix budgets passed. All 12 policy-mean cells
+failed deterministic-target equality because preview and execution targets
+used different floating-point precision before inverse tanh. A subsequent
+precision fix leaves this recorded failure intact. Recorded selection histories
+also show that changing the checkpoint objective cannot explain the candidate's
+Walker2d regression. See the [v24 result](freq_hrl_mujoco_v24_policy_mean_upper_projection_target_result_2026-09-14.md).
+
+Forbidden: V24 supports a universal policy-mean target, target variance
+reduction, reward preservation, correction no-tradeoff, confirmation, or
+manuscript superiority. V24 roots and this parameterization are retired;
+correcting the audit does not authorize confirmation or retrospective
+checkpoint selection.
 
 ### legacy_c1_c9_matrix_snapshot
 

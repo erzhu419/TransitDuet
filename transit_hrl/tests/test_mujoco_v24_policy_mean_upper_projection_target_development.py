@@ -5,6 +5,8 @@ from pathlib import Path
 import shlex
 from unittest import mock
 
+import pytest
+
 from freq_hrl.experiments.mujoco import control_validation
 from scripts import analyze_mujoco_v24_policy_mean_upper_projection_target_development as analysis
 from scripts import mujoco_v24_policy_mean_upper_projection_target_development_spec as spec
@@ -245,8 +247,25 @@ def _weight_training(arm: str):
 
 def _synthetic_load(passes: bool):
     def load(run_name, environment, arm, optimizer_seed):
-        del run_name, environment, optimizer_seed
+        del run_name
         summary = {
+            **spec.ARMS[arm],
+            "protocol_version": spec.FROZEN_CORE_PROTOCOL_VERSION,
+            "code_revision": spec.FROZEN_ALGORITHM_REVISION,
+            "environment": environment,
+            "optimizer_seed": optimizer_seed,
+            "rollout_seed_roots": list(spec.TRAIN_SEEDS),
+            "checkpoint_selection_seed_roots": list(spec.SELECTION_SEEDS),
+            "eval_seeds": list(spec.EVALUATION_SEEDS),
+            "ppo_clip_ratio": spec.PPO_CLIP_RATIO,
+            "terminal_reserve_context_enabled": True,
+            "terminal_reserve_projection_enabled": True,
+            "iterations": spec.ITERATIONS,
+            "steps": spec.STEPS,
+            "checkpoint_minimum_eligible_iteration": spec.CHECKPOINT_MINIMUM_ITERATION,
+            "terminal_reserve_upper_window": spec.TERMINAL_RESERVE_UPPER_WINDOW,
+            "terminal_reserve_lower_window": spec.TERMINAL_RESERVE_LOWER_WINDOW,
+            "checkpoint_score_mode": spec.CHECKPOINT_SCORE_MODE,
             "selected_checkpoint_iteration": 400,
             "capacity_actual_parameter_count": 12345,
             "projection_consistency_weight_training": _weight_training(arm),
@@ -275,8 +294,11 @@ def _synthetic_load(passes: bool):
             reward, component, total = 80.0, 1.20, 0.30
         policy_mean = arm == spec.POLICY_MEAN_UNIFORM_010
         rows = [{
-            "disturbance_mode": "standard",
-            "seed": spec.EVALUATION_SEEDS[0],
+            "disturbance_mode": mode,
+            "seed": seed,
+            "protocol_valid": True,
+            "terminal_reserve_context_enabled": True,
+            "terminal_reserve_projection_enabled": True,
             "episode_return": reward,
             "terminal_reserve_certificate_violation_count": 0.0,
             "terminal_reserve_component_correction_rms_mean": component,
@@ -294,18 +316,18 @@ def _synthetic_load(passes: bool):
                 2.0 if policy_mean else 0.0
             ),
             "terminal_reserve_upper_policy_mean_target_delta_rms_mean": 0.0,
-        }]
+        } for mode in spec.EVALUATION_DISTURBANCE_MODES
+          for seed in spec.EVALUATION_SEEDS]
         return summary, rows
 
     return load
 
 
 def test_analysis_advances_only_the_policy_mean_candidate_when_all_gates_pass():
-    with mock.patch.object(analysis, "_validate_cell", return_value=None):
-        with mock.patch.object(
-            analysis, "_load_cell", side_effect=_synthetic_load(True)
-        ):
-            result = analysis.analyze("synthetic")
+    with mock.patch.object(
+        analysis, "_load_cell", side_effect=_synthetic_load(True)
+    ):
+        result = analysis.analyze("synthetic")
     assert result["status"] == spec.ADVANCES_STATUS
     assert result["selected_candidate"] == spec.POLICY_MEAN_UNIFORM_010
     assert result["candidate_results"][
@@ -321,10 +343,42 @@ def test_analysis_advances_only_the_policy_mean_candidate_when_all_gates_pass():
 
 
 def test_analysis_stops_when_policy_mean_candidate_fails():
-    with mock.patch.object(analysis, "_validate_cell", return_value=None):
-        with mock.patch.object(
-            analysis, "_load_cell", side_effect=_synthetic_load(False)
-        ):
-            result = analysis.analyze("synthetic")
+    with mock.patch.object(
+        analysis, "_load_cell", side_effect=_synthetic_load(False)
+    ):
+        result = analysis.analyze("synthetic")
     assert result["status"] == spec.STOPS_STATUS
     assert result["selected_candidate"] is None
+
+
+@pytest.mark.parametrize("delta,failed", [(1e-13, False), (1e-8, True)])
+def test_target_audit_failure_is_reported_without_relaxing_frozen_gate(delta, failed):
+    load = _synthetic_load(True)
+
+    def with_delta(run_name, environment, arm, optimizer_seed):
+        summary, rows = load(run_name, environment, arm, optimizer_seed)
+        if arm == spec.POLICY_MEAN_UNIFORM_010:
+            for row in rows:
+                row["terminal_reserve_upper_policy_mean_target_delta_rms_mean"] = delta
+        return summary, rows
+
+    with mock.patch.object(analysis, "_load_cell", side_effect=with_delta):
+        result = analysis.analyze("synthetic")
+    assert result["advance_gate"] is not failed
+    assert len(result["cell_audit_failures"]) == (12 if failed else 0)
+    gates = result["candidate_results"][spec.POLICY_MEAN_UNIFORM_010]["gates"]
+    assert gates["reward_floor_vs_all_controls_in_every_environment"]
+    assert gates["training_activity_audit_supported"] is not failed
+
+
+def test_analysis_still_rejects_wrong_source_revision():
+    load = _synthetic_load(True)
+
+    def wrong_revision(*args):
+        summary, rows = load(*args)
+        summary["code_revision"] = "different_source"
+        return summary, rows
+
+    with mock.patch.object(analysis, "_load_cell", side_effect=wrong_revision):
+        with pytest.raises(ValueError, match="cell contract mismatch"):
+            analysis.analyze("synthetic")

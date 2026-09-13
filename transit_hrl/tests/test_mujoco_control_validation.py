@@ -3,6 +3,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import torch
@@ -1510,6 +1511,61 @@ class MujocoControlIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(
             rows[0]["terminal_reserve_certificate_violation_count"], 0.0
+        )
+
+    def test_policy_mean_target_matches_execution_precision_after_projection(self):
+        observation_dim, action_dim = environment_dimensions(
+            "HalfCheetah-v5", episode_horizon=32
+        )
+        model = _hierarchical_model(
+            state_dim=mujoco_policy_state_dim(
+                observation_dim, action_dim, terminal_reserve_projection=True
+            ),
+            action_dim=action_dim,
+            hidden_dim=8,
+            learning_rate=3e-4,
+            leakage_constraint=False,
+            upper_projection_target_aggregation="decision_policy_mean",
+        )
+        upper = np.linspace(-1.3, 1.1, action_dim, dtype=np.float32)
+        lower = np.linspace(0.9, -0.7, action_dim, dtype=np.float32)
+        values = {"logp": 0.0, "value": 0.0, "cost_value": 0.0}
+        options = dict(
+            seed=2063,
+            env_id="HalfCheetah-v5",
+            disturbance_mode="mixed",
+            steps=32,
+            upper_period=4,
+            frequency_routing=True,
+            leakage_constraint=False,
+            sample=False,
+            episode_horizon=32,
+            collect_trajectory=True,
+            terminal_reserve_projection=True,
+            upper_hf_rms_budget=0.075,
+            lower_lf_rms_budget=0.0475,
+        )
+        with mock.patch.object(
+            model, "act_upper", return_value={**values, "action": upper}
+        ), mock.patch.object(
+            model, "act_lower",
+            return_value={**values, "action": lower, "mean_action": lower},
+        ):
+            candidate_batch, candidate = rollout_hierarchical(model, **options)
+            model.config.upper_projection_target_aggregation = "decision_time"
+            control_batch, control = rollout_hierarchical(model, **options)
+        self.assertGreater(candidate["terminal_reserve_component_correction_rms_mean"], 0.0)
+        self.assertEqual(
+            candidate["terminal_reserve_upper_policy_mean_target_delta_rms_mean"],
+            0.0,
+        )
+        np.testing.assert_array_equal(
+            candidate_batch.upper.projection_target, control_batch.upper.projection_target
+        )
+        self.assertEqual(candidate["episode_return"], control["episode_return"])
+        self.assertEqual(
+            candidate["terminal_reserve_correction_rms_mean"],
+            control["terminal_reserve_correction_rms_mean"],
         )
 
     def test_explicit_v1416_protocol_keeps_control_arm_comparable(self):

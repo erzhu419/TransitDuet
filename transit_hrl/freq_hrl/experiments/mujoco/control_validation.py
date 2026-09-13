@@ -1906,7 +1906,8 @@ def rollout_hierarchical(
                         mean_lower_residual,
                     )
                     upper_projection_target = _raw_projection_target(
-                        np.asarray(mean_projection_row["upper"]),
+                        # Match the executed component precision before atanh.
+                        np.asarray(mean_projection_row["upper"], dtype=np.float32),
                         scale=float(upper_action_scale),
                     )
                 projection_row = terminal_projector.project(

@@ -26,6 +26,10 @@ from scripts.submit_mujoco_v24_policy_mean_upper_projection_target_development_s
 )
 
 
+class EvaluationTargetAuditError(ValueError):
+    """A complete cell failed the frozen deterministic-target equality gate."""
+
+
 def _mean(rows: list[dict[str, Any]], key: str) -> float:
     return statistics.fmean(float(row[key]) for row in rows)
 
@@ -273,7 +277,7 @@ def _validate_cell(
     ) or (
         not expects_policy_mean and not evaluation_target_disabled
     ):
-        raise ValueError(
+        raise EvaluationTargetAuditError(
             f"v24 policy-mean evaluation audit mismatch: "
             f"{environment}/{arm}/{optimizer_seed}"
         )
@@ -667,6 +671,7 @@ def _candidate_result(
 
 def analyze(run_name: str) -> dict[str, Any]:
     registry: dict[tuple[str, str, int], dict[str, Any]] = {}
+    audit_failures: list[dict[str, Any]] = []
     path_sets: dict[tuple[str, int], set[frozenset[tuple[str, int]]]] = {}
     parameter_counts: dict[tuple[str, int], set[int]] = {}
     for environment in spec.ENVIRONMENTS:
@@ -675,7 +680,15 @@ def analyze(run_name: str) -> dict[str, Any]:
                 summary, rows = _load_cell(
                     run_name, environment, arm, optimizer_seed
                 )
-                _validate_cell(environment, arm, optimizer_seed, summary, rows)
+                try:
+                    _validate_cell(environment, arm, optimizer_seed, summary, rows)
+                except EvaluationTargetAuditError as exc:
+                    audit_failures.append({
+                        "environment": environment,
+                        "arm": arm,
+                        "optimizer_seed": int(optimizer_seed),
+                        "error": str(exc),
+                    })
                 cell = _summarize_cell(summary, rows)
                 registry[(environment, arm, int(optimizer_seed))] = cell
                 key = (environment, int(optimizer_seed))
@@ -695,7 +708,10 @@ def analyze(run_name: str) -> dict[str, Any]:
         arm: _training_audit(registry, arm) for arm in spec.ARMS
     }
     common_valid = all(row["supported"] for row in validity.values())
-    training_valid = all(row["supported"] for row in training_audits.values())
+    training_valid = (
+        not audit_failures
+        and all(row["supported"] for row in training_audits.values())
+    )
     candidates = {
         arm: _candidate_result(
             registry,
@@ -718,6 +734,7 @@ def analyze(run_name: str) -> dict[str, Any]:
         "status": spec.ADVANCES_STATUS if advances else spec.STOPS_STATUS,
         "selected_candidate": selected,
         "advance_gate": advances,
+        "cell_audit_failures": audit_failures,
         "validity": validity,
         "training_audits": training_audits,
         "candidate_results": candidates,
@@ -737,6 +754,7 @@ def _write_readme(result: dict[str, Any], path: Path) -> None:
         f"- Cells: {result['cell_count']}",
         f"- Selected candidate: `{result['selected_candidate']}`",
         f"- Evidence role: `{result['evidence_role']}`",
+        f"- Deterministic-target audit failures: {len(result['cell_audit_failures'])}",
     ]
     for arm in spec.CANDIDATES:
         candidate = result["candidate_results"][arm]
