@@ -150,3 +150,62 @@ def test_containing_balls_are_removed_without_reordering_active_constraints():
     np.testing.assert_array_equal(retained[0][0], balls[0][0])
     np.testing.assert_array_equal(retained[1][0], balls[3][0])
     assert [radius for _, radius in retained] == [0.25, 0.20]
+
+
+def test_single_active_ball_solution_skips_iterative_projection():
+    class FailIfDykstraRuns(CausalTerminalReserveProjector):
+        def _dykstra_ball_box(self, *args, **kwargs):
+            raise AssertionError("analytic single-ball solution was missed")
+
+    projector = FailIfDykstraRuns()
+    projected, metadata = projector._project_ball_intersection(
+        np.asarray([0.9, 0.0]),
+        balls=[
+            (np.asarray([0.0, 0.0]), 0.5),
+            (np.asarray([0.1, 0.0]), 0.5),
+        ],
+        low=np.asarray([-1.0, -1.0]),
+        high=np.asarray([1.0, 1.0]),
+    )
+    np.testing.assert_allclose(projected, [0.5, 0.0], atol=1e-14)
+    assert metadata == {"converged": True, "iterations": 1}
+
+
+def test_analytic_path_resolves_a_reference_iteration_limit_case():
+    dimension = 3
+    seed = 9332
+    rng = np.random.default_rng(seed)
+    steps = 30
+    phase = np.arange(48, dtype=np.float64)[:, None]
+    offsets = np.arange(dimension, dtype=np.float64)[None, :]
+    upper = 0.55 * np.sin(0.17 * phase + 0.3 * offsets)
+    upper += rng.normal(0.0, 0.24, size=(48, dimension))
+    lower = 0.45 * np.sin(0.83 * phase + 0.2 * offsets)
+    lower += rng.normal(0.0, 0.27, size=(48, dimension))
+    upper = np.clip(upper, -0.95, 0.95)
+    lower = np.clip(lower, -0.95, 0.95)
+
+    optimized = _projector(CausalTerminalReserveProjector, dimension)
+    reference = _projector(_ReferenceProjector, dimension)
+    for index in range(steps - 1):
+        actual = optimized.project(upper[index], lower[index])
+        expected = reference.project(upper[index], lower[index])
+        _assert_equivalent(actual, expected)
+
+    upper_action = upper[steps - 1]
+    lower_action = lower[steps - 1]
+    actual = optimized.preview(upper_action, lower_action)
+    expected = reference.preview(upper_action, lower_action)
+    assert actual["projection_converged"]
+    assert not expected["projection_converged"]
+    assert expected["projection_iterations"] == 512
+    assert actual["terminal_certificate_feasible"]
+    actual_distance = float(
+        np.sum(np.square(actual["upper"] - upper_action))
+        + np.sum(np.square(actual["lower"] - lower_action))
+    )
+    expected_distance = float(
+        np.sum(np.square(expected["upper"] - upper_action))
+        + np.sum(np.square(expected["lower"] - lower_action))
+    )
+    assert actual_distance <= expected_distance + 1e-10

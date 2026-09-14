@@ -590,6 +590,30 @@ class CausalTerminalReserveProjector:
             for center, radius in effective_balls
         ):
             return start, {"converged": True, "iterations": 1}
+        candidate = None
+        maximum_projection_distance = -1.0
+        for center, radius in effective_balls:
+            delta = start - center
+            squared_norm = float(np.dot(delta, delta))
+            if squared_norm <= radius * radius or squared_norm <= 1e-60:
+                continue
+            norm = math.sqrt(squared_norm)
+            projection_distance = norm - radius
+            if projection_distance > maximum_projection_distance:
+                maximum_projection_distance = projection_distance
+                candidate = center + (radius / norm) * delta
+        if (
+            candidate is not None
+            and np.all(candidate >= low)
+            and np.all(candidate <= high)
+            and all(
+                float(np.dot(candidate - other_center, candidate - other_center))
+                <= other_radius * other_radius
+                + 1e-14 * max(1.0, other_radius * other_radius)
+                for other_center, other_radius in balls
+            )
+        ):
+            return candidate, {"converged": True, "iterations": 1}
         return self._dykstra_ball_box(
             start,
             balls=effective_balls,
@@ -601,27 +625,30 @@ class CausalTerminalReserveProjector:
     def _nonredundant_balls(
         balls: list[tuple[np.ndarray, float]],
     ) -> list[tuple[np.ndarray, float]]:
-        normalized: list[tuple[int, np.ndarray, float]] = []
-        for index, (center, radius) in enumerate(balls):
-            origin = np.asarray(center, dtype=np.float64)
-            bound = float(radius)
-            if not np.isfinite(bound) or bound < 0.0:
-                raise ValueError("ball radius must be finite and non-negative")
-            normalized.append((index, origin, bound))
-
-        retained: list[tuple[int, np.ndarray, float]] = []
-        for candidate in sorted(normalized, key=lambda item: item[2]):
-            _, center, radius = candidate
-            if any(
-                math.sqrt(float(np.dot(center - inner_center, center - inner_center)))
-                + inner_radius
-                <= radius
-                for _, inner_center, inner_radius in retained
-            ):
-                continue
-            retained.append(candidate)
-        retained.sort(key=lambda item: item[0])
-        return [(center, radius) for _, center, radius in retained]
+        if not balls:
+            return []
+        centers = np.stack([
+            np.asarray(center, dtype=np.float64) for center, _ in balls
+        ])
+        radii = np.asarray([float(radius) for _, radius in balls])
+        if np.any(~np.isfinite(radii)) or np.any(radii < 0.0):
+            raise ValueError("ball radius must be finite and non-negative")
+        deltas = centers[:, None, :] - centers[None, :, :]
+        distances = np.sqrt(np.sum(deltas * deltas, axis=2))
+        contains = distances + radii[None, :] <= radii[:, None]
+        indices = np.arange(radii.size)
+        preferred_inner = (
+            (radii[None, :] < radii[:, None])
+            | (
+                (radii[None, :] == radii[:, None])
+                & (indices[None, :] < indices[:, None])
+            )
+        )
+        retained = ~np.any(contains & preferred_inner, axis=1)
+        return [
+            (centers[index], float(radii[index]))
+            for index in np.flatnonzero(retained)
+        ]
 
     def _dykstra_ball_box(
         self,
