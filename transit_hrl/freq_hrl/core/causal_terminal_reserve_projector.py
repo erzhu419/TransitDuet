@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
@@ -582,53 +583,78 @@ class CausalTerminalReserveProjector:
         low: np.ndarray,
         high: np.ndarray,
     ) -> tuple[np.ndarray, dict[str, Any]]:
-        projectors = [
-            self._ball_projector(center, radius)
-            for center, radius in balls
-        ]
-        projectors.append(lambda values: np.clip(values, low, high))
-        return self._dykstra(np.clip(proposed, low, high), projectors)
+        effective_balls = self._nonredundant_balls(balls)
+        start = np.clip(proposed, low, high)
+        if all(
+            float(np.dot(start - center, start - center)) <= radius * radius
+            for center, radius in effective_balls
+        ):
+            return start, {"converged": True, "iterations": 1}
+        return self._dykstra_ball_box(
+            start,
+            balls=effective_balls,
+            low=low,
+            high=high,
+        )
 
-    def _dykstra(
+    @staticmethod
+    def _nonredundant_balls(
+        balls: list[tuple[np.ndarray, float]],
+    ) -> list[tuple[np.ndarray, float]]:
+        normalized: list[tuple[int, np.ndarray, float]] = []
+        for index, (center, radius) in enumerate(balls):
+            origin = np.asarray(center, dtype=np.float64)
+            bound = float(radius)
+            if not np.isfinite(bound) or bound < 0.0:
+                raise ValueError("ball radius must be finite and non-negative")
+            normalized.append((index, origin, bound))
+
+        retained: list[tuple[int, np.ndarray, float]] = []
+        for candidate in sorted(normalized, key=lambda item: item[2]):
+            _, center, radius = candidate
+            if any(
+                math.sqrt(float(np.dot(center - inner_center, center - inner_center)))
+                + inner_radius
+                <= radius
+                for _, inner_center, inner_radius in retained
+            ):
+                continue
+            retained.append(candidate)
+        retained.sort(key=lambda item: item[0])
+        return [(center, radius) for _, center, radius in retained]
+
+    def _dykstra_ball_box(
         self,
         start: np.ndarray,
-        projectors: list[Callable[[np.ndarray], np.ndarray]],
+        *,
+        balls: list[tuple[np.ndarray, float]],
+        low: np.ndarray,
+        high: np.ndarray,
     ) -> tuple[np.ndarray, dict[str, Any]]:
         values = np.asarray(start, dtype=np.float64).copy()
-        residuals = [np.zeros_like(values) for _ in projectors]
+        residuals = np.zeros((len(balls) + 1, values.size), dtype=np.float64)
         converged = False
         iteration = 0
         for iteration in range(1, self.maximum_projection_iterations + 1):
             previous = values.copy()
-            for index, projector in enumerate(projectors):
+            for index, (center, radius) in enumerate(balls):
                 shifted = values + residuals[index]
-                projected = np.asarray(projector(shifted), dtype=np.float64)
+                delta = shifted - center
+                squared_norm = float(np.dot(delta, delta))
+                if squared_norm <= radius * radius or squared_norm <= 1e-60:
+                    projected = shifted.copy()
+                else:
+                    projected = center + (radius / math.sqrt(squared_norm)) * delta
                 residuals[index] = shifted - projected
                 values = projected
+            shifted = values + residuals[-1]
+            projected = np.clip(shifted, low, high)
+            residuals[-1] = shifted - projected
+            values = projected
             if float(np.max(np.abs(values - previous))) <= self.projection_tolerance:
                 converged = True
                 break
         return values, {"converged": converged, "iterations": iteration}
-
-    @staticmethod
-    def _ball_projector(
-        center: np.ndarray,
-        radius: float,
-    ) -> Callable[[np.ndarray], np.ndarray]:
-        origin = np.asarray(center, dtype=np.float64)
-        bound = float(radius)
-        if not np.isfinite(bound) or bound < 0.0:
-            raise ValueError("ball radius must be finite and non-negative")
-
-        def project(values: np.ndarray) -> np.ndarray:
-            point = np.asarray(values, dtype=np.float64)
-            delta = point - origin
-            norm = float(np.linalg.norm(delta))
-            if norm <= bound or norm <= 1e-30:
-                return point.copy()
-            return origin + (bound / norm) * delta
-
-        return project
 
     def _component_feasible(
         self,
