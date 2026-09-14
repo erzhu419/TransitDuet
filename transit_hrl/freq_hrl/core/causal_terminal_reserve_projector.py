@@ -8,8 +8,6 @@ from typing import Any
 
 import numpy as np
 
-from .receding_horizon_responsibility import future_rolling_mean_system
-
 
 @dataclass
 class _TerminalCertificate:
@@ -479,60 +477,92 @@ class CausalTerminalReserveProjector:
             np.stack(rows)
             if rows else np.empty((0, self._dimension), dtype=np.float64)
         )
-        rolling, rolling_offset = future_rolling_mean_system(
+        residual_coefficients, residual_offsets = self._backup_residual_system(
             past,
-            horizon=int(window),
-            window=int(window),
+            window=window,
+            high_pass=high_pass,
+            backup_coefficients=backup_coefficients,
         )
-        coefficients = np.asarray(backup_coefficients, dtype=np.float64)
-        mean_coefficients = rolling @ coefficients
-        if high_pass:
-            residual_coefficients = coefficients - mean_coefficients
-            residual_offsets = -rolling_offset
-        else:
-            residual_coefficients = mean_coefficients
-            residual_offsets = rolling_offset
-
         allowed = (
             (self._step_count + np.arange(1, int(window) + 1))
             * self._dimension
             * float(rms_budget) ** 2
             - float(accumulated_energy)
         )
-        balls: list[tuple[np.ndarray, float]] = []
-        impossible = False
-        coefficient_energy = 0.0
-        linear = np.zeros(self._dimension, dtype=np.float64)
-        constant = 0.0
-        for index in range(int(window)):
-            coefficient = float(residual_coefficients[index])
-            offset = residual_offsets[index]
-            coefficient_energy += coefficient ** 2
-            linear += coefficient * offset
-            constant += float(np.sum(np.square(offset)))
-            radius_numerator = float(allowed[index]) - constant
-            if coefficient_energy <= 1e-30:
-                if radius_numerator < -self.feasibility_tolerance:
-                    impossible = True
-                continue
-            radius_squared = (
-                radius_numerator
-                + float(np.dot(linear, linear)) / coefficient_energy
-            ) / coefficient_energy
-            if radius_squared < -self.feasibility_tolerance:
-                impossible = True
-                continue
-            center = -linear / coefficient_energy
-            balls.append((center.copy(), float(np.sqrt(max(radius_squared, 0.0)))))
+        coefficient_energy = np.cumsum(np.square(residual_coefficients))
+        linear = np.cumsum(
+            residual_coefficients[:, None] * residual_offsets,
+            axis=0,
+        )
+        constant = np.cumsum(np.sum(np.square(residual_offsets), axis=1))
+        radius_numerator = allowed - constant
+        active = coefficient_energy > 1e-30
+        radius_squared = np.full(int(window), np.nan, dtype=np.float64)
+        radius_squared[active] = (
+            radius_numerator[active]
+            + np.sum(np.square(linear[active]), axis=1)
+            / coefficient_energy[active]
+        ) / coefficient_energy[active]
+        impossible = bool(np.any(
+            (~active & (radius_numerator < -self.feasibility_tolerance))
+            | (
+                active
+                & (radius_squared < -self.feasibility_tolerance)
+            )
+        ))
+        valid = active & (radius_squared >= -self.feasibility_tolerance)
+        centers = -linear[valid] / coefficient_energy[valid, None]
+        radii = np.sqrt(np.maximum(radius_squared[valid], 0.0))
+        balls = tuple(
+            (center.copy(), float(radius))
+            for center, radius in zip(centers, radii, strict=True)
+        )
 
         return _TerminalCertificate(
             coefficients=residual_coefficients,
             offsets=residual_offsets,
             allowed_future_energy=allowed,
-            balls=tuple(balls),
+            balls=balls,
             impossible=bool(impossible),
             tolerance=self.feasibility_tolerance,
         )
+
+    @staticmethod
+    def _backup_residual_system(
+        past: np.ndarray,
+        *,
+        window: int,
+        high_pass: bool,
+        backup_coefficients: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        count = int(window)
+        history = np.asarray(past, dtype=np.float64)
+        past_count = int(history.shape[0])
+        future_indices = np.arange(count)
+        ends = past_count + future_indices + 1
+        starts = np.maximum(0, ends - count)
+        denominators = (ends - starts).astype(np.float64)
+        past_starts = np.minimum(starts, past_count)
+        history_prefix = np.concatenate((
+            np.zeros((1, history.shape[1]), dtype=np.float64),
+            np.cumsum(history, axis=0),
+        ))
+        rolling_offsets = (
+            history_prefix[past_count] - history_prefix[past_starts]
+        ) / denominators[:, None]
+        future_starts = np.maximum(0, starts - past_count)
+        coefficients = np.asarray(backup_coefficients, dtype=np.float64)
+        coefficient_prefix = np.concatenate((
+            np.zeros(1, dtype=np.float64),
+            np.cumsum(coefficients),
+        ))
+        mean_coefficients = (
+            coefficient_prefix[future_indices + 1]
+            - coefficient_prefix[future_starts]
+        ) / denominators
+        if high_pass:
+            return coefficients - mean_coefficients, -rolling_offsets
+        return mean_coefficients, rolling_offsets
 
     def _project_component(
         self,
@@ -590,30 +620,6 @@ class CausalTerminalReserveProjector:
             for center, radius in effective_balls
         ):
             return start, {"converged": True, "iterations": 1}
-        candidate = None
-        maximum_projection_distance = -1.0
-        for center, radius in effective_balls:
-            delta = start - center
-            squared_norm = float(np.dot(delta, delta))
-            if squared_norm <= radius * radius or squared_norm <= 1e-60:
-                continue
-            norm = math.sqrt(squared_norm)
-            projection_distance = norm - radius
-            if projection_distance > maximum_projection_distance:
-                maximum_projection_distance = projection_distance
-                candidate = center + (radius / norm) * delta
-        if (
-            candidate is not None
-            and np.all(candidate >= low)
-            and np.all(candidate <= high)
-            and all(
-                float(np.dot(candidate - other_center, candidate - other_center))
-                <= other_radius * other_radius
-                + 1e-14 * max(1.0, other_radius * other_radius)
-                for other_center, other_radius in balls
-            )
-        ):
-            return candidate, {"converged": True, "iterations": 1}
         return self._dykstra_ball_box(
             start,
             balls=effective_balls,
@@ -660,25 +666,34 @@ class CausalTerminalReserveProjector:
     ) -> tuple[np.ndarray, dict[str, Any]]:
         values = np.asarray(start, dtype=np.float64).copy()
         residuals = np.zeros((len(balls) + 1, values.size), dtype=np.float64)
+        previous = np.empty_like(values)
+        shifted = np.empty_like(values)
+        delta = np.empty_like(values)
         converged = False
         iteration = 0
         for iteration in range(1, self.maximum_projection_iterations + 1):
-            previous = values.copy()
+            np.copyto(previous, values)
             for index, (center, radius) in enumerate(balls):
-                shifted = values + residuals[index]
-                delta = shifted - center
+                np.add(values, residuals[index], out=shifted)
+                np.subtract(shifted, center, out=delta)
                 squared_norm = float(np.dot(delta, delta))
                 if squared_norm <= radius * radius or squared_norm <= 1e-60:
-                    projected = shifted.copy()
+                    np.copyto(values, shifted)
+                    residuals[index].fill(0.0)
                 else:
-                    projected = center + (radius / math.sqrt(squared_norm)) * delta
-                residuals[index] = shifted - projected
-                values = projected
-            shifted = values + residuals[-1]
-            projected = np.clip(shifted, low, high)
-            residuals[-1] = shifted - projected
-            values = projected
-            if float(np.max(np.abs(values - previous))) <= self.projection_tolerance:
+                    np.multiply(
+                        delta,
+                        radius / math.sqrt(squared_norm),
+                        out=values,
+                    )
+                    np.add(values, center, out=values)
+                    np.subtract(shifted, values, out=residuals[index])
+            np.add(values, residuals[-1], out=shifted)
+            np.clip(shifted, low, high, out=values)
+            np.subtract(shifted, values, out=residuals[-1])
+            np.subtract(values, previous, out=delta)
+            np.abs(delta, out=delta)
+            if float(np.max(delta)) <= self.projection_tolerance:
                 converged = True
                 break
         return values, {"converged": converged, "iterations": iteration}

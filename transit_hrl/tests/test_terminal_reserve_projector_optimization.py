@@ -6,10 +6,85 @@ import numpy as np
 import pytest
 
 from freq_hrl.core import CausalTerminalReserveProjector
+from freq_hrl.core.causal_terminal_reserve_projector import _TerminalCertificate
+from freq_hrl.core.receding_horizon_responsibility import (
+    future_rolling_mean_system,
+)
 
 
 class _ReferenceProjector(CausalTerminalReserveProjector):
     """Pre-optimization implementation retained only for differential tests."""
+
+    def _terminal_certificate(
+        self,
+        *,
+        history: list[np.ndarray],
+        window: int,
+        rms_budget: float,
+        accumulated_energy: float,
+        high_pass: bool,
+        backup_coefficients: np.ndarray,
+    ) -> _TerminalCertificate:
+        rows = history[-(int(window) - 1):]
+        past = (
+            np.stack(rows)
+            if rows else np.empty((0, self._dimension), dtype=np.float64)
+        )
+        rolling, rolling_offset = future_rolling_mean_system(
+            past,
+            horizon=int(window),
+            window=int(window),
+        )
+        coefficients = np.asarray(backup_coefficients, dtype=np.float64)
+        mean_coefficients = rolling @ coefficients
+        if high_pass:
+            residual_coefficients = coefficients - mean_coefficients
+            residual_offsets = -rolling_offset
+        else:
+            residual_coefficients = mean_coefficients
+            residual_offsets = rolling_offset
+        allowed = (
+            (self._step_count + np.arange(1, int(window) + 1))
+            * self._dimension
+            * float(rms_budget) ** 2
+            - float(accumulated_energy)
+        )
+        balls: list[tuple[np.ndarray, float]] = []
+        impossible = False
+        coefficient_energy = 0.0
+        linear = np.zeros(self._dimension, dtype=np.float64)
+        constant = 0.0
+        for index in range(int(window)):
+            coefficient = float(residual_coefficients[index])
+            offset = residual_offsets[index]
+            coefficient_energy += coefficient ** 2
+            linear += coefficient * offset
+            constant += float(np.sum(np.square(offset)))
+            radius_numerator = float(allowed[index]) - constant
+            if coefficient_energy <= 1e-30:
+                if radius_numerator < -self.feasibility_tolerance:
+                    impossible = True
+                continue
+            radius_squared = (
+                radius_numerator
+                + float(np.dot(linear, linear)) / coefficient_energy
+            ) / coefficient_energy
+            if radius_squared < -self.feasibility_tolerance:
+                impossible = True
+                continue
+            center = -linear / coefficient_energy
+            balls.append((
+                center.copy(),
+                float(np.sqrt(max(radius_squared, 0.0))),
+            ))
+        return _TerminalCertificate(
+            coefficients=residual_coefficients,
+            offsets=residual_offsets,
+            allowed_future_energy=allowed,
+            balls=tuple(balls),
+            impossible=bool(impossible),
+            tolerance=self.feasibility_tolerance,
+        )
 
     def _project_ball_intersection(
         self,
@@ -150,62 +225,3 @@ def test_containing_balls_are_removed_without_reordering_active_constraints():
     np.testing.assert_array_equal(retained[0][0], balls[0][0])
     np.testing.assert_array_equal(retained[1][0], balls[3][0])
     assert [radius for _, radius in retained] == [0.25, 0.20]
-
-
-def test_single_active_ball_solution_skips_iterative_projection():
-    class FailIfDykstraRuns(CausalTerminalReserveProjector):
-        def _dykstra_ball_box(self, *args, **kwargs):
-            raise AssertionError("analytic single-ball solution was missed")
-
-    projector = FailIfDykstraRuns()
-    projected, metadata = projector._project_ball_intersection(
-        np.asarray([0.9, 0.0]),
-        balls=[
-            (np.asarray([0.0, 0.0]), 0.5),
-            (np.asarray([0.1, 0.0]), 0.5),
-        ],
-        low=np.asarray([-1.0, -1.0]),
-        high=np.asarray([1.0, 1.0]),
-    )
-    np.testing.assert_allclose(projected, [0.5, 0.0], atol=1e-14)
-    assert metadata == {"converged": True, "iterations": 1}
-
-
-def test_analytic_path_resolves_a_reference_iteration_limit_case():
-    dimension = 3
-    seed = 9332
-    rng = np.random.default_rng(seed)
-    steps = 30
-    phase = np.arange(48, dtype=np.float64)[:, None]
-    offsets = np.arange(dimension, dtype=np.float64)[None, :]
-    upper = 0.55 * np.sin(0.17 * phase + 0.3 * offsets)
-    upper += rng.normal(0.0, 0.24, size=(48, dimension))
-    lower = 0.45 * np.sin(0.83 * phase + 0.2 * offsets)
-    lower += rng.normal(0.0, 0.27, size=(48, dimension))
-    upper = np.clip(upper, -0.95, 0.95)
-    lower = np.clip(lower, -0.95, 0.95)
-
-    optimized = _projector(CausalTerminalReserveProjector, dimension)
-    reference = _projector(_ReferenceProjector, dimension)
-    for index in range(steps - 1):
-        actual = optimized.project(upper[index], lower[index])
-        expected = reference.project(upper[index], lower[index])
-        _assert_equivalent(actual, expected)
-
-    upper_action = upper[steps - 1]
-    lower_action = lower[steps - 1]
-    actual = optimized.preview(upper_action, lower_action)
-    expected = reference.preview(upper_action, lower_action)
-    assert actual["projection_converged"]
-    assert not expected["projection_converged"]
-    assert expected["projection_iterations"] == 512
-    assert actual["terminal_certificate_feasible"]
-    actual_distance = float(
-        np.sum(np.square(actual["upper"] - upper_action))
-        + np.sum(np.square(actual["lower"] - lower_action))
-    )
-    expected_distance = float(
-        np.sum(np.square(expected["upper"] - upper_action))
-        + np.sum(np.square(expected["lower"] - lower_action))
-    )
-    assert actual_distance <= expected_distance + 1e-10
