@@ -29,6 +29,7 @@ from freq_hrl.experiments.multiscale_tracking_validation import (
 from freq_hrl.experiments.multiscale_tracking_analysis import (
     analyze_stage1_cells,
 )
+from scripts.submit_multiscale_goal_stage1_scheduleurm import training_command
 
 
 def small_time_scale() -> PhysicalTimeScaleContract:
@@ -204,6 +205,14 @@ class StageOneProtocolTest(unittest.TestCase):
                 ]
             )
         np.testing.assert_allclose(target_rms, 0.75, atol=1e-12)
+
+    def test_scheduler_command_emits_an_explicit_success_marker(self):
+        command = training_command(
+            "stage1_test",
+            ("clean", "flat_history", 45007),
+            preflight=True,
+        )
+        self.assertTrue(command.endswith("'complete: result.json written'"))
 
     def test_four_grid_has_information_and_capacity_contracts(self):
         contract = small_time_scale()

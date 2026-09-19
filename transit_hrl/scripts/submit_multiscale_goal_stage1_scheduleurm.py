@@ -100,7 +100,12 @@ def training_command(
         "OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 "
         "TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES="
     )
-    return environment + " " + shlex.join(command)
+    return (
+        environment
+        + " "
+        + shlex.join(command)
+        + " && printf '%s\\n' 'complete: result.json written'"
+    )
 
 
 def task_specification(
