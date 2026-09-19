@@ -135,6 +135,16 @@ def analyze_pointmaze_cells(
     confidence: float = 0.95,
 ) -> dict[str, Any]:
     items = list(cells)
+    runtime_payloads = [cell.get("runtime_versions") for cell in items]
+    if any(not isinstance(payload, dict) or not payload for payload in runtime_payloads):
+        raise ValueError("PointMaze cells must record runtime versions")
+    serialized_runtimes = {
+        json.dumps(payload, sort_keys=True)
+        for payload in runtime_payloads
+    }
+    if len(serialized_runtimes) != 1:
+        raise ValueError("PointMaze cells use inconsistent runtime versions")
+    runtime_versions = dict(runtime_payloads[0])
     indexed = _index_rows(items)
     available = {method for method, _, _ in indexed}
     if available != set(POINTMAZE_METHODS):
@@ -225,6 +235,7 @@ def analyze_pointmaze_cells(
             replicate_sets[POINTMAZE_METHODS[0]]
         ),
         "ordinary_hrl_min_success_rate": ORDINARY_HRL_MIN_SUCCESS_RATE,
+        "runtime_versions": runtime_versions,
         "absolute": absolute,
         "hrl_vs_flat": comparison,
         "ordinary_hrl_learning_status": ordinary_hrl_status,
@@ -256,6 +267,10 @@ def render_report(analysis: dict[str, Any]) -> str:
         f"Independent training replicates: {analysis['independent_training_replicate_count']}",
         f"Ordinary HRL learning gate: **{analysis['ordinary_hrl_learning_status']}**",
         f"Multiscale admission: **{analysis['multiscale_admission_status']}**",
+        "Runtime: " + ", ".join(
+            f"{name}={value}"
+            for name, value in analysis["runtime_versions"].items()
+        ),
         "",
         "| Method | Success mean [95% CI] | Return mean | Final distance mean |",
         "|---|---:|---:|---:|",

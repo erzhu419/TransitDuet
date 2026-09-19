@@ -62,6 +62,13 @@ this gate.
 - PPO epochs: 4.
 - Evidence stage: development, not confirmation.
 
+The Linux formal runtime is frozen in `requirements-pointmaze.txt`. Every cell
+records Python, NumPy, Torch, Gymnasium, Gymnasium-Robotics, MuJoCo,
+PettingZoo, and SciPy versions. Analysis rejects a matrix if those records are
+missing or differ across cells. The scheduler-node runtime is MuJoCo 3.2.7
+because the shared Python 3.10 environment cannot install the Python 3.11+
+MuJoCo 3.6.0 wheel used by the optional local control environment.
+
 Train, validation, and held-out evaluation seed roles are disjoint within every
 optimizer root and are not reused across optimizer roots. The two methods use
 paired role seeds and optimizer roots.

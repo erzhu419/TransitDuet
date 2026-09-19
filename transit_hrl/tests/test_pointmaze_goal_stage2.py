@@ -12,6 +12,7 @@ from freq_hrl.experiments.pointmaze_goal_validation import (
     pointmaze_dimensions,
     pointmaze_goal_bounds,
     pointmaze_checkpoint_rank,
+    pointmaze_runtime_versions,
     rollout_flat_pointmaze,
     rollout_hrl_pointmaze,
     squash_box_action,
@@ -79,6 +80,23 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
             {"success": 0.0, "episode_return": 100.0},
         ])
         self.assertGreater(more_success, more_return)
+
+    def test_runtime_versions_cover_the_physics_stack(self):
+        versions = pointmaze_runtime_versions()
+        self.assertEqual(
+            set(versions),
+            {
+                "python",
+                "numpy",
+                "torch",
+                "gymnasium",
+                "gymnasium_robotics",
+                "mujoco",
+                "pettingzoo",
+                "scipy",
+            },
+        )
+        self.assertTrue(all(versions.values()))
 
     def test_flat_and_hrl_pointmaze_rollouts_update(self):
         dimensions = pointmaze_dimensions(env_id=DEFAULT_ENV_ID, horizon=32)
@@ -151,6 +169,7 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
                 cells.append({
                     "policy": method,
                     "optimizer_seed": root,
+                    "runtime_versions": {"python": "test"},
                     "evaluation_rows": rows,
                 })
         analysis = analyze_pointmaze_cells(cells)
@@ -168,6 +187,7 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
             cells.append({
                 "policy": method,
                 "optimizer_seed": 101,
+                "runtime_versions": {"python": "test"},
                 "evaluation_rows": [{
                     "algorithm_path": "goal_conditioned_hrl_mainline",
                     "protocol_valid": 1.0,
@@ -179,6 +199,29 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
                 } for seed in seeds],
             })
         with self.assertRaisesRegex(ValueError, "held-out seeds"):
+            analyze_pointmaze_cells(cells)
+
+    def test_analysis_rejects_runtime_drift(self):
+        cells = []
+        for method, runtime in (
+            ("flat_goal_ppo", {"mujoco": "3.2.7"}),
+            ("hrl_goal_ppo", {"mujoco": "3.6.0"}),
+        ):
+            cells.append({
+                "policy": method,
+                "optimizer_seed": 101,
+                "runtime_versions": runtime,
+                "evaluation_rows": [{
+                    "algorithm_path": "goal_conditioned_hrl_mainline",
+                    "protocol_valid": 1.0,
+                    "training_replicate_seed": 101,
+                    "seed": 1,
+                    "success": 0.0,
+                    "episode_return": 0.0,
+                    "final_goal_distance": 1.0,
+                }],
+            })
+        with self.assertRaisesRegex(ValueError, "runtime versions"):
             analyze_pointmaze_cells(cells)
 
 

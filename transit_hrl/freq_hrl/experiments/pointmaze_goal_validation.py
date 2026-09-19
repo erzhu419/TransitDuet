@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+from importlib.metadata import version
 import json
+import platform
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -76,6 +78,25 @@ def _load_gymnasium() -> tuple[Any, Any]:
         ) from exc
     gym.register_envs(gymnasium_robotics)
     return gym, gymnasium_robotics
+
+
+def pointmaze_runtime_versions() -> dict[str, str]:
+    distributions = {
+        "gymnasium": "gymnasium",
+        "gymnasium_robotics": "gymnasium-robotics",
+        "mujoco": "mujoco",
+        "pettingzoo": "pettingzoo",
+        "scipy": "scipy",
+    }
+    return {
+        "python": platform.python_version(),
+        "numpy": str(np.__version__),
+        "torch": str(torch.__version__),
+        **{
+            name: str(version(distribution))
+            for name, distribution in distributions.items()
+        },
+    }
 
 
 def make_pointmaze_environment(
@@ -633,6 +654,7 @@ def train_pointmaze_cell(
         "dimensions": dimensions.__dict__,
         "capacity": capacity,
         "environment_contract": contract,
+        "runtime_versions": pointmaze_runtime_versions(),
         "world_low": world_low.tolist(),
         "world_high": world_high.tolist(),
         "upper_period_steps": int(upper_period_steps),
