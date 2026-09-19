@@ -305,7 +305,13 @@ def render_report(analysis: dict[str, Any]) -> str:
         "",
         f"HRL versus flat paired status: **{comparison['joint_status']}**.",
         "The statistical unit is the independent optimizer root; evaluation episodes are averaged within root.",
-        "Multiscale mechanisms remain blocked unless the ordinary HRL success-rate CI clears the frozen gate.",
+        (
+            "The ordinary-HRL gate cleared; a separately registered "
+            "multiscale factorial experiment is now admitted."
+            if analysis["multiscale_admission_status"] == "admitted"
+            else "Multiscale mechanisms remain blocked unless the ordinary "
+            "HRL success-rate CI clears the frozen gate."
+        ),
         "",
     ])
     return "\n".join(lines)

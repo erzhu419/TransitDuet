@@ -61,6 +61,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | multiscale_goal_stage1_v1_development | identifiable_tracking | development | mainline_hrl_increment_not_supported | negative_main_or_si | false |
 | pointmaze_goal_stage2_v1_development | pointmaze_goal_control | development | ordinary_hrl_learning_not_supported | negative_main_or_si | false |
 | pointmaze_goal_stage2_v2_development | pointmaze_goal_control | development | credit_repaired_but_learning_not_supported | negative_main_or_si | false |
+| pointmaze_goal_stage2_v3_development | pointmaze_goal_control | development | ordinary_hrl_learning_supported_multiscale_admitted | positive_si | true |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -488,6 +489,19 @@ so reward alignment must be repaired in a fresh protocol. See the
 
 Forbidden: Stage-2 V2 establishes ordinary-HRL learning, a hierarchy advantage,
 or authorization to add multiscale mechanisms.
+
+### pointmaze_goal_stage2_v3_development
+
+The reward-aligned fixed-horizon campaign completed 16 cells and 256 held-out
+episodes. Hierarchical success was 0.789 with root-level 95% CI [0.710, 0.868],
+clearing the registered lower-CI gate of 0.50. Paired return and final-distance
+improvements over capacity-matched flat PPO were supported; the paired success
+difference was inconclusive. This establishes a working ordinary-HRL substrate
+and admits a separately registered multiscale factorial experiment. See the
+[Stage-2 V3 result](freq_hrl_pointmaze_stage2_v3_result_2026-09-19.md).
+
+Forbidden: Stage-2 V3 establishes a multiscale benefit, a frequency-by-
+hierarchy interaction, general Freq-HRL superiority, or confirmation.
 
 ### legacy_c1_c9_matrix_snapshot
 

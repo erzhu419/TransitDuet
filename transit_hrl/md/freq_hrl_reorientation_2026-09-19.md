@@ -170,3 +170,12 @@ so reaching the target no longer removes future positive dense reward. V2
 option credit, budgets, capacity matching, selection schedule, and the absolute
 success gate remain unchanged; all seed roles are fresh. See
 `freq_hrl_pointmaze_stage2_v3_protocol_2026-09-19.md`.
+
+Stage-2 V3 completed 16/16 cells and 256 fixed-horizon held-out episodes. The
+ordinary-HRL gate is **supported**: hierarchical success was 0.789 with
+root-level 95% CI [0.710, 0.868]. Paired dense return and final-distance
+improvements over flat PPO were supported, while the paired success difference
+was inconclusive. Reward-success association became positive and lower critic
+stability held. This admits a separately registered PointMaze multiscale
+factorial experiment; it does not itself support a Freq-HRL claim. See
+`freq_hrl_pointmaze_stage2_v3_result_2026-09-19.md`.

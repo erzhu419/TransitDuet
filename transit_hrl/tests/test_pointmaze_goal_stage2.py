@@ -17,7 +17,10 @@ from freq_hrl.experiments.pointmaze_goal_validation import (
     rollout_hrl_pointmaze,
     squash_box_action,
 )
-from freq_hrl.experiments.pointmaze_goal_analysis import analyze_pointmaze_cells
+from freq_hrl.experiments.pointmaze_goal_analysis import (
+    analyze_pointmaze_cells,
+    render_report,
+)
 
 
 class PointMazeGoalStageTwoTest(unittest.TestCase):
@@ -204,6 +207,7 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
         self.assertEqual(analysis["ordinary_hrl_learning_status"], "supported")
         self.assertEqual(analysis["multiscale_admission_status"], "admitted")
         self.assertEqual(analysis["hrl_vs_flat"]["joint_status"], "supported")
+        self.assertIn("multiscale factorial experiment is now admitted", render_report(analysis))
 
     def test_analysis_rejects_unpaired_heldout_seeds(self):
         cells = []
