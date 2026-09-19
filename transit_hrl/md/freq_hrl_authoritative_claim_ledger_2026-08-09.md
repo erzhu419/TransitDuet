@@ -66,6 +66,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_multiscale_stage3_v1_development | pointmaze_goal_control | development | cancelled_all_64_cells_after_design_review | excluded_development | false |
 | pointmaze_multiscale_stage3_v2_preflight | pointmaze_goal_control | preflight | corrected_state_and_stress_contract_software_gate_passed | smoke_only | false |
 | pointmaze_multiscale_stage3_v2_development | pointmaze_goal_control | development | routing_increment_supported_but_freq_hrl_specific_gate_not_supported | negative_main_or_si | false |
+| pointmaze_routing_stage4_v1_preflight | pointmaze_goal_control | preflight | routing_attribution_software_gate_passed | smoke_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -551,6 +552,18 @@ PPO significantly exceeded HRL multiscale under observation noise. See the
 
 Forbidden: V2 proves Freq-HRL-specific superiority, a positive
 hierarchy-by-frequency interaction, or a confirmatory result.
+
+### pointmaze_routing_stage4_v1_preflight
+
+All 15 Stage-4 cells completed with five within-HRL routing controls, matched
+capacity and seed roles, retained current physical feedback, finite PPO
+updates, correct macro boundaries, and independently registered stress
+channels. See the
+[Stage-4 preflight](freq_hrl_pointmaze_routing_stage4_preflight_2026-09-20.md).
+
+Forbidden: the Stage-4 preflight establishes selective-routing performance,
+superiority to all-band, swapped, causal-filter, or history controls, or any
+Freq-HRL paper claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

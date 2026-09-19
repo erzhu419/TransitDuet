@@ -223,3 +223,9 @@ seeds. The gate requires correct routing to beat both all-band and swapped
 routing under each primary stress, which distinguishes assignment from generic
 multiscale representation or compression. See
 `freq_hrl_pointmaze_routing_stage4_protocol_2026-09-20.md`.
+
+The 15-cell Stage-4 preflight completed as tasks t97442-t97456 and passed the
+registered software, update, capacity, seed, state-feedback, timing, runtime,
+and stress-channel checks. It is software evidence only and authorizes the
+unchanged 120-cell development matrix. See
+`freq_hrl_pointmaze_routing_stage4_preflight_2026-09-20.md`.
