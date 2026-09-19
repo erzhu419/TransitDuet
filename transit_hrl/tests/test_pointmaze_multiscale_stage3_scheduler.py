@@ -57,6 +57,8 @@ class PointMazeMultiscaleStageThreeSchedulerTest(unittest.TestCase):
             ),
         )
         self.assertEqual(spec.CHECKPOINT_EVALUATION_INTERVAL, 96)
+        self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
+        int(spec.ALGORITHM_REVISION, 16)
         self.assertEqual(spec.RUNTIME_EXPECTATIONS["mujoco"], "3.2.7")
 
 
