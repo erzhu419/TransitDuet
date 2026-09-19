@@ -59,6 +59,21 @@ is not yet a positive Freq-HRL result. See
 `md/freq_hrl_pointmaze_stage2_v3_result_2026-09-19.md`, and
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
+The admitted Stage-3 experiment is a preregistered PointMaze factorial:
+
+```bash
+python3 scripts/submit_pointmaze_multiscale_stage3_scheduleurm.py --run-name pointmaze_multiscale_stage3_v1_preflight_20260919_r1 --preflight
+```
+
+Raw-history and Haar flat policies receive the same 32 actor-visible samples.
+The HRL multiscale arm routes slow information to the waypoint policy and
+current physical plus mid/high information to the actuator policy. The clean
+scenario is a noninferiority boundary; the registered mixed stress combines a
+hidden slow action drift with fast action and observation noise. The primary
+claim additionally requires a positive hierarchy-by-multiscale interaction,
+so a flat multiscale gain cannot be relabeled as a Freq-HRL gain. See
+`md/freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
