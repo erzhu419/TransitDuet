@@ -14,14 +14,14 @@ ALGORITHM_REVISION = "daacf09ac92ea5b794a516e729e023ad53797c25"
 METHODS = tuple(POINTMAZE_METHODS)
 ENV_ID = DEFAULT_ENV_ID
 OPTIMIZER_SEEDS = (
-    64007,
-    64013,
-    64037,
-    64049,
-    64059,
-    64083,
-    64101,
-    64121,
+    74007,
+    74013,
+    74037,
+    74049,
+    74059,
+    74083,
+    74101,
+    74121,
 )
 ITERATIONS = 768
 HORIZON = 300
@@ -45,7 +45,7 @@ def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
         replicate = OPTIMIZER_SEEDS.index(int(optimizer_seed))
     except ValueError as exc:
         raise ValueError("optimizer seed is not registered") from exc
-    base = 400_000 + replicate * 1_000
+    base = 600_000 + replicate * 1_000
     return {
         "train": tuple(base + value for value in (11, 17, 23, 39)),
         "selection": tuple(

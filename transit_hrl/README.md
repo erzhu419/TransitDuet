@@ -45,11 +45,14 @@ changes, restores progress-based intrinsic reward, and uses a larger, less
 frequently reused validation set with entirely fresh seeds. V2 also failed the
 gate: both methods reached 0.297 mean success, and post-hoc analysis exposed a
 positive-dense-return/early-termination conflict that must be corrected before
-further hierarchy tuning. This is not a positive Freq-HRL result. See
-`md/freq_hrl_pointmaze_stage2_protocol_2026-09-19.md` and
+further hierarchy tuning. V3 uses the official fixed-horizon PointMaze mode so
+earlier success and larger dense return are directionally aligned for both
+methods. This is not a positive Freq-HRL result. See
+`md/freq_hrl_pointmaze_stage2_protocol_2026-09-19.md`,
 `md/freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md`,
 `md/freq_hrl_pointmaze_stage2_v2_protocol_2026-09-19.md`,
-`md/freq_hrl_pointmaze_stage2_v2_result_2026-09-19.md`, and
+`md/freq_hrl_pointmaze_stage2_v2_result_2026-09-19.md`,
+`md/freq_hrl_pointmaze_stage2_v3_protocol_2026-09-19.md`, and
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
 The package also retains the earlier components for:

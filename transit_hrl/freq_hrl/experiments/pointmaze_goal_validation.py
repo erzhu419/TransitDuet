@@ -36,14 +36,17 @@ from freq_hrl.rl import (
 
 POINTMAZE_GOAL_PROTOCOL_V1 = "pointmaze_goal_control_stage2_v1"
 POINTMAZE_GOAL_PROTOCOL_V2 = "pointmaze_goal_control_stage2_v2"
-POINTMAZE_GOAL_PROTOCOL_VERSION = POINTMAZE_GOAL_PROTOCOL_V2
+POINTMAZE_GOAL_PROTOCOL_V3 = "pointmaze_goal_control_stage2_v3"
+POINTMAZE_GOAL_PROTOCOL_VERSION = POINTMAZE_GOAL_PROTOCOL_V3
 POINTMAZE_GOAL_PROTOCOL_VERSIONS = (
     POINTMAZE_GOAL_PROTOCOL_V1,
     POINTMAZE_GOAL_PROTOCOL_V2,
+    POINTMAZE_GOAL_PROTOCOL_V3,
 )
 POINTMAZE_METHODS = ("flat_goal_ppo", "hrl_goal_ppo")
 DEFAULT_ENV_ID = "PointMaze_UMaze-v3"
 POINTMAZE_LOWER_ACTION_COST = 0.005
+POINTMAZE_CONTINUING_TASK = True
 DEFAULT_TRAIN_SEEDS = (51011, 51017, 51031, 51047)
 DEFAULT_SELECTION_SEEDS = (52009, 52021, 52027, 52051)
 DEFAULT_EVAL_SEEDS = (
@@ -167,7 +170,7 @@ def make_pointmaze_environment(
     return gym.make(
         str(env_id),
         reward_type="dense",
-        continuing_task=False,
+        continuing_task=POINTMAZE_CONTINUING_TASK,
         reset_target=False,
         max_episode_steps=int(horizon),
     )
@@ -752,6 +755,11 @@ def train_pointmaze_cell(
         "environment_id": str(env_id),
         "optimizer_seed": int(optimizer_seed),
         "reward_type": "dense",
+        "continuing_task": POINTMAZE_CONTINUING_TASK,
+        "reset_target": False,
+        "task_reward_contract": (
+            "fixed_horizon_exp_negative_goal_distance_v1"
+        ),
         "success_is_primary_endpoint": True,
         "checkpoint_objective": POINTMAZE_CHECKPOINT_RANK_CONTRACT,
         "goal_semantics": "upper_relative_xy_waypoint_lower_physical_acceleration",
@@ -890,6 +898,11 @@ def resolved_pointmaze_protocol(
         "methods": method_names,
         "environment_id": str(env_id),
         "reward_type": "dense",
+        "continuing_task": POINTMAZE_CONTINUING_TASK,
+        "reset_target": False,
+        "task_reward_contract": (
+            "fixed_horizon_exp_negative_goal_distance_v1"
+        ),
         "primary_endpoint": "success_rate",
         "checkpoint_rank_contract": POINTMAZE_CHECKPOINT_RANK_CONTRACT,
         "iterations": int(iterations),

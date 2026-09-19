@@ -57,6 +57,15 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
         try:
             low, high = pointmaze_goal_bounds(environment)
             self.assertAlmostEqual(environment.unwrapped.point_env.dt, 0.01)
+            self.assertTrue(environment.unwrapped.continuing_task)
+            goal = np.zeros(2, dtype=np.float32)
+            self.assertEqual(
+                float(environment.unwrapped.compute_reward(goal, goal, {})),
+                1.0,
+            )
+            self.assertFalse(
+                environment.unwrapped.compute_terminated(goal, goal, {})
+            )
         finally:
             environment.close()
         np.testing.assert_allclose(low, [-1.5, -1.5])
@@ -128,6 +137,7 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
             parameter_budget=int(flat_capacity["reference_parameter_budget"]),
         )
         self.assertEqual(flat_row["protocol_valid"], 1.0)
+        self.assertEqual(flat_row["episode_length"], 32)
         self.assertEqual(flat_batch.size, flat_row["episode_length"])
         flat_metrics = flat.update(flat_batch)
         self.assertTrue(np.isfinite(flat_metrics["loss"]))
@@ -143,6 +153,7 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
             maximum_subgoal_delta=0.75,
         )
         self.assertEqual(hrl_row["protocol_valid"], 1.0)
+        self.assertEqual(hrl_row["episode_length"], 32)
         self.assertEqual(hrl_batch.lower.size, hrl_row["episode_length"])
         self.assertEqual(hrl_batch.upper.size, hrl_row["upper_decision_count"])
         lower_boundaries = np.flatnonzero(hrl_batch.lower.done)

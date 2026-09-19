@@ -163,3 +163,10 @@ about half the positive dense return of failed full-horizon episodes because
 success terminated the episode. The next protocol must align the common PPO
 training reward with success before changing the hierarchy again. See
 `freq_hrl_pointmaze_stage2_v2_result_2026-09-19.md`.
+
+Stage-2 V3 is frozen as the common reward-semantics repair. It uses the
+official fixed-horizon PointMaze mode (`continuing_task=True`, unchanged target)
+so reaching the target no longer removes future positive dense reward. V2
+option credit, budgets, capacity matching, selection schedule, and the absolute
+success gate remain unchanged; all seed roles are fresh. See
+`freq_hrl_pointmaze_stage2_v3_protocol_2026-09-19.md`.

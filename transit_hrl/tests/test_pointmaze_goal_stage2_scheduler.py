@@ -35,7 +35,7 @@ class PointMazeGoalStageTwoSchedulerTest(unittest.TestCase):
         self.assertIn("complete: result.json written", command)
 
     def test_frozen_revision_is_full_sha(self):
-        self.assertEqual(spec.PROTOCOL, "pointmaze_goal_control_stage2_v2")
+        self.assertEqual(spec.PROTOCOL, "pointmaze_goal_control_stage2_v3")
         self.assertEqual(spec.CHECKPOINT_EVALUATION_INTERVAL, 96)
         self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
         int(spec.ALGORITHM_REVISION, 16)
