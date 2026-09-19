@@ -92,6 +92,13 @@ comparison were not supported, and flat multiscale PPO was better under
 observation noise. See
 `md/freq_hrl_pointmaze_multiscale_stage3_v2_result_2026-09-20.md`.
 
+The next registered experiment is a within-HRL routing attribution: raw
+history, causal filtering, all bands to both levels, the intended routing, and
+the swapped routing are compared under clean, observation-noise, and action-
+stress conditions. It tests whether band-to-level assignment matters beyond
+generic Haar features or compression. See
+`md/freq_hrl_pointmaze_routing_stage4_protocol_2026-09-20.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

@@ -342,7 +342,7 @@ class PointMazeFeatureBuilder:
             flat = physical + goal + int(snapshot.history.size)
             upper = physical + goal + int(snapshot.history.size)
             lower = physical + goal + int(snapshot.history.size)
-        elif representation == "multiscale":
+        elif representation in ("multiscale", "multiscale_routed"):
             flat = physical + goal + int(snapshot.multiscale.size)
             upper = (
                 physical
@@ -352,6 +352,18 @@ class PointMazeFeatureBuilder:
             )
             lower = (
                 physical + goal + int(snapshot.mid.size) + int(snapshot.high.size)
+            )
+        elif representation == "multiscale_all":
+            flat = physical + goal + int(snapshot.multiscale.size)
+            upper = physical + goal + int(snapshot.multiscale.size)
+            lower = physical + goal + int(snapshot.multiscale.size)
+        elif representation == "multiscale_swapped":
+            flat = physical + goal + int(snapshot.multiscale.size)
+            upper = (
+                physical + goal + int(snapshot.mid.size) + int(snapshot.high.size)
+            )
+            lower = (
+                physical + goal + int(snapshot.slow.size) + int(snapshot.mid.size)
             )
         else:
             raise ValueError("unknown PointMaze feature representation")
@@ -377,7 +389,7 @@ class PointMazeFeatureBuilder:
             else self.snapshot.filtered
             if representation == "filtered"
             else self.snapshot.multiscale
-            if representation == "multiscale"
+            if representation.startswith("multiscale")
             else None
         )
         if encoded is None:
@@ -392,9 +404,15 @@ class PointMazeFeatureBuilder:
             task_features = self.snapshot.history
         elif representation == "filtered":
             task_features = self.snapshot.filtered
-        elif representation == "multiscale":
+        elif representation in ("multiscale", "multiscale_routed"):
             task_features = np.concatenate(
                 (self.snapshot.slow, self.snapshot.mid)
+            )
+        elif representation == "multiscale_all":
+            task_features = self.snapshot.multiscale
+        elif representation == "multiscale_swapped":
+            task_features = np.concatenate(
+                (self.snapshot.mid, self.snapshot.high)
             )
         else:
             raise ValueError("unknown PointMaze upper representation")
@@ -421,9 +439,15 @@ class PointMazeFeatureBuilder:
             task_features = self.snapshot.history
         elif representation == "filtered":
             task_features = self.snapshot.filtered
-        elif representation == "multiscale":
+        elif representation in ("multiscale", "multiscale_routed"):
             task_features = np.concatenate(
                 (self.snapshot.mid, self.snapshot.high)
+            )
+        elif representation == "multiscale_all":
+            task_features = self.snapshot.multiscale
+        elif representation == "multiscale_swapped":
+            task_features = np.concatenate(
+                (self.snapshot.slow, self.snapshot.mid)
             )
         else:
             raise ValueError("unknown PointMaze lower representation")
@@ -437,6 +461,7 @@ def pointmaze_multiscale_dimensions(
     env_id: str,
     horizon: int,
     time_scale: PhysicalTimeScaleContract,
+    representations: Iterable[str] = ("history", "filtered", "multiscale"),
 ) -> dict[str, PointMazeMultiscaleDimensions]:
     environment = make_pointmaze_environment(env_id=env_id, horizon=horizon)
     try:
@@ -454,11 +479,11 @@ def pointmaze_multiscale_dimensions(
                 action_dim=action_dim,
                 representation=representation,
             )
-            for representation in ("history", "filtered", "multiscale")
+            for representation in map(str, representations)
         }
     finally:
         environment.close()
-    if len({value.flat for value in dimensions.values()}) != 1:
+    if not dimensions or len({value.flat for value in dimensions.values()}) != 1:
         raise RuntimeError(
             "raw, causal-filter, and Haar flat states must have equal size"
         )
@@ -491,6 +516,10 @@ def _episode_row(
     parameter_budget: int,
     time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float,
+    protocol_version: str = POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_MULTISCALE_ALGORITHM_PATH,
+    representation_override: str | None = None,
+    hierarchical_override: bool | None = None,
 ) -> dict[str, Any]:
     reward_array = np.asarray(rewards, dtype=np.float64)
     distance_array = np.asarray(goal_distances, dtype=np.float64)
@@ -503,7 +532,16 @@ def _episode_row(
     subgoal_distance_array = np.asarray(subgoal_distances, dtype=np.float64)
     subgoal_array = np.asarray(subgoals, dtype=np.float64)
     intrinsic_array = np.asarray(intrinsic_rewards, dtype=np.float64)
-    hierarchical = _is_hierarchical(method)
+    hierarchical = (
+        _is_hierarchical(method)
+        if hierarchical_override is None
+        else bool(hierarchical_override)
+    )
+    representation = (
+        _representation(method)
+        if representation_override is None
+        else str(representation_override)
+    )
     protocol_valid = bool(
         reward_array.size > 0
         and reward_array.size
@@ -536,11 +574,11 @@ def _episode_row(
     )
     execution_delta = executed_array - requested_array
     return {
-        "protocol_version": POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
-        "algorithm_path": POINTMAZE_MULTISCALE_ALGORITHM_PATH,
+        "protocol_version": str(protocol_version),
+        "algorithm_path": str(algorithm_path),
         "method": str(method),
         "scenario": str(scenario),
-        "representation": _representation(method),
+        "representation": representation,
         "hierarchical": float(hierarchical),
         "seed": int(seed),
         "episode_return": float(np.sum(reward_array)),
@@ -765,10 +803,18 @@ def rollout_hrl_pointmaze_multiscale(
     parameter_budget: int,
     time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float,
+    representation_override: str | None = None,
+    protocol_version: str = POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_MULTISCALE_ALGORITHM_PATH,
 ) -> tuple[Any, dict[str, Any]]:
-    if not _is_hierarchical(method):
-        raise ValueError("HRL PointMaze rollout received a flat method")
-    representation = _representation(method)
+    if representation_override is None:
+        if not _is_hierarchical(method):
+            raise ValueError("HRL PointMaze rollout received a flat method")
+        representation = _representation(method)
+    else:
+        if not str(method).startswith("hrl_"):
+            raise ValueError("HRL PointMaze rollout method must be hierarchical")
+        representation = str(representation_override)
     environment = make_pointmaze_environment(env_id=env_id, horizon=horizon)
     try:
         truth, _ = environment.reset(seed=int(seed))
@@ -939,6 +985,10 @@ def rollout_hrl_pointmaze_multiscale(
             parameter_budget=parameter_budget,
             time_scale=time_scale,
             maximum_subgoal_delta=maximum_subgoal_delta,
+            protocol_version=protocol_version,
+            algorithm_path=algorithm_path,
+            representation_override=representation,
+            hierarchical_override=True,
         )
         return batch, row
     finally:

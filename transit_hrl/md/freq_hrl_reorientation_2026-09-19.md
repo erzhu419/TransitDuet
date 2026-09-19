@@ -215,3 +215,11 @@ and flat multiscale PPO significantly exceeded HRL multiscale under
 observation noise. The result is a representation-positive but
 hierarchy-specific-negative boundary. See
 `freq_hrl_pointmaze_multiscale_stage3_v2_result_2026-09-20.md`.
+
+Stage 4 therefore moves to within-HRL attribution rather than adding roots to
+the failed V2 gate. It compares intended routing against all-band,
+frequency-swapped, causal-filter, and raw-history controls with fresh role
+seeds. The gate requires correct routing to beat both all-band and swapped
+routing under each primary stress, which distinguishes assignment from generic
+multiscale representation or compression. See
+`freq_hrl_pointmaze_routing_stage4_protocol_2026-09-20.md`.

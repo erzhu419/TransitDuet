@@ -84,6 +84,41 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
             )
             np.testing.assert_allclose(lower_after[:4], changed["observation"])
 
+    def test_stage_four_routing_controls_preserve_information_contract(self):
+        observation = {
+            "observation": np.asarray([0.1, -0.2, 0.3, -0.4]),
+            "achieved_goal": np.asarray([0.1, -0.2]),
+            "desired_goal": np.asarray([1.0, 1.0]),
+        }
+        builder = PointMazeFeatureBuilder(
+            physical_dim=4, time_scale=self.time_scale
+        )
+        builder.reset(observation)
+        expected = {
+            "multiscale_all": (134, 134),
+            "multiscale_routed": (38, 126),
+            "multiscale_swapped": (126, 38),
+        }
+        for representation, (upper_dim, lower_dim) in expected.items():
+            dimensions = builder.dimensions(
+                observation, action_dim=2, representation=representation
+            )
+            upper = builder.upper_state(
+                observation, representation=representation
+            )
+            lower = builder.lower_state(
+                observation,
+                subgoal=np.asarray([0.2, 0.3]),
+                representation=representation,
+            )
+            self.assertEqual(
+                (dimensions.upper, dimensions.lower),
+                (upper_dim, lower_dim),
+            )
+            self.assertEqual((upper.size, lower.size), (upper_dim, lower_dim))
+            np.testing.assert_allclose(upper[:4], observation["observation"])
+            np.testing.assert_allclose(lower[:4], observation["observation"])
+
     def test_lower_features_hide_final_goal_in_both_representations(self):
         environment = make_pointmaze_environment(
             env_id=DEFAULT_ENV_ID, horizon=64
