@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 from pathlib import Path
 import shlex
 import subprocess
 import sys
+import time
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +46,18 @@ def cell_relative_dir(
         / scenario
         / method
         / f"replicate_{int(optimizer_seed)}"
+    )
+
+
+def task_signature(
+    run_name: str,
+    scenario: str,
+    method: str,
+    optimizer_seed: int,
+) -> str:
+    return (
+        f"Freq-HRL/{spec.PROTOCOL}/{run_name}/{scenario}/"
+        f"{method}/{int(optimizer_seed)}"
     )
 
 
@@ -129,9 +143,8 @@ def task_specification(
         ),
         "cmd": training_command(run_name, cell, preflight=preflight),
         "cwd": str(ROOT),
-        "signature": (
-            f"Freq-HRL/{spec.PROTOCOL}/{run_name}/{scenario}/"
-            f"{method}/{optimizer_seed}"
+        "signature": task_signature(
+            run_name, scenario, method, optimizer_seed
         ),
         "resource_family": f"Freq-HRL/{spec.PROTOCOL}/cell",
         "cpu": 1,
@@ -186,11 +199,125 @@ def _inventory(run_name: str) -> list[dict[str, object]]:
     return list(payload.get("results", []))
 
 
+def sync_results(
+    run_name: str,
+    *,
+    preflight: bool,
+    workers: int,
+) -> None:
+    tasks = {
+        str(task["signature"]): task
+        for task in _inventory(run_name)
+    }
+    expected: list[tuple[str, Path, dict[str, object]]] = []
+    for scenario, method, optimizer_seed in spec.cells(preflight=preflight):
+        signature = task_signature(
+            run_name, scenario, method, optimizer_seed
+        )
+        task = tasks.get(signature)
+        if task is None:
+            raise SystemExit(f"stage-3 sync task missing: {signature}")
+        if task.get("status") != "done" or not task.get("node"):
+            raise SystemExit(
+                f"stage-3 task is not done: {task.get('id')} "
+                f"status={task.get('status')}"
+            )
+        path = ROOT / cell_relative_dir(
+            run_name, scenario, method, optimizer_seed
+        )
+        expected.append((signature, path, task))
+
+    scheduler_dir = str(SCHEDULER.parent)
+    if scheduler_dir not in sys.path:
+        sys.path.insert(0, scheduler_dir)
+    import scheduler as scheduler_runtime  # type: ignore  # noqa: E402
+
+    pending = [
+        item for item in expected
+        if not (item[1] / "result.json").is_file()
+    ]
+
+    def sync_one(
+        item: tuple[str, Path, dict[str, object]],
+    ) -> tuple[str, bool, str]:
+        signature, path, task = item
+        ok, message = scheduler_runtime._sync_one_result({
+            "node": task["node"],
+            "result_dir": str(path),
+            "local_result_dir": str(path),
+        })
+        return signature, bool(ok), str(message)
+
+    errors: dict[str, str] = {}
+    for attempt in range(1, 4):
+        if not pending:
+            break
+        errors = {}
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=max(1, int(workers))
+        ) as executor:
+            for signature, ok, message in executor.map(sync_one, pending):
+                if not ok:
+                    errors[signature] = message
+        pending = [
+            item for item in pending
+            if not (item[1] / "result.json").is_file()
+        ]
+        if pending and attempt < 3:
+            time.sleep(float(attempt))
+    if pending:
+        signature, path, _ = pending[0]
+        raise SystemExit(
+            f"stage-3 result sync incomplete: {len(pending)} cells; "
+            f"first={signature}; path={path}; "
+            f"error={errors.get(signature, 'missing result.json')}"
+        )
+
+    for signature, path, _ in expected:
+        payload = json.loads(
+            (path / "result.json").read_text(encoding="utf-8")
+        )
+        if (
+            payload.get("status") != "complete"
+            or payload.get("protocol", {}).get("protocol_version")
+            != spec.PROTOCOL
+            or len(payload.get("cells", [])) != 1
+        ):
+            raise SystemExit(f"invalid synced result: {signature}")
+
+    manifest = {
+        "run_name": str(run_name),
+        "protocol": spec.PROTOCOL,
+        "algorithm_revision": spec.ALGORITHM_REVISION,
+        "cell_count": len(expected),
+        "artifact_contract": "result_json_only_v1",
+        "nodes": {
+            node: sum(str(item[2]["node"]) == node for item in expected)
+            for node in sorted({str(item[2]["node"]) for item in expected})
+        },
+        "tasks": {
+            signature: {
+                "task_id": task["id"],
+                "node": task["node"],
+            }
+            for signature, _, task in expected
+        },
+    }
+    output = ROOT / "results" / run_name
+    (output / "run_scoped_result_sync.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(f"synced {len(expected)} PointMaze stage-3 result JSON files")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--sync-results", action="store_true")
+    parser.add_argument("--sync-workers", type=int, default=4)
     args = parser.parse_args()
 
     subprocess.run(
@@ -206,6 +333,15 @@ def main() -> int:
         cwd=ROOT,
         check=True,
     )
+    if args.sync_results:
+        if args.dry_run:
+            raise SystemExit("--sync-results cannot be combined with --dry-run")
+        sync_results(
+            args.run_name,
+            preflight=args.preflight,
+            workers=args.sync_workers,
+        )
+        return 0
     if _inventory(args.run_name):
         raise SystemExit("run already registered; inspect it before resubmission")
     cells = spec.cells(preflight=args.preflight)

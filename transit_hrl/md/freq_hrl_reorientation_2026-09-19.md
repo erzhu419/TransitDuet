@@ -196,3 +196,10 @@ with no more than 0.10 clean success degradation at the lower 95% CI endpoint.
 This prevents a generic representation gain from being attributed to the
 hierarchy. See
 `freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`.
+
+The eight-cell Stage-3 preflight completed on scheduler tasks t95327-t95334.
+All paths had valid fixed-horizon rollouts, matched stress sequences and
+parameter budgets, correct option boundaries, finite updates, and compact
+result artifacts. This clears the software gate for the 64-cell development
+matrix but supplies no performance evidence. See
+`freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md`.

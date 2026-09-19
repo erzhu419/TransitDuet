@@ -72,7 +72,10 @@ scenario is a noninferiority boundary; the registered mixed stress combines a
 hidden slow action drift with fast action and observation noise. The primary
 claim additionally requires a positive hierarchy-by-multiscale interaction,
 so a flat multiscale gain cannot be relabeled as a Freq-HRL gain. See
-`md/freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`.
+`md/freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`. The 8-cell
+preflight passed all software, causality, pairing, and serialization checks;
+it is not performance evidence. See
+`md/freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md`.
 
 The package also retains the earlier components for:
 
