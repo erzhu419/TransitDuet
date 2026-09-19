@@ -154,3 +154,12 @@ reward, terminates lower GAE at waypoint changes without terminating the upper
 SMDP transition, uses fresh seed roles, and reduces noisy checkpoint reuse.
 The task, interaction budget, capacity match, and absolute success gate remain
 unchanged. See `freq_hrl_pointmaze_stage2_v2_protocol_2026-09-19.md`.
+
+Stage-2 V2 then completed 16/16 cells and 256 held-out episodes but again did
+not support the ordinary-HRL gate. Both methods had 0.297 mean success, and the
+HRL 95% CI was [0.152, 0.441]. The option-credit repair sharply reduced lower
+value loss, but post-hoc analysis found that successful episodes accumulated
+about half the positive dense return of failed full-horizon episodes because
+success terminated the episode. The next protocol must align the common PPO
+training reward with success before changing the hierarchy again. See
+`freq_hrl_pointmaze_stage2_v2_result_2026-09-19.md`.

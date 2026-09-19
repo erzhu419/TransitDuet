@@ -60,6 +60,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v25_sample_consistent_upper_development | mujoco_control | development | failed_registered_development_gates | development_only | false |
 | multiscale_goal_stage1_v1_development | identifiable_tracking | development | mainline_hrl_increment_not_supported | negative_main_or_si | false |
 | pointmaze_goal_stage2_v1_development | pointmaze_goal_control | development | ordinary_hrl_learning_not_supported | negative_main_or_si | false |
+| pointmaze_goal_stage2_v2_development | pointmaze_goal_control | development | credit_repaired_but_learning_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -473,6 +474,20 @@ supported and multiscale enhancement remains blocked. See the
 
 Forbidden: Stage-2 V1 establishes a working ordinary-HRL substrate, a hierarchy
 advantage, or authorization to add multiscale mechanisms.
+
+### pointmaze_goal_stage2_v2_development
+
+The corrected option-credit campaign completed 16 cells and 256 held-out
+episodes. Flat and hierarchical mean success were both 0.297; the hierarchical
+95% CI was [0.152, 0.441], below the registered lower-CI gate of 0.50. The
+paired success difference was 0.000 with 95% CI [-0.137, 0.137]. Lower critic
+stability improved, but the task-learning gate did not. Post-hoc analysis found
+that early successful termination reduced accumulated positive dense reward,
+so reward alignment must be repaired in a fresh protocol. See the
+[Stage-2 V2 result](freq_hrl_pointmaze_stage2_v2_result_2026-09-19.md).
+
+Forbidden: Stage-2 V2 establishes ordinary-HRL learning, a hierarchy advantage,
+or authorization to add multiscale mechanisms.
 
 ### legacy_c1_c9_matrix_snapshot
 
