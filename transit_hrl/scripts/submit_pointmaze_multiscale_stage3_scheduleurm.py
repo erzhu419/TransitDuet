@@ -199,16 +199,27 @@ def _inventory(run_name: str) -> list[dict[str, object]]:
     return list(payload.get("results", []))
 
 
+def _inventory_by_signature(
+    inventory: list[dict[str, object]],
+) -> dict[str, dict[str, object]]:
+    selected: dict[str, dict[str, object]] = {}
+    for task in inventory:
+        signature = str(task["signature"])
+        current = selected.get(signature)
+        if current is None or (
+            current.get("status") != "done" and task.get("status") == "done"
+        ):
+            selected[signature] = task
+    return selected
+
+
 def sync_results(
     run_name: str,
     *,
     preflight: bool,
     workers: int,
 ) -> None:
-    tasks = {
-        str(task["signature"]): task
-        for task in _inventory(run_name)
-    }
+    tasks = _inventory_by_signature(_inventory(run_name))
     expected: list[tuple[str, Path, dict[str, object]]] = []
     for scenario, method, optimizer_seed in spec.cells(preflight=preflight):
         signature = task_signature(

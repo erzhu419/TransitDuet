@@ -3,6 +3,7 @@ import unittest
 from scripts import pointmaze_multiscale_stage3_spec as spec
 from scripts.submit_hyperparameter_pilot_scheduleurm import LINUX_CPU_NODES
 from scripts.submit_pointmaze_multiscale_stage3_scheduleurm import (
+    _inventory_by_signature,
     task_specification,
     training_command,
 )
@@ -60,6 +61,24 @@ class PointMazeMultiscaleStageThreeSchedulerTest(unittest.TestCase):
         self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
         int(spec.ALGORITHM_REVISION, 16)
         self.assertEqual(spec.RUNTIME_EXPECTATIONS["mujoco"], "3.2.7")
+
+    def test_result_sync_prefers_successful_retry_over_failed_attempt(self):
+        signature = "Freq-HRL/test/cell"
+        selected = _inventory_by_signature([
+            {
+                "id": "t-retry",
+                "signature": signature,
+                "status": "done",
+                "node": "node003",
+            },
+            {
+                "id": "t-original",
+                "signature": signature,
+                "status": "failed",
+                "node": "node006",
+            },
+        ])
+        self.assertEqual(selected[signature]["id"], "t-retry")
 
 
 if __name__ == "__main__":
