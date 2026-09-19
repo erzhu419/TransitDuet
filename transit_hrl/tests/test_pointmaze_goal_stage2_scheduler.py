@@ -37,6 +37,8 @@ class PointMazeGoalStageTwoSchedulerTest(unittest.TestCase):
     def test_frozen_revision_is_full_sha(self):
         self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
         int(spec.ALGORITHM_REVISION, 16)
+        self.assertEqual(spec.RUNTIME_EXPECTATIONS["mujoco"], "3.2.7")
+        self.assertEqual(spec.RUNTIME_EXPECTATIONS["gymnasium"], "1.2.0")
 
 
 if __name__ == "__main__":

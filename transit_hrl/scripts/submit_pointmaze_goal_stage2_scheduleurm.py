@@ -210,6 +210,7 @@ def main() -> int:
         "preflight": bool(args.preflight),
         "methods": list(spec.METHODS),
         "optimizer_seeds": list(optimizer_seeds),
+        "runtime_expectations": dict(spec.RUNTIME_EXPECTATIONS),
         "cells": [list(cell) for cell in cells],
         "options": {
             str(seed): spec.cell_options(seed, preflight=args.preflight)

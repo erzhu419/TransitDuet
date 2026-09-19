@@ -9,7 +9,7 @@ from freq_hrl.experiments.pointmaze_goal_validation import (
 
 
 PROTOCOL = "pointmaze_goal_control_stage2_v1"
-ALGORITHM_REVISION = "d8fcbc8cb03b76e023063f061315684a2a6500be"
+ALGORITHM_REVISION = "cf904fdb6b69ee1c04d56169e55c51a7c639313e"
 METHODS = tuple(POINTMAZE_METHODS)
 ENV_ID = DEFAULT_ENV_ID
 OPTIMIZER_SEEDS = (
@@ -29,6 +29,14 @@ REFERENCE_HIDDEN_DIM = 128
 LEARNING_RATE = 3e-4
 UPPER_PERIOD_SECONDS = 0.25
 MAXIMUM_SUBGOAL_DELTA = 0.75
+RUNTIME_EXPECTATIONS = {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121",
+}
 
 
 def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
