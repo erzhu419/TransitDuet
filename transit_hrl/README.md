@@ -4,11 +4,33 @@ This directory is the isolated workspace for the general Freq-HRL direction.
 Existing `FreqDuet/` and `transit_duet/` code should be treated as read-only
 references unless a file is intentionally copied into this tree first.
 
-The first package here is `freq_hrl`, a domain-agnostic core for:
+The active research mainline is now **multiscale goal-conditioned HRL**:
+
+- the upper policy emits a state-space goal or plan at a physical-time macro
+  interval;
+- the lower policy alone emits the actuator action and retains full physical
+  feedback;
+- causal history and multiscale policies use the same trailing samples;
+- projector, promotion, leakage loss, and responsibility gauge are disabled in
+  the stage-1 mainline until a task-level conflict justifies them.
+
+Run the four-grid stage-1 protocol with:
+
+```bash
+python3 scripts/run_multiscale_goal_stage1.py --methods flat_history flat_multiscale hrl_history hrl_multiscale flat_causal_filter --scenarios clean slow_target_fast_force slow_signal_fast_observation_noise band_swap --output results/multiscale_goal_stage1/result.json
+```
+
+Use `--dry-run` to write the fully resolved protocol without training. The
+checkpoint objective is mean episode return, and every result records `dt`,
+window durations, signal RMS, saturation, system response time, and the
+actor-observability contract. See
+`md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
+
+The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
 - causal fixed-bin stream adapters;
-- upper/lower frequency routing masks;
+- experimental upper/lower frequency routing masks;
 - high-frequency to low-frequency promotion;
 - action-effect leakage regularization;
 - frequency responsibility diagnostics;
@@ -26,18 +48,18 @@ Current domain entry points:
   frequency features for portfolio/execution experiments.
 - `freq_hrl.domains.trading.PortfolioExecutionEnv`: a minimal portfolio target
   plus execution-speed environment for early FreqTradeDuet tests.
-- `freq_hrl.domains.mujoco`: a causal slow/mid/high observation adapter for
-  standard Gymnasium MuJoCo tasks. It uses the same shared flat PPO and SMDP
-  PPO trainers as the Trading and Transit paths.
+- `freq_hrl.domains.mujoco`: goal-observation and physical-time adapters for
+  PointMaze/AntMaze, plus the historical constrained-action adapter.
 
-Run a single MuJoCo shared-core validation cell with:
+The following historical MuJoCo entry point is the **spectral action-constraint
+side branch**, not the multiscale goal-conditioned mainline:
 
 ```bash
 MUJOCO_GL=egl PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl python3 -m freq_hrl.experiments.mujoco.control_validation --method freq_hrl --env-id HalfCheetah-v5 --disturbance-mode standard --train-seeds 31013 31019 31033 --selection-seeds 32003 32009 32027 --eval-seeds 33013 33023 33029 33037 33049 --steps 500 --iterations 64 --optimizer-seed 34019 --output-dir transit_hrl/results/mujoco_control/halfcheetah/freq_hrl/replicate_34019
 ```
 
-The optional pinned runtime is listed in `requirements-mujoco.txt`. The
-MuJoCo path compares capacity-matched `flat_ppo`, `generic_hrl`,
+The optional pinned runtime is listed in `requirements-mujoco.txt`. This side
+branch compares capacity-matched `flat_ppo`, `generic_hrl`,
 `freq_hrl_no_leakage`, and `freq_hrl`; a short smoke cell validates only the
 software path and is not performance evidence.
 

@@ -23,6 +23,11 @@ from .leakage import (
     LeakageRegularizer,
     evaluate_rms_leakage_budget,
 )
+from .multiscale import (
+    CausalHaarMultiscaleEncoder,
+    MultiscaleSnapshot,
+    PhysicalTimeScaleContract,
+)
 from .phase0 import (
     PHASE0_REQUIRED_FIELDS,
     PHASE0_SCHEMA_VERSION,
@@ -79,6 +84,7 @@ __all__ = [
     "CausalSmoothMacroGaugeFixer",
     "CausalStreamingAuditProjectionFixer",
     "CausalLowFrequencyEffectProjector",
+    "CausalHaarMultiscaleEncoder",
     "CausalRollingBandTracker",
     "CausalSmoothstepMacroPlan",
     "CausalZeroDCMacroProjector",
@@ -90,10 +96,12 @@ __all__ = [
     "FrozenFreqHRLSpec",
     "LeakageRegularizer",
     "MultiEntityBinnedStream",
+    "MultiscaleSnapshot",
     "PHASE0_REQUIRED_FIELDS",
     "PHASE0_SCHEMA_VERSION",
     "Phase0TraceLogger",
     "PromotionSignal",
+    "PhysicalTimeScaleContract",
     "RewardAttributionAccumulator",
     "audit_shared_training_core",
     "binned_mutual_information",

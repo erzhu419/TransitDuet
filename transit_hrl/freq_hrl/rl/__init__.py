@@ -24,6 +24,11 @@ from .joint_actor_critic import (
     JointTrajectoryBatch,
     concat_joint_batches,
 )
+from .goal_conditioned_actor_critic import (
+    GOAL_CONDITIONED_TRAINER_CONTRACT,
+    GoalConditionedActorCriticPPO,
+    GoalConditionedPPOConfig,
+)
 from .checkpoint_selection import (
     RobustValidationCheckpointSelector,
     StateAlignedLexicographicCheckpointSelector,
@@ -96,6 +101,9 @@ __all__ = [
     "CausalGRUStateEncoder",
     "CausalGRUValueNet",
     "FrequencySeparatedActorCriticPPO",
+    "GOAL_CONDITIONED_TRAINER_CONTRACT",
+    "GoalConditionedActorCriticPPO",
+    "GoalConditionedPPOConfig",
     "HierarchicalRolloutBuilder",
     "HierarchicalTrajectoryBatch",
     "LearnedPlanActionMapper",

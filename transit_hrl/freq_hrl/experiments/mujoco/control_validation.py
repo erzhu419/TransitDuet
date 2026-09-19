@@ -1,4 +1,9 @@
-"""Shared-core Freq-HRL validation on Gymnasium MuJoCo control tasks."""
+"""Spectrally constrained action-control side branch on MuJoCo locomotion.
+
+This historical runner studies action projection, gauge, and frequency-budget
+constraints.  The multiscale goal-conditioned Freq-HRL mainline has a separate
+entry point in ``freq_hrl.experiments.multiscale_tracking_validation``.
+"""
 
 from __future__ import annotations
 
@@ -61,6 +66,7 @@ from freq_hrl.rl.smdp_actor_critic import UPPER_PROJECTION_CONSISTENCY_OBJECTIVE
 MUJOCO_CONTROL_PROTOCOL_VERSION = (
     "freq_hrl_mujoco_shared_core_v14_15_closed_loop_restoration_filter"
 )
+MUJOCO_ALGORITHM_PATH = "spectral_action_constraint_side_branch"
 MUJOCO_CONTROL_PROTOCOL_VERSION_V14_16 = (
     "freq_hrl_mujoco_shared_core_v14_16_crossed_pathwise_restoration"
 )
@@ -1062,6 +1068,7 @@ def _episode_row(
         np.abs(additive_action) - 1.0, 0.0
     )
     return {
+        "algorithm_path": MUJOCO_ALGORITHM_PATH,
         "seed": int(seed),
         "environment": str(env_id),
         "disturbance_mode": str(disturbance_mode),
@@ -6584,6 +6591,7 @@ def train_mujoco_method(
     payload["summary"] = summarize(evaluation_rows)
     payload["eval_seeds"] = list(evaluation)
     payload.update({
+        "algorithm_path": MUJOCO_ALGORITHM_PATH,
         "protocol_version": effective_protocol_version,
         "protocol_version_selection": selected_protocol_version,
         "method": name,

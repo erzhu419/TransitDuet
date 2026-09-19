@@ -464,6 +464,7 @@ class SMDPPPOConfig:
     upper_action_dim: int
     lower_action_dim: int
     upper_cost_critic: bool = False
+    lower_cost_critic: bool = True
     upper_cost_state_dim: int = 0
     lower_cost_state_dim: int = 0
     hf_state_dim: int = 0
@@ -1775,6 +1776,16 @@ class FrequencySeparatedActorCriticPPO:
             raise ValueError(
                 "an active upper constraint requires upper_cost_critic=True"
             )
+        if (
+            not bool(config.lower_cost_critic)
+            and (
+                float(config.lower_dual_lr) > 0.0
+                or float(config.lower_lambda_init) > 0.0
+            )
+        ):
+            raise ValueError(
+                "an active lower constraint requires lower_cost_critic=True"
+            )
         if str(config.upper_constraint_update_mode) not in CONSTRAINT_UPDATE_MODES:
             raise ValueError(
                 "upper_constraint_update_mode must be scalarized, "
@@ -1852,9 +1863,12 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_value = ValueNet(
                 config.lower_state_dim, config.hidden_dim
             ).to(self.device)
-            self.lower_cost_value = ValueNet(
-                self.lower_cost_state_dim, config.hidden_dim
-            ).to(self.device)
+            self.lower_cost_value = (
+                ValueNet(
+                    self.lower_cost_state_dim, config.hidden_dim
+                ).to(self.device)
+                if bool(config.lower_cost_critic) else None
+            )
             if int(config.hf_state_dim) > 0:
                 self.hf_actor = GaussianActor(
                     config.hf_state_dim,
@@ -1899,9 +1913,12 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_value = CausalGRUValueNet(
                 state_dim=config.lower_state_dim, **value_kwargs
             ).to(self.device)
-            self.lower_cost_value = CausalGRUValueNet(
-                state_dim=self.lower_cost_state_dim, **value_kwargs
-            ).to(self.device)
+            self.lower_cost_value = (
+                CausalGRUValueNet(
+                    state_dim=self.lower_cost_state_dim, **value_kwargs
+                ).to(self.device)
+                if bool(config.lower_cost_critic) else None
+            )
             if int(config.hf_state_dim) > 0:
                 self.hf_actor = CausalGRUGaussianActor(
                     state_dim=config.hf_state_dim,
@@ -1927,7 +1944,10 @@ class FrequencySeparatedActorCriticPPO:
             nn.init.zeros_(linear_layers[-1].weight)
             if linear_layers[-1].bias is not None:
                 nn.init.zeros_(linear_layers[-1].bias)
-        if bool(config.lower_zero_init_cost_value):
+        if (
+            bool(config.lower_zero_init_cost_value)
+            and self.lower_cost_value is not None
+        ):
             linear_layers = [
                 module
                 for module in self.lower_cost_value.modules()
@@ -1999,9 +2019,12 @@ class FrequencySeparatedActorCriticPPO:
             self.lower_value.parameters(),
             lr=float(config.lower_learning_rate),
         )
-        self.lower_cost_value_optimizer = torch.optim.Adam(
-            self.lower_cost_value.parameters(),
-            lr=float(config.lower_learning_rate),
+        self.lower_cost_value_optimizer = (
+            torch.optim.Adam(
+                self.lower_cost_value.parameters(),
+                lr=float(config.lower_learning_rate),
+            )
+            if self.lower_cost_value is not None else None
         )
         self.hf_actor_optimizer: torch.optim.Optimizer | None = None
         self.hf_value_optimizer: torch.optim.Optimizer | None = None
@@ -2528,12 +2551,10 @@ class FrequencySeparatedActorCriticPPO:
             "lower_actor": self.lower_actor.state_dict(),
             "upper_value": self.upper_value.state_dict(),
             "lower_value": self.lower_value.state_dict(),
-            "lower_cost_value": self.lower_cost_value.state_dict(),
             "upper_actor_optimizer": self.upper_actor_optimizer.state_dict(),
             "upper_value_optimizer": self.upper_value_optimizer.state_dict(),
             "lower_actor_optimizer": self.lower_actor_optimizer.state_dict(),
             "lower_value_optimizer": self.lower_value_optimizer.state_dict(),
-            "lower_cost_value_optimizer": self.lower_cost_value_optimizer.state_dict(),
             "constraint_lambda": float(self.constraint_lambda),
             "upper_constraint_lambda": float(
                 self.upper_constraint_lambda
@@ -2562,6 +2583,13 @@ class FrequencySeparatedActorCriticPPO:
                 "upper_cost_value": self.upper_cost_value.state_dict(),
                 "upper_cost_value_optimizer": (
                     self.upper_cost_value_optimizer.state_dict()
+                ),
+            })
+        if self.lower_cost_value is not None:
+            payload.update({
+                "lower_cost_value": self.lower_cost_value.state_dict(),
+                "lower_cost_value_optimizer": (
+                    self.lower_cost_value_optimizer.state_dict()
                 ),
             })
         if self.promotion_actor is not None and self.promotion_value is not None:
@@ -2595,7 +2623,12 @@ class FrequencySeparatedActorCriticPPO:
         self.lower_actor.load_state_dict(payload["lower_actor"])
         self.upper_value.load_state_dict(payload["upper_value"])
         self.lower_value.load_state_dict(payload["lower_value"])
-        self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
+        if self.lower_cost_value is not None:
+            if "lower_cost_value" not in payload:
+                raise ValueError(
+                    "checkpoint is missing the configured lower cost critic"
+                )
+            self.lower_cost_value.load_state_dict(payload["lower_cost_value"])
         if self.upper_cost_value is not None:
             if "upper_cost_value" not in payload:
                 raise ValueError(
@@ -2751,7 +2784,10 @@ class FrequencySeparatedActorCriticPPO:
         cost_tensor = self._state_tensor(
             state if cost_state is None else cost_state
         )
-        if int(cost_tensor.shape[1]) != self.lower_cost_state_dim:
+        if (
+            self.lower_cost_value is not None
+            and int(cost_tensor.shape[1]) != self.lower_cost_state_dim
+        ):
             raise ValueError(
                 "lower cost state has dimension "
                 f"{int(cost_tensor.shape[1])}, expected "
@@ -2764,19 +2800,27 @@ class FrequencySeparatedActorCriticPPO:
                 )
             )
             value = self.lower_value.forward_incremental(tensor)
-            cost_value = self.lower_cost_value.forward_incremental(cost_tensor)
+            cost_value = (
+                self.lower_cost_value.forward_incremental(cost_tensor)
+                if self.lower_cost_value is not None else None
+            )
         else:
             action, logp, mean_action = self.lower_actor.forward_with_mean(
                 tensor, sample=sample
             )
             value = self.lower_value(tensor)
-            cost_value = self.lower_cost_value(cost_tensor)
+            cost_value = (
+                self.lower_cost_value(cost_tensor)
+                if self.lower_cost_value is not None else None
+            )
         return {
             "action": action.cpu().numpy().reshape(-1),
             "mean_action": mean_action.cpu().numpy().reshape(-1),
             "logp": float(logp.item()),
             "value": float(value.item()),
-            "cost_value": float(cost_value.item()),
+            "cost_value": (
+                float(cost_value.item()) if cost_value is not None else 0.0
+            ),
         }
 
     @torch.no_grad()

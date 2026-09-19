@@ -57,7 +57,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v22_uniform_terminal_reserve_confirmation | mujoco_control | confirmatory | joint_confirmation_not_supported | mixed_or_negative_main_or_si | false |
 | mujoco_v23_causal_upper_projection_target_development | mujoco_control | development | causal_upper_target_not_supported | development_only | false |
 | mujoco_v24_policy_mean_upper_projection_target_development | mujoco_control | development | policy_mean_target_not_supported | development_only | false |
-| mujoco_v25_sample_consistent_upper_development | mujoco_control | development | preflight_valid_development_pending | development_only | false |
+| mujoco_v25_sample_consistent_upper_development | mujoco_control | development | failed_registered_development_gates | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -434,10 +434,14 @@ Controlled same-state diagnostics completed 48 cells and 144 snapshots. They
 motivate testing an upper-only fixed-sample action-space objective; they do not
 measure learned-policy performance. The corrected native training preflight
 t93693-t93704 passed all 12 cells and 60 evaluation episodes. Full fresh-root
-development t93706-t93753 is submitted with one prespecified candidate and
-matched zero/raw-mean controls; the raw-sample arm is diagnostic only.
-Performance results are pending. See the
-[v25 diagnostic and protocol](freq_hrl_v25_same_state_target_diagnostic_2026-09-14.md).
+development t93706-t93753 then completed 48/48 cells and 1,920 evaluation
+episodes. The prespecified action-sample candidate failed the validity, reward,
+correction, and Hopper correction gates and does not advance. The raw-sample
+arm remains diagnostic only. See the
+[v25 result](freq_hrl_mujoco_v25_sample_consistent_upper_result_2026-09-19.md).
+
+Forbidden: V25 supports action-sample superiority, confirmation, or a repaired
+result under the later optimized projector.
 
 ### legacy_c1_c9_matrix_snapshot
 

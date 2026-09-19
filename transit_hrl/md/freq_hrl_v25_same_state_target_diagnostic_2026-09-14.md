@@ -1,5 +1,11 @@
 # V25 Same-State Target Diagnostic
 
+> Result update, 2026-09-19: the full 48-cell development run completed and
+> failed the registered validity, reward, correction, and Hopper correction
+> gates. See
+> `freq_hrl_mujoco_v25_sample_consistent_upper_result_2026-09-19.md`. The
+> protocol text below is retained as the preregistration record.
+
 The next step after v24 is a controlled objective diagnosis. It uses the
 unchanged terminal-reserve projector and fresh random roots, with no saved
 policies, retired experimental paths, or environment reward evaluation.
@@ -80,9 +86,10 @@ at both levels; the zero arm applied it in none. Small exports total 746,288
 bytes, including registration and analysis, with no local checkpoints/history.
 
 Full development `mujoco_v25_sample_consistent_upper_development_20260914_r1`
-is submitted as t93706-t93753: 48 cells, 512 iterations each, 1,920 planned
-evaluation episodes. Tasks may use any of node001-node006, one CPU and 1,536 MiB
-each. Results are pending; this is not a performance improvement result.
+was submitted as t93706-t93753: 48 cells, 512 iterations each, and 1,920
+evaluation episodes. It later completed and failed the registered development
+gates documented in the result update above. This diagnostic remains a
+preregistration record, not a performance improvement result.
 
 ## Limitations
 
