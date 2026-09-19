@@ -62,13 +62,21 @@ def _paired_interval(
     }
 
 
-def _index_rows(cells: Iterable[dict[str, Any]]) -> dict[tuple[str, str, int], dict[str, Any]]:
-    indexed: dict[tuple[str, str, int], dict[str, Any]] = {}
+def _index_rows(
+    cells: Iterable[dict[str, Any]],
+) -> dict[tuple[str, str, int, int], dict[str, Any]]:
+    indexed: dict[tuple[str, str, int, int], dict[str, Any]] = {}
     for cell in cells:
         method = str(cell["policy"])
         scenario = str(cell["scenario"])
+        cell_replicate = int(cell.get("optimizer_seed", -1))
         for row in cell.get("evaluation_rows", []):
-            key = (scenario, method, int(row["seed"]))
+            replicate = int(row.get(
+                "training_replicate_seed", cell_replicate
+            ))
+            if replicate < 0:
+                raise ValueError("evaluation row is missing its training replicate")
+            key = (scenario, method, replicate, int(row["seed"]))
             if key in indexed:
                 raise ValueError(f"duplicate evaluation row: {key}")
             if float(row.get("protocol_valid", 0.0)) != 1.0:
@@ -82,7 +90,7 @@ def _index_rows(cells: Iterable[dict[str, Any]]) -> dict[tuple[str, str, int], d
 
 
 def _paired_values(
-    indexed: dict[tuple[str, str, int], dict[str, Any]],
+    indexed: dict[tuple[str, str, int, int], dict[str, Any]],
     *,
     scenario: str,
     candidate: str,
@@ -90,32 +98,43 @@ def _paired_values(
     metric: str,
     higher_is_better: bool,
 ) -> np.ndarray:
-    candidate_rows = {
-        seed: row
-        for (row_scenario, method, seed), row in indexed.items()
-        if row_scenario == scenario and method == candidate
-    }
-    baseline_rows = {
-        seed: row
-        for (row_scenario, method, seed), row in indexed.items()
-        if row_scenario == scenario and method == baseline
-    }
+    def grouped(method_name: str) -> dict[int, dict[int, dict[str, Any]]]:
+        groups: dict[int, dict[int, dict[str, Any]]] = {}
+        for (
+            row_scenario,
+            row_method,
+            replicate,
+            evaluation_seed,
+        ), row in indexed.items():
+            if row_scenario == scenario and row_method == method_name:
+                groups.setdefault(replicate, {})[evaluation_seed] = row
+        return groups
+
+    candidate_rows = grouped(candidate)
+    baseline_rows = grouped(baseline)
     if not candidate_rows or set(candidate_rows) != set(baseline_rows):
         raise ValueError(
             f"unpaired rows for {scenario}: {candidate} versus {baseline}"
         )
     sign = 1.0 if higher_is_better else -1.0
-    return np.asarray([
-        sign * (
-            float(candidate_rows[seed][metric])
-            - float(baseline_rows[seed][metric])
-        )
-        for seed in sorted(candidate_rows)
-    ], dtype=np.float64)
+    differences = []
+    for replicate in sorted(candidate_rows):
+        if set(candidate_rows[replicate]) != set(baseline_rows[replicate]):
+            raise ValueError(
+                f"evaluation seeds are unpaired in replicate {replicate}"
+            )
+        candidate_mean = float(np.mean([
+            float(row[metric]) for row in candidate_rows[replicate].values()
+        ]))
+        baseline_mean = float(np.mean([
+            float(row[metric]) for row in baseline_rows[replicate].values()
+        ]))
+        differences.append(sign * (candidate_mean - baseline_mean))
+    return np.asarray(differences, dtype=np.float64)
 
 
 def _comparison(
-    indexed: dict[tuple[str, str, int], dict[str, Any]],
+    indexed: dict[tuple[str, str, int, int], dict[str, Any]],
     *,
     scenario: str,
     candidate: str,
@@ -157,7 +176,7 @@ def _comparison(
 
 
 def _interaction(
-    indexed: dict[tuple[str, str, int], dict[str, Any]],
+    indexed: dict[tuple[str, str, int, int], dict[str, Any]],
     *,
     scenario: str,
     metric: str,
@@ -165,27 +184,49 @@ def _interaction(
     confidence: float,
 ) -> dict[str, Any]:
     methods = tuple(STAGE1_CORE_METHODS)
-    rows_by_method: dict[str, dict[int, dict[str, Any]]] = {
-        method: {
-            seed: row
-            for (row_scenario, row_method, seed), row in indexed.items()
-            if row_scenario == scenario and row_method == method
-        }
-        for method in methods
-    }
-    seed_sets = [set(rows) for rows in rows_by_method.values()]
-    if not seed_sets[0] or any(seeds != seed_sets[0] for seeds in seed_sets[1:]):
+    rows_by_method: dict[str, dict[int, dict[int, dict[str, Any]]]] = {}
+    for method in methods:
+        grouped: dict[int, dict[int, dict[str, Any]]] = {}
+        for (
+            row_scenario,
+            row_method,
+            replicate,
+            evaluation_seed,
+        ), row in indexed.items():
+            if row_scenario == scenario and row_method == method:
+                grouped.setdefault(replicate, {})[evaluation_seed] = row
+        rows_by_method[method] = grouped
+    replicate_sets = [set(rows) for rows in rows_by_method.values()]
+    if (
+        not replicate_sets[0]
+        or any(replicates != replicate_sets[0] for replicates in replicate_sets[1:])
+    ):
         raise ValueError(f"factorial rows are not paired for {scenario}")
     sign = 1.0 if higher_is_better else -1.0
     values = []
-    for seed in sorted(seed_sets[0]):
+    for replicate in sorted(replicate_sets[0]):
+        evaluation_seed_sets = [
+            set(rows_by_method[method][replicate]) for method in methods
+        ]
+        if any(
+            seeds != evaluation_seed_sets[0]
+            for seeds in evaluation_seed_sets[1:]
+        ):
+            raise ValueError(
+                f"factorial evaluation seeds are unpaired in replicate {replicate}"
+            )
+        means = {
+            method: float(np.mean([
+                float(row[metric])
+                for row in rows_by_method[method][replicate].values()
+            ]))
+            for method in methods
+        }
         flat_gain = (
-            float(rows_by_method["flat_multiscale"][seed][metric])
-            - float(rows_by_method["flat_history"][seed][metric])
+            means["flat_multiscale"] - means["flat_history"]
         )
         hrl_gain = (
-            float(rows_by_method["hrl_multiscale"][seed][metric])
-            - float(rows_by_method["hrl_history"][seed][metric])
+            means["hrl_multiscale"] - means["hrl_history"]
         )
         values.append(sign * (hrl_gain - flat_gain))
     return _paired_interval(np.asarray(values), confidence=confidence)
@@ -213,7 +254,7 @@ def analyze_stage1_cells(
     indexed = _index_rows(items)
     available = {
         (scenario, method)
-        for scenario, method, _ in indexed
+        for scenario, method, _, _ in indexed
     }
     required = {
         (scenario, method)
@@ -291,6 +332,9 @@ def analyze_stage1_cells(
         "confidence": float(confidence),
         "cell_count": len(items),
         "evaluation_row_count": len(indexed),
+        "independent_training_replicate_count": len({
+            replicate for _, _, replicate, _ in indexed
+        }),
         "scenarios": scenario_results,
         "mainline_hrl_increment_status": (
             "supported"
@@ -307,6 +351,7 @@ def render_report(analysis: dict[str, Any]) -> str:
         "",
         f"Protocol: `{analysis['protocol_version']}`",
         f"Evaluation rows: {analysis['evaluation_row_count']}",
+        f"Independent training replicates: {analysis['independent_training_replicate_count']}",
         f"Mainline HRL increment: **{analysis['mainline_hrl_increment_status']}**",
         "",
         "| Scenario | Flat representation | HRL on history | Multiscale HRL vs HRL | Multiscale HRL vs flat multiscale |",

@@ -708,6 +708,7 @@ def train_stage1_cell(
     time_scale: PhysicalTimeScaleContract,
     reference_hidden_dim: int = 64,
     learning_rate: float = 3e-4,
+    checkpoint_evaluation_interval: int = 8,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
     if str(scenario) not in TRACKING_SCENARIOS:
         raise ValueError(f"unknown tracking scenario: {scenario}")
@@ -730,6 +731,7 @@ def train_stage1_cell(
         "protocol_version": MULTISCALE_GOAL_PROTOCOL_VERSION,
         "algorithm_path": "multiscale_goal_hrl_mainline",
         "scenario": str(scenario),
+        "optimizer_seed": int(optimizer_seed),
         "representation": _representation(method),
         "history_information_contract": (
             "same_fixed_trailing_samples_raw_causal_lowpass_or_orthonormal_haar"
@@ -787,6 +789,9 @@ def train_stage1_cell(
             domain="identifiable_tracking",
             metadata=common_metadata,
             checkpoint_score_contract="mean_episode_return",
+            checkpoint_evaluation_interval=int(
+                checkpoint_evaluation_interval
+            ),
         )
     else:
         payload, rows, trained = train_joint_ppo(
@@ -808,10 +813,16 @@ def train_stage1_cell(
             domain="identifiable_tracking",
             metadata=common_metadata,
             checkpoint_score_contract="mean_episode_return",
+            checkpoint_evaluation_interval=int(
+                checkpoint_evaluation_interval
+            ),
         )
     if _is_hierarchical(method):
         payload["training_core"] = payload["trainer"]
         payload["trainer"] = "goal_conditioned_smdp_ppo_v1"
+    for row in rows:
+        row["training_replicate_seed"] = int(optimizer_seed)
+    payload["optimizer_seed"] = int(optimizer_seed)
     payload["evaluation_rows"] = rows
     return payload, rows, trained
 
@@ -826,6 +837,7 @@ def resolved_stage1_protocol(
     time_scale: PhysicalTimeScaleContract,
     reference_hidden_dim: int,
     learning_rate: float,
+    checkpoint_evaluation_interval: int,
     train_seeds: Iterable[int],
     selection_seeds: Iterable[int],
     eval_seeds: Iterable[int],
@@ -850,6 +862,9 @@ def resolved_stage1_protocol(
         "optimizer_seed": int(optimizer_seed),
         "reference_hidden_dim": int(reference_hidden_dim),
         "learning_rate": float(learning_rate),
+        "checkpoint_evaluation_interval": int(
+            checkpoint_evaluation_interval
+        ),
         "train_seeds": training,
         "selection_seeds": selection,
         "eval_seeds": evaluation,
@@ -894,6 +909,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fast-period-seconds", type=float, default=0.2)
     parser.add_argument("--reference-hidden-dim", type=int, default=64)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--checkpoint-evaluation-interval", type=int, default=8)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--dry-run", action="store_true")
     return parser
@@ -916,6 +932,7 @@ def main(argv: list[str] | None = None) -> int:
         time_scale=time_scale,
         reference_hidden_dim=args.reference_hidden_dim,
         learning_rate=args.learning_rate,
+        checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
         train_seeds=args.train_seeds,
         selection_seeds=args.selection_seeds,
         eval_seeds=args.eval_seeds,
@@ -940,6 +957,9 @@ def main(argv: list[str] | None = None) -> int:
                     time_scale=time_scale,
                     reference_hidden_dim=args.reference_hidden_dim,
                     learning_rate=args.learning_rate,
+                    checkpoint_evaluation_interval=(
+                        args.checkpoint_evaluation_interval
+                    ),
                 )
                 output["cells"].append(payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)

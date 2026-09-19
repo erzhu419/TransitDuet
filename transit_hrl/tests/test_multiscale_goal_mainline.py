@@ -160,20 +160,23 @@ class StageOneProtocolTest(unittest.TestCase):
         cells = []
         for scenario in TRACKING_SCENARIOS:
             for method, (reward_gain, error_gain) in effects.items():
-                rows = []
-                for seed in (1, 2, 3, 4):
-                    rows.append({
-                        "seed": seed,
-                        "algorithm_path": "multiscale_goal_hrl_mainline",
-                        "protocol_valid": 1.0,
-                        "episode_return": 100.0 + seed + reward_gain,
-                        "tracking_rmse": 10.0 + 0.1 * seed + error_gain,
+                for replicate in (101, 103, 107, 109):
+                    rows = []
+                    for seed in (1, 2):
+                        rows.append({
+                            "seed": seed,
+                            "training_replicate_seed": replicate,
+                            "algorithm_path": "multiscale_goal_hrl_mainline",
+                            "protocol_valid": 1.0,
+                            "episode_return": 100.0 + seed + reward_gain,
+                            "tracking_rmse": 10.0 + 0.1 * seed + error_gain,
+                        })
+                    cells.append({
+                        "policy": method,
+                        "scenario": scenario,
+                        "optimizer_seed": replicate,
+                        "evaluation_rows": rows,
                     })
-                cells.append({
-                    "policy": method,
-                    "scenario": scenario,
-                    "evaluation_rows": rows,
-                })
         return cells
 
     def test_scenarios_separate_truth_location_and_match_rms(self):
@@ -289,6 +292,7 @@ class StageOneProtocolTest(unittest.TestCase):
     def test_factorial_analysis_uses_paired_seed_differences(self):
         analysis = analyze_stage1_cells(self._synthetic_cells())
         self.assertEqual(analysis["mainline_hrl_increment_status"], "supported")
+        self.assertEqual(analysis["independent_training_replicate_count"], 4)
         clean = analysis["scenarios"]["clean"]
         self.assertEqual(clean["representation_flat"]["joint_status"], "supported")
         self.assertEqual(
@@ -297,7 +301,7 @@ class StageOneProtocolTest(unittest.TestCase):
         )
         self.assertIn("multiscale_vs_causal_filter", clean)
         with self.assertRaisesRegex(ValueError, "incomplete"):
-            analyze_stage1_cells(self._synthetic_cells()[:-2])
+            analyze_stage1_cells(self._synthetic_cells()[:-8])
 
 
 if __name__ == "__main__":
