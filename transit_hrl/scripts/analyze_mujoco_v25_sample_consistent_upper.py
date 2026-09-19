@@ -2,6 +2,7 @@
 """Apply the frozen v25 gates to small exports; never select the diagnostic arm."""
 
 import argparse
+from collections import Counter
 import csv
 import json
 import math
@@ -27,6 +28,25 @@ def mean(rows, key):
 
 def truth(value):
     return str(value).lower() in ("true", "1", "1.0")
+
+
+def row_validity_failures(row):
+    failures = []
+    if not truth(row["protocol_valid"]):
+        failures.append("protocol_invalid")
+    if not truth(row["terminal_reserve_projection_enabled"]):
+        failures.append("projection_disabled")
+    if not truth(row["terminal_reserve_context_enabled"]):
+        failures.append("context_disabled")
+    if float(row["terminal_reserve_certificate_violation_count"]) != 0:
+        failures.append("certificate_violation")
+    if float(row["terminal_reserve_recursive_fallback_rate"]) > 0.05:
+        failures.append("fallback_rate")
+    if float(row["terminal_reserve_upper_prefix_power_max"]) > 0.075 ** 2 + 1e-8:
+        failures.append("upper_prefix_power")
+    if float(row["terminal_reserve_lower_prefix_power_max"]) > 0.0475 ** 2 + 1e-8:
+        failures.append("lower_prefix_power")
+    return failures
 
 
 def validate_cell(summary, rows, cell, *, preflight):
@@ -76,15 +96,28 @@ def validate_cell(summary, rows, cell, *, preflight):
                     "terminal_reserve_lower_prefix_power_max")
     if not all(math.isfinite(float(row[key])) for row in rows for key in numeric_keys):
         raise ValueError(f"nonfinite evaluation metrics: {cell}")
-    return all(
-        truth(row["protocol_valid"]) and truth(row["terminal_reserve_projection_enabled"])
-        and truth(row["terminal_reserve_context_enabled"])
-        and float(row["terminal_reserve_certificate_violation_count"]) == 0
-        and float(row["terminal_reserve_recursive_fallback_rate"]) <= 0.05
-        and float(row["terminal_reserve_upper_prefix_power_max"]) <= 0.075 ** 2 + 1e-8
-        and float(row["terminal_reserve_lower_prefix_power_max"]) <= 0.0475 ** 2 + 1e-8
-        for row in rows
-    )
+    failures = []
+    for row in rows:
+        reasons = row_validity_failures(row)
+        if reasons:
+            failures.append({
+                "environment": cell[0],
+                "arm": cell[1],
+                "optimizer_seed": int(cell[2]),
+                "disturbance_mode": row["disturbance_mode"],
+                "evaluation_seed": int(row["seed"]),
+                "reasons": reasons,
+                "fallback_rate": float(
+                    row["terminal_reserve_recursive_fallback_rate"]
+                ),
+                "upper_prefix_power": float(
+                    row["terminal_reserve_upper_prefix_power_max"]
+                ),
+                "lower_prefix_power": float(
+                    row["terminal_reserve_lower_prefix_power_max"]
+                ),
+            })
+    return failures
 
 
 def development_gates(values):
@@ -122,20 +155,58 @@ def analyze(directory):
     for key, value in json.loads(json.dumps(expected)).items():
         if registration.get(key) != value:
             raise ValueError(f"registration mismatch: {key}")
-    values, capacities, rows_by_cell, validity = {}, {}, {}, []
+    values, capacities, rows_by_cell = {}, {}, {}
+    validity_failures = []
     for cell in cells(preflight):
         path = directory / cell_dir(directory.name, *cell).relative_to(Path("results") / directory.name)
         summary = json.loads((path / "cell_summary.json").read_text())
         with (path / "evaluation_rows.csv").open(newline="") as handle:
             rows = list(csv.DictReader(handle))
-        validity.append(validate_cell(summary, rows, cell, preflight=preflight))
+        validity_failures.extend(
+            validate_cell(summary, rows, cell, preflight=preflight)
+        )
         capacities[cell] = summary["capacity_actual_parameter_count"]
         values[cell] = {key: mean(rows, metric) for key, metric in METRICS.items()}
         rows_by_cell[cell] = rows
     capacity_matched = all(len({v for (env, _, _), v in capacities.items() if env == environment}) == 1 for environment in spec.ENVIRONMENTS)
-    gates = dict(validity=all(validity), capacity_matched=capacity_matched)
+    all_rows = [row for rows in rows_by_cell.values() for row in rows]
+    validity_maxima = {
+        "certificate_violation_count": max(
+            float(row["terminal_reserve_certificate_violation_count"])
+            for row in all_rows
+        ),
+        "fallback_rate": max(
+            float(row["terminal_reserve_recursive_fallback_rate"])
+            for row in all_rows
+        ),
+        "upper_prefix_power": max(
+            float(row["terminal_reserve_upper_prefix_power_max"])
+            for row in all_rows
+        ),
+        "lower_prefix_power": max(
+            float(row["terminal_reserve_lower_prefix_power_max"])
+            for row in all_rows
+        ),
+    }
+    reason_counts = Counter(
+        reason for failure in validity_failures for reason in failure["reasons"]
+    )
+    gates = dict(
+        validity=not validity_failures,
+        capacity_matched=capacity_matched,
+    )
     report = dict(protocol=spec.PROTOCOL, preflight=preflight, cell_count=len(values),
                   evaluation_row_count=sum(map(len, rows_by_cell.values())))
+    report["validity_diagnostics"] = {
+        "invalid_row_count": len(validity_failures),
+        "invalid_cell_count": len({
+            (row["environment"], row["arm"], row["optimizer_seed"])
+            for row in validity_failures
+        }),
+        "reason_counts": dict(sorted(reason_counts.items())),
+        "max_observed": validity_maxima,
+        "failures": validity_failures,
+    }
     if not preflight:
         report["environments"], performance = development_gates(values)
         gates.update(performance)

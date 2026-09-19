@@ -4,7 +4,10 @@ import unittest
 from freq_hrl.experiments.mujoco.control_validation import build_parser
 from scripts import mujoco_v25_sample_consistent_upper_spec as spec
 from scripts.submit_mujoco_v25_sample_consistent_upper_scheduleurm import cells, task_spec, training_command
-from scripts.analyze_mujoco_v25_sample_consistent_upper import development_gates
+from scripts.analyze_mujoco_v25_sample_consistent_upper import (
+    development_gates,
+    row_validity_failures,
+)
 
 
 class SampleConsistentUpperScreenTest(unittest.TestCase):
@@ -48,6 +51,25 @@ class SampleConsistentUpperScreenTest(unittest.TestCase):
             values[(env, spec.CANDIDATE, seed)]["reward"] = 100.
         _, gates = development_gates(values)
         self.assertFalse(gates["reward_wins"])
+
+    def test_validity_diagnostics_name_the_failed_frozen_gate(self):
+        row = {
+            "protocol_valid": "true",
+            "terminal_reserve_projection_enabled": "true",
+            "terminal_reserve_context_enabled": "true",
+            "terminal_reserve_certificate_violation_count": "0",
+            "terminal_reserve_recursive_fallback_rate": "0.05",
+            "terminal_reserve_upper_prefix_power_max": str(0.075 ** 2),
+            "terminal_reserve_lower_prefix_power_max": str(0.0475 ** 2),
+        }
+        self.assertEqual(row_validity_failures(row), [])
+        row["terminal_reserve_recursive_fallback_rate"] = "0.0501"
+        self.assertEqual(row_validity_failures(row), ["fallback_rate"])
+        row["terminal_reserve_certificate_violation_count"] = "1"
+        self.assertEqual(
+            row_validity_failures(row),
+            ["certificate_violation", "fallback_rate"],
+        )
 
 
 if __name__ == "__main__":
