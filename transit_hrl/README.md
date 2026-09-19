@@ -59,22 +59,24 @@ is not yet a positive Freq-HRL result. See
 `md/freq_hrl_pointmaze_stage2_v3_result_2026-09-19.md`, and
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
-The admitted Stage-3 experiment is a preregistered PointMaze factorial:
+The active Stage-3 V2 experiment is a preregistered PointMaze factorial:
 
 ```bash
-python3 scripts/submit_pointmaze_multiscale_stage3_scheduleurm.py --run-name pointmaze_multiscale_stage3_v1_preflight_20260919_r1 --preflight
+python3 scripts/submit_pointmaze_multiscale_stage3_scheduleurm.py --run-name pointmaze_multiscale_stage3_v2_preflight_20260919_r1 --preflight
 ```
 
-Raw-history and Haar flat policies receive the same 32 actor-visible samples.
-The HRL multiscale arm routes slow information to the waypoint policy and
-current physical plus mid/high information to the actuator policy. The clean
-scenario is a noninferiority boundary; the registered mixed stress combines a
-hidden slow action drift with fast action and observation noise. The primary
-claim additionally requires a positive hierarchy-by-multiscale interaction,
-so a flat multiscale gain cannot be relabeled as a Freq-HRL gain. See
-`md/freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`. The 8-cell
-preflight passed all software, causality, pairing, and serialization checks;
-it is not performance evidence. See
+Raw-history, causal-filter, and Haar flat policies use the same 32
+actor-visible samples. Both HRL levels retain current physical feedback;
+multiscale features augment it, with slow+mid routed upward and mid+high routed
+downward. Observation noise, continuous action stress, and persistent mode
+shift are separate scenarios. The auxiliary causal-filter baseline and the
+factorial interaction prevent generic smoothing gains from being relabeled as
+Freq-HRL gains. See
+`md/freq_hrl_pointmaze_multiscale_stage3_v2_protocol_2026-09-19.md`.
+
+The V1 preflight was software-valid but design-invalid because its upper
+multiscale state removed current physical feedback. All 64 V1 development
+tasks were cancelled, and no partial output is evidence. See
 `md/freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md`.
 
 The package also retains the earlier components for:

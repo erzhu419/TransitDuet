@@ -62,7 +62,8 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_goal_stage2_v1_development | pointmaze_goal_control | development | ordinary_hrl_learning_not_supported | negative_main_or_si | false |
 | pointmaze_goal_stage2_v2_development | pointmaze_goal_control | development | credit_repaired_but_learning_not_supported | negative_main_or_si | false |
 | pointmaze_goal_stage2_v3_development | pointmaze_goal_control | development | ordinary_hrl_learning_supported_multiscale_admitted | positive_si | true |
-| pointmaze_multiscale_stage3_v1_preflight | pointmaze_goal_control | preflight | software_gate_passed_performance_not_tested | smoke_only | false |
+| pointmaze_multiscale_stage3_v1_preflight | pointmaze_goal_control | preflight | superseded_design_invalid_upper_missing_current_physical_state | excluded_development | false |
+| pointmaze_multiscale_stage3_v1_development | pointmaze_goal_control | development | cancelled_all_64_cells_after_design_review | excluded_development | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -506,15 +507,24 @@ hierarchy interaction, general Freq-HRL superiority, or confirmation.
 
 ### pointmaze_multiscale_stage3_v1_preflight
 
-The eight-cell preflight completed with valid fixed-horizon rollouts, paired
-causal stress streams, matched parameter budgets, correct option boundaries,
-finite learned-policy updates, and compact result serialization. It authorizes
-the frozen development matrix only. See the
+The eight-cell preflight completed its software checks, but design review found
+that the upper multiscale state omitted current physical feedback, contrary to
+the adopted redesign. Its former development authorization is withdrawn. See the
 [Stage-3 preflight](freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md).
 
 Forbidden: The Stage-3 preflight establishes a multiscale representation
 benefit, a hierarchy-by-frequency interaction, a performance improvement, or
 any Freq-HRL paper claim.
+
+### pointmaze_multiscale_stage3_v1_development
+
+All 64 registered V1 development tasks (`t95604`-`t95667`) were cancelled after
+the state-contract defect was identified. No completed or partial V1 cell is a
+performance result. The corrected V2 protocol uses fresh seeds and restores
+current physical feedback to both levels.
+
+Forbidden: Any V1 development output is used for performance, tuning, or claim
+selection.
 
 ### legacy_c1_c9_matrix_snapshot
 

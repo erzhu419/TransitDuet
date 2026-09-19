@@ -12,13 +12,18 @@ from scipy import stats
 
 from .pointmaze_multiscale_validation import (
     POINTMAZE_MULTISCALE_ALGORITHM_PATH,
+    POINTMAZE_MULTISCALE_CORE_METHODS,
     POINTMAZE_MULTISCALE_METHODS,
     POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
     POINTMAZE_MULTISCALE_SCENARIOS,
 )
 
 
-PRIMARY_STRESS_SCENARIO = "mixed_causal_stress"
+PRIMARY_STRESS_SCENARIOS = (
+    "fast_observation_noise",
+    "slow_drift_fast_action",
+)
+SECONDARY_STRESS_SCENARIO = "persistent_action_shift"
 CLEAN_SUCCESS_NONINFERIORITY_MARGIN = 0.10
 METRICS = {
     "success": True,
@@ -235,9 +240,9 @@ def _interaction_values(
             method=method,
             metric=metric,
         )
-        for method in POINTMAZE_MULTISCALE_METHODS
+        for method in POINTMAZE_MULTISCALE_CORE_METHODS
     }
-    roots = set(means[POINTMAZE_MULTISCALE_METHODS[0]])
+    roots = set(means[POINTMAZE_MULTISCALE_CORE_METHODS[0]])
     if any(set(values) != roots for values in means.values()):
         raise ValueError("stage-3 interaction is not root paired")
     sign = 1.0 if higher_is_better else -1.0
@@ -325,6 +330,20 @@ def analyze_pointmaze_multiscale_cells(
                 baseline="flat_multiscale",
                 confidence=confidence,
             ),
+            "flat_multiscale_vs_causal_filter": _comparison(
+                indexed,
+                scenario=scenario,
+                candidate="flat_multiscale",
+                baseline="flat_causal_filter",
+                confidence=confidence,
+            ),
+            "freq_hrl_vs_causal_filter": _comparison(
+                indexed,
+                scenario=scenario,
+                candidate="hrl_multiscale",
+                baseline="flat_causal_filter",
+                confidence=confidence,
+            ),
             "factorial_interaction": interaction,
         }
     clean_success = scenarios["clean"]["freq_routing_increment"]["success"]
@@ -338,42 +357,56 @@ def analyze_pointmaze_multiscale_cells(
             else "not_supported"
         ),
     }
-    primary = scenarios[PRIMARY_STRESS_SCENARIO]
-    stress_success_status = str(
-        primary["freq_routing_increment"]["success"]["status"]
-    )
-    interaction_success_status = str(
-        primary["factorial_interaction"]["success"]["status"]
+    stress_gates = {
+        scenario: {
+            "freq_routing_success": str(
+                scenarios[scenario]["freq_routing_increment"]["success"]["status"]
+            ),
+            "factorial_interaction_success": str(
+                scenarios[scenario]["factorial_interaction"]["success"]["status"]
+            ),
+        }
+        for scenario in PRIMARY_STRESS_SCENARIOS
+    }
+    observation_filter_status = str(
+        scenarios["fast_observation_noise"]["freq_hrl_vs_causal_filter"][
+            "success"
+        ]["status"]
     )
     mainline_status = (
         "supported"
-        if stress_success_status == "supported"
-        and interaction_success_status == "supported"
+        if all(
+            gate["freq_routing_success"] == "supported"
+            and gate["factorial_interaction_success"] == "supported"
+            for gate in stress_gates.values()
+        )
+        and observation_filter_status == "supported"
         and clean_noninferiority["status"] == "supported"
         else "not_supported"
     )
     return {
-        "analysis_version": "pointmaze_multiscale_goal_stage3_analysis_v1",
+        "analysis_version": "pointmaze_multiscale_goal_stage3_analysis_v2",
         "protocol_version": POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
         "confidence": float(confidence),
         "cell_count": len(items),
         "evaluation_row_count": len(indexed),
         "independent_training_replicate_count": len(roots),
         "runtime_versions": runtime_versions,
-        "primary_stress_scenario": PRIMARY_STRESS_SCENARIO,
+        "primary_stress_scenarios": list(PRIMARY_STRESS_SCENARIOS),
+        "secondary_stress_scenario": SECONDARY_STRESS_SCENARIO,
         "clean_success_noninferiority": clean_noninferiority,
         "scenarios": scenarios,
         "freq_hrl_mainline_status": mainline_status,
         "claim_gate": {
-            "stress_hrl_multiscale_vs_hrl_history_success": stress_success_status,
-            "stress_factorial_interaction_success": interaction_success_status,
+            "primary_stress": stress_gates,
+            "observation_noise_vs_causal_filter_success": observation_filter_status,
             "clean_success_noninferiority": clean_noninferiority["status"],
         },
         "claim_boundary": (
-            "Freq-HRL requires a positive primary-stress success increment, "
-            "a positive hierarchy-by-multiscale success interaction, and clean "
-            "success noninferiority; flat representation gains are reported "
-            "separately."
+            "Cross-stress Freq-HRL requires positive success increments and "
+            "hierarchy-by-multiscale interactions in both registered primary "
+            "stress families, superiority to the causal-filter control under "
+            "observation noise, and clean success noninferiority."
         ),
     }
 
@@ -435,6 +468,8 @@ def render_report(analysis: dict[str, Any]) -> str:
             ("Hierarchy on raw history", "hierarchy_on_history"),
             ("Freq routing increment", "freq_routing_increment"),
             ("Freq-HRL vs flat multiscale", "freq_hrl_vs_flat_multiscale"),
+            ("Flat multiscale vs causal filter", "flat_multiscale_vs_causal_filter"),
+            ("Freq-HRL vs causal filter", "freq_hrl_vs_causal_filter"),
         ):
             comparison = result[key]
             lines.append(
@@ -460,8 +495,17 @@ def render_report(analysis: dict[str, Any]) -> str:
     lines.extend([
         "## Claim gate",
         "",
-        f"- Primary-stress Freq routing success: **{gate['stress_hrl_multiscale_vs_hrl_history_success']}**",
-        f"- Primary-stress factorial interaction: **{gate['stress_factorial_interaction_success']}**",
+    ])
+    for scenario, scenario_gate in gate["primary_stress"].items():
+        lines.extend([
+            f"- {scenario} Freq routing success: "
+            f"**{scenario_gate['freq_routing_success']}**",
+            f"- {scenario} factorial interaction: "
+            f"**{scenario_gate['factorial_interaction_success']}**",
+        ])
+    lines.extend([
+        "- Observation-noise Freq-HRL versus causal filter: "
+        f"**{gate['observation_noise_vs_causal_filter_success']}**",
         f"- Clean success noninferiority: **{gate['clean_success_noninferiority']}**",
         "",
         analysis["claim_boundary"],

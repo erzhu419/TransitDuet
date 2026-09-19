@@ -45,11 +45,44 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
         )
         self.assertEqual(dimensions["history"].history, 128)
         self.assertEqual(dimensions["history"].flat, 134)
+        self.assertEqual(dimensions["filtered"].flat, 134)
         self.assertEqual(dimensions["multiscale"].flat, 134)
+        self.assertEqual(dimensions["history"].upper, 134)
+        self.assertEqual(dimensions["multiscale"].upper, 38)
+        self.assertEqual(dimensions["multiscale"].lower, 126)
         self.assertEqual(dimensions["multiscale"].slow, 8)
         self.assertEqual(dimensions["multiscale"].mid, 24)
         self.assertEqual(dimensions["multiscale"].high, 96)
         self.assertEqual(dimensions["multiscale"].slow_energy, 4)
+
+    def test_both_hierarchy_levels_keep_current_physical_feedback(self):
+        observation = {
+            "observation": np.asarray([0.1, -0.2, 0.3, -0.4]),
+            "achieved_goal": np.asarray([0.1, -0.2]),
+            "desired_goal": np.asarray([1.0, 1.0]),
+        }
+        changed = {key: value.copy() for key, value in observation.items()}
+        changed["observation"] = np.asarray([0.7, -0.8, 0.9, -1.0])
+        changed["achieved_goal"] = changed["observation"][:2].copy()
+        builder = PointMazeFeatureBuilder(
+            physical_dim=4, time_scale=self.time_scale
+        )
+        builder.reset(observation)
+        for representation in ("history", "multiscale"):
+            upper_before = builder.upper_state(
+                observation, representation=representation
+            )
+            upper_after = builder.upper_state(
+                changed, representation=representation
+            )
+            np.testing.assert_allclose(upper_after[:4], changed["observation"])
+            self.assertFalse(np.array_equal(upper_before[:4], upper_after[:4]))
+            lower_after = builder.lower_state(
+                changed,
+                subgoal=np.asarray([0.2, 0.3]),
+                representation=representation,
+            )
+            np.testing.assert_allclose(lower_after[:4], changed["observation"])
 
     def test_lower_features_hide_final_goal_in_both_representations(self):
         environment = make_pointmaze_environment(
@@ -95,12 +128,13 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
             physical_dim=4,
             goal_dim=2,
             action_dim=2,
+            horizon_steps=64,
         )
         first = CausalPointMazeStress(
-            scenario="mixed_causal_stress", **kwargs
+            scenario="persistent_action_shift", **kwargs
         )
         second = CausalPointMazeStress(
-            scenario="mixed_causal_stress", **kwargs
+            scenario="persistent_action_shift", **kwargs
         )
         for _ in range(4):
             visible_a, noise_a = first.observe(observation)
@@ -119,7 +153,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
                 np.testing.assert_array_equal(left, right)
         clean = CausalPointMazeStress(scenario="clean", **kwargs)
         visible, noise = clean.observe(observation)
-        executed, slow, fast = clean.execute(
+        executed, slow, fast, persistent = clean.execute(
             np.asarray([0.2, -0.3]), -np.ones(2), np.ones(2)
         )
         np.testing.assert_array_equal(noise, np.zeros(4))
@@ -127,8 +161,64 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
         np.testing.assert_allclose(executed, [0.2, -0.3])
         np.testing.assert_array_equal(slow, np.zeros(2))
         np.testing.assert_array_equal(fast, np.zeros(2))
+        np.testing.assert_array_equal(persistent, np.zeros(2))
 
-    def test_four_real_rollouts_are_trainable_and_capacity_matched(self):
+    def test_stress_families_change_only_the_registered_channel(self):
+        observation = {
+            "observation": np.asarray([0.1, -0.2, 0.3, -0.4]),
+            "achieved_goal": np.asarray([0.1, -0.2]),
+            "desired_goal": np.asarray([1.0, 1.0]),
+        }
+        kwargs = dict(
+            seed=29,
+            dt_seconds=0.01,
+            physical_dim=4,
+            goal_dim=2,
+            action_dim=2,
+            horizon_steps=64,
+        )
+        observation_stress = CausalPointMazeStress(
+            scenario="fast_observation_noise", **kwargs
+        )
+        _, noise = observation_stress.observe(observation)
+        _, slow, fast, persistent = observation_stress.execute(
+            np.zeros(2), -np.ones(2), np.ones(2)
+        )
+        self.assertGreater(float(np.linalg.norm(noise)), 0.0)
+        np.testing.assert_array_equal(slow, np.zeros(2))
+        np.testing.assert_array_equal(fast, np.zeros(2))
+        np.testing.assert_array_equal(persistent, np.zeros(2))
+
+        action_stress = CausalPointMazeStress(
+            scenario="slow_drift_fast_action", **kwargs
+        )
+        _, noise = action_stress.observe(observation)
+        _, slow, fast, persistent = action_stress.execute(
+            np.zeros(2), -np.ones(2), np.ones(2)
+        )
+        np.testing.assert_array_equal(noise, np.zeros(4))
+        self.assertGreater(float(np.linalg.norm(slow)), 0.0)
+        self.assertGreater(float(np.linalg.norm(fast)), 0.0)
+        np.testing.assert_array_equal(persistent, np.zeros(2))
+
+        shift = CausalPointMazeStress(
+            scenario="persistent_action_shift", **kwargs
+        )
+        persistent_values = [
+            shift.execute(np.zeros(2), -np.ones(2), np.ones(2))[3]
+            for _ in range(64)
+        ]
+        onset = shift.metadata()["persistent_action_shift_onset_step"]
+        self.assertTrue(all(
+            np.array_equal(value, np.zeros(2))
+            for value in persistent_values[:onset]
+        ))
+        self.assertTrue(all(
+            float(np.linalg.norm(value)) > 0.0
+            for value in persistent_values[onset:]
+        ))
+
+    def test_five_real_rollouts_are_trainable_and_capacity_matched(self):
         dimensions = pointmaze_multiscale_dimensions(
             env_id=DEFAULT_ENV_ID,
             horizon=64,
@@ -147,7 +237,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
             )
             kwargs = dict(
                 method=method,
-                scenario="mixed_causal_stress",
+                scenario="fast_observation_noise",
                 env_id=DEFAULT_ENV_ID,
                 seed=23,
                 horizon=64,
@@ -173,15 +263,90 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
             self.assertEqual(row["terminated"], 0.0)
             self.assertEqual(row["truncated"], 1.0)
             self.assertGreater(row["measurement_noise_rms"], 0.0)
+            self.assertEqual(row["slow_action_stress_rms"], 0.0)
+            self.assertEqual(row["fast_action_stress_rms"], 0.0)
+            self.assertEqual(row["persistent_action_stress_rms"], 0.0)
             self.assertEqual(
                 row["protocol_version"],
                 POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
             )
 
+    def test_rollout_diagnostics_keep_stress_families_separate(self):
+        dimensions = pointmaze_multiscale_dimensions(
+            env_id=DEFAULT_ENV_ID,
+            horizon=64,
+            time_scale=self.time_scale,
+        )
+        model, capacity = build_pointmaze_multiscale_model(
+            method="flat_history",
+            dimensions=dimensions,
+            reference_hidden_dim=16,
+            learning_rate=3e-4,
+            optimizer_seed=211,
+        )
+        rows = {}
+        for scenario in (
+            "clean",
+            "fast_observation_noise",
+            "slow_drift_fast_action",
+            "persistent_action_shift",
+        ):
+            _, rows[scenario] = rollout_flat_pointmaze_multiscale(
+                model,
+                method="flat_history",
+                scenario=scenario,
+                env_id=DEFAULT_ENV_ID,
+                seed=31,
+                horizon=64,
+                sample=False,
+                parameter_budget=int(capacity["reference_parameter_budget"]),
+                time_scale=self.time_scale,
+            )
+        channels = (
+            "measurement_noise_rms",
+            "slow_action_stress_rms",
+            "fast_action_stress_rms",
+            "persistent_action_stress_rms",
+        )
+        self.assertTrue(all(rows["clean"][name] == 0.0 for name in channels))
+        self.assertGreater(
+            rows["fast_observation_noise"]["measurement_noise_rms"], 0.0
+        )
+        self.assertTrue(all(
+            rows["fast_observation_noise"][name] == 0.0
+            for name in channels[1:]
+        ))
+        self.assertEqual(
+            rows["slow_drift_fast_action"]["measurement_noise_rms"], 0.0
+        )
+        self.assertGreater(
+            rows["slow_drift_fast_action"]["slow_action_stress_rms"], 0.0
+        )
+        self.assertGreater(
+            rows["slow_drift_fast_action"]["fast_action_stress_rms"], 0.0
+        )
+        self.assertEqual(
+            rows["slow_drift_fast_action"]["persistent_action_stress_rms"],
+            0.0,
+        )
+        self.assertTrue(all(
+            rows["persistent_action_shift"][name] == 0.0
+            for name in channels[:3]
+        ))
+        self.assertGreater(
+            rows["persistent_action_shift"]["persistent_action_stress_rms"],
+            0.0,
+        )
+
     @staticmethod
     def _synthetic_cells():
         cells = []
-        for scenario in ("clean", "mixed_causal_stress"):
+        for scenario in (
+            "clean",
+            "fast_observation_noise",
+            "slow_drift_fast_action",
+            "persistent_action_shift",
+        ):
             for method in POINTMAZE_MULTISCALE_METHODS:
                 for root in (101, 103, 107, 109):
                     rows = []
@@ -190,6 +355,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
                         success = {
                             "flat_history": 0.50,
                             "flat_multiscale": 0.50,
+                            "flat_causal_filter": 0.50,
                             "hrl_history": 0.70,
                             "hrl_multiscale": 0.70,
                         }[method]
@@ -197,6 +363,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
                         success = {
                             "flat_history": 0.40,
                             "flat_multiscale": 0.50,
+                            "flat_causal_filter": 0.55,
                             "hrl_history": 0.40,
                             "hrl_multiscale": 0.80,
                         }[method]
@@ -226,7 +393,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
         analysis = analyze_pointmaze_multiscale_cells(self._synthetic_cells())
         self.assertEqual(analysis["independent_training_replicate_count"], 4)
         self.assertEqual(analysis["freq_hrl_mainline_status"], "supported")
-        stress = analysis["scenarios"]["mixed_causal_stress"]
+        stress = analysis["scenarios"]["fast_observation_noise"]
         self.assertAlmostEqual(
             stress["flat_representation"]["success"]["mean_improvement"],
             0.10,
@@ -236,6 +403,7 @@ class PointMazeMultiscaleStageThreeTest(unittest.TestCase):
             0.30,
         )
         self.assertIn("Flat representation", render_report(analysis))
+        self.assertIn("causal filter", render_report(analysis))
 
     def test_analysis_rejects_an_incomplete_factorial(self):
         cells = self._synthetic_cells()

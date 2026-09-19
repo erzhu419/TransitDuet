@@ -180,26 +180,23 @@ stability held. This admits a separately registered PointMaze multiscale
 factorial experiment; it does not itself support a Freq-HRL claim. See
 `freq_hrl_pointmaze_stage2_v3_result_2026-09-19.md`.
 
-## Stage-3 Registered Factorial
+## Stage-3 V2 Registered Factorial
 
-The admitted PointMaze experiment now freezes the same four-grid design used
-for mechanism identification: flat/HRL crossed with raw history/multiscale.
-It uses clean control as a noninferiority boundary and a paired causal stress
-with hidden slow action drift plus fast action and measurement noise as the
-primary mechanism condition. The flat multiscale arm receives every Haar band;
-the Freq-HRL arm routes slow information to the upper waypoint policy and
-current physical plus mid/high information to the lower actuator policy.
+The admitted PointMaze experiment uses the same four-grid design used for
+mechanism identification: flat/HRL crossed with raw history/multiscale, plus a
+flat causal-filter control. Both hierarchy levels retain full current physical
+feedback. Multiscale history augments that feedback: slow+mid is routed upward
+and mid+high downward. Observation noise, continuous slow/fast action stress,
+and persistent action-mode shift are separate causal scenarios.
 
-A positive Freq-HRL claim requires both a positive stressed success increment
-over `hrl_history` and a positive hierarchy-by-multiscale success interaction,
-with no more than 0.10 clean success degradation at the lower 95% CI endpoint.
-This prevents a generic representation gain from being attributed to the
-hierarchy. See
-`freq_hrl_pointmaze_multiscale_stage3_protocol_2026-09-19.md`.
+A cross-stress Freq-HRL claim requires positive success increments and
+factorial interactions in both primary stress families, superiority to causal
+filtering under observation noise, and clean noninferiority. See
+`freq_hrl_pointmaze_multiscale_stage3_v2_protocol_2026-09-19.md`.
 
-The eight-cell Stage-3 preflight completed on scheduler tasks t95327-t95334.
-All paths had valid fixed-horizon rollouts, matched stress sequences and
-parameter budgets, correct option boundaries, finite updates, and compact
-result artifacts. This clears the software gate for the 64-cell development
-matrix but supplies no performance evidence. See
+The eight-cell V1 preflight completed on scheduler tasks t95327-t95334, but a
+subsequent design review found that its upper multiscale policy had lost
+current physical feedback. All 64 V1 development tasks t95604-t95667 were
+cancelled. V1 supplies no performance evidence and does not authorize V2;
+V2 requires fresh preflight and seeds. See
 `freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md`.

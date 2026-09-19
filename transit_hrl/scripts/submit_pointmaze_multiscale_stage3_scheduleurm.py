@@ -368,10 +368,15 @@ def main() -> int:
             for seed in optimizer_seeds
         },
         "claim_gate": {
-            "primary_stress": "mixed_causal_stress",
+            "primary_stress": [
+                "fast_observation_noise",
+                "slow_drift_fast_action",
+            ],
+            "secondary_stress": "persistent_action_shift",
             "primary_endpoint": "success",
             "clean_success_noninferiority_margin": 0.10,
             "requires_positive_factorial_interaction": True,
+            "requires_observation_noise_superiority_to_causal_filter": True,
         },
         "scheduler": {
             "nodes": list(LINUX_CPU_NODES),

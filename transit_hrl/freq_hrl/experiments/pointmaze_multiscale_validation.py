@@ -47,14 +47,26 @@ from .pointmaze_goal_validation import (
 )
 
 
-POINTMAZE_MULTISCALE_PROTOCOL_VERSION = "pointmaze_multiscale_goal_stage3_v1"
-POINTMAZE_MULTISCALE_METHODS = (
+POINTMAZE_MULTISCALE_PROTOCOL_V1 = "pointmaze_multiscale_goal_stage3_v1"
+POINTMAZE_MULTISCALE_PROTOCOL_V2 = "pointmaze_multiscale_goal_stage3_v2"
+POINTMAZE_MULTISCALE_PROTOCOL_VERSION = POINTMAZE_MULTISCALE_PROTOCOL_V2
+POINTMAZE_MULTISCALE_CORE_METHODS = (
     "flat_history",
     "flat_multiscale",
     "hrl_history",
     "hrl_multiscale",
 )
-POINTMAZE_MULTISCALE_SCENARIOS = ("clean", "mixed_causal_stress")
+POINTMAZE_MULTISCALE_AUXILIARY_METHODS = ("flat_causal_filter",)
+POINTMAZE_MULTISCALE_METHODS = (
+    *POINTMAZE_MULTISCALE_CORE_METHODS,
+    *POINTMAZE_MULTISCALE_AUXILIARY_METHODS,
+)
+POINTMAZE_MULTISCALE_SCENARIOS = (
+    "clean",
+    "fast_observation_noise",
+    "slow_drift_fast_action",
+    "persistent_action_shift",
+)
 POINTMAZE_MULTISCALE_ALGORITHM_PATH = "pointmaze_multiscale_goal_hrl_mainline"
 
 
@@ -62,6 +74,8 @@ def _representation(method: str) -> str:
     name = str(method)
     if name not in POINTMAZE_MULTISCALE_METHODS:
         raise ValueError(f"unknown PointMaze multiscale method: {name}")
+    if name == "flat_causal_filter":
+        return "filtered"
     return "multiscale" if name.endswith("multiscale") else "history"
 
 
@@ -79,6 +93,8 @@ class PointMazeStressSpec:
     slow_action_std: float
     slow_action_time_constant_seconds: float
     fast_action_noise_std: float
+    persistent_action_shift_amplitude: float
+    persistent_action_shift_onset_fraction: float
 
 
 POINTMAZE_STRESS_SPECS = {
@@ -88,13 +104,35 @@ POINTMAZE_STRESS_SPECS = {
         slow_action_std=0.0,
         slow_action_time_constant_seconds=1.0,
         fast_action_noise_std=0.0,
+        persistent_action_shift_amplitude=0.0,
+        persistent_action_shift_onset_fraction=0.35,
     ),
-    "mixed_causal_stress": PointMazeStressSpec(
+    "fast_observation_noise": PointMazeStressSpec(
         position_noise_std=0.06,
         velocity_noise_std=0.08,
+        slow_action_std=0.0,
+        slow_action_time_constant_seconds=1.0,
+        fast_action_noise_std=0.0,
+        persistent_action_shift_amplitude=0.0,
+        persistent_action_shift_onset_fraction=0.35,
+    ),
+    "slow_drift_fast_action": PointMazeStressSpec(
+        position_noise_std=0.0,
+        velocity_noise_std=0.0,
         slow_action_std=0.12,
         slow_action_time_constant_seconds=1.0,
         fast_action_noise_std=0.08,
+        persistent_action_shift_amplitude=0.0,
+        persistent_action_shift_onset_fraction=0.35,
+    ),
+    "persistent_action_shift": PointMazeStressSpec(
+        position_noise_std=0.0,
+        velocity_noise_std=0.0,
+        slow_action_std=0.0,
+        slow_action_time_constant_seconds=1.0,
+        fast_action_noise_std=0.0,
+        persistent_action_shift_amplitude=0.18,
+        persistent_action_shift_onset_fraction=0.35,
     ),
 }
 
@@ -111,6 +149,7 @@ class CausalPointMazeStress:
         physical_dim: int,
         goal_dim: int,
         action_dim: int,
+        horizon_steps: int,
     ) -> None:
         if str(scenario) not in POINTMAZE_STRESS_SPECS:
             raise ValueError(f"unknown PointMaze stress scenario: {scenario}")
@@ -121,6 +160,9 @@ class CausalPointMazeStress:
         self.physical_dim = int(physical_dim)
         self.goal_dim = int(goal_dim)
         self.action_dim = int(action_dim)
+        self.horizon_steps = int(horizon_steps)
+        if self.horizon_steps < 2:
+            raise ValueError("PointMaze stress horizon must span at least two steps")
         self.dt_seconds = float(dt_seconds)
         if not np.isfinite(self.dt_seconds) or self.dt_seconds <= 0.0:
             raise ValueError("PointMaze stress dt must be positive and finite")
@@ -139,6 +181,23 @@ class CausalPointMazeStress:
             self.spec.slow_action_std,
             size=self.action_dim,
         ).astype(np.float32)
+        direction = self._action_rng.normal(size=self.action_dim)
+        direction_norm = float(np.linalg.norm(direction))
+        if direction_norm <= 1e-12:
+            direction = np.ones(self.action_dim, dtype=np.float64)
+            direction_norm = float(np.linalg.norm(direction))
+        self._persistent_direction = np.asarray(
+            direction / direction_norm, dtype=np.float32
+        )
+        self._persistent_onset_step = int(np.clip(
+            round(
+                self.spec.persistent_action_shift_onset_fraction
+                * self.horizon_steps
+            ),
+            1,
+            self.horizon_steps - 1,
+        ))
+        self._action_step = 0
 
     def observe(self, truth: Any) -> tuple[dict[str, np.ndarray], np.ndarray]:
         parsed = parse_goal_observation(truth)
@@ -170,7 +229,7 @@ class CausalPointMazeStress:
         requested_action: np.ndarray,
         low: np.ndarray,
         high: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         requested = np.asarray(requested_action, dtype=np.float32).reshape(-1)
         if requested.shape != (self.action_dim,):
             raise ValueError("PointMaze requested action dimension changed")
@@ -186,12 +245,24 @@ class CausalPointMazeStress:
         fast_action = self._action_rng.normal(
             0.0, self.spec.fast_action_noise_std, size=self.action_dim
         ).astype(np.float32, copy=False)
+        persistent_action = (
+            self.spec.persistent_action_shift_amplitude
+            * self._persistent_direction
+            if self._action_step >= self._persistent_onset_step
+            else np.zeros(self.action_dim, dtype=np.float32)
+        ).astype(np.float32, copy=False)
         executed = np.clip(
-            requested + self._slow_action + fast_action,
+            requested + self._slow_action + fast_action + persistent_action,
             np.asarray(low, dtype=np.float32),
             np.asarray(high, dtype=np.float32),
         ).astype(np.float32, copy=False)
-        return executed, self._slow_action.copy(), fast_action
+        self._action_step += 1
+        return (
+            executed,
+            self._slow_action.copy(),
+            fast_action,
+            persistent_action.copy(),
+        )
 
     def metadata(self) -> dict[str, Any]:
         return {
@@ -201,6 +272,10 @@ class CausalPointMazeStress:
             "measurement_timing": "current_truth_plus_current_noise_before_action",
             "action_stress_timing": "current_hidden_disturbance_after_actor_action",
             "slow_action_ar_coefficient": self._slow_rho,
+            "persistent_action_shift_onset_step": self._persistent_onset_step,
+            "persistent_action_shift_onset_seconds": (
+                self._persistent_onset_step * self.dt_seconds
+            ),
         }
 
 
@@ -263,13 +338,18 @@ class PointMazeFeatureBuilder:
         snapshot = self.snapshot
         physical = int(parsed.physical.size)
         goal = int(parsed.achieved_goal.size)
-        if representation == "history":
+        if representation in ("history", "filtered"):
             flat = physical + goal + int(snapshot.history.size)
-            upper = goal + int(snapshot.history.size)
+            upper = physical + goal + int(snapshot.history.size)
             lower = physical + goal + int(snapshot.history.size)
         elif representation == "multiscale":
             flat = physical + goal + int(snapshot.multiscale.size)
-            upper = goal + int(snapshot.slow.size) + int(snapshot.slow_energy.size)
+            upper = (
+                physical
+                + goal
+                + int(snapshot.slow.size)
+                + int(snapshot.mid.size)
+            )
             lower = (
                 physical + goal + int(snapshot.mid.size) + int(snapshot.high.size)
             )
@@ -294,6 +374,8 @@ class PointMazeFeatureBuilder:
         encoded = (
             self.snapshot.history
             if representation == "history"
+            else self.snapshot.filtered
+            if representation == "filtered"
             else self.snapshot.multiscale
             if representation == "multiscale"
             else None
@@ -308,14 +390,16 @@ class PointMazeFeatureBuilder:
         parsed = parse_goal_observation(observation)
         if representation == "history":
             task_features = self.snapshot.history
+        elif representation == "filtered":
+            task_features = self.snapshot.filtered
         elif representation == "multiscale":
             task_features = np.concatenate(
-                (self.snapshot.slow, self.snapshot.slow_energy)
+                (self.snapshot.slow, self.snapshot.mid)
             )
         else:
             raise ValueError("unknown PointMaze upper representation")
         return np.concatenate(
-            (parsed.desired_goal, task_features)
+            (parsed.physical, parsed.goal_error, task_features)
         ).astype(np.float32, copy=False)
 
     def lower_state(
@@ -335,6 +419,8 @@ class PointMazeFeatureBuilder:
             raise ValueError("PointMaze subgoal dimension mismatch")
         if representation == "history":
             task_features = self.snapshot.history
+        elif representation == "filtered":
+            task_features = self.snapshot.filtered
         elif representation == "multiscale":
             task_features = np.concatenate(
                 (self.snapshot.mid, self.snapshot.high)
@@ -368,12 +454,14 @@ def pointmaze_multiscale_dimensions(
                 action_dim=action_dim,
                 representation=representation,
             )
-            for representation in ("history", "multiscale")
+            for representation in ("history", "filtered", "multiscale")
         }
     finally:
         environment.close()
-    if dimensions["history"].flat != dimensions["multiscale"].flat:
-        raise RuntimeError("raw history and Haar transform must have equal size")
+    if len({value.flat for value in dimensions.values()}) != 1:
+        raise RuntimeError(
+            "raw, causal-filter, and Haar flat states must have equal size"
+        )
     return dimensions
 
 
@@ -389,6 +477,7 @@ def _episode_row(
     measurement_noise: list[np.ndarray],
     slow_action_stress: list[np.ndarray],
     fast_action_stress: list[np.ndarray],
+    persistent_action_stress: list[np.ndarray],
     path_length: float,
     success: bool,
     terminated: bool,
@@ -410,6 +499,7 @@ def _episode_row(
     measurement_array = np.asarray(measurement_noise, dtype=np.float64)
     slow_array = np.asarray(slow_action_stress, dtype=np.float64)
     fast_array = np.asarray(fast_action_stress, dtype=np.float64)
+    persistent_array = np.asarray(persistent_action_stress, dtype=np.float64)
     subgoal_distance_array = np.asarray(subgoal_distances, dtype=np.float64)
     subgoal_array = np.asarray(subgoals, dtype=np.float64)
     intrinsic_array = np.asarray(intrinsic_rewards, dtype=np.float64)
@@ -423,6 +513,7 @@ def _episode_row(
         == measurement_array.shape[0]
         == slow_array.shape[0]
         == fast_array.shape[0]
+        == persistent_array.shape[0]
         and all(np.all(np.isfinite(array)) for array in (
             reward_array,
             distance_array,
@@ -431,6 +522,7 @@ def _episode_row(
             measurement_array,
             slow_array,
             fast_array,
+            persistent_array,
         ))
         and (
             not hierarchical
@@ -467,6 +559,9 @@ def _episode_row(
         "measurement_noise_rms": float(np.sqrt(np.mean(np.square(measurement_array)))),
         "slow_action_stress_rms": float(np.sqrt(np.mean(np.square(slow_array)))),
         "fast_action_stress_rms": float(np.sqrt(np.mean(np.square(fast_array)))),
+        "persistent_action_stress_rms": float(
+            np.sqrt(np.mean(np.square(persistent_array)))
+        ),
         "upper_decision_count": int(upper_decisions),
         "subgoal_tracking_rmse": (
             float(np.sqrt(np.mean(np.square(subgoal_distance_array))))
@@ -508,6 +603,7 @@ def _stress_for_episode(
     timing: Any,
     observation: Any,
     action_dim: int,
+    horizon: int,
 ) -> CausalPointMazeStress:
     parsed = parse_goal_observation(observation)
     return CausalPointMazeStress(
@@ -517,6 +613,7 @@ def _stress_for_episode(
         physical_dim=int(parsed.physical.size),
         goal_dim=int(parsed.achieved_goal.size),
         action_dim=int(action_dim),
+        horizon_steps=int(horizon),
     )
 
 
@@ -547,6 +644,7 @@ def rollout_flat_pointmaze_multiscale(
             timing=timing,
             observation=truth,
             action_dim=int(action_low.size),
+            horizon=horizon,
         )
         visible, _ = stress.observe(truth)
         features = PointMazeFeatureBuilder(
@@ -567,6 +665,7 @@ def rollout_flat_pointmaze_multiscale(
         measurement_noise: list[np.ndarray] = []
         slow_action_stress: list[np.ndarray] = []
         fast_action_stress: list[np.ndarray] = []
+        persistent_action_stress: list[np.ndarray] = []
         path_length = 0.0
         success = False
         terminated = truncated = False
@@ -576,9 +675,12 @@ def rollout_flat_pointmaze_multiscale(
             output = model.act(state, sample=sample)
             raw_action = np.asarray(output["action"], dtype=np.float32).reshape(-1)
             requested = squash_box_action(raw_action, action_low, action_high)
-            executed, slow_stress, fast_stress = stress.execute(
-                requested, action_low, action_high
-            )
+            (
+                executed,
+                slow_stress,
+                fast_stress,
+                persistent_stress,
+            ) = stress.execute(requested, action_low, action_high)
             next_truth, reward, terminated, truncated, info = environment.step(executed)
             done = bool(terminated or truncated)
             next_visible, noise = stress.observe(next_truth)
@@ -601,6 +703,7 @@ def rollout_flat_pointmaze_multiscale(
             measurement_noise.append(noise)
             slow_action_stress.append(slow_stress)
             fast_action_stress.append(fast_stress)
+            persistent_action_stress.append(persistent_stress)
             truth, visible = next_truth, next_visible
             features.update(visible)
             if done:
@@ -620,6 +723,7 @@ def rollout_flat_pointmaze_multiscale(
             measurement_noise=measurement_noise,
             slow_action_stress=slow_action_stress,
             fast_action_stress=fast_action_stress,
+            persistent_action_stress=persistent_action_stress,
             path_length=path_length,
             success=success,
             terminated=terminated,
@@ -689,6 +793,7 @@ def rollout_hrl_pointmaze_multiscale(
             timing=timing,
             observation=truth,
             action_dim=int(action_low.size),
+            horizon=horizon,
         )
         visible, _ = stress.observe(truth)
         features = PointMazeFeatureBuilder(
@@ -705,6 +810,7 @@ def rollout_hrl_pointmaze_multiscale(
         measurement_noise: list[np.ndarray] = []
         slow_action_stress: list[np.ndarray] = []
         fast_action_stress: list[np.ndarray] = []
+        persistent_action_stress: list[np.ndarray] = []
         subgoal_distances: list[float] = []
         subgoals: list[np.ndarray] = []
         intrinsic_rewards: list[float] = []
@@ -748,9 +854,12 @@ def rollout_hrl_pointmaze_multiscale(
                 lower_output["action"], dtype=np.float32
             ).reshape(-1)
             requested = squash_box_action(raw_action, action_low, action_high)
-            executed, slow_stress, fast_stress = stress.execute(
-                requested, action_low, action_high
-            )
+            (
+                executed,
+                slow_stress,
+                fast_stress,
+                persistent_stress,
+            ) = stress.execute(requested, action_low, action_high)
             next_truth, task_reward, terminated, truncated, info = environment.step(executed)
             done = bool(terminated or truncated)
             next_visible, noise = stress.observe(next_truth)
@@ -792,6 +901,7 @@ def rollout_hrl_pointmaze_multiscale(
             measurement_noise.append(noise)
             slow_action_stress.append(slow_stress)
             fast_action_stress.append(fast_stress)
+            persistent_action_stress.append(persistent_stress)
             subgoal_distances.append(subgoal_distance)
             intrinsic_rewards.append(float(intrinsic_reward))
             achieved_before_true = parsed_next_true.achieved_goal
@@ -815,6 +925,7 @@ def rollout_hrl_pointmaze_multiscale(
             measurement_noise=measurement_noise,
             slow_action_stress=slow_action_stress,
             fast_action_stress=fast_action_stress,
+            persistent_action_stress=persistent_action_stress,
             path_length=path_length,
             success=success,
             terminated=terminated,
@@ -966,6 +1077,7 @@ def train_pointmaze_multiscale_cell(
             timing=timing,
             observation=observation,
             action_dim=int(np.prod(probe.action_space.shape)),
+            horizon=horizon,
         )
     finally:
         probe.close()
@@ -1011,11 +1123,15 @@ def train_pointmaze_multiscale_cell(
         "goal_semantics": "upper_relative_xy_waypoint_lower_physical_acceleration",
         "lower_final_goal_visibility": "hidden; lower receives only waypoint error",
         "history_information_contract": (
-            "same_fixed_trailing_actor_visible_samples_raw_or_orthonormal_haar"
+            "same_fixed_trailing_actor_visible_samples_raw_causal_filter_or_"
+            "orthonormal_haar"
+        ),
+        "current_physical_feedback_contract": (
+            "both_hierarchy_levels_retain_full_current_actor_visible_physical_state"
         ),
         "frequency_routing_contract": (
-            "flat_multiscale_gets_all_bands; hrl_multiscale_routes_slow_to_upper_"
-            "and_current_physical_plus_mid_high_to_lower"
+            "flat_multiscale_gets_all_bands; hrl_multiscale_adds_slow_mid_to_"
+            "upper_and_mid_high_to_lower_without_removing_current_physical_state"
         ),
         "stress_observability_contract": (
             "actor_never_receives_measurement_or_action_disturbance_truth"
@@ -1159,9 +1275,14 @@ def resolved_pointmaze_multiscale_protocol(
     return {
         "protocol_version": POINTMAZE_MULTISCALE_PROTOCOL_VERSION,
         "methods": method_names,
-        "factorial_core_methods": list(POINTMAZE_MULTISCALE_METHODS),
+        "factorial_core_methods": list(POINTMAZE_MULTISCALE_CORE_METHODS),
+        "auxiliary_baselines": list(POINTMAZE_MULTISCALE_AUXILIARY_METHODS),
         "scenarios": scenario_names,
-        "primary_stress_scenario": "mixed_causal_stress",
+        "primary_stress_scenarios": [
+            "fast_observation_noise",
+            "slow_drift_fast_action",
+        ],
+        "secondary_stress_scenario": "persistent_action_shift",
         "clean_noninferiority_margin_success": 0.10,
         "primary_endpoint": "success_rate",
         "supportive_endpoints": ["episode_return", "final_goal_distance"],

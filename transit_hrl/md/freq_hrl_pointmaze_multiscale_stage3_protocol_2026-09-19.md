@@ -2,6 +2,15 @@
 
 Date: 2026-09-19
 
+## Status
+
+Superseded before performance evidence. The V1 upper multiscale state removed
+current physical feedback and retained only the desired goal plus slow
+features. This violated the GPT6 redesign requirement that both hierarchy
+levels retain full current physical feedback. The 64-cell V1 development run
+was cancelled in full as tasks `t95604`-`t95667`; no partial result is evidence.
+The corrected V2 protocol is documented separately.
+
 ## Purpose
 
 PointMaze Stage-2 V3 established that the ordinary goal-conditioned hierarchy

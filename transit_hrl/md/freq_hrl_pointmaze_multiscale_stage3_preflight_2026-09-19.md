@@ -4,6 +4,13 @@ Date: 2026-09-19
 
 ## Outcome
 
+**Superseded after design review.** The software checks below remain an
+accurate record of V1 execution, but the preflight no longer authorizes a
+performance run. V1 removed current physical feedback from the upper
+multiscale policy, contrary to the adopted GPT6 design. All 64 subsequently
+started development tasks (`t95604`-`t95667`) were cancelled before completion.
+No V1 partial output may be used as performance evidence.
+
 The eight-cell preflight
 `pointmaze_multiscale_stage3_v1_preflight_20260919_r1` completed successfully as
 scheduler tasks `t95327` through `t95334` on node004, node005, and node006.
@@ -28,6 +35,6 @@ checks:
 The preflight used two training updates, one optimizer root, and one held-out
 episode per cell. Its success, return, distance, and factorial intervals are
 therefore software diagnostics only. The preflight does not support or
-contradict a performance claim. It authorizes the frozen 64-cell development
-matrix without changing stress amplitudes, model settings, endpoints, or claim
-gates.
+contradict a performance claim. Its former authorization of the V1 development
+matrix is withdrawn. V2 requires a fresh preflight and fresh optimizer,
+training, selection, and evaluation seeds.

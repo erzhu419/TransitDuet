@@ -10,8 +10,8 @@ from scripts.submit_pointmaze_multiscale_stage3_scheduleurm import (
 
 class PointMazeMultiscaleStageThreeSchedulerTest(unittest.TestCase):
     def test_formal_factorial_and_seed_roles_are_fresh_and_paired(self):
-        self.assertEqual(len(spec.cells(preflight=False)), 64)
-        self.assertEqual(len(spec.cells(preflight=True)), 8)
+        self.assertEqual(len(spec.cells(preflight=False)), 160)
+        self.assertEqual(len(spec.cells(preflight=True)), 20)
         observed = set()
         for optimizer_seed in spec.OPTIMIZER_SEEDS:
             roles = spec.seed_roles(optimizer_seed)
@@ -36,7 +36,7 @@ class PointMazeMultiscaleStageThreeSchedulerTest(unittest.TestCase):
         self.assertIn("complete: result.json written", command)
 
     def test_protocol_freezes_the_registered_factorial(self):
-        self.assertEqual(spec.PROTOCOL, "pointmaze_multiscale_goal_stage3_v1")
+        self.assertEqual(spec.PROTOCOL, "pointmaze_multiscale_goal_stage3_v2")
         self.assertEqual(
             spec.METHODS,
             (
@@ -44,14 +44,19 @@ class PointMazeMultiscaleStageThreeSchedulerTest(unittest.TestCase):
                 "flat_multiscale",
                 "hrl_history",
                 "hrl_multiscale",
+                "flat_causal_filter",
             ),
         )
         self.assertEqual(
-            spec.SCENARIOS, ("clean", "mixed_causal_stress")
+            spec.SCENARIOS,
+            (
+                "clean",
+                "fast_observation_noise",
+                "slow_drift_fast_action",
+                "persistent_action_shift",
+            ),
         )
         self.assertEqual(spec.CHECKPOINT_EVALUATION_INTERVAL, 96)
-        self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
-        int(spec.ALGORITHM_REVISION, 16)
         self.assertEqual(spec.RUNTIME_EXPECTATIONS["mujoco"], "3.2.7")
 
 

@@ -11,19 +11,19 @@ from freq_hrl.experiments.pointmaze_multiscale_validation import (
 
 
 PROTOCOL = POINTMAZE_MULTISCALE_PROTOCOL_VERSION
-ALGORITHM_REVISION = "454590b4280e39a6ae2ed29fdf66fb5c04903f80"
+ALGORITHM_REVISION = "UNFROZEN"
 METHODS = tuple(POINTMAZE_MULTISCALE_METHODS)
 SCENARIOS = tuple(POINTMAZE_MULTISCALE_SCENARIOS)
 ENV_ID = DEFAULT_ENV_ID
 OPTIMIZER_SEEDS = (
-    84007,
-    84011,
-    84047,
-    84053,
-    84059,
-    84061,
-    84089,
-    84121,
+    94007,
+    94009,
+    94033,
+    94049,
+    94057,
+    94079,
+    94103,
+    94111,
 )
 ITERATIONS = 768
 HORIZON = 300
@@ -49,7 +49,7 @@ def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
         replicate = OPTIMIZER_SEEDS.index(int(optimizer_seed))
     except ValueError as exc:
         raise ValueError("optimizer seed is not registered") from exc
-    base = 800_000 + replicate * 1_000
+    base = 900_000 + replicate * 1_000
     return {
         "train": tuple(base + value for value in (11, 17, 23, 39)),
         "selection": tuple(
