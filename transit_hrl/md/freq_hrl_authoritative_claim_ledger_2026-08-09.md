@@ -65,6 +65,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_multiscale_stage3_v1_preflight | pointmaze_goal_control | preflight | superseded_design_invalid_upper_missing_current_physical_state | excluded_development | false |
 | pointmaze_multiscale_stage3_v1_development | pointmaze_goal_control | development | cancelled_all_64_cells_after_design_review | excluded_development | false |
 | pointmaze_multiscale_stage3_v2_preflight | pointmaze_goal_control | preflight | corrected_state_and_stress_contract_software_gate_passed | smoke_only | false |
+| pointmaze_multiscale_stage3_v2_development | pointmaze_goal_control | development | routing_increment_supported_but_freq_hrl_specific_gate_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -537,6 +538,19 @@ the [V2 preflight](freq_hrl_pointmaze_multiscale_stage3_v2_preflight_2026-09-19.
 Forbidden: The V2 preflight establishes a representation benefit, a causal
 filter advantage, a hierarchy-by-frequency interaction, or any performance
 claim.
+
+### pointmaze_multiscale_stage3_v2_development
+
+Across eight independent optimizer roots, HRL multiscale improved success over
+HRL history under both primary stresses and the secondary persistent shift,
+while clean noninferiority passed. The registered mainline gate nevertheless
+failed: both primary success interactions were inconclusive, the
+observation-noise causal-filter contrast was inconclusive, and flat multiscale
+PPO significantly exceeded HRL multiscale under observation noise. See the
+[V2 result](freq_hrl_pointmaze_multiscale_stage3_v2_result_2026-09-20.md).
+
+Forbidden: V2 proves Freq-HRL-specific superiority, a positive
+hierarchy-by-frequency interaction, or a confirmatory result.
 
 ### legacy_c1_c9_matrix_snapshot
 

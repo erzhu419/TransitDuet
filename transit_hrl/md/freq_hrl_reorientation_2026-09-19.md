@@ -206,3 +206,12 @@ passed the registered state, capacity, seed, option-boundary, runtime, and
 independent-stress checks and authorizes the frozen 160-cell development
 matrix. It remains software evidence only. See
 `freq_hrl_pointmaze_multiscale_stage3_v2_preflight_2026-09-19.md`.
+
+The full V2 development matrix subsequently completed all 160 cells and 2,560
+held-out episodes. Frequency routing improved the HRL history baseline under
+both primary stresses, but the Freq-HRL-specific gate was not supported:
+factorial interactions and the causal-filter comparison were inconclusive,
+and flat multiscale PPO significantly exceeded HRL multiscale under
+observation noise. The result is a representation-positive but
+hierarchy-specific-negative boundary. See
+`freq_hrl_pointmaze_multiscale_stage3_v2_result_2026-09-20.md`.

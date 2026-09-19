@@ -85,6 +85,13 @@ checks. It authorizes the frozen 160-cell development matrix but is not
 performance evidence. See
 `md/freq_hrl_pointmaze_multiscale_stage3_v2_preflight_2026-09-19.md`.
 
+The 160-cell V2 development matrix is complete. Multiscale routing improved
+the raw-history HRL baseline under both primary stresses, but the registered
+Freq-HRL-specific gate failed: the factorial interactions and causal-filter
+comparison were not supported, and flat multiscale PPO was better under
+observation noise. See
+`md/freq_hrl_pointmaze_multiscale_stage3_v2_result_2026-09-20.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
