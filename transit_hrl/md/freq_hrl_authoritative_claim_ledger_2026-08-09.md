@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-09-14
+Date: 2026-09-19
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -58,6 +58,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v23_causal_upper_projection_target_development | mujoco_control | development | causal_upper_target_not_supported | development_only | false |
 | mujoco_v24_policy_mean_upper_projection_target_development | mujoco_control | development | policy_mean_target_not_supported | development_only | false |
 | mujoco_v25_sample_consistent_upper_development | mujoco_control | development | failed_registered_development_gates | development_only | false |
+| multiscale_goal_stage1_v1_development | identifiable_tracking | development | mainline_hrl_increment_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -442,6 +443,22 @@ arm remains diagnostic only. See the
 
 Forbidden: V25 supports action-sample superiority, confirmation, or a repaired
 result under the later optimized projector.
+
+### multiscale_goal_stage1_v1_development
+
+The reoriented goal-conditioned mainline completed 160 unique cells, eight
+independent optimizer roots per method-scenario cell, and 1,280 held-out
+evaluation episodes. The registered mainline HRL increment was not supported.
+`hrl_multiscale` was worse than capacity-matched `flat_multiscale` in clean and
+fast-force conditions, and the flat multiscale representation contrast was
+inconclusive in every scenario. This valid negative result motivates moving to
+a task with genuine waypoint semantics rather than tuning the tracking system
+for a positive outcome. See the
+[Stage-1 V1 result](freq_hrl_multiscale_goal_stage1_v1_result_2026-09-19.md).
+
+Forbidden: Stage-1 V1 establishes a multiscale representation benefit, a
+goal-conditioned hierarchy benefit, a hierarchy-by-frequency interaction, or
+general Freq-HRL superiority.
 
 ### legacy_c1_c9_matrix_snapshot
 

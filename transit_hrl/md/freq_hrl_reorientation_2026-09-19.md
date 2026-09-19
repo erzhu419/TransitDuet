@@ -117,5 +117,15 @@ does not advance to confirmation.
 
 The new mainline has passed interface, causal-prefix, equal-information,
 physical-time, parameter-budget, PointMaze-adapter, and learned PPO/SMDP smoke
-tests. These establish a valid experimental path only. Stage-1 multi-seed
-performance results are not yet available and no superiority claim is made.
+tests. The frozen Stage-1 V1 development matrix then completed 160 unique cells,
+eight independent optimizer roots per method-scenario cell, and 1,280 held-out
+evaluation episodes. Its mainline HRL increment is **not supported**:
+`hrl_multiscale` was contradicted against `flat_multiscale` in clean and
+fast-force conditions, while the flat representation contrast was
+inconclusive throughout. See
+`freq_hrl_multiscale_goal_stage1_v1_result_2026-09-19.md`.
+
+This negative result closes the identifiable point-mass task as a source of a
+positive mainline claim. The next gate is ordinary goal-conditioned HRL on
+PointMaze. Multiscale enhancement is not admitted there until the hierarchy
+baseline itself learns the task.
