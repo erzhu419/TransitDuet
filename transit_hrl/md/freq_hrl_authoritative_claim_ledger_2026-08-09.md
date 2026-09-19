@@ -64,6 +64,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_goal_stage2_v3_development | pointmaze_goal_control | development | ordinary_hrl_learning_supported_multiscale_admitted | positive_si | true |
 | pointmaze_multiscale_stage3_v1_preflight | pointmaze_goal_control | preflight | superseded_design_invalid_upper_missing_current_physical_state | excluded_development | false |
 | pointmaze_multiscale_stage3_v1_development | pointmaze_goal_control | development | cancelled_all_64_cells_after_design_review | excluded_development | false |
+| pointmaze_multiscale_stage3_v2_preflight | pointmaze_goal_control | preflight | corrected_state_and_stress_contract_software_gate_passed | smoke_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -525,6 +526,17 @@ current physical feedback to both levels.
 
 Forbidden: Any V1 development output is used for performance, tuning, or claim
 selection.
+
+### pointmaze_multiscale_stage3_v2_preflight
+
+All 20 V2 cells completed with the corrected current-physical-feedback
+contract, matched capacity and seed roles, fixed horizons and option
+boundaries, finite updates, and independently registered stress channels. See
+the [V2 preflight](freq_hrl_pointmaze_multiscale_stage3_v2_preflight_2026-09-19.md).
+
+Forbidden: The V2 preflight establishes a representation benefit, a causal
+filter advantage, a hierarchy-by-frequency interaction, or any performance
+claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

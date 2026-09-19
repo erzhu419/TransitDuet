@@ -200,3 +200,9 @@ current physical feedback. All 64 V1 development tasks t95604-t95667 were
 cancelled. V1 supplies no performance evidence and does not authorize V2;
 V2 requires fresh preflight and seeds. See
 `freq_hrl_pointmaze_multiscale_stage3_preflight_2026-09-19.md`.
+
+The corrected 20-cell V2 preflight then completed as tasks t95931-t95950. It
+passed the registered state, capacity, seed, option-boundary, runtime, and
+independent-stress checks and authorizes the frozen 160-cell development
+matrix. It remains software evidence only. See
+`freq_hrl_pointmaze_multiscale_stage3_v2_preflight_2026-09-19.md`.
