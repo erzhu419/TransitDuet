@@ -12,6 +12,7 @@ from scipy import stats
 
 from .pointmaze_goal_validation import (
     POINTMAZE_GOAL_PROTOCOL_VERSION,
+    POINTMAZE_GOAL_PROTOCOL_VERSIONS,
     POINTMAZE_METHODS,
 )
 
@@ -135,6 +136,16 @@ def analyze_pointmaze_cells(
     confidence: float = 0.95,
 ) -> dict[str, Any]:
     items = list(cells)
+    protocol_versions = {
+        str(cell.get("protocol_version", POINTMAZE_GOAL_PROTOCOL_VERSION))
+        for cell in items
+    }
+    if (
+        len(protocol_versions) != 1
+        or not protocol_versions.issubset(POINTMAZE_GOAL_PROTOCOL_VERSIONS)
+    ):
+        raise ValueError("PointMaze cells use an invalid or mixed protocol version")
+    protocol_version = next(iter(protocol_versions))
     runtime_payloads = [cell.get("runtime_versions") for cell in items]
     if any(not isinstance(payload, dict) or not payload for payload in runtime_payloads):
         raise ValueError("PointMaze cells must record runtime versions")
@@ -226,8 +237,8 @@ def analyze_pointmaze_cells(
         else "not_supported"
     )
     return {
-        "analysis_version": "pointmaze_goal_control_stage2_analysis_v1",
-        "protocol_version": POINTMAZE_GOAL_PROTOCOL_VERSION,
+        "analysis_version": "pointmaze_goal_control_stage2_analysis_v2",
+        "protocol_version": protocol_version,
         "confidence": float(confidence),
         "cell_count": len(items),
         "evaluation_row_count": len(indexed),
@@ -247,14 +258,19 @@ def analyze_pointmaze_cells(
 
 def load_pointmaze_cells(paths: Iterable[Path]) -> list[dict[str, Any]]:
     cells: list[dict[str, Any]] = []
+    protocol_versions: set[str] = set()
     for path in paths:
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
         protocol = payload.get("protocol", {})
-        if protocol.get("protocol_version") != POINTMAZE_GOAL_PROTOCOL_VERSION:
+        protocol_version = str(protocol.get("protocol_version", ""))
+        if protocol_version not in POINTMAZE_GOAL_PROTOCOL_VERSIONS:
             raise ValueError(f"wrong PointMaze protocol version in {path}")
+        protocol_versions.add(protocol_version)
         if payload.get("status") != "complete":
             raise ValueError(f"incomplete PointMaze result: {path}")
         cells.extend(payload.get("cells", []))
+    if len(protocol_versions) != 1:
+        raise ValueError("PointMaze input files mix protocol versions")
     return cells
 
 

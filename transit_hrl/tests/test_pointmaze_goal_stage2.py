@@ -145,6 +145,22 @@ class PointMazeGoalStageTwoTest(unittest.TestCase):
         self.assertEqual(hrl_row["protocol_valid"], 1.0)
         self.assertEqual(hrl_batch.lower.size, hrl_row["episode_length"])
         self.assertEqual(hrl_batch.upper.size, hrl_row["upper_decision_count"])
+        lower_boundaries = np.flatnonzero(hrl_batch.lower.done)
+        self.assertEqual(
+            len(lower_boundaries),
+            hrl_row["lower_option_boundary_count"],
+        )
+        self.assertTrue(all(
+            (int(index) + 1) % 8 == 0
+            or int(index) == hrl_batch.lower.size - 1
+            for index in lower_boundaries
+        ))
+        self.assertTrue(np.isfinite(hrl_row["lower_intrinsic_return"]))
+        self.assertAlmostEqual(
+            float(np.sum(hrl_batch.lower.reward)),
+            float(hrl_row["lower_intrinsic_return"]),
+            places=5,
+        )
         hrl_metrics = hrl.update(hrl_batch)
         self.assertTrue(np.isfinite(hrl_metrics["upper_loss"]))
         self.assertTrue(np.isfinite(hrl_metrics["lower_loss"]))

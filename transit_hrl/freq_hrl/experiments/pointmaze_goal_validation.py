@@ -34,9 +34,16 @@ from freq_hrl.rl import (
 )
 
 
-POINTMAZE_GOAL_PROTOCOL_VERSION = "pointmaze_goal_control_stage2_v1"
+POINTMAZE_GOAL_PROTOCOL_V1 = "pointmaze_goal_control_stage2_v1"
+POINTMAZE_GOAL_PROTOCOL_V2 = "pointmaze_goal_control_stage2_v2"
+POINTMAZE_GOAL_PROTOCOL_VERSION = POINTMAZE_GOAL_PROTOCOL_V2
+POINTMAZE_GOAL_PROTOCOL_VERSIONS = (
+    POINTMAZE_GOAL_PROTOCOL_V1,
+    POINTMAZE_GOAL_PROTOCOL_V2,
+)
 POINTMAZE_METHODS = ("flat_goal_ppo", "hrl_goal_ppo")
 DEFAULT_ENV_ID = "PointMaze_UMaze-v3"
+POINTMAZE_LOWER_ACTION_COST = 0.005
 DEFAULT_TRAIN_SEEDS = (51011, 51017, 51031, 51047)
 DEFAULT_SELECTION_SEEDS = (52009, 52021, 52027, 52051)
 DEFAULT_EVAL_SEEDS = (
@@ -56,6 +63,58 @@ POINTMAZE_CHECKPOINT_RANK_NAMES = (
 POINTMAZE_CHECKPOINT_RANK_CONTRACT = (
     "lexicographic_mean_success_then_mean_dense_episode_return_v1"
 )
+POINTMAZE_HISTORY_FIELDS = frozenset({
+    "iteration",
+    "training_rollout_seeds",
+    "score",
+    "checkpoint_evaluation_performed",
+    "checkpoint_selection_score",
+    "checkpoint_selection_rank",
+    "checkpoint_selection_eligible",
+    "checkpoint_selected",
+    "sampled_objective",
+    "sampled_episode_length_mean",
+    "sampled_reward_mean",
+    "success_mean",
+    "episode_return_mean",
+    "reward_mean_mean",
+    "final_goal_distance_mean",
+    "minimum_goal_distance_mean",
+    "episode_length_mean",
+    "path_length_mean",
+    "action_rms_mean",
+    "action_saturation_rate_mean",
+    "subgoal_tracking_rmse_mean",
+    "subgoal_reached_rate_mean",
+    "subgoal_rms_mean",
+    "lower_intrinsic_return_mean",
+    "lower_intrinsic_reward_mean_mean",
+    "lower_option_boundary_count_mean",
+    "loss",
+    "policy_loss",
+    "value_loss",
+    "entropy",
+    "approx_kl",
+    "clip_fraction",
+    "actor_optimizer_steps",
+    "value_optimizer_steps",
+    "upper_loss",
+    "upper_policy_loss",
+    "upper_value_loss",
+    "upper_entropy",
+    "upper_actor_optimizer_steps",
+    "upper_value_optimizer_steps",
+    "upper_mean_duration",
+    "upper_transitions",
+    "lower_loss",
+    "lower_policy_loss",
+    "lower_value_loss",
+    "lower_entropy",
+    "lower_actor_optimizer_steps",
+    "lower_value_optimizer_steps",
+    "lower_mean_duration",
+    "lower_transitions",
+})
 
 
 @dataclass(frozen=True)
@@ -206,6 +265,8 @@ def _episode_row(
     truncated: bool,
     subgoal_distances: list[float],
     subgoals: list[np.ndarray],
+    intrinsic_rewards: list[float],
+    lower_option_boundaries: int,
     upper_decisions: int,
     parameter_count: int,
     parameter_budget: int,
@@ -218,13 +279,22 @@ def _episode_row(
     action_array = np.asarray(actions, dtype=np.float64)
     subgoal_distance_array = np.asarray(subgoal_distances, dtype=np.float64)
     subgoal_array = np.asarray(subgoals, dtype=np.float64)
+    intrinsic_reward_array = np.asarray(intrinsic_rewards, dtype=np.float64)
     protocol_valid = bool(
         reward_array.size > 0
         and reward_array.size == distance_array.size == action_array.shape[0]
         and np.all(np.isfinite(reward_array))
         and np.all(np.isfinite(distance_array))
         and np.all(np.isfinite(action_array))
-        and (method == "flat_goal_ppo" or 0 < upper_decisions < reward_array.size)
+        and (
+            method == "flat_goal_ppo"
+            or (
+                0 < upper_decisions < reward_array.size
+                and intrinsic_reward_array.size == reward_array.size
+                and np.all(np.isfinite(intrinsic_reward_array))
+                and 0 < lower_option_boundaries <= upper_decisions
+            )
+        )
     )
     return {
         "protocol_version": POINTMAZE_GOAL_PROTOCOL_VERSION,
@@ -255,6 +325,15 @@ def _episode_row(
             float(np.sqrt(np.mean(np.square(subgoal_array))))
             if subgoal_array.size else 0.0
         ),
+        "lower_intrinsic_return": (
+            float(np.sum(intrinsic_reward_array))
+            if intrinsic_reward_array.size else 0.0
+        ),
+        "lower_intrinsic_reward_mean": (
+            float(np.mean(intrinsic_reward_array))
+            if intrinsic_reward_array.size else 0.0
+        ),
+        "lower_option_boundary_count": int(lower_option_boundaries),
         "env_dt_seconds": float(env_dt_seconds),
         "upper_period_steps": int(upper_period_steps),
         "upper_period_seconds": float(upper_period_steps * env_dt_seconds),
@@ -340,6 +419,8 @@ def rollout_flat_pointmaze(
             truncated=truncated,
             subgoal_distances=[],
             subgoals=[],
+            intrinsic_rewards=[],
+            lower_option_boundaries=0,
             upper_decisions=0,
             parameter_count=parameter_count,
             parameter_budget=parameter_budget,
@@ -388,7 +469,7 @@ def rollout_hrl_pointmaze(
             maximum_delta=maximum_delta,
             world_low=world_low,
             world_high=world_high,
-            action_cost=0.0,
+            action_cost=POINTMAZE_LOWER_ACTION_COST,
         )
         model.reset_recurrent_inference()
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
@@ -397,10 +478,13 @@ def rollout_hrl_pointmaze(
         actions: list[np.ndarray] = []
         subgoal_distances: list[float] = []
         subgoals: list[np.ndarray] = []
+        intrinsic_rewards: list[float] = []
         path_length = 0.0
         success = False
         terminated = truncated = False
         upper_decisions = 0
+        lower_option_boundaries = 0
+        last_lower_terminal = False
         parsed = parse_goal_observation(observation)
         achieved_before = parsed.achieved_goal
         subgoal = achieved_before.copy()
@@ -432,10 +516,16 @@ def rollout_hrl_pointmaze(
             subgoal_distance = float(np.linalg.norm(
                 (subgoal - parsed_next.achieved_goal) / maximum_delta
             ) / np.sqrt(goal_dim))
-            intrinsic_reward = (
-                -subgoal_distance
-                - 0.005 * float(np.mean(np.square(action)))
+            intrinsic_reward = subgoal_adapter.intrinsic_reward(
+                achieved_before=achieved_before,
+                achieved_after=parsed_next.achieved_goal,
+                subgoal=subgoal,
+                action=action,
             )
+            option_boundary = (step + 1) % int(upper_period_steps) == 0
+            lower_terminal = bool(done or option_boundary)
+            last_lower_terminal = lower_terminal
+            lower_option_boundaries += int(lower_terminal)
             builder.add_lower(
                 state=lower_state,
                 action=raw_action,
@@ -444,6 +534,7 @@ def rollout_hrl_pointmaze(
                 reward=float(intrinsic_reward),
                 upper_reward=float(task_reward),
                 done=done,
+                lower_done=lower_terminal,
                 cost=0.0,
             )
             goal_distance = float(np.linalg.norm(parsed_next.goal_error))
@@ -455,10 +546,13 @@ def rollout_hrl_pointmaze(
             distances.append(goal_distance)
             actions.append(action)
             subgoal_distances.append(subgoal_distance)
+            intrinsic_rewards.append(float(intrinsic_reward))
             achieved_before = parsed_next.achieved_goal
             observation = next_observation
             if done:
                 break
+        if rewards and not last_lower_terminal:
+            lower_option_boundaries += 1
         builder.finish(terminal=True)
         batch = builder.build() if sample else None
         row = _episode_row(
@@ -473,6 +567,8 @@ def rollout_hrl_pointmaze(
             truncated=truncated,
             subgoal_distances=subgoal_distances,
             subgoals=subgoals,
+            intrinsic_rewards=intrinsic_rewards,
+            lower_option_boundaries=lower_option_boundaries,
             upper_decisions=upper_decisions,
             parameter_count=model.trainable_parameter_count,
             parameter_budget=parameter_budget,
@@ -595,6 +691,19 @@ def pointmaze_checkpoint_rank(
     return success, episode_return
 
 
+def compact_pointmaze_history(
+    history: Iterable[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return [
+        {
+            key: value
+            for key, value in row.items()
+            if key in POINTMAZE_HISTORY_FIELDS
+        }
+        for row in history
+    ]
+
+
 def train_pointmaze_cell(
     *,
     method: str,
@@ -660,6 +769,18 @@ def train_pointmaze_cell(
         "upper_period_steps": int(upper_period_steps),
         "upper_period_seconds": float(upper_period_seconds),
         "maximum_subgoal_delta": float(maximum_subgoal_delta),
+        "lower_intrinsic_reward_contract": (
+            "waypoint_distance_progress_minus_action_cost_v1"
+            if str(method) == "hrl_goal_ppo" else "not_applicable"
+        ),
+        "lower_intrinsic_action_cost": (
+            POINTMAZE_LOWER_ACTION_COST
+            if str(method) == "hrl_goal_ppo" else 0.0
+        ),
+        "lower_credit_boundary_contract": (
+            "waypoint_change_or_episode_end_v1"
+            if str(method) == "hrl_goal_ppo" else "not_applicable"
+        ),
     }
     seed_fn = lambda root, iteration: _training_seed(
         optimizer_seed=optimizer_seed,
@@ -701,6 +822,10 @@ def train_pointmaze_cell(
         )
         payload["training_core"] = payload["trainer"]
         payload["trainer"] = "goal_conditioned_smdp_ppo_v1"
+        payload["trajectory_contract"]["lower"] = (
+            "one primitive transition with GAE terminated at waypoint "
+            "change or episode end"
+        )
     elif str(method) == "flat_goal_ppo":
         payload, rows, trained = train_joint_ppo(
             model=model,
@@ -731,6 +856,8 @@ def train_pointmaze_cell(
         raise ValueError(f"unknown PointMaze method: {method}")
     for row in rows:
         row["training_replicate_seed"] = int(optimizer_seed)
+    payload["history"] = compact_pointmaze_history(payload["history"])
+    payload["history_schema"] = "pointmaze_compact_training_history_v1"
     payload["optimizer_seed"] = int(optimizer_seed)
     payload["evaluation_rows"] = rows
     return payload, rows, trained
@@ -773,6 +900,13 @@ def resolved_pointmaze_protocol(
         "reference_hidden_dim": int(reference_hidden_dim),
         "learning_rate": float(learning_rate),
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
+        "lower_intrinsic_reward_contract": (
+            "waypoint_distance_progress_minus_action_cost_v1"
+        ),
+        "lower_intrinsic_action_cost": POINTMAZE_LOWER_ACTION_COST,
+        "lower_credit_boundary_contract": (
+            "waypoint_change_or_episode_end_v1"
+        ),
         "train_seeds": training,
         "selection_seeds": selection,
         "eval_seeds": evaluation,

@@ -16,8 +16,8 @@ class PointMazeGoalStageTwoSchedulerTest(unittest.TestCase):
         for optimizer_seed in spec.OPTIMIZER_SEEDS:
             roles = spec.seed_roles(optimizer_seed)
             values = [seed for seeds in roles.values() for seed in seeds]
-            self.assertEqual(len(values), 16)
-            self.assertEqual(len(set(values)), 16)
+            self.assertEqual(len(values), 36)
+            self.assertEqual(len(set(values)), 36)
             self.assertFalse(observed.intersection(values))
             observed.update(values)
 
@@ -35,6 +35,8 @@ class PointMazeGoalStageTwoSchedulerTest(unittest.TestCase):
         self.assertIn("complete: result.json written", command)
 
     def test_frozen_revision_is_full_sha(self):
+        self.assertEqual(spec.PROTOCOL, "pointmaze_goal_control_stage2_v2")
+        self.assertEqual(spec.CHECKPOINT_EVALUATION_INTERVAL, 96)
         self.assertEqual(len(spec.ALGORITHM_REVISION), 40)
         int(spec.ALGORITHM_REVISION, 16)
         self.assertEqual(spec.RUNTIME_EXPECTATIONS["mujoco"], "3.2.7")

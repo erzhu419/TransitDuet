@@ -94,6 +94,41 @@ class HierarchicalRolloutBuilderTest(unittest.TestCase):
         self.assertEqual(float(batch.upper.done[-1]), 1.0)
         self.assertEqual(float(batch.lower.done[-1]), 1.0)
 
+    def test_lower_option_boundary_does_not_terminate_upper_transition(self):
+        builder = HierarchicalRolloutBuilder(gamma=0.95)
+        builder.begin_upper(
+            state=np.zeros(3, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+        )
+        builder.add_lower(
+            state=np.zeros(2, dtype=np.float32),
+            action=np.zeros(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+            reward=1.0,
+            done=False,
+            lower_done=True,
+        )
+        builder.begin_upper(
+            state=np.ones(3, dtype=np.float32),
+            action=np.ones(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+        )
+        builder.add_lower(
+            state=np.ones(2, dtype=np.float32),
+            action=np.ones(1, dtype=np.float32),
+            logp=0.0,
+            value=0.0,
+            reward=2.0,
+            done=True,
+        )
+        batch = builder.build()
+        np.testing.assert_array_equal(batch.lower.done, [1.0, 1.0])
+        np.testing.assert_array_equal(batch.upper.done, [0.0, 1.0])
+
     def test_projection_targets_align_with_both_decision_rates(self):
         builder = HierarchicalRolloutBuilder(gamma=0.95)
         builder.begin_upper(

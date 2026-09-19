@@ -148,3 +148,9 @@ identified lower-level credit crossing waypoint boundaries and a mismatch with
 the existing progress-reward contract; those defects must be repaired and
 tested in a new development protocol before multiscale mechanisms are admitted.
 See `freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md`.
+
+Stage-2 V2 is frozen as a clean repair test. It restores progress-based lower
+reward, terminates lower GAE at waypoint changes without terminating the upper
+SMDP transition, uses fresh seed roles, and reduces noisy checkpoint reuse.
+The task, interaction budget, capacity match, and absolute success gate remain
+unchanged. See `freq_hrl_pointmaze_stage2_v2_protocol_2026-09-19.md`.

@@ -863,6 +863,7 @@ class HierarchicalRolloutBuilder:
         value: float,
         reward: float,
         done: bool,
+        lower_done: bool | None = None,
         cost_state: np.ndarray | None = None,
         cost: float = 0.0,
         upper_reward: float | None = None,
@@ -919,7 +920,8 @@ class HierarchicalRolloutBuilder:
         self._lower["action"].append(np.asarray(action, dtype=np.float32).copy())
         self._lower["reward"].append(float(reward))
         self._lower["duration"].append(1)
-        self._lower["done"].append(float(bool(done)))
+        lower_terminal = bool(done) or bool(lower_done)
+        self._lower["done"].append(float(lower_terminal))
         self._lower["old_logp"].append(float(logp))
         self._lower["old_value"].append(float(value))
         self._lower["cost"].append(float(cost))

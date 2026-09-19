@@ -40,9 +40,13 @@ selection is lexicographic by validation success rate and then dense return.
 The completed V1 development gate was not supported: hierarchical success was
 0.359 with root-level 95% CI [0.197, 0.522], below the registered 0.50 lower-CI
 threshold. Multiscale enhancement therefore remains blocked while the
-ordinary-HRL credit path is repaired. This is not a positive Freq-HRL result. See
+ordinary-HRL credit path is repaired. V2 terminates lower GAE at waypoint
+changes, restores progress-based intrinsic reward, and uses a larger, less
+frequently reused validation set with entirely fresh seeds. This is not a
+positive Freq-HRL result. See
 `md/freq_hrl_pointmaze_stage2_protocol_2026-09-19.md` and
 `md/freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md`, plus
+`md/freq_hrl_pointmaze_stage2_v2_protocol_2026-09-19.md` and
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
 The package also retains the earlier components for:

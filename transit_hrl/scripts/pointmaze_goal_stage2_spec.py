@@ -1,30 +1,31 @@
-"""Frozen protocol for the PointMaze ordinary-HRL stage-2 gate."""
+"""Frozen protocol for the corrected PointMaze ordinary-HRL stage-2 gate."""
 
 from __future__ import annotations
 
 from freq_hrl.experiments.pointmaze_goal_validation import (
     DEFAULT_ENV_ID,
+    POINTMAZE_GOAL_PROTOCOL_VERSION,
     POINTMAZE_METHODS,
 )
 
 
-PROTOCOL = "pointmaze_goal_control_stage2_v1"
+PROTOCOL = POINTMAZE_GOAL_PROTOCOL_VERSION
 ALGORITHM_REVISION = "cf904fdb6b69ee1c04d56169e55c51a7c639313e"
 METHODS = tuple(POINTMAZE_METHODS)
 ENV_ID = DEFAULT_ENV_ID
 OPTIMIZER_SEEDS = (
-    54007,
-    54013,
-    54037,
-    54049,
-    54059,
-    54083,
-    54101,
-    54121,
+    64007,
+    64013,
+    64037,
+    64049,
+    64059,
+    64083,
+    64101,
+    64121,
 )
 ITERATIONS = 768
 HORIZON = 300
-CHECKPOINT_EVALUATION_INTERVAL = 16
+CHECKPOINT_EVALUATION_INTERVAL = 96
 REFERENCE_HIDDEN_DIM = 128
 LEARNING_RATE = 3e-4
 UPPER_PERIOD_SECONDS = 0.25
@@ -44,13 +45,50 @@ def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
         replicate = OPTIMIZER_SEEDS.index(int(optimizer_seed))
     except ValueError as exc:
         raise ValueError("optimizer seed is not registered") from exc
-    base = 200_000 + replicate * 1_000
+    base = 400_000 + replicate * 1_000
     return {
         "train": tuple(base + value for value in (11, 17, 23, 39)),
-        "selection": tuple(base + value for value in (113, 127, 131, 149)),
+        "selection": tuple(
+            base + value
+            for value in (
+                101,
+                103,
+                107,
+                109,
+                127,
+                131,
+                137,
+                149,
+                151,
+                163,
+                167,
+                173,
+                179,
+                181,
+                191,
+                197,
+            )
+        ),
         "evaluation": tuple(
             base + value
-            for value in (211, 223, 227, 239, 251, 263, 269, 281)
+            for value in (
+                211,
+                223,
+                227,
+                229,
+                233,
+                239,
+                241,
+                251,
+                257,
+                263,
+                269,
+                271,
+                277,
+                281,
+                283,
+                293,
+            )
         ),
     }
 
