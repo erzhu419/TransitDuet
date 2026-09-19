@@ -105,6 +105,15 @@ subgoals. PointMaze must first show that ordinary goal-conditioned HRL learns
 the task. Multiscale enhancement is evaluated only after that baseline works.
 AntMaze follows PointMaze.
 
+The frozen Stage-2 V1 development gate uses `PointMaze_UMaze-v3`, a 300-step
+horizon, eight independent optimizer roots, and matched primitive interaction
+budgets. Checkpoints are selected on disjoint validation seeds by mean success
+rate first and dense return second. The ordinary-HRL gate is supported only if
+the lower bound of the root-level 95% success-rate interval is at least 0.50.
+Flat-versus-HRL paired effects are reported but do not replace that absolute
+learning requirement. See
+`freq_hrl_pointmaze_stage2_protocol_2026-09-19.md`.
+
 ## Frozen Negative Result
 
 MuJoCo v25 is a failed development result. Its 48 cells and 1,920 evaluation

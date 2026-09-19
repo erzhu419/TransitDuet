@@ -14,7 +14,7 @@ The active research mainline is now **multiscale goal-conditioned HRL**:
 - projector, promotion, leakage loss, and responsibility gauge are disabled in
   the stage-1 mainline until a task-level conflict justifies them.
 
-Run the four-grid stage-1 protocol with:
+The completed four-grid Stage-1 protocol was run with:
 
 ```bash
 python3 scripts/run_multiscale_goal_stage1.py --methods flat_history flat_multiscale hrl_history hrl_multiscale flat_causal_filter --scenarios clean slow_target_fast_force slow_signal_fast_observation_noise band_swap --output results/multiscale_goal_stage1/result.json
@@ -23,7 +23,22 @@ python3 scripts/run_multiscale_goal_stage1.py --methods flat_history flat_multis
 Use `--dry-run` to write the fully resolved protocol without training. The
 checkpoint objective is mean episode return, and every result records `dt`,
 window durations, signal RMS, saturation, system response time, and the
-actor-observability contract. See
+actor-observability contract. Its 160-cell development result was negative;
+see `md/freq_hrl_multiscale_goal_stage1_v1_result_2026-09-19.md`.
+
+The current Stage-2 gate tests ordinary goal-conditioned HRL on PointMaze
+before any multiscale mechanism is admitted:
+
+```bash
+python3 scripts/run_pointmaze_goal_stage2.py --methods flat_goal_ppo hrl_goal_ppo --iterations 768 --horizon 300 --upper-period-seconds 0.25 --maximum-subgoal-delta 0.75 --output results/pointmaze_goal_stage2/result.json
+```
+
+The upper policy emits a relative XY waypoint and the lower policy alone emits
+physical acceleration. The lower policy cannot observe the final task goal.
+Capacity and environment transitions are matched against flat PPO; checkpoint
+selection is lexicographic by validation success rate and then dense return.
+This is an ordinary-HRL admission gate, not yet a positive Freq-HRL result. See
+`md/freq_hrl_pointmaze_stage2_protocol_2026-09-19.md` and
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
 The package also retains the earlier components for:

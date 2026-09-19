@@ -29,6 +29,12 @@ from .goal_conditioned_actor_critic import (
     GoalConditionedActorCriticPPO,
     GoalConditionedPPOConfig,
 )
+from .capacity import (
+    flat_actor_critic_parameter_count,
+    hierarchical_actor_critic_parameter_count,
+    matched_hierarchical_hidden_dim,
+    mlp_parameter_count,
+)
 from .checkpoint_selection import (
     RobustValidationCheckpointSelector,
     StateAlignedLexicographicCheckpointSelector,
@@ -104,6 +110,10 @@ __all__ = [
     "GOAL_CONDITIONED_TRAINER_CONTRACT",
     "GoalConditionedActorCriticPPO",
     "GoalConditionedPPOConfig",
+    "flat_actor_critic_parameter_count",
+    "hierarchical_actor_critic_parameter_count",
+    "matched_hierarchical_hidden_dim",
+    "mlp_parameter_count",
     "HierarchicalRolloutBuilder",
     "HierarchicalTrajectoryBatch",
     "LearnedPlanActionMapper",

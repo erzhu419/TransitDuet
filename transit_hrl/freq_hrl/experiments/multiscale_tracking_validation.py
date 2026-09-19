@@ -31,6 +31,8 @@ from freq_hrl.rl import (
     JointPPOConfig,
     JointTrajectoryBatch,
     summarize_numeric_rows,
+    flat_actor_critic_parameter_count,
+    matched_hierarchical_hidden_dim,
     train_frequency_separated_ppo,
     train_joint_ppo,
 )
@@ -179,68 +181,6 @@ class TrackingFeatureBuilder:
             goal_error,
             task_features,
         )).astype(np.float32, copy=False)
-
-
-def _mlp_parameter_count(in_dim: int, out_dim: int, hidden_dim: int) -> int:
-    hidden = int(hidden_dim)
-    if hidden < 1:
-        return int(in_dim * out_dim + out_dim)
-    return int(
-        in_dim * hidden + hidden
-        + hidden * hidden + hidden
-        + hidden * out_dim + out_dim
-    )
-
-
-def _flat_parameter_count(state_dim: int, action_dim: int, hidden_dim: int) -> int:
-    return int(
-        _mlp_parameter_count(state_dim, action_dim, hidden_dim)
-        + action_dim
-        + _mlp_parameter_count(state_dim, 1, hidden_dim)
-    )
-
-
-def _hierarchical_parameter_count(
-    *,
-    upper_state_dim: int,
-    lower_state_dim: int,
-    goal_dim: int,
-    action_dim: int,
-    hidden_dim: int,
-) -> int:
-    return int(
-        _mlp_parameter_count(upper_state_dim, goal_dim, hidden_dim)
-        + goal_dim
-        + _mlp_parameter_count(lower_state_dim, action_dim, hidden_dim)
-        + action_dim
-        + _mlp_parameter_count(upper_state_dim, 1, hidden_dim)
-        + _mlp_parameter_count(lower_state_dim, 1, hidden_dim)
-    )
-
-
-def _matched_hierarchical_hidden_dim(
-    *,
-    target_parameter_count: int,
-    upper_state_dim: int,
-    lower_state_dim: int,
-    goal_dim: int,
-    action_dim: int,
-    maximum_hidden_dim: int = 256,
-) -> tuple[int, int, float]:
-    if int(target_parameter_count) < 1:
-        raise ValueError("target parameter count must be positive")
-    candidates = []
-    for hidden in range(1, int(maximum_hidden_dim) + 1):
-        actual = _hierarchical_parameter_count(
-            upper_state_dim=upper_state_dim,
-            lower_state_dim=lower_state_dim,
-            goal_dim=goal_dim,
-            action_dim=action_dim,
-            hidden_dim=hidden,
-        )
-        candidates.append((abs(actual - int(target_parameter_count)), hidden, actual))
-    _, hidden, actual = min(candidates)
-    return hidden, actual, float(actual / int(target_parameter_count))
 
 
 def _episode_row(
@@ -640,7 +580,7 @@ def build_stage1_model(
 ) -> tuple[Any, dict[str, Any]]:
     name = str(method)
     representation = _representation(name)
-    target_parameters = _flat_parameter_count(
+    target_parameters = flat_actor_critic_parameter_count(
         dimensions["history"].flat,
         1,
         int(reference_hidden_dim),
@@ -668,7 +608,7 @@ def build_stage1_model(
             "hidden_dim": int(reference_hidden_dim),
         }
     selected = dimensions[representation]
-    hidden_dim, expected, ratio = _matched_hierarchical_hidden_dim(
+    hidden_dim, expected, ratio = matched_hierarchical_hidden_dim(
         target_parameter_count=target_parameters,
         upper_state_dim=selected.upper,
         lower_state_dim=selected.lower,

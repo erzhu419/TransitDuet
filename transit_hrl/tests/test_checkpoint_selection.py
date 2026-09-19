@@ -1010,12 +1010,34 @@ class RobustValidationCheckpointSelectorTest(unittest.TestCase):
                 float(row["reward_mean"]) for row in rows
             ),
             checkpoint_score_contract="minimum_validation_reward_v1",
+            checkpoint_rank_fn=lambda rows: (
+                min(float(row["reward_mean"]) for row in rows),
+                float(np.mean([
+                    float(row["reward_mean"]) for row in rows
+                ])),
+            ),
+            checkpoint_rank_names=("worst_reward", "mean_reward"),
+            checkpoint_rank_contract="worst_then_mean_reward_v1",
+            checkpoint_minimum_iteration=0,
         )
         self.assertEqual(payload["initial_validation_score"], 10.0)
         self.assertEqual(
             payload["checkpoint_score_contract"],
             "minimum_validation_reward_v1",
         )
+        self.assertEqual(
+            payload["checkpoint_selection_protocol"],
+            "state_aligned_lexicographic_validation_v1",
+        )
+        self.assertEqual(
+            payload["checkpoint_rank_names"],
+            ["worst_reward", "mean_reward"],
+        )
+        self.assertEqual(
+            payload["checkpoint_rank_contract"],
+            "worst_then_mean_reward_v1",
+        )
+        self.assertEqual(payload["selected_checkpoint_iteration"], 0)
 
 
 if __name__ == "__main__":

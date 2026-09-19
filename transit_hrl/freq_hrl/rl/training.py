@@ -847,9 +847,13 @@ def train_joint_ppo(
     metadata: dict[str, Any] | None = None,
     checkpoint_smoothing_window: int = 1,
     checkpoint_min_delta: float = 0.0,
+    checkpoint_minimum_iteration: int = -1,
     checkpoint_evaluation_interval: int = 1,
     checkpoint_score_fn: CheckpointScoreFn | None = None,
     checkpoint_score_contract: str = "mean_objective",
+    checkpoint_rank_fn: CheckpointRankFn | None = None,
+    checkpoint_rank_names: tuple[str, ...] = (),
+    checkpoint_rank_contract: str = "disabled",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], JointActorCriticPPO]:
     """Train a standard flat PPO with one joint action and one task return."""
 
@@ -860,6 +864,23 @@ def train_joint_ppo(
     selection_seed_list = list(selection_seeds or train_seeds)
     if not str(checkpoint_score_contract).strip():
         raise ValueError("checkpoint_score_contract must be non-empty")
+    rank_names = tuple(map(str, checkpoint_rank_names))
+    if (checkpoint_rank_fn is None) != (not rank_names):
+        raise ValueError(
+            "checkpoint rank function and rank names must be configured together"
+        )
+    if checkpoint_rank_fn is not None and not str(
+        checkpoint_rank_contract
+    ).strip():
+        raise ValueError("checkpoint rank contract must be non-empty")
+    if checkpoint_rank_fn is not None and (
+        int(checkpoint_smoothing_window) != 1
+        or float(checkpoint_min_delta) != 0.0
+    ):
+        raise ValueError(
+            "state-aligned checkpoint ranking requires smoothing_window=1 "
+            "and min_delta=0"
+        )
 
     def validation_score(rows: list[dict[str, Any]]) -> float:
         score = (
@@ -871,15 +892,43 @@ def train_joint_ppo(
             raise ValueError("checkpoint score must be finite")
         return score
 
+    def validation_rank(
+        rows: list[dict[str, Any]],
+    ) -> tuple[float, ...] | None:
+        if checkpoint_rank_fn is None:
+            return None
+        rank = tuple(float(value) for value in checkpoint_rank_fn(rows))
+        if len(rank) != len(rank_names) or not np.all(np.isfinite(rank)):
+            raise ValueError("checkpoint rank must be finite and aligned")
+        return rank
+
+    total_iterations = max(1, int(iterations))
+    if int(checkpoint_minimum_iteration) >= total_iterations:
+        raise ValueError(
+            "checkpoint minimum iteration must be below total iterations"
+        )
+
     initial_rows = [
         rollout_fn(model, int(seed), False)[1] for seed in selection_seed_list
     ]
     initial_validation_score = validation_score(initial_rows)
-    selector = RobustValidationCheckpointSelector(
-        initial_score=initial_validation_score,
-        initial_state=model.state_dict(),
-        smoothing_window=checkpoint_smoothing_window,
-        min_delta=checkpoint_min_delta,
+    initial_validation_rank = validation_rank(initial_rows)
+    selector = (
+        StateAlignedLexicographicCheckpointSelector(
+            initial_score=initial_validation_score,
+            initial_rank=initial_validation_rank,
+            rank_names=rank_names,
+            initial_state=model.state_dict(),
+            minimum_eligible_iteration=int(checkpoint_minimum_iteration),
+        )
+        if initial_validation_rank is not None
+        else RobustValidationCheckpointSelector(
+            initial_score=initial_validation_score,
+            initial_state=model.state_dict(),
+            smoothing_window=checkpoint_smoothing_window,
+            min_delta=checkpoint_min_delta,
+            minimum_eligible_iteration=int(checkpoint_minimum_iteration),
+        )
     )
     history: list[dict[str, Any]] = [{
         "iteration": -1,
@@ -897,7 +946,6 @@ def train_joint_ppo(
         "value_optimizer_steps": 0.0,
     }]
 
-    total_iterations = max(1, int(iterations))
     for iteration in range(total_iterations):
         batches: list[JointTrajectoryBatch] = []
         sampled_rows: list[dict[str, Any]] = []
@@ -925,9 +973,21 @@ def train_joint_ppo(
             validation_score(eval_rows)
             if evaluate_checkpoint else None
         )
+        rank = validation_rank(eval_rows) if evaluate_checkpoint else None
         checkpoint_fields = (
-            selector.consider(
-                score=float(score), state=model.state_dict(), iteration=iteration
+            (
+                selector.consider(
+                    score=float(score),
+                    rank=rank,
+                    state=model.state_dict(),
+                    iteration=iteration,
+                )
+                if rank is not None
+                else selector.consider(
+                    score=float(score),
+                    state=model.state_dict(),
+                    iteration=iteration,
+                )
             )
             if evaluate_checkpoint else {
                 "checkpoint_selection_score": float(selector.best_score),
@@ -946,6 +1006,8 @@ def train_joint_ppo(
             **metrics,
         })
 
+    if not selector.has_eligible_selection:
+        raise RuntimeError("checkpoint selector produced no eligible checkpoint")
     model.load_state_dict(selector.best_state)
     heldout_rows = [rollout_fn(model, int(seed), False)[1] for seed in eval_seeds]
     actor_optimizer_steps = int(sum(
@@ -986,6 +1048,10 @@ def train_joint_ppo(
         **selector.metadata(total_iterations=max(1, int(iterations))),
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
         "checkpoint_score_contract": str(checkpoint_score_contract),
+        "checkpoint_rank_contract": (
+            str(checkpoint_rank_contract)
+            if checkpoint_rank_fn is not None else "disabled"
+        ),
     }
     return payload, heldout_rows, model
 
