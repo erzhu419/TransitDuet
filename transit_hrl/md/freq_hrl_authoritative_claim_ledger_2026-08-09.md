@@ -59,6 +59,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | mujoco_v24_policy_mean_upper_projection_target_development | mujoco_control | development | policy_mean_target_not_supported | development_only | false |
 | mujoco_v25_sample_consistent_upper_development | mujoco_control | development | failed_registered_development_gates | development_only | false |
 | multiscale_goal_stage1_v1_development | identifiable_tracking | development | mainline_hrl_increment_not_supported | negative_main_or_si | false |
+| pointmaze_goal_stage2_v1_development | pointmaze_goal_control | development | ordinary_hrl_learning_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -459,6 +460,19 @@ for a positive outcome. See the
 Forbidden: Stage-1 V1 establishes a multiscale representation benefit, a
 goal-conditioned hierarchy benefit, a hierarchy-by-frequency interaction, or
 general Freq-HRL superiority.
+
+### pointmaze_goal_stage2_v1_development
+
+The genuine waypoint/action hierarchy completed 16 cells, eight independent
+optimizer roots per method, and 128 held-out episodes. Hierarchical success was
+0.359 with root-level 95% CI [0.197, 0.522], below the registered lower-CI gate
+of 0.50. Its paired success difference against capacity-matched flat PPO was
++0.125 with 95% CI [-0.181, 0.431]. The ordinary-HRL learning gate is not
+supported and multiscale enhancement remains blocked. See the
+[Stage-2 V1 result](freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md).
+
+Forbidden: Stage-2 V1 establishes a working ordinary-HRL substrate, a hierarchy
+advantage, or authorization to add multiscale mechanisms.
 
 ### legacy_c1_c9_matrix_snapshot
 

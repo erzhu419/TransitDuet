@@ -37,8 +37,12 @@ The upper policy emits a relative XY waypoint and the lower policy alone emits
 physical acceleration. The lower policy cannot observe the final task goal.
 Capacity and environment transitions are matched against flat PPO; checkpoint
 selection is lexicographic by validation success rate and then dense return.
-This is an ordinary-HRL admission gate, not yet a positive Freq-HRL result. See
+The completed V1 development gate was not supported: hierarchical success was
+0.359 with root-level 95% CI [0.197, 0.522], below the registered 0.50 lower-CI
+threshold. Multiscale enhancement therefore remains blocked while the
+ordinary-HRL credit path is repaired. This is not a positive Freq-HRL result. See
 `md/freq_hrl_pointmaze_stage2_protocol_2026-09-19.md` and
+`md/freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md`, plus
 `md/freq_hrl_reorientation_2026-09-19.md` for the research boundary.
 
 The package also retains the earlier components for:

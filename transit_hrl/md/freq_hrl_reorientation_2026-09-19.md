@@ -138,3 +138,13 @@ This negative result closes the identifiable point-mass task as a source of a
 positive mainline claim. The next gate is ordinary goal-conditioned HRL on
 PointMaze. Multiscale enhancement is not admitted there until the hierarchy
 baseline itself learns the task.
+
+The frozen PointMaze Stage-2 V1 development campaign subsequently completed
+all 16 cells and 128 held-out episodes. The ordinary-HRL gate was **not
+supported**: hierarchical success was 0.359 with root-level 95% CI [0.197,
+0.522], whose lower endpoint missed the registered 0.50 threshold. The paired
+success contrast against flat PPO was inconclusive. Post-hoc code inspection
+identified lower-level credit crossing waypoint boundaries and a mismatch with
+the existing progress-reward contract; those defects must be repaired and
+tested in a new development protocol before multiscale mechanisms are admitted.
+See `freq_hrl_pointmaze_stage2_v1_result_2026-09-19.md`.
