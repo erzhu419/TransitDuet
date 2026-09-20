@@ -229,3 +229,13 @@ registered software, update, capacity, seed, state-feedback, timing, runtime,
 and stress-channel checks. It is software evidence only and authorizes the
 unchanged 120-cell development matrix. See
 `freq_hrl_pointmaze_routing_stage4_preflight_2026-09-20.md`.
+
+The full 120-cell Stage-4 matrix then rejected the fixed intended assignment.
+Routed improved over raw history in clean and observation-noise conditions,
+but did not significantly beat all-band HRL and was significantly worse than
+swapped routing in clean and both stresses. Because PointMaze supplies
+endogenous physical-state history rather than an explicit exogenous stream,
+this result narrows the redesign: preserve physical feedback for both levels,
+separate exogenous context from endogenous state, and test fixed or learned
+routing on fresh seeds without relabeling the winning swapped control. See
+`freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md`.

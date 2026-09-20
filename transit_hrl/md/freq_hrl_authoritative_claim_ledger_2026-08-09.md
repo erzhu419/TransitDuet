@@ -67,6 +67,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_multiscale_stage3_v2_preflight | pointmaze_goal_control | preflight | corrected_state_and_stress_contract_software_gate_passed | smoke_only | false |
 | pointmaze_multiscale_stage3_v2_development | pointmaze_goal_control | development | routing_increment_supported_but_freq_hrl_specific_gate_not_supported | negative_main_or_si | false |
 | pointmaze_routing_stage4_v1_preflight | pointmaze_goal_control | preflight | routing_attribution_software_gate_passed | smoke_only | false |
+| pointmaze_routing_stage4_v1_development | pointmaze_goal_control | development | selective_routing_not_supported_swapped_dominates | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -564,6 +565,20 @@ channels. See the
 Forbidden: the Stage-4 preflight establishes selective-routing performance,
 superiority to all-band, swapped, causal-filter, or history controls, or any
 Freq-HRL paper claim.
+
+### pointmaze_routing_stage4_v1_development
+
+Across eight independent optimizer roots, intended routing improved over raw
+history in clean and observation-noise conditions and over causal filtering
+under observation noise. The registered attribution gate nevertheless failed:
+routed-versus-all was inconclusive in both primary stresses, while swapped
+routing significantly exceeded intended routing in clean and both stresses.
+See the
+[Stage-4 result](freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md).
+
+Forbidden: Stage 4 validates the intended Freq-HRL routing, a universal
+slow-upper/high-lower rule, post-hoc relabeling of swapped routing, or a
+confirmatory result.
 
 ### legacy_c1_c9_matrix_snapshot
 

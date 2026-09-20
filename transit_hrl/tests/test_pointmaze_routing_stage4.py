@@ -5,6 +5,7 @@ import numpy as np
 from freq_hrl.core import PhysicalTimeScaleContract
 from freq_hrl.experiments.pointmaze_goal_validation import DEFAULT_ENV_ID
 from freq_hrl.experiments.pointmaze_multiscale_validation import (
+    PointMazeFeatureBuilder,
     pointmaze_multiscale_dimensions,
     rollout_hrl_pointmaze_multiscale,
 )
@@ -75,6 +76,68 @@ class PointMazeRoutingStageFourTest(unittest.TestCase):
             self.assertEqual(row["lower_option_boundary_count"], 3)
             self.assertTrue(np.all(np.isfinite(batch.upper.reward)))
             self.assertTrue(np.all(np.isfinite(batch.lower.reward)))
+
+    def test_routed_and_swapped_labels_select_the_registered_bands(self):
+        builder = PointMazeFeatureBuilder(
+            physical_dim=4,
+            time_scale=self.time_scale,
+        )
+
+        def observation(step):
+            physical = np.asarray([
+                np.sin(step / 3.0),
+                np.cos(step / 5.0),
+                step / 31.0,
+                (-1.0) ** step * step / 17.0,
+            ], dtype=np.float32)
+            return {
+                "observation": physical,
+                "achieved_goal": physical[:2],
+                "desired_goal": np.asarray([0.75, -0.25], dtype=np.float32),
+            }
+
+        current = observation(0)
+        builder.reset(current)
+        for step in range(1, 32):
+            current = observation(step)
+            builder.update(current)
+
+        snapshot = builder.snapshot
+        prefix = 6
+        subgoal = np.asarray([0.4, -0.1], dtype=np.float32)
+        routed_upper = builder.upper_state(
+            current, representation="multiscale_routed"
+        )
+        routed_lower = builder.lower_state(
+            current,
+            subgoal=subgoal,
+            representation="multiscale_routed",
+        )
+        swapped_upper = builder.upper_state(
+            current, representation="multiscale_swapped"
+        )
+        swapped_lower = builder.lower_state(
+            current,
+            subgoal=subgoal,
+            representation="multiscale_swapped",
+        )
+
+        np.testing.assert_allclose(
+            routed_upper[prefix:],
+            np.concatenate((snapshot.slow, snapshot.mid)),
+        )
+        np.testing.assert_allclose(
+            routed_lower[prefix:],
+            np.concatenate((snapshot.mid, snapshot.high)),
+        )
+        np.testing.assert_allclose(
+            swapped_upper[prefix:],
+            np.concatenate((snapshot.mid, snapshot.high)),
+        )
+        np.testing.assert_allclose(
+            swapped_lower[prefix:],
+            np.concatenate((snapshot.slow, snapshot.mid)),
+        )
 
     @staticmethod
     def _synthetic_cells():
