@@ -71,6 +71,8 @@ def _interval(
 
 def _index_rows(
     cells: Iterable[dict[str, Any]],
+    *,
+    algorithm_path: str,
 ) -> tuple[dict[tuple[str, str, int, int], dict[str, Any]], dict[str, str]]:
     indexed: dict[tuple[str, str, int, int], dict[str, Any]] = {}
     runtimes: list[dict[str, str]] = []
@@ -93,7 +95,7 @@ def _index_rows(
                 raise ValueError(f"duplicate routing evaluation row: {key}")
             if float(row.get("protocol_valid", 0.0)) != 1.0:
                 raise ValueError(f"invalid routing evaluation row: {key}")
-            if str(row.get("algorithm_path")) != POINTMAZE_ROUTING_ALGORITHM_PATH:
+            if str(row.get("algorithm_path")) != str(algorithm_path):
                 raise ValueError(f"wrong routing algorithm path: {key}")
             if str(row.get("scenario")) != scenario or str(row.get("method")) != method:
                 raise ValueError(f"routing row identity mismatch: {key}")
@@ -186,12 +188,18 @@ def analyze_pointmaze_routing_cells(
     cells: Iterable[dict[str, Any]],
     *,
     confidence: float = 0.95,
+    protocol_version: str = POINTMAZE_ROUTING_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_ROUTING_ALGORITHM_PATH,
+    analysis_version: str = "pointmaze_frequency_routing_stage4_analysis_v1",
 ) -> dict[str, Any]:
     items = list(cells)
     protocols = {str(cell.get("protocol_version", "")) for cell in items}
-    if protocols != {POINTMAZE_ROUTING_PROTOCOL_VERSION}:
+    if protocols != {str(protocol_version)}:
         raise ValueError("routing cells use a wrong or mixed protocol version")
-    indexed, runtime_versions = _index_rows(items)
+    indexed, runtime_versions = _index_rows(
+        items,
+        algorithm_path=str(algorithm_path),
+    )
     roots = _validate_pairing(indexed)
     scenarios: dict[str, Any] = {}
     for scenario in POINTMAZE_ROUTING_SCENARIOS:
@@ -281,8 +289,8 @@ def analyze_pointmaze_routing_cells(
         else "not_supported"
     )
     return {
-        "analysis_version": "pointmaze_frequency_routing_stage4_analysis_v1",
-        "protocol_version": POINTMAZE_ROUTING_PROTOCOL_VERSION,
+        "analysis_version": str(analysis_version),
+        "protocol_version": str(protocol_version),
         "confidence": float(confidence),
         "cell_count": len(items),
         "evaluation_row_count": len(indexed),

@@ -6,7 +6,7 @@ import argparse
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 import numpy as np
 import torch
@@ -68,11 +68,26 @@ POINTMAZE_ROUTING_REPRESENTATIONS = {
     "hrl_multiscale_routed": "multiscale_routed",
     "hrl_multiscale_swapped": "multiscale_swapped",
 }
+POINTMAZE_ROUTING_CONTRACT = {
+    "history": "raw_history_to_both_levels",
+    "filtered": "causal_filtered_history_to_both_levels",
+    "multiscale_all": "all_haar_bands_to_both_levels",
+    "multiscale_routed": "slow_mid_upper_and_mid_high_lower",
+    "multiscale_swapped": "mid_high_upper_and_slow_mid_lower",
+}
 
 
-def routing_representation(method: str) -> str:
+def routing_representation(
+    method: str,
+    representations: Mapping[str, str] | None = None,
+) -> str:
+    mapping = (
+        POINTMAZE_ROUTING_REPRESENTATIONS
+        if representations is None
+        else representations
+    )
     try:
-        return POINTMAZE_ROUTING_REPRESENTATIONS[str(method)]
+        return str(mapping[str(method)])
     except KeyError as exc:
         raise ValueError(f"unknown PointMaze routing method: {method}") from exc
 
@@ -84,8 +99,9 @@ def build_pointmaze_routing_model(
     reference_hidden_dim: int,
     learning_rate: float,
     optimizer_seed: int,
+    method_representations: Mapping[str, str] | None = None,
 ) -> tuple[GoalConditionedActorCriticPPO, dict[str, Any]]:
-    representation = routing_representation(method)
+    representation = routing_representation(method, method_representations)
     reference = dimensions["history"]
     selected = dimensions[representation]
     target_parameters = flat_actor_critic_parameter_count(
@@ -143,8 +159,18 @@ def train_pointmaze_routing_cell(
     reference_hidden_dim: int = 128,
     learning_rate: float = 3e-4,
     checkpoint_evaluation_interval: int = 96,
+    method_representations: Mapping[str, str] | None = None,
+    protocol_version: str = POINTMAZE_ROUTING_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_ROUTING_ALGORITHM_PATH,
+    routing_contract: Mapping[str, str] | None = None,
+    domain: str = "pointmaze_frequency_routing_attribution",
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
-    representation = routing_representation(method)
+    representation_mapping = (
+        POINTMAZE_ROUTING_REPRESENTATIONS
+        if method_representations is None
+        else dict(method_representations)
+    )
+    representation = routing_representation(method, representation_mapping)
     if str(scenario) not in POINTMAZE_ROUTING_SCENARIOS:
         raise ValueError(f"unknown PointMaze routing scenario: {scenario}")
     training, selection, evaluation = _validate_seed_roles(
@@ -175,7 +201,7 @@ def train_pointmaze_routing_cell(
     if time_scale.upper_period_steps >= int(horizon):
         raise ValueError("PointMaze upper period must be shorter than the horizon")
     representations = tuple(dict.fromkeys(
-        ("history", *POINTMAZE_ROUTING_REPRESENTATIONS.values())
+        ("history", *representation_mapping.values())
     ))
     dimensions = pointmaze_multiscale_dimensions(
         env_id=env_id,
@@ -189,6 +215,7 @@ def train_pointmaze_routing_cell(
         reference_hidden_dim=reference_hidden_dim,
         learning_rate=learning_rate,
         optimizer_seed=optimizer_seed,
+        method_representations=representation_mapping,
     )
     parameter_budget = int(capacity["reference_parameter_budget"])
     encoder = CausalHaarMultiscaleEncoder(
@@ -196,8 +223,8 @@ def train_pointmaze_routing_cell(
         time_scale=time_scale,
     )
     common_metadata = {
-        "protocol_version": POINTMAZE_ROUTING_PROTOCOL_VERSION,
-        "algorithm_path": POINTMAZE_ROUTING_ALGORITHM_PATH,
+        "protocol_version": str(protocol_version),
+        "algorithm_path": str(algorithm_path),
         "environment_id": str(env_id),
         "scenario": str(scenario),
         "optimizer_seed": int(optimizer_seed),
@@ -217,13 +244,11 @@ def train_pointmaze_routing_cell(
         "current_physical_feedback_contract": (
             "both_hierarchy_levels_retain_full_current_actor_visible_physical_state"
         ),
-        "routing_attribution_contract": {
-            "history": "raw_history_to_both_levels",
-            "filtered": "causal_filtered_history_to_both_levels",
-            "multiscale_all": "all_haar_bands_to_both_levels",
-            "multiscale_routed": "slow_mid_upper_and_mid_high_lower",
-            "multiscale_swapped": "mid_high_upper_and_slow_mid_lower",
-        },
+        "routing_attribution_contract": dict(
+            POINTMAZE_ROUTING_CONTRACT
+            if routing_contract is None
+            else routing_contract
+        ),
         "stress_observability_contract": (
             "actor_never_receives_measurement_or_action_disturbance_truth"
         ),
@@ -269,14 +294,14 @@ def train_pointmaze_routing_cell(
             time_scale=time_scale,
             maximum_subgoal_delta=maximum_subgoal_delta,
             representation_override=representation,
-            protocol_version=POINTMAZE_ROUTING_PROTOCOL_VERSION,
-            algorithm_path=POINTMAZE_ROUTING_ALGORITHM_PATH,
+            protocol_version=str(protocol_version),
+            algorithm_path=str(algorithm_path),
         ),
         objective_fn=lambda row: float(row["episode_return"]),
         summary_fn=summarize_numeric_rows,
         training_seed_fn=seed_fn,
         policy=str(method),
-        domain="pointmaze_frequency_routing_attribution",
+        domain=str(domain),
         metadata=common_metadata,
         checkpoint_score_contract="mean_dense_episode_return",
         checkpoint_rank_fn=pointmaze_checkpoint_rank,
@@ -317,22 +342,31 @@ def resolved_pointmaze_routing_protocol(
     train_seeds: Iterable[int],
     selection_seeds: Iterable[int],
     eval_seeds: Iterable[int],
+    method_representations: Mapping[str, str] | None = None,
+    protocol_version: str = POINTMAZE_ROUTING_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_ROUTING_ALGORITHM_PATH,
 ) -> dict[str, Any]:
     training, selection, evaluation = _validate_seed_roles(
         train_seeds, selection_seeds, eval_seeds
     )
     method_names = list(map(str, methods))
     scenario_names = list(map(str, scenarios))
-    if not method_names or any(name not in POINTMAZE_ROUTING_METHODS for name in method_names):
+    representation_mapping = (
+        POINTMAZE_ROUTING_REPRESENTATIONS
+        if method_representations is None
+        else dict(method_representations)
+    )
+    if not method_names or any(name not in representation_mapping for name in method_names):
         raise ValueError("PointMaze routing protocol has an invalid method set")
     if not scenario_names or any(name not in POINTMAZE_ROUTING_SCENARIOS for name in scenario_names):
         raise ValueError("PointMaze routing protocol has an invalid scenario set")
     return {
-        "protocol_version": POINTMAZE_ROUTING_PROTOCOL_VERSION,
-        "algorithm_path": POINTMAZE_ROUTING_ALGORITHM_PATH,
+        "protocol_version": str(protocol_version),
+        "algorithm_path": str(algorithm_path),
         "methods": method_names,
         "representations": {
-            method: routing_representation(method) for method in method_names
+            method: routing_representation(method, representation_mapping)
+            for method in method_names
         },
         "scenarios": scenario_names,
         "primary_stress_scenarios": [

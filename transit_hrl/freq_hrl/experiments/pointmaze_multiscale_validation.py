@@ -353,7 +353,11 @@ class PointMazeFeatureBuilder:
             lower = (
                 physical + goal + int(snapshot.mid.size) + int(snapshot.high.size)
             )
-        elif representation == "multiscale_all":
+        elif representation in (
+            "multiscale_all",
+            "multiscale_routed_masked",
+            "multiscale_swapped_masked",
+        ):
             flat = physical + goal + int(snapshot.multiscale.size)
             upper = physical + goal + int(snapshot.multiscale.size)
             lower = physical + goal + int(snapshot.multiscale.size)
@@ -410,6 +414,18 @@ class PointMazeFeatureBuilder:
             )
         elif representation == "multiscale_all":
             task_features = self.snapshot.multiscale
+        elif representation == "multiscale_routed_masked":
+            task_features = np.concatenate((
+                self.snapshot.slow,
+                self.snapshot.mid,
+                np.zeros_like(self.snapshot.high),
+            ))
+        elif representation == "multiscale_swapped_masked":
+            task_features = np.concatenate((
+                np.zeros_like(self.snapshot.slow),
+                self.snapshot.mid,
+                self.snapshot.high,
+            ))
         elif representation == "multiscale_swapped":
             task_features = np.concatenate(
                 (self.snapshot.mid, self.snapshot.high)
@@ -445,6 +461,18 @@ class PointMazeFeatureBuilder:
             )
         elif representation == "multiscale_all":
             task_features = self.snapshot.multiscale
+        elif representation == "multiscale_routed_masked":
+            task_features = np.concatenate((
+                np.zeros_like(self.snapshot.slow),
+                self.snapshot.mid,
+                self.snapshot.high,
+            ))
+        elif representation == "multiscale_swapped_masked":
+            task_features = np.concatenate((
+                self.snapshot.slow,
+                self.snapshot.mid,
+                np.zeros_like(self.snapshot.high),
+            ))
         elif representation == "multiscale_swapped":
             task_features = np.concatenate(
                 (self.snapshot.slow, self.snapshot.mid)
