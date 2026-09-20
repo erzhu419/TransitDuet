@@ -57,9 +57,11 @@ def task_signature(
     scenario: str,
     method: str,
     optimizer_seed: int,
+    *,
+    protocol: str = spec.PROTOCOL,
 ) -> str:
     return (
-        f"Freq-HRL/{spec.PROTOCOL}/{run_name}/{scenario}/"
+        f"Freq-HRL/{str(protocol)}/{run_name}/{scenario}/"
         f"{method}/{int(optimizer_seed)}"
     )
 
@@ -69,16 +71,20 @@ def training_command(
     cell: tuple[str, str, int],
     *,
     preflight: bool,
+    protocol_spec=spec,
+    runner_script: str = "scripts/run_pointmaze_routing_stage4.py",
 ) -> str:
     scenario, method, optimizer_seed = cell
-    options = spec.cell_options(optimizer_seed, preflight=preflight)
+    options = protocol_spec.cell_options(
+        optimizer_seed, preflight=preflight
+    )
     output = cell_relative_dir(
         run_name, scenario, method, optimizer_seed
     ) / "result.json"
     command = [
         DEFAULT_LINUX_PYTHON,
         "-u",
-        "scripts/run_pointmaze_routing_stage4.py",
+        str(runner_script),
         "--methods",
         method,
         "--scenarios",
@@ -132,20 +138,35 @@ def task_specification(
     cell: tuple[str, str, int],
     *,
     preflight: bool,
+    protocol_spec=spec,
+    runner_script: str = "scripts/run_pointmaze_routing_stage4.py",
+    stage_label: str = "stage4",
 ) -> dict[str, object]:
     scenario, method, optimizer_seed = cell
     relative = cell_relative_dir(run_name, scenario, method, optimizer_seed)
     phase = "preflight" if preflight else "development"
     return {
-        "project": spec.PROTOCOL,
+        "project": protocol_spec.PROTOCOL,
         "description": (
-            f"Freq-HRL PointMaze stage4 {phase} {scenario} {method} "
+            f"Freq-HRL PointMaze {stage_label} {phase} {scenario} {method} "
             f"root{optimizer_seed}"
         ),
-        "cmd": training_command(run_name, cell, preflight=preflight),
+        "cmd": training_command(
+            run_name,
+            cell,
+            preflight=preflight,
+            protocol_spec=protocol_spec,
+            runner_script=runner_script,
+        ),
         "cwd": str(ROOT),
-        "signature": task_signature(run_name, scenario, method, optimizer_seed),
-        "resource_family": f"Freq-HRL/{spec.PROTOCOL}/cell",
+        "signature": task_signature(
+            run_name,
+            scenario,
+            method,
+            optimizer_seed,
+            protocol=protocol_spec.PROTOCOL,
+        ),
+        "resource_family": f"Freq-HRL/{protocol_spec.PROTOCOL}/cell",
         "cpu": 1,
         "ram_mb": 2560,
         "vram": 0,
@@ -166,14 +187,18 @@ def task_specification(
     }
 
 
-def _inventory(run_name: str) -> list[dict[str, object]]:
+def _inventory(
+    run_name: str,
+    *,
+    protocol: str = spec.PROTOCOL,
+) -> list[dict[str, object]]:
     process = subprocess.run(
         [
             sys.executable,
             str(SCHEDULER),
             "results",
             "--signature",
-            f"Freq-HRL/{spec.PROTOCOL}/{run_name}/*",
+            f"Freq-HRL/{str(protocol)}/{run_name}/*",
             "--status",
             "queued",
             "launching",
@@ -195,11 +220,28 @@ def _inventory(run_name: str) -> list[dict[str, object]]:
     return list(payload.get("results", []))
 
 
-def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
-    tasks = _inventory_by_signature(_inventory(run_name))
+def sync_results(
+    run_name: str,
+    *,
+    preflight: bool,
+    workers: int,
+    protocol_spec=spec,
+) -> None:
+    tasks = _inventory_by_signature(_inventory(
+        run_name,
+        protocol=protocol_spec.PROTOCOL,
+    ))
     expected: list[tuple[str, Path, dict[str, object]]] = []
-    for scenario, method, optimizer_seed in spec.cells(preflight=preflight):
-        signature = task_signature(run_name, scenario, method, optimizer_seed)
+    for scenario, method, optimizer_seed in protocol_spec.cells(
+        preflight=preflight
+    ):
+        signature = task_signature(
+            run_name,
+            scenario,
+            method,
+            optimizer_seed,
+            protocol=protocol_spec.PROTOCOL,
+        )
         task = tasks.get(signature)
         if task is None:
             raise SystemExit(f"stage-4 sync task missing: {signature}")
@@ -261,15 +303,16 @@ def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
         payload = json.loads((path / "result.json").read_text(encoding="utf-8"))
         if (
             payload.get("status") != "complete"
-            or payload.get("protocol", {}).get("protocol_version") != spec.PROTOCOL
+            or payload.get("protocol", {}).get("protocol_version")
+            != protocol_spec.PROTOCOL
             or len(payload.get("cells", [])) != 1
         ):
             raise SystemExit(f"invalid synced result: {signature}")
 
     manifest = {
         "run_name": str(run_name),
-        "protocol": spec.PROTOCOL,
-        "algorithm_revision": spec.ALGORITHM_REVISION,
+        "protocol": protocol_spec.PROTOCOL,
+        "algorithm_revision": protocol_spec.ALGORITHM_REVISION,
         "cell_count": len(expected),
         "artifact_contract": "result_json_only_v1",
         "nodes": {
@@ -286,7 +329,10 @@ def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(f"synced {len(expected)} PointMaze stage-4 result JSON files")
+    print(
+        f"synced {len(expected)} PointMaze {protocol_spec.PROTOCOL} "
+        "result JSON files"
+    )
 
 
 def main() -> int:

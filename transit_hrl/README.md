@@ -115,6 +115,12 @@ cleanly identify frequency semantics. A fresh equal-shape masked-routing
 protocol is required. See
 `md/freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md`.
 
+Stage-4 V2 repairs that attribution confound with fixed 134-dimensional states
+at both levels. Routed and swapped controls now zero excluded Haar blocks while
+retaining identical network shapes, per-level parameter counts, and initial
+weights for each root. It uses fresh seeds and the unchanged V1 claim gate.
+See `md/freq_hrl_pointmaze_routing_stage4_v2_protocol_2026-09-20.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

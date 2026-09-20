@@ -86,6 +86,9 @@ exogenous context from endogenous physical feedback. Relabeling the winning
 V1 swapped control as Freq-HRL would be post-hoc claim substitution and is
 prohibited.
 
+The fresh equal-shape repair is frozen separately in
+`freq_hrl_pointmaze_routing_stage4_v2_protocol_2026-09-20.md`.
+
 ## Claim Boundary
 
 Allowed: under the frozen PointMaze endogenous-history protocol, multiscale

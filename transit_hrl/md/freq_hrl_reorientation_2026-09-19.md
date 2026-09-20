@@ -241,3 +241,11 @@ band semantics. The immediate repair is a fresh equal-shape masked-routing
 protocol; exogenous/endogenous separation remains the next environment-level
 test. See
 `freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md`.
+
+Stage-4 V2 freezes that repair at algorithm revision
+`f9ab0b4a532d1bc0c31466b24d4dcbc70634e585`. Both levels always receive fixed
+134-dimensional states; routed and swapped arms differ only in which Haar
+coefficient slots are zeroed. Network shapes, per-level parameters, and initial
+weights are identical within each fresh optimizer root. The V1 scenarios,
+training budget, endpoints, and conjunctive gate remain unchanged. See
+`freq_hrl_pointmaze_routing_stage4_v2_protocol_2026-09-20.md`.
