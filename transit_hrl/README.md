@@ -109,8 +109,10 @@ The 120-cell matrix is complete. The intended slow+mid-upper / mid+high-lower
 routing beat raw history in clean and observation-noise conditions, but the
 registered attribution gate failed: routed did not significantly beat the
 all-band control and was significantly worse than swapped routing in all three
-scenarios. This rejects a universal fixed band-to-level assignment for
-endogenous PointMaze physical history. See
+scenarios. Post-hoc design audit found that unequal Haar band sizes also
+swapped the upper/lower input-layer parameter allocation, so this run does not
+cleanly identify frequency semantics. A fresh equal-shape masked-routing
+protocol is required. See
 `md/freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md`.
 
 The package also retains the earlier components for:

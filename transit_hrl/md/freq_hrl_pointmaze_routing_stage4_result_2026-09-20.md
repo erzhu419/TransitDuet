@@ -63,17 +63,28 @@ policy; swapped does the reverse. The result is therefore not explained by a
 label reversal.
 
 Frequency representation matters in this PointMaze setup, but the assumed
-fixed assignment does not. The encoded signal is endogenous physical-state
-history rather than an explicit exogenous time series. In this setting, the
-upper waypoint policy benefited from mid+high history and the lower actuator
-policy from slow+mid history. This rejects a domain-general fixed
-`slow -> upper, high -> lower` rule; it does not establish that swapped routing
-is universally correct.
+fixed assignment is not supported by this implementation. A post-hoc design
+audit identified an attribution confound caused by unequal Haar band sizes.
+Routed used upper/lower state dimensions 38/126 and allocated 25,479/42,023
+parameters to the two levels; swapped used dimensions 126/38 and reversed the
+allocation to 42,023/25,479. Both arms had the same 67,502 total parameters,
+but the comparison changed per-level capacity at the same time as frequency
+content. The observed swapped advantage therefore cannot be assigned solely
+to frequency semantics.
 
-The next algorithmic step must separate actor-visible exogenous context from
-endogenous physical feedback, or learn routing under a fresh preregistered
-protocol. Relabeling the winning swapped control as Freq-HRL would be post-hoc
-claim substitution and is prohibited.
+The encoded signal is also endogenous physical-state history rather than an
+explicit exogenous time series. V1 rejects the registered routed
+implementation and its selective-routing gate, but it does not by itself
+reject every fixed `slow -> upper, high -> lower` protocol or establish that
+swapped frequency semantics are preferable.
+
+The immediate repair is a fresh protocol where both levels always receive a
+fixed-shape multiscale vector and routing changes only coefficient masks. That
+holds architecture, initialization shape, and per-level parameter counts
+constant. A subsequent environment-level test must separate actor-visible
+exogenous context from endogenous physical feedback. Relabeling the winning
+V1 swapped control as Freq-HRL would be post-hoc claim substitution and is
+prohibited.
 
 ## Claim Boundary
 
@@ -81,11 +92,14 @@ Allowed: under the frozen PointMaze endogenous-history protocol, multiscale
 features and their level assignment materially affected HRL performance; the
 registered routed arm improved over history in clean and observation-noise
 conditions and over causal filtering under observation noise, but failed the
-selective-routing gate because swapped routing performed better.
+selective-routing gate because swapped routing performed better. V1 also
+exposed a per-level capacity confound that must be removed before semantic
+routing attribution.
 
 Forbidden: Stage 4 validates the intended Freq-HRL routing, proves a universal
-frequency-to-level assignment, establishes swapped routing outside this
-PointMaze setting, or supplies a confirmatory headline result.
+frequency-to-level assignment, proves swapped band semantics are superior,
+establishes swapped routing outside this PointMaze setting, or supplies a
+confirmatory headline result.
 
 Machine-readable analysis remains under
 `results/pointmaze_routing_stage4_v1_development_20260920_r1/analysis/`.

@@ -233,9 +233,11 @@ unchanged 120-cell development matrix. See
 The full 120-cell Stage-4 matrix then rejected the fixed intended assignment.
 Routed improved over raw history in clean and observation-noise conditions,
 but did not significantly beat all-band HRL and was significantly worse than
-swapped routing in clean and both stresses. Because PointMaze supplies
-endogenous physical-state history rather than an explicit exogenous stream,
-this result narrows the redesign: preserve physical feedback for both levels,
-separate exogenous context from endogenous state, and test fixed or learned
-routing on fresh seeds without relabeling the winning swapped control. See
+swapped routing in clean and both stresses. A post-hoc design audit found that
+the unequal slow/high coefficient counts also reversed upper/lower input-layer
+parameter allocation: both arms had 67,502 total parameters, but their
+25,479/42,023 per-level split was exchanged. V1 therefore does not isolate
+band semantics. The immediate repair is a fresh equal-shape masked-routing
+protocol; exogenous/endogenous separation remains the next environment-level
+test. See
 `freq_hrl_pointmaze_routing_stage4_result_2026-09-20.md`.
