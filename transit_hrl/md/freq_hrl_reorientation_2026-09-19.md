@@ -249,3 +249,9 @@ coefficient slots are zeroed. Network shapes, per-level parameters, and initial
 weights are identical within each fresh optimizer root. The V1 scenarios,
 training budget, endpoints, and conjunctive gate remain unchanged. See
 `freq_hrl_pointmaze_routing_stage4_v2_protocol_2026-09-20.md`.
+
+The 15-cell V2 preflight completed as tasks t99438-t99452. It passed exact-mask,
+equal-shape, identical-initialization, learned-update, fresh-seed, timing,
+runtime, and stress-channel checks. This remains software evidence only and
+authorizes the unchanged 120-cell V2 matrix. See
+`freq_hrl_pointmaze_routing_stage4_v2_preflight_2026-09-20.md`.

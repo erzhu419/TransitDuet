@@ -121,6 +121,11 @@ retaining identical network shapes, per-level parameter counts, and initial
 weights for each root. It uses fresh seeds and the unchanged V1 claim gate.
 See `md/freq_hrl_pointmaze_routing_stage4_v2_protocol_2026-09-20.md`.
 
+The 15-cell V2 preflight passed equal-shape, identical-initialization,
+learned-update, fresh-seed, timing, runtime, and stress-channel checks. It is
+software evidence only and authorizes the unchanged 120-cell matrix. See
+`md/freq_hrl_pointmaze_routing_stage4_v2_preflight_2026-09-20.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
