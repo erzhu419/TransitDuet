@@ -108,7 +108,11 @@ def _cell_identity(cell: dict[str, Any]) -> tuple[str, int]:
     return method, root
 
 
-def _validate_cells(cells: list[dict[str, Any]]) -> tuple[int, ...]:
+def _validate_cells(
+    cells: list[dict[str, Any]],
+    *,
+    methods: tuple[str, ...] = POINTMAZE_EXOGENOUS_ROUTING_METHODS,
+) -> tuple[int, ...]:
     if not cells:
         raise ValueError("Stage-6 analysis requires cells")
     identities: set[tuple[str, int]] = set()
@@ -171,7 +175,7 @@ def _validate_cells(cells: list[dict[str, Any]]) -> tuple[int, ...]:
     expected = {
         (method, root)
         for root in roots
-        for method in POINTMAZE_EXOGENOUS_ROUTING_METHODS
+        for method in methods
     }
     if identities != expected:
         raise ValueError("Stage-6 method/root matrix is incomplete")
@@ -223,6 +227,8 @@ def _index_rows(
 
 def _validate_row_pairing(
     indexed: dict[tuple[str, int, int], dict[str, Any]],
+    *,
+    methods: tuple[str, ...] = POINTMAZE_EXOGENOUS_ROUTING_METHODS,
 ) -> None:
     identities = {
         method: {
@@ -230,7 +236,7 @@ def _validate_row_pairing(
             for row_method, root, seed in indexed
             if row_method == method
         }
-        for method in POINTMAZE_EXOGENOUS_ROUTING_METHODS
+        for method in methods
     }
     if any(not values for values in identities.values()):
         raise ValueError("Stage-6 analysis requires every method")
@@ -246,13 +252,13 @@ def _validate_row_pairing(
         "force_x_rms",
         "force_y_rms",
     )
-    reference_method = POINTMAZE_EXOGENOUS_ROUTING_METHODS[0]
+    reference_method = methods[0]
     for root, seed in identities[reference_method]:
         reference = {
             name: indexed[(reference_method, root, seed)].get(name)
             for name in exogenous_keys
         }
-        for method in POINTMAZE_EXOGENOUS_ROUTING_METHODS[1:]:
+        for method in methods[1:]:
             candidate = {
                 name: indexed[(method, root, seed)].get(name)
                 for name in exogenous_keys
