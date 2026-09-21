@@ -74,6 +74,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_exogenous_stage5_v1_development | pointmaze_exogenous_control | development | paired_learning_supported_but_absolute_hrl_gate_not_supported | negative_main_or_si | false |
 | pointmaze_exogenous_stage5_stability_v1_development | pointmaze_exogenous_control | development_selection | eight_rollout_recipe_selected_on_reused_difficult_roots | development_only | false |
 | pointmaze_exogenous_stage5_v2_preflight | pointmaze_exogenous_control | preflight | fresh_seed_equal_budget_software_gate_passed | smoke_only | false |
+| pointmaze_exogenous_stage5_v2_confirmation | pointmaze_exogenous_control | confirmation | ordinary_hrl_substrate_gate_supported_frequency_routing_admitted | positive_si | true |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -658,6 +659,16 @@ runtime, and compact-artifact checks. See the
 
 Forbidden: the V2 preflight establishes learning, passes the substrate gate,
 proves an HRL advantage, or authorizes frequency routing.
+
+### pointmaze_exogenous_stage5_v2_confirmation
+
+Across eight fresh optimizer roots, ordinary HRL achieved tracking success
+0.887 [0.860, 0.915]. Its final-minus-untrained success and return improvements
+were both supported, satisfying every registered substrate condition. See the
+[V2 result](freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md).
+
+Forbidden: V2 proves HRL superiority over flat PPO, selective frequency
+assignment, leakage control, promotion, or domain-general Freq-HRL.
 
 ### legacy_c1_c9_matrix_snapshot
 

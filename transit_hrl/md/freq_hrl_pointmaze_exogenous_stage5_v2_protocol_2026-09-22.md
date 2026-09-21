@@ -59,3 +59,8 @@ domain-general Freq-HRL.
 
 The two-cell preflight completed and passed all registered execution checks.
 See `freq_hrl_pointmaze_exogenous_stage5_v2_preflight_2026-09-22.md`.
+
+The formal V2 matrix passed all three registered gate conditions. Ordinary HRL
+is therefore admitted as the substrate for a fresh external-stream routing
+attribution experiment. See
+`freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md`.

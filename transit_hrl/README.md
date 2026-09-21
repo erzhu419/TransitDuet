@@ -151,6 +151,14 @@ root-level 95% interval [0.424, 0.808]. The lower endpoint missed the frozen
 remains blocked. See
 `md/freq_hrl_pointmaze_exogenous_stage5_result_2026-09-21.md`.
 
+A bounded stability screen selected eight training rollout roots, and the
+fresh-seed Stage-5 V2 confirmation then passed the full substrate gate: HRL
+tracking success was 0.887 [0.860, 0.915], with positive success and return
+gains over its paired untrained policy. HRL-versus-flat remained inconclusive.
+External-stream frequency-routing attribution is now admitted, but no routing
+claim follows from the substrate result itself. See
+`md/freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

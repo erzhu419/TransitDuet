@@ -295,3 +295,11 @@ an optimization recipe rather than supplying evidence. A Stage-5 V2 may now
 use fresh optimizer and role seeds, with equal eight-rollout budgets for flat
 and HRL. See
 `freq_hrl_pointmaze_exogenous_stage5_stability_result_2026-09-22.md`.
+
+The fresh-seed, equal-interaction-budget Stage-5 V2 confirmation closed that
+prerequisite. HRL tracking success was 0.887 [0.860, 0.915], and both registered
+final-minus-untrained gains were supported. HRL-versus-flat remained
+inconclusive, so this establishes reliable ordinary-HRL substrate learning,
+not a hierarchy advantage. A fresh external-stream frequency-routing
+attribution experiment is now admitted. See
+`freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md`.
