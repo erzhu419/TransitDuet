@@ -72,6 +72,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_routing_stage4_v2_development | pointmaze_goal_control | development | multiscale_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
 | pointmaze_exogenous_stage5_v1_preflight | pointmaze_exogenous_control | preflight | separate_external_stream_software_gate_passed | smoke_only | false |
 | pointmaze_exogenous_stage5_v1_development | pointmaze_exogenous_control | development | paired_learning_supported_but_absolute_hrl_gate_not_supported | negative_main_or_si | false |
+| pointmaze_exogenous_stage5_stability_v1_development | pointmaze_exogenous_control | development_selection | eight_rollout_recipe_selected_on_reused_difficult_roots | development_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -635,6 +636,17 @@ endpoint missed the frozen 0.50 requirement. See the
 Forbidden: Stage-5 V1 passes the substrate gate, proves HRL superiority to flat
 PPO, authorizes external-stream frequency routing, or supports a general
 Freq-HRL claim.
+
+### pointmaze_exogenous_stage5_stability_v1_development
+
+On the two reused difficult optimizer initializations and fresh environment
+paths, increasing training rollouts from four to eight improved both roots and
+met the frozen development-selection rule. Changing checkpoint rank alone had
+no effect. See the
+[stability result](freq_hrl_pointmaze_exogenous_stage5_stability_result_2026-09-22.md).
+
+Forbidden: this post-hoc recipe screen passes Stage 5, supplies independent
+performance evidence, proves HRL superiority, or authorizes frequency routing.
 
 ### legacy_c1_c9_matrix_snapshot
 

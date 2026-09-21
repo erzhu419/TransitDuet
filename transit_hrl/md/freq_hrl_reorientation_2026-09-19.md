@@ -286,3 +286,12 @@ not learn and one remained on the boundary. The substrate gate is therefore not
 supported and external-stream frequency routing remains blocked pending a
 fresh optimization-stability repair. See
 `freq_hrl_pointmaze_exogenous_stage5_result_2026-09-21.md`.
+
+The registered Stage-5 stability screen reused the two difficult optimizer
+initializations but replaced all environment-path seeds. Increasing the
+training rollout batch from four to eight raised worst-root held-out success
+from 0.442 to 0.955; changing checkpoint rank alone had no effect. This selects
+an optimization recipe rather than supplying evidence. A Stage-5 V2 may now
+use fresh optimizer and role seeds, with equal eight-rollout budgets for flat
+and HRL. See
+`freq_hrl_pointmaze_exogenous_stage5_stability_result_2026-09-22.md`.

@@ -58,3 +58,9 @@ claim.
 
 The four-cell software preflight completed and passed. See
 `freq_hrl_pointmaze_exogenous_stage5_stability_preflight_2026-09-21.md`.
+
+The formal screen selected `more_rollouts`: both eight-rollout arms improved
+both difficult roots and were identical, while changing checkpoint rank alone
+had no effect. A fresh-seed V2 is authorized with the original rank mode and
+eight training rollout roots for both flat and HRL. See
+`freq_hrl_pointmaze_exogenous_stage5_stability_result_2026-09-22.md`.
