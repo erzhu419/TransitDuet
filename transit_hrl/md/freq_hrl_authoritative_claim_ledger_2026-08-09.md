@@ -77,6 +77,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_exogenous_stage5_v2_confirmation | pointmaze_exogenous_control | confirmation | ordinary_hrl_substrate_gate_supported_frequency_routing_admitted | positive_si | true |
 | pointmaze_exogenous_routing_stage6_v1_preflight | pointmaze_exogenous_control | preflight | equal_shape_external_routing_software_gate_passed | smoke_only | false |
 | pointmaze_exogenous_routing_stage6_v1_development | pointmaze_exogenous_control | development | all_band_hrl_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
+| pointmaze_exogenous_multiscale_stage7_v1_preflight | pointmaze_exogenous_control | preflight | fresh_four_grid_software_gate_passed | smoke_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -695,6 +696,18 @@ Forbidden: Stage 6 validates fixed slow-upper/high-lower assignment, proves
 superiority over generic all-band multiscale HRL, permits relabeling swapped
 routing, establishes a hierarchy-specific interaction, or supplies
 confirmatory/domain-general Freq-HRL evidence.
+
+### pointmaze_exogenous_multiscale_stage7_v1_preflight
+
+The fresh four-method factorial completed at its reserved preflight root on
+four CPU nodes and passed method, seed, equal-shape, capacity, causal-stream,
+update, runtime, and result-artifact checks. It authorizes the fixed 16-root
+confirmation without contributing a performance observation. See the
+[Stage-7 preflight](freq_hrl_pointmaze_exogenous_multiscale_stage7_preflight_2026-09-22.md).
+
+Forbidden: the Stage-7 preflight confirms a multiscale effect, a hierarchy
+effect, their interaction, or any Freq-HRL performance claim. Registered or
+running confirmation tasks are not completed evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 

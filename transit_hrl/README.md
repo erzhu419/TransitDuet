@@ -170,6 +170,14 @@ test is a fresh confirmation of the simpler flat/HRL by history/all-band
 factorial, not another repair of this failed gate. See
 `md/freq_hrl_pointmaze_exogenous_routing_stage6_result_2026-09-22.md`.
 
+Stage 7 freezes that fresh confirmation at 16 optimizer roots using only the
+flat/HRL by history/all-band factorial. Its four-cell preflight passed on four
+independent CPU nodes and is software evidence only. The fixed 64-cell
+confirmation has been dispatched without interim analysis or sequential root
+extension. See
+`md/freq_hrl_pointmaze_exogenous_multiscale_stage7_protocol_2026-09-22.md` and
+`md/freq_hrl_pointmaze_exogenous_multiscale_stage7_preflight_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
