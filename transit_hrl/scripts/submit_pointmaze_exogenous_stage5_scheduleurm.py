@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import sys
 import time
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +38,18 @@ CPU_JUSTIFICATION = (
 )
 
 
+def _experiment_protocol(protocol_spec: Any) -> str:
+    return str(getattr(protocol_spec, "EXPERIMENT_PROTOCOL", protocol_spec.PROTOCOL))
+
+
+def _preflight_optimizer_seeds(protocol_spec: Any) -> tuple[int, ...]:
+    return tuple(map(int, getattr(
+        protocol_spec,
+        "PREFLIGHT_OPTIMIZER_SEEDS",
+        protocol_spec.OPTIMIZER_SEEDS[:1],
+    )))
+
+
 def cell_relative_dir(
     run_name: str,
     method: str,
@@ -55,9 +68,11 @@ def task_signature(
     run_name: str,
     method: str,
     optimizer_seed: int,
+    *,
+    protocol_spec: Any = spec,
 ) -> str:
     return (
-        f"Freq-HRL/{spec.PROTOCOL}/{run_name}/{method}/"
+        f"Freq-HRL/{_experiment_protocol(protocol_spec)}/{run_name}/{method}/"
         f"{int(optimizer_seed)}"
     )
 
@@ -67,9 +82,10 @@ def training_command(
     cell: tuple[str, int],
     *,
     preflight: bool,
+    protocol_spec: Any = spec,
 ) -> str:
     method, optimizer_seed = cell
-    options = spec.cell_options(optimizer_seed, preflight=preflight)
+    options = protocol_spec.cell_options(optimizer_seed, preflight=preflight)
     output = cell_relative_dir(run_name, method, optimizer_seed) / "result.json"
     command = [
         DEFAULT_LINUX_PYTHON,
@@ -87,6 +103,8 @@ def training_command(
         str(optimizer_seed),
         "--checkpoint-evaluation-interval",
         str(options["checkpoint_evaluation_interval"]),
+        "--checkpoint-rank-mode",
+        str(options.get("checkpoint_rank_mode", "success_then_return")),
         "--reference-hidden-dim",
         str(options["reference_hidden_dim"]),
         "--learning-rate",
@@ -132,19 +150,32 @@ def task_specification(
     cell: tuple[str, int],
     *,
     preflight: bool,
+    protocol_spec: Any = spec,
 ) -> dict[str, object]:
     method, optimizer_seed = cell
     relative = cell_relative_dir(run_name, method, optimizer_seed)
     phase = "preflight" if preflight else "development"
     return {
-        "project": spec.PROTOCOL,
+        "project": _experiment_protocol(protocol_spec),
         "description": (
             f"Freq-HRL PointMaze stage5 {phase} {method} root{optimizer_seed}"
         ),
-        "cmd": training_command(run_name, cell, preflight=preflight),
+        "cmd": training_command(
+            run_name,
+            cell,
+            preflight=preflight,
+            protocol_spec=protocol_spec,
+        ),
         "cwd": str(ROOT),
-        "signature": task_signature(run_name, method, optimizer_seed),
-        "resource_family": f"Freq-HRL/{spec.PROTOCOL}/cell",
+        "signature": task_signature(
+            run_name,
+            method,
+            optimizer_seed,
+            protocol_spec=protocol_spec,
+        ),
+        "resource_family": (
+            f"Freq-HRL/{_experiment_protocol(protocol_spec)}/cell"
+        ),
         "cpu": 1,
         "ram_mb": 2560,
         "vram": 0,
@@ -165,14 +196,18 @@ def task_specification(
     }
 
 
-def _inventory(run_name: str) -> list[dict[str, object]]:
+def _inventory(
+    run_name: str,
+    *,
+    protocol_spec: Any = spec,
+) -> list[dict[str, object]]:
     process = subprocess.run(
         [
             sys.executable,
             str(SCHEDULER),
             "results",
             "--signature",
-            f"Freq-HRL/{spec.PROTOCOL}/{run_name}/*",
+            f"Freq-HRL/{_experiment_protocol(protocol_spec)}/{run_name}/*",
             "--status",
             "queued",
             "launching",
@@ -194,11 +229,24 @@ def _inventory(run_name: str) -> list[dict[str, object]]:
     return list(payload.get("results", []))
 
 
-def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
-    tasks = _inventory_by_signature(_inventory(run_name))
+def sync_results(
+    run_name: str,
+    *,
+    preflight: bool,
+    workers: int,
+    protocol_spec: Any = spec,
+) -> None:
+    tasks = _inventory_by_signature(_inventory(
+        run_name, protocol_spec=protocol_spec
+    ))
     expected: list[tuple[str, Path, dict[str, object]]] = []
-    for method, optimizer_seed in spec.cells(preflight=preflight):
-        signature = task_signature(run_name, method, optimizer_seed)
+    for method, optimizer_seed in protocol_spec.cells(preflight=preflight):
+        signature = task_signature(
+            run_name,
+            method,
+            optimizer_seed,
+            protocol_spec=protocol_spec,
+        )
         task = tasks.get(signature)
         if task is None:
             raise SystemExit(f"stage-5 sync task missing: {signature}")
@@ -260,15 +308,16 @@ def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
         if (
             payload.get("status") != "complete"
             or payload.get("protocol", {}).get("protocol_version")
-            != spec.PROTOCOL
+            != protocol_spec.PROTOCOL
             or len(payload.get("cells", [])) != 1
         ):
             raise SystemExit(f"invalid synced result: {signature}")
 
     manifest = {
         "run_name": str(run_name),
-        "protocol": spec.PROTOCOL,
-        "algorithm_revision": spec.ALGORITHM_REVISION,
+        "protocol": _experiment_protocol(protocol_spec),
+        "runtime_protocol": protocol_spec.PROTOCOL,
+        "algorithm_revision": protocol_spec.ALGORITHM_REVISION,
         "cell_count": len(expected),
         "artifact_contract": "result_json_only_v1",
         "nodes": {
@@ -288,7 +337,7 @@ def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
     print(f"synced {len(expected)} Stage-5 result JSON files")
 
 
-def main() -> int:
+def main(protocol_spec: Any = spec) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--preflight", action="store_true")
@@ -302,7 +351,7 @@ def main() -> int:
             "git",
             "diff",
             "--exit-code",
-            spec.ALGORITHM_REVISION,
+            protocol_spec.ALGORITHM_REVISION,
             "--",
             "freq_hrl",
             RUNNER_SCRIPT,
@@ -317,35 +366,44 @@ def main() -> int:
             args.run_name,
             preflight=args.preflight,
             workers=args.sync_workers,
+            protocol_spec=protocol_spec,
         )
         return 0
-    if _inventory(args.run_name):
+    if _inventory(args.run_name, protocol_spec=protocol_spec):
         raise SystemExit("run already registered; inspect it before resubmission")
-    cells = spec.cells(preflight=args.preflight)
+    cells = protocol_spec.cells(preflight=args.preflight)
     run_directory = ROOT / "results" / args.run_name
     if any(run_directory.glob("cells/**/result.json")):
         raise SystemExit("run already contains completed cells")
     run_directory.mkdir(parents=True, exist_ok=True)
-    roots = spec.OPTIMIZER_SEEDS[:1] if args.preflight else spec.OPTIMIZER_SEEDS
+    roots = (
+        _preflight_optimizer_seeds(protocol_spec)
+        if args.preflight else tuple(map(int, protocol_spec.OPTIMIZER_SEEDS))
+    )
     registration = {
-        "protocol": spec.PROTOCOL,
-        "algorithm_revision": spec.ALGORITHM_REVISION,
-        "evidence_stage": "preflight" if args.preflight else "development",
+        "protocol": _experiment_protocol(protocol_spec),
+        "runtime_protocol": protocol_spec.PROTOCOL,
+        "algorithm_revision": protocol_spec.ALGORITHM_REVISION,
+        "evidence_stage": (
+            "preflight"
+            if args.preflight
+            else str(getattr(protocol_spec, "EVIDENCE_STAGE", "development"))
+        ),
         "preflight": bool(args.preflight),
-        "methods": list(spec.METHODS),
+        "methods": list(protocol_spec.METHODS),
         "optimizer_seeds": list(roots),
-        "runtime_expectations": dict(spec.RUNTIME_EXPECTATIONS),
+        "runtime_expectations": dict(protocol_spec.RUNTIME_EXPECTATIONS),
         "cells": [list(cell) for cell in cells],
         "options": {
-            str(seed): spec.cell_options(seed, preflight=args.preflight)
+            str(seed): protocol_spec.cell_options(seed, preflight=args.preflight)
             for seed in roots
         },
-        "claim_gate": {
+        "claim_gate": getattr(protocol_spec, "CLAIM_GATE", {
             "hrl_tracking_success_ci_lower": ">=0.50",
             "hrl_final_vs_untrained_tracking_success": "positive_ci",
             "hrl_final_vs_untrained_episode_return": "positive_ci",
             "hrl_vs_flat": "reported_not_gating",
-        },
+        }),
         "scheduler": {
             "nodes": list(LINUX_CPU_NODES),
             "require_node": None,
@@ -360,11 +418,16 @@ def main() -> int:
     )
     execute_bulk(
         [
-            task_specification(args.run_name, cell, preflight=args.preflight)
+            task_specification(
+                args.run_name,
+                cell,
+                preflight=args.preflight,
+                protocol_spec=protocol_spec,
+            )
             for cell in cells
         ],
         dry_run=args.dry_run,
-        intent_label=f"{spec.PROTOCOL}:{args.run_name}",
+        intent_label=f"{_experiment_protocol(protocol_spec)}:{args.run_name}",
     )
     if not args.dry_run:
         subprocess.run([sys.executable, str(SCHEDULER), "dispatch"], check=True)
@@ -373,4 +436,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
