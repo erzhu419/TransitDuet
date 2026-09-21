@@ -42,6 +42,14 @@ def _experiment_protocol(protocol_spec: Any) -> str:
     return str(getattr(protocol_spec, "EXPERIMENT_PROTOCOL", protocol_spec.PROTOCOL))
 
 
+def _runner_script(protocol_spec: Any) -> str:
+    return str(getattr(protocol_spec, "RUNNER_SCRIPT", RUNNER_SCRIPT))
+
+
+def _stage_label(protocol_spec: Any) -> str:
+    return str(getattr(protocol_spec, "STAGE_LABEL", "stage5"))
+
+
 def _preflight_optimizer_seeds(protocol_spec: Any) -> tuple[int, ...]:
     return tuple(map(int, getattr(
         protocol_spec,
@@ -90,7 +98,7 @@ def training_command(
     command = [
         DEFAULT_LINUX_PYTHON,
         "-u",
-        RUNNER_SCRIPT,
+        _runner_script(protocol_spec),
         "--methods",
         method,
         "--env-id",
@@ -158,7 +166,8 @@ def task_specification(
     return {
         "project": _experiment_protocol(protocol_spec),
         "description": (
-            f"Freq-HRL PointMaze stage5 {phase} {method} root{optimizer_seed}"
+            f"Freq-HRL PointMaze {_stage_label(protocol_spec)} {phase} "
+            f"{method} root{optimizer_seed}"
         ),
         "cmd": training_command(
             run_name,
@@ -249,10 +258,13 @@ def sync_results(
         )
         task = tasks.get(signature)
         if task is None:
-            raise SystemExit(f"stage-5 sync task missing: {signature}")
+            raise SystemExit(
+                f"{_stage_label(protocol_spec)} sync task missing: {signature}"
+            )
         if task.get("status") != "done" or not task.get("node"):
             raise SystemExit(
-                f"stage-5 task is not done: {task.get('id')} "
+                f"{_stage_label(protocol_spec)} task is not done: "
+                f"{task.get('id')} "
                 f"status={task.get('status')}"
             )
         path = ROOT / cell_relative_dir(run_name, method, optimizer_seed)
@@ -298,7 +310,8 @@ def sync_results(
     if pending:
         signature, path, _ = pending[0]
         raise SystemExit(
-            f"stage-5 result sync incomplete: {len(pending)} cells; "
+            f"{_stage_label(protocol_spec)} result sync incomplete: "
+            f"{len(pending)} cells; "
             f"first={signature}; path={path}; "
             f"error={errors.get(signature, 'missing result.json')}"
         )
@@ -334,7 +347,9 @@ def sync_results(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(f"synced {len(expected)} Stage-5 result JSON files")
+    print(
+        f"synced {len(expected)} {_stage_label(protocol_spec)} result JSON files"
+    )
 
 
 def main(protocol_spec: Any = spec) -> int:
@@ -354,7 +369,7 @@ def main(protocol_spec: Any = spec) -> int:
             protocol_spec.ALGORITHM_REVISION,
             "--",
             "freq_hrl",
-            RUNNER_SCRIPT,
+            _runner_script(protocol_spec),
         ],
         cwd=ROOT,
         check=True,
