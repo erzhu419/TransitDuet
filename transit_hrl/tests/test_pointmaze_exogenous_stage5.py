@@ -204,6 +204,24 @@ class PointMazeExogenousStageFiveTest(unittest.TestCase):
         ])
         self.assertGreater(high_success, high_return)
 
+    def test_checkpoint_rank_can_prioritize_dense_return(self):
+        high_success = pointmaze_exogenous_checkpoint_rank(
+            [{"tracking_success_rate": 0.6, "episode_return": 1.0}],
+            mode="return_then_success",
+        )
+        high_return = pointmaze_exogenous_checkpoint_rank(
+            [{"tracking_success_rate": 0.5, "episode_return": 100.0}],
+            mode="return_then_success",
+        )
+        self.assertLess(high_success, high_return)
+
+    def test_checkpoint_rank_rejects_unknown_mode(self):
+        with self.assertRaisesRegex(ValueError, "unknown.*rank mode"):
+            pointmaze_exogenous_checkpoint_rank(
+                [{"tracking_success_rate": 0.5, "episode_return": 100.0}],
+                mode="unregistered",
+            )
+
     def test_analysis_requires_absolute_learning_and_paired_gain(self):
         cells = []
         for method in ("flat_exogenous_history", "hrl_exogenous_history"):

@@ -53,12 +53,38 @@ POINTMAZE_EXOGENOUS_METHODS = (
     "flat_exogenous_history",
     "hrl_exogenous_history",
 )
+POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODES = (
+    "success_then_return",
+    "return_then_success",
+)
+DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE = "success_then_return"
+_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_NAMES = {
+    "success_then_return": (
+        "mean_tracking_success_rate",
+        "mean_dense_episode_return",
+    ),
+    "return_then_success": (
+        "mean_dense_episode_return",
+        "mean_tracking_success_rate",
+    ),
+}
+_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACTS = {
+    "success_then_return": (
+        "lexicographic_mean_tracking_success_then_mean_dense_return_v1"
+    ),
+    "return_then_success": (
+        "lexicographic_mean_dense_return_then_mean_tracking_success_v1"
+    ),
+}
 POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_NAMES = (
-    "mean_tracking_success_rate",
-    "mean_dense_episode_return",
+    _POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_NAMES[
+        DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE
+    ]
 )
 POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACT = (
-    "lexicographic_mean_tracking_success_then_mean_dense_return_v1"
+    _POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACTS[
+        DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE
+    ]
 )
 DEFAULT_TARGET_SPEED = 1.0
 DEFAULT_FORCE_RMS = 0.12
@@ -663,8 +689,21 @@ def build_pointmaze_exogenous_model(
     }
 
 
+def pointmaze_exogenous_checkpoint_rank_spec(
+    mode: str,
+) -> tuple[tuple[str, str], str]:
+    name = str(mode)
+    if name not in POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODES:
+        raise ValueError(f"unknown external PointMaze checkpoint rank mode: {name}")
+    return (
+        _POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_NAMES[name],
+        _POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACTS[name],
+    )
+
+
 def pointmaze_exogenous_checkpoint_rank(
     rows: list[dict[str, Any]],
+    mode: str = DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE,
 ) -> tuple[float, float]:
     if not rows:
         raise ValueError("external PointMaze checkpoint requires rows")
@@ -676,6 +715,9 @@ def pointmaze_exogenous_checkpoint_rank(
     ]))
     if not np.isfinite(success) or not np.isfinite(episode_return):
         raise ValueError("external PointMaze checkpoint rank must be finite")
+    pointmaze_exogenous_checkpoint_rank_spec(mode)
+    if mode == "return_then_success":
+        return episode_return, success
     return success, episode_return
 
 
@@ -712,6 +754,9 @@ def train_pointmaze_exogenous_cell(
     reference_hidden_dim: int = 128,
     learning_rate: float = 3e-4,
     checkpoint_evaluation_interval: int = 16,
+    checkpoint_rank_mode: str = (
+        DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE
+    ),
 ) -> tuple[dict[str, Any], list[dict[str, Any]], Any]:
     training, selection, evaluation = _validate_seed_roles(
         train_seeds, selection_seeds, eval_seeds
@@ -738,6 +783,9 @@ def train_pointmaze_exogenous_cell(
         force_rms=force_rms,
         force_period_seconds=force_period_seconds,
     )
+    checkpoint_rank_names, checkpoint_rank_contract = (
+        pointmaze_exogenous_checkpoint_rank_spec(checkpoint_rank_mode)
+    )
     model, capacity = build_pointmaze_exogenous_model(
         method=method,
         dimensions=dimensions,
@@ -753,7 +801,8 @@ def train_pointmaze_exogenous_cell(
         "optimizer_seed": int(optimizer_seed),
         "task_reward_contract": "fixed_horizon_exp_negative_dynamic_target_distance_v1",
         "primary_endpoint": "tracking_success_rate",
-        "checkpoint_objective": POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACT,
+        "checkpoint_objective": checkpoint_rank_contract,
+        "checkpoint_rank_mode": str(checkpoint_rank_mode),
         "state_contract": "current_physical_z_plus_separate_external_x_history_v1",
         "external_stream_contract": (
             "action_independent_slow_route_target_plus_fast_measured_force_v1"
@@ -812,9 +861,11 @@ def train_pointmaze_exogenous_cell(
         "domain": "pointmaze_exogenous_control",
         "metadata": common_metadata,
         "checkpoint_score_contract": "mean_dense_episode_return",
-        "checkpoint_rank_fn": pointmaze_exogenous_checkpoint_rank,
-        "checkpoint_rank_names": POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_NAMES,
-        "checkpoint_rank_contract": POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACT,
+        "checkpoint_rank_fn": lambda rows: pointmaze_exogenous_checkpoint_rank(
+            rows, mode=checkpoint_rank_mode
+        ),
+        "checkpoint_rank_names": checkpoint_rank_names,
+        "checkpoint_rank_contract": checkpoint_rank_contract,
         "checkpoint_minimum_iteration": 0,
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
     }
@@ -886,6 +937,7 @@ def resolved_pointmaze_exogenous_protocol(
     reference_hidden_dim: int,
     learning_rate: float,
     checkpoint_evaluation_interval: int,
+    checkpoint_rank_mode: str,
     train_seeds: Iterable[int],
     selection_seeds: Iterable[int],
     eval_seeds: Iterable[int],
@@ -896,6 +948,9 @@ def resolved_pointmaze_exogenous_protocol(
     names = list(map(str, methods))
     if not names or any(name not in POINTMAZE_EXOGENOUS_METHODS for name in names):
         raise ValueError("external PointMaze protocol has an unknown method")
+    _, checkpoint_rank_contract = pointmaze_exogenous_checkpoint_rank_spec(
+        checkpoint_rank_mode
+    )
     return {
         "protocol_version": POINTMAZE_EXOGENOUS_PROTOCOL_VERSION,
         "algorithm_path": POINTMAZE_EXOGENOUS_ALGORITHM_PATH,
@@ -914,7 +969,8 @@ def resolved_pointmaze_exogenous_protocol(
         "reference_hidden_dim": int(reference_hidden_dim),
         "learning_rate": float(learning_rate),
         "checkpoint_evaluation_interval": int(checkpoint_evaluation_interval),
-        "checkpoint_rank_contract": POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACT,
+        "checkpoint_rank_mode": str(checkpoint_rank_mode),
+        "checkpoint_rank_contract": checkpoint_rank_contract,
         "primary_endpoint": "tracking_success_rate",
         "train_seeds": training,
         "selection_seeds": selection,
@@ -959,6 +1015,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--reference-hidden-dim", type=int, default=128)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--checkpoint-evaluation-interval", type=int, default=16)
+    parser.add_argument(
+        "--checkpoint-rank-mode",
+        choices=POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODES,
+        default=DEFAULT_POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_MODE,
+    )
     parser.add_argument("--train-seeds", nargs="+", type=int, required=True)
     parser.add_argument("--selection-seeds", nargs="+", type=int, required=True)
     parser.add_argument("--eval-seeds", nargs="+", type=int, required=True)
@@ -986,6 +1047,7 @@ def main(argv: list[str] | None = None) -> int:
         reference_hidden_dim=args.reference_hidden_dim,
         learning_rate=args.learning_rate,
         checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
+        checkpoint_rank_mode=args.checkpoint_rank_mode,
         train_seeds=args.train_seeds,
         selection_seeds=args.selection_seeds,
         eval_seeds=args.eval_seeds,
@@ -1016,6 +1078,7 @@ def main(argv: list[str] | None = None) -> int:
                 reference_hidden_dim=args.reference_hidden_dim,
                 learning_rate=args.learning_rate,
                 checkpoint_evaluation_interval=args.checkpoint_evaluation_interval,
+                checkpoint_rank_mode=args.checkpoint_rank_mode,
             )
             output["cells"].append(payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)
