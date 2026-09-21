@@ -89,6 +89,13 @@ POINTMAZE_EXOGENOUS_CHECKPOINT_RANK_CONTRACT = (
 DEFAULT_TARGET_SPEED = 1.0
 DEFAULT_FORCE_RMS = 0.12
 DEFAULT_FORCE_PERIOD_SECONDS = (0.04, 0.04)
+POINTMAZE_EXOGENOUS_REPRESENTATIONS = (
+    "history",
+    "filtered",
+    "multiscale_all",
+    "multiscale_routed_masked",
+    "multiscale_swapped_masked",
+)
 
 POINTMAZE_EXOGENOUS_HISTORY_FIELDS = POINTMAZE_HISTORY_FIELDS | frozenset({
     "tracking_success_rate_mean",
@@ -141,11 +148,15 @@ class PointMazeExogenousFeatureBuilder:
         observation: PointMazeExternalObservation,
         *,
         action_dim: int,
+        representation: str = "history",
     ) -> PointMazeExogenousDimensions:
         physical = int(observation.physical.size)
         goal = int(observation.achieved_goal.size)
         task = int(observation.task_measurement.size)
         history = int(self.snapshot.history.size)
+        encoded = self._task_features(representation, level="flat")
+        if int(encoded.size) != history:
+            raise RuntimeError("external representation changed fixed state shape")
         shared = physical + goal + history
         return PointMazeExogenousDimensions(
             physical=physical,
@@ -158,21 +169,66 @@ class PointMazeExogenousFeatureBuilder:
             lower=shared,
         )
 
-    def flat_state(self, observation: PointMazeExternalObservation) -> np.ndarray:
+    def _task_features(self, representation: str, *, level: str) -> np.ndarray:
+        name = str(representation)
+        if level not in ("flat", "upper", "lower"):
+            raise ValueError(f"unknown external hierarchy level: {level}")
+        if name == "history":
+            return self.snapshot.history
+        if name == "filtered":
+            return self.snapshot.filtered
+        if name == "multiscale_all" or level == "flat":
+            if name not in POINTMAZE_EXOGENOUS_REPRESENTATIONS:
+                raise ValueError(
+                    f"unknown external PointMaze representation: {name}"
+                )
+            return self.snapshot.multiscale
+        if name == "multiscale_routed_masked":
+            blocks = (
+                (self.snapshot.slow, self.snapshot.mid, np.zeros_like(self.snapshot.high))
+                if level == "upper"
+                else (np.zeros_like(self.snapshot.slow), self.snapshot.mid, self.snapshot.high)
+            )
+            return np.concatenate(blocks)
+        if name == "multiscale_swapped_masked":
+            blocks = (
+                (np.zeros_like(self.snapshot.slow), self.snapshot.mid, self.snapshot.high)
+                if level == "upper"
+                else (self.snapshot.slow, self.snapshot.mid, np.zeros_like(self.snapshot.high))
+            )
+            return np.concatenate(blocks)
+        raise ValueError(f"unknown external PointMaze representation: {name}")
+
+    def flat_state(
+        self,
+        observation: PointMazeExternalObservation,
+        *,
+        representation: str = "history",
+    ) -> np.ndarray:
         return np.concatenate((
             observation.physical,
             observation.target_error,
-            self.snapshot.history,
+            self._task_features(representation, level="flat"),
         )).astype(np.float32, copy=False)
 
-    def upper_state(self, observation: PointMazeExternalObservation) -> np.ndarray:
-        return self.flat_state(observation)
+    def upper_state(
+        self,
+        observation: PointMazeExternalObservation,
+        *,
+        representation: str = "history",
+    ) -> np.ndarray:
+        return np.concatenate((
+            observation.physical,
+            observation.target_error,
+            self._task_features(representation, level="upper"),
+        )).astype(np.float32, copy=False)
 
     def lower_state(
         self,
         observation: PointMazeExternalObservation,
         *,
         subgoal: np.ndarray,
+        representation: str = "history",
     ) -> np.ndarray:
         waypoint_error = np.asarray(
             np.asarray(subgoal, dtype=np.float32).reshape(-1)
@@ -184,7 +240,7 @@ class PointMazeExogenousFeatureBuilder:
         return np.concatenate((
             observation.physical,
             waypoint_error,
-            self.snapshot.history,
+            self._task_features(representation, level="lower"),
         )).astype(np.float32, copy=False)
 
 
@@ -216,6 +272,7 @@ def pointmaze_exogenous_dimensions(
     target_speed: float = DEFAULT_TARGET_SPEED,
     force_rms: float = DEFAULT_FORCE_RMS,
     force_period_seconds: tuple[float, float] = DEFAULT_FORCE_PERIOD_SECONDS,
+    representation: str = "history",
 ) -> PointMazeExogenousDimensions:
     task = _make_task(
         env_id=env_id,
@@ -232,6 +289,7 @@ def pointmaze_exogenous_dimensions(
         return features.dimensions(
             observation,
             action_dim=int(task.action_low.size),
+            representation=representation,
         )
     finally:
         task.environment.close()
@@ -260,6 +318,8 @@ def _episode_row(
     time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float,
     task: PointMazeExternalTask,
+    protocol_version: str = POINTMAZE_EXOGENOUS_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_EXOGENOUS_ALGORITHM_PATH,
 ) -> dict[str, Any]:
     reward = np.asarray(rewards, dtype=np.float64)
     distance = np.asarray(distances, dtype=np.float64)
@@ -270,7 +330,7 @@ def _episode_row(
     subgoal_distance = np.asarray(subgoal_distances, dtype=np.float64)
     subgoal_array = np.asarray(subgoals, dtype=np.float64)
     intrinsic = np.asarray(intrinsic_rewards, dtype=np.float64)
-    hierarchical = str(method) == "hrl_exogenous_history"
+    hierarchical = str(method).startswith("hrl_exogenous")
     protocol_valid = bool(
         reward.size == task.horizon
         and reward.size
@@ -295,8 +355,8 @@ def _episode_row(
         )
     )
     return {
-        "protocol_version": POINTMAZE_EXOGENOUS_PROTOCOL_VERSION,
-        "algorithm_path": POINTMAZE_EXOGENOUS_ALGORITHM_PATH,
+        "protocol_version": str(protocol_version),
+        "algorithm_path": str(algorithm_path),
         "method": str(method),
         "seed": int(seed),
         "episode_return": float(np.sum(reward)),
@@ -361,6 +421,10 @@ def rollout_flat_pointmaze_exogenous(
     target_speed: float,
     force_rms: float,
     force_period_seconds: tuple[float, float],
+    method: str = "flat_exogenous_history",
+    representation: str = "history",
+    protocol_version: str = POINTMAZE_EXOGENOUS_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_EXOGENOUS_ALGORITHM_PATH,
 ) -> tuple[JointTrajectoryBatch | None, dict[str, Any]]:
     task = _make_task(
         env_id=env_id,
@@ -390,7 +454,9 @@ def rollout_flat_pointmaze_exogenous(
         terminated = truncated = False
         achieved_before = observation.achieved_goal.copy()
         for _ in range(int(horizon)):
-            state = features.flat_state(observation)
+            state = features.flat_state(
+                observation, representation=representation
+            )
             output = model.act(state, sample=sample)
             raw_action = np.asarray(output["action"], dtype=np.float32).reshape(-1)
             requested = squash_box_action(
@@ -425,7 +491,7 @@ def rollout_flat_pointmaze_exogenous(
             if parameter.requires_grad
         ))
         row = _episode_row(
-            method="flat_exogenous_history",
+            method=method,
             seed=seed,
             rewards=rewards,
             distances=distances,
@@ -446,6 +512,8 @@ def rollout_flat_pointmaze_exogenous(
             time_scale=time_scale,
             maximum_subgoal_delta=0.0,
             task=task,
+            protocol_version=protocol_version,
+            algorithm_path=algorithm_path,
         )
         batch = None
         if sample:
@@ -475,6 +543,10 @@ def rollout_hrl_pointmaze_exogenous(
     target_speed: float,
     force_rms: float,
     force_period_seconds: tuple[float, float],
+    method: str = "hrl_exogenous_history",
+    representation: str = "history",
+    protocol_version: str = POINTMAZE_EXOGENOUS_PROTOCOL_VERSION,
+    algorithm_path: str = POINTMAZE_EXOGENOUS_ALGORITHM_PATH,
 ) -> tuple[Any, dict[str, Any]]:
     task = _make_task(
         env_id=env_id,
@@ -521,7 +593,9 @@ def rollout_hrl_pointmaze_exogenous(
         upper_period_steps = int(time_scale.upper_period_steps)
         for step in range(int(horizon)):
             if step % upper_period_steps == 0:
-                upper_state = features.upper_state(observation)
+                upper_state = features.upper_state(
+                    observation, representation=representation
+                )
                 upper_output = model.plan_goal(upper_state, sample=sample)
                 raw_goal = np.asarray(
                     upper_output["action"], dtype=np.float32
@@ -536,7 +610,9 @@ def rollout_hrl_pointmaze_exogenous(
                 subgoals.append(subgoal.copy())
                 upper_decisions += 1
             lower_state = features.lower_state(
-                observation, subgoal=subgoal
+                observation,
+                subgoal=subgoal,
+                representation=representation,
             )
             lower_output = model.act_conditioned(lower_state, sample=sample)
             raw_action = np.asarray(
@@ -594,7 +670,7 @@ def rollout_hrl_pointmaze_exogenous(
         builder.finish(terminal=True)
         batch = builder.build() if sample else None
         row = _episode_row(
-            method="hrl_exogenous_history",
+            method=method,
             seed=seed,
             rewards=rewards,
             distances=distances,
@@ -615,6 +691,8 @@ def rollout_hrl_pointmaze_exogenous(
             time_scale=time_scale,
             maximum_subgoal_delta=maximum_subgoal_delta,
             task=task,
+            protocol_version=protocol_version,
+            algorithm_path=algorithm_path,
         )
         return batch, row
     finally:

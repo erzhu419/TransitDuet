@@ -126,6 +126,79 @@ class PointMazeExogenousStageFiveTest(unittest.TestCase):
         self.assertEqual(before.size, 134)
         self.assertEqual(lower.size, 134)
 
+    def test_external_frequency_masks_are_equal_shape_and_exact(self):
+        observation = PointMazeExternalObservation(
+            physical=np.asarray([0.1, -0.2, 0.3, -0.4], dtype=np.float32),
+            achieved_goal=np.asarray([0.1, -0.2], dtype=np.float32),
+            task_measurement=np.asarray([0.5, 0.6, -0.1, 0.2], dtype=np.float32),
+            target=np.asarray([0.5, 0.6], dtype=np.float32),
+            force=np.asarray([-0.1, 0.2], dtype=np.float32),
+        )
+        features = PointMazeExogenousFeatureBuilder(time_scale=self.time_scale)
+        features.reset(observation)
+        for index in range(1, 9):
+            measurement = np.asarray(
+                [0.5 + 0.01 * index, 0.6, (-1) ** index * 0.1, 0.2],
+                dtype=np.float32,
+            )
+            features.update(PointMazeExternalObservation(
+                physical=observation.physical,
+                achieved_goal=observation.achieved_goal,
+                task_measurement=measurement,
+                target=measurement[:2],
+                force=measurement[2:],
+            ))
+        snapshot = features.snapshot
+        zeros_slow = np.zeros_like(snapshot.slow)
+        zeros_high = np.zeros_like(snapshot.high)
+        subgoal = np.asarray([0.2, 0.3], dtype=np.float32)
+        routed_upper = features.upper_state(
+            observation, representation="multiscale_routed_masked"
+        )
+        routed_lower = features.lower_state(
+            observation,
+            subgoal=subgoal,
+            representation="multiscale_routed_masked",
+        )
+        swapped_upper = features.upper_state(
+            observation, representation="multiscale_swapped_masked"
+        )
+        swapped_lower = features.lower_state(
+            observation,
+            subgoal=subgoal,
+            representation="multiscale_swapped_masked",
+        )
+        all_upper = features.upper_state(
+            observation, representation="multiscale_all"
+        )
+        np.testing.assert_array_equal(
+            routed_upper[6:],
+            np.concatenate((snapshot.slow, snapshot.mid, zeros_high)),
+        )
+        np.testing.assert_array_equal(
+            routed_lower[6:],
+            np.concatenate((zeros_slow, snapshot.mid, snapshot.high)),
+        )
+        np.testing.assert_array_equal(
+            swapped_upper[6:],
+            np.concatenate((zeros_slow, snapshot.mid, snapshot.high)),
+        )
+        np.testing.assert_array_equal(
+            swapped_lower[6:],
+            np.concatenate((snapshot.slow, snapshot.mid, zeros_high)),
+        )
+        np.testing.assert_array_equal(all_upper[6:], snapshot.multiscale)
+        self.assertEqual(
+            {
+                routed_upper.size,
+                routed_lower.size,
+                swapped_upper.size,
+                swapped_lower.size,
+                all_upper.size,
+            },
+            {134},
+        )
+
     def test_flat_and_hrl_rollouts_are_trainable_and_equal_shape(self):
         dimensions = pointmaze_exogenous_dimensions(
             env_id=DEFAULT_ENV_ID,
