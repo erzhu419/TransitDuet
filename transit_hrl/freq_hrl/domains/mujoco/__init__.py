@@ -20,6 +20,13 @@ from .goal_adapter import (
     goal_environment_contract,
     parse_goal_observation,
 )
+from .pointmaze_external import (
+    POINTMAZE_U_ROUTE_CELLS,
+    POINTMAZE_U_ROUTE_XY,
+    PointMazeExternalDriver,
+    PointMazeExternalObservation,
+    PointMazeExternalTask,
+)
 
 __all__ = [
     "CausalBandDecomposer",
@@ -32,6 +39,11 @@ __all__ = [
     "LOWER_ACTION_ROUTER_MODES",
     "RESPONSIBILITY_MODES",
     "RelativeSubgoalAdapter",
+    "POINTMAZE_U_ROUTE_CELLS",
+    "POINTMAZE_U_ROUTE_XY",
+    "PointMazeExternalDriver",
+    "PointMazeExternalObservation",
+    "PointMazeExternalTask",
     "action_from_unit_box",
     "deterministic_actuation_disturbance",
     "environment_timing",
