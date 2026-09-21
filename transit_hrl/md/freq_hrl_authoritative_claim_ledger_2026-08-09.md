@@ -75,6 +75,8 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_exogenous_stage5_stability_v1_development | pointmaze_exogenous_control | development_selection | eight_rollout_recipe_selected_on_reused_difficult_roots | development_only | false |
 | pointmaze_exogenous_stage5_v2_preflight | pointmaze_exogenous_control | preflight | fresh_seed_equal_budget_software_gate_passed | smoke_only | false |
 | pointmaze_exogenous_stage5_v2_confirmation | pointmaze_exogenous_control | confirmation | ordinary_hrl_substrate_gate_supported_frequency_routing_admitted | positive_si | true |
+| pointmaze_exogenous_routing_stage6_v1_preflight | pointmaze_exogenous_control | preflight | equal_shape_external_routing_software_gate_passed | smoke_only | false |
+| pointmaze_exogenous_routing_stage6_v1_development | pointmaze_exogenous_control | development | all_band_hrl_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -669,6 +671,30 @@ were both supported, satisfying every registered substrate condition. See the
 
 Forbidden: V2 proves HRL superiority over flat PPO, selective frequency
 assignment, leakage control, promotion, or domain-general Freq-HRL.
+
+### pointmaze_exogenous_routing_stage6_v1_preflight
+
+All eight representation and routing methods completed at the reserved
+preflight root and passed equal-shape, identical-initialization, causal-stream,
+seed-pairing, update, option-boundary, runtime, and result-artifact checks. See
+the [Stage-6 preflight](freq_hrl_pointmaze_exogenous_routing_stage6_preflight_2026-09-22.md).
+
+Forbidden: the preflight establishes a representation benefit, routing
+direction, hierarchy interaction, or performance claim.
+
+### pointmaze_exogenous_routing_stage6_v1_development
+
+Across eight optimizer roots, all-band multiscale HRL improved tracking
+success over HRL history by 0.050 [0.003, 0.096]. Intended routing also beat
+history and causal filtering. The registered selective-routing conjunction
+failed because intended routing did not beat all-band input or swapped routing,
+and the hierarchy-by-multiscale interaction was inconclusive. See the
+[Stage-6 result](freq_hrl_pointmaze_exogenous_routing_stage6_result_2026-09-22.md).
+
+Forbidden: Stage 6 validates fixed slow-upper/high-lower assignment, proves
+superiority over generic all-band multiscale HRL, permits relabeling swapped
+routing, establishes a hierarchy-specific interaction, or supplies
+confirmatory/domain-general Freq-HRL evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 

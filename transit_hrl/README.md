@@ -159,6 +159,17 @@ External-stream frequency-routing attribution is now admitted, but no routing
 claim follows from the substrate result itself. See
 `md/freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md`.
 
+The admitted 64-cell Stage-6 attribution matrix is complete. All-band
+multiscale HRL improved success over HRL history by 0.050 [0.003, 0.096], and
+intended routing improved over history and causal filtering. The strict
+selective-routing claim nevertheless failed: intended routing was
+inconclusive against both all-band and swapped routing, and the
+hierarchy-by-multiscale interaction crossed zero. Fixed slow-upper/high-lower
+masking is therefore closed as the mainline mechanism. The next independent
+test is a fresh confirmation of the simpler flat/HRL by history/all-band
+factorial, not another repair of this failed gate. See
+`md/freq_hrl_pointmaze_exogenous_routing_stage6_result_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

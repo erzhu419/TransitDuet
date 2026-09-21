@@ -303,3 +303,15 @@ inconclusive, so this establishes reliable ordinary-HRL substrate learning,
 not a hierarchy advantage. A fresh external-stream frequency-routing
 attribution experiment is now admitted. See
 `freq_hrl_pointmaze_exogenous_stage5_v2_result_2026-09-22.md`.
+
+Stage 6 then completed the admitted eight-method attribution on eight fresh
+optimizer roots. All-band multiscale HRL improved success over HRL history,
+and intended routing improved over history and causal filtering. The
+selective-routing conjunction was not supported: intended routing was
+inconclusive against all-band and swapped controls, while the factorial
+hierarchy-by-multiscale interaction also crossed zero. This reproduces the
+earlier warning under a clean separate exogenous stream: causal multiscale
+representation can help, but fixed hard band assignment is not identified as
+the mechanism. The mainline now drops hard masking and advances only the
+history-versus-all-band factorial to fresh confirmation. See
+`freq_hrl_pointmaze_exogenous_routing_stage6_result_2026-09-22.md`.
