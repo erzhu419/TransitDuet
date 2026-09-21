@@ -57,3 +57,5 @@ admit a subsequent fresh frequency-routing attribution experiment. It would
 not by itself prove hierarchy superiority, selective frequency assignment, or
 domain-general Freq-HRL.
 
+The two-cell preflight completed and passed all registered execution checks.
+See `freq_hrl_pointmaze_exogenous_stage5_v2_preflight_2026-09-22.md`.
