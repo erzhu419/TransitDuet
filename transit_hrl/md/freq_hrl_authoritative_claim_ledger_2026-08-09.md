@@ -70,6 +70,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_routing_stage4_v1_development | pointmaze_goal_control | development | selective_routing_not_supported_swapped_wins_with_per_level_capacity_confound | negative_main_or_si | false |
 | pointmaze_routing_stage4_v2_preflight | pointmaze_goal_control | preflight | equal_shape_masked_routing_software_gate_passed | smoke_only | false |
 | pointmaze_routing_stage4_v2_development | pointmaze_goal_control | development | multiscale_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
+| pointmaze_exogenous_stage5_v1_preflight | pointmaze_exogenous_control | preflight | separate_external_stream_software_gate_passed | smoke_only | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -609,6 +610,18 @@ contradicted under action stress. See the
 Forbidden: V2 validates selective frequency assignment, proves superiority to
 generic multiscale HRL, supports the exogenous-state Freq-HRL claim, or permits
 post-hoc relabeling of swapped routing.
+
+### pointmaze_exogenous_stage5_v1_preflight
+
+The flat and hierarchical preflight cells completed on separate eligible CPU
+nodes and passed the frozen external-stream, current-physical-feedback,
+equal-state-shape, capacity, learned-update, option-boundary, runtime, and
+result-artifact checks. See the
+[Stage-5 preflight](freq_hrl_pointmaze_exogenous_stage5_preflight_2026-09-21.md).
+
+Forbidden: the Stage-5 preflight establishes dynamic-task learning, a hierarchy
+advantage, a frequency representation benefit, selective routing, or any
+Freq-HRL performance claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

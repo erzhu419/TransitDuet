@@ -266,3 +266,14 @@ Freq-HRL routing claim. The next mainline benchmark must provide a separate
 actor-visible exogenous stream while leaving endogenous physical feedback
 unchanged at both levels. See
 `freq_hrl_pointmaze_routing_stage4_v2_result_2026-09-21.md`.
+
+Stage 5 implements that required environment-level separation. Both hierarchy
+levels retain current physical state, while a separately buffered external
+stream supplies a slow moving target and a measured 0.04-second execution
+force whose path is independent of actions. Frequency routing remains disabled
+for the substrate gate. The two-cell preflight completed as tasks t99960 and
+t99961 on node004 and node006 and passed state, capacity, causal, update,
+option-boundary, runtime, and artifact checks. It authorizes the frozen 16-cell
+development matrix but is not performance evidence. See
+`freq_hrl_pointmaze_exogenous_stage5_protocol_2026-09-21.md` and
+`freq_hrl_pointmaze_exogenous_stage5_preflight_2026-09-21.md`.

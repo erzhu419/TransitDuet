@@ -134,6 +134,16 @@ routing under action stress. This closes endogenous PointMaze history as
 evidence for the central exogenous-stream assignment claim. See
 `md/freq_hrl_pointmaze_routing_stage4_v2_result_2026-09-21.md`.
 
+Stage 5 now separates current endogenous physical state from an
+action-independent, actor-visible external stream containing a slow moving
+target and a fast measured force. Frequency routing is disabled until ordinary
+HRL learns this dynamic tracking task. The frozen two-cell scheduler preflight
+passed state-shape, parameter-budget, causal-observability, PPO-update,
+option-boundary, runtime, and dynamic-placement checks. It is software evidence
+only and authorizes the 16-cell development matrix. See
+`md/freq_hrl_pointmaze_exogenous_stage5_protocol_2026-09-21.md` and
+`md/freq_hrl_pointmaze_exogenous_stage5_preflight_2026-09-21.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
