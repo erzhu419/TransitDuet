@@ -56,3 +56,5 @@ It cannot repair the V1 result, pass the Stage-5 gate, establish hierarchy
 advantage, authorize frequency routing, or support a manuscript performance
 claim.
 
+The four-cell software preflight completed and passed. See
+`freq_hrl_pointmaze_exogenous_stage5_stability_preflight_2026-09-21.md`.
