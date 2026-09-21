@@ -126,6 +126,14 @@ learned-update, fresh-seed, timing, runtime, and stress-channel checks. It is
 software evidence only and authorizes the unchanged 120-cell matrix. See
 `md/freq_hrl_pointmaze_routing_stage4_v2_preflight_2026-09-20.md`.
 
+The full V2 matrix is complete. Equal-shape routed history significantly beat
+raw history in clean and both stresses and beat causal filtering in both
+stresses. The selective-routing gate still failed: routed did not significantly
+beat all-band HRL in either stress and was significantly worse than swapped
+routing under action stress. This closes endogenous PointMaze history as
+evidence for the central exogenous-stream assignment claim. See
+`md/freq_hrl_pointmaze_routing_stage4_v2_result_2026-09-21.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

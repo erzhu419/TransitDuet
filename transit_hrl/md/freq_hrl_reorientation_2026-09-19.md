@@ -255,3 +255,14 @@ equal-shape, identical-initialization, learned-update, fresh-seed, timing,
 runtime, and stress-channel checks. This remains software evidence only and
 authorizes the unchanged 120-cell V2 matrix. See
 `freq_hrl_pointmaze_routing_stage4_v2_preflight_2026-09-20.md`.
+
+The 120-cell V2 matrix completed with 1,920 held-out episodes and passed every
+execution audit. Routed multiscale history improved over raw history in clean
+and both stresses, but the selective assignment gate was not supported:
+routed-versus-all was inconclusive in both stresses and swapped routing was
+better under action stress. Because V2 cleanly removes the V1 capacity
+confound, this closes endogenous PointMaze history as evidence for the central
+Freq-HRL routing claim. The next mainline benchmark must provide a separate
+actor-visible exogenous stream while leaving endogenous physical feedback
+unchanged at both levels. See
+`freq_hrl_pointmaze_routing_stage4_v2_result_2026-09-21.md`.

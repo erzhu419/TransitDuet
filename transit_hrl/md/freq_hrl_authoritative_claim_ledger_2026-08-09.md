@@ -69,6 +69,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_routing_stage4_v1_preflight | pointmaze_goal_control | preflight | routing_attribution_software_gate_passed | smoke_only | false |
 | pointmaze_routing_stage4_v1_development | pointmaze_goal_control | development | selective_routing_not_supported_swapped_wins_with_per_level_capacity_confound | negative_main_or_si | false |
 | pointmaze_routing_stage4_v2_preflight | pointmaze_goal_control | preflight | equal_shape_masked_routing_software_gate_passed | smoke_only | false |
+| pointmaze_routing_stage4_v2_development | pointmaze_goal_control | development | multiscale_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -594,6 +595,20 @@ fresh seed roles, finite PPO updates, and paired stress channels. See the
 
 Forbidden: the V2 preflight establishes a routing direction, performance
 effect, or Freq-HRL paper claim.
+
+### pointmaze_routing_stage4_v2_development
+
+Across eight independent optimizer roots, equal-shape routed history improved
+success over raw history in clean and both stresses and over causal filtering
+in both stresses. The registered gate nevertheless failed: routed-versus-all
+was inconclusive in both primary stresses, routed-versus-swapped was
+inconclusive under observation noise, and routed-versus-swapped was
+contradicted under action stress. See the
+[Stage-4 V2 result](freq_hrl_pointmaze_routing_stage4_v2_result_2026-09-21.md).
+
+Forbidden: V2 validates selective frequency assignment, proves superiority to
+generic multiscale HRL, supports the exogenous-state Freq-HRL claim, or permits
+post-hoc relabeling of swapped routing.
 
 ### legacy_c1_c9_matrix_snapshot
 
