@@ -277,3 +277,12 @@ option-boundary, runtime, and artifact checks. It authorizes the frozen 16-cell
 development matrix but is not performance evidence. See
 `freq_hrl_pointmaze_exogenous_stage5_protocol_2026-09-21.md` and
 `freq_hrl_pointmaze_exogenous_stage5_preflight_2026-09-21.md`.
+
+The full 16-cell Stage-5 V1 matrix then completed with 256 final held-out and
+256 paired untrained episodes. HRL final-minus-untrained tracking success and
+return were supported, but the absolute success interval was 0.616 [0.424,
+0.808], missing the frozen 0.50 lower-bound requirement. One optimizer root did
+not learn and one remained on the boundary. The substrate gate is therefore not
+supported and external-stream frequency routing remains blocked pending a
+fresh optimization-stability repair. See
+`freq_hrl_pointmaze_exogenous_stage5_result_2026-09-21.md`.

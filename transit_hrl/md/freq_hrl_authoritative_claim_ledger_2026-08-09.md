@@ -71,6 +71,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_routing_stage4_v2_preflight | pointmaze_goal_control | preflight | equal_shape_masked_routing_software_gate_passed | smoke_only | false |
 | pointmaze_routing_stage4_v2_development | pointmaze_goal_control | development | multiscale_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
 | pointmaze_exogenous_stage5_v1_preflight | pointmaze_exogenous_control | preflight | separate_external_stream_software_gate_passed | smoke_only | false |
+| pointmaze_exogenous_stage5_v1_development | pointmaze_exogenous_control | development | paired_learning_supported_but_absolute_hrl_gate_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -622,6 +623,18 @@ result-artifact checks. See the
 Forbidden: the Stage-5 preflight establishes dynamic-task learning, a hierarchy
 advantage, a frequency representation benefit, selective routing, or any
 Freq-HRL performance claim.
+
+### pointmaze_exogenous_stage5_v1_development
+
+Across eight optimizer roots, HRL improved over its paired untrained policy in
+tracking success, return, tracking RMSE, and final distance. Its absolute
+tracking success was 0.616 with root-level 95% CI [0.424, 0.808], whose lower
+endpoint missed the frozen 0.50 requirement. See the
+[Stage-5 V1 result](freq_hrl_pointmaze_exogenous_stage5_result_2026-09-21.md).
+
+Forbidden: Stage-5 V1 passes the substrate gate, proves HRL superiority to flat
+PPO, authorizes external-stream frequency routing, or supports a general
+Freq-HRL claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

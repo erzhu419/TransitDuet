@@ -144,6 +144,13 @@ only and authorizes the 16-cell development matrix. See
 `md/freq_hrl_pointmaze_exogenous_stage5_protocol_2026-09-21.md` and
 `md/freq_hrl_pointmaze_exogenous_stage5_preflight_2026-09-21.md`.
 
+The 16-cell development matrix is complete. HRL significantly improved over
+its own paired untrained policy, but its mean tracking success of 0.616 had a
+root-level 95% interval [0.424, 0.808]. The lower endpoint missed the frozen
+0.50 absolute threshold, so the substrate gate failed and frequency routing
+remains blocked. See
+`md/freq_hrl_pointmaze_exogenous_stage5_result_2026-09-21.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
