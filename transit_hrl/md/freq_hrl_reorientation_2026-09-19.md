@@ -365,3 +365,12 @@ branch-fit/evaluation paths to test whether causal history predicts local
 opportunities; they never enter candidate features. The eight-root conjunction
 can authorize Stage-9 development only and is defined in
 `freq_hrl_stage8b_counterfactual_plan_validity_protocol_2026-09-22.md`.
+
+The completed Stage-8B result supports the existence and causal predictability
+of delayed renewal value, but not the registered incremental value of the full
+history predictor over current plan/state. That contrast was +0.004908 with a
+95% CI of [-0.001556, 0.011371]. Stage 9 therefore remains blocked and no roots
+will be appended. A successor must first develop and independently qualify a
+compact plan-validity representation; deploying a trigger now would skip the
+failed gate. See
+`freq_hrl_stage8b_counterfactual_plan_validity_result_2026-09-22.md`.

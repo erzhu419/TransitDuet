@@ -15,10 +15,10 @@ goal-conditioned HRL**:
   fixed frequency representation or routing rule;
 - Stage 8 found strong plan dependence but rejected immediate regime-event
   timing and did not support privileged regime input;
-- Stage 8B directly measures paired `keep`/`renew` plan value and tests whether
-  causal history predicts it beyond current plan/state;
-- deployed belief, plan-validity trigger, and joint training remain disabled
-  until that task-level qualification passes.
+- Stage 8B found positive paired `keep`/`renew` plan value and usable causal
+  ranking, but causal history did not significantly beat current plan/state;
+- deployed belief, plan-validity trigger, and joint training therefore remain
+  disabled.
 
 The completed four-grid Stage-1 protocol was run with:
 
@@ -238,6 +238,15 @@ extra-transition accounting, analyzer, and compact-artifact checks on
 `node004`. It authorizes the unchanged eight-root development matrix but is
 not performance evidence. See
 `md/freq_hrl_stage8b_counterfactual_plan_validity_preflight_2026-09-22.md`.
+
+The fixed eight-root Stage-8B matrix is complete and **does not authorize Stage
+9**. Seven of eight registered checks passed: delayed regime-change renewal had
+positive paired local value, exceeded immediate regime, force-pulse, and
+distractor opportunities, and causal history had positive rank and selected
+utility. The required history-versus-plan/state selected-utility contrast was
++0.004908 [-0.001556, 0.011371], so it remained inconclusive. The completed run
+is retained and no roots will be appended. See
+`md/freq_hrl_stage8b_counterfactual_plan_validity_result_2026-09-22.md`.
 
 The package also retains the earlier components for:
 

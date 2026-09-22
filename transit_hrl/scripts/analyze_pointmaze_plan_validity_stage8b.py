@@ -25,6 +25,20 @@ from freq_hrl.experiments.pointmaze_plan_validity_branching import (  # noqa: E4
     POINTMAZE_PLAN_VALIDITY_PROTOCOL_VERSION,
     PREDICTOR_NAMES,
 )
+from scripts.pointmaze_plan_validity_stage8b_spec import (  # noqa: E402
+    OPTIMIZER_SEEDS,
+    PREFLIGHT_OPTIMIZER_SEEDS,
+    RUNTIME_EXPECTATIONS,
+    seed_roles,
+)
+
+
+SEED_FIELDS = {
+    "train": "train_seeds",
+    "selection": "selection_seeds",
+    "branch_fit": "branch_fit_seeds",
+    "branch_eval": "branch_eval_seeds",
+}
 
 
 def _interval(
@@ -85,6 +99,37 @@ def _cell_identity(cell: dict[str, Any]) -> int:
     return root
 
 
+def _validate_seed_contracts(cells: Iterable[dict[str, Any]]) -> None:
+    expected_sizes: tuple[int, ...] | None = None
+    owners: dict[int, tuple[int, str]] = {}
+    for cell in cells:
+        root = _cell_identity(cell)
+        role_values = {
+            role: tuple(map(int, cell.get(field, [])))
+            for role, field in SEED_FIELDS.items()
+        }
+        if any(len(values) != len(set(values)) for values in role_values.values()):
+            raise ValueError(f"Stage-8B seed role contains duplicates: {root}")
+        role_sets = {role: set(values) for role, values in role_values.items()}
+        sizes = tuple(len(role_sets[role]) for role in SEED_FIELDS)
+        if any(size < 1 for size in sizes):
+            raise ValueError(f"Stage-8B seed role is empty: {root}")
+        if expected_sizes is None:
+            expected_sizes = sizes
+        elif sizes != expected_sizes:
+            raise ValueError("Stage-8B seed role counts differ across roots")
+        if sum(sizes) != len(set().union(*role_sets.values())):
+            raise ValueError(f"Stage-8B seed roles overlap within root: {root}")
+        for role, seeds in role_sets.items():
+            for seed in seeds:
+                previous = owners.setdefault(seed, (root, role))
+                if previous != (root, role):
+                    raise ValueError(
+                        "Stage-8B seeds are reused across optimizer roots: "
+                        f"{seed} belongs to {previous} and {(root, role)}"
+                    )
+
+
 def _validate_controller_rows(
     cell: dict[str, Any],
     *,
@@ -99,18 +144,22 @@ def _validate_controller_rows(
     if not evaluation_seeds or not fit_seeds or evaluation_seeds & fit_seeds:
         raise ValueError(f"Stage-8B branch seed split is invalid: {root}")
 
-    trained = {
-        int(row["seed"]): row
-        for row in cell.get("canonical_evaluation_rows", [])
-        if int(row["seed"]) in evaluation_seeds
-    }
-    untrained = {
-        int(row["seed"]): row
-        for row in cell.get("untrained_evaluation_rows", [])
-        if int(row["seed"]) in evaluation_seeds
-    }
-    if set(trained) != evaluation_seeds or set(untrained) != evaluation_seeds:
+    controller_seeds = evaluation_seeds | fit_seeds
+    trained_rows = cell.get("canonical_evaluation_rows", [])
+    untrained_rows = cell.get("untrained_evaluation_rows", [])
+    trained_all = {int(row["seed"]): row for row in trained_rows}
+    untrained_all = {int(row["seed"]): row for row in untrained_rows}
+    if (
+        len(trained_rows) != len(controller_seeds)
+        or len(untrained_rows) != len(controller_seeds)
+        or len(trained_all) != len(trained_rows)
+        or len(untrained_all) != len(untrained_rows)
+        or set(trained_all) != controller_seeds
+        or set(untrained_all) != controller_seeds
+    ):
         raise ValueError(f"Stage-8B controller evaluation is incomplete: {root}")
+    trained = {seed: trained_all[seed] for seed in evaluation_seeds}
+    untrained = {seed: untrained_all[seed] for seed in evaluation_seeds}
     differences = []
     for seed in sorted(evaluation_seeds):
         final = trained[seed]
@@ -394,6 +443,8 @@ def analyze_stage8b(
     cells: Iterable[dict[str, Any]],
     *,
     confidence: float = 0.95,
+    expected_roots: Iterable[int] | None = None,
+    expected_runtime: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     items = list(cells)
     if not items:
@@ -401,23 +452,21 @@ def analyze_stage8b(
     identities = [_cell_identity(cell) for cell in items]
     if len(set(identities)) != len(items):
         raise ValueError("Stage-8B optimizer roots must be unique")
+    if expected_roots is not None and set(identities) != set(map(int, expected_roots)):
+        raise ValueError("Stage-8B registered optimizer-root matrix is incomplete")
     runtime = {
         json.dumps(cell.get("runtime_versions"), sort_keys=True)
         for cell in items
     }
     if len(runtime) != 1 or "null" in runtime:
         raise ValueError("Stage-8B runtime versions differ or are missing")
-    seed_contracts = {
-        tuple(tuple(map(int, cell.get(name, []))) for name in (
-            "train_seeds",
-            "selection_seeds",
-            "branch_fit_seeds",
-            "branch_eval_seeds",
-        ))
+    if expected_runtime is not None and any(
+        cell.get("runtime_versions", {}).get(name) != version
         for cell in items
-    }
-    if len(seed_contracts) != 1:
-        raise ValueError("Stage-8B roots are not path paired")
+        for name, version in expected_runtime.items()
+    ):
+        raise ValueError("Stage-8B runtime does not match the frozen protocol")
+    _validate_seed_contracts(items)
 
     by_root = {
         _cell_identity(cell): _root_summary(cell) for cell in items
@@ -461,7 +510,7 @@ def analyze_stage8b(
     }
     authorized = bool(all(checks.values()))
     return {
-        "analysis_version": "pointmaze_plan_validity_stage8b_analysis_v1",
+        "analysis_version": "pointmaze_plan_validity_stage8b_analysis_v2",
         "protocol_version": POINTMAZE_PLAN_VALIDITY_PROTOCOL_VERSION,
         "confidence": float(confidence),
         "cell_count": len(items),
@@ -563,9 +612,32 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    cells = load_cells(args.inputs)
+    roots = {int(cell["optimizer_seed"]) for cell in cells}
+    if roots == set(PREFLIGHT_OPTIMIZER_SEEDS):
+        expected_roots = PREFLIGHT_OPTIMIZER_SEEDS
+        preflight = True
+    elif roots == set(OPTIMIZER_SEEDS):
+        expected_roots = OPTIMIZER_SEEDS
+        preflight = False
+    else:
+        raise ValueError("Stage-8B inputs are not a complete registered matrix")
+    for cell in cells:
+        expected = seed_roles(int(cell["optimizer_seed"]))
+        if preflight:
+            expected = {name: values[:1] for name, values in expected.items()}
+        if any(
+            tuple(map(int, cell.get(SEED_FIELDS[role], []))) != values
+            for role, values in expected.items()
+        ):
+            raise ValueError("Stage-8B seeds do not match the frozen protocol")
     analysis = analyze_stage8b(
-        load_cells(args.inputs), confidence=args.confidence
+        cells,
+        confidence=args.confidence,
+        expected_roots=expected_roots,
+        expected_runtime=RUNTIME_EXPECTATIONS,
     )
+    analysis["matrix"] = "preflight" if preflight else "formal_development"
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "analysis.json").write_text(
         json.dumps(analysis, indent=2, sort_keys=True) + "\n",

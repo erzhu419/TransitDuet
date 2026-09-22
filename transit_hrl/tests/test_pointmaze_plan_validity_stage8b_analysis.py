@@ -75,8 +75,11 @@ def _branch_row(
 def _cells() -> list[dict]:
     cells = []
     for root in (101, 103, 107, 109):
-        eval_seeds = [31, 32]
-        fit_seeds = [21, 22]
+        seed_base = root * 100
+        train_seeds = [seed_base + 1, seed_base + 2]
+        selection_seeds = [seed_base + 11, seed_base + 12]
+        fit_seeds = [seed_base + 21, seed_base + 22]
+        eval_seeds = [seed_base + 31, seed_base + 32]
         branch_rows = []
         for seed in eval_seeds:
             for index, category in enumerate(BRANCH_CATEGORIES):
@@ -93,6 +96,7 @@ def _cells() -> list[dict]:
                     10 + index * 10 + seed,
                     split="predictor_fit",
                 ))
+        controller_eval_seeds = [*fit_seeds, *eval_seeds]
         manifest = {}
         for seed in (*fit_seeds, *eval_seeds):
             seed_rows = [
@@ -123,8 +127,8 @@ def _cells() -> list[dict]:
             "plan_validity_predictor_deployment": "disabled",
             "max_events_per_class": 1,
             "runtime_versions": {"python": "test"},
-            "train_seeds": [1, 2],
-            "selection_seeds": [11, 12],
+            "train_seeds": train_seeds,
+            "selection_seeds": selection_seeds,
             "branch_fit_seeds": fit_seeds,
             "branch_eval_seeds": eval_seeds,
             "canonical_evaluation_rows": [
@@ -134,7 +138,7 @@ def _cells() -> list[dict]:
                     "training_replicate_seed": root,
                     "tracking_squared_error_integral": 5.0,
                 }
-                for seed in eval_seeds
+                for seed in controller_eval_seeds
             ],
             "untrained_evaluation_rows": [
                 {
@@ -143,7 +147,7 @@ def _cells() -> list[dict]:
                     "training_replicate_seed": root,
                     "tracking_squared_error_integral": 10.0,
                 }
-                for seed in eval_seeds
+                for seed in controller_eval_seeds
             ],
             "branch_evaluation_rows": branch_rows,
             "branch_fit_rows": fit_rows,
@@ -189,6 +193,24 @@ class PointMazePlanValidityStageEightBAnalysisTest(unittest.TestCase):
         )
         self.assertTrue(all(analysis["qualification_checks"].values()))
         self.assertEqual(analysis["independent_optimizer_root_count"], 4)
+
+    def test_seed_reuse_across_optimizer_roots_is_rejected(self):
+        cells = _cells()
+        cells[1]["branch_eval_seeds"] = cells[0]["branch_eval_seeds"]
+        with self.assertRaisesRegex(ValueError, "reused across optimizer roots"):
+            analyze_stage8b(cells)
+
+    def test_incomplete_expected_root_matrix_is_rejected(self):
+        cells = _cells()
+        expected_roots = [cell["optimizer_seed"] for cell in cells]
+        with self.assertRaisesRegex(ValueError, "matrix is incomplete"):
+            analyze_stage8b(cells[:-1], expected_roots=expected_roots)
+
+    def test_duplicate_seed_inside_role_is_rejected(self):
+        cells = _cells()
+        cells[0]["train_seeds"] = [10101, 10101]
+        with self.assertRaisesRegex(ValueError, "contains duplicates"):
+            analyze_stage8b(cells)
 
 
 if __name__ == "__main__":
