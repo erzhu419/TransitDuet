@@ -4,15 +4,19 @@ This directory is the isolated workspace for the general Freq-HRL direction.
 Existing `FreqDuet/` and `transit_duet/` code should be treated as read-only
 references unless a file is intentionally copied into this tree first.
 
-The active research mainline is now **multiscale goal-conditioned HRL**:
+The active research mainline is now **plan-validity qualification for
+goal-conditioned HRL**:
 
 - the upper policy emits a state-space goal or plan at a physical-time macro
   interval;
 - the lower policy alone emits the actuator action and retains full physical
   feedback;
-- causal history and multiscale policies use the same trailing samples;
-- projector, promotion, leakage loss, and responsibility gauge are disabled in
-  the stage-1 mainline until a task-level conflict justifies them.
+- the Stage-7 evidence supports the ordinary hierarchy more strongly than any
+  fixed frequency representation or routing rule;
+- Stage 8 asks whether current regime information and correctly timed
+  replanning have value under a matched upper-call budget;
+- learned belief, plan-validity critic, and event trigger remain disabled until
+  that task-level qualification passes.
 
 The completed four-grid Stage-1 protocol was run with:
 
@@ -187,6 +191,18 @@ goal-conditioned HRL retains supported return/RMSE improvements, but the
 current PointMaze evidence does not support a confirmed frequency-specific
 algorithm. See
 `md/freq_hrl_pointmaze_exogenous_multiscale_stage7_result_2026-09-22.md`.
+
+Stage 8 is a new development task, not an extension of Stage 7. It introduces
+a 12-second PointMaze task with hidden persistent target-motion regimes,
+measured short force pulses, and a reward-irrelevant distractor. The frozen
+goal-conditioned controller is evaluated under stale/perturbed plans and under
+privileged event schedules that preserve the fixed 2 Hz upper-call budget. A
+separate oracle controller sees only the current true regime, never future
+regimes. The primary endpoint is integrated squared tracking error. Learned
+belief and event-triggered replanning are authorized only if plan refresh,
+plan content, current regime information, matched-budget timing, and a usable
+causal identification window are all supported across the fixed eight roots.
+See `md/freq_hrl_stage8_plan_value_protocol_2026-09-22.md`.
 
 The package also retains the earlier components for:
 

@@ -725,6 +725,22 @@ frequency interaction, selective frequency assignment, or domain-general
 Freq-HRL. The `-0.000041` lower bound must not be rounded to claim a positive
 success contrast, and no sequential root extension is authorized.
 
+### pointmaze_plan_value_stage8_v1_development
+
+The implementation and fixed eight-root development protocol test whether
+plan refresh, plan content, current privileged regime information, and
+matched-budget event timing have measurable control value before any learned
+belief or trigger is built. The primary endpoint is integrated squared
+tracking error. Oracle schedules and current-regime context are explicitly
+privileged qualification references. At registration time there is no Stage-8
+performance result. See the
+[Stage-8 protocol](freq_hrl_stage8_plan_value_protocol_2026-09-22.md).
+
+Forbidden: protocol registration or preflight validates belief-triggered HRL,
+establishes a deployable change detector, revives a frequency-specific claim,
+or supplies paper performance evidence. Stage 9 remains unauthorized until
+every frozen Stage-8 qualification check passes without added roots.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

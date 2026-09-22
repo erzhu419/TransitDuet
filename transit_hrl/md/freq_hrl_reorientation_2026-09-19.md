@@ -326,3 +326,19 @@ clearly than any fixed or all-band frequency representation. A new mainline
 must add decision-relevant temporal inference or replanning rather than another
 invertible basis transform. See
 `freq_hrl_pointmaze_exogenous_multiscale_stage7_result_2026-09-22.md`.
+
+## Stage-8 reorientation after failed frequency confirmation
+
+Stage 7 closes complete Haar coordinates and hard frequency routing as the
+current mainline, not every possible temporal representation. The next
+question is whether an existing upper plan has a measurable validity horizon:
+does current hidden-regime information improve planning, and does moving the
+same number of upper calls to regime-relevant times reduce control loss?
+
+Stage 8 therefore adds no learned belief or trigger. It first measures plan
+dependence with stale and perturbed waypoints, then compares fixed timing with
+privileged matched-budget event timing. It also records an event-conditioned,
+causal observation-delay witness so an oracle benefit is not mistaken for a
+learnable opportunity. Failure of any registered qualification condition keeps
+Stage 9 blocked; roots cannot be appended after inspection. See
+`freq_hrl_stage8_plan_value_protocol_2026-09-22.md`.
