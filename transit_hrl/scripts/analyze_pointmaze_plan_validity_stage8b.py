@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 from pathlib import Path
 import sys
@@ -155,6 +156,7 @@ def _validate_branch_rows(
     }.issubset(path_manifest):
         raise ValueError(f"Stage-8B compact branch metadata is invalid: {root}")
     categories_by_seed: dict[int, set[str]] = {}
+    category_counts_by_seed: dict[int, Counter[str]] = {}
     for row in rows:
         seed = int(row.get("seed", -1))
         category = str(row.get("category", ""))
@@ -187,6 +189,7 @@ def _validate_branch_rows(
             raise ValueError(f"Stage-8B branch row is invalid: {identity}")
         observed.add(identity)
         categories_by_seed.setdefault(seed, set()).add(category)
+        category_counts_by_seed.setdefault(seed, Counter())[category] += 1
         if len(row.get("causal_features", [])) != len(schema):
             raise ValueError(f"Stage-8B feature shape is invalid: {identity}")
         if any(
@@ -234,6 +237,12 @@ def _validate_branch_rows(
         for categories in categories_by_seed.values()
     ):
         raise ValueError(f"Stage-8B category coverage is incomplete: {root}")
+    expected_count = int(cell.get("max_events_per_class", -1))
+    if expected_count < 1 or any(
+        set(counts.values()) != {expected_count}
+        for counts in category_counts_by_seed.values()
+    ):
+        raise ValueError(f"Stage-8B category counts are unbalanced: {root}")
     return rows
 
 

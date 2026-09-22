@@ -121,6 +121,7 @@ def _cells() -> list[dict]:
             "evidence_role": "counterfactual_plan_validity_qualification",
             "trigger_training": "disabled_qualification_only",
             "plan_validity_predictor_deployment": "disabled",
+            "max_events_per_class": 1,
             "runtime_versions": {"python": "test"},
             "train_seeds": [1, 2],
             "selection_seeds": [11, 12],

@@ -129,12 +129,13 @@ def plan_renewal_opportunities(
             (int(source) + int(lag_steps), int(source))
             for source in sorted(set(map(int, sources)))
             if valid(int(source) + int(lag_steps))
+            and int(source) + int(lag_steps) not in occupied
         ]
         selected_steps = set(_evenly_spaced(
             (step for step, _ in candidates), count=max_events_per_class
         ))
         for step, source in candidates:
-            if step not in selected_steps or step in occupied:
+            if step not in selected_steps:
                 continue
             opportunities.append(PlanRenewalOpportunity(
                 category=category,
