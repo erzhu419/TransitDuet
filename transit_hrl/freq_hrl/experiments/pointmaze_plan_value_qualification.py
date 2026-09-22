@@ -856,6 +856,7 @@ def train_pointmaze_plan_value_cell(
     waypoint_perturbation: float,
     event_window_seconds: float,
     task_options: dict[str, Any],
+    diagnostic_schedules: Iterable[str] = POINTMAZE_PLAN_VALUE_SCHEDULES,
 ) -> tuple[dict[str, Any], GoalConditionedActorCriticPPO]:
     training, selection, evaluation = _validate_seed_roles(
         train_seeds, selection_seeds, eval_seeds
@@ -982,9 +983,17 @@ def train_pointmaze_plan_value_cell(
     )
     for row in canonical_rows:
         row["training_replicate_seed"] = int(optimizer_seed)
+    schedules = tuple(map(str, diagnostic_schedules))
+    if not schedules or any(
+        schedule not in POINTMAZE_PLAN_VALUE_SCHEDULES
+        for schedule in schedules
+    ):
+        raise ValueError("plan-value diagnostic schedule is invalid")
+    if len(set(schedules)) != len(schedules):
+        raise ValueError("plan-value diagnostic schedules must be unique")
     diagnostic_rows: list[dict[str, Any]] = []
     for seed in evaluation:
-        for schedule_mode in POINTMAZE_PLAN_VALUE_SCHEDULES:
+        for schedule_mode in schedules:
             _, row = rollout_hrl_pointmaze_plan_value(
                 trained,
                 seed=int(seed),
@@ -1002,6 +1011,7 @@ def train_pointmaze_plan_value_cell(
     payload["untrained_evaluation_rows"] = untrained_rows
     payload["canonical_evaluation_rows"] = canonical_rows
     payload["evaluation_rows"] = diagnostic_rows
+    payload["diagnostic_schedules"] = list(schedules)
     payload["trajectory_contract"]["upper"] = (
         "one transition per actual replan interval with gamma^duration bootstrap"
     )
