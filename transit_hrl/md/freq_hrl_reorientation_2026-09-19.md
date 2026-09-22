@@ -315,3 +315,14 @@ representation can help, but fixed hard band assignment is not identified as
 the mechanism. The mainline now drops hard masking and advances only the
 history-versus-all-band factorial to fresh confirmation. See
 `freq_hrl_pointmaze_exogenous_routing_stage6_result_2026-09-22.md`.
+
+The fixed sixteen-root Stage-7 confirmation did not reproduce the Stage-6
+development signal. HRL all-band and HRL history had essentially equal success,
+the all-band HRL versus flat all-band success interval missed zero by only
+`-0.000041` on its lower endpoint, and the factorial interaction crossed zero.
+The conjunction is therefore not supported and cannot be extended with more
+roots. PointMaze now supports the ordinary goal-conditioned hierarchy more
+clearly than any fixed or all-band frequency representation. A new mainline
+must add decision-relevant temporal inference or replanning rather than another
+invertible basis transform. See
+`freq_hrl_pointmaze_exogenous_multiscale_stage7_result_2026-09-22.md`.

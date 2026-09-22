@@ -78,6 +78,7 @@ This is the only manuscript claim ledger. Unregistered artifacts and the old ind
 | pointmaze_exogenous_routing_stage6_v1_preflight | pointmaze_exogenous_control | preflight | equal_shape_external_routing_software_gate_passed | smoke_only | false |
 | pointmaze_exogenous_routing_stage6_v1_development | pointmaze_exogenous_control | development | all_band_hrl_gain_supported_but_selective_routing_not_supported | negative_main_or_si | false |
 | pointmaze_exogenous_multiscale_stage7_v1_preflight | pointmaze_exogenous_control | preflight | fresh_four_grid_software_gate_passed | smoke_only | false |
+| pointmaze_exogenous_multiscale_stage7_v1_confirmation | pointmaze_exogenous_control | confirmation | multiscale_hrl_confirmation_not_supported | negative_main_or_si | false |
 | legacy_c1_c9_matrix_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 | legacy_paper_diagnostics_snapshot | cross_domain_legacy | legacy | excluded_legacy | excluded_legacy | false |
 
@@ -708,6 +709,21 @@ confirmation without contributing a performance observation. See the
 Forbidden: the Stage-7 preflight confirms a multiscale effect, a hierarchy
 effect, their interaction, or any Freq-HRL performance claim. Registered or
 running confirmation tasks are not completed evidence.
+
+### pointmaze_exogenous_multiscale_stage7_v1_confirmation
+
+Across sixteen fresh optimizer roots, HRL all-band versus HRL history was
++0.0018 [-0.0289, 0.0326], HRL all-band versus flat all-band was +0.0584
+[-0.000041, 0.1168], and the hierarchy-by-multiscale interaction was +0.0236
+[-0.0488, 0.0960]. All three frequency-specific primary conditions were
+inconclusive, so the confirmation conjunction failed. Ordinary HRL retained
+supported return and RMSE improvements over flat controls. See the
+[Stage-7 result](freq_hrl_pointmaze_exogenous_multiscale_stage7_result_2026-09-22.md).
+
+Forbidden: Stage 7 confirms a multiscale representation benefit, a hierarchy-
+frequency interaction, selective frequency assignment, or domain-general
+Freq-HRL. The `-0.000041` lower bound must not be rounded to claim a positive
+success contrast, and no sequential root extension is authorized.
 
 ### legacy_c1_c9_matrix_snapshot
 

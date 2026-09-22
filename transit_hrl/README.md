@@ -178,6 +178,16 @@ extension. See
 `md/freq_hrl_pointmaze_exogenous_multiscale_stage7_protocol_2026-09-22.md` and
 `md/freq_hrl_pointmaze_exogenous_multiscale_stage7_preflight_2026-09-22.md`.
 
+The full Stage-7 confirmation is now complete and **not supported**. HRL
+all-band versus HRL history was +0.0018 [-0.0289, 0.0326], HRL all-band versus
+flat all-band was +0.0584 [-0.000041, 0.1168], and the hierarchy-by-multiscale
+interaction was +0.0236 [-0.0488, 0.0960]. The Stage-6 representation signal
+did not replicate, and no sequential root extension is allowed. Ordinary
+goal-conditioned HRL retains supported return/RMSE improvements, but the
+current PointMaze evidence does not support a confirmed frequency-specific
+algorithm. See
+`md/freq_hrl_pointmaze_exogenous_multiscale_stage7_result_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
