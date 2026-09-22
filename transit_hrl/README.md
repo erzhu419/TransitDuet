@@ -209,6 +209,18 @@ performance evidence. See
 `md/freq_hrl_stage8_plan_value_protocol_2026-09-22.md` and
 `md/freq_hrl_stage8_plan_value_preflight_2026-09-22.md`.
 
+The full 16-cell Stage-8 matrix is complete and **does not authorize Stage
+9**. The learned history controller, plan refresh, and plan content checks were
+supported, but current-regime oracle information was inconclusive. Zero-delay
+event replanning significantly worsened integrated tracking error, and waiting
+250 ms improved rather than degraded it. The audit also found that the nominal
+500-ms schedule realized only 0.307 s mean first-response delay and that event
+relocation exposed a fixed-duration planner to 1-112-step options. The failed
+run is retained; no roots will be appended. The next admissible work is a fresh
+counterfactual `keep` versus `renew` plan-value qualification with corrected
+delay and variable-duration semantics, not a learned trigger. See
+`md/freq_hrl_stage8_plan_value_result_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

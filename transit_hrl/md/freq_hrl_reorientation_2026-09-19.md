@@ -342,3 +342,18 @@ causal observation-delay witness so an oracle benefit is not mistaken for a
 learnable opportunity. Failure of any registered qualification condition keeps
 Stage 9 blocked; roots cannot be appended after inspection. See
 `freq_hrl_stage8_plan_value_protocol_2026-09-22.md`.
+
+The completed Stage-8 matrix supports plan dependence but fails the task
+qualification gate. The current-regime oracle was inconclusive, immediate
+event replanning was harmful, and nominal 250-ms timing was better rather than
+worse. This rejects the shortcut from change detection to replanning. It also
+exposed two protocol defects for any successor: event relocation produced
+1-112-step option durations for a planner trained only at 50 steps, and the
+nominal 500-ms condition did not enforce a 500-ms first post-event delay.
+
+Accordingly, Stage 9 remains blocked. The next independent protocol must test
+the causal value of `renew now` against `keep current plan` through paired
+simulator branches with a common downstream rule. Only after that value is
+predictable from causal observations, and variable-duration/delay semantics
+are repaired, may a budgeted trigger be trained. See
+`freq_hrl_stage8_plan_value_result_2026-09-22.md`.

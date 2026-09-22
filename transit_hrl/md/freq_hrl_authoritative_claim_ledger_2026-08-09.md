@@ -727,21 +727,20 @@ success contrast, and no sequential root extension is authorized.
 
 ### pointmaze_plan_value_stage8_v1_development
 
-The implementation and fixed eight-root development protocol test whether
-plan refresh, plan content, current privileged regime information, and
-matched-budget event timing have measurable control value before any learned
-belief or trigger is built. The primary endpoint is integrated squared
-tracking error. Oracle schedules and current-regime context are explicitly
-privileged qualification references. The two-cell preflight passed its
-registered software and accounting checks; there is still no Stage-8
-performance result. See the
-[Stage-8 protocol](freq_hrl_stage8_plan_value_protocol_2026-09-22.md) and
+The fixed eight-root result supports learned control, plan refresh, and plan
+content, but the qualification conjunction failed. Current-regime oracle
+information was inconclusive (+0.0255 ISE improvement, 95% CI [-0.1096,
+0.1607]); zero-delay event timing was significantly worse than fixed timing
+(-0.7686 [-0.8890, -0.6482]); and a nominal 250-ms delay improved rather than
+degraded the event schedule. Stage 9 is not authorized and no roots may be
+appended. See the [Stage-8 result](freq_hrl_stage8_plan_value_result_2026-09-22.md),
+[protocol](freq_hrl_stage8_plan_value_protocol_2026-09-22.md), and
 [preflight](freq_hrl_stage8_plan_value_preflight_2026-09-22.md).
 
-Forbidden: protocol registration or preflight validates belief-triggered HRL,
-establishes a deployable change detector, revives a frequency-specific claim,
-or supplies paper performance evidence. Stage 9 remains unauthorized until
-every frozen Stage-8 qualification check passes without added roots.
+Forbidden: Stage 8 validates belief-triggered HRL, establishes that detected
+regime boundaries are optimal replan times, demonstrates monotone delay cost,
+revives a frequency-specific claim, or supplies a positive paper result. The
+post-hoc 250-ms diagnostic is hypothesis-generating only.
 
 ### legacy_c1_c9_matrix_snapshot
 
