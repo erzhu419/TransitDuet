@@ -763,6 +763,21 @@ causality, branch-budget, predictor, and compact-artifact checks. It supplies
 no performance observation. See the
 [Stage-8B preflight](freq_hrl_stage8b_counterfactual_plan_validity_preflight_2026-09-22.md).
 
+### pointmaze_compact_plan_validity_stage8c_v1_development
+
+Stage 8C is a new predictor qualification, not an extension of Stage-8B roots.
+The failed Stage-8B result was used only to choose a frozen 39-feature causal
+interaction structure. Its evaluation rows are consumed development data and
+cannot contribute confirmation. The new candidate is compared on fresh roots
+with nonlinear current-only and generic causal-dynamic baselines under grouped
+branch-fit-only regularization selection. See the
+[Stage-8C protocol](freq_hrl_stage8c_compact_plan_validity_protocol_2026-09-22.md).
+
+Forbidden until the complete fresh matrix passes: Stage 8C validates a
+deployed trigger, improves closed-loop control, establishes belief value, or
+supports a frequency-specific/domain-general Freq-HRL claim. A preflight or a
+post-hoc Stage-8B development contrast is not performance evidence.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

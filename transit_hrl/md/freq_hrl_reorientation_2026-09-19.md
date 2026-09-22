@@ -374,3 +374,12 @@ will be appended. A successor must first develop and independently qualify a
 compact plan-validity representation; deploying a trigger now would skip the
 failed gate. See
 `freq_hrl_stage8b_counterfactual_plan_validity_result_2026-09-22.md`.
+
+Stage 8C freezes that compact-representation repair. The prior evaluation data
+select the model family only and are retired from evidence. A 39-feature causal
+interaction predictor is tested on fresh roots against a 170-feature nonlinear
+current-only baseline and a 170-feature generic causal-dynamic model. All
+regularization selection is grouped by branch-fit path, and privileged regime,
+event, future, and distractor inputs are absent. Only a full fresh conjunction
+may authorize later budgeted-trigger development; see
+`freq_hrl_stage8c_compact_plan_validity_protocol_2026-09-22.md`.

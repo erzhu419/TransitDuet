@@ -248,6 +248,15 @@ utility. The required history-versus-plan/state selected-utility contrast was
 is retained and no roots will be appended. See
 `md/freq_hrl_stage8b_counterfactual_plan_validity_result_2026-09-22.md`.
 
+Stage 8C is the fresh predictor repair. The revealed Stage-8B data are used
+only to select a frozen 39-feature causal interaction structure; all Stage-8C
+evidence will use new optimizer and path seeds. The candidate is compared with
+a 170-feature nonlinear current-only baseline and a 170-feature generic causal
+dynamic model, with ridge regularization selected only by grouped branch-fit
+cross-validation. No predictor receives event labels, regime context, future
+values, or distractor features. See
+`md/freq_hrl_stage8c_compact_plan_validity_protocol_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
