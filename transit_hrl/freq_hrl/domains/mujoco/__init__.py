@@ -27,6 +27,12 @@ from .pointmaze_external import (
     PointMazeExternalObservation,
     PointMazeExternalTask,
 )
+from .pointmaze_regime import (
+    POINTMAZE_REGIME_SPEEDS,
+    PointMazeRegimeDriver,
+    PointMazeRegimeObservation,
+    PointMazeRegimeTask,
+)
 
 __all__ = [
     "CausalBandDecomposer",
@@ -44,6 +50,10 @@ __all__ = [
     "PointMazeExternalDriver",
     "PointMazeExternalObservation",
     "PointMazeExternalTask",
+    "POINTMAZE_REGIME_SPEEDS",
+    "PointMazeRegimeDriver",
+    "PointMazeRegimeObservation",
+    "PointMazeRegimeTask",
     "action_from_unit_box",
     "deterministic_actuation_disturbance",
     "environment_timing",
