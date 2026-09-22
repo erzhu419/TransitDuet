@@ -778,6 +778,17 @@ deployed trigger, improves closed-loop control, establishes belief value, or
 supports a frequency-specific/domain-general Freq-HRL claim. A preflight or a
 post-hoc Stage-8B development contrast is not performance evidence.
 
+The initial 240-step preflight failed before evidence because one registered
+path lacked a force-pulse opportunity. After changing only the implementation
+preflight horizon to 300 steps and adding coverage tests, task `t100474`
+completed and passed the runtime, seed, balanced-opportunity, grouped-CV,
+causality, exact-prefix, call-isolation, branch-budget, analyzer, and compact-
+artifact checks. See the
+[Stage-8C preflight](freq_hrl_stage8c_compact_plan_validity_preflight_2026-09-22.md).
+
+Forbidden: the Stage-8C preflight point estimates are performance evidence or
+authorize Stage 9. Only the complete frozen eight-root conjunction can do so.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

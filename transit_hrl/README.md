@@ -257,6 +257,14 @@ cross-validation. No predictor receives event labels, regime context, future
 values, or distractor features. See
 `md/freq_hrl_stage8c_compact_plan_validity_protocol_2026-09-22.md`.
 
+The first Stage-8C preflight failed before evidence because one frozen path had
+no force pulse within its 240-step implementation horizon. The repaired
+300-step preflight completed as `t100474` on `node002` and passed runtime,
+balanced-opportunity, grouped-CV, causal-feature, exact-prefix, call-isolation,
+branch-budget, analyzer, and compact-artifact checks. It authorizes the
+unchanged eight-root matrix but supplies no performance observation. See
+`md/freq_hrl_stage8c_compact_plan_validity_preflight_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

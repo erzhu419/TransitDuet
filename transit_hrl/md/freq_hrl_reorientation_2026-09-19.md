@@ -383,3 +383,9 @@ regularization selection is grouped by branch-fit path, and privileged regime,
 event, future, and distractor inputs are absent. Only a full fresh conjunction
 may authorize later budgeted-trigger development; see
 `freq_hrl_stage8c_compact_plan_validity_protocol_2026-09-22.md`.
+
+The repaired Stage-8C preflight completed as task `t100474` after increasing
+only its implementation horizon from 240 to 300 steps so every frozen branch
+path contains all six opportunity classes. Its software and artifact audits
+passed; its single-root signs and intervals are not performance evidence. See
+`freq_hrl_stage8c_compact_plan_validity_preflight_2026-09-22.md`.
