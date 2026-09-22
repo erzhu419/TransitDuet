@@ -451,6 +451,10 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if not 0.0 < float(args.selection_rate) <= 1.0:
         raise ValueError("selection rate must be in (0, 1]")
+    if float(args.ridge_alpha) != 1.0:
+        raise ValueError(
+            "legacy --ridge-alpha is fixed at 1.0; use --ridge-alpha-grid"
+        )
     task_options = _task_options(args)
     protocol = resolved_compact_plan_validity_protocol(
         args=args, task_options=task_options
