@@ -13,10 +13,12 @@ goal-conditioned HRL**:
   feedback;
 - the Stage-7 evidence supports the ordinary hierarchy more strongly than any
   fixed frequency representation or routing rule;
-- Stage 8 asks whether current regime information and correctly timed
-  replanning have value under a matched upper-call budget;
-- learned belief, plan-validity critic, and event trigger remain disabled until
-  that task-level qualification passes.
+- Stage 8 found strong plan dependence but rejected immediate regime-event
+  timing and did not support privileged regime input;
+- Stage 8B directly measures paired `keep`/`renew` plan value and tests whether
+  causal history predicts it beyond current plan/state;
+- deployed belief, plan-validity trigger, and joint training remain disabled
+  until that task-level qualification passes.
 
 The completed four-grid Stage-1 protocol was run with:
 
@@ -220,6 +222,15 @@ run is retained; no roots will be appended. The next admissible work is a fresh
 counterfactual `keep` versus `renew` plan-value qualification with corrected
 delay and variable-duration semantics, not a learned trigger. See
 `md/freq_hrl_stage8_plan_value_result_2026-09-22.md`.
+
+Stage 8B is the independent repair. It replaces event-time relocation with
+paired `keep current waypoint` / `renew now` simulator branches sharing an
+exact deterministic prefix and common 0.50-second downstream rule. A causal
+history predictor is qualified against plan-age, current-plan/state, and
+change-magnitude baselines; true regime context is diagnostic only. The fixed
+eight-root conjunction can authorize only later trigger development, not a
+closed-loop claim. See
+`md/freq_hrl_stage8b_counterfactual_plan_validity_protocol_2026-09-22.md`.
 
 The package also retains the earlier components for:
 

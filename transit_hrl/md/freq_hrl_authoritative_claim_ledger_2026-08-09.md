@@ -742,6 +742,19 @@ regime boundaries are optimal replan times, demonstrates monotone delay cost,
 revives a frequency-specific claim, or supplies a positive paper result. The
 post-hoc 250-ms diagnostic is hypothesis-generating only.
 
+### pointmaze_plan_validity_stage8b_v1_development
+
+This fresh protocol uses paired deterministic simulator branches to measure
+local `renew now` value directly. Candidate predictors receive causal state,
+plan, age, and history only; the current true regime is restricted to a
+privileged ceiling. The fixed eight-root matrix and conjunction are registered
+in the [Stage-8B protocol](freq_hrl_stage8b_counterfactual_plan_validity_protocol_2026-09-22.md).
+
+Forbidden until the complete matrix passes: Stage 8B validates a budgeted
+trigger, improves closed-loop control, establishes learned belief value, or
+supports a frequency-specific/domain-general Freq-HRL claim. Branch-selection
+utility is a local counterfactual ranking diagnostic, not episode return.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

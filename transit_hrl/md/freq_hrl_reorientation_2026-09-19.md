@@ -357,3 +357,11 @@ simulator branches with a common downstream rule. Only after that value is
 predictable from causal observations, and variable-duration/delay semantics
 are repaired, may a budgeted trigger be trained. See
 `freq_hrl_stage8_plan_value_result_2026-09-22.md`.
+
+Stage 8B now implements that independent protocol. It uses exact-prefix paired
+simulator branches, a common 0.50-second no-replan continuation, and separate
+branch-fit/evaluation paths to test whether causal history predicts local
+`renew` value beyond current plan/state. Event tables only sample diagnostic
+opportunities; they never enter candidate features. The eight-root conjunction
+can authorize Stage-9 development only and is defined in
+`freq_hrl_stage8b_counterfactual_plan_validity_protocol_2026-09-22.md`.
