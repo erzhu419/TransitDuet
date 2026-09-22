@@ -43,7 +43,7 @@ class PointMazeCompactPlanValidityStageEightCSchedulerTest(unittest.TestCase):
     def test_preflight_exercises_grouped_cross_validation(self):
         options = spec.cell_options(207001, preflight=True)
         self.assertEqual(options["iterations"], 2)
-        self.assertEqual(options["horizon"], 240)
+        self.assertEqual(options["horizon"], 300)
         self.assertEqual(options["max_events_per_class"], 1)
         self.assertEqual(len(options["train"]), 1)
         self.assertEqual(len(options["selection"]), 1)
@@ -51,8 +51,17 @@ class PointMazeCompactPlanValidityStageEightCSchedulerTest(unittest.TestCase):
         self.assertEqual(len(options["branch_eval"]), 2)
 
     def test_every_frozen_branch_path_has_balanced_opportunities(self):
-        for root in spec.OPTIMIZER_SEEDS:
-            options = spec.cell_options(root, preflight=False)
+        matrices = (
+            (spec.PREFLIGHT_OPTIMIZER_SEEDS, True, 1),
+            (spec.OPTIMIZER_SEEDS, False, 4),
+        )
+        cases = (
+            (root, preflight, expected_per_class)
+            for roots, preflight, expected_per_class in matrices
+            for root in roots
+        )
+        for root, preflight, expected_per_class in cases:
+            options = spec.cell_options(root, preflight=preflight)
             for role in ("branch_fit", "branch_eval"):
                 for seed in options[role]:
                     driver = PointMazeRegimeDriver(
@@ -97,7 +106,9 @@ class PointMazeCompactPlanValidityStageEightCSchedulerTest(unittest.TestCase):
                         )
                     )
                     self.assertEqual(set(counts), set(BRANCH_CATEGORIES))
-                    self.assertEqual(set(counts.values()), {4})
+                    self.assertEqual(
+                        set(counts.values()), {expected_per_class}
+                    )
 
     def test_task_is_dynamic_single_core_and_explicit_about_alpha_grid(self):
         cell = spec.cells(preflight=True)[0]

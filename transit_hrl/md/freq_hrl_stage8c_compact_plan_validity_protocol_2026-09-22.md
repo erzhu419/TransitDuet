@@ -72,8 +72,17 @@ forbidden.
 
 The preflight root is `207001`. It uses one training path, one selection path,
 two branch-fit paths, and two branch-evaluation paths so grouped alpha selection
-is exercised. It uses two controller iterations, a 240-step horizon, and one
+is exercised. It uses two controller iterations, a 300-step horizon, and one
 opportunity per class. Preflight validates implementation only.
+
+The first implementation preflight (`...preflight_20260922_r1`) exposed a
+protocol-test defect: one registered branch-evaluation seed had no force-pulse
+opportunity before step 240. It failed before producing evidence and its three
+scheduler attempts remain recorded as two failures and one cancelled retry.
+The repaired preflight changes only its horizon from 240 to 300 steps. A frozen
+test now verifies all four preflight branch paths as well as every formal branch
+path have complete, balanced opportunity classes. The formal 1,200-step matrix,
+algorithm revision, seeds, predictors, and gate are unchanged.
 
 ## Registered Gate
 
