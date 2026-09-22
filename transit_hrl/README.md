@@ -232,6 +232,13 @@ eight-root conjunction can authorize only later trigger development, not a
 closed-loop claim. See
 `md/freq_hrl_stage8b_counterfactual_plan_validity_protocol_2026-09-22.md`.
 
+The one-cell Stage-8B preflight passed runtime, exact-prefix replay, feature
+causality, branch-call isolation, balanced opportunity coverage, predictor,
+extra-transition accounting, analyzer, and compact-artifact checks on
+`node004`. It authorizes the unchanged eight-root development matrix but is
+not performance evidence. See
+`md/freq_hrl_stage8b_counterfactual_plan_validity_preflight_2026-09-22.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

@@ -755,6 +755,11 @@ trigger, improves closed-loop control, establishes learned belief value, or
 supports a frequency-specific/domain-general Freq-HRL claim. Branch-selection
 utility is a local counterfactual ranking diagnostic, not episode return.
 
+The one-cell Stage-8B preflight passed the registered runtime, replay,
+causality, branch-budget, predictor, and compact-artifact checks. It supplies
+no performance observation. See the
+[Stage-8B preflight](freq_hrl_stage8b_counterfactual_plan_validity_preflight_2026-09-22.md).
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
