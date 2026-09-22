@@ -356,8 +356,11 @@ def train_pointmaze_compact_plan_validity_cell(
     for row in (*fit_rows, *eval_rows):
         row.pop("feature_names")
         row.pop("feature_masks")
+        row.pop("oracle_regime_context", None)
+        row.pop("oracle_regime_used_only_by_diagnostic_predictor", None)
         row["protocol_version"] = POINTMAZE_COMPACT_PLAN_VALIDITY_PROTOCOL_VERSION
         row["algorithm_path"] = POINTMAZE_COMPACT_PLAN_VALIDITY_ALGORITHM_PATH
+        row["privileged_regime_context_present"] = False
 
     payload["source_branch_protocol_version"] = (
         POINTMAZE_PLAN_VALIDITY_PROTOCOL_VERSION
