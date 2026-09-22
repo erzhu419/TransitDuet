@@ -202,7 +202,12 @@ regimes. The primary endpoint is integrated squared tracking error. Learned
 belief and event-triggered replanning are authorized only if plan refresh,
 plan content, current regime information, matched-budget timing, and a usable
 causal identification window are all supported across the fixed eight roots.
-See `md/freq_hrl_stage8_plan_value_protocol_2026-09-22.md`.
+The two-cell preflight passed runtime, state, capacity, update, path-pairing,
+budget, variable-duration, and compact-artifact checks on `node004` and
+`node006`. It authorizes the fixed 16-cell development matrix but supplies no
+performance evidence. See
+`md/freq_hrl_stage8_plan_value_protocol_2026-09-22.md` and
+`md/freq_hrl_stage8_plan_value_preflight_2026-09-22.md`.
 
 The package also retains the earlier components for:
 

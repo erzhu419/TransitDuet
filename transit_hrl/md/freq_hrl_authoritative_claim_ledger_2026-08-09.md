@@ -732,9 +732,11 @@ plan refresh, plan content, current privileged regime information, and
 matched-budget event timing have measurable control value before any learned
 belief or trigger is built. The primary endpoint is integrated squared
 tracking error. Oracle schedules and current-regime context are explicitly
-privileged qualification references. At registration time there is no Stage-8
+privileged qualification references. The two-cell preflight passed its
+registered software and accounting checks; there is still no Stage-8
 performance result. See the
-[Stage-8 protocol](freq_hrl_stage8_plan_value_protocol_2026-09-22.md).
+[Stage-8 protocol](freq_hrl_stage8_plan_value_protocol_2026-09-22.md) and
+[preflight](freq_hrl_stage8_plan_value_preflight_2026-09-22.md).
 
 Forbidden: protocol registration or preflight validates belief-triggered HRL,
 establishes a deployable change detector, revives a frequency-specific claim,
