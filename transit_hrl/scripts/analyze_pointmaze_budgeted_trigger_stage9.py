@@ -253,9 +253,15 @@ def analyze(paths: Iterable[Path]) -> dict[str, Any]:
     if set(roots) == set(spec.PREFLIGHT_OPTIMIZER_SEEDS):
         expected_roots = spec.PREFLIGHT_OPTIMIZER_SEEDS
         preflight = True
+        matrix = "preflight"
     elif set(roots) == set(spec.OPTIMIZER_SEEDS):
         expected_roots = spec.OPTIMIZER_SEEDS
         preflight = False
+        matrix = "formal_development"
+    elif set(roots) == set(spec.CONFIRMATION_OPTIMIZER_SEEDS):
+        expected_roots = spec.CONFIRMATION_OPTIMIZER_SEEDS
+        preflight = False
+        matrix = "independent_seed_confirmation"
     else:
         raise ValueError("Stage-9 registered root matrix is incomplete")
     if len(roots) != len(expected_roots):
@@ -272,20 +278,27 @@ def analyze(paths: Iterable[Path]) -> dict[str, Any]:
         "candidate_beats_current_only_ise": intervals["candidate_minus_current_episode_tracking_ise"]["status"] == "supported",
         "candidate_return_beats_fixed": intervals["candidate_minus_fixed_episode_return"]["status"] == "supported",
     }
+    phase = (
+        "confirmation" if matrix == "independent_seed_confirmation"
+        else "development"
+    )
     return {
         "analysis_version": "pointmaze_budgeted_trigger_stage9_analysis_v1",
         "protocol_version": POINTMAZE_BUDGETED_TRIGGER_PROTOCOL_VERSION,
-        "matrix": "preflight" if preflight else "formal_development",
+        "matrix": matrix,
         "optimizer_root_count": len(summaries),
         "statistical_unit": "optimizer_seed_root",
         "root_summaries": {str(root): summaries[root] for root in sorted(summaries)},
         "intervals": intervals,
         "qualification_checks": checks,
         "decision": (
-            "stage9_development_gate_passed"
-            if all(checks.values()) else "stage9_development_gate_failed"
+            f"stage9_{phase}_gate_"
+            f"{'passed' if all(checks.values()) else 'failed'}"
         ),
         "claim_boundary": (
+            "PointMaze independent-seed confirmation only; domain transfer "
+            "and external validity remain required"
+            if matrix == "independent_seed_confirmation" else
             "PointMaze development only; independent confirmation and domain "
             "transfer remain required"
         ),

@@ -286,6 +286,8 @@ The candidate reduced episode tracking ISE relative to fixed planning by
 is PointMaze development evidence only; independent confirmation and domain
 transfer are outstanding. See
 `md/freq_hrl_stage9_budgeted_trigger_result_2026-09-26.md`.
+The fresh eight-root confirmation roster and unchanged gate are frozen in
+`md/freq_hrl_stage9_budgeted_trigger_confirmation_protocol_2026-09-26.md`.
 
 The package also retains the earlier components for:
 

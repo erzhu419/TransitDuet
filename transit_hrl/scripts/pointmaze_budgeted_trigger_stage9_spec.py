@@ -23,6 +23,9 @@ from freq_hrl.experiments.pointmaze_plan_value_qualification import (
 
 PROTOCOL = POINTMAZE_BUDGETED_TRIGGER_PROTOCOL_VERSION
 EXPERIMENT_PROTOCOL = "pointmaze_budgeted_trigger_stage9_v1_development"
+CONFIRMATION_EXPERIMENT_PROTOCOL = (
+    "pointmaze_budgeted_trigger_stage9_v2_confirmation"
+)
 ALGORITHM_REVISION = "91b3e6919bcffe3a75d4942b0df31ae8478d69f6"
 RUNNER_SCRIPT = "scripts/run_pointmaze_budgeted_trigger_stage9.py"
 POLICY = "hrl_regime_history"
@@ -31,6 +34,10 @@ PREFLIGHT_OPTIMIZER_SEEDS = (208001,)
 OPTIMIZER_SEEDS = (
     208011, 208023, 208037, 208049,
     208061, 208073, 208089, 208101,
+)
+CONFIRMATION_OPTIMIZER_SEEDS = (
+    209011, 209023, 209037, 209049,
+    209061, 209073, 209089, 209101,
 )
 ITERATIONS = 384
 HORIZON = 1200
@@ -74,6 +81,10 @@ CLAIM_GATE = {
     "sequential_root_extension": "forbidden",
     "authorization_scope": "stage9_development_result_only",
 }
+CONFIRMATION_CLAIM_GATE = {
+    **CLAIM_GATE,
+    "authorization_scope": "stage9_pointmaze_confirmation_result_only",
+}
 
 _TRAIN_OFFSETS = (11, 17, 23, 29, 41, 47, 59, 61)
 _SELECTION_OFFSETS = (101, 103, 109, 127, 131, 137, 149, 151)
@@ -88,6 +99,8 @@ def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
     root = int(optimizer_seed)
     if root in PREFLIGHT_OPTIMIZER_SEEDS:
         base = 2_159_000
+    elif root in CONFIRMATION_OPTIMIZER_SEEDS:
+        base = 2_180_000 + CONFIRMATION_OPTIMIZER_SEEDS.index(root) * 1_000
     else:
         try:
             replicate = OPTIMIZER_SEEDS.index(root)
@@ -102,8 +115,13 @@ def seed_roles(optimizer_seed: int) -> dict[str, tuple[int, ...]]:
     }
 
 
-def cells(*, preflight: bool) -> list[tuple[str, int]]:
-    roots = PREFLIGHT_OPTIMIZER_SEEDS if preflight else OPTIMIZER_SEEDS
+def cells(*, preflight: bool, confirmation: bool = False) -> list[tuple[str, int]]:
+    if preflight and confirmation:
+        raise ValueError("Stage-9 preflight and confirmation are distinct")
+    roots = (
+        CONFIRMATION_OPTIMIZER_SEEDS if confirmation else
+        PREFLIGHT_OPTIMIZER_SEEDS if preflight else OPTIMIZER_SEEDS
+    )
     return [(POLICY, root) for root in roots]
 
 

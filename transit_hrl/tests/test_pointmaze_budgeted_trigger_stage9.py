@@ -27,7 +27,11 @@ class PointMazeBudgetedTriggerStageNineTest(unittest.TestCase):
             for seed in values
         }
         observed = set()
-        for root in (*spec.PREFLIGHT_OPTIMIZER_SEEDS, *spec.OPTIMIZER_SEEDS):
+        for root in (
+            *spec.PREFLIGHT_OPTIMIZER_SEEDS,
+            *spec.OPTIMIZER_SEEDS,
+            *spec.CONFIRMATION_OPTIMIZER_SEEDS,
+        ):
             values = [
                 seed for role in spec.seed_roles(root).values() for seed in role
             ]
@@ -38,8 +42,10 @@ class PointMazeBudgetedTriggerStageNineTest(unittest.TestCase):
             observed.update(values)
 
     def test_all_registered_branch_fit_paths_have_balanced_opportunities(self):
-        for preflight in (True, False):
-            for _, root in spec.cells(preflight=preflight):
+        for preflight, confirmation in ((True, False), (False, False), (False, True)):
+            for _, root in spec.cells(
+                preflight=preflight, confirmation=confirmation,
+            ):
                 options = spec.cell_options(root, preflight=preflight)
                 count = options["max_events_per_class"]
                 for seed in options["branch_fit"]:
@@ -89,6 +95,25 @@ class PointMazeBudgetedTriggerStageNineTest(unittest.TestCase):
         self.assertEqual(task["cpu"], 1)
         self.assertEqual(task["ram_mb"], 1536)
         self.assertTrue(task["allow_no_ckpt"])
+
+    def test_confirmation_uses_fresh_roots_and_same_frozen_options(self):
+        cells = spec.cells(preflight=False, confirmation=True)
+        self.assertEqual(len(cells), 8)
+        self.assertFalse(set(spec.OPTIMIZER_SEEDS).intersection(root for _, root in cells))
+        self.assertEqual(
+            spec.CONFIRMATION_CLAIM_GATE["authorization_scope"],
+            "stage9_pointmaze_confirmation_result_only",
+        )
+        for _, root in cells:
+            options = spec.cell_options(root, preflight=False)
+            self.assertEqual(len(options["trigger_eval"]), 16)
+            task = task_specification(
+                "unit_stage9_confirmation", root,
+                preflight=False, confirmation=True,
+            )
+            self.assertEqual(task["project"], spec.CONFIRMATION_EXPERIMENT_PROTOCOL)
+            self.assertEqual(task["cpu"], 1)
+            self.assertIsNone(task["require_node"])
 
 
 if __name__ == "__main__":

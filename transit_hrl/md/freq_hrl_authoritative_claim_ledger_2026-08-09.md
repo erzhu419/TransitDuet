@@ -822,6 +822,10 @@ closed-loop improvement under this task and training protocol. Not yet
 established: independent confirmation, cross-domain transfer, or a
 domain-general frequency-separated HRL result.
 
+The new [independent-seed confirmation protocol](freq_hrl_stage9_budgeted_trigger_confirmation_protocol_2026-09-26.md)
+freezes eight fresh optimizer roots and the same five gates. It has no outcome
+yet and does not change the development claim boundary.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

@@ -33,8 +33,12 @@ def cell_relative_dir(run_name: str, root: int) -> Path:
     return Path("results") / run_name / "cells" / spec.POLICY / f"replicate_{root}"
 
 
-def task_signature(run_name: str, root: int) -> str:
-    return f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}"
+def task_signature(run_name: str, root: int, *, confirmation: bool = False) -> str:
+    protocol = (
+        spec.CONFIRMATION_EXPERIMENT_PROTOCOL
+        if confirmation else spec.EXPERIMENT_PROTOCOL
+    )
+    return f"Freq-HRL/{protocol}/{run_name}/{spec.POLICY}/{root}"
 
 
 def training_command(run_name: str, root: int, *, preflight: bool) -> str:
@@ -84,16 +88,25 @@ def training_command(run_name: str, root: int, *, preflight: bool) -> str:
     )
 
 
-def task_specification(run_name: str, root: int, *, preflight: bool) -> dict[str, object]:
+def task_specification(
+    run_name: str, root: int, *, preflight: bool, confirmation: bool = False
+) -> dict[str, object]:
     relative = cell_relative_dir(run_name, root)
-    phase = "preflight" if preflight else "development"
+    phase = (
+        "confirmation" if confirmation else
+        "preflight" if preflight else "development"
+    )
+    protocol = (
+        spec.CONFIRMATION_EXPERIMENT_PROTOCOL
+        if confirmation else spec.EXPERIMENT_PROTOCOL
+    )
     return {
-        "project": spec.EXPERIMENT_PROTOCOL,
+        "project": protocol,
         "description": f"Freq-HRL PointMaze stage9 {phase} {spec.POLICY} root{root}",
         "cmd": training_command(run_name, root, preflight=preflight),
         "cwd": str(ROOT),
-        "signature": task_signature(run_name, root),
-        "resource_family": f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/cell",
+        "signature": task_signature(run_name, root, confirmation=confirmation),
+        "resource_family": f"Freq-HRL/{protocol}/cell",
         "cpu": 1,
         "ram_mb": 1536,
         "vram": 0,
@@ -117,11 +130,15 @@ def task_specification(run_name: str, root: int, *, preflight: bool) -> dict[str
     }
 
 
-def _inventory(run_name: str) -> list[dict[str, object]]:
+def _inventory(run_name: str, *, confirmation: bool = False) -> list[dict[str, object]]:
+    protocol = (
+        spec.CONFIRMATION_EXPERIMENT_PROTOCOL
+        if confirmation else spec.EXPERIMENT_PROTOCOL
+    )
     process = subprocess.run(
         [
             sys.executable, str(SCHEDULER), "results", "--signature",
-            f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/*",
+            f"Freq-HRL/{protocol}/{run_name}/*",
             "--status", "queued", "launching", "running", "done", "failed",
             "cancelled", "--limit", "0", "--include-empty", "--no-log-scan", "--json",
         ],
@@ -133,11 +150,13 @@ def _inventory(run_name: str) -> list[dict[str, object]]:
     return list(payload.get("results", []))
 
 
-def sync_results(run_name: str, *, preflight: bool, workers: int) -> None:
-    tasks = _inventory_by_signature(_inventory(run_name))
+def sync_results(
+    run_name: str, *, preflight: bool, confirmation: bool = False, workers: int
+) -> None:
+    tasks = _inventory_by_signature(_inventory(run_name, confirmation=confirmation))
     expected = []
-    for _, root in spec.cells(preflight=preflight):
-        signature = task_signature(run_name, root)
+    for _, root in spec.cells(preflight=preflight, confirmation=confirmation):
+        signature = task_signature(run_name, root, confirmation=confirmation)
         task = tasks.get(signature)
         if task is None or task.get("status") != "done" or not task.get("node"):
             raise SystemExit(f"Stage-9 task is not done: {signature}")
@@ -178,10 +197,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
     parser.add_argument("--preflight", action="store_true")
+    parser.add_argument("--confirmation", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--sync-results", action="store_true")
     parser.add_argument("--sync-workers", type=int, default=4)
     args = parser.parse_args()
+    if args.preflight and args.confirmation:
+        parser.error("preflight and confirmation are distinct phases")
     subprocess.run(
         ["git", "diff", "--exit-code", spec.ALGORITHM_REVISION, "--",
          "freq_hrl", spec.RUNNER_SCRIPT],
@@ -189,28 +211,43 @@ def main() -> int:
         check=True,
     )
     if args.sync_results:
-        sync_results(args.run_name, preflight=args.preflight, workers=args.sync_workers)
+        sync_results(
+            args.run_name, preflight=args.preflight,
+            confirmation=args.confirmation, workers=args.sync_workers,
+        )
         return 0
-    if _inventory(args.run_name):
+    if _inventory(args.run_name, confirmation=args.confirmation):
         raise SystemExit("Stage-9 run already registered")
     run_dir = ROOT / "results" / args.run_name
     if any(run_dir.glob("cells/**/result.json")):
         raise SystemExit("Stage-9 run already contains completed cells")
     run_dir.mkdir(parents=True, exist_ok=True)
-    roots = spec.PREFLIGHT_OPTIMIZER_SEEDS if args.preflight else spec.OPTIMIZER_SEEDS
+    roots = (
+        spec.CONFIRMATION_OPTIMIZER_SEEDS if args.confirmation else
+        spec.PREFLIGHT_OPTIMIZER_SEEDS if args.preflight else spec.OPTIMIZER_SEEDS
+    )
+    protocol = (
+        spec.CONFIRMATION_EXPERIMENT_PROTOCOL
+        if args.confirmation else spec.EXPERIMENT_PROTOCOL
+    )
     registration = {
-        "protocol": spec.EXPERIMENT_PROTOCOL,
+        "protocol": protocol,
         "runtime_protocol": spec.PROTOCOL,
         "algorithm_revision": spec.ALGORITHM_REVISION,
         "preflight": bool(args.preflight),
+        "confirmation": bool(args.confirmation),
         "optimizer_seeds": list(roots),
         "runtime_expectations": spec.RUNTIME_EXPECTATIONS,
-        "cells": [list(cell) for cell in spec.cells(preflight=args.preflight)],
+        "cells": [list(cell) for cell in spec.cells(
+            preflight=args.preflight, confirmation=args.confirmation,
+        )],
         "options": {
             str(root): spec.cell_options(root, preflight=args.preflight)
             for root in roots
         },
-        "claim_gate": spec.CLAIM_GATE,
+        "claim_gate": (
+            spec.CONFIRMATION_CLAIM_GATE if args.confirmation else spec.CLAIM_GATE
+        ),
         "scheduler": {
             "nodes": list(LINUX_CPU_NODES), "require_node": None,
             "cpu_per_cell": 1, "ram_mb_per_cell": 1536,
@@ -222,10 +259,14 @@ def main() -> int:
         encoding="utf-8",
     )
     execute_bulk(
-        [task_specification(args.run_name, root, preflight=args.preflight)
-         for _, root in spec.cells(preflight=args.preflight)],
+        [task_specification(
+            args.run_name, root, preflight=args.preflight,
+            confirmation=args.confirmation,
+        ) for _, root in spec.cells(
+            preflight=args.preflight, confirmation=args.confirmation,
+        )],
         dry_run=args.dry_run,
-        intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{args.run_name}",
+        intent_label=f"{protocol}:{args.run_name}",
     )
     if not args.dry_run:
         subprocess.run([sys.executable, str(SCHEDULER), "dispatch"], check=True)
