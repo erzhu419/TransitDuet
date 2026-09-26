@@ -4,6 +4,8 @@ Date: 2026-09-27
 
 Protocol: `pointmaze_termination_mc_credit_v3_development`
 
+Algorithm revision: `1fc6dc8ffff597362bfa02bbb962b5915f5a3609`
+
 The stochastic diagnostic found frequent but poorly conditioned early calls.
 The v1 PPO used GAE lambda 0.95 per **decision**, although each action changes
 the number of subsequent checks. Its trace weights therefore depend on the
