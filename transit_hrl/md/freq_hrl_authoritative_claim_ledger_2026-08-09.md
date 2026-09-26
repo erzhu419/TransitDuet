@@ -789,6 +789,17 @@ artifact checks. See the
 Forbidden: the Stage-8C preflight point estimates are performance evidence or
 authorize Stage 9. Only the complete frozen eight-root conjunction can do so.
 
+The complete Stage-8C matrix passed all seven registered root-level 95% CI
+checks. Its primary held-out selected-local-value contrast against the strong
+current-only quadratic baseline was +0.040329 [0.030866, 0.049792]. The
+independent branch-row audit matched this interval and verified all eight
+roots, seed splits, causal feature contracts, paired replay, and extra-step
+accounting. See the [Stage-8C result](freq_hrl_stage8c_compact_plan_validity_result_2026-09-26.md).
+
+Authorized: development of a budgeted closed-loop trigger on a fresh protocol.
+Not established: episode ISE/return improvement, superiority to fixed-budget
+replanning, or a frequency-specific/domain-general Freq-HRL claim.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

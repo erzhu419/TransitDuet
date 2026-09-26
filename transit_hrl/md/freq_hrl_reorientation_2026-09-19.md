@@ -389,3 +389,11 @@ only its implementation horizon from 240 to 300 steps so every frozen branch
 path contains all six opportunity classes. Its software and artifact audits
 passed; its single-root signs and intervals are not performance evidence. See
 `freq_hrl_stage8c_compact_plan_validity_preflight_2026-09-22.md`.
+
+The eight-root Stage-8C qualification then passed its complete registered
+conjunction. The candidate's selected local renewal value exceeded the
+current-only quadratic baseline by +0.040329 [0.030866, 0.049792], with a
+positive contrast in every root. Stage 9 may develop a causal budgeted trigger,
+but its closed-loop effect and variable-duration semantics require a separate
+fresh-seed test. See
+`freq_hrl_stage8c_compact_plan_validity_result_2026-09-26.md`.

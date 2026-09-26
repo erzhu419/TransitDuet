@@ -265,6 +265,13 @@ branch-budget, analyzer, and compact-artifact checks. It authorizes the
 unchanged eight-root matrix but supplies no performance observation. See
 `md/freq_hrl_stage8c_compact_plan_validity_preflight_2026-09-22.md`.
 
+The complete eight-root Stage-8C matrix passed all seven registered checks.
+The primary candidate-minus-current-only selected local value was +0.040329
+[0.030866, 0.049792] across roots, and the independent audit reproduced it
+from held-out branch rows. This authorizes budgeted-trigger development only;
+deployed control improvement remains untested. See
+`md/freq_hrl_stage8c_compact_plan_validity_result_2026-09-26.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
