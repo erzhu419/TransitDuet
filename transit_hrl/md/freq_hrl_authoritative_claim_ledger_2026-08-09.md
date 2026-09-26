@@ -823,8 +823,18 @@ established: independent confirmation, cross-domain transfer, or a
 domain-general frequency-separated HRL result.
 
 The new [independent-seed confirmation protocol](freq_hrl_stage9_budgeted_trigger_confirmation_protocol_2026-09-26.md)
-freezes eight fresh optimizer roots and the same five gates. It has no outcome
-yet and does not change the development claim boundary.
+froze eight fresh optimizer roots and the same five gates. All eight completed
+and the confirmation gate passed. Fixed minus candidate episode ISE was
++0.505541 [0.408443, 0.602640]; candidate minus fixed return was +40.662456
+[31.548406, 49.776506]. The other three registered root-level 95% intervals
+also had positive lower bounds. Independent episode-row calculation reproduced
+the intervals; every mode made 24 upper calls. See the
+[confirmation result](freq_hrl_stage9_budgeted_trigger_confirmation_result_2026-09-26.md).
+
+Authorized: independent-seed confirmation of fixed-budget, causal-history
+plan-validity triggering on this PointMaze hidden-regime task family.
+Forbidden: treating it as proof of frequency-band responsibility, domain
+generality, or benefit on a different environment/task distribution.
 
 ### legacy_c1_c9_matrix_snapshot
 

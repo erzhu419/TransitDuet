@@ -288,6 +288,12 @@ transfer are outstanding. See
 `md/freq_hrl_stage9_budgeted_trigger_result_2026-09-26.md`.
 The fresh eight-root confirmation roster and unchanged gate are frozen in
 `md/freq_hrl_stage9_budgeted_trigger_confirmation_protocol_2026-09-26.md`.
+All eight confirmation roots completed and passed the same five registered
+checks. Fixed minus candidate episode ISE was 0.505541 [0.408443, 0.602640];
+candidate minus fixed return was 40.662456 [31.548406, 49.776506]. See
+`md/freq_hrl_stage9_budgeted_trigger_confirmation_result_2026-09-26.md`.
+This is independent-seed PointMaze confirmation, not frequency-band or
+cross-domain validation.
 
 The package also retains the earlier components for:
 
