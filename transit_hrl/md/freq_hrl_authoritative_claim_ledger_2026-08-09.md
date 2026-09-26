@@ -844,6 +844,10 @@ fixed-controller replay against the Stage-9 confirmation paths. Its gate
 requires both baseline competence against fixed planning and candidate ISE
 superiority against the learned baseline. No Stage-10 performance outcome is
 available yet; reused Stage-9 paths make this a development comparison only.
+The [preflight](freq_hrl_stage10_learned_termination_preflight_2026-09-26.md)
+passed software and accounting checks but its two-iteration deterministic
+actor made no pre-deadline calls. It authorizes the unchanged eight-root
+development matrix, not a learned-termination performance claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

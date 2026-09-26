@@ -301,6 +301,9 @@ Stage-9 branch-replay count, and fixed-controller replay must match exactly.
 The revealed Stage-9 confirmation paths make this a development comparison,
 not new confirmation. See
 `md/freq_hrl_stage10_learned_termination_protocol_2026-09-26.md`.
+The single-root Stage-10 preflight passed software and accounting checks but
+supplies no performance evidence. See
+`md/freq_hrl_stage10_learned_termination_preflight_2026-09-26.md`.
 
 The package also retains the earlier components for:
 
