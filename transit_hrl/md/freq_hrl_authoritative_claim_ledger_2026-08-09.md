@@ -870,7 +870,17 @@ is a new, two-root development intervention, not independent confirmation.
 Its preflight `t100890` passed the six-call 300-step budget, actor-update,
 stochastic-activation, and exact fixed-controller replay checks. Development
 tasks `t100891` and `t100892` were launched on node006 and node005;
-no MC-credit performance outcome is available yet.
+their [result](freq_hrl_stage10_mc_credit_v3_result_2026-09-27.md) failed the
+development gate. MC stochastic ISE was 1.800670 versus old 1.781158 and
+fixed 1.587736 on root 209011; on root 209061 it was 1.484142 versus old
+1.380837 and fixed 1.447218. No fresh-root extension is licensed.
+
+The Stage-9 branch-fit labels also compare an **extra immediate upper call**
+with no call over a 50-step branch window. They are mostly off the deployed
+5-step decision grid and do not estimate the same-budget now-versus-later
+timing action. The independently confirmed closed-loop Stage-9 performance
+comparison remains valid, but the branch labels alone cannot establish the
+mechanism or value of the deployed timing choice.
 
 ### legacy_c1_c9_matrix_snapshot
 
