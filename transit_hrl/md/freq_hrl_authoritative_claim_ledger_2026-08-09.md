@@ -836,6 +836,15 @@ plan-validity triggering on this PointMaze hidden-regime task family.
 Forbidden: treating it as proof of frequency-band responsibility, domain
 generality, or benefit on a different environment/task distribution.
 
+### pointmaze_learned_termination_stage10_v1_development
+
+The [Stage-10 protocol](freq_hrl_stage10_learned_termination_protocol_2026-09-26.md)
+freezes a same-budget on-policy learned-termination baseline and requires exact
+fixed-controller replay against the Stage-9 confirmation paths. Its gate
+requires both baseline competence against fixed planning and candidate ISE
+superiority against the learned baseline. No Stage-10 performance outcome is
+available yet; reused Stage-9 paths make this a development comparison only.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

@@ -295,6 +295,13 @@ candidate minus fixed return was 40.662456 [31.548406, 49.776506]. See
 This is independent-seed PointMaze confirmation, not frequency-band or
 cross-domain validation.
 
+Stage 10 develops an on-policy learned-termination baseline under the same
+24-call budget. Its extra trigger-training interactions are capped below the
+Stage-9 branch-replay count, and fixed-controller replay must match exactly.
+The revealed Stage-9 confirmation paths make this a development comparison,
+not new confirmation. See
+`md/freq_hrl_stage10_learned_termination_protocol_2026-09-26.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;
