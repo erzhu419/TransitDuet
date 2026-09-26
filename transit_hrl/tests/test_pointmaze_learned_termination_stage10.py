@@ -26,6 +26,10 @@ class PointMazeLearnedTerminationStageTenTest(unittest.TestCase):
         self.assertIn("--termination-iterations 2", command)
         self.assertIn("--max-offset-steps 25", command)
         self.assertIn("--trigger-eval-seeds", command)
+        diagnostic = training_command(
+            "unit_stage10", root, preflight=True, stochastic_repetitions=4
+        )
+        self.assertIn("--termination-stochastic-repetitions 4", diagnostic)
         task = task_specification("unit_stage10", root, preflight=True)
         self.assertEqual(task["allowed_nodes"], list(LINUX_CPU_NODES))
         self.assertIsNone(task["require_node"])

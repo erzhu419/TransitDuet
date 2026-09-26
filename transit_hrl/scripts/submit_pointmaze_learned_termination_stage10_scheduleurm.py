@@ -37,7 +37,10 @@ def task_signature(run_name: str, root: int) -> str:
     return f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}"
 
 
-def training_command(run_name: str, root: int, *, preflight: bool) -> str:
+def training_command(
+    run_name: str, root: int, *, preflight: bool,
+    stochastic_repetitions: int = 0,
+) -> str:
     options = spec.cell_options(root, preflight=preflight)
     output = cell_relative_dir(run_name, root) / "result.json"
     command = [
@@ -59,6 +62,7 @@ def training_command(run_name: str, root: int, *, preflight: bool) -> str:
         "--termination-iterations", str(options["termination_iterations"]),
         "--termination-hidden-dim", str(options["termination_hidden_dim"]),
         "--termination-learning-rate", str(options["termination_learning_rate"]),
+        "--termination-stochastic-repetitions", str(stochastic_repetitions),
         "--regime-dwell-seconds", *map(str, options["regime_dwell_seconds"]),
         "--target-speed-modes", *map(str, options["target_speed_modes"]),
         "--force-pulse-amplitude", str(options["force_pulse_amplitude"]),
@@ -85,14 +89,18 @@ def training_command(run_name: str, root: int, *, preflight: bool) -> str:
 
 
 def task_specification(
-    run_name: str, root: int, *, preflight: bool
+    run_name: str, root: int, *, preflight: bool,
+    stochastic_repetitions: int = 0,
 ) -> dict[str, object]:
     relative = cell_relative_dir(run_name, root)
     phase = "preflight" if preflight else "development"
     return {
         "project": spec.EXPERIMENT_PROTOCOL,
         "description": f"Freq-HRL PointMaze stage10 {phase} {spec.POLICY} root{root}",
-        "cmd": training_command(run_name, root, preflight=preflight),
+        "cmd": training_command(
+            run_name, root, preflight=preflight,
+            stochastic_repetitions=stochastic_repetitions,
+        ),
         "cwd": str(ROOT),
         "signature": task_signature(run_name, root),
         "resource_family": f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/cell",

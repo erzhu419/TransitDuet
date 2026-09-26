@@ -452,6 +452,24 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
         )[0]
         for seed in trigger_eval
     ]
+    stochastic_evaluation = []
+    for repetition in range(args.termination_stochastic_repetitions):
+        for seed in trigger_eval:
+            torch.manual_seed(
+                int(args.optimizer_seed) * 1_000_000
+                + int(seed) * 16 + repetition
+            )
+            row, _ = rollout_learned_termination(
+                controller, policy, seed=seed, sample=True,
+                env_id=args.env_id, horizon=args.horizon, time_scale=time_scale,
+                maximum_subgoal_delta=args.maximum_subgoal_delta,
+                max_offset_steps=args.max_offset_steps,
+                check_stride_steps=args.check_stride_steps,
+                task_options=task_options,
+            )
+            row["mode"] = "learned_termination_ppo_stochastic"
+            row["policy_repetition"] = repetition
+            stochastic_evaluation.append(row)
     fixed = [
         row for row in controller_payload["evaluation_rows"]
         if int(row["seed"]) in set(trigger_eval)
@@ -491,6 +509,11 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
         "termination_state_contract": "causal_plan_features_plus_offset_fraction",
         "fixed_replay_rows": fixed,
         "learned_termination_evaluation_rows": evaluation,
+        "termination_stochastic_repetitions": args.termination_stochastic_repetitions,
+        "termination_stochastic_evaluation_rows": stochastic_evaluation,
+        "termination_stochastic_evaluation_primitive_steps": (
+            len(stochastic_evaluation) * args.horizon
+        ),
     }
 
 
@@ -500,6 +523,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--termination-iterations", type=int, default=20)
     parser.add_argument("--termination-hidden-dim", type=int, default=64)
     parser.add_argument("--termination-learning-rate", type=float, default=3e-4)
+    parser.add_argument("--termination-stochastic-repetitions", type=int, default=0)
     return parser
 
 
@@ -507,6 +531,8 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.termination_iterations < 1:
         raise ValueError("termination training requires an update")
+    if args.termination_stochastic_repetitions < 0:
+        raise ValueError("stochastic repetitions must be nonnegative")
     protocol = {
         "protocol_version": PROTOCOL_VERSION,
         "algorithm_path": ALGORITHM_PATH,
@@ -528,6 +554,7 @@ def main(argv: list[str] | None = None) -> int:
         "termination_iterations": args.termination_iterations,
         "termination_hidden_dim": args.termination_hidden_dim,
         "termination_learning_rate": args.termination_learning_rate,
+        "termination_stochastic_repetitions": args.termination_stochastic_repetitions,
         "train_seeds": args.train_seeds,
         "selection_seeds": args.selection_seeds,
         "branch_fit_seeds": args.branch_fit_seeds,
