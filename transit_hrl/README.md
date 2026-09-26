@@ -272,6 +272,13 @@ from held-out branch rows. This authorizes budgeted-trigger development only;
 deployed control improvement remains untested. See
 `md/freq_hrl_stage8c_compact_plan_validity_result_2026-09-26.md`.
 
+Stage 9 trains the controller with actual 25-75-step option durations and
+tests a branch-supervised causal trigger at exactly one upper call per 50-step
+bin. Its preflight completed as `t100579`, passed branch, budget, online replay,
+and compact-artifact checks, and authorizes the fixed eight-root development
+matrix. See `md/freq_hrl_stage9_budgeted_trigger_protocol_2026-09-26.md` and
+`md/freq_hrl_stage9_budgeted_trigger_preflight_2026-09-26.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

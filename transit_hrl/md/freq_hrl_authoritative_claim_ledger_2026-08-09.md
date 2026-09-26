@@ -800,6 +800,19 @@ Authorized: development of a budgeted closed-loop trigger on a fresh protocol.
 Not established: episode ISE/return improvement, superiority to fixed-budget
 replanning, or a frequency-specific/domain-general Freq-HRL claim.
 
+### pointmaze_budgeted_trigger_stage9_v1_development
+
+The new Stage-9 protocol compares fixed, random-offset, current-only, and
+causal-history planning schedules under exactly one upper call per 50-step bin.
+The controller trains on variable-duration options, and trigger thresholds use
+branch-fit paths only. The preflight passed paired replay, option-duration,
+call-budget, and artifact checks; see the
+[protocol](freq_hrl_stage9_budgeted_trigger_protocol_2026-09-26.md) and
+[preflight](freq_hrl_stage9_budgeted_trigger_preflight_2026-09-26.md).
+
+Forbidden until the eight-root matrix completes: the Stage-9 trigger improves
+episode ISE or return. The preflight's single-root signs are not evidence.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
