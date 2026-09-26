@@ -304,6 +304,12 @@ not new confirmation. See
 The single-root Stage-10 preflight passed software and accounting checks but
 supplies no performance evidence. See
 `md/freq_hrl_stage10_learned_termination_preflight_2026-09-26.md`.
+The complete Stage-10 development matrix **failed** its gate: learned
+termination did not beat fixed planning (ISE difference -0.078637
+[-0.205896, 0.048623]), and seven of eight deterministic actors never called
+upper before the deadline. The candidate's positive contrast against this arm
+is not evidence against a competent learned-termination baseline. See
+`md/freq_hrl_stage10_learned_termination_result_2026-09-26.md`.
 
 The package also retains the earlier components for:
 

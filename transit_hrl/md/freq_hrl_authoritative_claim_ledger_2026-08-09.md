@@ -849,6 +849,17 @@ passed software and accounting checks but its two-iteration deterministic
 actor made no pre-deadline calls. It authorizes the unchanged eight-root
 development matrix, not a learned-termination performance claim.
 
+The eight-root Stage-10 matrix failed the conjunctive gate. Fixed minus
+learned-termination ISE was -0.078637 [-0.205896, 0.048623], while learned
+termination minus the Stage-9 candidate was +0.584178 [0.534655, 0.633702].
+Seven selected deterministic actors made no pre-deadline calls; the eighth
+made nine across 16 held-out episodes. See the
+[Stage-10 result](freq_hrl_stage10_learned_termination_result_2026-09-26.md).
+
+Forbidden: claiming the Stage-9 candidate outperforms a competent on-policy
+learned-termination baseline. The v1 actor updated numerically but its
+deterministic deployment was nearly always the deadline policy.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
