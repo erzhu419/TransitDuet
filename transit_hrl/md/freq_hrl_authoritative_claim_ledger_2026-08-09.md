@@ -842,8 +842,8 @@ The [Stage-10 protocol](freq_hrl_stage10_learned_termination_protocol_2026-09-26
 freezes a same-budget on-policy learned-termination baseline and requires exact
 fixed-controller replay against the Stage-9 confirmation paths. Its gate
 requires both baseline competence against fixed planning and candidate ISE
-superiority against the learned baseline. No Stage-10 performance outcome is
-available yet; reused Stage-9 paths make this a development comparison only.
+superiority against the learned baseline. Reused Stage-9 paths make this a
+development comparison only.
 The [preflight](freq_hrl_stage10_learned_termination_preflight_2026-09-26.md)
 passed software and accounting checks but its two-iteration deterministic
 actor made no pre-deadline calls. It authorizes the unchanged eight-root
@@ -859,6 +859,14 @@ made nine across 16 held-out episodes. See the
 Forbidden: claiming the Stage-9 candidate outperforms a competent on-policy
 learned-termination baseline. The v1 actor updated numerically but its
 deterministic deployment was nearly always the deadline policy.
+
+The [stochastic diagnostic](freq_hrl_stage10_stochastic_diagnostic_result_2026-09-27.md)
+found active but inconsistent sampling: stochastic ISE was 1.781158 versus
+fixed 1.587736 on root 209011, and 1.380837 versus fixed 1.447218 on root
+209061. Both were worse than the Stage-9 candidate. This rules out a simple
+deterministic-threshold explanation; it does not establish competent learned
+termination. The [full-return credit screen](freq_hrl_stage10_mc_credit_v3_protocol_2026-09-27.md)
+is a new, two-root development intervention, not independent confirmation.
 
 ### legacy_c1_c9_matrix_snapshot
 

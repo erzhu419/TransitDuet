@@ -39,8 +39,28 @@ from .pointmaze_plan_value_qualification import (
 
 
 PROTOCOL_VERSION = "pointmaze_learned_termination_stage10_v1"
+MC_CREDIT_PROTOCOL_VERSION = "pointmaze_termination_mc_credit_v3_development"
 ALGORITHM_PATH = "on_policy_bernoulli_termination_fixed_upper_call_budget"
 FEATURE_DIM = 38  # 37 causal plan features and the within-bin offset.
+
+
+def credited_records(
+    trajectories: Iterable[list[dict[str, Any]]], *, gae_lambda: float
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for episode in trajectories:
+        advantage = 0.0
+        next_value = 0.0
+        for record in reversed(episode):
+            delta = record["reward"] + next_value - record["value"]
+            advantage = delta + gae_lambda * advantage
+            records.append({
+                **record,
+                "advantage": advantage,
+                "return_target": advantage + record["value"],
+            })
+            next_value = record["value"]
+    return records
 
 
 class TerminationPPO:
@@ -50,7 +70,10 @@ class TerminationPPO:
         seed: int,
         hidden_dim: int = 64,
         learning_rate: float = 3e-4,
+        gae_lambda: float = 0.95,
     ) -> None:
+        if not 0.0 <= gae_lambda <= 1.0:
+            raise ValueError("termination GAE lambda must be in [0, 1]")
         torch.manual_seed(int(seed) + 10_003)
         self.actor = BernoulliActor(FEATURE_DIM, hidden_dim, init_logit=-1.0)
         self.critic = ValueNet(FEATURE_DIM, hidden_dim)
@@ -63,6 +86,7 @@ class TerminationPPO:
         self.scale = np.ones(FEATURE_DIM, dtype=np.float32)
         self.normalized = False
         self.optimizer_steps = 0
+        self.gae_lambda = float(gae_lambda)
 
     def set_normalizer(self, trajectories: Iterable[list[dict[str, Any]]]) -> None:
         states = np.asarray(
@@ -92,19 +116,7 @@ class TerminationPPO:
         }
 
     def update(self, trajectories: Iterable[list[dict[str, Any]]]) -> dict[str, float]:
-        records: list[dict[str, Any]] = []
-        for episode in trajectories:
-            advantage = 0.0
-            next_value = 0.0
-            for record in reversed(episode):
-                delta = record["reward"] + next_value - record["value"]
-                advantage = delta + 0.95 * advantage
-                records.append({
-                    **record,
-                    "advantage": advantage,
-                    "return_target": advantage + record["value"],
-                })
-                next_value = record["value"]
+        records = credited_records(trajectories, gae_lambda=self.gae_lambda)
         if not records:
             raise ValueError("termination PPO has no decisions")
         states = torch.as_tensor(np.stack([r["state"] for r in records]))
@@ -369,6 +381,7 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
         seed=args.optimizer_seed,
         hidden_dim=args.termination_hidden_dim,
         learning_rate=args.termination_learning_rate,
+        gae_lambda=args.termination_gae_lambda,
     )
     initial_weights = torch.cat([
         parameter.detach().flatten() for parameter in policy.actor.parameters()
@@ -476,7 +489,10 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
     ]
     return {
         "optimizer_seed": args.optimizer_seed,
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": (
+            MC_CREDIT_PROTOCOL_VERSION
+            if args.termination_gae_lambda == 1.0 else PROTOCOL_VERSION
+        ),
         "algorithm_path": ALGORITHM_PATH,
         "train_seeds": list(training),
         "selection_seeds": list(selection),
@@ -501,6 +517,7 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
         "termination_optimizer_steps": policy.optimizer_steps,
         "termination_actor_weight_change_norm": weight_change,
         "termination_training_iterations": args.termination_iterations,
+        "termination_gae_lambda": args.termination_gae_lambda,
         "termination_rollouts_before_eval": rollouts,
         "termination_extra_primitive_steps": rollouts * args.horizon,
         "termination_selected_iteration": best_iteration,
@@ -523,6 +540,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--termination-iterations", type=int, default=20)
     parser.add_argument("--termination-hidden-dim", type=int, default=64)
     parser.add_argument("--termination-learning-rate", type=float, default=3e-4)
+    parser.add_argument("--termination-gae-lambda", type=float, default=0.95)
     parser.add_argument("--termination-stochastic-repetitions", type=int, default=0)
     return parser
 
@@ -533,8 +551,13 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("termination training requires an update")
     if args.termination_stochastic_repetitions < 0:
         raise ValueError("stochastic repetitions must be nonnegative")
+    if args.termination_gae_lambda not in (0.95, 1.0):
+        raise ValueError("only the frozen GAE 0.95 and MC 1.0 protocols are supported")
     protocol = {
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": (
+            MC_CREDIT_PROTOCOL_VERSION
+            if args.termination_gae_lambda == 1.0 else PROTOCOL_VERSION
+        ),
         "algorithm_path": ALGORITHM_PATH,
         "source_controller_protocol": POINTMAZE_BUDGETED_TRIGGER_PROTOCOL_VERSION,
         "evidence_role": "learned_termination_development",
@@ -554,6 +577,7 @@ def main(argv: list[str] | None = None) -> int:
         "termination_iterations": args.termination_iterations,
         "termination_hidden_dim": args.termination_hidden_dim,
         "termination_learning_rate": args.termination_learning_rate,
+        "termination_gae_lambda": args.termination_gae_lambda,
         "termination_stochastic_repetitions": args.termination_stochastic_repetitions,
         "train_seeds": args.train_seeds,
         "selection_seeds": args.selection_seeds,

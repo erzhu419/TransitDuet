@@ -40,6 +40,7 @@ def task_signature(run_name: str, root: int) -> str:
 def training_command(
     run_name: str, root: int, *, preflight: bool,
     stochastic_repetitions: int = 0,
+    termination_gae_lambda: float | None = None,
 ) -> str:
     options = spec.cell_options(root, preflight=preflight)
     output = cell_relative_dir(run_name, root) / "result.json"
@@ -78,6 +79,8 @@ def training_command(
         "--trigger-eval-seeds", *map(str, options["trigger_eval"]),
         "--output", str(output),
     ]
+    if termination_gae_lambda is not None:
+        command.extend(["--termination-gae-lambda", str(termination_gae_lambda)])
     environment = (
         "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 "
         "OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 "
@@ -91,6 +94,7 @@ def training_command(
 def task_specification(
     run_name: str, root: int, *, preflight: bool,
     stochastic_repetitions: int = 0,
+    termination_gae_lambda: float | None = None,
 ) -> dict[str, object]:
     relative = cell_relative_dir(run_name, root)
     phase = "preflight" if preflight else "development"
@@ -100,6 +104,7 @@ def task_specification(
         "cmd": training_command(
             run_name, root, preflight=preflight,
             stochastic_repetitions=stochastic_repetitions,
+            termination_gae_lambda=termination_gae_lambda,
         ),
         "cwd": str(ROOT),
         "signature": task_signature(run_name, root),

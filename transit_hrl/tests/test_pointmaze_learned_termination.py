@@ -5,10 +5,27 @@ import numpy as np
 from freq_hrl.experiments.pointmaze_learned_termination import (
     FEATURE_DIM,
     TerminationPPO,
+    credited_records,
 )
 
 
 class TerminationPPOTest(unittest.TestCase):
+    def test_full_return_credit_does_not_decay_with_decision_count(self):
+        episode = [
+            {"reward": -1.0, "value": 0.0},
+            {"reward": -2.0, "value": 0.0},
+        ]
+        mc = credited_records([episode], gae_lambda=1.0)
+        old = credited_records([episode], gae_lambda=0.95)
+        more_checks = credited_records([[
+            {"reward": -1.0, "value": 0.0},
+            {"reward": -1.0, "value": 0.0},
+            {"reward": -1.0, "value": 0.0},
+        ]], gae_lambda=1.0)
+        self.assertEqual([r["return_target"] for r in mc], [-2.0, -3.0])
+        self.assertEqual(more_checks[-1]["return_target"], mc[-1]["return_target"])
+        self.assertAlmostEqual(old[1]["return_target"], -2.9)
+
     def test_on_policy_update_changes_actor_after_normalization(self):
         policy = TerminationPPO(seed=71, hidden_dim=16)
         warm = []
