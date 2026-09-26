@@ -14,7 +14,7 @@ import argparse
 from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import numpy as np
 from scipy import stats
@@ -101,6 +101,7 @@ def plan_renewal_opportunities(
     distractor_change_steps: Iterable[int],
     seed: int,
     max_events_per_class: int,
+    blocked_steps: Iterable[int] = (),
 ) -> tuple[PlanRenewalOpportunity, ...]:
     """Build bounded causal opportunities without using future actor input."""
 
@@ -113,9 +114,14 @@ def plan_renewal_opportunities(
         raise ValueError("plan-validity opportunity counts must be positive")
     latest = int(horizon) - int(branch_window_steps)
     fixed = set(range(0, int(horizon), int(period_steps)))
+    blocked = set(map(int, blocked_steps))
 
     def valid(step: int) -> bool:
-        return 1 <= int(step) <= latest and int(step) not in fixed
+        return (
+            1 <= int(step) <= latest
+            and int(step) not in fixed
+            and int(step) not in blocked
+        )
 
     opportunities: list[PlanRenewalOpportunity] = []
     occupied: set[int] = set()
@@ -325,6 +331,7 @@ def _run_branch(
     time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float,
     task_options: dict[str, Any],
+    prefix_decision_steps: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
     if str(model.config.state_encoder) != "mlp":
         raise ValueError("paired branch replay currently requires stateless MLPs")
@@ -351,10 +358,14 @@ def _run_branch(
         )
         features.reset(observation)
         model.reset_recurrent_inference()
-        fixed = set(fixed_replan_steps(
-            horizon=horizon,
-            period_steps=time_scale.upper_period_steps,
-        ))
+        fixed = set(
+            prefix_decision_steps
+            if prefix_decision_steps is not None
+            else fixed_replan_steps(
+                horizon=horizon,
+                period_steps=time_scale.upper_period_steps,
+            )
+        )
         if opportunity.step in fixed:
             raise ValueError("branch opportunity collides with a fixed replan")
 
@@ -501,6 +512,7 @@ def evaluate_plan_renewal_pair(
     task_options: dict[str, Any],
     optimizer_seed: int,
     split: str,
+    prefix_decision_steps: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
     common = {
         "seed": int(seed),
@@ -511,6 +523,7 @@ def evaluate_plan_renewal_pair(
         "time_scale": time_scale,
         "maximum_subgoal_delta": float(maximum_subgoal_delta),
         "task_options": dict(task_options),
+        "prefix_decision_steps": prefix_decision_steps,
     }
     keep = _run_branch(model, renew=False, **common)
     renew = _run_branch(model, renew=True, **common)
@@ -640,12 +653,17 @@ def evaluate_plan_renewal_dataset(
     time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float,
     task_options: dict[str, Any],
+    prefix_decision_steps_fn: Callable[[int], tuple[int, ...]] | None = None,
 ) -> list[dict[str, Any]]:
     branch_window_steps = max(1, int(round(
         float(branch_window_seconds) / time_scale.dt_seconds
     )))
     rows: list[dict[str, Any]] = []
     for seed in map(int, seeds):
+        prefix_decision_steps = (
+            prefix_decision_steps_fn(seed)
+            if prefix_decision_steps_fn is not None else None
+        )
         task = _make_task(
             env_id=env_id, seed=seed, horizon=horizon, **task_options
         )
@@ -659,6 +677,10 @@ def evaluate_plan_renewal_dataset(
                 distractor_change_steps=task.driver.distractor_change_steps,
                 seed=seed,
                 max_events_per_class=max_events_per_class,
+                blocked_steps=(
+                    prefix_decision_steps
+                    if prefix_decision_steps is not None else ()
+                ),
             )
         finally:
             task.environment.close()
@@ -675,6 +697,7 @@ def evaluate_plan_renewal_dataset(
                 task_options=task_options,
                 optimizer_seed=optimizer_seed,
                 split=split,
+                prefix_decision_steps=prefix_decision_steps,
             ))
     return rows
 

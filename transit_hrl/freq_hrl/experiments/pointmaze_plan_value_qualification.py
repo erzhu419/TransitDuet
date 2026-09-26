@@ -13,7 +13,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 import time
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 import numpy as np
 import torch
@@ -525,6 +525,7 @@ def rollout_hrl_pointmaze_plan_value(
     waypoint_perturbation: float,
     event_window_seconds: float,
     task_options: dict[str, Any],
+    decision_steps_override: Iterable[int] | None = None,
 ) -> tuple[Any, dict[str, Any]]:
     name = str(method)
     if name not in POINTMAZE_PLAN_VALUE_METHODS:
@@ -553,13 +554,29 @@ def rollout_hrl_pointmaze_plan_value(
         features.reset(observation)
         model.reset_recurrent_inference()
         builder = HierarchicalRolloutBuilder(gamma=float(model.config.gamma))
-        schedule = schedule_for_task(
-            task, time_scale=time_scale, schedule_mode=schedule_mode
-        )
-        decision_set = set(schedule)
         fixed_budget = len(fixed_replan_steps(
             horizon=horizon, period_steps=time_scale.upper_period_steps
         ))
+        schedule = (
+            schedule_for_task(
+                task, time_scale=time_scale, schedule_mode=schedule_mode
+            )
+            if decision_steps_override is None
+            else tuple(map(int, decision_steps_override))
+        )
+        if (
+            not schedule
+            or schedule[0] != 0
+            or len(schedule) != len(set(schedule))
+            or tuple(sorted(schedule)) != schedule
+            or schedule[-1] >= int(horizon)
+            or (
+                decision_steps_override is not None
+                and len(schedule) != fixed_budget
+            )
+        ):
+            raise ValueError("plan-value decision schedule is invalid")
+        decision_set = set(schedule)
         perturb_rng = np.random.default_rng(
             np.random.SeedSequence([int(seed), 8_170_031])
         )
@@ -857,6 +874,8 @@ def train_pointmaze_plan_value_cell(
     event_window_seconds: float,
     task_options: dict[str, Any],
     diagnostic_schedules: Iterable[str] = POINTMAZE_PLAN_VALUE_SCHEDULES,
+    training_decision_steps_fn: Callable[[int], tuple[int, ...]] | None = None,
+    training_schedule_name: str = "fixed",
 ) -> tuple[dict[str, Any], GoalConditionedActorCriticPPO]:
     training, selection, evaluation = _validate_seed_roles(
         train_seeds, selection_seeds, eval_seeds
@@ -905,7 +924,14 @@ def train_pointmaze_plan_value_cell(
             policy,
             seed=seed,
             sample=sample,
-            schedule_mode="fixed",
+            schedule_mode=(
+                training_schedule_name
+                if training_decision_steps_fn is not None else "fixed"
+            ),
+            decision_steps_override=(
+                training_decision_steps_fn(int(seed))
+                if training_decision_steps_fn is not None else None
+            ),
             **common_rollout,
         )
     )
@@ -922,7 +948,10 @@ def train_pointmaze_plan_value_cell(
         "optimizer_seed": int(optimizer_seed),
         "evidence_role": "task_qualification_development",
         "primary_endpoint": "tracking_squared_error_integral",
-        "training_schedule": "fixed_period",
+        "training_schedule": (
+            training_schedule_name
+            if training_decision_steps_fn is not None else "fixed_period"
+        ),
         "diagnostic_schedule_contract": (
             "same_frozen_policy_with_fixed_budget_event_relocation_v1"
         ),
