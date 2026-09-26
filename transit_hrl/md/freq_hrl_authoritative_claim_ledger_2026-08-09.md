@@ -882,6 +882,13 @@ timing action. The independently confirmed closed-loop Stage-9 performance
 comparison remains valid, but the branch labels alone cannot establish the
 mechanism or value of the deployed timing choice.
 
+The [Stage-11 protocol](freq_hrl_stage11_timing_pair_v1_protocol_2026-09-27.md)
+tests one-call-per-bin now-versus-deadline counterfactuals on the legal
+5-step grid, with 230,400 paired replay steps per root. Preflight `t100899`
+passed exact paired-prefix, call-budget, fixed-controller replay, and output
+checks. Development tasks `t100902` and `t100903` started on node004 and
+node006. No Stage-11 performance result is available yet.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
