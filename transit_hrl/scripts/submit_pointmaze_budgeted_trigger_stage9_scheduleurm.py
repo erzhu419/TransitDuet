@@ -41,13 +41,17 @@ def task_signature(run_name: str, root: int, *, confirmation: bool = False) -> s
     return f"Freq-HRL/{protocol}/{run_name}/{spec.POLICY}/{root}"
 
 
-def training_command(run_name: str, root: int, *, preflight: bool) -> str:
+def training_command(
+    run_name: str, root: int, *, preflight: bool,
+    runner_script: str | None = None,
+    extra_args: tuple[str, ...] = (),
+) -> str:
     options = spec.cell_options(root, preflight=preflight)
     output = cell_relative_dir(run_name, root) / "result.json"
     command = [
         DEFAULT_LINUX_PYTHON,
         "-u",
-        spec.RUNNER_SCRIPT,
+        spec.RUNNER_SCRIPT if runner_script is None else runner_script,
         "--env-id", str(options["env_id"]),
         "--iterations", str(options["iterations"]),
         "--horizon", str(options["horizon"]),
@@ -78,6 +82,7 @@ def training_command(run_name: str, root: int, *, preflight: bool) -> str:
         "--trigger-eval-seeds", *map(str, options["trigger_eval"]),
         "--output", str(output),
     ]
+    command.extend(extra_args)
     environment = (
         "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 "
         "OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 "
@@ -89,7 +94,9 @@ def training_command(run_name: str, root: int, *, preflight: bool) -> str:
 
 
 def task_specification(
-    run_name: str, root: int, *, preflight: bool, confirmation: bool = False
+    run_name: str, root: int, *, preflight: bool, confirmation: bool = False,
+    runner_script: str | None = None,
+    extra_args: tuple[str, ...] = (),
 ) -> dict[str, object]:
     relative = cell_relative_dir(run_name, root)
     phase = (
@@ -103,7 +110,10 @@ def task_specification(
     return {
         "project": protocol,
         "description": f"Freq-HRL PointMaze stage9 {phase} {spec.POLICY} root{root}",
-        "cmd": training_command(run_name, root, preflight=preflight),
+        "cmd": training_command(
+            run_name, root, preflight=preflight,
+            runner_script=runner_script, extra_args=extra_args,
+        ),
         "cwd": str(ROOT),
         "signature": task_signature(run_name, root, confirmation=confirmation),
         "resource_family": f"Freq-HRL/{protocol}/cell",
