@@ -5,8 +5,9 @@ Date: 2026-09-26
 Run: `pointmaze_budgeted_trigger_stage9_v2_confirmation_20260926_r1`
 
 Tasks `t100612`-`t100619` completed on node001/node004/node005/node006.
-All eight frozen optimizer roots and 128 held-out trigger-evaluation episodes
-passed the registered result contract. The confirmation set has 320 distinct
+All eight frozen optimizer roots and 128 held-out trigger-evaluation paths
+(512 paired-mode rollouts) passed the registered result contract. The
+confirmation set has 320 distinct
 train/selection/branch-fit/evaluation path seeds, with no overlap with Stage-9
 development. No optimizer roots were appended.
 
