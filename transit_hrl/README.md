@@ -279,6 +279,14 @@ and compact-artifact checks, and authorizes the fixed eight-root development
 matrix. See `md/freq_hrl_stage9_budgeted_trigger_protocol_2026-09-26.md` and
 `md/freq_hrl_stage9_budgeted_trigger_preflight_2026-09-26.md`.
 
+The frozen eight-root Stage-9 development matrix passed its registered gate.
+The candidate reduced episode tracking ISE relative to fixed planning by
+0.396372 [0.275784, 0.516959] and increased return by 30.770657
+[21.111415, 40.429899], at 24 upper calls per episode in every mode. This
+is PointMaze development evidence only; independent confirmation and domain
+transfer are outstanding. See
+`md/freq_hrl_stage9_budgeted_trigger_result_2026-09-26.md`.
+
 The package also retains the earlier components for:
 
 - causal exogenous stream encoders;

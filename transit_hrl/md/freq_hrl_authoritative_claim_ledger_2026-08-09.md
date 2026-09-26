@@ -810,8 +810,17 @@ call-budget, and artifact checks; see the
 [protocol](freq_hrl_stage9_budgeted_trigger_protocol_2026-09-26.md) and
 [preflight](freq_hrl_stage9_budgeted_trigger_preflight_2026-09-26.md).
 
-Forbidden until the eight-root matrix completes: the Stage-9 trigger improves
-episode ISE or return. The preflight's single-root signs are not evidence.
+The frozen eight-root development matrix passed all five registered root-level
+95% CI checks. Fixed minus candidate episode tracking ISE was +0.396372
+[0.275784, 0.516959]; candidate minus fixed episode return was +30.770657
+[21.111415, 40.429899]. Independent episode-row calculation matched the
+registered analyzer, and every mode made exactly 24 upper calls. See the
+[Stage-9 result](freq_hrl_stage9_budgeted_trigger_result_2026-09-26.md).
+
+Authorized: a PointMaze hidden-regime development claim of fixed-budget
+closed-loop improvement under this task and training protocol. Not yet
+established: independent confirmation, cross-domain transfer, or a
+domain-general frequency-separated HRL result.
 
 ### legacy_c1_c9_matrix_snapshot
 
