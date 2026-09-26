@@ -867,6 +867,10 @@ fixed 1.587736 on root 209011, and 1.380837 versus fixed 1.447218 on root
 deterministic-threshold explanation; it does not establish competent learned
 termination. The [full-return credit screen](freq_hrl_stage10_mc_credit_v3_protocol_2026-09-27.md)
 is a new, two-root development intervention, not independent confirmation.
+Its preflight `t100890` passed the six-call 300-step budget, actor-update,
+stochastic-activation, and exact fixed-controller replay checks. Development
+tasks `t100891` and `t100892` were launched on node006 and node005;
+no MC-credit performance outcome is available yet.
 
 ### legacy_c1_c9_matrix_snapshot
 
