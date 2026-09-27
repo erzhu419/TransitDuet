@@ -1,5 +1,7 @@
 # Stage-14 Adaptive-Continuation Timing Diagnostic
 
+Implementation revision: `161a55b99f`.
+
 Stage-13 supports local score validity under static future planning times,
 but the deployed keep action waits just one check, not necessarily to the
 deadline. This diagnostic holds the controller, Stage-12 predictor/threshold,

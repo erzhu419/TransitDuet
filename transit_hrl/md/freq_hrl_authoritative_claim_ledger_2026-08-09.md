@@ -917,6 +917,14 @@ The 125 static-continuation pairs are mechanism evidence, not a new
 closed-loop performance result. The one-check adaptive-continuation action
 value remains unmeasured.
 
+The [Stage-14 protocol](freq_hrl_stage14_adaptive_pair_diagnostic_protocol_2026-09-27.md)
+keeps the same predictor, threshold and sampled prefixes, and compares now,
+one-check deferral, and deadline deferral with adaptive continuation.
+Preflight `t101001` passed exact factual decision/ISE/return replay and
+three-arm prefix/budget checks. Tasks `t101002/101003` started on node004/006;
+the two-root diagnostic has no outcome yet and cannot establish performance
+superiority.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
