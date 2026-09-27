@@ -1162,6 +1162,12 @@ Stage-27's fixed causal features and ridge fits remain unchanged. Remote
 controller weights are reused after factual replay, with no reconstruction
 or updates. Twenty focused tests passed. The screen changes block-level
 continuation rules; it is not a deployed or confirmatory performance result.
+Implementation `f455dda8d0`: preflight `t101665` completed on node004 with
+zero factual replay errors and all eight pairs/4060 steps accounted for.
+Independent call-count and metric recomputation matched; both scientific
+gates failed. Full settings remain frozen, without preflight-driven retuning.
+Full tasks `t101666/101667` are registered for 209011/209061 at the same
+frozen implementation, 480 new pairs and 658800 new steps per root.
 
 ### legacy_c1_c9_matrix_snapshot
 

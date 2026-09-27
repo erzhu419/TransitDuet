@@ -39,6 +39,14 @@ Twenty focused tests passed: actual old-waypoint holding, executed late
 renewal, prefix/future isolation, gross versus settled gates, fit isolation,
 cached factual matching, exact step accounting and remote-only cache staging.
 
+Implementation frozen at `f455dda8d0`. Preflight `t101665` completed on
+node004: factual return/ISE errors zero, eight pairs, 4060 new steps,
+three fits/15 scalar solves. Independent row/call/metric recomputation
+matched. Retrieved 48727 bytes of JSON, no raw cache or checkpoint.
+Both scientific gates failed; retain the result with full settings unchanged.
+Full tasks `t101666/101667` register roots 209011/209061 at the same frozen
+revision, 480 pairs per root, with no independent-confirmation claim.
+
 ## Limitations
 
 This fresh-path development screen reuses controller roots and changes the

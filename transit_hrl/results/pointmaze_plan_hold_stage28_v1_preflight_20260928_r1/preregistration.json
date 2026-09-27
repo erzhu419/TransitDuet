@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "cached_controller; old_plan_hold100; executed_equal_call_settlement150; ridge_alpha1",
+  "evidence_role": "fresh_path_true_plan_hold_development_only",
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_path": 2,
+  "preflight": true,
+  "protocol": "pointmaze_plan_hold_stage28_v1_development",
+  "scheduler": {
+    "cpu_per_cell": 2,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 3072,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_temporal_plan_stage26_v1_development",
+  "source_revision": "f455dda8d00fed39d8f27dc5db5c07bd99e835fd",
+  "workers": 1
+}
