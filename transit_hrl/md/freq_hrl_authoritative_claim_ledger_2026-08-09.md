@@ -914,8 +914,8 @@ pairs only). Development diagnostics `t100988/989` completed; the
 has positive mean chosen-action benefit in both early/deadline strata on
 both roots. This does not support a blanket deployed-state score failure.
 The 125 static-continuation pairs are mechanism evidence, not a new
-closed-loop performance result. The one-check adaptive-continuation action
-value remains unmeasured.
+closed-loop performance result. This test did not measure the one-check
+adaptive-continuation action value; Stage-14 below addresses that contrast.
 
 The [Stage-14 protocol](freq_hrl_stage14_adaptive_pair_diagnostic_protocol_2026-09-27.md)
 keeps the same predictor, threshold and sampled prefixes, and compares now,
@@ -935,9 +935,17 @@ with Stage-12 adaptive continuation, two observable clocks, and zero-threshold
 deployment. No diagnostic evaluation labels are fitted. Preflight `t101092`
 passed causal pairing, exact reference replay and call-budget checks; its
 tiny candidate chose bin starts throughout, not a performance success.
-Development tasks `t101096/101097` started on node004/006. The new candidate
-has no development result yet; additional fitting costs 240,000 steps/root
-on top of the inherited supervision and replayed controller training.
+Development tasks `t101096/101097` completed. The
+[Stage-15 result](freq_hrl_stage15_onecheck_advantage_result_2026-09-27.md)
+failed the frozen gate on both roots: ISE 1.587736/1.093164 versus Stage-12
+1.144676/1.050864 and Stage-9 1.143830/0.838439. Root 209011 exactly
+collapsed to fixed-at-bin-start planning; its grouped regression did not
+beat the fold-wise training-mean predictor. Root 209061 retained conditional
+timing but did not improve the primary endpoint. Additional fitting cost
+240,000 steps/root on top of inherited supervision and replayed controller
+training. Stage-15 is not adopted; no threshold tuning, further iterations,
+or fresh-root confirmation follow from this failure. Stage-9 remains the
+performance reference, not proof of a general frequency-based HRL method.
 
 ### legacy_c1_c9_matrix_snapshot
 
