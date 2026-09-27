@@ -1110,6 +1110,13 @@ It matches MSE actions on 209011 and short-window/uniform on 209061. All
 Stop objective fitting on this fixed cache; the next design concerns temporal
 plan-validity supervision and state coverage, not retuning this predictor.
 
+The [Stage-26 protocol](freq_hrl_stage26_temporal_plan_protocol_2026-09-28.md)
+freezes new training/evaluation paths and matched-budget temporal cost curves.
+It tests ordered history against same-size current-only and shuffled-history
+models. Raw sequences and weights remain on the server. This begins a new
+data-design screen, without reopening failed cached-candidate gates or
+claiming policy improvement.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
