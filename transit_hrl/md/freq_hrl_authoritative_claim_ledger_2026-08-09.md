@@ -998,6 +998,9 @@ budgets match; the number of label draws differs. Whole-path holdout prevents
 replica leakage. Both roots must beat the single-label and zero controls before
 qualification. This adds no environment replay or controller training, and
 does not authorize deployment or independent confirmation.
+Implementation `dc8a2bf316` passed 22 focused tests. Preflight `t101351` on
+node006 passed accounting and matched-fit checks with zero new environment
+steps. Both tiny fits predicted zero and did not qualify; settings remain frozen.
 
 ### legacy_c1_c9_matrix_snapshot
 

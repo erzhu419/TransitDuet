@@ -1,5 +1,8 @@
 # Stage-19 Cached-Label Averaging Diagnostic
 
+Implementation `dc8a2bf316`; 22 focused tests passed, including default critic
+behavior, shared normalization and exclusion of all held-out labels/costs.
+
 Freeze before fitting: roots 209011/209061, operational preflight 208001.
 Use exactly Stage-18's 16 selected opportunities/root (two per path) and their
 eight conditional-future contrasts, joined to Stage-16 compact endpoints.
@@ -30,3 +33,9 @@ This is a small, reused-development-state representation/label diagnostic,
 not independent confirmation or a deployed policy. It tests whether averaging
 improves this learner, not whether future noise is the sole cause of failure.
 No deployment or root expansion follows automatically, even on qualification.
+
+Preflight `t101351` completed on node006. Its 6,452-byte JSON passed paired
+normalization, path isolation and zero-new-step accounting checks: two pairs,
+eight cached labels, four fits/256 updates. Both treatments predicted zero;
+raw MSE was 2.549147e-8 for both and zero, corrected MSE -4.954739e-8.
+Qualification failed on a tie. No settings were changed before development.
