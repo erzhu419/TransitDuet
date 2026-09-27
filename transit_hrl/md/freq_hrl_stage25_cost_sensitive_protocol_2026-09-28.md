@@ -29,6 +29,11 @@ Use scheduleurm, dynamic node001-node006, 1 CPU/1536 MB per task, JSON only.
 Nineteen focused tests cover gradient/cost algebra, causal input isolation,
 whole-path fitting, scoring-label separation and scheduler input/resources.
 
+Execution at `9de3131c41`: preflight `t101527` on node004; full tasks
+`t101530/101531` on node004/node006, all completed. The
+[result](freq_hrl_stage25_cost_sensitive_result_2026-09-28.md) retains both
+failed gates without changing the protocol.
+
 ## Limitations
 
 These development states and scoring labels were previously inspected.

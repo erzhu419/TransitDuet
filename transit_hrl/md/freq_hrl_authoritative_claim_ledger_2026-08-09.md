@@ -1102,6 +1102,13 @@ Whole-path holdout, old eight-draw training labels and cached 64-draw scoring
 remain fixed. Uniform classification, MSE, short-window-only and constant
 actions are controls. This is a new development screen with no rollout or
 deployment, not a rescue of the failed Stage-23 gate.
+Tasks `t101530/101531` completed. The
+[Stage-25 result](freq_hrl_stage25_cost_sensitive_result_2026-09-28.md) fails
+both gates: cost-sensitive benefit versus short-window is -0.013872/0.
+It matches MSE actions on 209011 and short-window/uniform on 209061. All
+64 supervised fits are accounted for, with zero new environment steps.
+Stop objective fitting on this fixed cache; the next design concerns temporal
+plan-validity supervision and state coverage, not retuning this predictor.
 
 ### legacy_c1_c9_matrix_snapshot
 
