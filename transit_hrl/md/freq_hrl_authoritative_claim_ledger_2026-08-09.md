@@ -991,6 +991,14 @@ on both roots. This does not establish a noise-only cause or state sufficiency.
 No deployment or root expansion follows; Stage-9 remains the performance
 reference. A cached-label averaging diagnostic is the next proposed step.
 
+The [Stage-19 protocol](freq_hrl_stage19_averaged_label_protocol_2026-09-27.md)
+freezes single-replica versus averaged-label fits on exactly the cached Stage-18
+opportunities. States, training-only normalization, initialization and optimizer
+budgets match; the number of label draws differs. Whole-path holdout prevents
+replica leakage. Both roots must beat the single-label and zero controls before
+qualification. This adds no environment replay or controller training, and
+does not authorize deployment or independent confirmation.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

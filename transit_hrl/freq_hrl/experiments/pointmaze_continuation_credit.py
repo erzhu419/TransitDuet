@@ -34,7 +34,8 @@ def continuation_loss(prediction, target, weight, *, objective):
     raise ValueError("unknown continuation objective")
 
 
-def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS, objective="absolute"):
+def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS, objective="absolute",
+                     contrast_targets=None):
     """Fit V_pi on other paths; queries contain states, never fitting targets."""
     x = np.asarray([r["features"] for r in train], dtype=np.float64)
     y = np.asarray([r["cost_to_go"] for r in train], dtype=np.float64)
@@ -67,7 +68,15 @@ def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS, objective="abso
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     state = torch.tensor((x - mean) / scale, dtype=torch.float32)
     time_left = torch.tensor(remaining, dtype=torch.float32)
-    target = torch.tensor((y - rate * remaining) / target_scale, dtype=torch.float32)
+    target_values = (y - rate * remaining) / target_scale
+    if contrast_targets is not None:
+        contrasts = np.asarray(contrast_targets, dtype=np.float64)
+        if (objective != "paired_contrast" or contrasts.shape != (len(train) // 2,)
+                or not np.all(np.isfinite(contrasts))):
+            raise ValueError("contrast targets require one finite label per aligned pair")
+        # Keep the original training-only normalization fixed across label treatments.
+        target_values[1::2] = target_values[::2] + contrasts / target_scale
+    target = torch.tensor(target_values, dtype=torch.float32)
     weight = torch.tensor(weights, dtype=torch.float32)
     model.train()
     for _ in range(epochs):
