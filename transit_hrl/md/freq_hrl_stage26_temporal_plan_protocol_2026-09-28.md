@@ -40,9 +40,13 @@ Execution at `b7bc0c587c`: preflight `t101584` completed on node004 with
 4 training/4 evaluation pairs, 64x23 inputs and 8,860 charged steps. Only
 10,928 bytes of JSON were retrieved; all three raw artifacts stayed remote.
 Both preflight scientific gates failed; full settings remain frozen.
-Tasks `t101585/101586` are running on node004/node006 for 209011/209061.
-Expected total steps are 4,860,700/4,851,700, each including 4,243,200 for
-controller reconstruction and 1,200 for factual replay. Full results pending.
+Tasks `t101585/101586` completed on node004/node006 for 209011/209061.
+Each returned 320 training/160 evaluation pairs, with 640 optimizer updates
+per matched model. Charged steps are 4,860,700/4,851,700, each including
+4,243,200 for controller reconstruction and 1,200 for factual replay.
+Both full-run prediction and decision gates failed: current-frame repetition
+outperformed ordered history on both roots. See the
+[Stage-26 result](freq_hrl_stage26_temporal_plan_result_2026-09-28.md).
 
 ## Limitations
 

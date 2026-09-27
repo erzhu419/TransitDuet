@@ -1119,8 +1119,17 @@ claiming policy improvement.
 Implementation `b7bc0c587c` passed 16 focused tests. Real-environment preflight
 `t101584` completed on node004 with matched factual replay, eight temporal
 pairs and 8,860 accounted steps; its scientific gates failed. Full tasks
-`t101585/101586` are running on node004/node006. No full-run result or new
-performance qualification is available yet.
+`t101585/101586` completed on node004/node006. The
+[Stage-26 result](freq_hrl_stage26_temporal_plan_result_2026-09-28.md) fails
+both frozen gates on both roots. Ordered-history curve MSE is 39.15%/52.55%
+worse than current-frame repetition; paired local ISE benefit versus that
+control is -0.001443/-0.001866. Current-only MSE is lower on all 16 evaluation
+paths. All 960 temporal pairs and 9,712,400 charged steps are accounted for;
+returned row-level and path metrics were independently recomputed.
+The supervision learns a local timing signal, but does not qualify the
+history candidate. No retuning, seed extension or control promotion follows;
+Stage-9 remains the performance reference. Next, establish the observation
+and temporal-credit requirements before another candidate or rollout screen.
 
 ### legacy_c1_c9_matrix_snapshot
 
