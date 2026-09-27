@@ -108,7 +108,7 @@ def qualify(pairs, *, root, fit_seeds, eval_seeds, epochs=VALUE_EPOCHS):
             "critic_optimizer_steps": len(folds) * epochs}
 
 
-def run_cell(args):
+def load_cached_pairs(args):
     cached = []
     for path, protocol in ((args.source_result, SOURCE_PROTOCOL),
                            (args.endpoint_result, ENDPOINT_PROTOCOL)):
@@ -127,7 +127,11 @@ def run_cell(args):
                    for s in args.branch_fit_seeds)
             or any(len(r["replicate_tail_advantages"]) != args.future_replicates for r in noise["noise_rows"])):
         raise ValueError("averaged-label source sampling differs")
-    pairs = join_cached_pairs(source["branch_fit_rows"], noise["noise_rows"])
+    return noise, join_cached_pairs(source["branch_fit_rows"], noise["noise_rows"])
+
+
+def run_cell(args):
+    noise, pairs = load_cached_pairs(args)
     result = qualify(pairs, root=args.optimizer_seed, fit_seeds=args.branch_fit_seeds,
                      eval_seeds=args.trigger_eval_seeds)
     result["inherited_stage18_additional_primitive_steps"] = noise["additional_primitive_steps"]

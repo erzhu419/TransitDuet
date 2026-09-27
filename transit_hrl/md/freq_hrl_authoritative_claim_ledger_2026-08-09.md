@@ -1010,6 +1010,14 @@ it does not qualify this critic. No new environment steps, deployment or
 fresh-root extension were added. Cross-path extrapolation remains a candidate
 failure mechanism, not an established explanation.
 
+The [Stage-20 protocol](freq_hrl_stage20_regularized_pair_protocol_2026-09-27.md)
+freezes a shared linear value difference with unit L2 on path-weighted mean
+squared error. It uses the same cached states, labels and endpoint normalization
+as Stage-19, with 40 coefficients and no intercept or new environment samples.
+The mean-label candidate must beat zero and the matched Stage-19 neural fit
+on both roots. Single labels remain diagnostic only; no deployment follows
+automatically from a reused-development-state qualification.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
