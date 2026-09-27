@@ -1154,6 +1154,15 @@ are zero. Next is true multi-duration keep/renew supervision with unchanged
 lower feedback and a frozen planning-resource comparison, using remote
 controller caches rather than another reconstruction. No policy is promoted.
 
+The [Stage-28 protocol](freq_hrl_stage28_plan_hold_protocol_2026-09-28.md)
+freezes new paths and genuine 100-step old-waypoint holding. Gross hold
+curves have unequal post-check call counts; the primary 150-step settlement
+has one executed upper call in each arm, with no intervening replans.
+Stage-27's fixed causal features and ridge fits remain unchanged. Remote
+controller weights are reused after factual replay, with no reconstruction
+or updates. Twenty focused tests passed. The screen changes block-level
+continuation rules; it is not a deployed or confirmatory performance result.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
