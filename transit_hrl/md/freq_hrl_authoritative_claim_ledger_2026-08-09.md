@@ -947,6 +947,17 @@ training. Stage-15 is not adopted; no threshold tuning, further iterations,
 or fresh-root confirmation follow from this failure. Stage-9 remains the
 performance reference, not proof of a general frequency-based HRL method.
 
+The [Stage-16 protocol](freq_hrl_stage16_continuation_credit_protocol_2026-09-27.md)
+tests 50-step observed credit plus path-crossfitted continuation value, with a
+matched short-only control. The controller, two development roots and timing
+budgets remain frozen; Ridge alpha 100 and zero threshold are fixed in advance.
+Continuation qualification concerns action contrasts, not individual-value fit.
+Implementation `0bab1e9e48` passed 21 focused tests; preflight `t101192` completed
+on node006 with exact replay, four pairs and two path-disjoint folds. Its tiny
+critic did not beat zero-tail contrast MSE; bootstrap always used the deadline.
+Operational preflight passed, not scientific qualification. The frozen two-root
+development screen is next; no Stage-16 development result is available yet.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
