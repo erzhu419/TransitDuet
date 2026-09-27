@@ -37,6 +37,7 @@ from .pointmaze_plan_value_qualification import (
 
 
 PROTOCOL_VERSION = "pointmaze_timing_pair_stage11_v1_development"
+WINDOWED_PROTOCOL_VERSION = "pointmaze_timing_pair_stage12_v1_development"
 ALGORITHM_PATH = "same_budget_grid_timing_pairs_branch_supervised_ridge"
 
 
@@ -61,8 +62,14 @@ def timing_pair_schedule(
 def timing_pair_opportunities(
     *, seed: int, optimizer_seed: int, horizon: int, period_steps: int,
     max_offset_steps: int, check_stride_steps: int, pairs_per_seed: int,
+    credit_window_steps: int = 0,
 ) -> tuple[tuple[int, int], ...]:
     bins = np.arange(1, horizon // period_steps)
+    if credit_window_steps:
+        bins = bins[
+            bins * period_steps + max_offset_steps - check_stride_steps
+            + credit_window_steps <= horizon
+        ]
     if (
         not 1 <= pairs_per_seed <= len(bins)
         or max_offset_steps % check_stride_steps
@@ -86,6 +93,7 @@ def rollout_timing_schedule(
     *, seed: int, decision_steps: tuple[int, ...], capture_step: int,
     env_id: str, horizon: int, time_scale: PhysicalTimeScaleContract,
     maximum_subgoal_delta: float, task_options: dict[str, Any],
+    credit_window_steps: int = 0,
 ) -> dict[str, Any]:
     period = time_scale.upper_period_steps
     if (
@@ -93,6 +101,8 @@ def rollout_timing_schedule(
         or tuple(step // period for step in decision_steps)
         != tuple(range(horizon // period))
         or capture_step < 0 or capture_step >= horizon
+        or credit_window_steps not in (0, period)
+        or capture_step + credit_window_steps > horizon
     ):
         raise ValueError("timing-pair rollout violates its call budget")
     task = _make_task(env_id=env_id, seed=seed, horizon=horizon, **task_options)
@@ -120,6 +130,8 @@ def rollout_timing_schedule(
         last_plan_step = -1
         episode_return = 0.0
         episode_ise = 0.0
+        credit_ise = 0.0
+        credit_step_count = 0
         prefix_snapshot = None
         feature_names = None
         causal_features = None
@@ -164,10 +176,14 @@ def rollout_timing_schedule(
             if (terminated or truncated) and step + 1 != horizon:
                 raise RuntimeError("timing-pair episode ended early")
             episode_return += float(reward)
-            episode_ise += (
+            error = (
                 float(info["tracking_distance"]) ** 2
                 * time_scale.dt_seconds
             )
+            episode_ise += error
+            if capture_step <= step < capture_step + credit_window_steps:
+                credit_ise += error
+                credit_step_count += 1
             achieved_before = next_observation.achieved_goal.copy()
             observation = next_observation
             history.update(observation)
@@ -176,6 +192,8 @@ def rollout_timing_schedule(
         return {
             "episode_return": episode_return,
             "tracking_squared_error_integral": episode_ise,
+            "credit_window_squared_error_integral": credit_ise,
+            "credit_window_step_count": credit_step_count,
             "decision_steps": decision_steps,
             "upper_decision_count": len(decision_steps),
             "feature_names": feature_names,
@@ -191,6 +209,7 @@ def evaluate_timing_pair(
     *, seed: int, bin_index: int, offset: int, env_id: str, horizon: int,
     time_scale: PhysicalTimeScaleContract, maximum_subgoal_delta: float,
     max_offset_steps: int, task_options: dict[str, Any],
+    credit_window_steps: int = 0,
 ) -> dict[str, Any]:
     wait_schedule, now_schedule = timing_pair_schedule(
         horizon=horizon,
@@ -205,6 +224,7 @@ def evaluate_timing_pair(
         "env_id": env_id, "horizon": horizon, "time_scale": time_scale,
         "maximum_subgoal_delta": maximum_subgoal_delta,
         "task_options": task_options,
+        "credit_window_steps": credit_window_steps,
     }
     wait = rollout_timing_schedule(
         controller, decision_steps=wait_schedule, **common,
@@ -221,13 +241,20 @@ def evaluate_timing_pair(
         or not np.array_equal(
             wait["causal_features"], now["causal_features"]
         )
+        or wait["credit_window_step_count"] != credit_window_steps
+        or now["credit_window_step_count"] != credit_window_steps
     ):
         raise RuntimeError("timing-pair arms lack an identical causal prefix")
+    credit_key = (
+        "credit_window_squared_error_integral" if credit_window_steps
+        else "tracking_squared_error_integral"
+    )
     return {
         "seed": int(seed),
         "bin_index": int(bin_index),
         "offset": int(offset),
         "opportunity_step": int(opportunity_step),
+        "credit_window_steps": int(credit_window_steps),
         "feature_names": list(wait["feature_names"]),
         "causal_features": wait["causal_features"].tolist(),
         "candidate_feature_has_future_access": False,
@@ -239,6 +266,9 @@ def evaluate_timing_pair(
             "tracking_squared_error_integral"
         ],
         "renew_ise_advantage": (
+            wait[credit_key] - now[credit_key]
+        ),
+        "full_episode_ise_advantage": (
             wait["tracking_squared_error_integral"]
             - now["tracking_squared_error_integral"]
         ),
@@ -336,6 +366,7 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
             maximum_subgoal_delta=args.maximum_subgoal_delta,
             max_offset_steps=args.max_offset_steps,
             task_options=task_options,
+            credit_window_steps=args.credit_window_steps,
         )
         for seed in branch_fit
         for bin_index, offset in timing_pair_opportunities(
@@ -346,6 +377,7 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
             max_offset_steps=args.max_offset_steps,
             check_stride_steps=args.check_stride_steps,
             pairs_per_seed=args.pairs_per_seed,
+            credit_window_steps=args.credit_window_steps,
         )
     ]
     predictors = fit_budgeted_trigger_predictors(
@@ -382,7 +414,10 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
     ]
     return {
         "optimizer_seed": args.optimizer_seed,
-        "protocol_version": PROTOCOL_VERSION,
+        "protocol_version": (
+            WINDOWED_PROTOCOL_VERSION if args.credit_window_steps
+            else PROTOCOL_VERSION
+        ),
         "algorithm_path": ALGORITHM_PATH,
         "controller_selected_iteration": payload["selected_checkpoint_iteration"],
         "controller_parameter_count": payload["capacity"]["actual_parameter_count"],
@@ -391,6 +426,7 @@ def train_cell(args: argparse.Namespace) -> dict[str, Any]:
         "branch_fit_seeds": list(branch_fit),
         "trigger_eval_seeds": list(trigger_eval),
         "pairs_per_seed": args.pairs_per_seed,
+        "credit_window_steps": args.credit_window_steps,
         "branch_fit_primitive_steps_replayed": sum(
             row["pair_primitive_steps_replayed"] for row in fit_rows
         ),
@@ -406,6 +442,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = build_stage9_parser()
     parser.description = __doc__
     parser.add_argument("--pairs-per-seed", type=int, default=12)
+    parser.add_argument("--credit-window-steps", type=int, default=0)
     return parser
 
 
@@ -417,18 +454,23 @@ def main(argv: list[str] | None = None) -> int:
         or not 1 <= args.pairs_per_seed < args.horizon // period
         or args.max_offset_steps != 25
         or args.check_stride_steps != 5
+        or args.credit_window_steps not in (0, period)
     ):
         raise ValueError("Stage-11 timing-pair protocol was changed")
     output = {
         "status": "dry_run" if args.dry_run else "complete",
         "protocol": {
-            "protocol_version": PROTOCOL_VERSION,
+            "protocol_version": (
+                WINDOWED_PROTOCOL_VERSION if args.credit_window_steps
+                else PROTOCOL_VERSION
+            ),
             "algorithm_path": ALGORITHM_PATH,
             "optimizer_seed": args.optimizer_seed,
             "environment_id": args.env_id,
             "iterations": args.iterations,
             "horizon": args.horizon,
             "pairs_per_seed": args.pairs_per_seed,
+            "credit_window_steps": args.credit_window_steps,
             "max_offset_steps": args.max_offset_steps,
             "check_stride_steps": args.check_stride_steps,
             "threshold_quantile": args.threshold_quantile,
@@ -438,7 +480,11 @@ def main(argv: list[str] | None = None) -> int:
             "branch_fit_seeds": args.branch_fit_seeds,
             "trigger_eval_seeds": args.trigger_eval_seeds,
             "task_options": _task_options(args),
-            "training_target": "same_budget_full_episode_ise_wait_minus_now",
+            "training_target": (
+                "same_budget_50_step_ise_wait_minus_now"
+                if args.credit_window_steps else
+                "same_budget_full_episode_ise_wait_minus_now"
+            ),
         },
         "cells": [] if args.dry_run else [train_cell(args)],
     }

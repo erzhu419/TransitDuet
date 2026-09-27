@@ -886,8 +886,14 @@ The [Stage-11 protocol](freq_hrl_stage11_timing_pair_v1_protocol_2026-09-27.md)
 tests one-call-per-bin now-versus-deadline counterfactuals on the legal
 5-step grid, with 230,400 paired replay steps per root. Preflight `t100899`
 passed exact paired-prefix, call-budget, fixed-controller replay, and output
-checks. Development tasks `t100902` and `t100903` started on node004 and
-node006. No Stage-11 performance result is available yet.
+checks. Development tasks `t100902` and `t100903` completed on node004 and
+node006.
+
+The [Stage-11 result](freq_hrl_stage11_timing_pair_v1_result_2026-09-27.md)
+failed its development gate: aligned candidate ISE was 1.713864/0.945610,
+versus Stage-9's 1.143830/0.838439 at roots 209011/209061. The same-budget
+full-episode labels were much less predictable than the Stage-9 short-window
+labels under path-grouped CV. No new-root confirmation follows from Stage-11.
 
 ### legacy_c1_c9_matrix_snapshot
 
