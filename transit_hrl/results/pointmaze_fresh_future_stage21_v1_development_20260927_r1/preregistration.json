@@ -1,0 +1,36 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cached_future_replicates": 8,
+  "continuation": "stage12_frozen; stage20_predictions_frozen; independent_conditional_futures",
+  "evidence_role": "frozen_prediction_independent_future_precision_only",
+  "future_replicates": 64,
+  "noise_pairs_per_seed": 2,
+  "optimizer_roots": [
+    209011,
+    209061
+  ],
+  "pairs_per_seed": 12,
+  "preflight": false,
+  "protocol": "pointmaze_fresh_future_stage21_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 16,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 12288,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_regularized_pair_stage20_v1_diagnostic",
+  "source_revision": "8f0e4c4acc63cd73ccc2a1e5d502b5085d214ef7",
+  "workers": 16
+}

@@ -52,3 +52,10 @@ passed; independent recomputation matched the paired intervals and corrected
 MSE. The tiny preflight failed both scientific gates: control-minus-candidate
 MSE is -3.29567e-7 for both controls, with interval
 [-3.37942e-7, -3.21192e-7]. Formal settings remain unchanged.
+
+Full run `pointmaze_fresh_future_stage21_v1_development_20260927_r1` was
+submitted at revision `8f0e4c4acc`: `t101399` (209011) started on node006,
+`t101400` (209061) on node005. Both logs reached controller reconstruction.
+Each task requests 16 cores and 12 GB, with dynamic placement and no node pin.
+Controller reconstruction is single-threaded; the 16-worker replay follows.
+No full-run scientific result is available yet.

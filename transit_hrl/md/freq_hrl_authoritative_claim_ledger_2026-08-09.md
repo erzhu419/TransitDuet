@@ -1040,6 +1040,8 @@ Implementation `95e310a2b9` passed 37 focused tests. Preflight `t101396`
 completed on node006 with exact frozen predictions and 11,700 charged steps.
 Its two-state/four-future scientific gates failed; this operational pass does
 not qualify the critic or alter the frozen full-run settings.
+Full tasks `t101399/101400`, submitted at `8f0e4c4acc`, started on
+node006/node005 for roots 209011/209061. Results remain pending.
 
 ### legacy_c1_c9_matrix_snapshot
 
