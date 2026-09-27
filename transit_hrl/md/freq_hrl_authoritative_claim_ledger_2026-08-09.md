@@ -1020,6 +1020,13 @@ automatically from a reused-development-state qualification.
 Implementation `76fca5c01b` passed 27 focused tests. Preflight `t101365` on
 node004 passed cache alignment, matched-normalization and zero-new-step checks.
 Its tiny mean-label ridge did not beat zero or Stage-19; settings remain frozen.
+Tasks `t101372/101373` completed on node006/node005. The
+[Stage-20 result](freq_hrl_stage20_regularized_pair_result_2026-09-27.md) failed
+the two-root gate: ridge mean-label corrected MSE is 0.001737412/0.000962561,
+versus zero 0.002319738/0.000945674. It reduces Stage-19 neural error by
+22.93%/98.19% but remains 1.79% worse than zero on the second root. No critic
+deployment or fresh-root extension follows. Coefficients remain frozen; an
+independent-future label-precision test is proposed, not yet executed.
 
 ### legacy_c1_c9_matrix_snapshot
 

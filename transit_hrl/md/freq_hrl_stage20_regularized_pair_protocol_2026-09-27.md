@@ -40,3 +40,9 @@ updates or new environment steps. Pairing, path isolation, matched normalization
 and metric recomputation passed. Corrected MSE: ridge mean 2.820614e-7,
 ridge single 1.075261e-5, zero/Stage-19 mean -4.954739e-8. Qualification failed;
 no parameter changes precede the development run.
+
+Development tasks `t101372/101373` completed on node006/node005 at submission
+revision `1c04d532f9`, run `pointmaze_regularized_pair_stage20_v1_development_20260927_r1`.
+The [result](freq_hrl_stage20_regularized_pair_result_2026-09-27.md) failed the
+two-root gate: 209011 qualified, but 209061 remains 1.79% worse than zero.
+No alpha, feature, coefficient or root changes followed the result.
