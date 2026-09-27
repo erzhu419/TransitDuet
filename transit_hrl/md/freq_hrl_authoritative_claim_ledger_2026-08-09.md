@@ -967,6 +967,12 @@ isolates paired-difference versus absolute-value critic loss on identical
 cached endpoints, initialization and normalization. It uses no new environment
 samples and no evaluation-path labels. Both roots must beat zero, a matched
 absolute-value control and frozen Stage-16 predictions before deployment testing.
+Tasks `t101251/101252` completed. The
+[Stage-17 result](freq_hrl_stage17_paired_value_result_2026-09-27.md)
+failed qualification: paired MSE 0.002655/0.002963 improves on the matched
+absolute-value control by 14.40%/22.28%, but loses to zero on both roots.
+No environment samples were added. This critic is not admitted to deployment;
+neither state insufficiency nor target noise has yet been established as the cause.
 
 ### legacy_c1_c9_matrix_snapshot
 

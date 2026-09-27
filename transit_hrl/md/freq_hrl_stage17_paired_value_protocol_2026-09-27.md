@@ -1,5 +1,7 @@
 # Stage-17 Paired-Value Qualification Protocol
 
+Implementation revision: `c23b05640f`; 26 focused tests passed.
+
 Frozen roots: 209011/209061; operational preflight: 208001. Use only the
 cached Stage-16 branch-fit endpoint pairs. No environment rollout, controller
 retraining, evaluation-path labels, new roots, trigger fit or policy deployment.
@@ -29,3 +31,10 @@ it does not establish control improvement or independent confirmation.
 Compute/root: 16 critic fits, 1,024 optimizer updates, zero new environment
 steps. Preflight has four fits/256 updates. Use scheduleurm, dynamic
 node001-node006, one CPU/1536 MB per cell. Transfer result JSON only.
+
+Preflight `t101249` completed on node004: four fits/256 updates, zero new
+environment steps. Paired/absolute/zero MSE: 0.000002292/0.000004148/0.000000705;
+operational checks passed, scientific qualification did not. Development
+tasks `t101251/101252` completed on node004/node006 under the unchanged
+protocol. The [result](freq_hrl_stage17_paired_value_result_2026-09-27.md)
+failed qualification on both roots; no deployment test is admitted.
