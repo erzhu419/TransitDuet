@@ -929,6 +929,16 @@ At early-call states, now-versus-one-check full ISE benefit is only
 The contrasts differ but do not establish the cause of Stage-12's performance
 gap, or a new performance claim.
 
+The [Stage-15 protocol](freq_hrl_stage15_onecheck_advantage_protocol_2026-09-27.md)
+fits full-episode now-versus-one-check advantage on branch-fit paths only,
+with Stage-12 adaptive continuation, two observable clocks, and zero-threshold
+deployment. No diagnostic evaluation labels are fitted. Preflight `t101092`
+passed causal pairing, exact reference replay and call-budget checks; its
+tiny candidate chose bin starts throughout, not a performance success.
+Development tasks `t101096/101097` started on node004/006. The new candidate
+has no development result yet; additional fitting costs 240,000 steps/root
+on top of the inherited supervision and replayed controller training.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

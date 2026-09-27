@@ -1,5 +1,7 @@
 # Stage-15 One-Check Advantage Development Protocol
 
+Implementation revision: `451b18e29a`.
+
 Frozen roots: 209011/209061; preflight: 208001. Reuse the Stage-12 controller,
 reference trigger, and seed roles. Stage-13/14 evaluation outcomes are never
 fitting labels. This is one approximate policy-improvement step, not another
