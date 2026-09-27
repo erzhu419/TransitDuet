@@ -1051,6 +1051,13 @@ steps were accounted for; no critic was refitted. This closes the fixed
 predictor's precision screen, not the general continuation-credit question.
 No deployment, retuning or sampling/root extension follows.
 
+The [Stage-22 protocol](freq_hrl_stage22_ridge_error_protocol_2026-09-27.md)
+uses cached labels to decompose the frozen ridge error into training-label
+realization, signal-mapping mismatch and their interaction. Its linear
+influence operators retain Stage-20 normalization, alpha and path holdouts.
+This is retrospective attribution with zero new environment steps or parameter
+updates, not a fresh qualification test. Fifteen focused tests passed.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
