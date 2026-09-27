@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "stage18_training_labels; stage21_scoring_only; bounded_contextual_value; matched_random_context",
+  "evidence_role": "cached_contextual_pair_development_only",
+  "fresh_future_replicates": 4,
+  "future_replicates": 4,
+  "noise_pairs_per_seed": 1,
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_seed": 2,
+  "preflight": true,
+  "protocol": "pointmaze_contextual_pair_stage23_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_fresh_future_stage21_v1_diagnostic",
+  "source_revision": "eef7b5394c7c2878d8807e81c055ed2b35108dad"
+}

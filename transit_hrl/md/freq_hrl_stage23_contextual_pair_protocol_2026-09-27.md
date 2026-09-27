@@ -36,6 +36,12 @@ Twenty-two focused tests passed: context activation, antisymmetry, bounded and
 matched row norms, weighted primal/dual equivalence, training-only normalization,
 scoring-label isolation, fold separation, gate semantics and scheduler resources.
 
+Preflight `t101514` passed operational checks on node004; its new models tied
+and failed the scientific gate. Full tasks `t101516/101517` completed on
+node004/node005 at `eef7b5394c`. The
+[result](freq_hrl_stage23_contextual_pair_result_2026-09-27.md) fails the two-root
+gate: 209061 loses to zero and the random-context control. Settings stayed frozen.
+
 ## Limitations
 
 These scoring labels informed prior diagnostics. This is a reused-development

@@ -1072,6 +1072,13 @@ and Stage-21 labels for scoring only. A same-size, row-norm-matched random
 context is an additional control. Both roots must beat zero, linear and random
 context for a development pass. Twenty-two focused tests passed; no new replay
 or independent-confirmation claim is involved.
+Tasks `t101516/101517` completed. The
+[Stage-23 result](freq_hrl_stage23_contextual_pair_result_2026-09-27.md) fails
+the two-root gate: corrected contextual MSE is 0.001897865/0.001387436,
+only 0.57%/0.63% better than linear. Root 209061 remains 11.19% worse than zero
+and 1.05% worse than matched random context. This bounded interaction is not
+qualified. Next is a cached tail-credit decision-value diagnostic, not another
+model-capacity or sample-budget expansion and not deployment.
 
 ### legacy_c1_c9_matrix_snapshot
 

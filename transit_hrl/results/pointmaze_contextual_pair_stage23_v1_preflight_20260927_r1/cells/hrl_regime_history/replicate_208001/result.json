@@ -1,0 +1,174 @@
+{
+  "cells": [
+    {
+      "additional_primitive_steps": 0,
+      "branch_fit_seeds": [
+        2159201,
+        2159211
+      ],
+      "controller_training_iterations": 0,
+      "critic_optimizer_steps": 0,
+      "evaluation_paths_used": 0,
+      "folds": [
+        {
+          "coefficient_norm": 0.00011234979206560832,
+          "effective_degrees_of_freedom": 0.5263157894736842,
+          "held_out_path": 2159201,
+          "method": "contextual",
+          "parameter_count": 365,
+          "query_pairs": 1,
+          "training_mse": 1.136022819946689e-08,
+          "training_pairs": 1,
+          "training_paths": [
+            2159211
+          ]
+        },
+        {
+          "coefficient_norm": 0.00011234979206560832,
+          "effective_degrees_of_freedom": 0.5263157894736842,
+          "held_out_path": 2159201,
+          "method": "random_context",
+          "parameter_count": 365,
+          "query_pairs": 1,
+          "training_mse": 1.136022819946689e-08,
+          "training_pairs": 1,
+          "training_paths": [
+            2159211
+          ]
+        },
+        {
+          "coefficient_norm": 7.596801444074162e-06,
+          "effective_degrees_of_freedom": 0.7939560439560439,
+          "held_out_path": 2159211,
+          "method": "contextual",
+          "parameter_count": 365,
+          "query_pairs": 1,
+          "training_mse": 1.4977004891181818e-11,
+          "training_pairs": 1,
+          "training_paths": [
+            2159201
+          ]
+        },
+        {
+          "coefficient_norm": 7.596801444074162e-06,
+          "effective_degrees_of_freedom": 0.7939560439560439,
+          "held_out_path": 2159211,
+          "method": "random_context",
+          "parameter_count": 365,
+          "query_pairs": 1,
+          "training_mse": 1.4977004891181818e-11,
+          "training_pairs": 1,
+          "training_paths": [
+            2159201
+          ]
+        }
+      ],
+      "metrics": {
+        "conditional_mean_mse_estimate": {
+          "contextual": 3.921754171428922e-07,
+          "linear": 3.921754171428866e-07,
+          "random_context": 3.921754171428922e-07,
+          "zero": 6.260843031680075e-08
+        },
+        "development_gate_passed": false,
+        "finite_repeat_correction": 1.1969466363938356e-08,
+        "mse_to_repeat_mean": {
+          "contextual": 4.041448835068305e-07,
+          "linear": 4.041448835068249e-07,
+          "random_context": 4.041448835068305e-07,
+          "zero": 7.45778966807391e-08
+        }
+      },
+      "optimizer_seed": 208001,
+      "path_metrics": {
+        "2159201": {
+          "conditional_mean_mse_estimate": {
+            "contextual": 6.680890083355798e-07,
+            "linear": 6.680890083355671e-07,
+            "random_context": 6.680890083355798e-07,
+            "zero": 3.6241371345278854e-10
+          },
+          "development_gate_passed": false,
+          "finite_repeat_correction": 5.450612649270115e-13,
+          "mse_to_repeat_mean": {
+            "contextual": 6.680895533968447e-07,
+            "linear": 6.68089553396832e-07,
+            "random_context": 6.680895533968447e-07,
+            "zero": 3.6295877471771555e-10
+          }
+        },
+        "2159211": {
+          "conditional_mean_mse_estimate": {
+            "contextual": 1.1626182595020455e-07,
+            "linear": 1.1626182595020603e-07,
+            "random_context": 1.1626182595020455e-07,
+            "zero": 1.248544469201487e-07
+          },
+          "development_gate_passed": false,
+          "finite_repeat_correction": 2.3938387666611783e-08,
+          "mse_to_repeat_mean": {
+            "contextual": 1.4020021361681633e-07,
+            "linear": 1.402002136168178e-07,
+            "random_context": 1.4020021361681633e-07,
+            "zero": 1.4879283458676048e-07
+          }
+        }
+      },
+      "ridge_fits": 4,
+      "rows": [
+        {
+          "check_step": 165,
+          "mean_variance": 5.450612649270115e-13,
+          "predictions": {
+            "contextual": 0.0008364189300753678,
+            "linear": 0.00083641893007536,
+            "random_context": 0.0008364189300753678,
+            "zero": 0.0
+          },
+          "repeat_mean": 1.9051476969456083e-05,
+          "seed": 2159201
+        },
+        {
+          "check_step": 200,
+          "mean_variance": 2.3938387666611783e-08,
+          "predictions": {
+            "contextual": 1.1303552802980288e-05,
+            "linear": 1.1303552802978298e-05,
+            "random_context": 1.1303552802980288e-05,
+            "zero": 0.0
+          },
+          "repeat_mean": 0.00038573674259365087,
+          "seed": 2159211
+        }
+      ],
+      "trigger_eval_seeds": [
+        2159301,
+        2159307
+      ]
+    }
+  ],
+  "protocol": {
+    "additional_primitive_steps": 0,
+    "alpha": 1.0,
+    "candidate": "contextual",
+    "context_transform": "tanh_training_z_over_sqrt_context_count",
+    "controls": [
+      "zero",
+      "linear",
+      "random_context"
+    ],
+    "endpoint_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_continuation_credit_stage16_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "evidence_role": "cached_contextual_pair_development_only",
+    "fresh_future_replicates": 4,
+    "fresh_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_future_stage21_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "future_replicates": 4,
+    "optimizer_seed": 208001,
+    "policy_deployment": false,
+    "prediction_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_regularized_pair_stage20_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "protocol_version": "pointmaze_contextual_pair_stage23_v1_diagnostic",
+    "random_context_seed_namespace": 23023,
+    "scoring_labels_previously_seen": true,
+    "source_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_state_noise_stage18_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json"
+  },
+  "status": "complete"
+}
