@@ -1096,6 +1096,13 @@ sensitivity retains these signs. This motivates a cost-sensitive decision
 objective, not another tail-MSE capacity expansion or a repaired Stage-23
 qualification. Stage-9 remains the performance reference.
 
+The [Stage-25 protocol](freq_hrl_stage25_cost_sensitive_protocol_2026-09-28.md)
+switches from tail-MSE fitting to cost-weighted causal now/wait classification.
+Whole-path holdout, old eight-draw training labels and cached 64-draw scoring
+remain fixed. Uniform classification, MSE, short-window-only and constant
+actions are controls. This is a new development screen with no rollout or
+deployment, not a rescue of the failed Stage-23 gate.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
