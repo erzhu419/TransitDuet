@@ -1036,6 +1036,10 @@ There is no critic refit or new root; controller reconstruction and new replay
 are explicitly charged (6,758,400 primitive steps/root). A precision pass
 requires positive lower bounds for both controls on both roots; it cannot
 establish new-state generalization or deployed-policy improvement.
+Implementation `95e310a2b9` passed 37 focused tests. Preflight `t101396`
+completed on node006 with exact frozen predictions and 11,700 charged steps.
+Its two-state/four-future scientific gates failed; this operational pass does
+not qualify the critic or alter the frozen full-run settings.
 
 ### legacy_c1_c9_matrix_snapshot
 

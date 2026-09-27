@@ -42,3 +42,13 @@ controller reconstruction in the parent. Request 16 cores/12 GB per full task,
 two cores/3 GB preflight, dynamically on node001-node006 via scheduleurm.
 Return compact contrasts, seeds, predictions and metrics only; no histories or
 checkpoints are downloaded. No extension beyond this fixed budget follows.
+
+## Execution
+
+Implementation `95e310a2b9`; preflight `t101396` completed on node006.
+Its 7,489-byte result contains two states with four fresh paired futures each.
+Frozen predictions, reconstructed endpoints and the 11,700-step accounting
+passed; independent recomputation matched the paired intervals and corrected
+MSE. The tiny preflight failed both scientific gates: control-minus-candidate
+MSE is -3.29567e-7 for both controls, with interval
+[-3.37942e-7, -3.21192e-7]. Formal settings remain unchanged.
