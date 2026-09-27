@@ -1080,6 +1080,13 @@ and 1.05% worse than matched random context. This bounded interaction is not
 qualified. Next is a cached tail-credit decision-value diagnostic, not another
 model-capacity or sample-budget expansion and not deployment.
 
+The [Stage-24 protocol](freq_hrl_stage24_tail_decision_protocol_2026-09-27.md)
+freezes an oracle-assisted tail decision on one half of the cached futures
+and scores it on the other. Reverse direction is sensitivity only; frozen
+critic choices remain descriptive comparisons. All references use observed
+counterfactual window costs. Nineteen tests passed; there is no new policy
+validation, qualification gate, model fit or environment sample.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
