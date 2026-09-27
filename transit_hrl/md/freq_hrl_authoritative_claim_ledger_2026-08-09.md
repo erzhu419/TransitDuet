@@ -1116,6 +1116,11 @@ It tests ordered history against same-size current-only and shuffled-history
 models. Raw sequences and weights remain on the server. This begins a new
 data-design screen, without reopening failed cached-candidate gates or
 claiming policy improvement.
+Implementation `b7bc0c587c` passed 16 focused tests. Real-environment preflight
+`t101584` completed on node004 with matched factual replay, eight temporal
+pairs and 8,860 accounted steps; its scientific gates failed. Full tasks
+`t101585/101586` are running on node004/node006. No full-run result or new
+performance qualification is available yet.
 
 ### legacy_c1_c9_matrix_snapshot
 

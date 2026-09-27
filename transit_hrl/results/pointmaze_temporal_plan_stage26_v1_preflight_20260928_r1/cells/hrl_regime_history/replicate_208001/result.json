@@ -1,0 +1,398 @@
+{
+  "cells": [
+    {
+      "branch_fit_seeds": [
+        2159201,
+        2159211
+      ],
+      "controller_reconstruction_primitive_steps": {
+        "selection": 900,
+        "training": 600,
+        "untrained_canonical_and_fixed_evaluation": 3600
+      },
+      "controller_selected_iteration": 1,
+      "coverage": {
+        "evaluation": {
+          "3259101": {
+            "0": 0,
+            "10": 1,
+            "15": 0,
+            "20": 0,
+            "5": 1
+          },
+          "3259102": {
+            "0": 0,
+            "10": 1,
+            "15": 1,
+            "20": 0,
+            "5": 0
+          }
+        },
+        "fit": {
+          "3259001": {
+            "0": 0,
+            "10": 1,
+            "15": 0,
+            "20": 0,
+            "5": 1
+          },
+          "3259002": {
+            "0": 0,
+            "10": 1,
+            "15": 1,
+            "20": 0,
+            "5": 0
+          }
+        }
+      },
+      "development_gate_passed": false,
+      "evaluation_pairs": 4,
+      "factual_replay_primitive_steps": 300,
+      "feature_names": [
+        "physical_0",
+        "physical_1",
+        "physical_2",
+        "physical_3",
+        "achieved_0",
+        "achieved_1",
+        "target_error_0",
+        "target_error_1",
+        "waypoint_error_0",
+        "waypoint_error_1",
+        "measured_0",
+        "measured_1",
+        "measured_2",
+        "measured_3",
+        "measured_4",
+        "measured_5",
+        "previous_action_0",
+        "previous_action_1",
+        "plan_age_fraction",
+        "within_bin_fraction",
+        "remaining_fraction",
+        "budget_spent",
+        "valid_observation"
+      ],
+      "fits": {
+        "feature_mean": [
+          -0.03157941997051239,
+          -0.23781423270702362,
+          0.2516516447067261,
+          -0.310387521982193,
+          -0.03157941997051239,
+          -0.23781423270702362,
+          -0.6896243095397949,
+          0.23781435191631317,
+          -0.06373655050992966,
+          0.08597879111766815,
+          -0.7212032079696655,
+          0.0,
+          0.0006922471220605075,
+          0.008614005520939827,
+          0.025412313640117645,
+          -0.16519013047218323,
+          -0.031776271760463715,
+          -0.0066533163189888,
+          0.6237499713897705,
+          0.4415625333786011,
+          0.5715885162353516,
+          0.6875,
+          0.98828125
+        ],
+        "feature_scale": [
+          1.1710777282714844,
+          0.5659810304641724,
+          0.8796885013580322,
+          0.6172230243682861,
+          1.1710777282714844,
+          0.5659810304641724,
+          1.020097017288208,
+          0.5389444231987,
+          0.23725971579551697,
+          0.18193332850933075,
+          0.18515630066394806,
+          1.0,
+          0.013382724486291409,
+          0.03730334714055061,
+          0.3304770588874817,
+          0.22402788698673248,
+          0.060163918882608414,
+          0.06976020336151123,
+          0.36933428049087524,
+          0.3124910891056061,
+          0.21660692989826202,
+          0.4635123908519745,
+          0.10761701315641403
+        ],
+        "fits": {
+          "current_repeat": {
+            "epochs": 4,
+            "initialization_seed": 2563963976,
+            "optimizer_steps": 4,
+            "parameter_count": 5571,
+            "training_rows": 4
+          },
+          "history": {
+            "epochs": 4,
+            "initialization_seed": 2563963976,
+            "optimizer_steps": 4,
+            "parameter_count": 5571,
+            "training_rows": 4
+          },
+          "shuffled_history": {
+            "epochs": 4,
+            "initialization_seed": 2563963976,
+            "optimizer_steps": 4,
+            "parameter_count": 5571,
+            "training_rows": 4
+          }
+        },
+        "target_scale": [
+          7.339789230693945e-05,
+          0.00019306982882832954,
+          0.0003726618301401069
+        ]
+      },
+      "metrics": {
+        "curve_rate_mse": {
+          "current_repeat": 6.302732941110125e-10,
+          "history": 6.218731667237753e-10,
+          "shuffled_history": 6.171639761959738e-10,
+          "zero": 6.207235141407129e-10
+        },
+        "decision_gate_passed": false,
+        "history_ise_benefit_vs_control": {
+          "always_now": 3.958321067727721e-06,
+          "always_wait": 0.0,
+          "current_repeat": 0.0,
+          "shuffled_history": 0.0
+        },
+        "now_counts": {
+          "always_now": 4,
+          "always_wait": 0,
+          "current_repeat": 0,
+          "history": 0,
+          "shuffled_history": 0
+        },
+        "opportunities": 4,
+        "prediction_gate_passed": false
+      },
+      "optimizer_seed": 208001,
+      "path_metrics": {
+        "3259101": {
+          "curve_rate_mse": {
+            "current_repeat": 1.1579448592762713e-09,
+            "history": 1.1409622665643822e-09,
+            "shuffled_history": 1.1324293119913147e-09,
+            "zero": 7.484279763304578e-10
+          },
+          "decision_gate_passed": false,
+          "history_ise_benefit_vs_control": {
+            "always_now": -9.538879748397086e-06,
+            "always_wait": 0.0,
+            "current_repeat": 0.0,
+            "shuffled_history": 0.0
+          },
+          "now_counts": {
+            "always_now": 2,
+            "always_wait": 0,
+            "current_repeat": 0,
+            "history": 0,
+            "shuffled_history": 0
+          },
+          "opportunities": 2,
+          "prediction_gate_passed": false
+        },
+        "3259102": {
+          "curve_rate_mse": {
+            "current_repeat": 1.026017289457535e-10,
+            "history": 1.0278406688316842e-10,
+            "shuffled_history": 1.018986404006328e-10,
+            "zero": 4.930190519509682e-10
+          },
+          "decision_gate_passed": false,
+          "history_ise_benefit_vs_control": {
+            "always_now": 1.7455521883852528e-05,
+            "always_wait": 0.0,
+            "current_repeat": 0.0,
+            "shuffled_history": 0.0
+          },
+          "now_counts": {
+            "always_now": 2,
+            "always_wait": 0,
+            "current_repeat": 0,
+            "history": 0,
+            "shuffled_history": 0
+          },
+          "opportunities": 2,
+          "prediction_gate_passed": false
+        }
+      },
+      "raw_server_bytes": {
+        "controller.pt": 3241894,
+        "curve_models.pt": 74126,
+        "temporal_pairs.npz": 27005
+      },
+      "raw_server_directory": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_temporal_plan_stage26_v1_preflight_20260928_r1/cells/hrl_regime_history/replicate_208001_raw",
+      "rows": [
+        {
+          "check_step": 105,
+          "curve": [
+            1.6179304038448777e-08,
+            1.8639925252095409e-06,
+            2.9984869295319582e-05
+          ],
+          "predicted_rates": {
+            "current_repeat": [
+              -3.789449621908527e-06,
+              -1.0808766225761696e-05,
+              -2.0862392477835335e-05
+            ],
+            "history": [
+              -3.941634705454602e-06,
+              -1.0512110893765549e-05,
+              -2.0289116042021595e-05
+            ],
+            "shuffled_history": [
+              -3.3883503104589644e-06,
+              -1.033326942154345e-05,
+              -1.998613645674119e-05
+            ]
+          },
+          "seed": 3259101
+        },
+        {
+          "check_step": 210,
+          "curve": [
+            -7.422713203183995e-07,
+            -4.384801850536996e-06,
+            -1.090710979852541e-05
+          ],
+          "predicted_rates": {
+            "current_repeat": [
+              -3.8629759009064755e-06,
+              -1.04996924758925e-05,
+              -2.0266210917538035e-05
+            ],
+            "history": [
+              -3.956864670461521e-06,
+              -1.0468301914694119e-05,
+              -2.0204875606015623e-05
+            ],
+            "shuffled_history": [
+              -3.679597005370286e-06,
+              -1.0188366062709372e-05,
+              -1.9686410984545784e-05
+            ]
+          },
+          "seed": 3259101
+        },
+        {
+          "check_step": 160,
+          "curve": [
+            4.7162033395969916e-07,
+            6.533801227177893e-07,
+            -1.7983517892004516e-05
+          ],
+          "predicted_rates": {
+            "current_repeat": [
+              -4.159645502388394e-06,
+              -1.173772372353015e-05,
+              -2.2655292172698083e-05
+            ],
+            "history": [
+              -4.463208782106479e-06,
+              -1.186921251548422e-05,
+              -2.29083411132621e-05
+            ],
+            "shuffled_history": [
+              -4.201182839445776e-06,
+              -1.1987455042989784e-05,
+              -2.3098320788701668e-05
+            ]
+          },
+          "seed": 3259102
+        },
+        {
+          "check_step": 215,
+          "curve": [
+            -7.148876473199797e-07,
+            -5.232964154054318e-06,
+            -1.692752587570054e-05
+          ],
+          "predicted_rates": {
+            "current_repeat": [
+              -4.531561794714285e-06,
+              -1.2858717172605671e-05,
+              -2.481939815401977e-05
+            ],
+            "history": [
+              -4.833253183221645e-06,
+              -1.285915447123111e-05,
+              -2.4819947910325944e-05
+            ],
+            "shuffled_history": [
+              -4.204346953540212e-06,
+              -1.2876634908390065e-05,
+              -2.493749025106018e-05
+            ]
+          },
+          "seed": 3259102
+        }
+      ],
+      "sequence_shape": [
+        64,
+        23
+      ],
+      "temporal_replay_primitive_steps": 3460,
+      "temporal_seed_roles": {
+        "evaluation": [
+          3259101,
+          3259102
+        ],
+        "fit": [
+          3259001,
+          3259002
+        ]
+      },
+      "training_pairs": 4,
+      "trigger_eval_seeds": [
+        2159301,
+        2159307
+      ]
+    }
+  ],
+  "protocol": {
+    "candidate": "history",
+    "controls": [
+      "current_repeat",
+      "shuffled_history"
+    ],
+    "curve_epochs": 4,
+    "curve_horizons_steps": [
+      10,
+      25,
+      50
+    ],
+    "evidence_role": "fresh_path_temporal_plan_development_only",
+    "gru_width": 32,
+    "history_steps": 64,
+    "optimizer_seed": 208001,
+    "pairs_per_path": 2,
+    "policy_deployment": false,
+    "protocol_version": "pointmaze_temporal_plan_stage26_v1_development",
+    "seed_roles": {
+      "evaluation": [
+        3259101,
+        3259102
+      ],
+      "fit": [
+        3259001,
+        3259002
+      ]
+    },
+    "source_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_timing_pair_stage12_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "workers": 1
+  },
+  "status": "complete"
+}
