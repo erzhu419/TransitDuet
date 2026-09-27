@@ -33,3 +33,10 @@ Schedule through node001-node006 without pins; sync compact JSON only.
 This jointly tests lower capacity and regularization, not their separate causal
 effects. Reused development states cannot confirm a deployment claim; even a
 pass requires a separate control-utility protocol. Preserve Stage-19 failures.
+
+Implementation `76fca5c01b`. Preflight `t101365` completed on node004;
+23,821-byte JSON, four 40-coefficient fits, eight cached labels, no gradient
+updates or new environment steps. Pairing, path isolation, matched normalization
+and metric recomputation passed. Corrected MSE: ridge mean 2.820614e-7,
+ridge single 1.075261e-5, zero/Stage-19 mean -4.954739e-8. Qualification failed;
+no parameter changes precede the development run.
