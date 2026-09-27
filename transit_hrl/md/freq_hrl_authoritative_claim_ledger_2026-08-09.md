@@ -955,9 +955,18 @@ Continuation qualification concerns action contrasts, not individual-value fit.
 Implementation `0bab1e9e48` passed 21 focused tests; preflight `t101192` completed
 on node006 with exact replay, four pairs and two path-disjoint folds. Its tiny
 critic did not beat zero-tail contrast MSE; bootstrap always used the deadline.
-Operational preflight passed, not scientific qualification. Development tasks
-`t101193/101194` launched on node006/node005 for the two frozen roots, without
-node pins. No Stage-16 development result is available yet.
+Development tasks `t101193/101194` completed. The
+[Stage-16 result](freq_hrl_stage16_continuation_credit_result_2026-09-27.md)
+failed the frozen gate: bootstrap ISE 1.240951/1.041449 loses to short-only
+1.181110/0.954915 and Stage-9 on both roots. Out-of-path tail-contrast skill
+versus zero is -16.96%/+1.40%. Conditional timing remains active, so this is
+not another constant-action collapse. Stage-16 is not adopted.
+
+The [Stage-17 protocol](freq_hrl_stage17_paired_value_protocol_2026-09-27.md)
+isolates paired-difference versus absolute-value critic loss on identical
+cached endpoints, initialization and normalization. It uses no new environment
+samples and no evaluation-path labels. Both roots must beat zero, a matched
+absolute-value control and frozen Stage-16 predictions before deployment testing.
 
 ### legacy_c1_c9_matrix_snapshot
 

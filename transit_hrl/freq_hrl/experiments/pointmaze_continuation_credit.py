@@ -25,7 +25,16 @@ VALUE_WIDTH = 64
 RIDGE_ALPHA = 100.0
 
 
-def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS):
+def continuation_loss(prediction, target, weight, *, objective):
+    residual = prediction - target
+    if objective == "absolute":
+        return torch.sum(weight * residual ** 2)
+    if objective == "paired_contrast":
+        return torch.sum((weight[::2] + weight[1::2]) * (residual[1::2] - residual[::2]) ** 2)
+    raise ValueError("unknown continuation objective")
+
+
+def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS, objective="absolute"):
     """Fit V_pi on other paths; queries contain states, never fitting targets."""
     x = np.asarray([r["features"] for r in train], dtype=np.float64)
     y = np.asarray([r["cost_to_go"] for r in train], dtype=np.float64)
@@ -43,6 +52,13 @@ def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS):
     scale[scale < 1e-8] = 1.0
     remaining_index = names.index("remaining_fraction")
     remaining = x[:, remaining_index]
+    if objective == "paired_contrast" and (len(train) % 2 or any(
+        (a["pair_key"], a["seed"]) != (b["pair_key"], b["seed"])
+        or (a["arm"], b["arm"]) != ("now", "wait")
+        or a["features"][remaining_index] != b["features"][remaining_index]
+        for a, b in zip(train[::2], train[1::2])
+    )):
+        raise ValueError("continuation endpoints are not aligned now/wait pairs")
     rate = float(np.sum(weights * remaining * y) / np.sum(weights * remaining ** 2))
     target_scale = max(float(np.sqrt(np.sum(weights * y ** 2))), 1e-8)
     torch.set_num_threads(1)
@@ -56,7 +72,7 @@ def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS):
     model.train()
     for _ in range(epochs):
         optimizer.zero_grad()
-        loss = torch.sum(weight * (time_left * model(state) - target) ** 2)
+        loss = continuation_loss(time_left * model(state), target, weight, objective=objective)
         loss.backward()
         optimizer.step()
     model.eval()
@@ -70,6 +86,7 @@ def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS):
         "training_paths": sorted(map(int, set(groups))), "training_rows": len(train),
         "query_rows": len(query), "epochs": epochs, "hidden_dim": VALUE_WIDTH,
         "optimizer_steps": epochs, "seed": seed,
+        "objective": objective,
         "baseline_cost_rate": rate, "target_scale": target_scale,
         "last_training_normalized_loss": float(loss.detach()),
     }
