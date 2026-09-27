@@ -31,10 +31,14 @@ from scripts.submit_pointmaze_timing_pair_stage11_scheduleurm import (
 
 
 def task_specification(run_name: str, root: int, *, preflight: bool, protocol_spec=spec) -> dict:
-    source = protocol_spec.source_result(root, preflight=preflight)
-    if not source.is_file():
-        raise FileNotFoundError(source)
-    extra_args = ["--source-result", str(source)]
+    sources = (protocol_spec.input_results(root, preflight=preflight)
+               if hasattr(protocol_spec, "input_results") else
+               {"source_result": protocol_spec.source_result(root, preflight=preflight)})
+    extra_args = []
+    for key, source in sources.items():
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        extra_args.extend(["--" + key.replace("_", "-"), str(source)])
     for key, value in protocol_spec.sampling_options(preflight=preflight).items():
         extra_args.extend(["--" + key.replace("_", "-"), str(value)])
     task = base_task_specification(
@@ -47,7 +51,7 @@ def task_specification(run_name: str, root: int, *, preflight: bool, protocol_sp
         "description": f"Freq-HRL {protocol_spec.EXPERIMENT_PROTOCOL} root{root}",
         "signature": task_signature(run_name, root, protocol_spec=protocol_spec),
         "resource_family": f"Freq-HRL/{protocol_spec.EXPERIMENT_PROTOCOL}/cell",
-        "stage_input_paths": [*task["stage_input_paths"], str(source.parent)],
+        "stage_input_paths": [*task["stage_input_paths"], *[str(s.parent) for s in sources.values()]],
     })
     return task
 

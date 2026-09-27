@@ -974,6 +974,13 @@ absolute-value control by 14.40%/22.28%, but loses to zero on both roots.
 No environment samples were added. This critic is not admitted to deployment;
 neither state insufficiency nor target noise has yet been established as the cause.
 
+The [Stage-18 protocol](freq_hrl_stage18_state_noise_protocol_2026-09-27.md)
+tests equal-shape compact versus full-controller-history critics and repeated
+conditional futures at unchanged branch endpoints. Future clocks are redrawn
+conditional on elapsed durations; current latent state is simulator-only.
+It adds 547,200 replay steps/root, not new optimizer roots or deployed policies.
+No Stage-18 result is available yet.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

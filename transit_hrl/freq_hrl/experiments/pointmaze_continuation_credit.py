@@ -85,6 +85,7 @@ def fit_continuation(train, query, *, seed, epochs=VALUE_EPOCHS, objective="abso
     return prediction, {
         "training_paths": sorted(map(int, set(groups))), "training_rows": len(train),
         "query_rows": len(query), "epochs": epochs, "hidden_dim": VALUE_WIDTH,
+        "state_dim": x.shape[1], "parameter_count": sum(p.numel() for p in model.parameters()),
         "optimizer_steps": epochs, "seed": seed,
         "objective": objective,
         "baseline_cost_rate": rate, "target_scale": target_scale,

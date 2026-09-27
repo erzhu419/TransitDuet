@@ -8,6 +8,7 @@ explicit oracle-reference experiments; it contains no future information.
 
 from __future__ import annotations
 
+from copy import copy
 from dataclasses import dataclass
 from typing import Any
 
@@ -142,7 +143,7 @@ class PointMazeRegimeDriver:
             np.random.default_rng(regime_seed), count=count
         )
         self._targets = self._build_targets(count=count)
-        self._forces, self._pulse_start_steps = self._build_force_pulses(
+        self._forces, self._pulse_start_steps, self._pulse_stop_steps = self._build_force_pulses(
             np.random.default_rng(force_seed), count=count
         )
         self._distractors, self._distractor_change_steps = (
@@ -235,9 +236,10 @@ class PointMazeRegimeDriver:
         rng: np.random.Generator,
         *,
         count: int,
-    ) -> tuple[np.ndarray, tuple[int, ...]]:
+    ) -> tuple[np.ndarray, tuple[int, ...], tuple[int, ...]]:
         force = np.zeros((int(count), 2), dtype=np.float64)
         starts: list[int] = []
+        stops: list[int] = []
         step = self._random_steps(rng, self.force_pulse_gap_seconds)
         while step < int(count) - 1:
             duration = self._random_steps(
@@ -250,8 +252,78 @@ class PointMazeRegimeDriver:
             stop = min(int(count), step + duration)
             force[step:stop] = vector
             starts.append(int(step))
+            stops.append(int(stop))
             step = stop + self._random_steps(rng, self.force_pulse_gap_seconds)
-        return force, tuple(starts)
+        return force, tuple(starts), tuple(stops)
+
+    def _conditional_next_step(self, rng, bounds, *, start: int, step: int) -> int:
+        low = _seconds_to_steps(bounds[0], self.dt_seconds)
+        high = _seconds_to_steps(bounds[1], self.dt_seconds)
+        return start + int(rng.integers(max(low, step - start + 1), high + 1))
+
+    def conditional_future(self, *, step: int, seed: int) -> PointMazeRegimeDriver:
+        """Redraw unrevealed clocks given the realized past and current latent state."""
+        if not 0 <= step < self.horizon:
+            raise ValueError("conditional future must start before the episode ends")
+        result = copy(self)
+        regime_rng, force_rng, distractor_rng = [
+            np.random.default_rng(s) for s in np.random.SeedSequence(seed).spawn(3)
+        ]
+        changes = [s for s in self._regime_change_steps if s <= step]
+        current = int(self._regime_ids[step])
+        result._regime_ids = self._regime_ids.copy()
+        result._regime_ids[step + 1:] = current
+        next_step = self._conditional_next_step(
+            regime_rng, self.regime_dwell_seconds, start=changes[-1] if changes else 0, step=step,
+        )
+        while next_step < self.horizon:
+            candidates = [i for i, speed in enumerate(self.target_speed_modes)
+                          if np.sign(speed) != np.sign(self.target_speed_modes[current])]
+            current = candidates[int(regime_rng.integers(len(candidates)))]
+            result._regime_ids[next_step:] = current
+            changes.append(next_step)
+            next_step += self._random_steps(regime_rng, self.regime_dwell_seconds)
+        result._regime_change_steps = tuple(changes)
+        result._targets = result._build_targets(count=self.horizon + 1)
+
+        # Completed pulse ends are past information; an active pulse's end is redrawn.
+        pulses = [(a, b) for a, b in zip(self._pulse_start_steps, self._pulse_stop_steps) if a <= step]
+        starts, stops = [a for a, _ in pulses], [b for _, b in pulses]
+        result._forces = self._forces.copy()
+        result._forces[step + 1:] = 0.0
+        if pulses and stops[-1] > step:
+            stop = min(self.horizon + 1, self._conditional_next_step(
+                force_rng, self.force_pulse_duration_seconds, start=starts[-1], step=step,
+            ))
+            stops[-1] = stop
+            result._forces[step + 1:stop] = self._forces[step]
+            next_step = stop + self._random_steps(force_rng, self.force_pulse_gap_seconds)
+        else:
+            next_step = self._conditional_next_step(
+                force_rng, self.force_pulse_gap_seconds, start=stops[-1] if stops else 0, step=step,
+            )
+        while next_step < self.horizon:
+            duration = self._random_steps(force_rng, self.force_pulse_duration_seconds)
+            angle = float(force_rng.uniform(0.0, 2.0 * np.pi))
+            stop = min(self.horizon + 1, next_step + duration)
+            result._forces[next_step:stop] = self.force_pulse_amplitude * np.array([np.cos(angle), np.sin(angle)])
+            starts.append(next_step)
+            stops.append(stop)
+            next_step = stop + self._random_steps(force_rng, self.force_pulse_gap_seconds)
+        result._pulse_start_steps, result._pulse_stop_steps = tuple(starts), tuple(stops)
+
+        changes = [s for s in self._distractor_change_steps if s <= step]
+        result._distractors = self._distractors.copy()
+        result._distractors[step + 1:] = self._distractors[step]
+        next_step = self._conditional_next_step(
+            distractor_rng, self.distractor_dwell_seconds, start=changes[-1] if changes else 0, step=step,
+        )
+        while next_step < self.horizon:
+            result._distractors[next_step:] = distractor_rng.uniform(-1.0, 1.0, size=2) * self.distractor_amplitude
+            changes.append(next_step)
+            next_step += self._random_steps(distractor_rng, self.distractor_dwell_seconds)
+        result._distractor_change_steps = tuple(changes)
+        return result
 
     def _build_distractors(
         self,

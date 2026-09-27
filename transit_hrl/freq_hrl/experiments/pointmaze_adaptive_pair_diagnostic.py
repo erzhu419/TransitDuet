@@ -28,11 +28,12 @@ ARMS = ("now", "wait_one_check", "wait_deadline")
 
 def rollout_intervention(
     controller, *, seed, intervention_step, arm, predictor, args, time_scale,
-    score_fn=None, collect_value_trace=False,
+    score_fn=None, collect_value_trace=False, capture_endpoint_history=False,
+    continuation_seed=None,
 ):
     period = time_scale.upper_period_steps
     if intervention_step is None:
-        if arm is not None:
+        if arm is not None or continuation_seed is not None:
             raise ValueError("a factual rollout has no intervention arm")
     elif (
         arm not in ARMS or not period <= intervention_step < args.horizon - period
@@ -64,6 +65,10 @@ def rollout_intervention(
         trace_start = 0 if intervention_step is None else intervention_step + period
         for step in range(args.horizon):
             bin_index, offset = divmod(step, period)
+            if continuation_seed is not None and step == trace_start:
+                task.driver = task.driver.conditional_future(step=step, seed=continuation_seed)
+                if not np.array_equal(np.concatenate(task.driver.sample(step)), observation.task_measurement):
+                    raise RuntimeError("conditional future changed the current observation")
             if collect_value_trace and step >= trace_start and (step - trace_start) % period == 0:
                 names, values, _ = _causal_plan_features(
                     observation=observation, feature_builder=history,
@@ -77,6 +82,8 @@ def rollout_intervention(
                                  (args.horizon - step) / args.horizon,
                                  float(bool(decisions) and decisions[-1] // period == bin_index)],
                 })
+                if capture_endpoint_history and step == trace_start:
+                    value_trace[-1]["controller_history"] = history.history.tolist()
             plan_now = step == 0
             if step > 0 and (not decisions or decisions[-1] // period != bin_index):
                 if offset <= args.max_offset_steps and offset % args.check_stride_steps == 0:
