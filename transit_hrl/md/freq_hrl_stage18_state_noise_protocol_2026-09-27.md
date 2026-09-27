@@ -1,5 +1,8 @@
 # Stage-18 State and Future-Noise Diagnostic
 
+Implementation: `8a0ea255d6`; 29 focused tests passed. Unforked generation
+matches the previous committed driver exactly on three 1,200-step paths.
+
 Frozen roots: 209011/209061; preflight: 208001. Preserve Stage-16/17 failures.
 Reconstruct the same frozen controller and Stage-12 reference trigger, then
 replay all 96 Stage-16 fit pairs/root. Require the recorded boundary features,
@@ -38,3 +41,10 @@ inherited supervision are additional. Preflight: two paths, two pairs/path,
 one noise opportunity/path, four futures, 300-step horizon, 7,800 replay steps.
 Run via scheduleurm on dynamic node001-node006, one CPU/1536 MB per task.
 Sync compact metrics/predictions/future contrasts only, not histories or ckpts.
+
+Preflight `t101286` completed on node004: exact cached endpoints and preserved
+fork boundaries, four pairs, two noise states/four futures each, 7,800 replay
+steps and 256 critic updates. Retrieved JSON: 6,970 bytes. Compact/full-history/
+zero MSE: 5.473e-7/6.781e-7/7.054e-7. Operational checks passed, but history
+qualification did not. Negative finite-replicate variance/MSE estimates were
+retained; no settings were changed before the full development diagnostic.

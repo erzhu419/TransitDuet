@@ -979,7 +979,9 @@ tests equal-shape compact versus full-controller-history critics and repeated
 conditional futures at unchanged branch endpoints. Future clocks are redrawn
 conditional on elapsed durations; current latent state is simulator-only.
 It adds 547,200 replay steps/root, not new optimizer roots or deployed policies.
-No Stage-18 result is available yet.
+Preflight `t101286` passed cached-endpoint, boundary and 7,800-step accounting
+checks on node004. Its tiny history comparison did not qualify; no settings
+were changed. No Stage-18 development result is available yet.
 
 ### legacy_c1_c9_matrix_snapshot
 
