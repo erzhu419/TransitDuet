@@ -7,6 +7,12 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts import pointmaze_deployed_pair_diagnostic_spec as spec
 from scripts.submit_hyperparameter_pilot_scheduleurm import (
@@ -23,9 +29,6 @@ from scripts.submit_pointmaze_timing_pair_stage11_scheduleurm import (
     sync_results,
     task_signature,
 )
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def task_specification(run_name: str, root: int, *, preflight: bool) -> dict:
