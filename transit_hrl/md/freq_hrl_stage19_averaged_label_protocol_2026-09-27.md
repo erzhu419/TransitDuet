@@ -39,3 +39,8 @@ normalization, path isolation and zero-new-step accounting checks: two pairs,
 eight cached labels, four fits/256 updates. Both treatments predicted zero;
 raw MSE was 2.549147e-8 for both and zero, corrected MSE -4.954739e-8.
 Qualification failed on a tie. No settings were changed before development.
+
+Development tasks `t101361/101362` completed on node004/node006, submitted at
+`a8fbaa34bc` as `pointmaze_averaged_label_stage19_v1_development_20260927_r1`.
+The [result](freq_hrl_stage19_averaged_label_result_2026-09-27.md) failed the
+two-root gate: root 209011 qualified, root 209061 did not. No retuning followed.

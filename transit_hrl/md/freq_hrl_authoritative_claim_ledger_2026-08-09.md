@@ -1001,6 +1001,14 @@ does not authorize deployment or independent confirmation.
 Implementation `dc8a2bf316` passed 22 focused tests. Preflight `t101351` on
 node006 passed accounting and matched-fit checks with zero new environment
 steps. Both tiny fits predicted zero and did not qualify; settings remain frozen.
+Tasks `t101361/101362` completed on node004/node006. The
+[Stage-19 result](freq_hrl_stage19_averaged_label_result_2026-09-27.md) failed
+the two-root gate: averaged-label corrected MSE 0.002254474/0.053225939 versus
+single-label 0.002294605/0.023586031 and zero 0.002319738/0.000945674.
+Averaging helps the first root slightly but substantially harms the second;
+it does not qualify this critic. No new environment steps, deployment or
+fresh-root extension were added. Cross-path extrapolation remains a candidate
+failure mechanism, not an established explanation.
 
 ### legacy_c1_c9_matrix_snapshot
 
