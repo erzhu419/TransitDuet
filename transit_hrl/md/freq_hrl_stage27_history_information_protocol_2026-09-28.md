@@ -27,6 +27,19 @@ One CPU/1.5 GB per task, dynamically placed on node001-node006 via scheduler.
 Fourteen focused tests passed, covering observed lags, future-label isolation,
 source-prefix matching, training-only fits, units and scheduler/cache scope.
 
+Execution frozen at `c1e5e72a44`: preflight `t101656` completed on node004,
+with four training/four evaluation rows, 27 scalar solves and 1,204 generated
+tape points. No new environment steps or controller updates; retrieved
+62,447 bytes of JSON. The preflight's nearly constant lag-one speed has
+training std 2.47e-6; normalization amplifies its float32 variation, producing
+history forecast MSE 1.83154e8. Retain this negative result; full settings
+remained unchanged. Full tasks `t101659/101660` completed on node004/node006
+for 209011/209061, each with 320 training/160 evaluation rows, six linear
+fits, 27 scalar solves and 28,824 generated tape points. No new environment
+steps or controller updates. Full-run slope std ranges from 0.322 to 0.863;
+the preflight scale amplification is absent. See the
+[Stage-27 result](freq_hrl_stage27_history_information_result_2026-09-28.md).
+
 ## Limitations
 
 This retrospective diagnostic cannot reopen Stage-26 or qualify a policy.

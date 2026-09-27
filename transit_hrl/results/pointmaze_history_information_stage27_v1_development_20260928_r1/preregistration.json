@@ -1,0 +1,31 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "stage26_remote_cache; lags1_10_25_50; horizons10_25_50; ridge_sum_loss_alpha1",
+  "evidence_role": "reused_temporal_cache_information_diagnostic_only",
+  "optimizer_roots": [
+    209011,
+    209061
+  ],
+  "preflight": false,
+  "protocol": "pointmaze_history_information_stage27_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_temporal_plan_stage26_v1_development",
+  "source_revision": "c1e5e72a44fa51c7785eb94a16a9082f29a2e32d"
+}

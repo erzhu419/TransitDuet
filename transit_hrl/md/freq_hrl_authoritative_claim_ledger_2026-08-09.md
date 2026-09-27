@@ -1131,6 +1131,29 @@ history candidate. No retuning, seed extension or control promotion follows;
 Stage-9 remains the performance reference. Next, establish the observation
 and temporal-credit requirements before another candidate or rollout screen.
 
+The [Stage-27 protocol](freq_hrl_stage27_history_information_protocol_2026-09-28.md)
+separates future-target forecast skill from cached timing-response prediction.
+It uses fixed-lag causal velocity summaries and matched current/shuffled views,
+with frozen unit ridge fits. This is a retrospective information diagnostic,
+not a new policy qualification. Implementation `c1e5e72a44` passed 14 tests.
+Preflight `t101656` completed on node004 with matched cached prefixes and zero
+new environment steps. Its four-row fit amplified near-constant velocity
+quantization and produced extreme predictions; that result is retained.
+Full tasks `t101659/101660` completed on node004/node006 without setting
+changes. The [Stage-27 result](freq_hrl_stage27_history_information_result_2026-09-28.md)
+shows future-target MSE reductions of 65.07%/58.53% versus current-only,
+with improvements on 15/16 paths and 27.11%/28.01% versus lag-one
+extrapolation on the horizon-averaged endpoint. Timing-response MSE changes
+by +2.79%/-0.18%; root 209011 still loses decision benefit to shuffled
+history and always-now. History contains useful predictive information in
+this cache, but the timing objective does not produce a stable all-control
+advantage. All 320 evaluation rows, 12 linear fits/54 scalar solves and
+57,648 regenerated tape points are accounted for. Independent recomputation
+matches labels and metrics within float32 rounding; new environment steps
+are zero. Next is true multi-duration keep/renew supervision with unchanged
+lower feedback and a frozen planning-resource comparison, using remote
+controller caches rather than another reconstruction. No policy is promoted.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
