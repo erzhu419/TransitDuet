@@ -48,3 +48,7 @@ steps. Retrieved JSON: 50,977 bytes. Operational checks passed; the tiny fit
 failed continuation qualification (MSE 0.003482 vs zero-tail 0.000000705).
 Bootstrap made all ten noninitial calls at the deadline. This is not a
 performance result; the frozen two-root development screen remains unchanged.
+
+Development run `pointmaze_continuation_credit_stage16_v1_development_20260927_r1`:
+`t101193` (root 209011, node006) and `t101194` (root 209061, node005) launched
+through dynamic scheduling, without node pins. Submission revision: `2ff5ab1ccf`.

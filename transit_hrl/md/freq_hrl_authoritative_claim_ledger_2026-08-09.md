@@ -955,8 +955,9 @@ Continuation qualification concerns action contrasts, not individual-value fit.
 Implementation `0bab1e9e48` passed 21 focused tests; preflight `t101192` completed
 on node006 with exact replay, four pairs and two path-disjoint folds. Its tiny
 critic did not beat zero-tail contrast MSE; bootstrap always used the deadline.
-Operational preflight passed, not scientific qualification. The frozen two-root
-development screen is next; no Stage-16 development result is available yet.
+Operational preflight passed, not scientific qualification. Development tasks
+`t101193/101194` launched on node006/node005 for the two frozen roots, without
+node pins. No Stage-16 development result is available yet.
 
 ### legacy_c1_c9_matrix_snapshot
 
