@@ -981,7 +981,9 @@ conditional on elapsed durations; current latent state is simulator-only.
 It adds 547,200 replay steps/root, not new optimizer roots or deployed policies.
 Preflight `t101286` passed cached-endpoint, boundary and 7,800-step accounting
 checks on node004. Its tiny history comparison did not qualify; no settings
-were changed. No Stage-18 development result is available yet.
+were changed. Development tasks `t101288`/`t101289` (roots 209011/209061)
+are running on node004/node006, submitted at `503ac8e0aa` without node pins.
+No Stage-18 development result is available yet.
 
 ### legacy_c1_c9_matrix_snapshot
 
