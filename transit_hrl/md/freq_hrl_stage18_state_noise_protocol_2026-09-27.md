@@ -52,4 +52,7 @@ retained; no settings were changed before the full development diagnostic.
 Development run: `pointmaze_state_noise_stage18_v1_development_20260927_r1`,
 submitted at `503ac8e0aa`. Task `t101288` (root 209011) started on node004;
 `t101289` (root 209061) started on node006 through the unpinned dynamic pool.
-Both are running; development results are pending.
+Both completed. The [result](freq_hrl_stage18_state_noise_result_2026-09-27.md)
+failed history qualification on both roots; no settings were changed or
+policies deployed. Full-history MSE exceeds compact by 5.89%/56.45% and
+also exceeds zero after conditional-mean finite-replicate correction.

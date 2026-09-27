@@ -982,8 +982,14 @@ It adds 547,200 replay steps/root, not new optimizer roots or deployed policies.
 Preflight `t101286` passed cached-endpoint, boundary and 7,800-step accounting
 checks on node004. Its tiny history comparison did not qualify; no settings
 were changed. Development tasks `t101288`/`t101289` (roots 209011/209061)
-are running on node004/node006, submitted at `503ac8e0aa` without node pins.
-No Stage-18 development result is available yet.
+completed on node004/node006, submitted at `503ac8e0aa` without node pins.
+The [Stage-18 result](freq_hrl_stage18_state_noise_result_2026-09-27.md)
+failed history qualification on both roots: full-history MSE is
+0.002623268/0.006137094, worse than compact and zero. Future variability is
+present, but corrected conditional-mean MSE also loses to zero for full history
+on both roots. This does not establish a noise-only cause or state sufficiency.
+No deployment or root expansion follows; Stage-9 remains the performance
+reference. A cached-label averaging diagnostic is the next proposed step.
 
 ### legacy_c1_c9_matrix_snapshot
 
