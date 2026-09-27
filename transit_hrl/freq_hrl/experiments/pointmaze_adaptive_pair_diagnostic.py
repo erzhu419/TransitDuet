@@ -28,7 +28,7 @@ ARMS = ("now", "wait_one_check", "wait_deadline")
 
 def rollout_intervention(
     controller, *, seed, intervention_step, arm, predictor, args, time_scale,
-    score_fn=None,
+    score_fn=None, collect_value_trace=False,
 ):
     period = time_scale.upper_period_steps
     if intervention_step is None:
@@ -60,8 +60,23 @@ def rollout_intervention(
         last_plan_step = -1
         decisions, rewards, errors = [], [], []
         captured = None
+        value_trace = []
+        trace_start = 0 if intervention_step is None else intervention_step + period
         for step in range(args.horizon):
             bin_index, offset = divmod(step, period)
+            if collect_value_trace and step >= trace_start and (step - trace_start) % period == 0:
+                names, values, _ = _causal_plan_features(
+                    observation=observation, feature_builder=history,
+                    subgoal=subgoal, plan_age_steps=step - last_plan_step,
+                    time_scale=time_scale,
+                )
+                value_trace.append({
+                    "step": step,
+                    "feature_names": [*names, "within_bin_fraction", "remaining_fraction", "budget_spent"],
+                    "features": [*map(float, values), offset / period,
+                                 (args.horizon - step) / args.horizon,
+                                 float(bool(decisions) and decisions[-1] // period == bin_index)],
+                })
             plan_now = step == 0
             if step > 0 and (not decisions or decisions[-1] // period != bin_index):
                 if offset <= args.max_offset_steps and offset % args.check_stride_steps == 0:
@@ -119,8 +134,13 @@ def rollout_intervention(
             or [s // period for s in decisions] != list(range(args.horizon // period))
         ):
             raise RuntimeError("intervention prefix or one-call-per-bin budget is invalid")
+        if collect_value_trace:
+            suffix = np.cumsum(np.asarray(errors)[::-1])[::-1] * time_scale.dt_seconds
+            for point in value_trace:
+                point["cost_to_go"] = float(suffix[point["step"]])
         return {
             **(captured or {}),
+            **({"value_trace": value_trace} if collect_value_trace else {}),
             "decision_steps": decisions,
             "episode_return": float(np.sum(rewards)),
             "tracking_squared_error_integral": float(np.sum(errors) * time_scale.dt_seconds),
