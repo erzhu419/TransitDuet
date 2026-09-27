@@ -44,8 +44,10 @@ node004: factual return/ISE errors zero, eight pairs, 4060 new steps,
 three fits/15 scalar solves. Independent row/call/metric recomputation
 matched. Retrieved 48727 bytes of JSON, no raw cache or checkpoint.
 Both scientific gates failed; retain the result with full settings unchanged.
-Full tasks `t101666/101667` register roots 209011/209061 at the same frozen
-revision, 480 pairs per root, with no independent-confirmation claim.
+Full tasks `t101666/101667` completed on node004/node006 at the same frozen
+revision, 480 pairs per root and 1317600 total new steps. Row schedules,
+root/path metrics and budgets match independent recomputation. Both gates
+fail on both roots; see the [result](freq_hrl_stage28_plan_hold_result_2026-09-28.md).
 
 ## Limitations
 

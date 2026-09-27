@@ -1166,8 +1166,15 @@ Implementation `f455dda8d0`: preflight `t101665` completed on node004 with
 zero factual replay errors and all eight pairs/4060 steps accounted for.
 Independent call-count and metric recomputation matched; both scientific
 gates failed. Full settings remain frozen, without preflight-driven retuning.
-Full tasks `t101666/101667` are registered for 209011/209061 at the same
-frozen implementation, 480 new pairs and 658800 new steps per root.
+Full tasks `t101666/101667` completed on node004/node006. The
+[Stage-28 result](freq_hrl_stage28_plan_hold_result_2026-09-28.md) fails
+both frozen gates on both roots. History's settled MSE is 4.43%/2.19%
+worse than current; settled ISE benefit versus shuffled is -0.012737/-0.032407.
+All 960 pairs and 1317600 new steps are accounted for, without reconstruction.
+Independent recomputation matches schedules, curves and all root/path metrics.
+Genuine long plan holding does not qualify this history value head. Next is
+causal action-conditioned state/plan-response modeling, distinct from the
+already-demonstrated exogenous forecast skill. No policy is promoted.
 
 ### legacy_c1_c9_matrix_snapshot
 
