@@ -32,6 +32,8 @@ def select_bins(
     *, root: int, seed: int, decision_steps: list[int], period: int,
     deadline: int, pairs_per_class: int,
 ) -> tuple[int, ...]:
+    if pairs_per_class < 1:
+        raise ValueError("pairs per class must be positive")
     eligible = range(1, len(decision_steps) - 1)
     early = [index for index in eligible
              if decision_steps[index] - index * period < deadline]
@@ -73,7 +75,7 @@ def replay_source_controller(args: argparse.Namespace) -> tuple:
         fast_period_seconds=args.fast_period_seconds,
     )
     period = time_scale.upper_period_steps
-    if period != 50 or args.max_offset_steps != 25 or args.pairs_per_class < 1:
+    if period != 50 or args.max_offset_steps != 25:
         raise ValueError("diagnostic timing protocol changed")
 
     def training_schedule(seed: int) -> tuple[int, ...]:

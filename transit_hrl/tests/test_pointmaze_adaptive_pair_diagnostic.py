@@ -89,6 +89,17 @@ class AdaptivePairDiagnosticTest(unittest.TestCase):
                 for result in results.values():
                     self.assertEqual(result["decision_steps"][2:], [105, 155, 205, 255])
                     np.testing.assert_array_equal(result["prefix"], results["now"]["prefix"])
+            factual = diagnostic.rollout_intervention(
+                ToyController(), seed=1, intervention_step=None, arm=None,
+                predictor={"threshold": 0.5}, args=args, time_scale=time_scale,
+            )
+            self.assertEqual(factual["decision_steps"], [0, 55, 105, 155, 205, 255])
+            all_wait = diagnostic.rollout_intervention(
+                ToyController(), seed=1, intervention_step=None, arm=None,
+                predictor={"threshold": 0.0}, args=args, time_scale=time_scale,
+                score_fn=lambda *a: -1.0,
+            )
+            self.assertEqual(all_wait["decision_steps"], [0, 75, 125, 175, 225, 275])
 
     def test_submission_keeps_original_roots_and_compact_inputs(self):
         self.assertEqual(spec.roots(preflight=False), (209011, 209061))

@@ -1,7 +1,9 @@
 """Same revealed roots and sampled bins as Stage-13; adaptive continuation."""
 
 from freq_hrl.experiments.pointmaze_adaptive_pair_diagnostic import PROTOCOL_VERSION
-from scripts.pointmaze_deployed_pair_diagnostic_spec import POLICY, roots, source_result
+from scripts.pointmaze_deployed_pair_diagnostic_spec import (
+    POLICY, EVIDENCE_ROLE, roots, source_result, sampling_options,
+)
 
 
 EXPERIMENT_PROTOCOL = PROTOCOL_VERSION

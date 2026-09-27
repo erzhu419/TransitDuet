@@ -15,6 +15,11 @@ EXPERIMENT_PROTOCOL = PROTOCOL_VERSION
 RUNNER_SCRIPT = "scripts/run_pointmaze_deployed_pair_diagnostic.py"
 POLICY = stage12.POLICY
 CONTINUATION = "static_factual_schedule_after_one_bin_flip"
+EVIDENCE_ROLE = "mechanism_diagnostic_only"
+
+
+def sampling_options(*, preflight: bool) -> dict[str, int]:
+    return {"pairs_per_class": 1 if preflight else 2}
 
 
 def roots(*, preflight: bool) -> tuple[int, ...]:

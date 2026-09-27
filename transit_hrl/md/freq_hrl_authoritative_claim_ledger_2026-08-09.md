@@ -921,9 +921,13 @@ The [Stage-14 protocol](freq_hrl_stage14_adaptive_pair_diagnostic_protocol_2026-
 keeps the same predictor, threshold and sampled prefixes, and compares now,
 one-check deferral, and deadline deferral with adaptive continuation.
 Preflight `t101001` passed exact factual decision/ISE/return replay and
-three-arm prefix/budget checks. Tasks `t101002/101003` started on node004/006;
-the two-root diagnostic has no outcome yet and cannot establish performance
-superiority.
+three-arm prefix/budget checks. Tasks `t101002/101003` completed. The
+[Stage-14 result](freq_hrl_stage14_adaptive_pair_diagnostic_result_2026-09-27.md)
+retains positive mean chosen-action benefit in both strata on both roots.
+At early-call states, now-versus-one-check full ISE benefit is only
+0.004277/0.020107, versus 0.066116/0.061322 for now-versus-deadline.
+The contrasts differ but do not establish the cause of Stage-12's performance
+gap, or a new performance claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

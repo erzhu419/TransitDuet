@@ -28,12 +28,16 @@ ARMS = ("now", "wait_one_check", "wait_deadline")
 
 def rollout_intervention(
     controller, *, seed, intervention_step, arm, predictor, args, time_scale,
+    score_fn=None,
 ):
     period = time_scale.upper_period_steps
-    offset = intervention_step % period
-    if (
+    if intervention_step is None:
+        if arm is not None:
+            raise ValueError("a factual rollout has no intervention arm")
+    elif (
         arm not in ARMS or not period <= intervention_step < args.horizon - period
-        or offset >= args.max_offset_steps or offset % args.check_stride_steps
+        or intervention_step % period >= args.max_offset_steps
+        or intervention_step % period % args.check_stride_steps
     ):
         raise ValueError("intervention must be an eligible nondeadline check")
     task = _make_task(
@@ -69,10 +73,14 @@ def rollout_intervention(
                     score = _predict_renewal_advantage(
                         feature_names=names, features=values,
                         predictor="causal_validity_interactions", fitted=predictor,
+                    ) if score_fn is None else score_fn(
+                        names, values, offset / args.max_offset_steps,
+                        (args.horizon - step) / args.horizon,
                     )
                     if step == intervention_step:
                         captured = {
                             "score": score, "features": np.asarray(values),
+                            "feature_names": names,
                             "prefix": np.concatenate((
                                 observation.physical, observation.achieved_goal,
                                 observation.target, observation.task_measurement,
@@ -106,15 +114,19 @@ def rollout_intervention(
             rewards.append(float(reward))
             errors.append(float(info["tracking_distance"]) ** 2)
             history.update(observation)
-        if captured is None or [s // period for s in decisions] != list(range(args.horizon // period)):
+        if (
+            (intervention_step is not None and captured is None)
+            or [s // period for s in decisions] != list(range(args.horizon // period))
+        ):
             raise RuntimeError("intervention prefix or one-call-per-bin budget is invalid")
         return {
-            **captured,
+            **(captured or {}),
             "decision_steps": decisions,
             "episode_return": float(np.sum(rewards)),
             "tracking_squared_error_integral": float(np.sum(errors) * time_scale.dt_seconds),
-            "window_ise": float(np.sum(errors[intervention_step:intervention_step + period])
-                                * time_scale.dt_seconds),
+            "window_ise": (float(np.sum(errors[intervention_step:intervention_step + period])
+                                 * time_scale.dt_seconds)
+                           if intervention_step is not None else None),
         }
     finally:
         task.environment.close()

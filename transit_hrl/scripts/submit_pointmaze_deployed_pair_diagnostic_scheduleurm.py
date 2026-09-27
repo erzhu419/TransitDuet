@@ -34,17 +34,17 @@ def task_specification(run_name: str, root: int, *, preflight: bool, protocol_sp
     source = protocol_spec.source_result(root, preflight=preflight)
     if not source.is_file():
         raise FileNotFoundError(source)
+    extra_args = ["--source-result", str(source)]
+    for key, value in protocol_spec.sampling_options(preflight=preflight).items():
+        extra_args.extend(["--" + key.replace("_", "-"), str(value)])
     task = base_task_specification(
         run_name, root, preflight=preflight, confirmation=not preflight,
         runner_script=protocol_spec.RUNNER_SCRIPT,
-        extra_args=(
-            "--source-result", str(source),
-            "--pairs-per-class", "1" if preflight else "2",
-        ),
+        extra_args=tuple(extra_args),
     )
     task.update({
         "project": protocol_spec.EXPERIMENT_PROTOCOL,
-        "description": f"Freq-HRL deployed-state timing diagnostic root{root}",
+        "description": f"Freq-HRL {protocol_spec.EXPERIMENT_PROTOCOL} root{root}",
         "signature": task_signature(run_name, root, protocol_spec=protocol_spec),
         "resource_family": f"Freq-HRL/{protocol_spec.EXPERIMENT_PROTOCOL}/cell",
         "stage_input_paths": [*task["stage_input_paths"], str(source.parent)],
@@ -81,11 +81,11 @@ def main(*, protocol_spec=spec) -> int:
             "source_revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
             ).strip(),
-            "evidence_role": "mechanism_diagnostic_only",
+            "evidence_role": protocol_spec.EVIDENCE_ROLE,
             "source_protocol": "pointmaze_timing_pair_stage12_v1_development",
             "preflight": args.preflight,
             "optimizer_roots": list(roots),
-            "pairs_per_class": 1 if args.preflight else 2,
+            **protocol_spec.sampling_options(preflight=args.preflight),
             "continuation": protocol_spec.CONTINUATION,
             "scheduler": {
                 "nodes": list(LINUX_CPU_NODES), "require_node": None,
