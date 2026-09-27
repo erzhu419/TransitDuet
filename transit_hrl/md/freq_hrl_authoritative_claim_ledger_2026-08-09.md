@@ -909,8 +909,13 @@ The [Stage-13 deployed-state diagnostic](freq_hrl_stage13_deployed_pair_diagnost
 probes one-bin now-versus-later timing at states reached by the Stage-12
 candidate, with factual planning times fixed thereafter. Preflight `t100987`
 passed retrained-controller replay and identical-prefix checks (two deadline
-pairs only). Development diagnostics `t100988/989` are running on node004/006.
-Their outcomes may guide mechanism repair but are not performance evidence.
+pairs only). Development diagnostics `t100988/989` completed; the
+[Stage-13 result](freq_hrl_stage13_deployed_pair_diagnostic_result_2026-09-27.md)
+has positive mean chosen-action benefit in both early/deadline strata on
+both roots. This does not support a blanket deployed-state score failure.
+The 125 static-continuation pairs are mechanism evidence, not a new
+closed-loop performance result. The one-check adaptive-continuation action
+value remains unmeasured.
 
 ### legacy_c1_c9_matrix_snapshot
 

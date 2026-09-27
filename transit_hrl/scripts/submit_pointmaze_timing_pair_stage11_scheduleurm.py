@@ -89,7 +89,7 @@ def sync_results(
         signature = task_signature(run_name, root, protocol_spec=protocol_spec)
         task = tasks.get(signature)
         if task is None or task.get("status") != "done" or not task.get("node"):
-            raise SystemExit(f"Stage-11 task is not done: {signature}")
+            raise SystemExit(f"task is not done: {signature}")
         expected.append((signature, ROOT / cell_relative_dir(run_name, root), task))
     scheduler_dir = str(SCHEDULER.parent)
     if scheduler_dir not in sys.path:
@@ -111,7 +111,7 @@ def sync_results(
         results = list(pool.map(sync_one, expected))
     failures = [item for item in results if not item[1]]
     if failures:
-        raise SystemExit(f"compact Stage-11 result sync failed: {failures}")
+        raise SystemExit(f"compact result sync failed: {failures}")
     for signature, path, _ in expected:
         result = json.loads((path / "result.json").read_text(encoding="utf-8"))
         if (
@@ -120,8 +120,8 @@ def sync_results(
             != protocol_spec.EXPERIMENT_PROTOCOL
             or len(result.get("cells", [])) != 1
         ):
-            raise SystemExit(f"invalid Stage-11 result: {signature}")
-    print(f"synced {len(expected)} compact Stage-11 result JSON files")
+            raise SystemExit(f"invalid result: {signature}")
+    print(f"synced {len(expected)} compact {protocol_spec.EXPERIMENT_PROTOCOL} result JSON files")
 
 
 def main(*, protocol_spec=spec) -> int:

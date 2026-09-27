@@ -47,7 +47,7 @@ def select_bins(
     return tuple(sorted(int(index) for index in selected))
 
 
-def run_cell(args: argparse.Namespace) -> dict:
+def replay_source_controller(args: argparse.Namespace) -> tuple:
     source = json.loads(args.source_result.read_text(encoding="utf-8"))
     if (
         source.get("status") != "complete"
@@ -107,7 +107,12 @@ def run_cell(args: argparse.Namespace) -> dict:
     )
     if payload["selected_checkpoint_iteration"] != cell["controller_selected_iteration"]:
         raise RuntimeError("retrained controller selected a different checkpoint")
+    return cell, controller, time_scale
 
+
+def run_cell(args: argparse.Namespace) -> dict:
+    cell, controller, time_scale = replay_source_controller(args)
+    period = time_scale.upper_period_steps
     predictor = cell["trigger_predictor"]
     threshold = predictor["threshold"]
     rows = []
@@ -182,7 +187,7 @@ def run_cell(args: argparse.Namespace) -> dict:
             })
     return {
         "optimizer_seed": args.optimizer_seed,
-        "selected_checkpoint_iteration": payload["selected_checkpoint_iteration"],
+        "selected_checkpoint_iteration": cell["controller_selected_iteration"],
         "paths": len(cell["aligned_candidate_rows"]),
         "pairs": len(rows),
         "pair_primitive_steps_replayed": sum(

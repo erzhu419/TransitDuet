@@ -14,6 +14,7 @@ from scripts import pointmaze_timing_pair_stage12_spec as stage12
 EXPERIMENT_PROTOCOL = PROTOCOL_VERSION
 RUNNER_SCRIPT = "scripts/run_pointmaze_deployed_pair_diagnostic.py"
 POLICY = stage12.POLICY
+CONTINUATION = "static_factual_schedule_after_one_bin_flip"
 
 
 def roots(*, preflight: bool) -> tuple[int, ...]:
