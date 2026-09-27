@@ -1065,6 +1065,14 @@ its label-realization and interaction terms are retained, not converted into
 error shares. This motivates a contextual-value diagnostic, not more samples
 for the frozen linear candidate or a new performance claim.
 
+The [Stage-23 protocol](freq_hrl_stage23_contextual_pair_protocol_2026-09-27.md)
+tests bounded causal-context interactions in a shared value difference. It
+retains old eight-draw training labels, Stage-20 folds/normalization/unit L2,
+and Stage-21 labels for scoring only. A same-size, row-norm-matched random
+context is an additional control. Both roots must beat zero, linear and random
+context for a development pass. Twenty-two focused tests passed; no new replay
+or independent-confirmation claim is involved.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
