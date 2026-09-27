@@ -899,7 +899,11 @@ The [Stage-12 protocol](freq_hrl_stage12_windowed_timing_pair_v1_protocol_2026-0
 keeps the same-budget timing contrast but fits its paired 50-step outcome.
 Preflight `t100942` passed exact fixed replay, paired-prefix, call-budget,
 window-label, and compact-result checks. Development tasks `t100944/945`
-started on node001/node005. Stage-12 performance is not yet known.
+completed. The [Stage-12 result](freq_hrl_stage12_windowed_timing_pair_v1_result_2026-09-27.md)
+failed its frozen gate: candidate ISE 1.144676/1.050864 versus Stage-9
+1.143830/0.838439 at roots 209011/209061. Static branch-fit labels are
+predictive of static full-episode contrasts, but this does not establish
+closed-loop benefit. No fresh-root confirmation follows.
 
 ### legacy_c1_c9_matrix_snapshot
 
