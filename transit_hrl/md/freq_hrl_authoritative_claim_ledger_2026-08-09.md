@@ -1028,6 +1028,15 @@ versus zero 0.002319738/0.000945674. It reduces Stage-19 neural error by
 deployment or fresh-root extension follows. Coefficients remain frozen; an
 independent-future label-precision test is proposed, not yet executed.
 
+The [Stage-21 protocol](freq_hrl_stage21_fresh_future_protocol_2026-09-27.md)
+freezes Stage-20 predictions and draws 64 independent futures at each existing
+state. It compares paired MSE differences against zero and Stage-19 with
+approximate conditional Monte Carlo intervals adjusted over four comparisons.
+There is no critic refit or new root; controller reconstruction and new replay
+are explicitly charged (6,758,400 primitive steps/root). A precision pass
+requires positive lower bounds for both controls on both roots; it cannot
+establish new-state generalization or deployed-policy improvement.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

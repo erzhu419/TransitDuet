@@ -53,6 +53,8 @@ def task_specification(run_name: str, root: int, *, preflight: bool, protocol_sp
         "resource_family": f"Freq-HRL/{protocol_spec.EXPERIMENT_PROTOCOL}/cell",
         "stage_input_paths": [*task["stage_input_paths"], *[str(s.parent) for s in sources.values()]],
     })
+    if hasattr(protocol_spec, "task_resources"):
+        task.update(protocol_spec.task_resources(preflight=preflight))
     return task
 
 
@@ -94,7 +96,7 @@ def main(*, protocol_spec=spec) -> int:
             "continuation": protocol_spec.CONTINUATION,
             "scheduler": {
                 "nodes": list(LINUX_CPU_NODES), "require_node": None,
-                "cpu_per_cell": 1, "ram_mb_per_cell": 1536,
+                "cpu_per_cell": tasks[0]["cpu"], "ram_mb_per_cell": tasks[0]["ram_mb"],
             },
             "artifacts": {"synced": ["result.json"], "checkpoints": "disabled"},
         }, indent=2, sort_keys=True) + "\n",
