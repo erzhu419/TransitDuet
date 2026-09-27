@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "frozen_stage20_ridge; cached_stage18_and_stage21_labels; retrospective_decomposition",
+  "evidence_role": "retrospective_frozen_ridge_error_decomposition_only",
+  "fresh_future_replicates": 4,
+  "future_replicates": 4,
+  "noise_pairs_per_seed": 1,
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_seed": 2,
+  "preflight": true,
+  "protocol": "pointmaze_ridge_error_stage22_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_fresh_future_stage21_v1_diagnostic",
+  "source_revision": "8721fa27768438eafcf8841a51a6f7180ff465e4"
+}

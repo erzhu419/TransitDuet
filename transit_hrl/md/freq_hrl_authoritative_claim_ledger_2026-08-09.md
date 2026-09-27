@@ -1057,6 +1057,13 @@ realization, signal-mapping mismatch and their interaction. Its linear
 influence operators retain Stage-20 normalization, alpha and path holdouts.
 This is retrospective attribution with zero new environment steps or parameter
 updates, not a fresh qualification test. Fifteen focused tests passed.
+Tasks `t101432/101433` completed. The
+[Stage-22 result](freq_hrl_stage22_ridge_error_result_2026-09-27.md) shows fresh
+training-state improvement of 44.80%/7.18%, versus held-out +16.31%/-11.90%.
+The signal-mapping error estimate on 209061 remains 29.80% worse than zero;
+its label-realization and interaction terms are retained, not converted into
+error shares. This motivates a contextual-value diagnostic, not more samples
+for the frozen linear candidate or a new performance claim.
 
 ### legacy_c1_c9_matrix_snapshot
 

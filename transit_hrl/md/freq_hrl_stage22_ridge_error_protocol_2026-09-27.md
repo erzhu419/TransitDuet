@@ -34,3 +34,9 @@ node001-node006; return only a compact JSON, with no checkpoint or raw replay.
 Implementation verification: 15 focused tests passed, including exact error
 reconstruction, unbiased finite-noise corrections, negative-term preservation,
 saved-coefficient replay, path isolation, input budgets and scheduler resources.
+
+Preflight `t101429` passed on node004; full tasks `t101432/101433` completed
+on node006/node005 at revision `8721fa2776`. The
+[result](freq_hrl_stage22_ridge_error_result_2026-09-27.md) points to fixed-mapping
+limitations rather than label precision as the next intervention. No new gate
+or performance claim was introduced.

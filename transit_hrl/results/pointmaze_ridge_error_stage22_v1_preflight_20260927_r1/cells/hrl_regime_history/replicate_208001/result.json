@@ -1,0 +1,91 @@
+{
+  "cells": [
+    {
+      "additional_primitive_steps": 0,
+      "branch_fit_seeds": [
+        2159201,
+        2159211
+      ],
+      "controller_training_iterations": 0,
+      "critic_parameter_updates": 0,
+      "evaluation_paths_used": 0,
+      "folds": [
+        {
+          "fresh_training_mse_estimate": 4.75160684817134e-08,
+          "fresh_training_zero_mse_estimate": 1.248544469201487e-07,
+          "held_out_path": 2159201,
+          "old_label_training_mse": 1.1360228199466887e-08
+        },
+        {
+          "fresh_training_mse_estimate": 1.6586464614699415e-11,
+          "fresh_training_zero_mse_estimate": 3.6241371345278854e-10,
+          "held_out_path": 2159211,
+          "old_label_training_mse": 1.4977004891181805e-11
+        }
+      ],
+      "influence_linear_systems": 2,
+      "metrics": {
+        "fresh_training_mse_estimate": 2.376632747316405e-08,
+        "fresh_training_zero_mse_estimate": 6.260843031680074e-08,
+        "interaction_estimate": -5.144516137346845e-07,
+        "old_label_training_mse": 5.6876026021790345e-09,
+        "propagated_old_label_variance_estimate": 1.0368693828811674e-06,
+        "signal_mismatch_mse_estimate": 8.935400710360387e-07,
+        "total_mse_estimate": 3.921754171428866e-07,
+        "training_label_realization_mse_estimate": 1.3086959841532441e-08,
+        "zero_mse_estimate": 6.260843031680074e-08
+      },
+      "optimizer_seed": 208001,
+      "rows": [
+        {
+          "check_step": 165,
+          "fresh_mean": 1.9051476969456083e-05,
+          "frozen_prediction": 0.00083641893007536,
+          "interaction_estimate": -1.0290248073929544e-06,
+          "propagated_fresh_mean_variance": 3.3077552245563645e-07,
+          "propagated_old_label_variance_estimate": 2.073738687604383e-06,
+          "seed": 2159201,
+          "signal_mismatch_mse_estimate": 1.6709397248449548e-06,
+          "signal_prediction_estimate": 0.0014338715335002702,
+          "total_mse_estimate": 6.680890083355671e-07,
+          "training_label_realization_mse_estimate": 2.6174090883566632e-08,
+          "zero_mse_estimate": 3.6241371345278854e-10
+        },
+        {
+          "check_step": 200,
+          "fresh_mean": 0.00038573674259365087,
+          "frozen_prediction": 1.1303552802978298e-05,
+          "interaction_estimate": 1.2157992358529136e-10,
+          "propagated_fresh_mean_variance": 1.9741040632529242e-13,
+          "propagated_old_label_variance_estimate": 7.81579518734788e-14,
+          "seed": 2159211,
+          "signal_mismatch_mse_estimate": 1.1614041722712249e-07,
+          "signal_prediction_estimate": 1.146544753598737e-05,
+          "total_mse_estimate": 1.1626182595020603e-07,
+          "training_label_realization_mse_estimate": -1.712005017492134e-13,
+          "zero_mse_estimate": 1.248544469201487e-07
+        }
+      ],
+      "trigger_eval_seeds": [
+        2159301,
+        2159307
+      ]
+    }
+  ],
+  "protocol": {
+    "additional_primitive_steps": 0,
+    "critic_parameter_updates": 0,
+    "endpoint_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_continuation_credit_stage16_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "evidence_role": "retrospective_frozen_ridge_error_decomposition_only",
+    "fresh_future_replicates": 4,
+    "fresh_labels_seen_in_stage21": true,
+    "fresh_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_future_stage21_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "future_replicates": 4,
+    "optimizer_seed": 208001,
+    "policy_deployment": false,
+    "prediction_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_regularized_pair_stage20_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json",
+    "protocol_version": "pointmaze_ridge_error_stage22_v1_diagnostic",
+    "source_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_state_noise_stage18_v1_preflight_20260927_r1/cells/hrl_regime_history/replicate_208001/result.json"
+  },
+  "status": "complete"
+}
