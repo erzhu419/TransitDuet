@@ -1040,8 +1040,16 @@ Implementation `95e310a2b9` passed 37 focused tests. Preflight `t101396`
 completed on node006 with exact frozen predictions and 11,700 charged steps.
 Its two-state/four-future scientific gates failed; this operational pass does
 not qualify the critic or alter the frozen full-run settings.
-Full tasks `t101399/101400`, submitted at `8f0e4c4acc`, started on
-node006/node005 for roots 209011/209061. Results remain pending.
+Full tasks `t101399/101400`, submitted at `8f0e4c4acc`, completed on
+node006/node005 for roots 209011/209061. The
+[Stage-21 result](freq_hrl_stage21_fresh_future_result_2026-09-27.md) fails the
+two-root gate: ridge improves 16.31% versus zero on 209011 but worsens 11.90%
+on 209061. The latter control-minus-ridge MSE interval is wholly negative,
+[-0.000276956, -0.000020074], not inconclusive. Both roots beat the Stage-19
+neural control. All 32 states/2,048 fresh paired futures and 13,516,800 charged
+steps were accounted for; no critic was refitted. This closes the fixed
+predictor's precision screen, not the general continuation-credit question.
+No deployment, retuning or sampling/root extension follows.
 
 ### legacy_c1_c9_matrix_snapshot
 

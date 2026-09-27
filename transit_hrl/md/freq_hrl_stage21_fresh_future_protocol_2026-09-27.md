@@ -58,4 +58,7 @@ submitted at revision `8f0e4c4acc`: `t101399` (209011) started on node006,
 `t101400` (209061) on node005. Both logs reached controller reconstruction.
 Each task requests 16 cores and 12 GB, with dynamic placement and no node pin.
 Controller reconstruction is single-threaded; the 16-worker replay follows.
-No full-run scientific result is available yet.
+Both tasks completed. The [result](freq_hrl_stage21_fresh_future_result_2026-09-27.md)
+fails the frozen two-root gate: 209011 improves over both controls, whereas
+209061 is worse than zero with its entire adjusted interval below zero.
+No budget extension, retuning or deployment follows.
