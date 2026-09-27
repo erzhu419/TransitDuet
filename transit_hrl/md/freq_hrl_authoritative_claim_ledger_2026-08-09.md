@@ -1086,6 +1086,15 @@ and scores it on the other. Reverse direction is sensitivity only; frozen
 critic choices remain descriptive comparisons. All references use observed
 counterfactual window costs. Nineteen tests passed; there is no new policy
 validation, qualification gate, model fit or environment sample.
+Tasks `t101523/101524` completed. The
+[Stage-24 result](freq_hrl_stage24_tail_decision_result_2026-09-27.md) gives
+primary oracle local benefits +0.011024/+0.001081, versus
++0.007247/-0.003890 for each frozen critic. All three critics choose exactly
+the same actions. The second-root oracle gain is about one conditional
+Monte Carlo SE, while the critics switch at the wrong states. Reverse-half
+sensitivity retains these signs. This motivates a cost-sensitive decision
+objective, not another tail-MSE capacity expansion or a repaired Stage-23
+qualification. Stage-9 remains the performance reference.
 
 ### legacy_c1_c9_matrix_snapshot
 

@@ -31,6 +31,11 @@ Nineteen focused tests passed, including disjoint action selection/scoring,
 negative oracle benefit, cost-sign algebra, Monte Carlo SE, tie behavior,
 credit reconstruction, frozen inputs and scheduler resources.
 
+Execution at `b67004479e`: preflight `t101520` on node006, full tasks
+`t101523/101524` on node006/node001, all completed. The
+[result](freq_hrl_stage24_tail_decision_result_2026-09-27.md) records the
+unchanged split and all three frozen critic comparisons.
+
 ## Limitations
 
 Both references use the counterfactual short-window outcome, not an online
