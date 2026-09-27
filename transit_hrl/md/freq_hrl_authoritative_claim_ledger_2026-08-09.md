@@ -905,6 +905,13 @@ failed its frozen gate: candidate ISE 1.144676/1.050864 versus Stage-9
 predictive of static full-episode contrasts, but this does not establish
 closed-loop benefit. No fresh-root confirmation follows.
 
+The [Stage-13 deployed-state diagnostic](freq_hrl_stage13_deployed_pair_diagnostic_protocol_2026-09-27.md)
+probes one-bin now-versus-later timing at states reached by the Stage-12
+candidate, with factual planning times fixed thereafter. Preflight `t100987`
+passed retrained-controller replay and identical-prefix checks (two deadline
+pairs only). Development diagnostics `t100988/989` are running on node004/006.
+Their outcomes may guide mechanism repair but are not performance evidence.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
