@@ -30,7 +30,7 @@ def change_norms(weights, initial):
                                    for key in state))) for name, state in weights.items()}
 
 
-def train(root, method, *, preflight, output, specification=spec):
+def train(root, method, *, preflight, output, specification=spec, lower_credit="intrinsic_option"):
     spec = specification
     native = spec.native_method(method)
     args = spec.source.arguments(root, preflight=preflight)
@@ -42,10 +42,11 @@ def train(root, method, *, preflight, output, specification=spec):
     initial = joint.inference_weights(model)
     raw = raw_directory(output)
     history, costs, updates, evaluation = [], [], {}, {}
+    credit_history, initial_credit_probe = [], None
     best_rank, best_iteration = None, None
     started = time.monotonic()
     with ProcessPoolExecutor(max_workers=opt["workers"], mp_context=mp.get_context("spawn"),
-                             initializer=joint.init_worker, initargs=(model.config, args, native)) as pool:
+                             initializer=joint.init_worker, initargs=(model.config, args, native, lower_credit)) as pool:
         def episodes(seeds, *, phase, sample=False):
             capture = phase in spec.COHORTS
             directory = raw / phase
@@ -76,8 +77,23 @@ def train(root, method, *, preflight, output, specification=spec):
         for iteration in range(1, opt["iterations"] + 1):
             offset = (iteration - 1) * opt["rollouts_per_iteration"]
             pairs = episodes(roles["training"][offset:offset + opt["rollouts_per_iteration"]], phase="train", sample=True)
+            batch = concat_hierarchical_batches([batch for batch, _ in pairs])
+            credit = [row["lower_training_credit"] for _, row in pairs]
+            if initial_credit_probe is None:
+                initial_credit_probe = {"seed": pairs[0][1]["seed"], **credit[0]}
+            advantage, returns = model._gae(batch.lower.reward, batch.lower.done,
+                                            batch.lower.duration, batch.lower.old_value)
+            credit_history.append({
+                "iteration": iteration, "primitive_steps": batch.lower.size,
+                "reward_sum": float(np.sum(batch.lower.reward, dtype=np.float64)),
+                "task_reward_sum": sum(row["task_reward_sum"] for row in credit),
+                "done_count": int(np.sum(batch.lower.done)),
+                "option_count": sum(row["option_count"] for row in credit),
+                "old_value_mean": float(np.mean(batch.lower.old_value)),
+                "advantage_mean": float(np.mean(advantage)), "advantage_std": float(np.std(advantage)),
+                "return_target_mean": float(np.mean(returns))})
             np.random.seed(np.random.SeedSequence([spec.SHUFFLE_SEED_NAMESPACE, root, iteration]).generate_state(1)[0])
-            metrics = update_components(model, concat_hierarchical_batches([batch for batch, _ in pairs]), spec.COMPONENTS[method])
+            metrics = update_components(model, batch, spec.COMPONENTS[method])
             for key, value in metrics.items():
                 if "optimizer_steps" in key:
                     updates[key] = updates.get(key, 0) + int(value)
@@ -103,6 +119,8 @@ def train(root, method, *, preflight, output, specification=spec):
               "checkpoint": str(raw / "selected.pt"), "final_checkpoint": str(raw / "final.pt"),
               "selected_iteration": best_iteration, "selection_history": history, "optimizer_steps": updates,
               "trained_parameter_change_norms": trained_changes, "selected_parameter_change_norms": selected_changes,
+              "lower_credit": lower_credit, "initial_credit_probe": initial_credit_probe,
+              "training_credit": credit_history,
               "evaluation_rows": evaluation, "wall_seconds": time.monotonic() - started}
     write_json(output, result)
     return result

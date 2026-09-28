@@ -50,7 +50,10 @@ def make_model(controller, method, *, root):
     return model
 
 
-def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None):
+def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
+            lower_credit="intrinsic_option"):
+    if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
+        raise ValueError("unregistered lower credit")
     scale = scale_for(args)
     task = _make_task(env_id=args.env_id, seed=seed, horizon=args.horizon, **_task_options(args))
     try:
@@ -117,10 +120,11 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 raise RuntimeError("joint-renewal native episode ended early")
             charged = float(reward) - spec.CALL_COST * int(plan_now)
             if sample:
-                intrinsic = adapter.intrinsic_reward(achieved_before=observation.achieved_goal,
-                                                     achieved_after=after.achieved_goal, subgoal=subgoal, action=action)
+                lower_reward = float(reward) if lower_credit.startswith("task_") else adapter.intrinsic_reward(
+                    achieved_before=observation.achieved_goal, achieved_after=after.achieved_goal,
+                    subgoal=subgoal, action=action)
                 builder.add_lower(state=state, action=output["action"], logp=output["logp"], value=output["value"],
-                                  reward=float(intrinsic), upper_reward=charged, done=done, cost=0.)
+                                  reward=float(lower_reward), upper_reward=charged, done=done, cost=0.)
                 gate_builder.add_reward(charged, done=done)
             rewards.append(float(reward))
             distances.append(float(info["tracking_distance"]))
@@ -143,7 +147,8 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
             batch = builder.build()
             # Renewal is chosen from the next observed state, so mark these
             # option boundaries after their actual decision times are known.
-            batch.lower.done[np.asarray(decisions[1:], dtype=int) - 1] = 1.
+            if lower_credit.endswith("_option"):
+                batch.lower.done[np.asarray(decisions[1:], dtype=int) - 1] = 1.
             batch.promotion = gate_builder.build() if method.startswith("learned_") else None
         reward_sum = float(np.sum(rewards))
         row = {"seed": int(seed), "method": method, "episode_length": args.horizon,
@@ -155,6 +160,12 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                "gate_sample": bool(sample if gate_sample is None else gate_sample), "gate_seed": gate_seed,
                "upper_inference_seconds": upper_time, "lower_inference_seconds": lower_time,
                "gate_inference_seconds": gate_time, "episode_wall_seconds": wall}
+        if sample:
+            row["lower_training_credit"] = {
+                "mode": lower_credit, "primitive_steps": batch.lower.size,
+                "reward_sum": float(np.sum(batch.lower.reward, dtype=np.float64)),
+                "task_reward_sum": float(np.sum(np.asarray(rewards, dtype=np.float32), dtype=np.float64)),
+                "done_count": int(np.sum(batch.lower.done)), "option_count": len(decisions)}
         raw = {key: np.asarray(value) for key, value in trace.items()} if capture else None
         if capture:
             raw.update(decision_steps=np.asarray(decisions), gate_steps=np.asarray(gate_steps),
@@ -168,18 +179,19 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
 _WORKER = None
 
 
-def init_worker(config, args, method):
+def init_worker(config, args, method, lower_credit="intrinsic_option"):
     global _WORKER
     torch.set_num_threads(1)
-    _WORKER = FrequencySeparatedActorCriticPPO(config), args, method
+    _WORKER = FrequencySeparatedActorCriticPPO(config), args, method, lower_credit
 
 
 def worker_rollout(job):
     weights, seed, sample, raw_path = job
-    model, args, method = _WORKER
+    model, args, method, lower_credit = _WORKER
     model.load_state_dict(weights)
     torch.manual_seed(int(seed) + args.optimizer_seed)
-    batch, row, raw = rollout(model, args, method, seed=seed, sample=sample, capture=raw_path is not None)
+    batch, row, raw = rollout(model, args, method, seed=seed, sample=sample,
+                              capture=raw_path is not None, lower_credit=lower_credit)
     if raw_path is not None:
         np.savez_compressed(raw_path, **raw)
     return batch, row
