@@ -1467,6 +1467,10 @@ replays. Method19500 steps/329 upper/592 gate calls; verification4500 steps/
 Full freeze:40 cells, 54192000 method steps, 144000 verification steps,
 seven adjusted reward contrasts. Same inherited critics, no rescaling or
 hyperparameter change; preserve all roots, arms and earlier negative results.
+Full `t102300`-`t102339` is registered and running across all six CPU nodes,
+with cpu9/ram12GiB per cell and no node pin. Four SSH handshake failures were
+retried at launch; all 40 cells started. Full performance/credit readout is
+pending; preflight metrics do not select treatments or change the freeze.
 
 ### legacy_c1_c9_matrix_snapshot
 
