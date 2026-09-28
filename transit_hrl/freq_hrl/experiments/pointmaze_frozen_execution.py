@@ -8,7 +8,8 @@ from . import pointmaze_critic_calibration as calibration
 from scripts import pointmaze_frozen_execution_stage40_spec as spec
 
 
-def worker_rollout(job):
+def worker_rollout(job, *, specification=spec):
+    spec = specification
     weights, seed, phase, mode, path, method = job
     model, args, native, credit = joint._WORKER
     model.load_state_dict(weights)
@@ -23,7 +24,8 @@ def worker_rollout(job):
     return batch, row
 
 
-def audit_result(result, *, raw_path):
+def audit_result(result, *, raw_path, specification=spec):
+    spec = specification
     audited = calibration.audit_result(result, raw_path=raw_path, specification=spec)
     root, method, preflight = result["root"], result["method"], result["preflight"]
     opt, roles = spec.options(preflight=preflight), spec.seed_roles(root, preflight=preflight)

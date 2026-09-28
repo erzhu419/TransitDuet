@@ -1560,6 +1560,23 @@ noninferiority claim. Next isolate deployment-aligned critic warmup while
 retaining both rewards and frozen controls; the remaining distribution mismatch
 is a hypothesis, not an established cause. No new training or retuning launched.
 
+### stage41_critic_warmup_execution_alignment
+
+The [Stage-41 protocol](freq_hrl_stage41_warmup_alignment_protocol_2026-09-28.md)
+isolates sampled versus deterministic frozen upper/gate during critic-only
+warmup. All learning arms then execute both levels deterministically, with
+stochastic lower and coupled per-step noise. Intrinsic/task pairs and frozen
+remain; PPO, source controller, initial gate and16+16 iterations are unchanged.
+Post-warmup actors/frozen values and first native learning episode transitions
+must match within each reward pair; lower critic weights/Adam may differ.
+All51 focused unit/regression tests pass on scheduler task `t102525`, including
+actual sampling, coupled lower noise, paired transitions and native-style replay
+accounting against a mocked environment. This is not native MuJoCo qualification.
+Fresh streams, eight registered deterministic return effects, Bonferroni8,
+no selection/exclusion/extension. Full40 cells:20064000 method steps plus624000
+verification steps. Conditional development on reused roots. Native preflight
+and full matrix are not yet qualified or launched; no utility claim.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
