@@ -1352,6 +1352,10 @@ Extra operational cost: 4851100 steps/3440 previews/80 solves; verification:
 9600 steps/3440 previews/80 solves. Models/checkpoints and seed selection did
 not change. The original Stage-33 claim is unchanged; restored caches now
 authorize resuming Stage-34 without resampling or selecting deployment paths.
+Resumed full deployment `t101957`-`t101964` is registered at `f1148ddf3e` with
+the unchanged 32 paths/root, 16 endpoints and 3081600-step budget. Only source
+directories are staged; all qualified model/result dependencies are read in
+place on the shared server filesystem.
 
 ### legacy_c1_c9_matrix_snapshot
 
