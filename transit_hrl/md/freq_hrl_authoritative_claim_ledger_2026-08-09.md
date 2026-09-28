@@ -1184,6 +1184,13 @@ fit trajectories and unperturbed evaluation paths support matched one-step
 actuator interventions; full lower feedback remains active. Twenty-eight
 tests passed. Qualification concerns state response and target forecasting,
 not plan-value policy improvement or deployment.
+Implementation `d5f4bfe3d9`: preflight `t101733` completed on node006 with
+zero factual errors, 2368 new steps, four fits/16 model updates. Independent
+server-side raw-array recomputation matched metrics, interventions and action
+alignment. Both scientific gates failed; absent external change coverage
+produced extreme NLL. Preserve this result without changing full settings.
+Full tasks `t101734/101735` register the same frozen implementation and
+roots 209011/209061, with 209520 new steps and four factorial fits per root.
 
 ### legacy_c1_c9_matrix_snapshot
 

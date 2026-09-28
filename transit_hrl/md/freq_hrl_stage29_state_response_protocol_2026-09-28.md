@@ -41,6 +41,16 @@ Twenty-eight focused tests passed, covering transition/action alignment,
 closed-loop excitation, matched interventions, external-head separation,
 label isolation, Gaussian likelihood, forward replay and exact accounting.
 
+Implementation frozen at `d5f4bfe3d9`. Preflight `t101733` completed on
+node006: zero factual errors, 96/96 transitions, four intervention pairs,
+four fits/16 updates and 2368 new steps. Server-only independent raw-array
+recomputation matched all metrics, effect labels, forward tapes and 94/96
+overlapping next-state/action alignments. Retrieved 32935 bytes of JSON.
+Both scientific gates failed. Some external training changes were zero,
+giving minimum target scales and extreme held-out NLL; preserve the result.
+Full tasks `t101734/101735` register 209011/209061 at the same revision,
+419040 total new steps and four parallel model fits per root.
+
 ## Limitations
 
 This qualifies one-step state response, not learned plan-value control or

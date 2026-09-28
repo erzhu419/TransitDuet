@@ -1,0 +1,33 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "cached_controller; action_excitation025; state_gaussian_gru64_latent16; factorial_history_action",
+  "evidence_role": "fresh_path_action_conditioned_predictive_state_development_only",
+  "model_epochs": 64,
+  "optimizer_roots": [
+    209011,
+    209061
+  ],
+  "preflight": false,
+  "protocol": "pointmaze_state_response_stage29_v1_development",
+  "scheduler": {
+    "cpu_per_cell": 5,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 8192,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_temporal_plan_stage26_v1_development",
+  "source_revision": "d5f4bfe3d97715062eb7f84e9b2b7224dc00a065",
+  "workers": 4
+}
