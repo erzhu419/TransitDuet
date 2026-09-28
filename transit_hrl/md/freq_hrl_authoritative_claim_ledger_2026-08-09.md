@@ -1711,6 +1711,17 @@ Next freeze signed microsteps versus full displacement with the same direction,
 reward and critic inputs. Local score estimates are not finite-update effects;
 no new training, exclusions, seed extension or post-outcome retuning launched.
 
+### stage44_signed_microsteps_along_first_lower_update
+
+The [Stage-44 protocol](freq_hrl_stage44_signed_microstep_protocol_2026-09-29.md)
+freezes alpha0, +1/16, -1/16 and1 along every Stage-42 first lower displacement.
+Only lower actor parameters, including log_std, vary; all other networks remain
+at before weights. No new training or first-batch reconstruction. Fresh paired
+paths in both modes, 16 registered sampled-return endpoints, original eight
+roots, no scale selection/extension. Full3993600 native steps/3328 offline
+trace audits; preflight15600/52. Zero optimizer/extra verification steps.
+This is a finite-step diagnostic, not a learner repair or independent evidence.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
