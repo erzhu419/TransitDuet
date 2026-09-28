@@ -140,6 +140,17 @@ class LevelDeploymentTest(unittest.TestCase):
             self.assertIsNone(task["require_node"])
             self.assertEqual(len(task["allowed_nodes"]), 6)
             self.assertEqual(task["stage_input_paths"], [str(spec.ROOT / "scripts"), str(spec.ROOT / "freq_hrl")])
+            self.assertIn("&& printf '%s\\n' 'Training complete: result.json written'", task["cmd"])
+
+    def test_related_submitters_use_scheduler_recognized_completion_marker(self):
+        files = list((spec.ROOT / "scripts").glob("submit_*scheduleurm.py"))
+        matched = 0
+        for path in files:
+            for line in path.read_text().splitlines():
+                if "complete: result.json written" in line:
+                    self.assertIn("Training complete: result.json written", line, str(path))
+                    matched += 1
+        self.assertGreater(matched, 0)
 
     def test_sampling_gain_is_not_reclassified_as_training_gain(self):
         main, cached = [], []

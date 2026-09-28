@@ -27,7 +27,7 @@ def task_specification(run_name, root, method, *, preflight):
     prefix = ("PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
               "MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= ")
     task.update(project=spec.EXPERIMENT_PROTOCOL, description=f"Freq-HRL stage37 {method} root{root}",
-                cmd=prefix + shlex.join(command) + " && printf '%s\\n' 'complete: result.json written'",
+                cmd=prefix + shlex.join(command) + " && printf '%s\\n' 'Training complete: result.json written'",
                 signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{method}/{root}",
                 resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/cell")
     return task

@@ -109,7 +109,7 @@ def training_command(
     )
     return (
         environment + " " + shlex.join(command)
-        + " && printf '%s\\n' 'complete: result.json written'"
+        + " && printf '%s\\n' 'Training complete: result.json written'"
     )
 
 
@@ -359,4 +359,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

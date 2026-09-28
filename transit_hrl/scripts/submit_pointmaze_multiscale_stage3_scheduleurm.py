@@ -120,7 +120,7 @@ def training_command(
         environment
         + " "
         + shlex.join(command)
-        + " && printf '%s\\n' 'complete: result.json written'"
+        + " && printf '%s\\n' 'Training complete: result.json written'"
     )
 
 

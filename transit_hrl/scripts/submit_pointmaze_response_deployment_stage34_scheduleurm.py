@@ -28,7 +28,7 @@ def task_specification(run_name, root, *, preflight):
     return {"project": spec.EXPERIMENT_PROTOCOL, "description": f"Freq-HRL stage34 deployment root{root}",
             "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
                    "MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "
-                   + shlex.join(command) + " && printf '%s\\n' 'complete: result.json written'",
+                   + shlex.join(command) + " && printf '%s\\n' 'Training complete: result.json written'",
             "cwd": str(ROOT), "signature": f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}",
             "resource_family": f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/deployment",
             "cpu": 2 if preflight else 17, "ram_mb": 3072 if preflight else 16384,

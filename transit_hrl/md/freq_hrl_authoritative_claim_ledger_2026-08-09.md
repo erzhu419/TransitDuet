@@ -1439,6 +1439,21 @@ Method24900 steps/486 upper/646 gate calls; verification4800 steps/93 upper/
 Full freeze: 40 training cells plus eight cached-gate cells, 58800000 method
 steps, 153600 verification steps, nine familywise-adjusted reward contrasts.
 Sampling gain and learning gain are separate; no outcome-driven mode choice.
+The [full result](freq_hrl_stage37_level_deployment_result_2026-09-28.md)
+completes 48 cells/6400 evaluation episodes, 48 trajectory audits, 128 native
+checkpoint/mode replays and the independent nine-endpoint bootstrap.
+Final-weight lower-only return -5.02 [-11.50,-0.28] and upper/lower return
+-15.88 [-28.07,-4.64] harm frozen; upper-only -8.40 [-21.10,5.53] is inconclusive.
+Cached gate-only sampled-minus-threshold -0.36 [-2.48,1.75] is inconclusive;
+gate-only-minus-frozen under sampled deployment -18.68 [-27.00,-12.05] is
+negative. Deployment sampling does not rescue learning. Registered method
+cost58800000 steps/1267672 upper/1740843 gate calls; verification153600
+steps/4200 upper/4892 gate calls. An unrecognized terminal marker caused eight
+duplicate retries: extra10838400 steps, charged method total69638400; they
+are not new replicates. Zero-exit originals are corrected done, the original
+diagnoses retained, and the submitter uses scheduler's Training complete
+marker. Current artifacts match the audited summary. Next test lower-credit
+alignment and gate SMDP credit allocation; the cause of harm is still open.
 
 ### legacy_c1_c9_matrix_snapshot
 

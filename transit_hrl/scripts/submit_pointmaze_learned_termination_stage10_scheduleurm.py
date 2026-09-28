@@ -87,7 +87,7 @@ def training_command(
         "TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES="
     )
     return environment + " " + shlex.join(command) + (
-        " && printf '%s\\n' 'complete: result.json written'"
+        " && printf '%s\\n' 'Training complete: result.json written'"
     )
 
 

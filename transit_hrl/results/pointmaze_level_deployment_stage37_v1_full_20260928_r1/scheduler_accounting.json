@@ -1,0 +1,189 @@
+{
+  "protocol": "pointmaze_level_deployment_stage37_v1",
+  "run_name": "pointmaze_level_deployment_stage37_v1_full_20260928_r1",
+  "status": "passed",
+  "cause": "The submitter printed complete: result.json written, which is absent from scheduler SUCCESS_PATTERNS. Eight zero-exit completed jobs were classified failed and automatically rerun.",
+  "original_task_roster": "t102233-t102280",
+  "original_cell_count": 48,
+  "summary_matches_current_training_artifacts": 40,
+  "duplicate_cells": [
+    {
+      "id": "t102260",
+      "retry_id": "t102282",
+      "method": "upper_lower",
+      "root": 310061,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 28851,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 49187
+      }
+    },
+    {
+      "id": "t102261",
+      "retry_id": "t102283",
+      "method": "fixed50",
+      "root": 310061,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 27096,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 0
+      }
+    },
+    {
+      "id": "t102265",
+      "retry_id": "t102284",
+      "method": "lower_only",
+      "root": 310073,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 29986,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 49442
+      }
+    },
+    {
+      "id": "t102266",
+      "retry_id": "t102285",
+      "method": "upper_lower",
+      "root": 310073,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 30020,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 49446
+      }
+    },
+    {
+      "id": "t102267",
+      "retry_id": "t102286",
+      "method": "fixed50",
+      "root": 310073,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 27096,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 0
+      }
+    },
+    {
+      "id": "t102271",
+      "retry_id": "t102287",
+      "method": "lower_only",
+      "root": 310089,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 29816,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 49645
+      }
+    },
+    {
+      "id": "t102272",
+      "retry_id": "t102288",
+      "method": "upper_lower",
+      "root": 310089,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 29827,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 49641
+      }
+    },
+    {
+      "id": "t102273",
+      "retry_id": "t102289",
+      "method": "fixed50",
+      "root": 310089,
+      "status": "complete",
+      "counts": {
+        "primitive_steps": 1354800,
+        "upper_inference_calls": 27096,
+        "lower_inference_calls": 1354800,
+        "gate_inference_calls": 0
+      }
+    }
+  ],
+  "duplicate_execution_cost": {
+    "primitive_steps": 10838400,
+    "upper_inference_calls": 229788,
+    "lower_inference_calls": 10838400,
+    "gate_inference_calls": 247361
+  },
+  "scheduler_correction": {
+    "status": "corrected",
+    "tasks": [
+      {
+        "id": "t102260",
+        "status": "done",
+        "retry_id": "t102282",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102261",
+        "status": "done",
+        "retry_id": "t102283",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102265",
+        "status": "done",
+        "retry_id": "t102284",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102266",
+        "status": "done",
+        "retry_id": "t102285",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102267",
+        "status": "done",
+        "retry_id": "t102286",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102271",
+        "status": "done",
+        "retry_id": "t102287",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102272",
+        "status": "done",
+        "retry_id": "t102288",
+        "retry_status": "done"
+      },
+      {
+        "id": "t102273",
+        "status": "done",
+        "retry_id": "t102289",
+        "retry_status": "done"
+      }
+    ]
+  },
+  "registered_method_cost": {
+    "gate_inference_calls": 1740843,
+    "lower_inference_calls": 58800000,
+    "primitive_steps": 58800000,
+    "upper_inference_calls": 1267672
+  },
+  "charged_method_primitive_steps": 69638400,
+  "verification_cost": {
+    "gate_inference_calls": 4892,
+    "lower_inference_calls": 153600,
+    "primitive_steps": 153600,
+    "upper_inference_calls": 4200
+  },
+  "excluded_from_statistics": "Duplicate retry executions are not extra independent roots, paths, or treatments.",
+  "marker_fix": "Training complete: result.json written"
+}
