@@ -41,7 +41,7 @@ class CountedController:
 
     def act_promotion(self, state, sample):
         self.gate_calls += 1
-        return {"action": self.gate_action, "logp": 0., "value": 0.}
+        return {"action": self.gate_action, "probability": self.gate_action, "logp": 0., "value": 0.}
 
 
 class JointRenewalTest(unittest.TestCase):

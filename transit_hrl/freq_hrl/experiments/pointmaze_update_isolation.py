@@ -30,7 +30,8 @@ def change_norms(weights, initial):
                                    for key in state))) for name, state in weights.items()}
 
 
-def train(root, method, *, preflight, output):
+def train(root, method, *, preflight, output, specification=spec):
+    spec = specification
     native = spec.native_method(method)
     args = spec.source.arguments(root, preflight=preflight)
     opt, roles = spec.options(preflight=preflight), spec.seed_roles(root, preflight=preflight)
@@ -75,7 +76,7 @@ def train(root, method, *, preflight, output):
         for iteration in range(1, opt["iterations"] + 1):
             offset = (iteration - 1) * opt["rollouts_per_iteration"]
             pairs = episodes(roles["training"][offset:offset + opt["rollouts_per_iteration"]], phase="train", sample=True)
-            np.random.seed(np.random.SeedSequence([36, root, iteration]).generate_state(1)[0])
+            np.random.seed(np.random.SeedSequence([spec.SHUFFLE_SEED_NAMESPACE, root, iteration]).generate_state(1)[0])
             metrics = update_components(model, concat_hierarchical_batches([batch for batch, _ in pairs]), spec.COMPONENTS[method])
             for key, value in metrics.items():
                 if "optimizer_steps" in key:
@@ -107,7 +108,8 @@ def train(root, method, *, preflight, output):
     return result
 
 
-def audit_result(result, *, raw_path):
+def audit_result(result, *, raw_path, specification=spec):
+    spec = specification
     root, method, preflight = result["root"], result["method"], result["preflight"]
     native = spec.native_method(method)
     if (result["status"] != "complete" or result["protocol"] != spec.EXPERIMENT_PROTOCOL
@@ -151,7 +153,8 @@ def audit_result(result, *, raw_path):
             "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting"}
 
 
-def aggregate(results):
+def aggregate(results, *, specification=spec):
+    spec = specification
     cells = {(r["root"], r["method"]): r for r in results}
     if len(results) != len(spec.OPTIMIZER_ROOTS) * len(spec.METHODS) or set(cells) != {
             (root, method) for root in spec.OPTIMIZER_ROOTS for method in spec.METHODS}:
@@ -161,24 +164,17 @@ def aggregate(results):
     for root in spec.OPTIMIZER_ROOTS:
         means = {cohort: {m: {k: float(np.mean([row[k] for row in cells[root, m]["evaluation_rows"][cohort]]))
                               for k in keys} for m in spec.METHODS} for cohort in spec.COHORTS}
-        v = means["final"]
-        f, g, c, j, b = (v[m] for m in spec.METHODS)
-        vector = [g["episode_return"] - f["episode_return"], c["episode_return"] - f["episode_return"],
-                  j["episode_return"] - f["episode_return"],
-                  j["episode_return"] - c["episode_return"] - g["episode_return"] + f["episode_return"],
-                  j["episode_return"] - b["episode_return"],
-                  b["tracking_squared_error_integral"] - j["tracking_squared_error_integral"],
-                  b["upper_inference_calls"] - j["upper_inference_calls"]]
+        vector = spec.contrasts(means["final"])
         roots.append({"root": root, "means": means, "endpoints": dict(zip(spec.ENDPOINTS, vector))})
     x = np.asarray([[row["endpoints"][k] for k in spec.ENDPOINTS] for row in roots])
     rng = np.random.default_rng(np.random.SeedSequence(spec.BOOTSTRAP_SEED))
     draws = x[rng.integers(0, len(x), (spec.BOOTSTRAP_DRAWS, len(x)))].mean(axis=1)
-    tail = .05 / (2 * len(spec.ENDPOINTS))
+    tail = .05 / (2 * spec.CI_FAMILY_SIZE)
     bounds = np.quantile(draws, [tail, 1 - tail], axis=0)
     endpoints = {name: {"mean": float(x[:, i].mean()), "ci": bounds[:, i].tolist(),
                         "effect": "positive" if bounds[0, i] > 0 else "negative" if bounds[1, i] < 0 else "inconclusive"}
                  for i, name in enumerate(spec.ENDPOINTS)}
     means = {cohort: {m: {k: float(np.mean([r["means"][cohort][m][k] for r in roots])) for k in keys}
                       for m in spec.METHODS} for cohort in spec.COHORTS}
-    return {"status": "stage36_component_diagnosis_complete", "primary_cohort": "final",
+    return {"status": spec.AGGREGATE_STATUS, "primary_cohort": "final",
             "root_count": len(roots), "primary_endpoints": endpoints, "means": means, "root_rows": roots}

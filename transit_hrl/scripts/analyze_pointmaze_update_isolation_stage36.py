@@ -17,7 +17,8 @@ from freq_hrl.rl.smdp_actor_critic import FrequencySeparatedActorCriticPPO, SMDP
 from scripts import pointmaze_update_isolation_stage36_spec as spec
 
 
-def analyze(run_name, *, preflight):
+def collect_results(run_name, *, preflight, specification=spec):
+    spec = specification
     directory = spec.ROOT / "results" / run_name
     results, audits, replays = [], [], []
     verification = {"primitive_steps": 0, "upper_inference_calls": 0, "lower_inference_calls": 0, "gate_inference_calls": 0}
@@ -32,7 +33,7 @@ def analyze(run_name, *, preflight):
             if (result["root"], result["method"], result["preflight"]) != (root, method, preflight):
                 raise ValueError("result cell identity changed")
             raw = path.parent.with_name(path.parent.name + "_raw")
-            audits.append(audit_result(result, raw_path=raw))
+            audits.append(audit_result(result, raw_path=raw, specification=spec))
             native = spec.native_method(method)
             initial = joint.inference_weights(joint.make_model(controller, native, root=root))
             for cohort in spec.COHORTS:
@@ -73,7 +74,13 @@ def analyze(run_name, *, preflight):
                                        for r in results if r["method"] == m], axis=0).tolist()
                                        for k in ("iteration", "utility", "return", "ise", "calls")} for m in spec.METHODS}}
     if not preflight:
-        summary["aggregate"] = aggregate(results)
+        summary["aggregate"] = aggregate(results, specification=spec)
+    return summary
+
+
+def analyze(run_name, *, preflight, specification=spec):
+    summary = collect_results(run_name, preflight=preflight, specification=specification)
+    directory = specification.ROOT / "results" / run_name
     write_json(directory / "qualification_summary.json", summary)
     print(json.dumps(summary, sort_keys=True))
     return summary

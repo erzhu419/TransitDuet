@@ -19,6 +19,19 @@ ENDPOINTS = ("gate_only:frozen:return", "controller_only:frozen:return",
              "joint:fixed50:ise", "joint:fixed50:calls")
 BOOTSTRAP_DRAWS = 65536
 BOOTSTRAP_SEED = (36, 36039)
+SHUFFLE_SEED_NAMESPACE = 36
+CI_FAMILY_SIZE = len(ENDPOINTS)
+AGGREGATE_STATUS = "stage36_component_diagnosis_complete"
+
+
+def contrasts(values):
+    f, g, c, j, b = (values[m] for m in METHODS)
+    return [g["episode_return"] - f["episode_return"], c["episode_return"] - f["episode_return"],
+            j["episode_return"] - f["episode_return"],
+            j["episode_return"] - c["episode_return"] - g["episode_return"] + f["episode_return"],
+            j["episode_return"] - b["episode_return"],
+            b["tracking_squared_error_integral"] - j["tracking_squared_error_integral"],
+            b["upper_inference_calls"] - j["upper_inference_calls"]]
 
 
 def roots(*, preflight):

@@ -50,7 +50,7 @@ def make_model(controller, method, *, root):
     return model
 
 
-def rollout(model, args, method, *, seed, sample, capture=False):
+def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None):
     scale = scale_for(args)
     task = _make_task(env_id=args.env_id, seed=seed, horizon=args.horizon, **_task_options(args))
     try:
@@ -63,7 +63,7 @@ def rollout(model, args, method, *, seed, sample, capture=False):
         model.reset_recurrent_inference()
         builder = HierarchicalRolloutBuilder(gamma=model.config.gamma) if sample else None
         gate_builder = PromotionRolloutBuilder(gamma=model.config.gamma) if sample else None
-        decisions, gate_steps, gate_actions, gate_states = [], [], [], []
+        decisions, gate_steps, gate_actions, gate_states, gate_probabilities = [], [], [], [], []
         trace = {key: [] for key in ("physical", "measurement", "achieved_before", "target_before",
                                      "subgoal_before", "subgoal", "achieved_after", "distance", "reward", "action")}
         rewards, distances = [], []
@@ -84,13 +84,16 @@ def rollout(model, args, method, *, seed, sample, capture=False):
                     state = gate_state(observation, history, subgoal, age=age, step=step,
                                        horizon=args.horizon, current_only=method == "learned_current")
                     clock = time.perf_counter()
-                    output = model.act_promotion(state, sample=sample)
+                    if gate_seed is not None:
+                        torch.manual_seed(int(gate_seed) + step)
+                    output = model.act_promotion(state, sample=sample if gate_sample is None else gate_sample)
                     gate_time += time.perf_counter() - clock
                     plan_now = bool(output["action"])
                     gate_steps.append(step)
                     gate_actions.append(int(plan_now))
                     if capture:
                         gate_states.append(state)
+                        gate_probabilities.append(output["probability"])
                     if sample:
                         gate_builder.begin(state=state, action=float(plan_now), logp=output["logp"], value=output["value"])
             if plan_now:
@@ -149,12 +152,14 @@ def rollout(model, args, method, *, seed, sample, capture=False):
                "lower_inference_calls": args.horizon, "gate_inference_calls": len(gate_steps),
                "charged_utility": reward_sum - spec.CALL_COST * len(decisions),
                "decision_steps": decisions, "gate_steps": gate_steps, "gate_actions": gate_actions,
+               "gate_sample": bool(sample if gate_sample is None else gate_sample), "gate_seed": gate_seed,
                "upper_inference_seconds": upper_time, "lower_inference_seconds": lower_time,
                "gate_inference_seconds": gate_time, "episode_wall_seconds": wall}
         raw = {key: np.asarray(value) for key, value in trace.items()} if capture else None
         if capture:
             raw.update(decision_steps=np.asarray(decisions), gate_steps=np.asarray(gate_steps),
-                       gate_actions=np.asarray(gate_actions), gate_states=np.asarray(gate_states))
+                       gate_actions=np.asarray(gate_actions), gate_states=np.asarray(gate_states),
+                       gate_probabilities=np.asarray(gate_probabilities))
         return batch, row, raw
     finally:
         task.environment.close()
