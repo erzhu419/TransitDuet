@@ -37,7 +37,8 @@ def policy_drift(actor, reference, state):
 
 def probe_diagnostics(model, batch, reference):
     with torch.no_grad():
-        value = model.lower_value(torch.as_tensor(batch.state, dtype=torch.float32, device=model.device)).cpu().numpy()
+        value_state = batch.state if batch.value_state is None else batch.value_state
+        value = model.lower_value(torch.as_tensor(value_state, dtype=torch.float32, device=model.device)).cpu().numpy()
     target = monte_carlo_returns(batch, model.config.gamma)
     return {"value_mean": float(value.mean()), "mc_return_mean": float(target.mean()),
             "mc_value_mse": float(np.mean((value - target) ** 2)),
@@ -71,14 +72,15 @@ def lower_update(model, batch, kind):
                                actor_updates_enabled=kind == "actor_critic")
 
 
-def train(root, method, *, preflight, output, specification=spec, rollout_worker=worker_rollout):
+def train(root, method, *, preflight, output, specification=spec, rollout_worker=worker_rollout,
+          model_factory=joint.make_model):
     spec = specification
     if method not in spec.METHODS:
         raise ValueError("unregistered calibration method")
     args, opt = spec.source.arguments(root, preflight=preflight), spec.options(preflight=preflight)
     roles = spec.seed_roles(root, preflight=preflight)
     controller, source_cell, replay = load_controller(args, spec.source_result(root, preflight=preflight))
-    model = joint.make_model(controller, "learned_history", root=root)
+    model = model_factory(controller, "learned_history", root=root)
     if model.lower_cost_value is not None or model.upper_cost_value is not None or model.hf_actor is not None:
         raise ValueError("Stage-39 requires the unconstrained Stage-33 controller")
     initial, anchor = joint.inference_weights(model), copy.deepcopy(model.lower_actor)

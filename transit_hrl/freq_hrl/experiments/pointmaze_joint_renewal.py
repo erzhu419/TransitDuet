@@ -51,7 +51,8 @@ def make_model(controller, method, *, root):
 
 
 def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
-            lower_credit="intrinsic_option", lower_sample=None, upper_sample=None, lower_seed=None):
+            lower_credit="intrinsic_option", lower_sample=None, upper_sample=None, lower_seed=None,
+            lower_value_context_builder=None):
     if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
         raise ValueError("unregistered lower credit")
     scale = scale_for(args)
@@ -69,6 +70,8 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
         decisions, gate_steps, gate_actions, gate_states, gate_probabilities = [], [], [], [], []
         trace = {key: [] for key in ("physical", "measurement", "achieved_before", "target_before",
                                      "subgoal_before", "subgoal", "achieved_after", "distance", "reward", "action")}
+        if lower_value_context_builder is not None:
+            trace["lower_value_context"] = []
         rewards, distances = [], []
         last_plan = -spec.MAX_AGE_STEPS
         subgoal = observation.achieved_goal.copy()
@@ -110,10 +113,15 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 decisions.append(step)
                 last_plan = step
             state = history.lower_state(observation, subgoal=subgoal)
+            value_state, value_context = None, None
+            if lower_value_context_builder is not None:
+                value_context = lower_value_context_builder(age=step - last_plan, step=step, horizon=args.horizon)
+                value_state = np.concatenate((state, value_context)).astype(np.float32)
             clock = time.perf_counter()
             if lower_seed is not None and (sample if lower_sample is None else lower_sample):
                 torch.manual_seed(int(lower_seed) + step)
-            output = model.act_lower(state, sample=sample if lower_sample is None else lower_sample)
+            value_kwargs = {} if value_state is None else {"value_state": value_state}
+            output = model.act_lower(state, sample=sample if lower_sample is None else lower_sample, **value_kwargs)
             lower_time += time.perf_counter() - clock
             action = squash_box_action(np.asarray(output["action"], dtype=np.float32), task.action_low, task.action_high)
             after, reward, terminated, truncated, info = task.step(action)
@@ -126,7 +134,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                     achieved_before=observation.achieved_goal, achieved_after=after.achieved_goal,
                     subgoal=subgoal, action=action)
                 builder.add_lower(state=state, action=output["action"], logp=output["logp"], value=output["value"],
-                                  reward=float(lower_reward), upper_reward=charged, done=done, cost=0.)
+                                  reward=float(lower_reward), upper_reward=charged, done=done, cost=0., value_state=value_state)
                 gate_builder.add_reward(charged, done=done)
             rewards.append(float(reward))
             distances.append(float(info["tracking_distance"]))
@@ -136,6 +144,8 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                           info["tracking_distance"], reward, action)
                 for key, value in zip(trace, values):
                     trace[key].append(np.asarray(value).copy())
+                if value_context is not None:
+                    trace["lower_value_context"].append(np.asarray(value_context).copy())
             observation = after
             history.update(observation)
         wall = time.perf_counter() - started

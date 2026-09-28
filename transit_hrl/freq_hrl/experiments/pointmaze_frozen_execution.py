@@ -8,7 +8,7 @@ from . import pointmaze_critic_calibration as calibration
 from scripts import pointmaze_frozen_execution_stage40_spec as spec
 
 
-def worker_rollout(job, *, specification=spec):
+def worker_rollout(job, *, specification=spec, lower_value_context_builder=None):
     spec = specification
     weights, seed, phase, mode, path, method = job
     model, args, native, credit = joint._WORKER
@@ -17,7 +17,7 @@ def worker_rollout(job, *, specification=spec):
     policy_seed = int(seed) + args.optimizer_seed if kwargs["sample"] else spec.policy_seed(args.optimizer_seed, seed)
     torch.manual_seed(policy_seed)
     batch, row, raw = joint.rollout(model, args, native, seed=seed, capture=path is not None,
-                                  lower_credit=credit, **kwargs)
+                                  lower_credit=credit, lower_value_context_builder=lower_value_context_builder, **kwargs)
     row.update(policy_seed=policy_seed, deployment_mode=mode)
     if path is not None:
         np.savez_compressed(path, **raw)

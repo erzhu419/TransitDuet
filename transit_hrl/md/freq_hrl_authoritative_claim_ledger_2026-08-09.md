@@ -1612,6 +1612,22 @@ with actor inputs, PPO, rewards and budgets matched. Gate has both explicit
 clocks; lower reward critic lacks them. This is a hypothesis, not an established
 cause. No additional seeds, retuning or new training launched.
 
+### stage42_critic_only_control_clock_information
+
+The [Stage-42 protocol](freq_hrl_stage42_critic_clock_protocol_2026-09-28.md)
+isolates explicit option age/remaining horizon in the lower reward critic.
+Same-capacity zero-clock controls preserve actor inputs, upper/gate weights,
+inherited critic weights, rewards, PPO and16+16 iteration budgets. Extra input
+columns start at zero; original gate construction precedes critic expansion.
+Warmup and learning use deterministic upper/gate with coupled stochastic lower.
+Independent reward-critic input flows through inference, rollout batches,
+concatenation, value loss and diagnostics. Native audits verify current-option
+age after renewal, unchanged actor inputs and paired first-learning transitions.
+Both reward pairs and frozen remain; eight deterministic return effects with
+Bonferroni8, fresh streams and no selection/exclusion/extension. Full40 cells:
+20064000 method steps plus624000 verification steps. Tests and native preflight
+are pending; there is no utility claim. Reused roots are conditional development.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
