@@ -1,0 +1,331 @@
+{
+  "audits": [
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "gate_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "controller_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "joint",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "checkpoint_replays": [
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "gate_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "gate_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "controller_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "controller_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "joint",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "joint",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "method_cost": {
+    "gate_inference_calls": 448,
+    "lower_inference_calls": 19500,
+    "primitive_steps": 19500,
+    "upper_inference_calls": 308
+  },
+  "protocol": "pointmaze_update_isolation_stage36_v1",
+  "run_name": "pointmaze_update_isolation_stage36_v1_preflight_20260928_r1",
+  "selection": [
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "gate_only",
+      "optimizer_steps": {
+        "promotion_actor_optimizer_steps": 8,
+        "promotion_advantage_optimizer_steps": 0,
+        "promotion_cost_value_optimizer_steps": 0,
+        "promotion_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "controller_only",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "joint",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "promotion_actor_optimizer_steps": 8,
+        "promotion_advantage_optimizer_steps": 0,
+        "promotion_cost_value_optimizer_steps": 0,
+        "promotion_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "fixed50",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    }
+  ],
+  "selection_curves": {
+    "controller_only": {
+      "calls": [
+        4,
+        4,
+        4
+      ],
+      "ise": [
+        8.066349589698124,
+        8.294407014137931,
+        6.79163248153518
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        88.32456280991511,
+        84.0467012055271,
+        90.2768457650387
+      ],
+      "utility": [
+        84.32456280991511,
+        80.0467012055271,
+        86.2768457650387
+      ]
+    },
+    "fixed50": {
+      "calls": [
+        6,
+        6,
+        6
+      ],
+      "ise": [
+        8.071696731301252,
+        6.299970063711852,
+        5.541910856463275
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        88.29358995942832,
+        101.54492006533718,
+        106.49638964601435
+      ],
+      "utility": [
+        82.29358995942832,
+        95.54492006533718,
+        100.49638964601435
+      ]
+    },
+    "frozen": {
+      "calls": [
+        4,
+        4,
+        4
+      ],
+      "ise": [
+        8.066349589698124,
+        8.066349589698124,
+        8.066349589698124
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        88.32456280991511,
+        88.32456280991511,
+        88.32456280991511
+      ],
+      "utility": [
+        84.32456280991511,
+        84.32456280991511,
+        84.32456280991511
+      ]
+    },
+    "gate_only": {
+      "calls": [
+        4,
+        7.5,
+        6
+      ],
+      "ise": [
+        8.066349589698124,
+        8.06911514811819,
+        8.069397372846035
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        88.32456280991511,
+        88.30269035200251,
+        88.29920861085088
+      ],
+      "utility": [
+        84.32456280991511,
+        80.80269035200251,
+        82.29920861085088
+      ]
+    },
+    "joint": {
+      "calls": [
+        4,
+        7.5,
+        6
+      ],
+      "ise": [
+        8.066349589698124,
+        8.273918124106107,
+        6.7902817050481925
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        88.32456280991511,
+        84.08515313098053,
+        90.26711020180487
+      ],
+      "utility": [
+        84.32456280991511,
+        76.58515313098053,
+        84.26711020180487
+      ]
+    }
+  },
+  "status": "preflight_passed",
+  "verification_cost": {
+    "gate_inference_calls": 72,
+    "lower_inference_calls": 3000,
+    "primitive_steps": 3000,
+    "upper_inference_calls": 36
+  }
+}

@@ -1399,6 +1399,20 @@ arrays are now read once per episode. Future runs retain final and selected
 weights for isolating gate credit from controller adaptation; do not add
 seeds or retune thresholds to reclassify this failed experiment.
 
+### stage36_component_update_isolation
+
+The [Stage-36 protocol](freq_hrl_stage36_update_isolation_protocol_2026-09-28.md)
+isolates gate updates from upper/lower adaptation in a 2x2 factorial with
+trained fixed50 reference. Final weights are primary; selected weights are
+reported separately on paired fresh paths. No reward, threshold or architecture
+retuning. Implementation `4b7af62fd9` passes 27 tests; NumPy PPO shuffles are
+explicitly seeded. [Preflight](freq_hrl_stage36_update_isolation_preflight_2026-09-28.md)
+`t102161`-`t102165` passes five native audits/ten checkpoint replays, including
+exact component freezes. Method cost 19500 steps/308 upper/448 gate calls;
+verification 3000 steps/36 upper/72 gate calls. Full budget: 40 cells,
+54192000 method steps plus 96000 verification steps. Component-effect
+diagnosis is conditional development, not an algorithm-superiority gate.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
