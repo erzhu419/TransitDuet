@@ -1412,6 +1412,20 @@ exact component freezes. Method cost 19500 steps/308 upper/448 gate calls;
 verification 3000 steps/36 upper/72 gate calls. Full budget: 40 cells,
 54192000 method steps plus 96000 verification steps. Component-effect
 diagnosis is conditional development, not an algorithm-superiority gate.
+The [full result](freq_hrl_stage36_update_isolation_result_2026-09-28.md)
+`t102166`-`t102205` completes all 40 cells/2560 evaluation episodes. All 40
+trajectory audits, 80 final/selected checkpoint replays and independent
+root-count bootstrap pass. Primary final-weight return effects versus frozen:
+gate-only -29.87 [-61.27,-3.97], upper/lower-only -19.22 [-29.45,-8.52],
+joint -44.24 [-76.39,-10.29]. Interaction +4.85 [-22.63,21.24] is inconclusive.
+Joint versus trained fixed50: return -37.75 [-54.46,-20.24], ISE reduction
+-0.74605 [-0.95952,-0.50541], call savings inconclusive. Both update paths
+harm this recipe; no gate-only or joint-superiority claim. Method cost
+54192000 steps/1149933 upper/1525849 gate calls; verification 96000
+steps/2171 upper/2649 gate calls. Next isolate upper/lower adaptation and
+stochastic-training versus deterministic-deployment effects. Stage-35's
+source builder already seeded NumPy; per-iteration Stage-36 seeding makes
+update-topology RNG control explicit, not an old unseeded-data correction.
 
 ### legacy_c1_c9_matrix_snapshot
 
