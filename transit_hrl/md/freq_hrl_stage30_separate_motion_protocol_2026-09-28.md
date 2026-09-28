@@ -32,7 +32,14 @@ Report root/path metrics and a small audit sample; full arrays stay remote.
 Scheduler node001-node006 dynamically, one CPU/1536 MB, compact JSON only.
 Twenty-four focused tests passed, covering causal time units, equal capacity,
 label isolation, unchanged physical prediction, source labels, disjoint paths,
-all-control gates and accounting. Freeze this implementation before sampling.
+all-control gates and accounting. Implementation frozen at `7d87dd7e8d`.
+Preflight `t101738` completed on node006: 56/56/56 rows, three fits/90 RHS,
+1806 generated tape points and zero environment steps. Server-side independent
+label, forecast, normalization and metric recomputation matched. One-step
+gate passed; planning/joint gates failed. Keep this negative result; full
+settings remain unchanged. Retrieved 81590 bytes of JSON, no raw arrays.
+Full tasks `t101739/101740` register roots 209011/209061 at the same frozen
+revision, three independent motion fits per root and zero environment steps.
 
 ## Limitations
 

@@ -1209,6 +1209,12 @@ paths, with current/shuffled/lag-one/zero controls. Both one-step and planning
 forecast gates must pass on both roots. Twenty-four focused tests passed.
 No new environment replay, controller update or policy claim is involved;
 the cached composition preserves physical predictions exactly.
+Implementation `7d87dd7e8d`: preflight `t101738` completed on node006 with
+all 56 fit/query/bridge rows and 1806 tape points accounted for. Independent
+server-side recomputation matched labels, forecasts, scales and metrics.
+One-step forecasting passes but planning/joint qualification fails. Full
+settings stay fixed; no physical model or policy is promoted.
+Full tasks `t101739/101740` register the same implementation for 209011/209061.
 
 ### legacy_c1_c9_matrix_snapshot
 
