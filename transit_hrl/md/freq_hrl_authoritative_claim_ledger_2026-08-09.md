@@ -1273,6 +1273,15 @@ old gates on the fresh paths, without relabeling Stage-31 or declaring a new
 primary win. Stop kernel correction; qualify the frozen original forecast
 response on new optimizer roots before deployment or reward claims.
 
+The [Stage-33 protocol](freq_hrl_stage33_new_root_response_protocol_2026-09-28.md)
+freezes eight unused optimizer roots and from-scratch Stage-12 controllers.
+It retains the original linear response, saves all heads before fresh query
+replay, and keeps roots even when motion diagnostics fail. Fifteen paired
+root-level endpoints require nominal Bonferroni-adjusted bootstrap lower
+bounds >0. Training and qualification have separate scheduler allocations.
+Thirty-two focused tests pass. Full scientific qualification is pending;
+the two-root development results and failed kernel experiment stay unchanged.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
