@@ -1189,8 +1189,18 @@ zero factual errors, 2368 new steps, four fits/16 model updates. Independent
 server-side raw-array recomputation matched metrics, interventions and action
 alignment. Both scientific gates failed; absent external change coverage
 produced extreme NLL. Preserve this result without changing full settings.
-Full tasks `t101734/101735` register the same frozen implementation and
-roots 209011/209061, with 209520 new steps and four factorial fits per root.
+Full tasks `t101734/101735` completed on node006/node005. The
+[Stage-29 result](freq_hrl_stage29_state_response_result_2026-09-28.md) passes
+both action-response gates against matched action-blind and zero-effect
+controls. History target-rate MSE is 0.74%/1.43% worse than current/action,
+with improvements on only 2/16 paths; both history and joint gates fail.
+All 419040 new steps, eight fits/14848 model updates and 320 effect pairs
+are accounted for, without controller updates or reconstruction. Server-side
+recomputation matches all metrics and 3632/3648 overlapping next-state/action
+labels; raw arrays and weights remain remote. Retain action response, then
+separate exogenous-motion inference using the demonstrated causal velocity
+information. Shared-latent interference remains a hypothesis. This is not
+plan-value or policy qualification; Stage-9 remains the performance reference.
 
 ### legacy_c1_c9_matrix_snapshot
 

@@ -48,8 +48,13 @@ recomputation matched all metrics, effect labels, forward tapes and 94/96
 overlapping next-state/action alignments. Retrieved 32935 bytes of JSON.
 Both scientific gates failed. Some external training changes were zero,
 giving minimum target scales and extreme held-out NLL; preserve the result.
-Full tasks `t101734/101735` register 209011/209061 at the same revision,
-419040 total new steps and four parallel model fits per root.
+Full tasks `t101734/101735` completed on node006/node005 at the same revision,
+419040 total new steps and four parallel model fits per root. The
+[full result](freq_hrl_stage29_state_response_result_2026-09-28.md) passes
+the action-response gate on both roots but fails the history and joint gates.
+History target-rate MSE is 0.74%/1.43% worse than current/action. Independent
+server-only recomputation matched all metrics and intervention labels, plus
+1816/1824 overlapping next-state/action rows per root. No policy is promoted.
 
 ## Limitations
 
