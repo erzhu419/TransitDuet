@@ -1315,6 +1315,15 @@ Method cost is 38796700 steps/3440 previews/80 solves; verification adds
 remote; only the compact summary is returned. This authorizes the next
 full-episode deployment test, not an episode-reward or planner-savings claim.
 
+The [Stage-34 protocol](freq_hrl_stage34_episode_deployment_protocol_2026-09-28.md)
+freezes those models for 32 fresh full-episode paths per root. Sequential
+150-step keep/renew blocks retain lower feedback; discarded candidate previews
+are paid policy calls and delayed plans use the current state. Sixteen paired
+root-level ISE/return endpoints require all adjusted lower bounds >0; original
+fixed50 and measured inference cost are separate references. Twenty-four
+focused tests pass. Implementation `7115ddf308`; preflight `t101930` is registered
+on the dynamic Linux pool. No deployed-control result has been declared.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

@@ -1,0 +1,110 @@
+{
+  "artifacts": {
+    "pull": "compact_summary_only",
+    "raw_and_weights": "server_only"
+  },
+  "budgets": {
+    "310001": {
+      "controller_updates": 0,
+      "evaluation_episodes": 20,
+      "evaluation_primitive_steps": 6000,
+      "factual_replay_primitive_steps": 300,
+      "motion_updates": 0,
+      "response_fits": 0,
+      "total_primitive_steps": 6300
+    }
+  },
+  "contract": {
+    "block_steps": 150,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      34,
+      34039
+    ],
+    "candidate_preview": "actual_policy_call_reused_only_if_immediately_executed",
+    "cost_role": "measured_not_equalized_with_unused_calls",
+    "decision": "settled_rate_strictly_positive",
+    "delayed_plan": "fresh_policy_at_current_state_not_cached_preview",
+    "evidence_role": "fresh_path_transfer_conditional_on_stage33_frozen_models",
+    "familywise_alpha": 0.05,
+    "fixed50_role": "original_frequency_reference_not_joint_gate",
+    "gate": "all_16_adjusted_lower_bounds_strictly_positive",
+    "hold_steps": 100,
+    "interval": "two_sided_percentile_bonferroni_16_endpoints",
+    "lower_feedback": "every_primitive_step",
+    "methods": [
+      "history",
+      "current_repeat",
+      "shuffled_history",
+      "lag1_extrapolation",
+      "zero_forecast",
+      "raw_history",
+      "raw_current",
+      "always_keep",
+      "always_renew",
+      "fixed50"
+    ],
+    "nonoverlapping_blocks": true,
+    "primary_endpoints": [
+      "ise:current_repeat",
+      "ise:shuffled_history",
+      "ise:lag1_extrapolation",
+      "ise:zero_forecast",
+      "ise:raw_history",
+      "ise:raw_current",
+      "ise:always_keep",
+      "ise:always_renew",
+      "return:current_repeat",
+      "return:shuffled_history",
+      "return:lag1_extrapolation",
+      "return:zero_forecast",
+      "return:raw_history",
+      "return:raw_current",
+      "return:always_keep",
+      "return:always_renew"
+    ],
+    "root_exclusion": "forbidden",
+    "root_weighting": "equal",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_root_response_stage33_v1_qualification",
+    "statistical_unit": "optimizer_seed_root",
+    "tail": "fixed50_from_last_settlement",
+    "timing_role": "descriptive_not_a_speedup_test",
+    "warmup_steps": 100
+  },
+  "evaluation_paths": {
+    "310001": [
+      4590001,
+      4590002
+    ]
+  },
+  "full_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "preflight": true,
+  "protocol": "pointmaze_response_deployment_stage34_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "7115ddf308e898ecc9120080f1bc6c985c2798c9"
+}
