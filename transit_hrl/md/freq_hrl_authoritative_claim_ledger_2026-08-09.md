@@ -1484,6 +1484,25 @@ unchanged intrinsic-option also harms return; the cause is not established.
 Next isolate critic calibration and first-update policy drift, not more seeds
 or reward retuning. No additional training jobs launched.
 
+### stage39_critic_calibration_and_early_policy_drift
+
+The [Stage-39 protocol](freq_hrl_stage39_critic_calibration_protocol_2026-09-28.md)
+compares sixteen critic-only warmup iterations against equally exposed delayed
+controls, followed by sixteen equal lower actor/critic learning iterations.
+Intrinsic/task option rewards are separate arms; upper/gate remain frozen.
+Keep0/16/17/20/32, with deterministic and lower-only sampled deployment;
+a disjoint fixed native probe diagnoses MC value error and Gaussian KL.
+Source `26dc18ab4f` passes 51 tests. Native preflight `t102378`-`t102382`
+passes five trajectory audits, forty snapshot/mode replays and ten native
+probe/initial-credit replays. Warmup actor optimizers do not step; learned
+arms have equal actor counts, with twice the critic steps in calibrated arms.
+Method33000 steps/745 upper/1050 gate calls; verification15000 steps/481
+upper/545 gate calls. This is execution readiness, not performance evidence.
+Full freeze:40 cells/eight reused roots, 20064000 method steps plus576000
+verification steps; eight adjusted deterministic return endpoints. No
+checkpoint selection, reward rescaling, learning-rate changes or seed extension.
+Formal diagnostic dispatch and full performance readout are pending.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

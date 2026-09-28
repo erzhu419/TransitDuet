@@ -1,0 +1,130 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_cell": {
+    "evaluation_primitive_steps": 4800,
+    "factual_replay_primitive_steps": 300,
+    "probe_primitive_steps": 300,
+    "total_primitive_steps": 6600,
+    "training_primitive_steps": 1200
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      39,
+      39039
+    ],
+    "checkpoint_selection": "none_all_registered_snapshots_retained",
+    "controller_source": "same_stage33_controller_and_stage35_initial_gate_as_stage38",
+    "critic_error": "fixed_probe_discounted_monte_carlo_returns_respecting_option_cuts",
+    "critic_initialization": "inherited_no_reset_no_reward_rescale",
+    "decision": "critic_calibration_and_early_update_diagnosis_not_algorithm_superiority",
+    "deployment_modes": [
+      "deterministic",
+      "lower_sampled"
+    ],
+    "deployment_upper_and_gate": "deterministic_in_both_modes",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "frozen_levels": "upper_and_gate_actor_and_critic_always_frozen",
+    "interval": "two_sided_percentile_bonferroni_8_endpoints",
+    "learning": "equal_lower_actor_and_critic_updates_after_warmup",
+    "lower_credit": {
+      "frozen": "intrinsic_option",
+      "intrinsic_calibrated": "intrinsic_option",
+      "intrinsic_delayed": "intrinsic_option",
+      "task_calibrated": "task_option",
+      "task_delayed": "task_option"
+    },
+    "lower_sampling_seed": "numpy_seedsequence_39_root_environment_seed_39019",
+    "methods": [
+      "frozen",
+      "intrinsic_delayed",
+      "intrinsic_calibrated",
+      "task_delayed",
+      "task_calibrated"
+    ],
+    "policy_drift": "exact_gaussian_kl_and_squashed_mean_action_change_on_fixed_probe_and_update_batch",
+    "ppo": "unchanged_shared_update_level_with_existing_actor_updates_enabled_argument",
+    "primary_cohort": "final_and_first_update_deterministic",
+    "primary_endpoints": [
+      "intrinsic_delayed:frozen:final_return",
+      "intrinsic_calibrated:frozen:final_return",
+      "task_delayed:frozen:final_return",
+      "task_calibrated:frozen:final_return",
+      "intrinsic:calibration:final_return",
+      "task:calibration:final_return",
+      "intrinsic:calibration:first_update_return",
+      "task:calibration:first_update_return"
+    ],
+    "probe": "one_disjoint_initial_stochastic_episode_never_used_for_updates",
+    "root_exclusion": "forbidden",
+    "sequential_extension": "forbidden",
+    "shuffle_seed": "numpy_seedsequence_39_root_global_iteration",
+    "statistical_unit": "equal_weight_optimizer_root_means_after_path_averaging",
+    "training_sampling": "on_policy_all_levels_seed_environment_plus_optimizer_root",
+    "warmup": "calibrated_critic_only_delayed_no_updates_same_frozen_actor_data"
+  },
+  "methods": [
+    "frozen",
+    "intrinsic_delayed",
+    "intrinsic_calibrated",
+    "task_delayed",
+    "task_calibrated"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 1,
+    "warmup_iterations": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_critic_calibration_stage39_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        10393001,
+        10393002
+      ],
+      "probe": [
+        10392001
+      ],
+      "training": [
+        10390001,
+        10390002,
+        10390003,
+        10390004
+      ]
+    }
+  },
+  "snapshots": [
+    0,
+    2,
+    3,
+    4
+  ],
+  "source_revision": "26dc18ab4f423a36f51b2cf295f77c2023b8dfce",
+  "total_method_steps": 33000,
+  "verification_budget": {
+    "native_episodes_per_cell": 10,
+    "total_primitive_steps": 15000
+  }
+}
