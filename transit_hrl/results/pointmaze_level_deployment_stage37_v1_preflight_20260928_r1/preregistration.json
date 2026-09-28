@@ -1,0 +1,236 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_gate_root": {
+    "evaluation_episodes": 18,
+    "selection_primitive_steps": 0,
+    "total_primitive_steps": 5400,
+    "training_primitive_steps": 0
+  },
+  "budget_per_training_cell": {
+    "evaluation_primitive_steps": 1200,
+    "factual_replay_primitive_steps": 300,
+    "selection_primitive_steps": 1800,
+    "total_primitive_steps": 3900,
+    "training_primitive_steps": 600
+  },
+  "contract": {
+    "all_primary_endpoints": [
+      "upper_only:frozen:return",
+      "lower_only:frozen:return",
+      "upper_lower:frozen:return",
+      "interaction:return",
+      "frozen:sampled_threshold:return",
+      "gate_only:sampled_threshold:return",
+      "joint:sampled_threshold:return",
+      "gate_only:frozen:sampled:return",
+      "joint:frozen:sampled:return"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      37,
+      37039
+    ],
+    "candidate_previews": 0,
+    "checkpoint_candidates": "initial_and_every_32_iterations_full_or_every_iteration_preflight",
+    "checkpoint_selection": "maximum_selection_return_minus_call_cost_then_minimum_ise",
+    "decision": "diagnose_upper_lower_updates_and_gate_deployment_not_algorithm_success",
+    "evaluation_cohorts": [
+      "final",
+      "selected"
+    ],
+    "evaluation_pairing": "same_untouched_paths_both_cohorts_and_all_methods",
+    "evidence_role": "conditional_level_and_deployment_diagnosis_not_independent_confirmation",
+    "familywise_alpha": 0.05,
+    "frozen_components": "skip_actor_and_critic_optimizer_updates_exact_weights_unchanged",
+    "frozen_gate": "stage35_initial_gate_weights_no_updates_in_all_training_arms",
+    "gate_check_steps": 25,
+    "gate_input": "causal_physical_target_error_measurement_history_waypoint_error_age_remaining_time",
+    "initialization": "same_stage33_controller_and_stage35_gate_initialization_fresh_optimizers",
+    "interaction": "upper_lower_minus_upper_only_minus_lower_only_plus_frozen",
+    "interval": "two_sided_percentile_bonferroni_9_endpoints",
+    "lower_feedback": "every_primitive_step",
+    "lower_reward": "unchanged_goal_conditioned_intrinsic_reward",
+    "max_plan_age_steps": 100,
+    "methods": [
+      "frozen",
+      "upper_only",
+      "lower_only",
+      "upper_lower",
+      "fixed50"
+    ],
+    "minibatch_shuffle_seed": "numpy_seedsequence_37_optimizer_root_iteration",
+    "primary_cohort": "final",
+    "primary_endpoints": [
+      "upper_only:frozen:return",
+      "lower_only:frozen:return",
+      "upper_lower:frozen:return",
+      "interaction:return"
+    ],
+    "root_exclusion": "forbidden",
+    "root_weighting": "equal",
+    "sample_training_actions": "all_levels_in_every_arm",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_root_response_stage33_v1_qualification",
+    "statistical_unit": "optimizer_seed_root",
+    "training": "same_native_rollouts_and_smdp_ppo_as_stage35_no_hyperparameter_change",
+    "updated_actor_and_critic_levels": {
+      "fixed50": [
+        "upper",
+        "lower"
+      ],
+      "frozen": [],
+      "lower_only": [
+        "lower"
+      ],
+      "upper_lower": [
+        "upper",
+        "lower"
+      ],
+      "upper_only": [
+        "upper"
+      ]
+    },
+    "upper_and_gate_reward": "native_dense_reward_minus_actual_call_cost",
+    "upper_call_cost_in_reward_units": 1.0
+  },
+  "gate_contract": {
+    "all_primary_endpoints": [
+      "upper_only:frozen:return",
+      "lower_only:frozen:return",
+      "upper_lower:frozen:return",
+      "interaction:return",
+      "frozen:sampled_threshold:return",
+      "gate_only:sampled_threshold:return",
+      "joint:sampled_threshold:return",
+      "gate_only:frozen:sampled:return",
+      "joint:frozen:sampled:return"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      37,
+      37039
+    ],
+    "candidate_previews": 0,
+    "check_steps": 25,
+    "checkpoint": "final128_full_final2_preflight_no_checkpoint_selection",
+    "controller_actions": "deterministic_upper_and_lower_in_both_modes",
+    "current_cost": 1.0,
+    "evidence_role": "fresh_path_diagnosis_on_stage36_frozen_final_weights",
+    "familywise_alpha": 0.05,
+    "gate_modes": [
+      "threshold",
+      "sampled"
+    ],
+    "gate_seed": "numpy_seedsequence_37_root_environment_seed_stream_uint32",
+    "interval": "two_sided_percentile_bonferroni_9_endpoints",
+    "max_plan_age_steps": 100,
+    "primary_endpoints": [
+      "frozen:sampled_threshold:return",
+      "gate_only:sampled_threshold:return",
+      "joint:sampled_threshold:return",
+      "gate_only:frozen:sampled:return",
+      "joint:frozen:sampled:return"
+    ],
+    "root_exclusion": "forbidden",
+    "sample_stream_pairing": "same_stream_seeds_for_all_cached_models",
+    "sampling": "bernoulli_original_probabilities_torch_seed_gate_seed_plus_observed_step",
+    "sequential_extension": "forbidden",
+    "source_methods": [
+      "frozen",
+      "gate_only",
+      "joint"
+    ],
+    "source_protocol": "pointmaze_update_isolation_stage36_v1",
+    "statistical_unit": "optimizer_root_means_after_path_and_stream_averaging",
+    "threshold": 0.5
+  },
+  "gate_options": {
+    "checkpoint": "stage36_final_no_selection",
+    "controller_sampling": false,
+    "gate_modes": [
+      "threshold",
+      "sampled"
+    ],
+    "paths": 2,
+    "sample_streams": 2,
+    "workers": 1
+  },
+  "gate_sampling_seeds": {
+    "310001": {
+      "8394001": [
+        1052040302,
+        3413724373
+      ],
+      "8394002": [
+        1077678454,
+        2859587566
+      ]
+    }
+  },
+  "methods": [
+    "frozen",
+    "upper_only",
+    "lower_only",
+    "upper_lower",
+    "fixed50",
+    "gate_deployment"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "call_cost": 1.0,
+    "check_steps": 25,
+    "evaluation_cohorts": [
+      "final",
+      "selected"
+    ],
+    "evaluation_paths": 2,
+    "iterations": 2,
+    "max_age_steps": 100,
+    "rollouts_per_iteration": 1,
+    "selection_interval": 1,
+    "selection_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_level_deployment_stage37_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        8393001,
+        8393002
+      ],
+      "gate_evaluation": [
+        8394001,
+        8394002
+      ],
+      "selection": [
+        8392001,
+        8392002
+      ],
+      "training": [
+        8390001,
+        8390002
+      ]
+    }
+  },
+  "source_revision": "21f4ee2dcc0f350e514065e49a23875aac06b225",
+  "total_method_steps": 24900
+}

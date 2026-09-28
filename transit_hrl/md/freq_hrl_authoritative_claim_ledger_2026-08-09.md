@@ -1427,6 +1427,19 @@ stochastic-training versus deterministic-deployment effects. Stage-35's
 source builder already seeded NumPy; per-iteration Stage-36 seeding makes
 update-topology RNG control explicit, not an old unseeded-data correction.
 
+### stage37_level_update_and_gate_deployment
+
+The [Stage-37 protocol](freq_hrl_stage37_level_deployment_protocol_2026-09-28.md)
+isolates upper/lower updates with a frozen gate and compares threshold versus
+sampled deployment on cached Stage-36 final weights. Implementation
+`21f4ee2dcc` passes 35 tests; native preflight `t102219`-`t102224` passes five
+training audits, one cached-gate audit and sixteen checkpoint replays.
+Method24900 steps/486 upper/646 gate calls; verification4800 steps/93 upper/
+131 gate calls. This is execution readiness, not a performance result.
+Full freeze: 40 training cells plus eight cached-gate cells, 58800000 method
+steps, 153600 verification steps, nine familywise-adjusted reward contrasts.
+Sampling gain and learning gain are separate; no outcome-driven mode choice.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

@@ -1,0 +1,374 @@
+{
+  "audits": [
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "upper_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "lower_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "upper_lower",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "checkpoint_replays": [
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "upper_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "upper_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "lower_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "lower_only",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "upper_lower",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "upper_lower",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 2,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "gate_audits": [
+    {
+      "episodes": 18,
+      "replays": [
+        {
+          "mode": "threshold",
+          "root": 310001,
+          "source": "frozen",
+          "status": "passed"
+        },
+        {
+          "mode": "sampled",
+          "root": 310001,
+          "source": "frozen",
+          "status": "passed"
+        },
+        {
+          "mode": "threshold",
+          "root": 310001,
+          "source": "gate_only",
+          "status": "passed"
+        },
+        {
+          "mode": "sampled",
+          "root": 310001,
+          "source": "gate_only",
+          "status": "passed"
+        },
+        {
+          "mode": "threshold",
+          "root": 310001,
+          "source": "joint",
+          "status": "passed"
+        },
+        {
+          "mode": "sampled",
+          "root": 310001,
+          "source": "joint",
+          "status": "passed"
+        }
+      ],
+      "root": 310001,
+      "status": "passed",
+      "verification_cost": {
+        "gate_inference_calls": 55,
+        "lower_inference_calls": 1800,
+        "primitive_steps": 1800,
+        "upper_inference_calls": 33
+      }
+    }
+  ],
+  "method_cost": {
+    "gate_inference_calls": 646,
+    "lower_inference_calls": 24900,
+    "primitive_steps": 24900,
+    "upper_inference_calls": 486
+  },
+  "protocol": "pointmaze_level_deployment_stage37_v1",
+  "run_name": "pointmaze_level_deployment_stage37_v1_preflight_20260928_r1",
+  "selection": [
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "upper_only",
+      "optimizer_steps": {
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "lower_only",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "upper_lower",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 2,
+      "method": "fixed50",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001
+    }
+  ],
+  "selection_curves": {
+    "fixed50": {
+      "calls": [
+        6,
+        6,
+        6
+      ],
+      "ise": [
+        6.614074840812874,
+        6.343676884394631,
+        6.136335076791494
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        89.38000862886562,
+        89.4129556556691,
+        91.16001383242912
+      ],
+      "utility": [
+        83.38000862886562,
+        83.4129556556691,
+        85.16001383242912
+      ]
+    },
+    "frozen": {
+      "calls": [
+        4.5,
+        4.5,
+        4.5
+      ],
+      "ise": [
+        6.613481109297787,
+        6.613481109297787,
+        6.613481109297787
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        89.3839398683004,
+        89.3839398683004,
+        89.3839398683004
+      ],
+      "utility": [
+        84.8839398683004,
+        84.8839398683004,
+        84.8839398683004
+      ]
+    },
+    "lower_only": {
+      "calls": [
+        4.5,
+        5,
+        4.5
+      ],
+      "ise": [
+        6.613481109297787,
+        5.811840308693949,
+        4.665602120584218
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        89.3839398683004,
+        96.47347398993145,
+        106.6607616321026
+      ],
+      "utility": [
+        84.8839398683004,
+        91.47347398993145,
+        102.1607616321026
+      ]
+    },
+    "upper_lower": {
+      "calls": [
+        4.5,
+        5,
+        4.5
+      ],
+      "ise": [
+        6.613481109297787,
+        5.867155427837439,
+        4.025533401368596
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        89.3839398683004,
+        96.20161017315884,
+        112.90791569825348
+      ],
+      "utility": [
+        84.8839398683004,
+        91.20161017315884,
+        108.40791569825348
+      ]
+    },
+    "upper_only": {
+      "calls": [
+        4.5,
+        4.5,
+        4.5
+      ],
+      "ise": [
+        6.613481109297787,
+        6.613095323357751,
+        6.612393267404046
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        89.3839398683004,
+        89.38503155519963,
+        89.38612420668869
+      ],
+      "utility": [
+        84.8839398683004,
+        84.88503155519963,
+        84.88612420668869
+      ]
+    }
+  },
+  "status": "preflight_passed",
+  "verification_cost": {
+    "gate_inference_calls": 131,
+    "lower_inference_calls": 4800,
+    "primitive_steps": 4800,
+    "upper_inference_calls": 93
+  }
+}
