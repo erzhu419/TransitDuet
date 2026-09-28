@@ -1346,6 +1346,12 @@ Operational recovery `t101949`-`t101956` replays the exact original Stage-33
 protocol into its original paths, without training or seed/model selection.
 Its extra cost and reproducibility checks are reported separately, not counted
 as independent evidence. Deployment awaits restored, matching response caches.
+Recovery completed: all eight raw-data/controller audits pass; every scientific
+root metric and the complete joint aggregate match the original exactly.
+Extra operational cost: 4851100 steps/3440 previews/80 solves; verification:
+9600 steps/3440 previews/80 solves. Models/checkpoints and seed selection did
+not change. The original Stage-33 claim is unchanged; restored caches now
+authorize resuming Stage-34 without resampling or selecting deployment paths.
 
 ### legacy_c1_c9_matrix_snapshot
 
