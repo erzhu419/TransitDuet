@@ -1,0 +1,341 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 192000,
+    "optimizer_steps": 0,
+    "reconstruction_primitive_steps": 38400,
+    "total_primitive_steps": 230400
+  },
+  "contract": {
+    "baseline": "shared_pre_update_actor_after_exact_actor_and_frozen_level_equality",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      43,
+      43043
+    ],
+    "checkpoint_selection": "none",
+    "checkpoints": "fixed_last_warmup_and_first_lower_update_no_selection",
+    "decision": "positive_training_gain_and_negative_task_direction_local_conflict_negative_sampled_return_finite_update_conflict",
+    "evaluation": "fresh_paired_paths_deterministic_upper_gate_deterministic_or_sampled_lower",
+    "evidence_role": "conditional_diagnosis_existing_development_weights_with_fresh_evaluation_not_confirmation",
+    "interval": "two_sided_percentile_bonferroni_16_paired_equal_root_means",
+    "methods": [
+      "intrinsic_sham",
+      "intrinsic_clock",
+      "task_sham",
+      "task_clock"
+    ],
+    "optimizer_steps": 0,
+    "primary_endpoints": [
+      "intrinsic_sham:training_surrogate_gain",
+      "intrinsic_sham:heldout_task_direction",
+      "intrinsic_sham:deterministic_return",
+      "intrinsic_sham:lower_sampled_return",
+      "intrinsic_clock:training_surrogate_gain",
+      "intrinsic_clock:heldout_task_direction",
+      "intrinsic_clock:deterministic_return",
+      "intrinsic_clock:lower_sampled_return",
+      "task_sham:training_surrogate_gain",
+      "task_sham:heldout_task_direction",
+      "task_sham:deterministic_return",
+      "task_sham:lower_sampled_return",
+      "task_clock:training_surrogate_gain",
+      "task_clock:heldout_task_direction",
+      "task_clock:deterministic_return",
+      "task_clock:lower_sampled_return"
+    ],
+    "root_exclusion": "forbidden",
+    "score_baseline": "leave_one_episode_out_mean_return_to_go_at_each_primitive_time_no_option_cuts",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "surrogate": "original_normalized_GAE_clipped_PPO_full_batch_after_minus_before",
+    "task_direction": "heldout_undiscounted_full_episode_score_gradient_dot_actual_parameter_displacement",
+    "training_reconstruction": "original_first_learning_batch_seeds_sampling_credit_values_and_GAE"
+  },
+  "methods": [
+    "intrinsic_sham",
+    "intrinsic_clock",
+    "task_sham",
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "evaluation_paths": 16,
+    "learning_iterations": 16,
+    "rollouts_per_iteration": 8,
+    "warmup_iterations": 16,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_update_direction_stage43_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "evaluation": [
+        10803001,
+        10803002,
+        10803003,
+        10803004,
+        10803005,
+        10803006,
+        10803007,
+        10803008,
+        10803009,
+        10803010,
+        10803011,
+        10803012,
+        10803013,
+        10803014,
+        10803015,
+        10803016
+      ],
+      "reconstruction": [
+        10700129,
+        10700130,
+        10700131,
+        10700132,
+        10700133,
+        10700134,
+        10700135,
+        10700136
+      ]
+    },
+    "310023": {
+      "evaluation": [
+        10813001,
+        10813002,
+        10813003,
+        10813004,
+        10813005,
+        10813006,
+        10813007,
+        10813008,
+        10813009,
+        10813010,
+        10813011,
+        10813012,
+        10813013,
+        10813014,
+        10813015,
+        10813016
+      ],
+      "reconstruction": [
+        10710129,
+        10710130,
+        10710131,
+        10710132,
+        10710133,
+        10710134,
+        10710135,
+        10710136
+      ]
+    },
+    "310037": {
+      "evaluation": [
+        10823001,
+        10823002,
+        10823003,
+        10823004,
+        10823005,
+        10823006,
+        10823007,
+        10823008,
+        10823009,
+        10823010,
+        10823011,
+        10823012,
+        10823013,
+        10823014,
+        10823015,
+        10823016
+      ],
+      "reconstruction": [
+        10720129,
+        10720130,
+        10720131,
+        10720132,
+        10720133,
+        10720134,
+        10720135,
+        10720136
+      ]
+    },
+    "310049": {
+      "evaluation": [
+        10833001,
+        10833002,
+        10833003,
+        10833004,
+        10833005,
+        10833006,
+        10833007,
+        10833008,
+        10833009,
+        10833010,
+        10833011,
+        10833012,
+        10833013,
+        10833014,
+        10833015,
+        10833016
+      ],
+      "reconstruction": [
+        10730129,
+        10730130,
+        10730131,
+        10730132,
+        10730133,
+        10730134,
+        10730135,
+        10730136
+      ]
+    },
+    "310061": {
+      "evaluation": [
+        10843001,
+        10843002,
+        10843003,
+        10843004,
+        10843005,
+        10843006,
+        10843007,
+        10843008,
+        10843009,
+        10843010,
+        10843011,
+        10843012,
+        10843013,
+        10843014,
+        10843015,
+        10843016
+      ],
+      "reconstruction": [
+        10740129,
+        10740130,
+        10740131,
+        10740132,
+        10740133,
+        10740134,
+        10740135,
+        10740136
+      ]
+    },
+    "310073": {
+      "evaluation": [
+        10853001,
+        10853002,
+        10853003,
+        10853004,
+        10853005,
+        10853006,
+        10853007,
+        10853008,
+        10853009,
+        10853010,
+        10853011,
+        10853012,
+        10853013,
+        10853014,
+        10853015,
+        10853016
+      ],
+      "reconstruction": [
+        10750129,
+        10750130,
+        10750131,
+        10750132,
+        10750133,
+        10750134,
+        10750135,
+        10750136
+      ]
+    },
+    "310089": {
+      "evaluation": [
+        10863001,
+        10863002,
+        10863003,
+        10863004,
+        10863005,
+        10863006,
+        10863007,
+        10863008,
+        10863009,
+        10863010,
+        10863011,
+        10863012,
+        10863013,
+        10863014,
+        10863015,
+        10863016
+      ],
+      "reconstruction": [
+        10760129,
+        10760130,
+        10760131,
+        10760132,
+        10760133,
+        10760134,
+        10760135,
+        10760136
+      ]
+    },
+    "310101": {
+      "evaluation": [
+        10873001,
+        10873002,
+        10873003,
+        10873004,
+        10873005,
+        10873006,
+        10873007,
+        10873008,
+        10873009,
+        10873010,
+        10873011,
+        10873012,
+        10873013,
+        10873014,
+        10873015,
+        10873016
+      ],
+      "reconstruction": [
+        10770129,
+        10770130,
+        10770131,
+        10770132,
+        10770133,
+        10770134,
+        10770135,
+        10770136
+      ]
+    }
+  },
+  "source_revision": "509b78e8ab6272ca7220c76394743454f8f9e825",
+  "source_run": "pointmaze_critic_clock_stage42_v1_full_20260928_r1",
+  "total_method_steps": 1843200
+}
