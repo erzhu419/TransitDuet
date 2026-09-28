@@ -1625,8 +1625,13 @@ concatenation, value loss and diagnostics. Native audits verify current-option
 age after renewal, unchanged actor inputs and paired first-learning transitions.
 Both reward pairs and frozen remain; eight deterministic return effects with
 Bonferroni8, fresh streams and no selection/exclusion/extension. Full40 cells:
-20064000 method steps plus624000 verification steps. Tests and native preflight
-are pending; there is no utility claim. Reused roots are conditional development.
+20064000 method steps plus624000 verification steps. All109 shared-core and
+focused regression tests pass on scheduler `t103608` (210.936s), including
+critic-only optimizer input, zero-column inheritance, original gate weights,
+renewal clock reset and native-style paired replay against a mocked environment.
+This is not native MuJoCo qualification. Implementation `d90a461511`; full
+matrix freeze `34c7feb8f1` precedes native outcomes. Native preflight is pending;
+there is no utility claim. Reused roots are conditional development.
 
 ### legacy_c1_c9_matrix_snapshot
 
