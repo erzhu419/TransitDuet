@@ -44,5 +44,10 @@ node001-node006 pool, 8 rollout workers + 1 learner per task, 12 GiB RAM.
 Only source directories are staged. Existing results/weights are read in
 place on the shared server; pull only compact JSON, not raw NPZ/checkpoints.
 
+## Scope
+
 This is conditional algorithm-development evidence. Earlier failed gates
 remain failed; a positive result requires independent confirmation next.
+Planning-call savings do not establish total compute savings. Gate inference
+counts and per-episode timings are recorded alongside upper/lower inference;
+this protocol does not make a wall-clock speedup claim.

@@ -1371,6 +1371,34 @@ locally; all full JSON, arrays and weights remain remote. Next address learned
 plan validity and renewal frequency in the native training/control loop,
 retaining fixed50 as a primary comparator rather than coarsening its cadence.
 
+### stage35_joint_renewal_development
+
+The [Stage-35 protocol](freq_hrl_stage35_joint_renewal_protocol_2026-09-28.md)
+jointly trains proposal-free renewal and upper/lower using native SMDP PPO,
+with equal-budget learned-current, fixed50 and fixed100 controls. Separate
+preflight `t102117`-`t102120` passes native trajectory/accounting audits,
+selected-checkpoint replay and nonzero actor/critic updates; 19 tests pass.
+Method cost 13200 steps/243 upper calls/194 gate calls; verification 1200
+steps/33 upper calls/22 gate calls. Implementation `e9575c0170` is frozen.
+Full `t102121`-`t102152` registers eight roots/four methods/42124800 steps.
+All five adjusted CI lower bounds must be positive, including reward, ISE
+and actual planning-call savings versus equally trained fixed50. Gate cost
+is also recorded; no total-compute speedup claim. This is development on
+reused Stage-33 roots, not independent confirmation.
+The [full result](freq_hrl_stage35_joint_renewal_result_2026-09-28.md) completes
+all 32 cells/1024 evaluation episodes. All trajectory audits, selected-policy
+replays and independent root-count intervals match. Joint gate fails: only
+utility versus fixed100 is supported. Versus fixed50, return change is -10.42
+[-33.23,12.30]; ISE reduction -0.34426 [-0.68428,-0.04264]; call savings -4.9375
+[-8.8502,-1.2109]. ISE and calls worsen. All 16 learned treatments select
+iteration0, so this is not successful learned-policy validation. Training
+reduces history selection calls but degrades return by 68.18 points at128.
+Method cost 42124800 steps/752124 upper calls/712946 gate calls; verification
+38400 steps/634 upper calls/636 gate calls. Twenty-one tests pass; compressed
+arrays are now read once per episode. Future runs retain final and selected
+weights for isolating gate credit from controller adaptation; do not add
+seeds or retune thresholds to reclassify this failed experiment.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

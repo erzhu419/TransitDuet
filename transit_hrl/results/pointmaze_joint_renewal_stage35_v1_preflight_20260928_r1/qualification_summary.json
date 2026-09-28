@@ -1,0 +1,149 @@
+{
+  "audits": [
+    {
+      "candidate_preview_calls": 0,
+      "checks": "native_metrics_causal_gate_execution_and_call_accounting",
+      "episodes": 2,
+      "method": "learned_history",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "candidate_preview_calls": 0,
+      "checks": "native_metrics_causal_gate_execution_and_call_accounting",
+      "episodes": 2,
+      "method": "learned_current",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "candidate_preview_calls": 0,
+      "checks": "native_metrics_causal_gate_execution_and_call_accounting",
+      "episodes": 2,
+      "method": "fixed50",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "candidate_preview_calls": 0,
+      "checks": "native_metrics_causal_gate_execution_and_call_accounting",
+      "episodes": 2,
+      "method": "fixed100",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "method_cost": {
+    "gate_inference_calls": 194,
+    "lower_inference_calls": 13200,
+    "primitive_steps": 13200,
+    "upper_inference_calls": 243
+  },
+  "protocol": "pointmaze_joint_renewal_stage35_v1",
+  "run_name": "pointmaze_joint_renewal_stage35_v1_preflight_20260928_r1",
+  "selection": [
+    {
+      "iteration": 1,
+      "method": "learned_history",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "promotion_actor_optimizer_steps": 8,
+        "promotion_advantage_optimizer_steps": 0,
+        "promotion_cost_value_optimizer_steps": 0,
+        "promotion_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001,
+      "trained_parameter_change_norms": {
+        "lower_actor": 0.3640182685487617,
+        "lower_value": 0.2852994577127864,
+        "promotion_actor": 0.4058867078970615,
+        "promotion_value": 0.45095488293239766,
+        "upper_actor": 0.40174909502412637,
+        "upper_value": 0.4419570713679776
+      }
+    },
+    {
+      "iteration": 1,
+      "method": "learned_current",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "promotion_actor_optimizer_steps": 8,
+        "promotion_advantage_optimizer_steps": 0,
+        "promotion_cost_value_optimizer_steps": 0,
+        "promotion_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001,
+      "trained_parameter_change_norms": {
+        "lower_actor": 0.3640182685487617,
+        "lower_value": 0.2852994577127864,
+        "promotion_actor": 0.37119990039752276,
+        "promotion_value": 0.415790868163331,
+        "upper_actor": 0.40174909502412637,
+        "upper_value": 0.4419570713679776
+      }
+    },
+    {
+      "iteration": 1,
+      "method": "fixed50",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001,
+      "trained_parameter_change_norms": {
+        "lower_actor": 0.39653481756722914,
+        "lower_value": 0.283424496011764,
+        "upper_actor": 0.3754989467245491,
+        "upper_value": 0.4338853085588536
+      }
+    },
+    {
+      "iteration": 1,
+      "method": "fixed100",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8,
+        "upper_actor_optimizer_steps": 8,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 8
+      },
+      "root": 310001,
+      "trained_parameter_change_norms": {
+        "lower_actor": 0.38804926468133666,
+        "lower_value": 0.2704260966397289,
+        "upper_actor": 0.3521182547823014,
+        "upper_value": 0.41340575003917723
+      }
+    }
+  ],
+  "status": "preflight_passed",
+  "verification_cost": {
+    "gate_inference_calls": 22,
+    "lower_inference_calls": 1200,
+    "primitive_steps": 1200,
+    "upper_inference_calls": 33
+  }
+}

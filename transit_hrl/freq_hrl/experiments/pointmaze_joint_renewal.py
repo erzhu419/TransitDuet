@@ -230,6 +230,8 @@ def train(root, method, *, preflight, output):
         trained_weights = inference_weights(model)
         trained_changes = {name: float(np.sqrt(sum(float(torch.sum((weights[key] - initial_weights[name][key]) ** 2))
                                                  for key in weights))) for name, weights in trained_weights.items()}
+        torch.save({"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "method": method,
+                    "iteration": opt["iterations"], "state_dict": model.state_dict()}, raw / "final.pt")
         selected = torch.load(raw / "selected.pt", map_location="cpu", weights_only=False)
         model.load_state_dict(selected["state_dict"])
         final_weights = inference_weights(model)
@@ -246,6 +248,7 @@ def train(root, method, *, preflight, output):
               "budget": spec.budget(preflight=preflight), "inference_counts": totals,
               "source_selected_iteration": source_cell["selected_checkpoint_iteration"], "source_replay": replay,
               "checkpoint": str(raw / "selected.pt"), "selected_iteration": best_iteration,
+              "final_checkpoint": str(raw / "final.pt"),
               "selection_history": history, "optimizer_steps": updates,
               "trained_parameter_change_norms": trained_changes,
               "selected_parameter_change_norms": changes,
@@ -287,7 +290,8 @@ def audit_result(result, *, raw_path):
         raise ValueError("joint-renewal evaluation roster incomplete")
     for row in rows:
         seed = row["seed"]
-        with np.load(Path(raw_path) / f"episode_{seed}.npz") as trace:
+        with np.load(Path(raw_path) / f"episode_{seed}.npz") as archive:
+            trace = {key: archive[key] for key in archive.files}
             steps = np.asarray(row["decision_steps"])
             np.testing.assert_array_equal(trace["decision_steps"], steps)
             if steps[0] != 0 or len(np.unique(steps)) != len(steps):

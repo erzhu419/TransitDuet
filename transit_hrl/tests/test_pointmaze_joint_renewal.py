@@ -49,9 +49,9 @@ class JointRenewalTest(unittest.TestCase):
     def setUpClass(cls):
         torch.set_num_threads(1)
 
-    def fake_rollout(self, model, method, *, sample=False, future_shift=0.):
+    def fake_rollout(self, model, method, *, sample=False, future_shift=0., horizon=200):
         args = spec.source.arguments(310001, preflight=True)
-        args.horizon = 200
+        args.horizon = horizon
         with patch.object(joint, "_make_task", return_value=DenseTask(future_shift)), patch.object(
                 joint, "pointmaze_goal_bounds", return_value=(np.full(2, -2.), np.full(2, 2.))):
             return joint.rollout(model, args, method, seed=1, sample=sample, capture=True)
@@ -162,6 +162,82 @@ class JointRenewalTest(unittest.TestCase):
             self.assertEqual(task["stage_input_paths"], [str(spec.ROOT / "scripts"), str(spec.ROOT / "freq_hrl")])
             self.assertFalse(any("/results/" in path for path in task["stage_input_paths"]))
 
+    def test_auditor_reads_each_compressed_array_only_once(self):
+        root, method = 310001, "fixed100"
+        roles, budget = spec.seed_roles(root, preflight=True), spec.budget(preflight=True)
+        horizon = spec.source.arguments(root, preflight=True).horizon
+        _, row, raw = self.fake_rollout(CountedController(), method, horizon=horizon)
+        rows = [{**row, "seed": seed} for seed in roles["evaluation"]]
+        result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(),
+                  "root": root, "method": method, "preflight": True, "options": spec.options(preflight=True),
+                  "seed_roles": roles, "budget": budget, "evaluation_rows": rows,
+                  "optimizer_steps": {"upper_actor_optimizer_steps": 1, "lower_actor_optimizer_steps": 1},
+                  "trained_parameter_change_norms": {"upper_actor": 1., "lower_actor": 1.},
+                  "selection_history": [{"iteration": i, "utility": i, "ise": 1.} for i in (0, 1, 2)], "selected_iteration": 2,
+                  "inference_counts": {phase: {"lower_inference_calls": budget[field]}
+                                       for phase, field in (("train", "training_primitive_steps"), ("selection", "selection_primitive_steps"),
+                                                            ("eval", "evaluation_primitive_steps"), ("factual_replay", "factual_replay_primitive_steps"))}}
+        with tempfile.TemporaryDirectory() as directory:
+            for seed in roles["evaluation"]:
+                np.savez_compressed(Path(directory) / f"episode_{seed}.npz", **raw)
+            with np.load(Path(directory) / f"episode_{roles['evaluation'][0]}.npz") as archive:
+                archive_type = type(archive)
+            original = archive_type.__getitem__
+            reads = Counter()
+
+            def counted(archive, key):
+                reads[key] += 1
+                return original(archive, key)
+
+            with patch.object(archive_type, "__getitem__", counted):
+                audit = joint.audit_result(result, raw_path=directory)
+        self.assertEqual(audit["status"], "passed")
+        self.assertEqual(dict(reads), {key: len(rows) for key in raw})
+
+    def test_final_weights_survive_selection_of_initial_checkpoint(self):
+        args = spec.source.arguments(310001, preflight=True)
+        dim = 6 + joint.scale_for(args).history_steps * 6
+        source = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=dim, lower_state_dim=dim, upper_action_dim=2, lower_action_dim=2,
+            hidden_dim=16, lower_cost_critic=False, upper_learning_rate=3e-4, lower_learning_rate=3e-4))
+
+        class ImmediatePool:
+            def __init__(self, *, initializer, initargs, **kwargs):
+                initializer(*initargs)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                pass
+
+            def map(self, function, jobs):
+                return map(function, jobs)
+
+        original = joint.worker_rollout
+        selections = []
+
+        def select_initial(job):
+            batch, row = original(job)
+            if not job[2] and job[3] is None:
+                selections.append(row)
+                row["charged_utility"] = 1000. - len(selections)
+            return batch, row
+
+        cell = {"selected_checkpoint_iteration": 0, "factual_row": {"decision_steps": list(range(0, args.horizon, 50))}}
+        with tempfile.TemporaryDirectory() as directory, patch.object(joint, "load_controller", return_value=(source, cell, {})), \
+                patch.object(joint, "ProcessPoolExecutor", ImmediatePool), patch.object(joint, "worker_rollout", select_initial), \
+                patch.object(joint, "_make_task", side_effect=lambda **kwargs: DenseTask()), \
+                patch.object(joint, "pointmaze_goal_bounds", return_value=(np.full(2, -2.), np.full(2, 2.))):
+            result = joint.train(310001, "learned_history", preflight=True, output=Path(directory) / "cell" / "result.json")
+            selected = torch.load(result["checkpoint"], map_location="cpu", weights_only=False)
+            final = torch.load(result["final_checkpoint"], map_location="cpu", weights_only=False)
+            self.assertEqual(selected["iteration"], 0)
+            self.assertEqual(final["iteration"], 2)
+            for level in ("upper_actor", "lower_actor", "promotion_actor"):
+                self.assertTrue(any(not torch.equal(value, final["state_dict"][level][key])
+                                    for key, value in selected["state_dict"][level].items()))
+
     def test_joint_gate_preserves_performance_and_capacity_control_failures(self):
         def cells(return_gain, current_gain=0.):
             results = []
@@ -187,3 +263,6 @@ class JointRenewalTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+from collections import Counter
+from pathlib import Path
+import tempfile

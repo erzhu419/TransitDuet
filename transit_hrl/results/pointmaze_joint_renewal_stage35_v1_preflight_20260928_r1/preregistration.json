@@ -1,0 +1,107 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_cell": {
+    "evaluation_primitive_steps": 600,
+    "factual_replay_primitive_steps": 300,
+    "selection_primitive_steps": 1800,
+    "total_primitive_steps": 3300,
+    "training_primitive_steps": 600
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      35,
+      35039
+    ],
+    "candidate_previews": 0,
+    "checkpoint_candidates": "initial_and_every_32_iterations_full_or_every_iteration_preflight",
+    "checkpoint_selection": "maximum_selection_return_minus_call_cost_then_minimum_ise",
+    "current_control": "repeat_current_measurement_to_same_history_width_gate_only",
+    "evidence_role": "conditional_joint_training_development_not_independent_confirmation",
+    "familywise_alpha": 0.05,
+    "gate": "all_5_adjusted_lower_bounds_strictly_positive",
+    "gate_check_steps": 25,
+    "gate_input": "causal_physical_target_error_measurement_history_waypoint_error_age_remaining_time",
+    "initialization": "same_stage33_weights_per_root_fresh_optimizers",
+    "interval": "two_sided_percentile_bonferroni_5_endpoints",
+    "lower_feedback": "every_primitive_step",
+    "lower_reward": "unchanged_goal_conditioned_intrinsic_reward",
+    "max_plan_age_steps": 100,
+    "methods": [
+      "learned_history",
+      "learned_current",
+      "fixed50",
+      "fixed100"
+    ],
+    "primary_endpoints": [
+      "return:fixed50",
+      "ise:fixed50",
+      "calls:fixed50",
+      "utility:fixed100",
+      "utility:learned_current"
+    ],
+    "root_exclusion": "forbidden",
+    "root_weighting": "equal",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_root_response_stage33_v1_qualification",
+    "statistical_unit": "optimizer_seed_root",
+    "training": "joint_on_policy_upper_lower_and_renewal_smdp_ppo",
+    "upper_and_gate_reward": "native_dense_reward_minus_actual_call_cost",
+    "upper_call_cost_in_reward_units": 1.0
+  },
+  "methods": [
+    "learned_history",
+    "learned_current",
+    "fixed50",
+    "fixed100"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "call_cost": 1.0,
+    "check_steps": 25,
+    "evaluation_paths": 2,
+    "iterations": 2,
+    "max_age_steps": 100,
+    "rollouts_per_iteration": 1,
+    "selection_interval": 1,
+    "selection_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_joint_renewal_stage35_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        6393001,
+        6393002
+      ],
+      "selection": [
+        6392001,
+        6392002
+      ],
+      "training": [
+        6390001,
+        6390002
+      ]
+    }
+  },
+  "source_revision": "e9575c0170fec8ff178aa7905bf5006a0eb8eaec"
+}
