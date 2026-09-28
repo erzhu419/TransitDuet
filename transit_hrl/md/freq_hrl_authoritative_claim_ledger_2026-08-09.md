@@ -1574,8 +1574,20 @@ actual sampling, coupled lower noise, paired transitions and native-style replay
 accounting against a mocked environment. This is not native MuJoCo qualification.
 Fresh streams, eight registered deterministic return effects, Bonferroni8,
 no selection/exclusion/extension. Full40 cells:20064000 method steps plus624000
-verification steps. Conditional development on reused roots. Native preflight
-and full matrix are not yet qualified or launched; no utility claim.
+verification steps. Implementation `e72fe5e468`; full freeze `1543cb8c9d`
+precedes native preflight outcomes. Preflight `t102588`-`t102592`: all five
+originals/80 evaluation episodes complete without duplicate children. Five
+trajectory audits,40 native snapshot/mode replays,15 probe/warmup/learning
+credit replays and both warmup/first-learning pair comparisons pass. Initial
+and warmup deployment outcomes remain exactly equal to frozen. First native
+learning states/actions/rewards/durations/done/logp match within each reward
+pair, while critic parameter distances are0.26053 intrinsic/0.10298 task and
+old-value RMSE0.02691/0.02910. Method33000 steps/465 upper/977 gate calls;
+verification16500 steps/249 upper/520 gate calls. Learned actor steps8 each,
+critic steps16 each; frozen0. See the
+[compact qualification](../results/pointmaze_warmup_alignment_stage41_v1_preflight_20260928_r1/qualification_summary.json).
+This qualifies execution, not utility. Full matrix is not yet launched;
+conditional development on reused roots, no performance claim or arm selection.
 
 ### legacy_c1_c9_matrix_snapshot
 

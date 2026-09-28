@@ -1,0 +1,143 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_cell": {
+    "evaluation_primitive_steps": 4800,
+    "factual_replay_primitive_steps": 300,
+    "probe_primitive_steps": 300,
+    "total_primitive_steps": 6600,
+    "training_primitive_steps": 1200
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      41,
+      41041
+    ],
+    "checkpoint_selection": "none_all_registered_snapshots_retained",
+    "controller_source": "same_stage33_controller_and_stage35_initial_gate_as_stage38",
+    "critic_error": "fixed_probe_discounted_monte_carlo_returns_respecting_option_cuts",
+    "critic_initialization": "inherited_then_sixteen_iteration_critic_only_warmup_no_reset_or_rescale",
+    "decision": "critic_warmup_distribution_diagnosis_not_algorithm_superiority",
+    "deployment_modes": [
+      "deterministic",
+      "lower_sampled"
+    ],
+    "deployment_upper_and_gate": "deterministic_in_both_modes",
+    "evaluation_policy_seed": "numpy_seedsequence_41_root_environment_seed_41017",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "first_learning_pair": "native_state_action_reward_duration_done_logp_equal_old_value_may_differ",
+    "frozen_levels": "upper_and_gate_actor_and_critic_always_frozen",
+    "gate_sampling_seed": "numpy_seedsequence_41_root_environment_seed_41029_plus_gate_step",
+    "interval": "two_sided_percentile_bonferroni_8_endpoints",
+    "learning": "equal_lower_actor_and_critic_updates_after_warmup",
+    "learning_execution": {
+      "frozen": "deterministic_upper_gate",
+      "intrinsic_aligned": "deterministic_upper_gate",
+      "intrinsic_sampled": "deterministic_upper_gate",
+      "task_aligned": "deterministic_upper_gate",
+      "task_sampled": "deterministic_upper_gate"
+    },
+    "lower_credit": {
+      "frozen": "intrinsic_option",
+      "intrinsic_aligned": "intrinsic_option",
+      "intrinsic_sampled": "intrinsic_option",
+      "task_aligned": "task_option",
+      "task_sampled": "task_option"
+    },
+    "lower_sampling_seed": "numpy_seedsequence_41_root_environment_seed_41019_plus_primitive_step",
+    "method_suffix": "sampled_or_aligned_describes_warmup_only_not_learning_execution",
+    "methods": [
+      "frozen",
+      "intrinsic_sampled",
+      "intrinsic_aligned",
+      "task_sampled",
+      "task_aligned"
+    ],
+    "policy_drift": "exact_gaussian_kl_and_squashed_mean_action_change_on_fixed_probe_and_update_batch",
+    "ppo": "unchanged_shared_update_level_with_existing_actor_updates_enabled_argument",
+    "primary_cohort": "final_and_first_update_deterministic",
+    "primary_endpoints": [
+      "intrinsic_sampled:frozen:final_return",
+      "intrinsic_aligned:frozen:final_return",
+      "task_sampled:frozen:final_return",
+      "task_aligned:frozen:final_return",
+      "intrinsic:warmup_alignment:final_return",
+      "task:warmup_alignment:final_return",
+      "intrinsic:warmup_alignment:first_update_return",
+      "task:warmup_alignment:first_update_return"
+    ],
+    "probe": "one_disjoint_initial_stochastic_episode_never_used_for_updates",
+    "root_exclusion": "forbidden",
+    "sequential_extension": "forbidden",
+    "shuffle_seed": "numpy_seedsequence_41_root_global_iteration",
+    "statistical_unit": "equal_weight_optimizer_root_means_after_path_averaging",
+    "training_policy_seed": "environment_seed_plus_optimizer_root",
+    "training_sampling": "lower_always_sampled_upper_and_gate_deterministic_in_all_learning_arms",
+    "warmup": "critic_only_sampled_or_deterministic_upper_gate_lower_always_sampled",
+    "warmup_pair": "actors_and_frozen_values_identical_lower_critic_and_its_adam_may_differ"
+  },
+  "methods": [
+    "frozen",
+    "intrinsic_sampled",
+    "intrinsic_aligned",
+    "task_sampled",
+    "task_aligned"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 1,
+    "warmup_iterations": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_warmup_alignment_stage41_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        10593001,
+        10593002
+      ],
+      "probe": [
+        10592001
+      ],
+      "training": [
+        10590001,
+        10590002,
+        10590003,
+        10590004
+      ]
+    }
+  },
+  "snapshots": [
+    0,
+    2,
+    3,
+    4
+  ],
+  "source_revision": "1543cb8c9d626581886343be32162c56908f401c",
+  "total_method_steps": 33000,
+  "verification_budget": {
+    "native_episodes_per_cell": 11,
+    "total_primitive_steps": 16500
+  }
+}
