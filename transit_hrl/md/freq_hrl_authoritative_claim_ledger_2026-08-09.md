@@ -1806,6 +1806,12 @@ Explicit tests-directory staging in `t104097` passes the corrected test in1.472s
 on node006. Combined65 checks include shared PPO, exact default/explicit GAE,
 unchanged critic/Adam, delayed task score and native-style pipeline. Scientific
 controls/seeds/budgets are unchanged; this is readiness, not utility evidence.
+Native preflight `t104102` on node004 completes at exit0 in26.479s; offline
+`t104103` qualifies52 trajectory audits, exact paired batches/task rewards and
+first critic/Adam equality. Method15600 steps/282 upper/494 gate calls,32 actor/
+32 critic steps,zero extra native verification. Only the7.6KB
+[preflight summary](../results/pointmaze_episode_credit_stage46_v1_preflight_20260929_r1/qualification_summary.json)
+is local; no estimator, threshold or frozen matrix change follows preflight.
 
 ### legacy_c1_c9_matrix_snapshot
 
