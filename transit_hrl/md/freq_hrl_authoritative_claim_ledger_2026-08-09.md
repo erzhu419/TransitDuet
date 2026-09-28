@@ -1238,6 +1238,17 @@ Independent server-side recomputation matched causal inputs, plans, labels,
 designs, metrics and 1330 new steps/four candidate proposals. Prediction and
 decision gates both failed; all methods renewed both queries. Preserve this
 result. Full tasks `t101745/101746` use the unchanged frozen configuration.
+Both full tasks completed on node006/node005. The
+[Stage-31 result](freq_hrl_stage31_forecast_response_result_2026-09-28.md) passes
+both decision-mean gates against all eight controls, but fails prediction
+and joint qualification. History settled-rate MSE loses to shuffled on root
+209011 and lag-one on root 209061; four root-209061 decision intervals cross
+zero. Independent server-side recomputation matches prefixes, candidate plans,
+labels, designs, predictions, metrics and all 347900 new steps/860 proposal
+calls. No model/controller updates or reconstruction occurred. Retain this
+positive local decision evidence and the failed joint gate. Next address
+plan-response approximation before new-root qualification; no episode reward
+or planning-cost claim follows. All views share a history-aware candidate.
 
 ### legacy_c1_c9_matrix_snapshot
 

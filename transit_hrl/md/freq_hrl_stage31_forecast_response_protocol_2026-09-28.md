@@ -43,6 +43,9 @@ plans, response designs, labels, metrics and budgets: 1330 new steps and four
 candidate proposals. Both scientific gates failed; all methods renewed both
 queries. Preserve this negative result. Full tasks `t101745/101746` retain the
 same revision and frozen settings, with no node pinning or parameter changes.
+Full tasks completed on node006/node005. Both decision-mean gates pass;
+prediction and joint gates fail. The [result](freq_hrl_stage31_forecast_response_result_2026-09-28.md)
+retains all controls, descriptive intervals and independently matched budgets.
 
 ## Limitations
 
