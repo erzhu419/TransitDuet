@@ -1586,8 +1586,15 @@ old-value RMSE0.02691/0.02910. Method33000 steps/465 upper/977 gate calls;
 verification16500 steps/249 upper/520 gate calls. Learned actor steps8 each,
 critic steps16 each; frozen0. See the
 [compact qualification](../results/pointmaze_warmup_alignment_stage41_v1_preflight_20260928_r1/qualification_summary.json).
-This qualifies execution, not utility. Full matrix is not yet launched;
-conditional development on reused roots, no performance claim or arm selection.
+This qualifies execution, not utility. Full `t102593`-`t102632` is registered;
+dispatch inventory confirms all40 originals running without duplicate children.
+Placement: node001=8,node002=3,node003=3,node004=9,node005=8,node006=9;
+cpu9/ram12GiB per task, dynamic placement without node binding. One SSH handshake
+failed before execution; scheduler retried the original `t102610` from node005
+to node004 without extra training. Registration matches the pre-outcome frozen
+matrix exactly except its Git source revision after documentation commits.
+Full performance readout is pending; conditional development on reused roots,
+no preflight outcome selects an arm or changes controls/seeds/budgets.
 
 ### legacy_c1_c9_matrix_snapshot
 
