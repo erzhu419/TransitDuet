@@ -1771,6 +1771,22 @@ steps. No threshold tuning follows this short no-rejection preflight. Only11KB
 [preflight qualification](../results/pointmaze_actor_acceptance_stage45_v1_preflight_20260929_r1/qualification_summary.json)
 is local; all raw data/weights remain remote, zero extra native verification.
 
+Full `t104074`-`t104081`:eight originals complete at exit0,474-487s/root,
+dynamically node001/004/005/006. Offline `t104086` passes paired batches,
+rollback/accounting and independent16-endpoint statistics. Zero positive,
+one negative,fifteen inconclusive. Accepted-minus-vanilla final effects all
+cross0; accepted intrinsic-sham minus frozen is-5.26214[-8.76267,-1.11608].
+Accepted treatment rejects133/512 updates; both treatments execute40960 actor/
+40960 critic steps and retain35640 actor steps. Rejection is not a cost saving.
+Method15052800 steps/370484 upper/528557 gate calls,12544 offline native trace
+audits,zero extra environment verification. See the
+[full result](freq_hrl_stage45_actor_acceptance_result_2026-09-29.md) and
+[71KB qualification](../results/pointmaze_actor_acceptance_stage45_v1_full_20260929_r1/qualification_summary.json).
+Training objective fidelity is enforced, not a demonstrated native learner
+repair/noninferiority. Keep the intervention experimental. Next isolate
+full-episode task credit versus original GAE; Stage38 reward/option-cut switching
+alone did not repair utility. No tuning, seed extension or new training follows.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
