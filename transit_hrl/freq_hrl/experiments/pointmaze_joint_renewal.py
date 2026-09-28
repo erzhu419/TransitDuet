@@ -288,6 +288,13 @@ def audit_result(result, *, raw_path):
     rows = result["evaluation_rows"]
     if [row["seed"] for row in rows] != result["seed_roles"]["evaluation"]:
         raise ValueError("joint-renewal evaluation roster incomplete")
+    audit_trajectories(rows, args=args, method=method, raw_path=raw_path)
+    return {"status": "passed", "root": root, "method": method, "episodes": len(rows),
+            "candidate_preview_calls": 0, "checks": "native_metrics_causal_gate_execution_and_call_accounting"}
+
+
+def audit_trajectories(rows, *, args, method, raw_path):
+    """Validate executed renewal trajectories shared by the training ablations."""
     for row in rows:
         seed = row["seed"]
         with np.load(Path(raw_path) / f"episode_{seed}.npz") as archive:
@@ -340,8 +347,6 @@ def audit_result(result, *, raw_path):
                     last = step
                 else:
                     np.testing.assert_array_equal(trace["subgoal"][step], trace["subgoal"][step - 1])
-    return {"status": "passed", "root": root, "method": method, "episodes": len(rows),
-            "candidate_preview_calls": 0, "checks": "native_metrics_causal_gate_execution_and_call_accounting"}
 
 
 def aggregate(results):
