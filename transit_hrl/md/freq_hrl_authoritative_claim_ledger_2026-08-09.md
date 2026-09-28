@@ -1642,9 +1642,30 @@ learn nonzero values; sham/frozen clock columns remain zero at every snapshot.
 Method33000 steps/741 upper/1011 gate calls; verification16500 steps/247 upper/
 504 gate calls. Learned actor steps8 and critic steps16 per arm; frozen0.
 See the [compact native qualification](../results/pointmaze_critic_clock_stage42_v1_preflight_20260928_r1/qualification_summary.json).
-This qualifies execution, not utility. Full dispatch is pending; reused roots
-are conditional development and no preflight outcome selects or modifies arms,
-controls, seeds or budgets.
+This qualifies execution, not utility. Full `t103621`-`t103660`: all40 originals/
+6400 evaluation episodes complete across node001-node006 without node binding
+or duplicate children. Two launch-only SSH retries add no training. Full audit
+`t103686` exits zero:40 trajectory audits,400 snapshot/mode replays,120 credit
+replays,16 paired comparisons and independent eight-endpoint bootstrap pass.
+Initial/warmup actor outcomes equal frozen; first-learning native transitions
+match within reward pairs. Clock columns learn nonzero weights, sham/frozen0.
+Intrinsic-sham vs frozen final:-4.8028,CI[-10.0412,-1.0695]; task-sham:-3.9735,
+CI[-7.1095,-0.9667]. These two effects are negative; the other six are
+inconclusive. Final clock-minus-sham:intrinsic+0.2719,CI[-3.4446,4.8891];
+task+1.9403,CI[-2.0183,7.0067]. Clock-only repair is not established. All four
+learned final means are below frozen in both deterministic/lower-sampled modes.
+Each learned arm5120 actor/10240 critic steps; frozen0. Method20064000 steps/
+486219 upper/699749 gate calls; verification624000 steps/15234 upper/21953 gate
+calls. See the [result](freq_hrl_stage42_critic_clock_result_2026-09-28.md) and
+[full compact qualification](../results/pointmaze_critic_clock_stage42_v1_full_20260928_r1/qualification_summary.json).
+Only small summaries are local; raw data/weights remain remote. Existing
+terminal handling closes deferred zero-exit records without rerunning tasks.
+Dispatch updates only the source revision after documentation commits; the
+pre-outcome controls, seeds and budgets remain frozen. Reused roots support
+conditional development; sampled means are descriptive and no noninferiority
+endpoint was registered. Next diagnose first-update PPO/GAE surrogate direction
+versus paired held-out task return. This is an open question, not a cause.
+No new training, seed extension, arm selection or post-outcome tuning launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
