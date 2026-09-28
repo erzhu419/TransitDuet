@@ -1527,9 +1527,17 @@ its per-step noise is coupled across arms. Both intrinsic/task reward pairs
 and frozen reference are retained, without checkpoint selection or PPO changes.
 All46 focused unit/regression tests pass, including actual sampling, lower
 noise coupling, paired warmup weights/Adam state and native replay accounting.
-Full freeze:40 cells/eight reused roots,20064000 method steps plus624000
-verification steps, eight adjusted return endpoints. Native preflight and
-full performance readout are pending; unit tests do not establish utility.
+Source `aa3813f47c`; full matrix freeze `983d525bcc` precedes native preflight
+outcomes. Native preflight `t102455`-`t102459` completes all five cells/80
+evaluation episodes, exit0 without duplicate children. Five trajectory audits,
+40 native snapshot/mode replays,15 probe/warmup/first-learning credit replays
+and both paired warmup weights/Adam state comparisons pass. Method33000
+steps/809 upper/1059 gate calls; verification16500 steps/230 upper/515 gate
+calls. Learned actor steps8 each, critic steps16 each; frozen0. This qualifies
+execution, not utility. Full freeze:40 cells/eight reused roots,20064000
+method steps plus624000 verification steps, eight adjusted return endpoints.
+Full performance readout is pending; no preflight outcome selects an arm or
+changes the registered protocol.
 
 ### legacy_c1_c9_matrix_snapshot
 
