@@ -1261,6 +1261,17 @@ Server-side recomputation matched causal inputs, plan proposals, held-path
 regression, centered kernels, predictions, metrics and 1330 new steps. Both
 scientific gates failed. Preserve this result; full `t101748/101749` use the
 unchanged settings. Verification solves are separate from method fit costs.
+Full tasks completed on node006/node005. The
+[Stage-32 result](freq_hrl_stage32_crossfit_response_result_2026-09-28.md) passes
+both gates only on 209061, so the primary qualification fails. Relative to
+unchanged linear history, kernel settled MSE worsens 4.58% on 209011 and
+improves 1.90% on 209061; decision benefit is -0.005574/+0.000586, with
+11/one changed decisions. Independent recomputation matches all 339600 new
+steps, 240 new/620 reused proposals and 252 method solves; 238 verification
+solves are additional. Retrospective original-linear-head scoring passes its
+old gates on the fresh paths, without relabeling Stage-31 or declaring a new
+primary win. Stop kernel correction; qualify the frozen original forecast
+response on new optimizer roots before deployment or reward claims.
 
 ### legacy_c1_c9_matrix_snapshot
 

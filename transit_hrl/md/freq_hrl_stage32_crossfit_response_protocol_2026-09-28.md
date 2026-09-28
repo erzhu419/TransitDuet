@@ -30,6 +30,9 @@ Dynamic node001-node006, 16 workers/17 CPU/24 GB; preflight 1/2 CPU/3 GB.
 Implementation `6ff7076cd4`: preflight `t101747` completed on node006;
 independent recomputation matched all 1330 steps, held-path fits and metrics.
 Both gates failed. Full `t101748/101749` retain the frozen configuration.
+Full tasks completed; [result](freq_hrl_stage32_crossfit_response_result_2026-09-28.md)
+passes both gates only on 209061. Overall primary qualification fails;
+retain the original linear head rather than promote the kernel correction.
 Limitations: reused optimizer roots and local paired decisions, not independent
 root confirmation, episode reward or planning-cost savings. Stage-9 stays the
 performance reference. Next-root confirmation follows only after qualification.
