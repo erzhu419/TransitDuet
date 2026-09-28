@@ -1301,6 +1301,19 @@ and ranks. Its real-trainer regression test now passes; future exports retain
 those fields. Existing controllers and historical results remain unchanged,
 and no training-improvement claim is derived from missing historical scores.
 Thirty-five focused tests pass. Proceed with all eight frozen response roots.
+Response tasks `t101918`-`t101925` completed on the dynamic Linux pool.
+The [Stage-33 result](freq_hrl_stage33_new_root_response_result_2026-09-28.md)
+passes the pre-registered independent-root joint gate: all 15 adjusted
+root-bootstrap lower bounds are positive. History settled ISE benefit is
+0.03738 versus current-repeat, 0.03670 versus shuffled and 0.02124 versus
+lag-one; their adjusted intervals exclude zero. Mean settled-rate MSE is
+0.06103 versus lag-one 0.06889 (11.42% lower). Seven of eight pointwise root
+gates pass; root 310049's small lag-one loss remains included.
+All eight compute-node audits and an independent root-count bootstrap match.
+Method cost is 38796700 steps/3440 previews/80 solves; verification adds
+9600 steps/3440 previews/80 solves. Full response JSON, arrays and weights stay
+remote; only the compact summary is returned. This authorizes the next
+full-episode deployment test, not an episode-reward or planner-savings claim.
 
 ### legacy_c1_c9_matrix_snapshot
 
