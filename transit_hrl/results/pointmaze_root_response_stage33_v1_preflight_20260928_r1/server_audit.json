@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "task_id": "t101757",
+  "node": "node006",
+  "source_revision": "49d030f653214bb28bfdbadb8ce6a7e374754519",
+  "optimizer_seed": 310001,
+  "controller_selected_iteration": 0,
+  "factual_replay": {
+    "seed": 4390201,
+    "absolute_errors": {
+      "episode_return": 0,
+      "tracking_squared_error_integral": 0
+    }
+  },
+  "checked_fit_pairs": 2,
+  "checked_query_pairs": 2,
+  "checked_quantities": [
+    "exact frozen roles",
+    "causal exogenous prefixes",
+    "raw paired-cost curve labels",
+    "causal controller proposals",
+    "motion and response ridge fits",
+    "saved predictions",
+    "equal-call arm schedules",
+    "decision and error metrics",
+    "full primitive-step budget"
+  ],
+  "method_primitive_steps": 7480,
+  "method_linear_solves": 10,
+  "method_scalar_rhs": 125,
+  "method_proposal_calls": 4,
+  "verification_primitive_steps": 600,
+  "verification_proposal_calls": 4,
+  "verification_linear_solves": 10,
+  "verification_scalar_rhs": 125,
+  "verification_attempts": 2,
+  "verification_note": "The first attempt stopped after factual replay because the training history also contains the initial iteration -1. Correcting that audit expectation did not change experiment code or results.",
+  "scientific_prediction_gate": false,
+  "scientific_decision_gate": false,
+  "scientific_motion_gate": false,
+  "compact_artifact_bytes": 47524,
+  "weights_and_raw": "server_only"
+}

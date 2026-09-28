@@ -1,0 +1,183 @@
+{
+  "artifacts": {
+    "synced": [
+      "result.json",
+      "controller.json"
+    ],
+    "weights_and_raw": "server_only"
+  },
+  "budgets": {
+    "310001": {
+      "candidate_proposal_inference_calls": 4,
+      "controller_total_primitive_steps": 5100,
+      "diagnostic_primitive_steps": 3600,
+      "excluded_incomplete_fit_prefixes": 2,
+      "factual_replay_primitive_steps": 300,
+      "fit_pair_primitive_steps": 1050,
+      "fit_pairs": 2,
+      "motion_linear_solves": 3,
+      "qualification_total_primitive_steps": 2380,
+      "query_pair_primitive_steps": 1030,
+      "query_pairs": 2,
+      "response_linear_solves": 7,
+      "scalar_rhs_count": 125,
+      "selection_primitive_steps": 900,
+      "training_primitive_steps": 600
+    }
+  },
+  "controller_run": null,
+  "full_qualification_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "310001": {
+      "branch_fit": [
+        4390201,
+        4390211
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 1,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 300,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 1,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "motion_eval": [
+        4391101,
+        4391102
+      ],
+      "motion_fit": [
+        4391001,
+        4391002
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "response_eval": [
+        4392101,
+        4392102
+      ],
+      "response_fit": [
+        4392001,
+        4392002
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        4390101
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        4390011
+      ],
+      "trigger_eval": [
+        4390301,
+        4390307
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "phase": "pipeline",
+  "preflight": true,
+  "protocol": "pointmaze_root_response_stage33_v1_qualification",
+  "qualification": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      33,
+      33039
+    ],
+    "familywise_alpha": 0.05,
+    "gate": "all_15_simultaneous_lower_bounds_strictly_positive",
+    "interval": "two_sided_percentile_bonferroni_15_endpoints",
+    "kernel_correction": false,
+    "methods": [
+      "history",
+      "current_repeat",
+      "shuffled_history",
+      "lag1_extrapolation",
+      "zero_forecast",
+      "raw_history",
+      "raw_current"
+    ],
+    "policy_deployment": false,
+    "primary_endpoints": [
+      "ise:current_repeat",
+      "ise:shuffled_history",
+      "ise:lag1_extrapolation",
+      "ise:zero_forecast",
+      "ise:raw_history",
+      "ise:raw_current",
+      "ise:always_keep",
+      "ise:always_renew",
+      "mse:current_repeat",
+      "mse:shuffled_history",
+      "mse:lag1_extrapolation",
+      "mse:zero_forecast",
+      "mse:raw_history",
+      "mse:raw_current",
+      "mse:zero_value"
+    ],
+    "retain_all_roots_regardless_of_controller_or_motion_metrics": true,
+    "root_weighting": "equal",
+    "sequential_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "scheduler": {
+    "cpu_per_task": 2,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "49d030f653214bb28bfdbadb8ce6a7e374754519"
+}

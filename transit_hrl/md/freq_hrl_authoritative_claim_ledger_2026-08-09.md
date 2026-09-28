@@ -1281,6 +1281,13 @@ root-level endpoints require nominal Bonferroni-adjusted bootstrap lower
 bounds >0. Training and qualification have separate scheduler allocations.
 Thirty-two focused tests pass. Full scientific qualification is pending;
 the two-root development results and failed kernel experiment stay unchanged.
+Implementation `49d030f653`: preflight `t101757` completed on node006.
+Server-side recomputation matched causal prefixes, proposals, labels, ridge
+fits, predictions, equal-call schedules and all 7480 method primitive steps.
+Checkpoint factual replay errors were zero. Motion, prediction and decision
+point gates failed and remain retained; this is infrastructure evidence only.
+Verification used 600 additional steps, four proposals and ten linear solves.
+Only 47524 compact JSON bytes were pulled; all weights/raw remain remote.
 
 ### legacy_c1_c9_matrix_snapshot
 
