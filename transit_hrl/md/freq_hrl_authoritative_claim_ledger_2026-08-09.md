@@ -1813,6 +1813,22 @@ first critic/Adam equality. Method15600 steps/282 upper/494 gate calls,32 actor/
 [preflight summary](../results/pointmaze_episode_credit_stage46_v1_preflight_20260929_r1/qualification_summary.json)
 is local; no estimator, threshold or frozen matrix change follows preflight.
 
+Full `t104104`-`t104111`:eight originals exit0 in238-245s/root; dynamic
+node001/004/005/006. Offline `t104112` passes paired first data/critic updates,
+accounting and independent eight-endpoint bootstrap. All eight adjusted
+sampled-return effects are inconclusive. MC-minus-GAE final:task-sham+1.97747
+[-3.58147,8.54266],task-clock+1.08525[-5.04823,9.17061]. Both MC-minus-frozen
+effects+0.26808[-3.54884,3.96834]; MC deployment means match exactly across
+critic variants, not two independent successes. First GAE/MC normalized inner
+products-0.11812/-0.12953 are descriptive, not a causal utility diagnosis.
+Method7680000 steps/182092 upper/267012 gate calls,20480 actor/20480 critic
+steps,6400 offline audits,zero extra native verification. See the
+[result](freq_hrl_stage46_episode_credit_result_2026-09-29.md) and
+[45KB qualification](../results/pointmaze_episode_credit_stage46_v1_full_20260929_r1/qualification_summary.json).
+No supported learning repair/noninferiority. Next freeze a state-conditioned
+full-task baseline with episode-held-out fits, retaining GAE/LOO/frozen utility
+controls. No seed extension, selection, tuning or new training follows.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
