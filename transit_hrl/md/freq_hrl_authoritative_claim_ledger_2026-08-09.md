@@ -1764,6 +1764,12 @@ Implementation `7d3d6bda9c`; full pre-outcome registration `15cecfd33c`.
 Scheduler `t104071` on node006 passes18 focused tests in107.976s: actor and
 nonempty Adam rollback with critic retained, vanilla/good-update controls,
 exact first batches, original-update native-style pipeline and adjusted CIs.
+Native preflight `t104072` on node006 and aggregate `t104073` pass:84 offline
+trace audits, four exact first-batch pairs,25200 steps/446 upper/818 gate calls.
+All16 tentative updates accepted,64 actor steps executed and retained/64 critic
+steps. No threshold tuning follows this short no-rejection preflight. Only11KB
+[preflight qualification](../results/pointmaze_actor_acceptance_stage45_v1_preflight_20260929_r1/qualification_summary.json)
+is local; all raw data/weights remain remote, zero extra native verification.
 
 ### legacy_c1_c9_matrix_snapshot
 
