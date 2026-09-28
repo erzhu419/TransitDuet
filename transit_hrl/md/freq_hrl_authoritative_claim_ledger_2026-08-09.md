@@ -1721,6 +1721,10 @@ paths in both modes, 16 registered sampled-return endpoints, original eight
 roots, no scale selection/extension. Full3993600 native steps/3328 offline
 trace audits; preflight15600/52. Zero optimizer/extra verification steps.
 This is a finite-step diagnostic, not a learner repair or independent evidence.
+Implementation `9d1bf4b503`, full pre-outcome registration `2c47eb2f48`.
+Scheduler `t103802` on node004 passes23 focused regressions in149.561s:
+signed interpolation including log_std, exact endpoints/fixed-level controls,
+mock existing-checkpoint pipeline, paired sampling, bootstrap and accounting.
 
 ### legacy_c1_c9_matrix_snapshot
 
