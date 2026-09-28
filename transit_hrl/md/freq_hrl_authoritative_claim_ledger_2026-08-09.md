@@ -1630,8 +1630,21 @@ focused regression tests pass on scheduler `t103608` (210.936s), including
 critic-only optimizer input, zero-column inheritance, original gate weights,
 renewal clock reset and native-style paired replay against a mocked environment.
 This is not native MuJoCo qualification. Implementation `d90a461511`; full
-matrix freeze `34c7feb8f1` precedes native outcomes. Native preflight is pending;
-there is no utility claim. Reused roots are conditional development.
+matrix freeze `34c7feb8f1` precedes native outcomes. Preflight `t103609`-`t103613`:
+all five originals/80 evaluation episodes complete without duplicate children.
+Native audit `t103615`: five trajectory audits,40 snapshot/mode replays,15
+probe/warmup/learning credit replays and both paired comparisons pass. Actual
+renewal clocks match stored context and critic training inputs. Initial/warmup
+actor outcomes equal frozen; first native learning states/actions/rewards/
+durations/done/logp match within both reward pairs. Warmup critic distances
+are0.02889 intrinsic/0.03464 task; old-value RMSE0.000951/0.001383. Clock weights
+learn nonzero values; sham/frozen clock columns remain zero at every snapshot.
+Method33000 steps/741 upper/1011 gate calls; verification16500 steps/247 upper/
+504 gate calls. Learned actor steps8 and critic steps16 per arm; frozen0.
+See the [compact native qualification](../results/pointmaze_critic_clock_stage42_v1_preflight_20260928_r1/qualification_summary.json).
+This qualifies execution, not utility. Full dispatch is pending; reused roots
+are conditional development and no preflight outcome selects or modifies arms,
+controls, seeds or budgets.
 
 ### legacy_c1_c9_matrix_snapshot
 
