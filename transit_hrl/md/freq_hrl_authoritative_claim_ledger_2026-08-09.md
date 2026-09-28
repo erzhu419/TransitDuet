@@ -1731,6 +1731,23 @@ Aggregation `t103813` passes the full paired roster and accounting, zero
 optimizer/extra verification steps. Only the8KB
 [preflight qualification](../results/pointmaze_signed_microstep_stage44_v1_preflight_20260929_r1/qualification_summary.json)
 is local; source weights and raw traces stay remote.
+Full `t103815`-`t103822` all exit0, dynamic node001/004/005/006,99-101s/root.
+All3328 offline native trace audits pass. Aggregate `t103825` on node005 exits0;
+independent16-endpoint bootstrap passes. Task-sham full-minus-positive-micro
+is-1.00451,CI[-1.61020,-0.27475], negative; other15 endpoints inconclusive.
+All positive-micro versus zero and signed-slope intervals cross0, so the
+registered finite-step attenuation conjunction is not met. Relative full-step
+loss in one arm does not establish microstep utility, universal overshoot or
+an algorithm repair. Method3993600 steps/99113 upper/140230 gate calls; zero
+optimizer/extra environment verification steps. The
+[result](freq_hrl_stage44_signed_microstep_result_2026-09-29.md) and53KB
+[compact qualification](../results/pointmaze_signed_microstep_stage44_v1_full_20260929_r1/qualification_summary.json)
+retain all eight roots and16 endpoints; raw traces/weights stay remote. Dispatch
+source revision changes only documentation; controls/seeds/budgets match the
+pre-outcome registration exactly. Existing terminal handling closes delayed
+zero-exit records without reruns. Next freeze training-batch-only full actor
+objective acceptance/rollback and paired native utility; no post-outcome scale
+selection, seed extension or new training launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
