@@ -1749,6 +1749,18 @@ zero-exit records without reruns. Next freeze training-batch-only full actor
 objective acceptance/rollback and paired native utility; no post-outcome scale
 selection, seed extension or new training launched.
 
+### stage45_training_objective_actor_acceptance
+
+The [Stage-45 protocol](freq_hrl_stage45_actor_acceptance_protocol_2026-09-29.md)
+freezes vanilla versus training-batch-only acceptance for all four Stage-42
+methods, warmup checkpoint16, sixteen lower-learning iterations. Restore actor
+and Adam on original full-batch actor-objective decrease; critic updates stay.
+Upper/gate networks fixed, same paired first batches and fresh seeds. Sixteen
+sampled-return endpoints include frozen-before utility, no scale/seed selection.
+Full15052800 steps/12544 offline native trace audits; preflight25200/84.
+Executed versus retained actor steps stay separate; no extra native verification.
+This is a conditional optimizer intervention, not a demonstrated learner repair.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
