@@ -1760,6 +1760,10 @@ sampled-return endpoints include frozen-before utility, no scale/seed selection.
 Full15052800 steps/12544 offline native trace audits; preflight25200/84.
 Executed versus retained actor steps stay separate; no extra native verification.
 This is a conditional optimizer intervention, not a demonstrated learner repair.
+Implementation `7d3d6bda9c`; full pre-outcome registration `15cecfd33c`.
+Scheduler `t104071` on node006 passes18 focused tests in107.976s: actor and
+nonempty Adam rollback with critic retained, vanilla/good-update controls,
+exact first batches, original-update native-style pipeline and adjusted CIs.
 
 ### legacy_c1_c9_matrix_snapshot
 
