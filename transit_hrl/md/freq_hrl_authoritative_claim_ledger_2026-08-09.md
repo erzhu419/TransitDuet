@@ -1335,6 +1335,9 @@ The first full allocation stopped before sampling: scheduler stage inputs must
 be directories, but its qualification input was a file. Correct only that
 directory declaration and reroute the same frozen roster; no model/seed/endpoint
 changes. Verification upper-call totals now include factual replay calls.
+All eight first-allocation tasks were cancelled while queued, with no running
+task or new outcome. Replacement `t101940`-`t101947` uses corrected implementation
+`04bf3627b4`, unchanged contracts/models and the exact same fresh-path roster.
 
 ### legacy_c1_c9_matrix_snapshot
 
