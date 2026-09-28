@@ -1,0 +1,107 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 15600,
+    "native_trace_audits": 52,
+    "optimizer_steps": 0,
+    "total_primitive_steps": 15600
+  },
+  "contract": {
+    "baseline": "shared_pre_update_actor_after_exact_actor_and_frozen_level_equality",
+    "baseline_scale": 0.0,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      44,
+      44044
+    ],
+    "checkpoint_selection": "none",
+    "checkpoints": "fixed_last_warmup_and_first_lower_update_no_selection",
+    "decision": "positive_micro_or_signed_slope_and_negative_full_vs_plus_supports_bounded_finite_step_attenuation",
+    "descriptive_mode": "deterministic",
+    "evaluation": "fresh_paired_paths_deterministic_upper_gate_deterministic_or_sampled_lower",
+    "evidence_role": "conditional_diagnosis_existing_development_weights_with_fresh_evaluation_not_confirmation",
+    "interval": "two_sided_percentile_bonferroni_16_paired_equal_root_means",
+    "lower_actor": "before_plus_alpha_times_after_minus_before_all_parameters_including_log_std",
+    "lower_sampling_seed": "numpy_seedsequence_44_root_environment_seed_44019_plus_primitive_step",
+    "methods": [
+      "intrinsic_sham",
+      "intrinsic_clock",
+      "task_sham",
+      "task_clock"
+    ],
+    "optimizer_steps": 0,
+    "other_networks": "unchanged_each_before_checkpoint",
+    "primary_endpoints": [
+      "intrinsic_sham:plus_vs_zero",
+      "intrinsic_sham:minus_vs_zero",
+      "intrinsic_sham:signed_slope",
+      "intrinsic_sham:full_vs_plus",
+      "intrinsic_clock:plus_vs_zero",
+      "intrinsic_clock:minus_vs_zero",
+      "intrinsic_clock:signed_slope",
+      "intrinsic_clock:full_vs_plus",
+      "task_sham:plus_vs_zero",
+      "task_sham:minus_vs_zero",
+      "task_sham:signed_slope",
+      "task_sham:full_vs_plus",
+      "task_clock:plus_vs_zero",
+      "task_clock:minus_vs_zero",
+      "task_clock:signed_slope",
+      "task_clock:full_vs_plus"
+    ],
+    "primary_mode": "lower_sampled",
+    "root_exclusion": "forbidden",
+    "scale_selection": "forbidden",
+    "scales": {
+      "full": 1.0,
+      "minus_micro": -0.0625,
+      "plus_micro": 0.0625
+    },
+    "sequential_extension": "forbidden",
+    "signed_slope": "finite_central_difference_not_exact_derivative",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1"
+  },
+  "methods": [
+    "intrinsic_sham",
+    "intrinsic_clock",
+    "task_sham",
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "horizon": 300,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_signed_microstep_stage44_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        10893001,
+        10893002
+      ]
+    }
+  },
+  "source_revision": "2c47eb2f48dc854bf0ed07081b07d6b2efd9c2ea",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 15600
+}
