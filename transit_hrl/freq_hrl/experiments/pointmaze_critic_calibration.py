@@ -45,7 +45,7 @@ def probe_diagnostics(model, batch, reference):
 
 
 def worker_rollout(job):
-    weights, seed, phase, mode, path = job
+    weights, seed, phase, mode, path, _ = job
     model, args, native, credit = joint._WORKER
     model.load_state_dict(weights)
     sampling = phase in ("train", "probe")
@@ -71,9 +71,10 @@ def lower_update(model, batch, kind):
                                actor_updates_enabled=kind == "actor_critic")
 
 
-def train(root, method, *, preflight, output):
+def train(root, method, *, preflight, output, specification=spec, rollout_worker=worker_rollout):
+    spec = specification
     if method not in spec.METHODS:
-        raise ValueError("unregistered Stage-39 method")
+        raise ValueError("unregistered calibration method")
     args, opt = spec.source.arguments(root, preflight=preflight), spec.options(preflight=preflight)
     roles = spec.seed_roles(root, preflight=preflight)
     controller, source_cell, replay = load_controller(args, spec.source_result(root, preflight=preflight))
@@ -83,7 +84,7 @@ def train(root, method, *, preflight, output):
     initial, anchor = joint.inference_weights(model), copy.deepcopy(model.lower_actor)
     raw, started = raw_directory(output), time.monotonic()
     costs, stages, training = [], {}, []
-    initial_training_credit = None
+    initial_training_credit, first_learning_credit = None, None
     with ProcessPoolExecutor(max_workers=opt["workers"], mp_context=mp.get_context("spawn"),
                              initializer=joint.init_worker,
                              initargs=(model.config, args, "learned_history", spec.LOWER_CREDIT[method])) as pool:
@@ -91,8 +92,8 @@ def train(root, method, *, preflight, output):
             if directory is not None:
                 directory.mkdir(parents=True, exist_ok=True)
             weights = joint.inference_weights(model)
-            pairs = list(pool.map(worker_rollout, [(weights, seed, phase, mode,
-                         str(directory / f"episode_{seed}.npz") if directory is not None else None) for seed in seeds]))
+            pairs = list(pool.map(rollout_worker, [(weights, seed, phase, mode,
+                         str(directory / f"episode_{seed}.npz") if directory is not None else None, method) for seed in seeds]))
             costs.extend({"phase": phase, **{k: row[k] for k in
                           ("upper_inference_calls", "lower_inference_calls", "gate_inference_calls")}} for _, row in pairs)
             return pairs
@@ -116,13 +117,16 @@ def train(root, method, *, preflight, output):
         snapshot(0)
         for iteration in range(1, spec.iterations(preflight=preflight) + 1):
             start = (iteration - 1) * opt["rollouts_per_iteration"]
-            pairs = episodes(roles["training"][start:start + opt["rollouts_per_iteration"]], phase="train")
+            mode = "warmup" if iteration <= opt["warmup_iterations"] else "learning"
+            pairs = episodes(roles["training"][start:start + opt["rollouts_per_iteration"]], phase="train", mode=mode)
             if initial_training_credit is None:
                 initial_training_credit = {"seed": pairs[0][1]["seed"], **pairs[0][1]["lower_training_credit"]}
+            if first_learning_credit is None and iteration > opt["warmup_iterations"]:
+                first_learning_credit = {"seed": pairs[0][1]["seed"], **pairs[0][1]["lower_training_credit"]}
             batch = concat_hierarchical_batches([b for b, _ in pairs]).lower
             before = copy.deepcopy(model.lower_actor)
             advantage, target = model._gae(batch.reward, batch.done, batch.duration, batch.old_value)
-            np.random.seed(np.random.SeedSequence([39, root, iteration]).generate_state(1)[0])
+            np.random.seed(spec.shuffle_seed(root, iteration))
             kind = spec.update_kind(method, iteration, preflight=preflight)
             update = lower_update(model, batch, kind)
             training.append({"iteration": iteration, "update_kind": kind, "primitive_steps": batch.size,
@@ -134,6 +138,9 @@ def train(root, method, *, preflight, output):
                              "advantage_mean": float(advantage.mean()), "advantage_std": float(advantage.std()),
                              "actor_optimizer_steps": int(update["lower_actor_optimizer_steps"]),
                              "value_optimizer_steps": int(update["lower_value_optimizer_steps"]),
+                             "rollout_sampling": [{key: row[key] for key in
+                                 ("seed", "policy_seed", "upper_sample", "gate_sample", "lower_sample", "lower_seed", "gate_seed")}
+                                 for _, row in pairs],
                              "policy_drift": policy_drift(model.lower_actor, before, batch.state)})
             if iteration in spec.snapshots(preflight=preflight):
                 snapshot(iteration)
@@ -148,6 +155,7 @@ def train(root, method, *, preflight, output):
               "source_selected_iteration": source_cell["selected_checkpoint_iteration"], "source_replay": replay,
               "probe_credit": {"seed": probe_row["seed"], **probe_row["lower_training_credit"]},
               "initial_training_credit": initial_training_credit, "training": training, "snapshots": stages,
+              "first_learning_credit": first_learning_credit,
               "optimizer_steps": {name: sum(row[name] for row in training)
                                   for name in ("actor_optimizer_steps", "value_optimizer_steps")},
               "wall_seconds": time.monotonic() - started}
@@ -155,7 +163,8 @@ def train(root, method, *, preflight, output):
     return result
 
 
-def audit_result(result, *, raw_path):
+def audit_result(result, *, raw_path, specification=spec):
+    spec = specification
     root, method, preflight = result["root"], result["method"], result["preflight"]
     if (method not in spec.METHODS or root not in spec.roots(preflight=preflight)
             or result["status"] != "complete" or result["protocol"] != spec.EXPERIMENT_PROTOCOL
@@ -192,7 +201,7 @@ def audit_result(result, *, raw_path):
         iteration = int(text)
         for name, delta in stage["parameter_change_norms"].items():
             allowed = (name == "lower_value" and method != "frozen" and
-                       (iteration > warm or (iteration > 0 and method.endswith("_calibrated")))) or (
+                       (iteration > warm or (iteration > 0 and spec.update_kind(method, iteration, preflight=preflight) == "critic"))) or (
                        name == "lower_actor" and method != "frozen" and iteration > warm)
             if (not allowed and delta != 0.) or (allowed and delta <= 0.):
                 raise ValueError("calibration snapshot component freeze violated")
@@ -213,7 +222,8 @@ def audit_result(result, *, raw_path):
     return {"root": root, "method": method, "status": "passed", "episodes": len(rows)}
 
 
-def aggregate(results, *, preflight):
+def aggregate(results, *, preflight, specification=spec):
+    spec = specification
     roots = spec.roots(preflight=preflight)
     cells = {(r["root"], r["method"]): r for r in results}
     if len(cells) != len(results) or set(cells) != {(r, m) for r in roots for m in spec.METHODS}:

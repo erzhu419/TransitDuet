@@ -51,7 +51,7 @@ def make_model(controller, method, *, root):
 
 
 def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
-            lower_credit="intrinsic_option", lower_sample=None):
+            lower_credit="intrinsic_option", lower_sample=None, upper_sample=None, lower_seed=None):
     if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
         raise ValueError("unregistered lower credit")
     scale = scale_for(args)
@@ -102,7 +102,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
             if plan_now:
                 state = history.upper_state(observation, oracle_context=None)
                 clock = time.perf_counter()
-                output = model.act_upper(state, sample=sample)
+                output = model.act_upper(state, sample=sample if upper_sample is None else upper_sample)
                 upper_time += time.perf_counter() - clock
                 subgoal = adapter.decode(np.asarray(output["action"], dtype=np.float32), observation.achieved_goal)
                 if sample:
@@ -111,6 +111,8 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 last_plan = step
             state = history.lower_state(observation, subgoal=subgoal)
             clock = time.perf_counter()
+            if lower_seed is not None and (sample if lower_sample is None else lower_sample):
+                torch.manual_seed(int(lower_seed) + step)
             output = model.act_lower(state, sample=sample if lower_sample is None else lower_sample)
             lower_time += time.perf_counter() - clock
             action = squash_box_action(np.asarray(output["action"], dtype=np.float32), task.action_low, task.action_high)
@@ -159,6 +161,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                "decision_steps": decisions, "gate_steps": gate_steps, "gate_actions": gate_actions,
                "gate_sample": bool(sample if gate_sample is None else gate_sample), "gate_seed": gate_seed,
                "lower_sample": bool(sample if lower_sample is None else lower_sample),
+               "upper_sample": bool(sample if upper_sample is None else upper_sample), "lower_seed": lower_seed,
                "upper_inference_seconds": upper_time, "lower_inference_seconds": lower_time,
                "gate_inference_seconds": gate_time, "episode_wall_seconds": wall}
         if sample:

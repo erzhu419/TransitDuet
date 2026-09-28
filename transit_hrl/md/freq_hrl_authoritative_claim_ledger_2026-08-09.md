@@ -1518,6 +1518,19 @@ return or noninferiority claim follows. Method20064000 steps/450660 upper/
 Next isolate frozen upper/gate training sampling versus deterministic
 deployment, not extend seeds or retune warmup. No new training jobs launched.
 
+### stage40_frozen_level_training_execution
+
+The [Stage-40 protocol](freq_hrl_stage40_frozen_execution_protocol_2026-09-28.md)
+tests sampled versus deployment-aligned frozen upper/gate execution only
+after identical critic-only warmup. Lower remains stochastic/on-policy;
+its per-step noise is coupled across arms. Both intrinsic/task reward pairs
+and frozen reference are retained, without checkpoint selection or PPO changes.
+All46 focused unit/regression tests pass, including actual sampling, lower
+noise coupling, paired warmup weights/Adam state and native replay accounting.
+Full freeze:40 cells/eight reused roots,20064000 method steps plus624000
+verification steps, eight adjusted return endpoints. Native preflight and
+full performance readout are pending; unit tests do not establish utility.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

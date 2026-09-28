@@ -63,6 +63,10 @@ def policy_seed(root, seed):
     return int(np.random.SeedSequence([39, root, seed, 39019]).generate_state(1)[0])
 
 
+def shuffle_seed(root, iteration):
+    return int(np.random.SeedSequence([39, root, iteration]).generate_state(1)[0])
+
+
 def source_result(root, *, preflight):
     return previous.source_result(root, preflight=preflight)
 
