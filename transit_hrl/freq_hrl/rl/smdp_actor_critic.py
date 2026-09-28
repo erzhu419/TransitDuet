@@ -3068,6 +3068,7 @@ class FrequencySeparatedActorCriticPPO:
         cost_value_net: ValueNet | None = None,
         cost_value_optimizer: torch.optim.Optimizer | None = None,
         actor_updates_enabled: bool = True,
+        actor_advantage: np.ndarray | None = None,
     ) -> dict[str, float]:
         cfg = self.config
         if not isinstance(actor_updates_enabled, bool):
@@ -3217,6 +3218,12 @@ class FrequencySeparatedActorCriticPPO:
             batch.next_value,
             batch.terminal,
         )
+        if actor_advantage is not None:
+            actor_advantage = np.asarray(actor_advantage, dtype=np.float32)
+            if actor_advantage.shape != (batch.size,) or not np.all(np.isfinite(actor_advantage)):
+                raise ValueError("actor_advantage must contain one finite value per transition")
+            # Alternate actor credit does not change the critic's GAE targets.
+            reward_adv = actor_advantage
         reward_adv_t = torch.as_tensor(self._normalize(reward_adv), dtype=torch.float32, device=self.device)
         returns_t = torch.as_tensor(returns, dtype=torch.float32, device=self.device)
         counterfactual_adv_t = None

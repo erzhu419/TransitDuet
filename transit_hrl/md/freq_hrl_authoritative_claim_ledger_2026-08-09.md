@@ -1787,6 +1787,18 @@ repair/noninferiority. Keep the intervention experimental. Next isolate
 full-episode task credit versus original GAE; Stage38 reward/option-cut switching
 alone did not repair utility. No tuning, seed extension or new training follows.
 
+### stage46_full_episode_task_actor_credit
+
+The [Stage-46 protocol](freq_hrl_stage46_episode_credit_protocol_2026-09-29.md)
+isolates original option-cut GAE versus full-episode undiscounted task RTG with
+LOO same-time training baselines, in both task-sham/task-clock warmup sources.
+Original critic GAE targets/updates and PPO settings stay fixed; no acceptance.
+Explicit actor advantage input preserves default shared PPO behavior and
+critic targets. First native data/task rewards and critic/Adam updates must
+match within each pair. Eight fixed sampled-return contrasts include frozen
+utility. Full7680000 steps/6400 offline trace audits, pre15600/52; no extra
+native verification. Conditional development only; no learned repair yet.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
