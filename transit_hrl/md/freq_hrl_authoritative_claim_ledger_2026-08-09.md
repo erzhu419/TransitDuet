@@ -1679,9 +1679,13 @@ Leave-one-episode-out time-indexed baselines do not cut at option boundaries.
 Fresh paired native before/after evaluation retains both deployment modes.
 Sixteen adjusted primary endpoints, eight reused roots, no selection/extension.
 Full1843200 primitive steps/1536 offline native trace audits; preflight7200/24.
-Zero extra verification environment steps. Execution qualification and dispatch
-are pending. This is conditional diagnosis, not an algorithmic repair or proof
-that a local gradient estimate predicts a finite-update return effect.
+Zero extra verification environment steps. Implementation `509b78e8ab`; full
+matrix freeze `a2beb8886d` precedes fresh native outcomes. Scheduler `t103726`
+passes17 focused tests (117.534s): independent PPO formula, analytic score
+direction, zero displacement/no optimizer mutation, mock existing-checkpoint
+pipeline, paired streams and root bootstrap. Native qualification and dispatch
+remain pending. This is conditional diagnosis, not an algorithmic repair or
+proof that a local gradient estimate predicts a finite-update return effect.
 
 ### legacy_c1_c9_matrix_snapshot
 
