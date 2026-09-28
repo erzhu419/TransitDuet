@@ -1,0 +1,489 @@
+{
+  "audits": [
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "intrinsic_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "intrinsic_episode",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "task_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 4,
+      "method": "task_episode",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "checkpoint_replays": [
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "intrinsic_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "intrinsic_episode",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "task_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 2,
+      "method": "task_episode",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_episode",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "credit_audits": [
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310001,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310001,
+      "status": "passed"
+    }
+  ],
+  "credit_diagnostics": [
+    {
+      "first": {
+        "advantage_mean": -0.05332617834210396,
+        "advantage_std": 0.0910595953464508,
+        "done_count": 9,
+        "iteration": 1,
+        "old_value_mean": 0.008865171112120152,
+        "option_count": 9,
+        "primitive_steps": 300,
+        "return_target_mean": -0.04446100816130638,
+        "reward_sum": -1.3975876729055017,
+        "task_reward_sum": 59.145058285444975
+      },
+      "last": {
+        "advantage_mean": -0.12258446961641312,
+        "advantage_std": 0.10369430482387543,
+        "done_count": 8,
+        "iteration": 2,
+        "old_value_mean": 0.07845079153776169,
+        "option_count": 8,
+        "primitive_steps": 300,
+        "return_target_mean": -0.04413368180394173,
+        "reward_sum": -1.7997859418173903,
+        "task_reward_sum": 105.18390573561192
+      },
+      "method": "frozen",
+      "root": 310001
+    },
+    {
+      "first": {
+        "advantage_mean": -0.05332617834210396,
+        "advantage_std": 0.0910595953464508,
+        "done_count": 9,
+        "iteration": 1,
+        "old_value_mean": 0.008865171112120152,
+        "option_count": 9,
+        "primitive_steps": 300,
+        "return_target_mean": -0.04446100816130638,
+        "reward_sum": -1.3975876729055017,
+        "task_reward_sum": 59.145058285444975
+      },
+      "last": {
+        "advantage_mean": -0.11648544669151306,
+        "advantage_std": 0.10370355099439621,
+        "done_count": 8,
+        "iteration": 2,
+        "old_value_mean": 0.05002918466925621,
+        "option_count": 8,
+        "primitive_steps": 300,
+        "return_target_mean": -0.06645625084638596,
+        "reward_sum": -2.0345419540863077,
+        "task_reward_sum": 94.71694160997868
+      },
+      "method": "intrinsic_option",
+      "root": 310001
+    },
+    {
+      "first": {
+        "advantage_mean": -0.08601486682891846,
+        "advantage_std": 0.09396598488092422,
+        "done_count": 1,
+        "iteration": 1,
+        "old_value_mean": 0.008865171112120152,
+        "option_count": 9,
+        "primitive_steps": 300,
+        "return_target_mean": -0.07714969664812088,
+        "reward_sum": -1.3975876729055017,
+        "task_reward_sum": 59.145058285444975
+      },
+      "last": {
+        "advantage_mean": -0.11773163080215454,
+        "advantage_std": 0.11162379384040833,
+        "done_count": 1,
+        "iteration": 2,
+        "old_value_mean": 0.04214176535606384,
+        "option_count": 8,
+        "primitive_steps": 300,
+        "return_target_mean": -0.0755898654460907,
+        "reward_sum": -1.8458930805372802,
+        "task_reward_sum": 105.7768715173006
+      },
+      "method": "intrinsic_episode",
+      "root": 310001
+    },
+    {
+      "first": {
+        "advantage_mean": 2.081411123275757,
+        "advantage_std": 2.791640520095825,
+        "done_count": 9,
+        "iteration": 1,
+        "old_value_mean": 0.008865171112120152,
+        "option_count": 9,
+        "primitive_steps": 300,
+        "return_target_mean": 2.0902762413024902,
+        "reward_sum": 59.145058285444975,
+        "task_reward_sum": 59.145058285444975
+      },
+      "last": {
+        "advantage_mean": 3.802075147628784,
+        "advantage_std": 4.431281566619873,
+        "done_count": 8,
+        "iteration": 2,
+        "old_value_mean": 0.13291111588478088,
+        "option_count": 8,
+        "primitive_steps": 300,
+        "return_target_mean": 3.934986114501953,
+        "reward_sum": 97.67656430602074,
+        "task_reward_sum": 97.67656430602074
+      },
+      "method": "task_option",
+      "root": 310001
+    },
+    {
+      "first": {
+        "advantage_mean": 2.8614189624786377,
+        "advantage_std": 2.974109649658203,
+        "done_count": 1,
+        "iteration": 1,
+        "old_value_mean": 0.008865171112120152,
+        "option_count": 9,
+        "primitive_steps": 300,
+        "return_target_mean": 2.87028431892395,
+        "reward_sum": 59.145058285444975,
+        "task_reward_sum": 59.145058285444975
+      },
+      "last": {
+        "advantage_mean": 4.7797675132751465,
+        "advantage_std": 4.688100814819336,
+        "done_count": 1,
+        "iteration": 2,
+        "old_value_mean": 0.1292410045862198,
+        "option_count": 8,
+        "primitive_steps": 300,
+        "return_target_mean": 4.909008502960205,
+        "reward_sum": 93.84878591448069,
+        "task_reward_sum": 93.84878591448069
+      },
+      "method": "task_episode",
+      "root": 310001
+    }
+  ],
+  "method_cost": {
+    "gate_inference_calls": 592,
+    "lower_inference_calls": 19500,
+    "primitive_steps": 19500,
+    "upper_inference_calls": 329
+  },
+  "protocol": "pointmaze_lower_credit_stage38_v1",
+  "run_name": "pointmaze_lower_credit_stage38_v1_preflight_20260928_r1",
+  "selection": [
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8
+      },
+      "root": 310001
+    },
+    {
+      "iteration": 0,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 8,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 8
+      },
+      "root": 310001
+    }
+  ],
+  "selection_curves": {
+    "frozen": {
+      "calls": [
+        4.5,
+        4.5,
+        4.5
+      ],
+      "ise": [
+        6.6875301034750905,
+        6.6875301034750905,
+        6.6875301034750905
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        122.60510915162189,
+        122.60510915162189,
+        122.60510915162189
+      ],
+      "utility": [
+        118.10510915162189,
+        118.10510915162189,
+        118.10510915162189
+      ]
+    },
+    "intrinsic_episode": {
+      "calls": [
+        4.5,
+        5,
+        5
+      ],
+      "ise": [
+        6.6875301034750905,
+        7.731409795144882,
+        5.1968464013531825
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        122.60510915162189,
+        108.43402353295741,
+        121.40287017142148
+      ],
+      "utility": [
+        118.10510915162189,
+        103.43402353295741,
+        116.40287017142148
+      ]
+    },
+    "intrinsic_option": {
+      "calls": [
+        4.5,
+        5,
+        5
+      ],
+      "ise": [
+        6.6875301034750905,
+        8.433166685141176,
+        7.574041932898008
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        122.60510915162189,
+        106.89331380492479,
+        113.43806394940748
+      ],
+      "utility": [
+        118.10510915162189,
+        101.89331380492479,
+        108.43806394940748
+      ]
+    },
+    "task_episode": {
+      "calls": [
+        4.5,
+        5,
+        5
+      ],
+      "ise": [
+        6.6875301034750905,
+        8.836794165125823,
+        6.783440164306237
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        122.60510915162189,
+        97.81234192703772,
+        103.08334590356093
+      ],
+      "utility": [
+        118.10510915162189,
+        92.81234192703772,
+        98.08334590356093
+      ]
+    },
+    "task_option": {
+      "calls": [
+        4.5,
+        5,
+        4.5
+      ],
+      "ise": [
+        6.6875301034750905,
+        8.79463570157013,
+        6.589154216512245
+      ],
+      "iteration": [
+        0,
+        1,
+        2
+      ],
+      "return": [
+        122.60510915162189,
+        96.87120555254401,
+        104.22586448541705
+      ],
+      "utility": [
+        118.10510915162189,
+        91.87120555254401,
+        99.72586448541705
+      ]
+    }
+  },
+  "status": "preflight_passed",
+  "verification_cost": {
+    "gate_inference_calls": 148,
+    "lower_inference_calls": 4500,
+    "primitive_steps": 4500,
+    "upper_inference_calls": 78
+  }
+}

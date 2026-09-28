@@ -1455,6 +1455,19 @@ diagnoses retained, and the submitter uses scheduler's Training complete
 marker. Current artifacts match the audited summary. Next test lower-credit
 alignment and gate SMDP credit allocation; the cause of harm is still open.
 
+### stage38_lower_reward_and_credit_boundary
+
+The [Stage-38 protocol](freq_hrl_stage38_lower_credit_protocol_2026-09-28.md)
+tests intrinsic/task reward x option/episode credit, plus frozen reference.
+Only lower actor/critic update; upper/gate remain frozen. Source `8c9487b78e`
+passes 45 tests. Native preflight `t102294`-`t102298` passes five trajectory
+audits, ten final/selected policy replays and five initial training-credit
+replays. Method19500 steps/329 upper/592 gate calls; verification4500 steps/
+78 upper/148 gate calls. This is readiness, not performance evidence.
+Full freeze:40 cells, 54192000 method steps, 144000 verification steps,
+seven adjusted reward contrasts. Same inherited critics, no rescaling or
+hyperparameter change; preserve all roots, arms and earlier negative results.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

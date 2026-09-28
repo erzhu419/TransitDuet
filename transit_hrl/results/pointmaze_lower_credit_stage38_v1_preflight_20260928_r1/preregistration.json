@@ -1,0 +1,167 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_cell": {
+    "evaluation_primitive_steps": 1200,
+    "factual_replay_primitive_steps": 300,
+    "selection_primitive_steps": 1800,
+    "total_primitive_steps": 3900,
+    "training_primitive_steps": 600
+  },
+  "contract": {
+    "all_primary_endpoints": [
+      "intrinsic_option:frozen:return",
+      "intrinsic_episode:frozen:return",
+      "task_option:frozen:return",
+      "task_episode:frozen:return",
+      "reward_source:return",
+      "credit_boundary:return",
+      "interaction:return"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      38,
+      38039
+    ],
+    "candidate_previews": 0,
+    "checkpoint_candidates": "initial_and_every_32_iterations_full_or_every_iteration_preflight",
+    "checkpoint_selection": "maximum_selection_return_minus_call_cost_then_minimum_ise",
+    "credit_boundary": "option_terminal_at_replanning_or_episode_terminal_only",
+    "credit_boundary_effect": "mean_episode_minus_mean_option_over_reward_sources",
+    "critic_initialization": "same_inherited_lower_critic_all_arms_no_reset_or_reward_rescaling",
+    "decision": "diagnose_lower_credit_not_algorithm_superiority",
+    "evaluation_cohorts": [
+      "final",
+      "selected"
+    ],
+    "evaluation_pairing": "same_untouched_paths_both_cohorts_and_all_methods",
+    "evidence_role": "conditional_lower_credit_development_not_independent_confirmation",
+    "familywise_alpha": 0.05,
+    "frozen_components": "skip_actor_and_critic_optimizer_updates_exact_weights_unchanged",
+    "frozen_gate": "stage35_initial_gate_weights_no_updates_in_all_training_arms",
+    "gate_check_steps": 25,
+    "gate_input": "causal_physical_target_error_measurement_history_waypoint_error_age_remaining_time",
+    "initialization": "same_stage33_controller_and_stage35_gate_initialization_fresh_optimizers",
+    "interaction": "task_episode_minus_task_option_minus_intrinsic_episode_plus_intrinsic_option",
+    "interval": "two_sided_percentile_bonferroni_7_endpoints",
+    "lower_credit": {
+      "frozen": "intrinsic_option",
+      "intrinsic_episode": "intrinsic_episode",
+      "intrinsic_option": "intrinsic_option",
+      "task_episode": "task_episode",
+      "task_option": "task_option"
+    },
+    "lower_feedback": "every_primitive_step",
+    "lower_reward": "factorial_intrinsic_adapter_or_unscaled_native_task_reward",
+    "max_plan_age_steps": 100,
+    "methods": [
+      "frozen",
+      "intrinsic_option",
+      "intrinsic_episode",
+      "task_option",
+      "task_episode"
+    ],
+    "minibatch_shuffle_seed": "numpy_seedsequence_38_optimizer_root_iteration",
+    "primary_cohort": "final",
+    "primary_endpoints": [
+      "intrinsic_option:frozen:return",
+      "intrinsic_episode:frozen:return",
+      "task_option:frozen:return",
+      "task_episode:frozen:return",
+      "reward_source:return",
+      "credit_boundary:return",
+      "interaction:return"
+    ],
+    "reward_source": "intrinsic_adapter_reward_or_unscaled_native_task_reward_no_added_call_cost",
+    "reward_source_effect": "mean_task_minus_mean_intrinsic_over_boundaries",
+    "root_exclusion": "forbidden",
+    "root_weighting": "equal",
+    "sample_training_actions": "all_levels_in_every_arm",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_root_response_stage33_v1_qualification",
+    "statistical_unit": "optimizer_seed_root",
+    "training": "on_policy_lower_actor_and_critic_only_upper_and_gate_frozen",
+    "updated_actor_and_critic_levels": {
+      "frozen": [],
+      "intrinsic_episode": [
+        "lower"
+      ],
+      "intrinsic_option": [
+        "lower"
+      ],
+      "task_episode": [
+        "lower"
+      ],
+      "task_option": [
+        "lower"
+      ]
+    },
+    "upper_and_gate_reward": "native_dense_reward_minus_actual_call_cost",
+    "upper_call_cost_in_reward_units": 1.0,
+    "verification": "both_cohort_checkpoints_and_initial_training_credit_native_replay"
+  },
+  "methods": [
+    "frozen",
+    "intrinsic_option",
+    "intrinsic_episode",
+    "task_option",
+    "task_episode"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "call_cost": 1.0,
+    "check_steps": 25,
+    "evaluation_cohorts": [
+      "final",
+      "selected"
+    ],
+    "evaluation_paths": 2,
+    "iterations": 2,
+    "max_age_steps": 100,
+    "rollouts_per_iteration": 1,
+    "selection_interval": 1,
+    "selection_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_lower_credit_stage38_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        9393001,
+        9393002
+      ],
+      "selection": [
+        9392001,
+        9392002
+      ],
+      "training": [
+        9390001,
+        9390002
+      ]
+    }
+  },
+  "source_revision": "8c9487b78e9d614671640b0fd8a08d7ca705786e",
+  "total_method_steps": 19500,
+  "verification_budget": {
+    "native_episodes_per_cell": 3,
+    "total_primitive_steps": 4500
+  }
+}
