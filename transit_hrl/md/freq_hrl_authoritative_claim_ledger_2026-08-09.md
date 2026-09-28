@@ -1501,11 +1501,22 @@ upper/545 gate calls. This is execution readiness, not performance evidence.
 Full freeze:40 cells/eight reused roots, 20064000 method steps plus576000
 verification steps; eight adjusted deterministic return endpoints. No
 checkpoint selection, reward rescaling, learning-rate changes or seed extension.
-Full `t102383`-`t102422` is preregistered and running across node001-node006,
-cpu9/ram12GiB per cell, no node pin. One SSH launch handshake was retried
-before execution; all forty originals started, without duplicate children.
-Preflight is recorded done/exit0 for all five jobs. Full performance readout
-is pending; no preflight outcome selects an arm or alters the frozen protocol.
+The [full result](freq_hrl_stage39_critic_calibration_result_2026-09-28.md)
+`t102383`-`t102422` completes all40 cells/6400 evaluation episodes, with all40
+trajectory audits,400 native snapshot/mode replays,80 probe/initial-credit
+replays and the independent eight-endpoint bootstrap passed. All originals
+exit zero without duplicate children; one launch-only SSH handshake was retried.
+All eight adjusted return intervals cross zero. Final versus frozen:
+intrinsic-delayed -4.6238 [-8.6284,0.0753], intrinsic-calibrated -3.4395
+[-7.2946,1.4610], task-delayed -3.4072 [-7.9386,1.0502], task-calibrated
+-3.0519 [-7.4313,1.1079]. Final calibration effects are intrinsic +1.1843
+[-0.8009,3.2260], task +0.3553 [-2.1069,2.7553]; first-update effects also
+inconclusive. Warmup reduces mean fixed-probe MSE0.0109671->0.0070719
+intrinsic and567.3732->208.9186 task without actor movement, but no supported
+return or noninferiority claim follows. Method20064000 steps/450660 upper/
+720194 gate calls; verification576000 steps/12835 upper/20088 gate calls.
+Next isolate frozen upper/gate training sampling versus deterministic
+deployment, not extend seeds or retune warmup. No new training jobs launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
