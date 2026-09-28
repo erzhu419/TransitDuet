@@ -165,6 +165,7 @@ class ResponseDeploymentTest(unittest.TestCase):
             self.assertEqual(task["ram_mb"], 3072 if preflight else 16384)
             self.assertFalse(any("_raw" in p or p.endswith(".pt") for p in task["stage_input_paths"]))
             self.assertFalse(any(p.endswith(".json") for p in task["stage_input_paths"]))
+            self.assertFalse(any("/results/" in p for p in task["stage_input_paths"]))
 
 
 if __name__ == "__main__":
