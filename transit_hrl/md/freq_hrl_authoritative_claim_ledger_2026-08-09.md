@@ -1226,6 +1226,14 @@ keep/renew plan-response validation with full lower feedback and equal upper
 call budgets. Target forecasting is qualified for development, not control
 reward, uncertainty calibration or independent-confirmation evidence.
 
+The [Stage-31 protocol](freq_hrl_stage31_forecast_response_protocol_2026-09-28.md)
+freezes Stage-30 motion inference and conditions a plan-response critic on
+causal candidate plans and forecast geometry. Stage-28 training pairs are
+reused with complete prefixes; new paths evaluate 150-step equal-call keep/renew
+credit with full lower feedback. Seven critic views and constant decisions
+are frozen controls; candidate proposal calls are counted. Twenty-four tests
+passed. The screen concerns paired local decision value, not deployment.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
