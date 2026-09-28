@@ -1,0 +1,3574 @@
+{
+  "aggregate": {
+    "means": {
+      "final": {
+        "frozen": {
+          "charged_utility": 875.0983208908864,
+          "episode_return": 904.1959771408864,
+          "tracking_squared_error_integral": 1.741504922520912,
+          "upper_inference_calls": 29.09765625
+        },
+        "intrinsic_episode": {
+          "charged_utility": 869.5801195695365,
+          "episode_return": 898.7285570695365,
+          "tracking_squared_error_integral": 1.8007511565980079,
+          "upper_inference_calls": 29.1484375
+        },
+        "intrinsic_option": {
+          "charged_utility": 864.8955003725825,
+          "episode_return": 893.9384691225825,
+          "tracking_squared_error_integral": 1.8623672670170965,
+          "upper_inference_calls": 29.04296875
+        },
+        "task_episode": {
+          "charged_utility": 858.1898793628851,
+          "episode_return": 887.2367543628851,
+          "tracking_squared_error_integral": 1.9284129134734034,
+          "upper_inference_calls": 29.046875
+        },
+        "task_option": {
+          "charged_utility": 864.4548268709206,
+          "episode_return": 893.6852956209206,
+          "tracking_squared_error_integral": 1.8656614391355935,
+          "upper_inference_calls": 29.23046875
+        }
+      },
+      "selected": {
+        "frozen": {
+          "charged_utility": 875.0983208908864,
+          "episode_return": 904.1959771408864,
+          "tracking_squared_error_integral": 1.741504922520912,
+          "upper_inference_calls": 29.09765625
+        },
+        "intrinsic_episode": {
+          "charged_utility": 875.3586266906848,
+          "episode_return": 904.4836266906848,
+          "tracking_squared_error_integral": 1.7310835310459394,
+          "upper_inference_calls": 29.125
+        },
+        "intrinsic_option": {
+          "charged_utility": 871.9609140854855,
+          "episode_return": 901.0820078354855,
+          "tracking_squared_error_integral": 1.7878374539590676,
+          "upper_inference_calls": 29.12109375
+        },
+        "task_episode": {
+          "charged_utility": 877.6709888720088,
+          "episode_return": 906.7608326220088,
+          "tracking_squared_error_integral": 1.7171255977513338,
+          "upper_inference_calls": 29.08984375
+        },
+        "task_option": {
+          "charged_utility": 876.1506203274685,
+          "episode_return": 905.3185890774685,
+          "tracking_squared_error_integral": 1.7365774675717103,
+          "upper_inference_calls": 29.16796875
+        }
+      }
+    },
+    "primary_cohort": "final",
+    "primary_endpoints": {
+      "credit_boundary:return": {
+        "ci": [
+          -10.065139628038438,
+          10.084619764411649
+        ],
+        "effect": "inconclusive",
+        "mean": -0.8292266555408432
+      },
+      "interaction:return": {
+        "ci": [
+          -23.216532115523314,
+          4.199437787794096
+        ],
+        "effect": "inconclusive",
+        "mean": -11.238629204989422
+      },
+      "intrinsic_episode:frozen:return": {
+        "ci": [
+          -9.660862553014624,
+          -1.4295009292690537
+        ],
+        "effect": "negative",
+        "mean": -5.467420071349977
+      },
+      "intrinsic_option:frozen:return": {
+        "ci": [
+          -13.38747843741082,
+          -7.081496095616718
+        ],
+        "effect": "negative",
+        "mean": -10.257508018303852
+      },
+      "reward_source:return": {
+        "ci": [
+          -19.69997082588837,
+          1.8739967125111197
+        ],
+        "effect": "inconclusive",
+        "mean": -5.87248810415668
+      },
+      "task_episode:frozen:return": {
+        "ci": [
+          -24.487179423016606,
+          -6.379171259115128
+        ],
+        "effect": "negative",
+        "mean": -16.959222778001376
+      },
+      "task_option:frozen:return": {
+        "ci": [
+          -30.50319984378983,
+          -0.49491755431343165
+        ],
+        "effect": "negative",
+        "mean": -10.510681519965829
+      }
+    },
+    "root_count": 8,
+    "root_rows": [
+      {
+        "endpoints": {
+          "credit_boundary:return": -14.327284904683665,
+          "interaction:return": -14.423814959040556,
+          "intrinsic_episode:frozen:return": -11.192328020765899,
+          "intrinsic_option:frozen:return": -4.076950595602511,
+          "reward_source:return": -6.926376691993255,
+          "task_episode:frozen:return": -25.330612192279432,
+          "task_option:frozen:return": -3.7914198080754886
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 873.4760348189914,
+              "episode_return": 903.6322848189914,
+              "tracking_squared_error_integral": 1.68596208404464,
+              "upper_inference_calls": 30.15625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 862.0337067982255,
+              "episode_return": 892.4399567982255,
+              "tracking_squared_error_integral": 1.8147101114860158,
+              "upper_inference_calls": 30.40625
+            },
+            "intrinsic_option": {
+              "charged_utility": 869.3990842233889,
+              "episode_return": 899.5553342233889,
+              "tracking_squared_error_integral": 1.7142429553549101,
+              "upper_inference_calls": 30.15625
+            },
+            "task_episode": {
+              "charged_utility": 847.8641726267119,
+              "episode_return": 878.3016726267119,
+              "tracking_squared_error_integral": 2.041733350497633,
+              "upper_inference_calls": 30.4375
+            },
+            "task_option": {
+              "charged_utility": 869.5596150109159,
+              "episode_return": 899.8408650109159,
+              "tracking_squared_error_integral": 1.7449847231080433,
+              "upper_inference_calls": 30.28125
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 873.4760348189914,
+              "episode_return": 903.6322848189914,
+              "tracking_squared_error_integral": 1.68596208404464,
+              "upper_inference_calls": 30.15625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 876.6614726759151,
+              "episode_return": 906.9114726759151,
+              "tracking_squared_error_integral": 1.641728426716674,
+              "upper_inference_calls": 30.25
+            },
+            "intrinsic_option": {
+              "charged_utility": 869.3990842233889,
+              "episode_return": 899.5553342233889,
+              "tracking_squared_error_integral": 1.7142429553549101,
+              "upper_inference_calls": 30.15625
+            },
+            "task_episode": {
+              "charged_utility": 878.4829124378925,
+              "episode_return": 908.6704124378925,
+              "tracking_squared_error_integral": 1.639573304547124,
+              "upper_inference_calls": 30.1875
+            },
+            "task_option": {
+              "charged_utility": 873.4760348189914,
+              "episode_return": 903.6322848189914,
+              "tracking_squared_error_integral": 1.68596208404464,
+              "upper_inference_calls": 30.15625
+            }
+          }
+        },
+        "root": 310011
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": 18.690304057061383,
+          "interaction:return": 17.762321436612183,
+          "intrinsic_episode:frozen:return": -0.10677840452649434,
+          "intrinsic_option:frozen:return": -9.915921743281729,
+          "reward_source:return": -35.74840409650409,
+          "task_episode:frozen:return": -26.974021782724435,
+          "task_option:frozen:return": -54.54548655809185
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 891.2219786929217,
+              "episode_return": 924.6282286929217,
+              "tracking_squared_error_integral": 1.4870440872561697,
+              "upper_inference_calls": 33.40625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 891.1464502883952,
+              "episode_return": 924.5214502883952,
+              "tracking_squared_error_integral": 1.4504664899592077,
+              "upper_inference_calls": 33.375
+            },
+            "intrinsic_option": {
+              "charged_utility": 881.3998069496399,
+              "episode_return": 914.7123069496399,
+              "tracking_squared_error_integral": 1.5736384092887794,
+              "upper_inference_calls": 33.3125
+            },
+            "task_episode": {
+              "charged_utility": 864.3729569101972,
+              "episode_return": 897.6542069101972,
+              "tracking_squared_error_integral": 1.7128474921571986,
+              "upper_inference_calls": 33.28125
+            },
+            "task_option": {
+              "charged_utility": 836.7389921348298,
+              "episode_return": 870.0827421348298,
+              "tracking_squared_error_integral": 2.0688691710738865,
+              "upper_inference_calls": 33.34375
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 891.2219786929217,
+              "episode_return": 924.6282286929217,
+              "tracking_squared_error_integral": 1.4870440872561697,
+              "upper_inference_calls": 33.40625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 891.1464502883952,
+              "episode_return": 924.5214502883952,
+              "tracking_squared_error_integral": 1.4504664899592077,
+              "upper_inference_calls": 33.375
+            },
+            "intrinsic_option": {
+              "charged_utility": 891.2219786929217,
+              "episode_return": 924.6282286929217,
+              "tracking_squared_error_integral": 1.4870440872561697,
+              "upper_inference_calls": 33.40625
+            },
+            "task_episode": {
+              "charged_utility": 891.2219786929217,
+              "episode_return": 924.6282286929217,
+              "tracking_squared_error_integral": 1.4870440872561697,
+              "upper_inference_calls": 33.40625
+            },
+            "task_option": {
+              "charged_utility": 891.2219786929217,
+              "episode_return": 924.6282286929217,
+              "tracking_squared_error_integral": 1.4870440872561697,
+              "upper_inference_calls": 33.40625
+            }
+          }
+        },
+        "root": 310023
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": -5.83602793288884,
+          "interaction:return": -9.494604234308326,
+          "intrinsic_episode:frozen:return": -9.291100822455178,
+          "intrinsic_option:frozen:return": -8.202375006720558,
+          "reward_source:return": 0.7796625062483713,
+          "task_episode:frozen:return": -13.258740433361027,
+          "task_option:frozen:return": -2.6754103833180807
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 868.1121454231297,
+              "episode_return": 897.1433954231297,
+              "tracking_squared_error_integral": 1.8144894231576296,
+              "upper_inference_calls": 29.03125
+            },
+            "intrinsic_episode": {
+              "charged_utility": 858.7272946006746,
+              "episode_return": 887.8522946006746,
+              "tracking_squared_error_integral": 1.9127521801832004,
+              "upper_inference_calls": 29.125
+            },
+            "intrinsic_option": {
+              "charged_utility": 859.9410204164092,
+              "episode_return": 888.9410204164092,
+              "tracking_squared_error_integral": 1.9208653115302976,
+              "upper_inference_calls": 29
+            },
+            "task_episode": {
+              "charged_utility": 854.6034049897687,
+              "episode_return": 883.8846549897687,
+              "tracking_squared_error_integral": 1.9295450867909238,
+              "upper_inference_calls": 29.28125
+            },
+            "task_option": {
+              "charged_utility": 865.1242350398117,
+              "episode_return": 894.4679850398117,
+              "tracking_squared_error_integral": 1.91367555009866,
+              "upper_inference_calls": 29.34375
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 868.1121454231297,
+              "episode_return": 897.1433954231297,
+              "tracking_squared_error_integral": 1.8144894231576296,
+              "upper_inference_calls": 29.03125
+            },
+            "intrinsic_episode": {
+              "charged_utility": 868.1121454231297,
+              "episode_return": 897.1433954231297,
+              "tracking_squared_error_integral": 1.8144894231576296,
+              "upper_inference_calls": 29.03125
+            },
+            "intrinsic_option": {
+              "charged_utility": 868.1121454231297,
+              "episode_return": 897.1433954231297,
+              "tracking_squared_error_integral": 1.8144894231576296,
+              "upper_inference_calls": 29.03125
+            },
+            "task_episode": {
+              "charged_utility": 874.9258601363267,
+              "episode_return": 904.2696101363267,
+              "tracking_squared_error_integral": 1.7459534806013703,
+              "upper_inference_calls": 29.34375
+            },
+            "task_option": {
+              "charged_utility": 871.548855406347,
+              "episode_return": 900.955105406347,
+              "tracking_squared_error_integral": 1.8185351821626896,
+              "upper_inference_calls": 29.40625
+            }
+          }
+        },
+        "root": 310037
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": -7.856502508768699,
+          "interaction:return": -29.88813832835649,
+          "intrinsic_episode:frozen:return": -2.6938594123136,
+          "intrinsic_option:frozen:return": -9.781426067723146,
+          "reward_source:return": -8.089806489997272,
+          "task_episode:frozen:return": -25.727735066489117,
+          "task_option:frozen:return": -2.9271633935421733
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            },
+            "intrinsic_episode": {
+              "charged_utility": 885.2017107772724,
+              "episode_return": 915.2329607772724,
+              "tracking_squared_error_integral": 1.571651237680954,
+              "upper_inference_calls": 30.03125
+            },
+            "intrinsic_option": {
+              "charged_utility": 878.2391441218629,
+              "episode_return": 908.1453941218629,
+              "tracking_squared_error_integral": 1.7148372679048103,
+              "upper_inference_calls": 29.90625
+            },
+            "task_episode": {
+              "charged_utility": 862.6678351230969,
+              "episode_return": 892.1990851230969,
+              "tracking_squared_error_integral": 1.7690661869253914,
+              "upper_inference_calls": 29.53125
+            },
+            "task_option": {
+              "charged_utility": 885.2809067960438,
+              "episode_return": 914.9996567960438,
+              "tracking_squared_error_integral": 1.6408615292013695,
+              "upper_inference_calls": 29.71875
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            },
+            "intrinsic_episode": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            },
+            "intrinsic_option": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            },
+            "task_episode": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            },
+            "task_option": {
+              "charged_utility": 887.926820189586,
+              "episode_return": 917.926820189586,
+              "tracking_squared_error_integral": 1.6141836367461386,
+              "upper_inference_calls": 30
+            }
+          }
+        },
+        "root": 310049
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": -10.596474528710928,
+          "interaction:return": -23.605809462452044,
+          "intrinsic_episode:frozen:return": -10.322570519398369,
+          "intrinsic_option:frozen:return": -11.529000721913462,
+          "reward_source:return": 2.677799075500957,
+          "task_episode:frozen:return": -19.447676175123433,
+          "task_option:frozen:return": 2.9517030848135164
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 829.5830649947234,
+              "episode_return": 851.7705649947234,
+              "tracking_squared_error_integral": 2.426390457475784,
+              "upper_inference_calls": 22.1875
+            },
+            "intrinsic_episode": {
+              "charged_utility": 819.510494475325,
+              "episode_return": 841.447994475325,
+              "tracking_squared_error_integral": 2.680021201396272,
+              "upper_inference_calls": 21.9375
+            },
+            "intrinsic_option": {
+              "charged_utility": 818.3353142728099,
+              "episode_return": 840.2415642728099,
+              "tracking_squared_error_integral": 2.697206171612717,
+              "upper_inference_calls": 21.90625
+            },
+            "task_episode": {
+              "charged_utility": 810.2291388195999,
+              "episode_return": 832.3228888195999,
+              "tracking_squared_error_integral": 2.820241602825814,
+              "upper_inference_calls": 22.09375
+            },
+            "task_option": {
+              "charged_utility": 832.5035180795369,
+              "episode_return": 854.7222680795369,
+              "tracking_squared_error_integral": 2.4264261260039026,
+              "upper_inference_calls": 22.21875
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 829.5830649947234,
+              "episode_return": 851.7705649947234,
+              "tracking_squared_error_integral": 2.426390457475784,
+              "upper_inference_calls": 22.1875
+            },
+            "intrinsic_episode": {
+              "charged_utility": 828.7232678913753,
+              "episode_return": 850.6295178913753,
+              "tracking_squared_error_integral": 2.451288535873405,
+              "upper_inference_calls": 21.90625
+            },
+            "intrinsic_option": {
+              "charged_utility": 818.3353142728099,
+              "episode_return": 840.2415642728099,
+              "tracking_squared_error_integral": 2.697206171612717,
+              "upper_inference_calls": 21.90625
+            },
+            "task_episode": {
+              "charged_utility": 839.7002717125004,
+              "episode_return": 861.5127717125004,
+              "tracking_squared_error_integral": 2.322608434501614,
+              "upper_inference_calls": 21.8125
+            },
+            "task_option": {
+              "charged_utility": 831.9425077205427,
+              "episode_return": 853.8175077205427,
+              "tracking_squared_error_integral": 2.4270436530920625,
+              "upper_inference_calls": 21.875
+            }
+          }
+        },
+        "root": 310061
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": 11.318250022723078,
+          "interaction:return": 6.15522612341374,
+          "intrinsic_episode:frozen:return": -0.8761704247061743,
+          "intrinsic_option:frozen:return": -9.116807385722382,
+          "reward_source:return": 3.1080487158938013,
+          "task_episode:frozen:return": 5.309491352894497,
+          "task_option:frozen:return": -9.08637173153545
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 892.8000015438362,
+              "episode_return": 927.1437515438362,
+              "tracking_squared_error_integral": 1.4835680609024096,
+              "upper_inference_calls": 34.34375
+            },
+            "intrinsic_episode": {
+              "charged_utility": 891.79883111913,
+              "episode_return": 926.26758111913,
+              "tracking_squared_error_integral": 1.4869319922237976,
+              "upper_inference_calls": 34.46875
+            },
+            "intrinsic_option": {
+              "charged_utility": 883.7456941581138,
+              "episode_return": 918.0269441581138,
+              "tracking_squared_error_integral": 1.6158843631707744,
+              "upper_inference_calls": 34.28125
+            },
+            "task_episode": {
+              "charged_utility": 898.1719928967307,
+              "episode_return": 932.4532428967307,
+              "tracking_squared_error_integral": 1.4713361382108823,
+              "upper_inference_calls": 34.28125
+            },
+            "task_option": {
+              "charged_utility": 883.7448798123007,
+              "episode_return": 918.0573798123007,
+              "tracking_squared_error_integral": 1.5991058521627977,
+              "upper_inference_calls": 34.3125
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 892.8000015438362,
+              "episode_return": 927.1437515438362,
+              "tracking_squared_error_integral": 1.4835680609024096,
+              "upper_inference_calls": 34.34375
+            },
+            "intrinsic_episode": {
+              "charged_utility": 892.8000015438362,
+              "episode_return": 927.1437515438362,
+              "tracking_squared_error_integral": 1.4835680609024096,
+              "upper_inference_calls": 34.34375
+            },
+            "intrinsic_option": {
+              "charged_utility": 892.8000015438362,
+              "episode_return": 927.1437515438362,
+              "tracking_squared_error_integral": 1.4835680609024096,
+              "upper_inference_calls": 34.34375
+            },
+            "task_episode": {
+              "charged_utility": 892.0997757545408,
+              "episode_return": 926.3810257545408,
+              "tracking_squared_error_integral": 1.485248553434507,
+              "upper_inference_calls": 34.28125
+            },
+            "task_option": {
+              "charged_utility": 892.8000015438362,
+              "episode_return": 927.1437515438362,
+              "tracking_squared_error_integral": 1.4835680609024096,
+              "upper_inference_calls": 34.34375
+            }
+          }
+        },
+        "root": 310073
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": -5.393754831119338,
+          "interaction:return": -19.69059037416082,
+          "intrinsic_episode:frozen:return": -8.868920546382242,
+          "intrinsic_option:frozen:return": -13.32046090234337,
+          "reward_source:return": 2.397958449897203,
+          "task_episode:frozen:return": -16.316257283565506,
+          "task_option:frozen:return": -1.0772072653658142
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 888.8807246384918,
+              "episode_return": 917.9744746384918,
+              "tracking_squared_error_integral": 1.5065634288632148,
+              "upper_inference_calls": 29.09375
+            },
+            "intrinsic_episode": {
+              "charged_utility": 879.7305540921095,
+              "episode_return": 909.1055540921095,
+              "tracking_squared_error_integral": 1.5803114870014066,
+              "upper_inference_calls": 29.375
+            },
+            "intrinsic_option": {
+              "charged_utility": 875.6227637361484,
+              "episode_return": 904.6540137361484,
+              "tracking_squared_error_integral": 1.6261649971423344,
+              "upper_inference_calls": 29.03125
+            },
+            "task_episode": {
+              "charged_utility": 872.7519673549263,
+              "episode_return": 901.6582173549263,
+              "tracking_squared_error_integral": 1.6524107717457248,
+              "upper_inference_calls": 28.90625
+            },
+            "task_option": {
+              "charged_utility": 887.0847673731259,
+              "episode_return": 916.8972673731259,
+              "tracking_squared_error_integral": 1.5699872448987227,
+              "upper_inference_calls": 29.8125
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 888.8807246384918,
+              "episode_return": 917.9744746384918,
+              "tracking_squared_error_integral": 1.5065634288632148,
+              "upper_inference_calls": 29.09375
+            },
+            "intrinsic_episode": {
+              "charged_utility": 882.9367299904857,
+              "episode_return": 912.1554799904857,
+              "tracking_squared_error_integral": 1.571972735714395,
+              "upper_inference_calls": 29.21875
+            },
+            "intrinsic_option": {
+              "charged_utility": 880.69651946982,
+              "episode_return": 909.72776946982,
+              "tracking_squared_error_integral": 1.5912570418643504,
+              "upper_inference_calls": 29.03125
+            },
+            "task_episode": {
+              "charged_utility": 888.2244952268915,
+              "episode_return": 917.3494952268915,
+              "tracking_squared_error_integral": 1.5285550832024373,
+              "upper_inference_calls": 29.125
+            },
+            "task_option": {
+              "charged_utility": 888.8807246384918,
+              "episode_return": 917.9744746384918,
+              "tracking_squared_error_integral": 1.5065634288632148,
+              "upper_inference_calls": 29.09375
+            }
+          }
+        },
+        "root": 310089
+      },
+      {
+        "endpoints": {
+          "credit_boundary:return": 7.367677382060265,
+          "interaction:return": -16.723623841623066,
+          "intrinsic_episode:frozen:return": -0.38763242025186173,
+          "intrinsic_option:frozen:return": -16.11712172312366,
+          "reward_source:return": -5.178786302299159,
+          "task_episode:frozen:return": -13.928230643362554,
+          "task_option:frozen:return": -12.934096104611285
+        },
+        "means": {
+          "final": {
+            "frozen": {
+              "charged_utility": 868.7857968254112,
+              "episode_return": 893.3482968254112,
+              "tracking_squared_error_integral": 1.9138382017213096,
+              "upper_inference_calls": 24.5625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 868.4919144051594,
+              "episode_return": 892.9606644051594,
+              "tracking_squared_error_integral": 1.9091645528532086,
+              "upper_inference_calls": 24.46875
+            },
+            "intrinsic_option": {
+              "charged_utility": 852.4811751022876,
+              "episode_return": 877.2311751022876,
+              "tracking_squared_error_integral": 2.036098660132149,
+              "upper_inference_calls": 24.75
+            },
+            "task_episode": {
+              "charged_utility": 854.8575661820487,
+              "episode_return": 879.4200661820487,
+              "tracking_squared_error_integral": 2.0301226786336586,
+              "upper_inference_calls": 24.5625
+            },
+            "task_option": {
+              "charged_utility": 855.6017007208,
+              "episode_return": 880.4142007208,
+              "tracking_squared_error_integral": 1.961381316537366,
+              "upper_inference_calls": 24.8125
+            }
+          },
+          "selected": {
+            "frozen": {
+              "charged_utility": 868.7857968254112,
+              "episode_return": 893.3482968254112,
+              "tracking_squared_error_integral": 1.9138382017213096,
+              "upper_inference_calls": 24.5625
+            },
+            "intrinsic_episode": {
+              "charged_utility": 874.5621255227551,
+              "episode_return": 899.4371255227551,
+              "tracking_squared_error_integral": 1.8209709392976556,
+              "upper_inference_calls": 24.875
+            },
+            "intrinsic_option": {
+              "charged_utility": 867.1954488683912,
+              "episode_return": 892.2891988683912,
+              "tracking_squared_error_integral": 1.900708254778216,
+              "upper_inference_calls": 25.09375
+            },
+            "task_episode": {
+              "charged_utility": 868.7857968254112,
+              "episode_return": 893.3482968254112,
+              "tracking_squared_error_integral": 1.9138382017213096,
+              "upper_inference_calls": 24.5625
+            },
+            "task_option": {
+              "charged_utility": 871.4080396090314,
+              "episode_return": 896.4705396090314,
+              "tracking_squared_error_integral": 1.8697196075063587,
+              "upper_inference_calls": 25.0625
+            }
+          }
+        },
+        "root": 310101
+      }
+    ],
+    "status": "stage38_lower_credit_diagnosis_complete"
+  },
+  "audits": [
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "frozen",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "intrinsic_episode",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "checks": "frozen_components_native_metrics_causal_gate_execution_and_accounting",
+      "episodes": 64,
+      "method": "task_episode",
+      "root": 310101,
+      "status": "passed"
+    }
+  ],
+  "checkpoint_replays": [
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "task_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 96,
+      "method": "task_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 64,
+      "method": "task_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 96,
+      "method": "task_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 64,
+      "method": "task_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "task_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 96,
+      "method": "intrinsic_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 96,
+      "method": "intrinsic_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "task_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "frozen",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "frozen",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "intrinsic_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 96,
+      "method": "task_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "final",
+      "iteration": 128,
+      "method": "task_episode",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "cohort": "selected",
+      "iteration": 0,
+      "method": "task_episode",
+      "root": 310101,
+      "status": "passed"
+    }
+  ],
+  "credit_audits": [
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310011,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310023,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310037,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310049,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310061,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310073,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310089,
+      "status": "passed"
+    },
+    {
+      "method": "frozen",
+      "mode": "intrinsic_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_option",
+      "mode": "intrinsic_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "method": "intrinsic_episode",
+      "mode": "intrinsic_episode",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "method": "task_option",
+      "mode": "task_option",
+      "root": 310101,
+      "status": "passed"
+    },
+    {
+      "method": "task_episode",
+      "mode": "task_episode",
+      "root": 310101,
+      "status": "passed"
+    }
+  ],
+  "credit_diagnostics": [
+    {
+      "first": {
+        "advantage_mean": -0.03011513315141201,
+        "advantage_std": 0.07168343663215637,
+        "done_count": 214,
+        "iteration": 1,
+        "old_value_mean": 0.23257528245449066,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.2024601548910141,
+        "reward_sum": 94.69667081870881,
+        "task_reward_sum": 6431.385283023119
+      },
+      "last": {
+        "advantage_mean": -0.01759597659111023,
+        "advantage_std": 0.05321888253092766,
+        "done_count": 195,
+        "iteration": 128,
+        "old_value_mean": 0.19674478471279144,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1791488081216812,
+        "reward_sum": 86.5360840262751,
+        "task_reward_sum": 6915.665232211351
+      },
+      "method": "frozen",
+      "root": 310011
+    },
+    {
+      "first": {
+        "advantage_mean": -0.03011513315141201,
+        "advantage_std": 0.07168343663215637,
+        "done_count": 214,
+        "iteration": 1,
+        "old_value_mean": 0.23257528245449066,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.2024601548910141,
+        "reward_sum": 94.69667081870881,
+        "task_reward_sum": 6431.385283023119
+      },
+      "last": {
+        "advantage_mean": 0.007621264550834894,
+        "advantage_std": 0.05064473673701286,
+        "done_count": 195,
+        "iteration": 128,
+        "old_value_mean": 0.14749082922935486,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1551121026277542,
+        "reward_sum": 84.12059337209996,
+        "task_reward_sum": 6890.9489832520485
+      },
+      "method": "intrinsic_option",
+      "root": 310011
+    },
+    {
+      "first": {
+        "advantage_mean": 0.15122316777706146,
+        "advantage_std": 0.16441217064857483,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.23257528245449066,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.3837984800338745,
+        "reward_sum": 94.69667081870881,
+        "task_reward_sum": 6431.385283023119
+      },
+      "last": {
+        "advantage_mean": -0.010894900187849998,
+        "advantage_std": 0.17042873799800873,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.4526832103729248,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.4417883157730103,
+        "reward_sum": 76.71831333355046,
+        "task_reward_sum": 6729.455388188362
+      },
+      "method": "intrinsic_episode",
+      "root": 310011
+    },
+    {
+      "first": {
+        "advantage_mean": 7.969982147216797,
+        "advantage_std": 3.7355141639709473,
+        "done_count": 214,
+        "iteration": 1,
+        "old_value_mean": 0.23257528245449066,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.202557563781738,
+        "reward_sum": 6431.385283023119,
+        "task_reward_sum": 6431.385283023119
+      },
+      "last": {
+        "advantage_mean": 0.5613595843315125,
+        "advantage_std": 8.820256233215332,
+        "done_count": 195,
+        "iteration": 128,
+        "old_value_mean": 21.315771102905273,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 21.87713050842285,
+        "reward_sum": 6927.422169685364,
+        "task_reward_sum": 6927.422169685364
+      },
+      "method": "task_option",
+      "root": 310011
+    },
+    {
+      "first": {
+        "advantage_mean": 12.006638526916504,
+        "advantage_std": 2.4345602989196777,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.23257528245449066,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.239215850830078,
+        "reward_sum": 6431.385283023119,
+        "task_reward_sum": 6431.385283023119
+      },
+      "last": {
+        "advantage_mean": 0.4385856091976166,
+        "advantage_std": 10.513500213623047,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 115.1058578491211,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 115.54444122314453,
+        "reward_sum": 6707.759257137775,
+        "task_reward_sum": 6707.759257137775
+      },
+      "method": "task_episode",
+      "root": 310011
+    },
+    {
+      "first": {
+        "advantage_mean": -0.025423435494303703,
+        "advantage_std": 0.06155375391244888,
+        "done_count": 212,
+        "iteration": 1,
+        "old_value_mean": 0.2170574963092804,
+        "option_count": 212,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19163405895233154,
+        "reward_sum": 85.92401840260436,
+        "task_reward_sum": 6886.360470220447
+      },
+      "last": {
+        "advantage_mean": -0.026679430156946182,
+        "advantage_std": 0.06498970091342926,
+        "done_count": 220,
+        "iteration": 128,
+        "old_value_mean": 0.21647608280181885,
+        "option_count": 220,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18979665637016296,
+        "reward_sum": 91.19953451404524,
+        "task_reward_sum": 6614.125820755959
+      },
+      "method": "frozen",
+      "root": 310023
+    },
+    {
+      "first": {
+        "advantage_mean": -0.025423435494303703,
+        "advantage_std": 0.06155375391244888,
+        "done_count": 212,
+        "iteration": 1,
+        "old_value_mean": 0.2170574963092804,
+        "option_count": 212,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19163405895233154,
+        "reward_sum": 85.92401840260436,
+        "task_reward_sum": 6886.360470220447
+      },
+      "last": {
+        "advantage_mean": -0.0028447227086871862,
+        "advantage_std": 0.05577867850661278,
+        "done_count": 220,
+        "iteration": 128,
+        "old_value_mean": 0.17400871217250824,
+        "option_count": 220,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.17116400599479675,
+        "reward_sum": 89.52119163713644,
+        "task_reward_sum": 6547.38800445199
+      },
+      "method": "intrinsic_option",
+      "root": 310023
+    },
+    {
+      "first": {
+        "advantage_mean": 0.13810646533966064,
+        "advantage_std": 0.14925138652324677,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.2170574963092804,
+        "option_count": 212,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.35516396164894104,
+        "reward_sum": 85.92401840260436,
+        "task_reward_sum": 6886.360470220447
+      },
+      "last": {
+        "advantage_mean": 0.012402113527059555,
+        "advantage_std": 0.16058260202407837,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.3769145011901855,
+        "option_count": 220,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.3893165588378906,
+        "reward_sum": 83.62109394224456,
+        "task_reward_sum": 6623.203552633524
+      },
+      "method": "intrinsic_episode",
+      "root": 310023
+    },
+    {
+      "first": {
+        "advantage_mean": 8.609457015991211,
+        "advantage_std": 3.9014270305633545,
+        "done_count": 212,
+        "iteration": 1,
+        "old_value_mean": 0.2170574963092804,
+        "option_count": 212,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.82651424407959,
+        "reward_sum": 6886.360470220447,
+        "task_reward_sum": 6886.360470220447
+      },
+      "last": {
+        "advantage_mean": -0.4261832535266876,
+        "advantage_std": 8.285965919494629,
+        "done_count": 220,
+        "iteration": 128,
+        "old_value_mean": 19.57046127319336,
+        "option_count": 220,
+        "primitive_steps": 9600,
+        "return_target_mean": 19.144277572631836,
+        "reward_sum": 6376.142176061869,
+        "task_reward_sum": 6376.142176061869
+      },
+      "method": "task_option",
+      "root": 310023
+    },
+    {
+      "first": {
+        "advantage_mean": 12.861807823181152,
+        "advantage_std": 2.405052423477173,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.2170574963092804,
+        "option_count": 212,
+        "primitive_steps": 9600,
+        "return_target_mean": 13.078866004943848,
+        "reward_sum": 6886.360470220447,
+        "task_reward_sum": 6886.360470220447
+      },
+      "last": {
+        "advantage_mean": 0.10451239347457886,
+        "advantage_std": 10.430328369140625,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 114.34558868408203,
+        "option_count": 220,
+        "primitive_steps": 9600,
+        "return_target_mean": 114.45010375976562,
+        "reward_sum": 6479.935163572431,
+        "task_reward_sum": 6479.935163572431
+      },
+      "method": "task_episode",
+      "root": 310023
+    },
+    {
+      "first": {
+        "advantage_mean": -0.022302882745862007,
+        "advantage_std": 0.06320734322071075,
+        "done_count": 204,
+        "iteration": 1,
+        "old_value_mean": 0.20310120284557343,
+        "option_count": 204,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18079833686351776,
+        "reward_sum": 87.2185608228635,
+        "task_reward_sum": 6642.075999781489
+      },
+      "last": {
+        "advantage_mean": -0.021270329132676125,
+        "advantage_std": 0.05809703841805458,
+        "done_count": 206,
+        "iteration": 128,
+        "old_value_mean": 0.2104078233242035,
+        "option_count": 206,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1891375035047531,
+        "reward_sum": 90.10486972507994,
+        "task_reward_sum": 6652.629655212164
+      },
+      "method": "frozen",
+      "root": 310037
+    },
+    {
+      "first": {
+        "advantage_mean": -0.022302882745862007,
+        "advantage_std": 0.06320734322071075,
+        "done_count": 204,
+        "iteration": 1,
+        "old_value_mean": 0.20310120284557343,
+        "option_count": 204,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18079833686351776,
+        "reward_sum": 87.2185608228635,
+        "task_reward_sum": 6642.075999781489
+      },
+      "last": {
+        "advantage_mean": 0.008614913560450077,
+        "advantage_std": 0.05355121195316315,
+        "done_count": 206,
+        "iteration": 128,
+        "old_value_mean": 0.16217991709709167,
+        "option_count": 206,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.17079482972621918,
+        "reward_sum": 90.32904965448176,
+        "task_reward_sum": 6629.170749798417
+      },
+      "method": "intrinsic_option",
+      "root": 310037
+    },
+    {
+      "first": {
+        "advantage_mean": 0.1426355540752411,
+        "advantage_std": 0.15707042813301086,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20310120284557343,
+        "option_count": 204,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.3457367420196533,
+        "reward_sum": 87.2185608228635,
+        "task_reward_sum": 6642.075999781489
+      },
+      "last": {
+        "advantage_mean": 0.005288824904710054,
+        "advantage_std": 0.16149309277534485,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.4103807210922241,
+        "option_count": 206,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.415669560432434,
+        "reward_sum": 82.35778434700859,
+        "task_reward_sum": 6608.5370584875345
+      },
+      "method": "intrinsic_episode",
+      "root": 310037
+    },
+    {
+      "first": {
+        "advantage_mean": 8.418869972229004,
+        "advantage_std": 3.8075215816497803,
+        "done_count": 204,
+        "iteration": 1,
+        "old_value_mean": 0.20310120284557343,
+        "option_count": 204,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.621971130371094,
+        "reward_sum": 6642.075999781489,
+        "task_reward_sum": 6642.075999781489
+      },
+      "last": {
+        "advantage_mean": -0.1573268473148346,
+        "advantage_std": 8.751524925231934,
+        "done_count": 206,
+        "iteration": 128,
+        "old_value_mean": 21.131864547729492,
+        "option_count": 206,
+        "primitive_steps": 9600,
+        "return_target_mean": 20.974538803100586,
+        "reward_sum": 6603.467896491289,
+        "task_reward_sum": 6603.467896491289
+      },
+      "method": "task_option",
+      "root": 310037
+    },
+    {
+      "first": {
+        "advantage_mean": 12.403255462646484,
+        "advantage_std": 2.292804479598999,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20310120284557343,
+        "option_count": 204,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.60635757446289,
+        "reward_sum": 6642.075999781489,
+        "task_reward_sum": 6642.075999781489
+      },
+      "last": {
+        "advantage_mean": 0.4600119888782501,
+        "advantage_std": 10.72368049621582,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 114.6861572265625,
+        "option_count": 206,
+        "primitive_steps": 9600,
+        "return_target_mean": 115.14617156982422,
+        "reward_sum": 6682.014463752508,
+        "task_reward_sum": 6682.014463752508
+      },
+      "method": "task_episode",
+      "root": 310037
+    },
+    {
+      "first": {
+        "advantage_mean": -0.018700655549764633,
+        "advantage_std": 0.054314401000738144,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.20263268053531647,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18393202126026154,
+        "reward_sum": 86.72632686635723,
+        "task_reward_sum": 6663.5603043437
+      },
+      "last": {
+        "advantage_mean": -0.034142233431339264,
+        "advantage_std": 0.07401981949806213,
+        "done_count": 233,
+        "iteration": 128,
+        "old_value_mean": 0.2426558881998062,
+        "option_count": 233,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.20851364731788635,
+        "reward_sum": 89.79617999902665,
+        "task_reward_sum": 6672.781826674938
+      },
+      "method": "frozen",
+      "root": 310049
+    },
+    {
+      "first": {
+        "advantage_mean": -0.018700655549764633,
+        "advantage_std": 0.054314401000738144,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.20263268053531647,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18393202126026154,
+        "reward_sum": 86.72632686635723,
+        "task_reward_sum": 6663.5603043437
+      },
+      "last": {
+        "advantage_mean": -0.003432383993640542,
+        "advantage_std": 0.06194775551557541,
+        "done_count": 233,
+        "iteration": 128,
+        "old_value_mean": 0.18659569323062897,
+        "option_count": 233,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18316331505775452,
+        "reward_sum": 90.25047590358099,
+        "task_reward_sum": 6630.820237606764
+      },
+      "method": "intrinsic_option",
+      "root": 310049
+    },
+    {
+      "first": {
+        "advantage_mean": 0.13948063552379608,
+        "advantage_std": 0.14788883924484253,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20263268053531647,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.34211328625679016,
+        "reward_sum": 86.72632686635723,
+        "task_reward_sum": 6663.5603043437
+      },
+      "last": {
+        "advantage_mean": 0.011342696845531464,
+        "advantage_std": 0.15460720658302307,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.3119019269943237,
+        "option_count": 231,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.3232446908950806,
+        "reward_sum": 79.95566959399275,
+        "task_reward_sum": 6537.642596244812
+      },
+      "method": "intrinsic_episode",
+      "root": 310049
+    },
+    {
+      "first": {
+        "advantage_mean": 8.4989013671875,
+        "advantage_std": 3.7429113388061523,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.20263268053531647,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.70153522491455,
+        "reward_sum": 6663.5603043437,
+        "task_reward_sum": 6663.5603043437
+      },
+      "last": {
+        "advantage_mean": -0.9668721556663513,
+        "advantage_std": 8.250633239746094,
+        "done_count": 233,
+        "iteration": 128,
+        "old_value_mean": 20.106163024902344,
+        "option_count": 233,
+        "primitive_steps": 9600,
+        "return_target_mean": 19.13928985595703,
+        "reward_sum": 6634.04981175065,
+        "task_reward_sum": 6634.04981175065
+      },
+      "method": "task_option",
+      "root": 310049
+    },
+    {
+      "first": {
+        "advantage_mean": 12.446059226989746,
+        "advantage_std": 2.4505786895751953,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20263268053531647,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.648691177368164,
+        "reward_sum": 6663.5603043437,
+        "task_reward_sum": 6663.5603043437
+      },
+      "last": {
+        "advantage_mean": 0.452183336019516,
+        "advantage_std": 10.748706817626953,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 114.95286560058594,
+        "option_count": 233,
+        "primitive_steps": 9600,
+        "return_target_mean": 115.4050521850586,
+        "reward_sum": 6682.691530659795,
+        "task_reward_sum": 6682.691530659795
+      },
+      "method": "task_episode",
+      "root": 310049
+    },
+    {
+      "first": {
+        "advantage_mean": -0.018533913418650627,
+        "advantage_std": 0.06617791205644608,
+        "done_count": 198,
+        "iteration": 1,
+        "old_value_mean": 0.20046928524971008,
+        "option_count": 198,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1819353550672531,
+        "reward_sum": 82.46249753138636,
+        "task_reward_sum": 6656.3809206187725
+      },
+      "last": {
+        "advantage_mean": -0.016042107716202736,
+        "advantage_std": 0.06442242115736008,
+        "done_count": 200,
+        "iteration": 128,
+        "old_value_mean": 0.2002527117729187,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1842106133699417,
+        "reward_sum": 84.71068080472622,
+        "task_reward_sum": 6639.646801292896
+      },
+      "method": "frozen",
+      "root": 310061
+    },
+    {
+      "first": {
+        "advantage_mean": -0.018533913418650627,
+        "advantage_std": 0.06617791205644608,
+        "done_count": 198,
+        "iteration": 1,
+        "old_value_mean": 0.20046928524971008,
+        "option_count": 198,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1819353550672531,
+        "reward_sum": 82.46249753138636,
+        "task_reward_sum": 6656.3809206187725
+      },
+      "last": {
+        "advantage_mean": 0.007622307166457176,
+        "advantage_std": 0.0652325451374054,
+        "done_count": 200,
+        "iteration": 128,
+        "old_value_mean": 0.1542605459690094,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.16188283264636993,
+        "reward_sum": 81.48402332856793,
+        "task_reward_sum": 6554.840062826872
+      },
+      "method": "intrinsic_option",
+      "root": 310061
+    },
+    {
+      "first": {
+        "advantage_mean": 0.13335952162742615,
+        "advantage_std": 0.14986532926559448,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20046928524971008,
+        "option_count": 198,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.33382877707481384,
+        "reward_sum": 82.46249753138636,
+        "task_reward_sum": 6656.3809206187725
+      },
+      "last": {
+        "advantage_mean": 0.0009776272345334291,
+        "advantage_std": 0.15858301520347595,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.3579012155532837,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.3588788509368896,
+        "reward_sum": 76.28899014808462,
+        "task_reward_sum": 6580.316778361797
+      },
+      "method": "intrinsic_episode",
+      "root": 310061
+    },
+    {
+      "first": {
+        "advantage_mean": 8.537506103515625,
+        "advantage_std": 3.789301633834839,
+        "done_count": 198,
+        "iteration": 1,
+        "old_value_mean": 0.20046928524971008,
+        "option_count": 198,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.73797607421875,
+        "reward_sum": 6656.3809206187725,
+        "task_reward_sum": 6656.3809206187725
+      },
+      "last": {
+        "advantage_mean": 0.8756237030029297,
+        "advantage_std": 8.14704704284668,
+        "done_count": 200,
+        "iteration": 128,
+        "old_value_mean": 18.945905685424805,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 19.8215274810791,
+        "reward_sum": 6586.516475111246,
+        "task_reward_sum": 6586.516475111246
+      },
+      "method": "task_option",
+      "root": 310061
+    },
+    {
+      "first": {
+        "advantage_mean": 12.43384075164795,
+        "advantage_std": 2.2770628929138184,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.20046928524971008,
+        "option_count": 198,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.634309768676758,
+        "reward_sum": 6656.3809206187725,
+        "task_reward_sum": 6656.3809206187725
+      },
+      "last": {
+        "advantage_mean": 0.27338582277297974,
+        "advantage_std": 10.254183769226074,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 111.8744125366211,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 112.14779663085938,
+        "reward_sum": 6433.609908849001,
+        "task_reward_sum": 6433.609908849001
+      },
+      "method": "task_episode",
+      "root": 310061
+    },
+    {
+      "first": {
+        "advantage_mean": -0.028685951605439186,
+        "advantage_std": 0.07048738747835159,
+        "done_count": 221,
+        "iteration": 1,
+        "old_value_mean": 0.22692856192588806,
+        "option_count": 221,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19824260473251343,
+        "reward_sum": 90.08113331314988,
+        "task_reward_sum": 6804.2892971634865
+      },
+      "last": {
+        "advantage_mean": -0.02863241545855999,
+        "advantage_std": 0.07100779563188553,
+        "done_count": 219,
+        "iteration": 128,
+        "old_value_mean": 0.2265622913837433,
+        "option_count": 219,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19792990386486053,
+        "reward_sum": 86.83731395725866,
+        "task_reward_sum": 6684.745210051537
+      },
+      "method": "frozen",
+      "root": 310073
+    },
+    {
+      "first": {
+        "advantage_mean": -0.028685951605439186,
+        "advantage_std": 0.07048738747835159,
+        "done_count": 221,
+        "iteration": 1,
+        "old_value_mean": 0.22692856192588806,
+        "option_count": 221,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19824260473251343,
+        "reward_sum": 90.08113331314988,
+        "task_reward_sum": 6804.2892971634865
+      },
+      "last": {
+        "advantage_mean": -0.0029145097360014915,
+        "advantage_std": 0.06267989426851273,
+        "done_count": 219,
+        "iteration": 128,
+        "old_value_mean": 0.18649417161941528,
+        "option_count": 219,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.18357966840267181,
+        "reward_sum": 85.95645144992586,
+        "task_reward_sum": 6602.779238939285
+      },
+      "method": "intrinsic_option",
+      "root": 310073
+    },
+    {
+      "first": {
+        "advantage_mean": 0.14378350973129272,
+        "advantage_std": 0.15580549836158752,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.22692856192588806,
+        "option_count": 221,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.3707120418548584,
+        "reward_sum": 90.08113331314988,
+        "task_reward_sum": 6804.2892971634865
+      },
+      "last": {
+        "advantage_mean": -0.0015475817490369081,
+        "advantage_std": 0.17126403748989105,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.4797297716140747,
+        "option_count": 219,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.478182315826416,
+        "reward_sum": 82.31709781873951,
+        "task_reward_sum": 6679.7101882994175
+      },
+      "method": "intrinsic_episode",
+      "root": 310073
+    },
+    {
+      "first": {
+        "advantage_mean": 8.320455551147461,
+        "advantage_std": 3.7595105171203613,
+        "done_count": 221,
+        "iteration": 1,
+        "old_value_mean": 0.22692856192588806,
+        "option_count": 221,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.547384262084961,
+        "reward_sum": 6804.2892971634865,
+        "task_reward_sum": 6804.2892971634865
+      },
+      "last": {
+        "advantage_mean": 0.025469716638326645,
+        "advantage_std": 8.419344902038574,
+        "done_count": 219,
+        "iteration": 128,
+        "old_value_mean": 19.370880126953125,
+        "option_count": 219,
+        "primitive_steps": 9600,
+        "return_target_mean": 19.39634895324707,
+        "reward_sum": 6703.168481811881,
+        "task_reward_sum": 6703.168481811881
+      },
+      "method": "task_option",
+      "root": 310073
+    },
+    {
+      "first": {
+        "advantage_mean": 12.716769218444824,
+        "advantage_std": 2.31278395652771,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.22692856192588806,
+        "option_count": 221,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.943697929382324,
+        "reward_sum": 6804.2892971634865,
+        "task_reward_sum": 6804.2892971634865
+      },
+      "last": {
+        "advantage_mean": 0.6351349353790283,
+        "advantage_std": 11.96304702758789,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 114.10286712646484,
+        "option_count": 219,
+        "primitive_steps": 9600,
+        "return_target_mean": 114.73799133300781,
+        "reward_sum": 6763.424108237028,
+        "task_reward_sum": 6763.424108237028
+      },
+      "method": "task_episode",
+      "root": 310073
+    },
+    {
+      "first": {
+        "advantage_mean": -0.015105229802429676,
+        "advantage_std": 0.04975615441799164,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.19399914145469666,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.17889390885829926,
+        "reward_sum": 89.12845358254324,
+        "task_reward_sum": 6757.928340256214
+      },
+      "last": {
+        "advantage_mean": -0.026841847226023674,
+        "advantage_std": 0.06944609433412552,
+        "done_count": 214,
+        "iteration": 128,
+        "old_value_mean": 0.230014368891716,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.203172504901886,
+        "reward_sum": 92.95555062539972,
+        "task_reward_sum": 6733.541477456689
+      },
+      "method": "frozen",
+      "root": 310089
+    },
+    {
+      "first": {
+        "advantage_mean": -0.015105229802429676,
+        "advantage_std": 0.04975615441799164,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.19399914145469666,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.17889390885829926,
+        "reward_sum": 89.12845358254324,
+        "task_reward_sum": 6757.928340256214
+      },
+      "last": {
+        "advantage_mean": -0.004423622973263264,
+        "advantage_std": 0.060551922768354416,
+        "done_count": 214,
+        "iteration": 128,
+        "old_value_mean": 0.1872912496328354,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.1828676015138626,
+        "reward_sum": 88.73071673468098,
+        "task_reward_sum": 6660.064730077982
+      },
+      "method": "intrinsic_option",
+      "root": 310089
+    },
+    {
+      "first": {
+        "advantage_mean": 0.14675845205783844,
+        "advantage_std": 0.15831315517425537,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.19399914145469666,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.3407575488090515,
+        "reward_sum": 89.12845358254324,
+        "task_reward_sum": 6757.928340256214
+      },
+      "last": {
+        "advantage_mean": 0.005833914969116449,
+        "advantage_std": 0.1688689887523651,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.52218759059906,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.5280215740203857,
+        "reward_sum": 88.88472005569201,
+        "task_reward_sum": 6683.3500014692545
+      },
+      "method": "intrinsic_episode",
+      "root": 310089
+    },
+    {
+      "first": {
+        "advantage_mean": 8.638346672058105,
+        "advantage_std": 3.8407013416290283,
+        "done_count": 200,
+        "iteration": 1,
+        "old_value_mean": 0.19399914145469666,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.832345962524414,
+        "reward_sum": 6757.928340256214,
+        "task_reward_sum": 6757.928340256214
+      },
+      "last": {
+        "advantage_mean": -0.3620472848415375,
+        "advantage_std": 8.999529838562012,
+        "done_count": 214,
+        "iteration": 128,
+        "old_value_mean": 21.251161575317383,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 20.889114379882812,
+        "reward_sum": 6691.059903934598,
+        "task_reward_sum": 6691.059903934598
+      },
+      "method": "task_option",
+      "root": 310089
+    },
+    {
+      "first": {
+        "advantage_mean": 12.627110481262207,
+        "advantage_std": 2.4969840049743652,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.19399914145469666,
+        "option_count": 200,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.821109771728516,
+        "reward_sum": 6757.928340256214,
+        "task_reward_sum": 6757.928340256214
+      },
+      "last": {
+        "advantage_mean": 0.33541443943977356,
+        "advantage_std": 10.661876678466797,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 114.90693664550781,
+        "option_count": 214,
+        "primitive_steps": 9600,
+        "return_target_mean": 115.24235534667969,
+        "reward_sum": 6641.079597815871,
+        "task_reward_sum": 6641.079597815871
+      },
+      "method": "task_episode",
+      "root": 310089
+    },
+    {
+      "first": {
+        "advantage_mean": -0.022072982043027878,
+        "advantage_std": 0.05814432352781296,
+        "done_count": 195,
+        "iteration": 1,
+        "old_value_mean": 0.2189277857542038,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19685481488704681,
+        "reward_sum": 92.92479195006445,
+        "task_reward_sum": 6728.581056892872
+      },
+      "last": {
+        "advantage_mean": -0.020379308611154556,
+        "advantage_std": 0.0530368909239769,
+        "done_count": 194,
+        "iteration": 128,
+        "old_value_mean": 0.2132740318775177,
+        "option_count": 194,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19289471209049225,
+        "reward_sum": 90.36732100117393,
+        "task_reward_sum": 6629.150179207325
+      },
+      "method": "frozen",
+      "root": 310101
+    },
+    {
+      "first": {
+        "advantage_mean": -0.022072982043027878,
+        "advantage_std": 0.05814432352781296,
+        "done_count": 195,
+        "iteration": 1,
+        "old_value_mean": 0.2189277857542038,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.19685481488704681,
+        "reward_sum": 92.92479195006445,
+        "task_reward_sum": 6728.581056892872
+      },
+      "last": {
+        "advantage_mean": 0.004051733296364546,
+        "advantage_std": 0.049898333847522736,
+        "done_count": 194,
+        "iteration": 128,
+        "old_value_mean": 0.14883413910865784,
+        "option_count": 194,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.15288586914539337,
+        "reward_sum": 83.95163597814258,
+        "task_reward_sum": 6517.2193485200405
+      },
+      "method": "intrinsic_option",
+      "root": 310101
+    },
+    {
+      "first": {
+        "advantage_mean": 0.14856888353824615,
+        "advantage_std": 0.15931950509548187,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.2189277857542038,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 0.36749669909477234,
+        "reward_sum": 92.92479195006445,
+        "task_reward_sum": 6728.581056892872
+      },
+      "last": {
+        "advantage_mean": 0.00030413587228395045,
+        "advantage_std": 0.17207728326320648,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 1.493808627128601,
+        "option_count": 194,
+        "primitive_steps": 9600,
+        "return_target_mean": 1.4941126108169556,
+        "reward_sum": 84.39719560081363,
+        "task_reward_sum": 6629.474373459816
+      },
+      "method": "intrinsic_episode",
+      "root": 310101
+    },
+    {
+      "first": {
+        "advantage_mean": 8.63080883026123,
+        "advantage_std": 3.8258697986602783,
+        "done_count": 195,
+        "iteration": 1,
+        "old_value_mean": 0.2189277857542038,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 8.849736213684082,
+        "reward_sum": 6728.581056892872,
+        "task_reward_sum": 6728.581056892872
+      },
+      "last": {
+        "advantage_mean": 0.40346381068229675,
+        "advantage_std": 8.652777671813965,
+        "done_count": 194,
+        "iteration": 128,
+        "old_value_mean": 20.622631072998047,
+        "option_count": 194,
+        "primitive_steps": 9600,
+        "return_target_mean": 21.026094436645508,
+        "reward_sum": 6626.044817864895,
+        "task_reward_sum": 6626.044817864895
+      },
+      "method": "task_option",
+      "root": 310101
+    },
+    {
+      "first": {
+        "advantage_mean": 12.56612491607666,
+        "advantage_std": 2.3616230487823486,
+        "done_count": 8,
+        "iteration": 1,
+        "old_value_mean": 0.2189277857542038,
+        "option_count": 195,
+        "primitive_steps": 9600,
+        "return_target_mean": 12.785052299499512,
+        "reward_sum": 6728.581056892872,
+        "task_reward_sum": 6728.581056892872
+      },
+      "last": {
+        "advantage_mean": 0.4639517068862915,
+        "advantage_std": 10.223347663879395,
+        "done_count": 8,
+        "iteration": 128,
+        "old_value_mean": 112.86117553710938,
+        "option_count": 194,
+        "primitive_steps": 9600,
+        "return_target_mean": 113.32514190673828,
+        "reward_sum": 6593.135029613972,
+        "task_reward_sum": 6593.135029613972
+      },
+      "method": "task_episode",
+      "root": 310101
+    }
+  ],
+  "independent_statistics": {
+    "endpoints": 7,
+    "method": "paired_root_count_weight_bootstrap",
+    "status": "passed"
+  },
+  "method_cost": {
+    "gate_inference_calls": 1977116,
+    "lower_inference_calls": 54192000,
+    "primitive_steps": 54192000,
+    "upper_inference_calls": 1186499
+  },
+  "protocol": "pointmaze_lower_credit_stage38_v1",
+  "run_name": "pointmaze_lower_credit_stage38_v1_full_20260928_r1",
+  "selection": [
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310011
+    },
+    {
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310011
+    },
+    {
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310011
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310011
+    },
+    {
+      "iteration": 32,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310011
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310023
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310023
+    },
+    {
+      "iteration": 128,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310023
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310023
+    },
+    {
+      "iteration": 0,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310023
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310037
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310037
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310037
+    },
+    {
+      "iteration": 96,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310037
+    },
+    {
+      "iteration": 64,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310037
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310049
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310049
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310049
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310049
+    },
+    {
+      "iteration": 0,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310049
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310061
+    },
+    {
+      "iteration": 128,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310061
+    },
+    {
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310061
+    },
+    {
+      "iteration": 96,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310061
+    },
+    {
+      "iteration": 64,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310061
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310073
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310073
+    },
+    {
+      "iteration": 0,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310073
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310073
+    },
+    {
+      "iteration": 32,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310073
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310089
+    },
+    {
+      "iteration": 96,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310089
+    },
+    {
+      "iteration": 96,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310089
+    },
+    {
+      "iteration": 0,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310089
+    },
+    {
+      "iteration": 32,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310089
+    },
+    {
+      "iteration": 0,
+      "method": "frozen",
+      "optimizer_steps": {},
+      "root": 310101
+    },
+    {
+      "iteration": 32,
+      "method": "intrinsic_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310101
+    },
+    {
+      "iteration": 32,
+      "method": "intrinsic_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310101
+    },
+    {
+      "iteration": 96,
+      "method": "task_option",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310101
+    },
+    {
+      "iteration": 0,
+      "method": "task_episode",
+      "optimizer_steps": {
+        "lower_actor_optimizer_steps": 5120,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 5120
+      },
+      "root": 310101
+    }
+  ],
+  "selection_curves": {
+    "frozen": {
+      "calls": [
+        29.34375,
+        29.34375,
+        29.34375,
+        29.34375,
+        29.34375
+      ],
+      "ise": [
+        1.8345165538476427,
+        1.8345165538476427,
+        1.8345165538476427,
+        1.8345165538476427,
+        1.8345165538476427
+      ],
+      "iteration": [
+        0,
+        32,
+        64,
+        96,
+        128
+      ],
+      "return": [
+        898.4432608154633,
+        898.4432608154633,
+        898.4432608154633,
+        898.4432608154633,
+        898.4432608154633
+      ],
+      "utility": [
+        869.0995108154633,
+        869.0995108154633,
+        869.0995108154633,
+        869.0995108154633,
+        869.0995108154633
+      ]
+    },
+    "intrinsic_episode": {
+      "calls": [
+        29.34375,
+        29.375,
+        29.421875,
+        29.3125,
+        29.375
+      ],
+      "ise": [
+        1.8345165538476427,
+        1.8495113487628076,
+        1.8697398754248256,
+        1.9188545551676306,
+        1.8912030042194814
+      ],
+      "iteration": [
+        0,
+        32,
+        64,
+        96,
+        128
+      ],
+      "return": [
+        898.4432608154633,
+        896.7524966163144,
+        894.8192366280031,
+        892.1276252286013,
+        893.0863199932817
+      ],
+      "utility": [
+        869.0995108154633,
+        867.3774966163144,
+        865.3973616280031,
+        862.8151252286013,
+        863.7113199932817
+      ]
+    },
+    "intrinsic_option": {
+      "calls": [
+        29.34375,
+        29.25,
+        29.34375,
+        29.4375,
+        29.484375
+      ],
+      "ise": [
+        1.8345165538476427,
+        1.8860493487637573,
+        1.881780983165572,
+        1.8772437158121564,
+        1.9162959488001936
+      ],
+      "iteration": [
+        0,
+        32,
+        64,
+        96,
+        128
+      ],
+      "return": [
+        898.4432608154633,
+        894.3769458750269,
+        892.767999833275,
+        892.6491063819968,
+        889.027526236201
+      ],
+      "utility": [
+        869.0995108154633,
+        865.1269458750269,
+        863.424249833275,
+        863.2116063819968,
+        859.543151236201
+      ]
+    },
+    "task_episode": {
+      "calls": [
+        29.34375,
+        29.390625,
+        29.46875,
+        29.421875,
+        29.34375
+      ],
+      "ise": [
+        1.8345165538476427,
+        1.8256973468725604,
+        1.8346825479460773,
+        2.0306374873551243,
+        2.0852747568867667
+      ],
+      "iteration": [
+        0,
+        32,
+        64,
+        96,
+        128
+      ],
+      "return": [
+        898.4432608154633,
+        900.6590501204632,
+        896.6611015969297,
+        886.6567707844182,
+        882.2477531078754
+      ],
+      "utility": [
+        869.0995108154633,
+        871.2684251204632,
+        867.1923515969297,
+        857.2348957844182,
+        852.9040031078754
+      ]
+    },
+    "task_option": {
+      "calls": [
+        29.34375,
+        29.375,
+        29.453125,
+        29.625,
+        29.625
+      ],
+      "ise": [
+        1.8345165538476427,
+        1.9203576174913013,
+        1.9205284294606895,
+        1.9586441938420767,
+        1.9621370162888554
+      ],
+      "iteration": [
+        0,
+        32,
+        64,
+        96,
+        128
+      ],
+      "return": [
+        898.4432608154633,
+        891.6529729850156,
+        892.297886471309,
+        889.5072177874771,
+        886.6636267484005
+      ],
+      "utility": [
+        869.0995108154633,
+        862.2779729850156,
+        862.844761471309,
+        859.8822177874771,
+        857.0386267484005
+      ]
+    }
+  },
+  "status": "complete",
+  "verification_cost": {
+    "gate_inference_calls": 5227,
+    "lower_inference_calls": 144000,
+    "primitive_steps": 144000,
+    "upper_inference_calls": 3560
+  }
+}

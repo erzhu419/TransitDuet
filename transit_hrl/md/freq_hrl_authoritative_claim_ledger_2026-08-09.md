@@ -1,6 +1,6 @@
 # Freq-HRL Authoritative Evidence Ledger
 
-Date: 2026-09-19
+Date: 2026-09-28
 
 This is the only manuscript claim ledger. Unregistered artifacts and the old independent claim generators are excluded by default.
 
@@ -1467,10 +1467,22 @@ replays. Method19500 steps/329 upper/592 gate calls; verification4500 steps/
 Full freeze:40 cells, 54192000 method steps, 144000 verification steps,
 seven adjusted reward contrasts. Same inherited critics, no rescaling or
 hyperparameter change; preserve all roots, arms and earlier negative results.
-Full `t102300`-`t102339` is registered and running across all six CPU nodes,
-with cpu9/ram12GiB per cell and no node pin. Four SSH handshake failures were
-retried at launch; all 40 cells started. Full performance/credit readout is
-pending; preflight metrics do not select treatments or change the freeze.
+The [full result](freq_hrl_stage38_lower_credit_result_2026-09-28.md)
+`t102300`-`t102339` completes 40 cells/2560 evaluation episodes. All 40
+trajectory audits, 80 final/selected native policy replays, 40 initial credit
+replays and the independent seven-endpoint bootstrap pass. All scheduler jobs
+exit zero; launch-only SSH retries produced no duplicate executions.
+Final return versus frozen: intrinsic-option -10.26 [-13.39,-7.08],
+intrinsic-episode -5.47 [-9.66,-1.43], task-option -10.51 [-30.50,-0.49],
+task-episode -16.96 [-24.49,-6.38]. All four update arms harm return.
+Reward-source, credit-boundary and interaction effects are inconclusive.
+Selected cohorts do not replace final endpoints; 15 of 32 learned cells
+select iteration0. Method54192000 steps/1186499 upper/1977116 gate calls;
+verification144000 steps/3560 upper/5227 gate calls. Initial value/target
+scale mismatch in task arms motivates critic calibration diagnostics, but
+unchanged intrinsic-option also harms return; the cause is not established.
+Next isolate critic calibration and first-update policy drift, not more seeds
+or reward retuning. No additional training jobs launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
