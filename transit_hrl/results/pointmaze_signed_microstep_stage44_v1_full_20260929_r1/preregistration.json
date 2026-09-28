@@ -1,0 +1,268 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 499200,
+    "native_trace_audits": 416,
+    "optimizer_steps": 0,
+    "total_primitive_steps": 499200
+  },
+  "contract": {
+    "baseline": "shared_pre_update_actor_after_exact_actor_and_frozen_level_equality",
+    "baseline_scale": 0.0,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      44,
+      44044
+    ],
+    "checkpoint_selection": "none",
+    "checkpoints": "fixed_last_warmup_and_first_lower_update_no_selection",
+    "decision": "positive_micro_or_signed_slope_and_negative_full_vs_plus_supports_bounded_finite_step_attenuation",
+    "descriptive_mode": "deterministic",
+    "evaluation": "fresh_paired_paths_deterministic_upper_gate_deterministic_or_sampled_lower",
+    "evidence_role": "conditional_diagnosis_existing_development_weights_with_fresh_evaluation_not_confirmation",
+    "interval": "two_sided_percentile_bonferroni_16_paired_equal_root_means",
+    "lower_actor": "before_plus_alpha_times_after_minus_before_all_parameters_including_log_std",
+    "lower_sampling_seed": "numpy_seedsequence_44_root_environment_seed_44019_plus_primitive_step",
+    "methods": [
+      "intrinsic_sham",
+      "intrinsic_clock",
+      "task_sham",
+      "task_clock"
+    ],
+    "optimizer_steps": 0,
+    "other_networks": "unchanged_each_before_checkpoint",
+    "primary_endpoints": [
+      "intrinsic_sham:plus_vs_zero",
+      "intrinsic_sham:minus_vs_zero",
+      "intrinsic_sham:signed_slope",
+      "intrinsic_sham:full_vs_plus",
+      "intrinsic_clock:plus_vs_zero",
+      "intrinsic_clock:minus_vs_zero",
+      "intrinsic_clock:signed_slope",
+      "intrinsic_clock:full_vs_plus",
+      "task_sham:plus_vs_zero",
+      "task_sham:minus_vs_zero",
+      "task_sham:signed_slope",
+      "task_sham:full_vs_plus",
+      "task_clock:plus_vs_zero",
+      "task_clock:minus_vs_zero",
+      "task_clock:signed_slope",
+      "task_clock:full_vs_plus"
+    ],
+    "primary_mode": "lower_sampled",
+    "root_exclusion": "forbidden",
+    "scale_selection": "forbidden",
+    "scales": {
+      "full": 1.0,
+      "minus_micro": -0.0625,
+      "plus_micro": 0.0625
+    },
+    "sequential_extension": "forbidden",
+    "signed_slope": "finite_central_difference_not_exact_derivative",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1"
+  },
+  "methods": [
+    "intrinsic_sham",
+    "intrinsic_clock",
+    "task_sham",
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "evaluation_paths": 16,
+    "horizon": 1200,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_signed_microstep_stage44_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "evaluation": [
+        10903001,
+        10903002,
+        10903003,
+        10903004,
+        10903005,
+        10903006,
+        10903007,
+        10903008,
+        10903009,
+        10903010,
+        10903011,
+        10903012,
+        10903013,
+        10903014,
+        10903015,
+        10903016
+      ]
+    },
+    "310023": {
+      "evaluation": [
+        10913001,
+        10913002,
+        10913003,
+        10913004,
+        10913005,
+        10913006,
+        10913007,
+        10913008,
+        10913009,
+        10913010,
+        10913011,
+        10913012,
+        10913013,
+        10913014,
+        10913015,
+        10913016
+      ]
+    },
+    "310037": {
+      "evaluation": [
+        10923001,
+        10923002,
+        10923003,
+        10923004,
+        10923005,
+        10923006,
+        10923007,
+        10923008,
+        10923009,
+        10923010,
+        10923011,
+        10923012,
+        10923013,
+        10923014,
+        10923015,
+        10923016
+      ]
+    },
+    "310049": {
+      "evaluation": [
+        10933001,
+        10933002,
+        10933003,
+        10933004,
+        10933005,
+        10933006,
+        10933007,
+        10933008,
+        10933009,
+        10933010,
+        10933011,
+        10933012,
+        10933013,
+        10933014,
+        10933015,
+        10933016
+      ]
+    },
+    "310061": {
+      "evaluation": [
+        10943001,
+        10943002,
+        10943003,
+        10943004,
+        10943005,
+        10943006,
+        10943007,
+        10943008,
+        10943009,
+        10943010,
+        10943011,
+        10943012,
+        10943013,
+        10943014,
+        10943015,
+        10943016
+      ]
+    },
+    "310073": {
+      "evaluation": [
+        10953001,
+        10953002,
+        10953003,
+        10953004,
+        10953005,
+        10953006,
+        10953007,
+        10953008,
+        10953009,
+        10953010,
+        10953011,
+        10953012,
+        10953013,
+        10953014,
+        10953015,
+        10953016
+      ]
+    },
+    "310089": {
+      "evaluation": [
+        10963001,
+        10963002,
+        10963003,
+        10963004,
+        10963005,
+        10963006,
+        10963007,
+        10963008,
+        10963009,
+        10963010,
+        10963011,
+        10963012,
+        10963013,
+        10963014,
+        10963015,
+        10963016
+      ]
+    },
+    "310101": {
+      "evaluation": [
+        10973001,
+        10973002,
+        10973003,
+        10973004,
+        10973005,
+        10973006,
+        10973007,
+        10973008,
+        10973009,
+        10973010,
+        10973011,
+        10973012,
+        10973013,
+        10973014,
+        10973015,
+        10973016
+      ]
+    }
+  },
+  "source_revision": "9d1bf4b5035a0b190557f518c78153fa6e79b337",
+  "source_run": "pointmaze_critic_clock_stage42_v1_full_20260928_r1",
+  "total_method_steps": 3993600
+}
