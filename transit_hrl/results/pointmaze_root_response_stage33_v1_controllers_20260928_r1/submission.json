@@ -1,0 +1,88 @@
+{
+  "protocol": "pointmaze_root_response_stage33_v1_qualification",
+  "phase": "train",
+  "source_revision": "8262599e74",
+  "run_name": "pointmaze_root_response_stage33_v1_controllers_20260928_r1",
+  "tasks": [
+    {
+      "task_id": "t101759",
+      "optimizer_seed": 310011,
+      "node": "node005",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101760",
+      "optimizer_seed": 310023,
+      "node": "node004",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101761",
+      "optimizer_seed": 310037,
+      "node": "node006",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101762",
+      "optimizer_seed": 310049,
+      "node": "node005",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101763",
+      "optimizer_seed": 310061,
+      "node": "node001",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101764",
+      "optimizer_seed": 310073,
+      "node": "node004",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101765",
+      "optimizer_seed": 310089,
+      "node": "node006",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    },
+    {
+      "task_id": "t101766",
+      "optimizer_seed": 310101,
+      "node": "node005",
+      "status": "running",
+      "observed_iteration": 9,
+      "cpu_cores": 1
+    }
+  ],
+  "scientific_qualification": "pending",
+  "frozen_full_controller_primitive_steps": 33945600,
+  "frozen_full_response_primitive_steps": 4851100,
+  "frozen_combined_method_primitive_steps": 38796700,
+  "next_phase": {
+    "run_name": "pointmaze_root_response_stage33_v1_qualification_20260928_r1",
+    "submitted": false,
+    "controller_run": "pointmaze_root_response_stage33_v1_controllers_20260928_r1",
+    "submit_command": "python3 scripts/submit_pointmaze_root_response_stage33_scheduleurm.py --run-name pointmaze_root_response_stage33_v1_qualification_20260928_r1 --phase response --controller-run pointmaze_root_response_stage33_v1_controllers_20260928_r1",
+    "sync_controllers_command": "python3 scripts/submit_pointmaze_root_response_stage33_scheduleurm.py --run-name pointmaze_root_response_stage33_v1_controllers_20260928_r1 --phase train --sync-results",
+    "pair_workers_per_root": 16,
+    "queries_per_root": 120,
+    "statistical_unit": "optimizer_seed_root",
+    "roster_extension": false
+  },
+  "artifacts": "compact_JSON_only_locally_weights_and_raw_server_only"
+}

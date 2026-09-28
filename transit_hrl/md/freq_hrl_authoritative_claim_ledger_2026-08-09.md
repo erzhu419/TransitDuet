@@ -1288,6 +1288,10 @@ Checkpoint factual replay errors were zero. Motion, prediction and decision
 point gates failed and remain retained; this is infrastructure evidence only.
 Verification used 600 additional steps, four proposals and ten linear solves.
 Only 47524 compact JSON bytes were pulled; all weights/raw remain remote.
+Full controller tasks `t101759`-`t101766` are running on the dynamic Linux pool;
+all eight logs reached iteration 9/384. Combined frozen training/qualification
+budget is 38796700 primitive steps. Response tasks await completed controllers;
+no full-root result or scientific qualification has been declared.
 
 ### legacy_c1_c9_matrix_snapshot
 
