@@ -1292,6 +1292,15 @@ Full controller tasks `t101759`-`t101766` are running on the dynamic Linux pool;
 all eight logs reached iteration 9/384. Combined frozen training/qualification
 budget is 38796700 primitive steps. Response tasks await completed controllers;
 no full-root result or scientific qualification has been declared.
+All eight controller tasks completed 384 iterations (56.7-60.3 minutes/root),
+with 33945600 registered controller steps and 16896 actor/critic optimizer
+steps each. Frozen configurations, episode roles, histories and checkpoint
+iterations match; 756242 compact JSON bytes were synced, with no weight pull.
+The compact-history exporter used obsolete names and dropped selection scores
+and ranks. Its real-trainer regression test now passes; future exports retain
+those fields. Existing controllers and historical results remain unchanged,
+and no training-improvement claim is derived from missing historical scores.
+Thirty-five focused tests pass. Proceed with all eight frozen response roots.
 
 ### legacy_c1_c9_matrix_snapshot
 

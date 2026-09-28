@@ -76,7 +76,10 @@ def train_controller(args, output):
     compact = {key: payload[key] for key in (
         "selected_checkpoint_iteration", "history", "summary", "capacity", "dimensions", "config",
         "runtime_versions", "world_low", "world_high", "actor_optimizer_steps_train",
-        "critic_optimizer_steps_train", "gradient_updates_train", "checkpoint_rank_contract")}
+        "critic_optimizer_steps_train", "gradient_updates_train", "checkpoint_rank_contract",
+        "history_schema", "checkpoint_initial_rank", "checkpoint_selected_rank",
+        "checkpoint_selection_score", "checkpoint_validation_observation_count",
+        "initial_validation_score", "selected_checkpoint_raw_score")}
     compact.update(controller_checkpoint=str(checkpoint),
                    factual_row=payload["canonical_evaluation_rows"][0],
                    seed_roles=roles, budget=spec.budget(args.optimizer_seed, preflight=args.preflight),

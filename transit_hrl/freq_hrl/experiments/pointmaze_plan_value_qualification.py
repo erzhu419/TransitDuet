@@ -819,17 +819,26 @@ def _compact_history(
 ) -> list[dict[str, Any]]:
     retained = {
         "iteration",
-        "train_objective",
-        "validation_score",
-        "validation_score_raw",
+        "score",
+        "sampled_objective",
+        "sampled_episode_length_mean",
+        "training_rollout_seeds",
+        "checkpoint_evaluation_performed",
+        "checkpoint_selection_score",
+        "checkpoint_selection_rank",
         "checkpoint_selected",
-        "checkpoint_eligible",
-        "mean_episode_return",
-        "mean_tracking_success_rate",
-        "mean_tracking_rmse",
-        "mean_tracking_squared_error_integral",
+        "checkpoint_selection_eligible",
+        "episode_length_mean",
+        "episode_return_mean",
+        "tracking_success_rate_mean",
+        "tracking_rmse_mean",
+        "tracking_squared_error_integral_mean",
         "upper_loss",
         "lower_loss",
+        "upper_policy_loss",
+        "upper_value_loss",
+        "lower_policy_loss",
+        "lower_value_loss",
     }
     return [
         {key: value for key, value in row.items() if key in retained}
@@ -1035,7 +1044,7 @@ def train_pointmaze_plan_value_cell(
     payload["training_core"] = payload["trainer"]
     payload["trainer"] = "goal_conditioned_variable_duration_smdp_ppo_v1"
     payload["history"] = _compact_history(payload["history"])
-    payload["history_schema"] = "pointmaze_plan_value_compact_history_v1"
+    payload["history_schema"] = "pointmaze_plan_value_compact_history_v2"
     payload["optimizer_seed"] = int(optimizer_seed)
     payload["untrained_evaluation_rows"] = untrained_rows
     payload["canonical_evaluation_rows"] = canonical_rows
