@@ -1501,7 +1501,11 @@ upper/545 gate calls. This is execution readiness, not performance evidence.
 Full freeze:40 cells/eight reused roots, 20064000 method steps plus576000
 verification steps; eight adjusted deterministic return endpoints. No
 checkpoint selection, reward rescaling, learning-rate changes or seed extension.
-Formal diagnostic dispatch and full performance readout are pending.
+Full `t102383`-`t102422` is preregistered and running across node001-node006,
+cpu9/ram12GiB per cell, no node pin. One SSH launch handshake was retried
+before execution; all forty originals started, without duplicate children.
+Preflight is recorded done/exit0 for all five jobs. Full performance readout
+is pending; no preflight outcome selects an arm or alters the frozen protocol.
 
 ### legacy_c1_c9_matrix_snapshot
 
