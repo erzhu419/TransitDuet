@@ -1536,8 +1536,13 @@ steps/809 upper/1059 gate calls; verification16500 steps/230 upper/515 gate
 calls. Learned actor steps8 each, critic steps16 each; frozen0. This qualifies
 execution, not utility. Full freeze:40 cells/eight reused roots,20064000
 method steps plus624000 verification steps, eight adjusted return endpoints.
-Full performance readout is pending; no preflight outcome selects an arm or
-changes the registered protocol.
+Full `t102460`-`t102499` is registered and all40 originals are running across
+node001-node006, cpu9/ram12GiB per cell without node pin. One SSH cwd handshake
+failed before execution; the original task rerouted to node005 without duplicate
+children or extra training steps. The dispatch registration changes only its
+Git source revision after documentation commits; controls, seeds and budgets
+remain identical to the pre-outcome freeze. Full performance readout is pending;
+no preflight outcome selects an arm or changes the registered protocol.
 
 ### legacy_c1_c9_matrix_snapshot
 
