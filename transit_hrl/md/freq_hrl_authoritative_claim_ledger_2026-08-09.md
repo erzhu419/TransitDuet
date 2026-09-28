@@ -1338,6 +1338,14 @@ changes. Verification upper-call totals now include factual replay calls.
 All eight first-allocation tasks were cancelled while queued, with no running
 task or new outcome. Replacement `t101940`-`t101947` uses corrected implementation
 `04bf3627b4`, unchanged contracts/models and the exact same fresh-path roster.
+That replacement failed before sampling: input-directory mirroring used
+`rsync --delete` and removed server-only Stage-33 response caches. All eight
+controller checkpoints remain intact; committed scientific results remain
+available. Remove result directories from deployment staging entirely.
+Operational recovery `t101949`-`t101956` replays the exact original Stage-33
+protocol into its original paths, without training or seed/model selection.
+Its extra cost and reproducibility checks are reported separately, not counted
+as independent evidence. Deployment awaits restored, matching response caches.
 
 ### legacy_c1_c9_matrix_snapshot
 

@@ -1,0 +1,10 @@
+{
+  "status": "failed_before_episode_sampling",
+  "task_ids": ["t101940", "t101941", "t101942", "t101943", "t101944", "t101945", "t101946", "t101947"],
+  "reason": "declared qualification input directory was mirrored with rsync --delete, removing server-only response caches",
+  "new_deployment_primitive_steps": 0,
+  "controller_checkpoints_present": [310011, 310023, 310037, 310049, 310061, 310073, 310089, 310101],
+  "fix": "stage only scripts and freq_hrl; read all model/result dependencies in place on the server",
+  "cache_recovery_tasks": ["t101949", "t101950", "t101951", "t101952", "t101953", "t101954", "t101955", "t101956"],
+  "cache_recovery_protocol": "unchanged Stage-33 seeds, checkpoints, options and endpoints; not additional scientific evidence"
+}
