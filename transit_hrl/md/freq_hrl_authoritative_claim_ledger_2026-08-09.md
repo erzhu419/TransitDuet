@@ -1536,13 +1536,29 @@ steps/809 upper/1059 gate calls; verification16500 steps/230 upper/515 gate
 calls. Learned actor steps8 each, critic steps16 each; frozen0. This qualifies
 execution, not utility. Full freeze:40 cells/eight reused roots,20064000
 method steps plus624000 verification steps, eight adjusted return endpoints.
-Full `t102460`-`t102499` is registered and all40 originals are running across
-node001-node006, cpu9/ram12GiB per cell without node pin. One SSH cwd handshake
-failed before execution; the original task rerouted to node005 without duplicate
-children or extra training steps. The dispatch registration changes only its
-Git source revision after documentation commits; controls, seeds and budgets
-remain identical to the pre-outcome freeze. Full performance readout is pending;
-no preflight outcome selects an arm or changes the registered protocol.
+Full `t102460`-`t102499`: all40 originals/6400 evaluation episodes complete,
+exit0 without duplicate children, across node001-node006 without node pin.
+One SSH cwd handshake failed before execution; the original rerouted to node005
+without extra training. Dispatch registration changes only the Git source
+revision after documentation commits; controls, seeds and budgets retain the
+pre-outcome freeze. Forty trajectory audits,400 native snapshot/mode replays,
+120 probe/warmup/learning credit replays,16 paired warmup weights/Adam comparisons
+and independent eight-endpoint bootstrap pass. All eight adjusted deterministic
+return endpoints are inconclusive. Task-aligned vs frozen final:+1.2661,
+CI[-2.3661,5.0726]; final intrinsic alignment:+1.7785,CI[-2.9639,6.9903];
+final task alignment:+2.5589,CI[-4.2915,11.2444]. First-update alignment means
+are negative in both reward pairs, also inconclusive. Task-aligned final
+mean906.4791 exceeds frozen905.2130; all four learned lower-sampled final means
+remain below their frozen905.8902 reference. Final probe Gaussian KL0.1845-0.2743,
+mean action std0.2096-0.2144 versus frozen0.2146. Each learned arm charges5120
+actor/10240 critic steps; frozen0. Method20064000 steps/467902 upper/719168 gate
+calls; verification624000 steps/16338 upper/22501 gate calls. See the
+[result](freq_hrl_stage40_frozen_execution_result_2026-09-28.md) and
+[compact summary](../results/pointmaze_frozen_execution_stage40_v1_full_20260928_r1/qualification_summary.json).
+This is conditional development on reused roots, not a supported repair or
+noninferiority claim. Next isolate deployment-aligned critic warmup while
+retaining both rewards and frozen controls; the remaining distribution mismatch
+is a hypothesis, not an established cause. No new training or retuning launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
