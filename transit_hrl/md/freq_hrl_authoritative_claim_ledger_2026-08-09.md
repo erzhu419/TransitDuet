@@ -1689,9 +1689,27 @@ all four original first-update batches and policy drifts match exactly;
 qualifies the fresh paired roster. Method7200 steps/203 upper/251 gate calls;
 zero optimizer/extra verification steps. Only the11KB
 [preflight qualification](../results/pointmaze_update_direction_stage43_v1_preflight_20260928_r1/qualification_summary.json)
-is local. Full dispatch remains pending; no preflight outcome selects arms,
-seeds, checkpoints or budgets. This is conditional diagnosis, not a repair or
-proof that a local gradient estimate predicts a finite-update return effect.
+is local. Full `t103741`-`t103748`: all eight original roots complete without
+duplicates, dynamically node001/004/005/006. All32 source first-update batches
+and policy drifts match;1536 native trace audits pass. Aggregation `t103760`
+exits0 with independent16-endpoint bootstrap passed. Intrinsic-clock clipped
+gain+0.00469210,CI[0.00001022,0.00853857]; intrinsic-sham task direction+40.8542,
+CI[6.4795,89.9444]. These two endpoints are positive, the other14 inconclusive;
+all eight actual return intervals cross0. No registered local-direction or
+finite-update conflict is supported, and no repair/noninferiority follows.
+Descriptive8/32 actual updates decrease both original full-batch clipped
+surrogate and entropy-inclusive actor objective; arm counts1/1/4/2. Mean
+clip fractions17.30%-20.29%, per-step KL0.01390-0.01641, episode KL sums
+16.68-19.69. This motivates finite-step/optimizer-fidelity diagnosis, not a
+causal claim. Method1843200 steps/45301 upper/64737 gate calls; zero optimizer/
+extra verification steps. See the [result](freq_hrl_stage43_update_direction_result_2026-09-28.md)
+and [full compact qualification](../results/pointmaze_update_direction_stage43_v1_full_20260928_r1/qualification_summary.json).
+Only76KB is local; weights/raw traces remain remote. Pre-outcome controls,
+seeds and budgets retain exact structured equality after dispatch source
+revision updates. Existing development roots do not supply confirmation.
+Next freeze signed microsteps versus full displacement with the same direction,
+reward and critic inputs. Local score estimates are not finite-update effects;
+no new training, exclusions, seed extension or post-outcome retuning launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
