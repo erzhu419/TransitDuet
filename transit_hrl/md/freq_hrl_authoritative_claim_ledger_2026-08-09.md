@@ -1725,6 +1725,12 @@ Implementation `9d1bf4b503`, full pre-outcome registration `2c47eb2f48`.
 Scheduler `t103802` on node004 passes23 focused regressions in149.561s:
 signed interpolation including log_std, exact endpoints/fixed-level controls,
 mock existing-checkpoint pipeline, paired sampling, bootstrap and accounting.
+Native preflight `t103805` on node004 completes with52 offline trace audits,
+exact actor endpoints and fixed networks;15600 steps/316 upper/507 gate calls.
+Aggregation `t103813` passes the full paired roster and accounting, zero
+optimizer/extra verification steps. Only the8KB
+[preflight qualification](../results/pointmaze_signed_microstep_stage44_v1_preflight_20260929_r1/qualification_summary.json)
+is local; source weights and raw traces stay remote.
 
 ### legacy_c1_c9_matrix_snapshot
 
