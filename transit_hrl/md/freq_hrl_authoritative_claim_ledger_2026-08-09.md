@@ -1667,6 +1667,22 @@ endpoint was registered. Next diagnose first-update PPO/GAE surrogate direction
 versus paired held-out task return. This is an open question, not a cause.
 No new training, seed extension, arm selection or post-outcome tuning launched.
 
+### stage43_first_update_training_and_task_direction
+
+The [Stage-43 protocol](freq_hrl_stage43_update_direction_protocol_2026-09-28.md)
+diagnoses all four Stage-42 first lower updates using fixed16/17 checkpoints.
+No training or optimizer steps. Reconstruct every original first-update episode
+and match recorded rewards, GAE stats, sampling and policy drift. Measure the
+original clipped surrogate; use fresh before-policy sampled paths to estimate
+the full-episode task score gradient dotted with the actual parameter update.
+Leave-one-episode-out time-indexed baselines do not cut at option boundaries.
+Fresh paired native before/after evaluation retains both deployment modes.
+Sixteen adjusted primary endpoints, eight reused roots, no selection/extension.
+Full1843200 primitive steps/1536 offline native trace audits; preflight7200/24.
+Zero extra verification environment steps. Execution qualification and dispatch
+are pending. This is conditional diagnosis, not an algorithmic repair or proof
+that a local gradient estimate predicts a finite-update return effect.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
