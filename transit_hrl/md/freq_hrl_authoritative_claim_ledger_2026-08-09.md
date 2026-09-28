@@ -1176,6 +1176,15 @@ Genuine long plan holding does not qualify this history value head. Next is
 causal action-conditioned state/plan-response modeling, distinct from the
 already-demonstrated exogenous forecast skill. No policy is promoted.
 
+The [Stage-29 protocol](freq_hrl_stage29_state_response_protocol_2026-09-28.md)
+introduces a generic action-conditioned Gaussian state predictor with the
+existing causal GRU and a 16-dimensional latent. Four matched factorial
+models separate history information from action conditioning. Fresh excited
+fit trajectories and unperturbed evaluation paths support matched one-step
+actuator interventions; full lower feedback remains active. Twenty-eight
+tests passed. Qualification concerns state response and target forecasting,
+not plan-value policy improvement or deployment.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
