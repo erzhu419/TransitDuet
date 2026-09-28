@@ -1356,6 +1356,20 @@ Resumed full deployment `t101957`-`t101964` is registered at `f1148ddf3e` with
 the unchanged 32 paths/root, 16 endpoints and 3081600-step budget. Only source
 directories are staged; all qualified model/result dependencies are read in
 place on the shared server filesystem.
+The [Stage-34 result](freq_hrl_stage34_episode_deployment_result_2026-09-28.md)
+completes all 2560 full episodes but fails the frozen joint gate: 13/16 adjusted
+lower bounds are positive. ISE versus current-repeat/lag-one and return versus
+lag-one remain inconclusive. Other original-control contrasts improve; six
+root point gates pass and all roots remain included. Eight trajectory audits
+and an independent root-count bootstrap agree. Original fixed50 is stronger:
+return 912.55 versus history 837.91; ISE 1.44439 versus 2.67543. History uses
+43.38% fewer actual upper calls, including discarded previews, at a performance
+cost. There is no no-tradeoff or whole-algorithm superiority claim. Method cost:
+3081600 steps/35029 upper calls/12544 previews, zero updates/fits; verification:
+9600 steps/35029 upper calls, zero solves. Only 46145 summary bytes return
+locally; all full JSON, arrays and weights remain remote. Next address learned
+plan validity and renewal frequency in the native training/control loop,
+retaining fixed50 as a primary comparator rather than coarsening its cadence.
 
 ### legacy_c1_c9_matrix_snapshot
 
