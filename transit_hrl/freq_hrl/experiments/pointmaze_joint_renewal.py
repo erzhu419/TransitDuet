@@ -51,7 +51,7 @@ def make_model(controller, method, *, root):
 
 
 def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
-            lower_credit="intrinsic_option"):
+            lower_credit="intrinsic_option", lower_sample=None):
     if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
         raise ValueError("unregistered lower credit")
     scale = scale_for(args)
@@ -111,7 +111,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 last_plan = step
             state = history.lower_state(observation, subgoal=subgoal)
             clock = time.perf_counter()
-            output = model.act_lower(state, sample=sample)
+            output = model.act_lower(state, sample=sample if lower_sample is None else lower_sample)
             lower_time += time.perf_counter() - clock
             action = squash_box_action(np.asarray(output["action"], dtype=np.float32), task.action_low, task.action_high)
             after, reward, terminated, truncated, info = task.step(action)
@@ -158,6 +158,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                "charged_utility": reward_sum - spec.CALL_COST * len(decisions),
                "decision_steps": decisions, "gate_steps": gate_steps, "gate_actions": gate_actions,
                "gate_sample": bool(sample if gate_sample is None else gate_sample), "gate_seed": gate_seed,
+               "lower_sample": bool(sample if lower_sample is None else lower_sample),
                "upper_inference_seconds": upper_time, "lower_inference_seconds": lower_time,
                "gate_inference_seconds": gate_time, "episode_wall_seconds": wall}
         if sample:
