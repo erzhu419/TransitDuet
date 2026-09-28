@@ -48,7 +48,7 @@ def audit(path):
         raw = {k: arrays[k][index] for k in ("ise", "reward", "sequence", "physical", "achieved", "measurement",
                                            "target", "position", "subgoal", "action")}
         np.testing.assert_array_equal(raw["measurement"], tapes[seed][:-1])
-        distance = np.linalg.norm(raw["position"] - raw["target"], axis=1)
+        distance = np.linalg.norm(raw["position"] - raw["target"], axis=1).astype(np.float64)
         np.testing.assert_allclose(raw["ise"], distance ** 2 * .01, rtol=0, atol=1e-12)
         np.testing.assert_allclose(raw["reward"], np.exp(-distance), rtol=0, atol=1e-12)
         assert abs(raw["ise"].sum() - row["tracking_squared_error_integral"]) < 1e-12
