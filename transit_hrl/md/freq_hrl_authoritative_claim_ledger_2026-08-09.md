@@ -1586,15 +1586,31 @@ old-value RMSE0.02691/0.02910. Method33000 steps/465 upper/977 gate calls;
 verification16500 steps/249 upper/520 gate calls. Learned actor steps8 each,
 critic steps16 each; frozen0. See the
 [compact qualification](../results/pointmaze_warmup_alignment_stage41_v1_preflight_20260928_r1/qualification_summary.json).
-This qualifies execution, not utility. Full `t102593`-`t102632` is registered;
-dispatch inventory confirms all40 originals running without duplicate children.
+This qualifies execution, not utility. Full `t102593`-`t102632`: all40 originals
+and6400 evaluation episodes complete without duplicate children.
 Placement: node001=8,node002=3,node003=3,node004=9,node005=8,node006=9;
 cpu9/ram12GiB per task, dynamic placement without node binding. One SSH handshake
 failed before execution; scheduler retried the original `t102610` from node005
 to node004 without extra training. Registration matches the pre-outcome frozen
 matrix exactly except its Git source revision after documentation commits.
-Full performance readout is pending; conditional development on reused roots,
-no preflight outcome selects an arm or changes controls/seeds/budgets.
+Full audit `t103509` exits zero:40 trajectory audits,400 native snapshot/mode
+replays,120 probe/warmup/learning credit replays and16 paired comparisons pass.
+All initial/warmup deployment outcomes equal frozen; paired actors/frozen values
+and first native learning episode transitions match. Lower critics differ.
+Independent eight-endpoint statistics pass. All eight adjusted CIs are
+inconclusive: task warmup-alignment final effect+1.0395[-1.2319,3.9083],
+intrinsic-0.7290[-6.1743,4.3353]; task-aligned vs frozen-0.9899[-3.0119,0.7976].
+All four learned final means remain below frozen in both deployment modes.
+No supported repair or noninferiority follows. Each learned arm charges5120
+actor/10240 critic steps; frozen0. Method20064000 steps/490877 upper/710476
+gate calls; verification624000 steps/18390 upper/23050 gate calls.
+See the [result](freq_hrl_stage41_warmup_alignment_result_2026-09-28.md) and
+[full compact qualification](../results/pointmaze_warmup_alignment_stage41_v1_full_20260928_r1/qualification_summary.json).
+Conditional development on reused roots; no outcome changes arms, controls,
+seeds or budgets. Next isolate critic-only option-age/remaining-horizon context
+with actor inputs, PPO, rewards and budgets matched. Gate has both explicit
+clocks; lower reward critic lacks them. This is a hypothesis, not an established
+cause. No additional seeds, retuning or new training launched.
 
 ### legacy_c1_c9_matrix_snapshot
 
