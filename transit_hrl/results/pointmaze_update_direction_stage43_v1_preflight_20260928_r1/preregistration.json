@@ -1,0 +1,103 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 6000,
+    "optimizer_steps": 0,
+    "reconstruction_primitive_steps": 1200,
+    "total_primitive_steps": 7200
+  },
+  "contract": {
+    "baseline": "shared_pre_update_actor_after_exact_actor_and_frozen_level_equality",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      43,
+      43043
+    ],
+    "checkpoint_selection": "none",
+    "checkpoints": "fixed_last_warmup_and_first_lower_update_no_selection",
+    "decision": "positive_training_gain_and_negative_task_direction_local_conflict_negative_sampled_return_finite_update_conflict",
+    "evaluation": "fresh_paired_paths_deterministic_upper_gate_deterministic_or_sampled_lower",
+    "evidence_role": "conditional_diagnosis_existing_development_weights_with_fresh_evaluation_not_confirmation",
+    "interval": "two_sided_percentile_bonferroni_16_paired_equal_root_means",
+    "methods": [
+      "intrinsic_sham",
+      "intrinsic_clock",
+      "task_sham",
+      "task_clock"
+    ],
+    "optimizer_steps": 0,
+    "primary_endpoints": [
+      "intrinsic_sham:training_surrogate_gain",
+      "intrinsic_sham:heldout_task_direction",
+      "intrinsic_sham:deterministic_return",
+      "intrinsic_sham:lower_sampled_return",
+      "intrinsic_clock:training_surrogate_gain",
+      "intrinsic_clock:heldout_task_direction",
+      "intrinsic_clock:deterministic_return",
+      "intrinsic_clock:lower_sampled_return",
+      "task_sham:training_surrogate_gain",
+      "task_sham:heldout_task_direction",
+      "task_sham:deterministic_return",
+      "task_sham:lower_sampled_return",
+      "task_clock:training_surrogate_gain",
+      "task_clock:heldout_task_direction",
+      "task_clock:deterministic_return",
+      "task_clock:lower_sampled_return"
+    ],
+    "root_exclusion": "forbidden",
+    "score_baseline": "leave_one_episode_out_mean_return_to_go_at_each_primitive_time_no_option_cuts",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "surrogate": "original_normalized_GAE_clipped_PPO_full_batch_after_minus_before",
+    "task_direction": "heldout_undiscounted_full_episode_score_gradient_dot_actual_parameter_displacement",
+    "training_reconstruction": "original_first_learning_batch_seeds_sampling_credit_values_and_GAE"
+  },
+  "methods": [
+    "intrinsic_sham",
+    "intrinsic_clock",
+    "task_sham",
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 1,
+    "warmup_iterations": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_update_direction_stage43_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        10793001,
+        10793002
+      ],
+      "reconstruction": [
+        10690003
+      ]
+    }
+  },
+  "source_revision": "d88cbc2afd572824209bc727f7b95422ee056852",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 7200
+}

@@ -1683,8 +1683,14 @@ Zero extra verification environment steps. Implementation `509b78e8ab`; full
 matrix freeze `a2beb8886d` precedes fresh native outcomes. Scheduler `t103726`
 passes17 focused tests (117.534s): independent PPO formula, analytic score
 direction, zero displacement/no optimizer mutation, mock existing-checkpoint
-pipeline, paired streams and root bootstrap. Native qualification and dispatch
-remain pending. This is conditional diagnosis, not an algorithmic repair or
+pipeline, paired streams and root bootstrap. Native preflight `t103728` exits0:
+all four original first-update batches and policy drifts match exactly;
+24 native trace audits pass, zero-displacement score is0. Aggregation `t103733`
+qualifies the fresh paired roster. Method7200 steps/203 upper/251 gate calls;
+zero optimizer/extra verification steps. Only the11KB
+[preflight qualification](../results/pointmaze_update_direction_stage43_v1_preflight_20260928_r1/qualification_summary.json)
+is local. Full dispatch remains pending; no preflight outcome selects arms,
+seeds, checkpoints or budgets. This is conditional diagnosis, not a repair or
 proof that a local gradient estimate predicts a finite-update return effect.
 
 ### legacy_c1_c9_matrix_snapshot
