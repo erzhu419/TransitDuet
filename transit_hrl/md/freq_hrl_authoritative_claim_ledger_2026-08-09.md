@@ -1798,6 +1798,14 @@ critic targets. First native data/task rewards and critic/Adam updates must
 match within each pair. Eight fixed sampled-return contrasts include frozen
 utility. Full7680000 steps/6400 offline trace audits, pre15600/52; no extra
 native verification. Conditional development only; no learned repair yet.
+Implementation `98f5ddca0d`; pre-outcome matrix freeze `dbed0be1ab`. Scheduler
+`t104090` passes64/65 tests in91.583s; the remaining comparator incorrectly
+passes string configuration to tensor assert-close. Test-only fix `c7b5c143cb`;
+`t104093` exposes omitted tests in unit staging, not a new algorithm failure.
+Explicit tests-directory staging in `t104097` passes the corrected test in1.472s
+on node006. Combined65 checks include shared PPO, exact default/explicit GAE,
+unchanged critic/Adam, delayed task score and native-style pipeline. Scientific
+controls/seeds/budgets are unchanged; this is readiness, not utility evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 
