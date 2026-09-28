@@ -38,8 +38,13 @@ Preflight `t101738` completed on node006: 56/56/56 rows, three fits/90 RHS,
 label, forecast, normalization and metric recomputation matched. One-step
 gate passed; planning/joint gates failed. Keep this negative result; full
 settings remain unchanged. Retrieved 81590 bytes of JSON, no raw arrays.
-Full tasks `t101739/101740` register roots 209011/209061 at the same frozen
-revision, three independent motion fits per root and zero environment steps.
+Full tasks `t101739/101740` completed on node006/node005 at the same frozen
+revision. The [full result](freq_hrl_stage30_separate_motion_result_2026-09-28.md)
+passes both gates on both roots: planning MSE drops 58.11%/63.12% versus current
+and 55.39%/56.56% versus lag-one. All 16 new paths beat every planning control.
+Server-only independent recomputation matches labels, predictions, scales and
+metrics. Three fits per root and zero environment steps are accounted for.
+This qualifies target-motion forecasts, not a deployed control policy.
 
 ## Limitations
 

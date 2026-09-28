@@ -1214,7 +1214,17 @@ all 56 fit/query/bridge rows and 1806 tape points accounted for. Independent
 server-side recomputation matched labels, forecasts, scales and metrics.
 One-step forecasting passes but planning/joint qualification fails. Full
 settings stay fixed; no physical model or policy is promoted.
-Full tasks `t101739/101740` register the same implementation for 209011/209061.
+Full tasks `t101739/101740` completed on node006/node005. The
+[Stage-30 result](freq_hrl_stage30_separate_motion_result_2026-09-28.md) passes
+both forecasting gates on both roots. Planning MSE is 58.11%/63.12% below
+current and 55.39%/56.56% below lag-one, beating all planning controls on
+16/16 fresh paths. Independent server-side recomputation matches labels,
+forecasts, normalization, metrics and accounting. Six motion fits and 76864
+generated tape points require zero new environment steps or physical updates.
+Cached external replacement leaves physical means unchanged. Next is causal
+keep/renew plan-response validation with full lower feedback and equal upper
+call budgets. Target forecasting is qualified for development, not control
+reward, uncertainty calibration or independent-confirmation evidence.
 
 ### legacy_c1_c9_matrix_snapshot
 
