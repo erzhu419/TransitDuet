@@ -1250,6 +1250,13 @@ positive local decision evidence and the failed joint gate. Next address
 plan-response approximation before new-root qualification; no episode reward
 or planning-cost claim follows. All views share a history-aware candidate.
 
+The [Stage-32 protocol](freq_hrl_stage32_crossfit_response_protocol_2026-09-28.md)
+keeps the Stage-31 linear response and adds a fixed, whole-path-cross-fitted
+kernel residual correction. Only cached training designs/labels are fitted;
+new paths compare all seven cross-fit and seven unchanged linear views.
+Both prediction and decision gates remain required; Stage-31 is not relabeled.
+Thirty-four tests pass. This is development, not new-root confirmation.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
