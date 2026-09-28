@@ -1202,6 +1202,14 @@ separate exogenous-motion inference using the demonstrated causal velocity
 information. Shared-latent interference remains a hypothesis. This is not
 plan-value or policy qualification; Stage-9 remains the performance reference.
 
+The [Stage-30 protocol](freq_hrl_stage30_separate_motion_protocol_2026-09-28.md)
+separates external motion inference from the frozen action-response component.
+It uses causal observed velocity lags, fixed unit ridge and new external query
+paths, with current/shuffled/lag-one/zero controls. Both one-step and planning
+forecast gates must pass on both roots. Twenty-four focused tests passed.
+No new environment replay, controller update or policy claim is involved;
+the cached composition preserves physical predictions exactly.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
