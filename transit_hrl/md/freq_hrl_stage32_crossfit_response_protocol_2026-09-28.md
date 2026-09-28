@@ -27,6 +27,9 @@ Full totals: 620 reused fit/240 fresh pairs, 339600 new primitive steps,
 Preflight: 1330 steps, two new/two reused calls, 21 linear+seven kernel solves.
 Dynamic node001-node006, 16 workers/17 CPU/24 GB; preflight 1/2 CPU/3 GB.
 34 tests pass. Sync JSON only; arrays and kernel coefficients stay remote.
+Implementation `6ff7076cd4`: preflight `t101747` completed on node006;
+independent recomputation matched all 1330 steps, held-path fits and metrics.
+Both gates failed. Full `t101748/101749` retain the frozen configuration.
 Limitations: reused optimizer roots and local paired decisions, not independent
 root confirmation, episode reward or planning-cost savings. Stage-9 stays the
 performance reference. Next-root confirmation follows only after qualification.

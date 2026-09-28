@@ -1256,6 +1256,11 @@ kernel residual correction. Only cached training designs/labels are fitted;
 new paths compare all seven cross-fit and seven unchanged linear views.
 Both prediction and decision gates remain required; Stage-31 is not relabeled.
 Thirty-four tests pass. This is development, not new-root confirmation.
+Implementation `6ff7076cd4`: preflight `t101747` completed on node006.
+Server-side recomputation matched causal inputs, plan proposals, held-path
+regression, centered kernels, predictions, metrics and 1330 new steps. Both
+scientific gates failed. Preserve this result; full `t101748/101749` use the
+unchanged settings. Verification solves are separate from method fit costs.
 
 ### legacy_c1_c9_matrix_snapshot
 
