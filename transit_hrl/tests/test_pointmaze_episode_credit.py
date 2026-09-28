@@ -53,7 +53,9 @@ class EpisodeCreditTest(unittest.TestCase):
         original_actor = copy.deepcopy(model.lower_actor.state_dict())
         metrics = self.core_update(model, batch)
         self.assertEqual(metrics, self.core_update(same, batch, advantage))
-        torch.testing.assert_close(model.state_dict(), same.state_dict(), atol=0, rtol=0)
+        self.assertEqual(model.config, same.config)
+        torch.testing.assert_close({k: v for k, v in model.state_dict().items() if k != "config"},
+                                   {k: v for k, v in same.state_dict().items() if k != "config"}, atol=0, rtol=0)
         self.core_update(zero, batch, np.zeros(batch.size, dtype=np.float32))
         torch.testing.assert_close(zero.lower_actor.state_dict(), original_actor, atol=0, rtol=0)
         torch.testing.assert_close(zero.lower_value.state_dict(), model.lower_value.state_dict(), atol=0, rtol=0)
