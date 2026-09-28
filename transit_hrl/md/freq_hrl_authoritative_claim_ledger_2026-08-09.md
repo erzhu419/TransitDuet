@@ -1233,6 +1233,11 @@ reused with complete prefixes; new paths evaluate 150-step equal-call keep/renew
 credit with full lower feedback. Seven critic views and constant decisions
 are frozen controls; candidate proposal calls are counted. Twenty-four tests
 passed. The screen concerns paired local decision value, not deployment.
+Implementation `073d377fa6`: preflight `t101743` completed on node006.
+Independent server-side recomputation matched causal inputs, plans, labels,
+designs, metrics and 1330 new steps/four candidate proposals. Prediction and
+decision gates both failed; all methods renewed both queries. Preserve this
+result. Full tasks `t101745/101746` use the unchanged frozen configuration.
 
 ### legacy_c1_c9_matrix_snapshot
 

@@ -35,6 +35,15 @@ two fit/two query pairs, four proposals, seven fits/35 RHS. Raw arrays and
 weights stay remote; sync result JSON only. Dynamic scheduler node001-node006,
 16 workers/17 CPU/24 GB, preflight one worker/2 CPU/3 GB. Twenty-four tests pass.
 
+## Execution
+
+Implementation `073d377fa6`: preflight `t101743` completed on node006.
+Independent server-side recomputation matched observed prefixes, candidate
+plans, response designs, labels, metrics and budgets: 1330 new steps and four
+candidate proposals. Both scientific gates failed; all methods renewed both
+queries. Preserve this negative result. Full tasks `t101745/101746` retain the
+same revision and frozen settings, with no node pinning or parameter changes.
+
 ## Limitations
 
 This is policy-specific paired local decision validation under reused roots,
