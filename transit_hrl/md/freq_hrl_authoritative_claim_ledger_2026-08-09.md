@@ -1325,12 +1325,16 @@ focused tests pass. Implementation `7115ddf308`; preflight `t101930` is register
 on the dynamic Linux pool. No deployed-control result has been declared.
 Preflight completed 20 full episodes and 6300 method steps. Server recomputation
 matches rewards, ISE, raw causal frames, all plans/decisions and paid calls;
-checkpoint replay errors are zero. Verification adds 300 steps/92 policy calls,
+checkpoint replay errors are zero. Verification adds 300 steps/98 upper calls,
 including 14 previews, with no solves. The point gate fails because history ties
 several controls; retain this infrastructure-only result. Full tasks
 `t101932`-`t101939` are registered at unchanged code/settings, 3081600 method
 steps and zero controller/motion/response updates. Only compact summaries
 return locally; full episode traces and model weights stay remote.
+The first full allocation stopped before sampling: scheduler stage inputs must
+be directories, but its qualification input was a file. Correct only that
+directory declaration and reroute the same frozen roster; no model/seed/endpoint
+changes. Verification upper-call totals now include factual replay calls.
 
 ### legacy_c1_c9_matrix_snapshot
 

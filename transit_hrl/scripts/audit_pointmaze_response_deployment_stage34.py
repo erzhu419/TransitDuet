@@ -119,7 +119,11 @@ def audit(path):
     return {"status": "pass", "optimizer_seed": root, "checked_episodes": len(expected),
             "checked_primitive_steps": sum(r["episode_length"] for r in cell["rows"]),
             "factual_replay": factual, "additional_verification_primitive_steps": args.horizon,
-            "additional_verification_policy_calls": plan_calls, "additional_verification_previews": previews,
+            "additional_verification_policy_calls": plan_calls + args.horizon // 50,
+            "raw_plan_recomputation_calls": plan_calls,
+            "factual_upper_inference_calls": args.horizon // 50,
+            "factual_lower_inference_calls": args.horizon,
+            "additional_verification_previews": previews,
             "additional_verification_response_calls": response_calls, "linear_solves": 0}
 
 

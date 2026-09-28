@@ -26,7 +26,7 @@ def task_specification(run_name, root, *, preflight):
         command.append("--preflight")
     inputs = [str(ROOT / "scripts"), str(ROOT / "freq_hrl")]
     if not preflight:
-        inputs.append(str(ROOT / "results" / spec.SOURCE_RUN / "root_qualification.json"))
+        inputs.append(str(ROOT / "results" / spec.SOURCE_RUN))
     return {"project": spec.EXPERIMENT_PROTOCOL, "description": f"Freq-HRL stage34 deployment root{root}",
             "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
                    "MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 TORCH_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "
