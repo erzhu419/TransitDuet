@@ -25,6 +25,11 @@ class EpisodeKLTest(unittest.TestCase):
     def setUpClass(cls):
         torch.set_num_threads(1)
 
+    def refresh_batch(self, model, batch):
+        with torch.no_grad():
+            batch.old_logp = model.lower_actor.log_prob_entropy(torch.from_numpy(batch.state), torch.from_numpy(batch.action))[0].numpy()
+            batch.old_value = model.lower_value(torch.from_numpy(batch.value_state)).numpy()
+
     def test_exact_gaussian_episode_sum_not_per_step_mean(self):
         model, batch, rewards = StateBaselineTest().data()
         reference = copy.deepcopy(model.lower_actor)
@@ -49,6 +54,10 @@ class EpisodeKLTest(unittest.TestCase):
             self.assertEqual(record["selected_scale"], 1.)
             for name in experiment.LOWER_STATE:
                 torch.testing.assert_close(getattr(observed, name).state_dict(), getattr(expected, name).state_dict(), atol=0, rtol=0)
+        np.random.seed(48)
+        episodes.update(model, batch, rewards, "episode_mc", specification=spec)
+        self.refresh_batch(model, batch)
+        self.assertTrue(model.lower_actor_optimizer.state)
         model.lower_actor_optimizer.param_groups[0]["lr"] = .2
         expected, bounded = copy.deepcopy(model), copy.deepcopy(model)
         record = experiment.update(bounded, batch, rewards, "episode_kl", root=310001, iteration=1)
@@ -68,9 +77,7 @@ class EpisodeKLTest(unittest.TestCase):
         model, batch, rewards = StateBaselineTest().data()
         np.random.seed(48)
         episodes.update(model, batch, rewards, "episode_mc", specification=spec)
-        with torch.no_grad():
-            batch.old_logp = model.lower_actor.log_prob_entropy(torch.from_numpy(batch.state), torch.from_numpy(batch.action))[0].numpy()
-            batch.old_value = model.lower_value(torch.from_numpy(batch.value_state)).numpy()
+        self.refresh_batch(model, batch)
         before = {name: copy.deepcopy(getattr(model, name).state_dict()) for name in experiment.LOWER_STATE}
         self.assertTrue(model.lower_actor_optimizer.state)
         expected = copy.deepcopy(model)

@@ -40,7 +40,7 @@ def update(model, batch, task_rewards, treatment, *, root, iteration):
     for backtrack in range(spec.MAX_BACKTRACKS + 1 if treatment == "episode_kl" else 1):
         # Restart the complete lower transaction so accepted Adam moments match the actual scaled-LR path.
         for name in LOWER_STATE:
-            getattr(model, name).load_state_dict(initial[name])
+            getattr(model, name).load_state_dict(copy.deepcopy(initial[name]))
         scale = 2. ** -backtrack
         for group, saved in zip(model.lower_actor_optimizer.param_groups, initial["lower_actor_optimizer"]["param_groups"]):
             group["lr"] = saved["lr"] * scale
@@ -57,7 +57,7 @@ def update(model, batch, task_rewards, treatment, *, root, iteration):
             break
     if not accepted:
         for name in ("lower_actor", "lower_actor_optimizer"):
-            getattr(model, name).load_state_dict(initial[name])
+            getattr(model, name).load_state_dict(copy.deepcopy(initial[name]))
     for group, saved in zip(model.lower_actor_optimizer.param_groups, initial["lower_actor_optimizer"]["param_groups"]):
         group["lr"] = saved["lr"]
     for name, state in first_critic.items():
