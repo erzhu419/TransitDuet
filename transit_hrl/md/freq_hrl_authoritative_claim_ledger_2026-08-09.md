@@ -1868,7 +1868,16 @@ with halved actor LR until maximum episode KL<=0.1,up to13 trials. Keep the
 first original critic update; charge all rejected actor/critic steps separately
 from retained steps. GAE/MC/frozen controls and exact first candidate pairing.
 Six fixed native utility endpoints,5836800 steps/4864 audits; no utility claim
-before qualification/results. No tuning or seed extension.
+before qualification/results. No tuning or seed extension. Pre-outcome freeze
+`6f12dbce8e`; initial `t104166` passes19/20 tests and catches shared-tensor Adam
+snapshot mutation under repeated restores. Fix `fd7a9df796` loads independent
+copies each trial; `t104168` passes20 tests in64.563s, including nonempty accepted/
+rejected Adam paths and Stage46/47 regressions. Native was not dispatched before
+this correction. Preflight `t104170` and offline `t104171` qualify52 trace audits,
+exact first batches/critic/MC candidates,15600 steps/208 upper/480 gate calls.
+Execute112 actor/112 critic steps,retain48/48,26 KL checks. Both KL updates accept
+scale1/16; first maximum episode KL3.29034 to0.03982. Only9KB compact JSON local;
+raw/weights remote. Mechanism feasibility is qualified, utility results pending.
 
 ### legacy_c1_c9_matrix_snapshot
 
