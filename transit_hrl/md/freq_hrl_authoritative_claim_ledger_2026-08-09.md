@@ -1894,6 +1894,16 @@ Keep experimental; no supported repair/noninferiority. Next isolate inherited
 versus fresh Adam state at the same episode-KL budget with GAE/frozen controls;
 no budget tuning or seed extension follows this result.
 
+### stage49_fixed_kl_actor_adam_initialization
+
+The [Stage-49 protocol](freq_hrl_stage49_adam_initialization_protocol_2026-09-29.md)
+crosses GAE/full-task MC with inherited/fresh actor Adam under the unchanged
+episode-KL0.1 budget. Clear actor Adam once at branch start,never critic; retain
+original critic updates and all trial costs. Four first batches/rewards/critic
+updates paired,step-count continuity checked. Nine frozen native contrasts include
+reset-credit interaction and all final arms minus frozen. Full7680000 steps/6400
+audits,pre20400/68. No utility claim pending qualified native results.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.

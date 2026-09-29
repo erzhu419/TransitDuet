@@ -28,16 +28,18 @@ def policy_terms(model, batch, reference, advantage, episode_count):
                 "clipped_surrogate": float(surrogate), "actor_objective": float(surrogate + model.config.entropy_coef * entropy.mean())}
 
 
-def update(model, batch, task_rewards, treatment, *, root, iteration):
+def update(model, batch, task_rewards, treatment, *, root, iteration, specification=spec):
+    spec = specification
     if treatment not in spec.TREATMENTS:
         raise ValueError("unregistered episode KL treatment")
     initial = {name: copy.deepcopy(getattr(model, name).state_dict()) for name in LOWER_STATE}
     reference = copy.deepcopy(model.lower_actor)
     advantage = (model._gae(batch.reward, batch.done, batch.duration, batch.old_value, batch.next_value, batch.terminal)[0]
-                 if treatment == "gae" else episodes.score_targets(task_rewards).reshape(-1).astype(np.float32))
+                 if spec.CREDITS[treatment] == "gae" else episodes.score_targets(task_rewards).reshape(-1).astype(np.float32))
     before = policy_terms(model, batch, reference, advantage, len(task_rewards))
     trials, first_critic, metrics, accepted, selected = [], None, None, False, 0.
-    for backtrack in range(spec.MAX_BACKTRACKS + 1 if treatment == "episode_kl" else 1):
+    bounded = treatment in spec.BOUNDED_TREATMENTS
+    for backtrack in range(spec.MAX_BACKTRACKS + 1 if bounded else 1):
         # Restart the complete lower transaction so accepted Adam moments match the actual scaled-LR path.
         for name in LOWER_STATE:
             getattr(model, name).load_state_dict(copy.deepcopy(initial[name]))
@@ -45,13 +47,14 @@ def update(model, batch, task_rewards, treatment, *, root, iteration):
         for group, saved in zip(model.lower_actor_optimizer.param_groups, initial["lower_actor_optimizer"]["param_groups"]):
             group["lr"] = saved["lr"] * scale
         np.random.seed(spec.shuffle_seed(root, iteration))
-        current = episodes.update(model, batch, task_rewards, treatment, specification=spec)
+        current = episodes.update(model, batch, task_rewards, treatment, specification=spec,
+                                  actor_advantage=None if treatment == "gae" else advantage)
         terms = policy_terms(model, batch, reference, advantage, len(task_rewards))
         trials.append({"scale": scale, **terms, **{k: current[k] for k in ("actor_optimizer_steps", "value_optimizer_steps")}})
         if backtrack == 0:
             metrics = current
             first_critic = {name: copy.deepcopy(getattr(model, name).state_dict()) for name in ("lower_value", "lower_value_optimizer")}
-        accepted = treatment != "episode_kl" or terms["max_episode_kl"] <= spec.KL_BUDGET
+        accepted = not bounded or terms["max_episode_kl"] <= spec.KL_BUDGET
         if accepted:
             selected = scale
             break
@@ -78,9 +81,10 @@ def train(root, *, preflight, output):
                           rollout_worker=worker_rollout, update_fn=update)
 
 
-def optimizer_steps(row, steps):
+def optimizer_steps(row, steps, *, specification=spec):
+    spec = specification
     trials = row["trials"]
-    bounded = row["actor_credit"] == "episode_kl"
+    bounded = row["actor_credit"] in spec.BOUNDED_TREATMENTS
     if not 1 <= len(trials) <= (spec.MAX_BACKTRACKS + 1 if bounded else 1):
         raise ValueError("episode KL trial roster changed")
     for index, trial in enumerate(trials):
@@ -102,8 +106,10 @@ def optimizer_steps(row, steps):
     return {"actor_optimizer_steps": len(trials) * steps, "value_optimizer_steps": len(trials) * steps}
 
 
-def aggregate(results, *, preflight):
-    summary = episodes.aggregate(results, preflight=preflight, specification=spec, step_counts=optimizer_steps)
+def aggregate(results, *, preflight, specification=spec):
+    spec = specification
+    summary = episodes.aggregate(results, preflight=preflight, specification=spec,
+        step_counts=lambda row, steps: optimizer_steps(row, steps, specification=spec))
     retained, checks = {"actor_optimizer_steps": 0, "value_optimizer_steps": 0}, 0
     by_root = {c["root"]: c for c in results}
     for root_row in summary["root_rows"]:
@@ -126,8 +132,9 @@ def aggregate(results, *, preflight):
                 "max_deployed_episode_kl": max(r["deployed_terms"]["max_episode_kl"] for r in history),
                 "executed_actor_steps": sum(r["actor_optimizer_steps"] for r in history),
                 "retained_actor_steps": sum(r["retained_actor_steps"] for r in history)}
-        if diagnostic["episode_mc"]["first_full_candidate"] != diagnostic["episode_kl"]["first_full_candidate"]:
-            raise ValueError("episode KL full candidate differs from paired original MC")
+        for left, right in spec.CANDIDATE_PAIRS:
+            if diagnostic[left]["first_full_candidate"] != diagnostic[right]["first_full_candidate"]:
+                raise ValueError("episode KL full candidate differs from paired original MC")
         root_row["kl_diagnostics"] = diagnostic
     summary["retained_optimizer_steps"] = retained
     summary["kl_check_calls"] = checks
