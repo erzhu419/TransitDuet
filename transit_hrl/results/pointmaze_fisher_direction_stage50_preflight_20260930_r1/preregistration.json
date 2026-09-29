@@ -1,0 +1,120 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 10800,
+    "native_trace_audits": 68,
+    "total_primitive_steps": 20400,
+    "training_primitive_steps": 9600
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      50,
+      50050
+    ],
+    "budget": "all_four_arms_maximum_training_episode_sum_exact_Gaussian_KL_at_most_0.1",
+    "candidate_scales": "1_then_successive_halves",
+    "cg_iterations": 10,
+    "cg_rtol": 1e-06,
+    "checkpoint_selection": "none",
+    "cost": "all_executed_Adam_steps_score_backward_HVP_CG_iterations_parameter_proposals_and_KL_checks_separate_from_retained",
+    "credit": "GAE_Adam_vs_time_LOO_full_task_MC_Adam_vs_same_MC_Euclidean_vs_same_MC_Fisher",
+    "critic": "original_GAE_critic_and_Adam_update_once_for_direct_directions_same_first_update_as_Adam_controls",
+    "curvature_decision": "also_Fisher_minus_Euclidean_final_positive_required_for_curvature_specific_benefit",
+    "decision": "first_exact_max_episode_KL_feasible_no_surrogate_floor_or_evaluation_access",
+    "direction": "Euclidean_g_or_truncated_solve_of_F_plus_damping_I_times_d_equals_g",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "fisher": "float64_Hessian_of_full_batch_mean_old_to_new_conditional_Gaussian_KL_at_old_actor",
+    "fisher_damping": 0.1,
+    "frozen_levels": "upper_gate_actor_and_value_parameters_fixed_state_mediated_actions_may_differ",
+    "initial_scale": "sqrt_2_KL_budget_over_horizon_times_undamped_d_F_d",
+    "initialization": "fixed_task_clock_Stage42_warmup16_and_Adam_no_new_warmup",
+    "interval": "two_sided_percentile_bonferroni_8_equal_root_paired_means",
+    "kl_budget": 0.1,
+    "limits": "reused_roots_development_not_confirmation_equal_KL_upper_bound_not_equal_realized_KL_no_population_guarantee",
+    "max_backtracks": 12,
+    "methods": [
+      "task_clock"
+    ],
+    "optimizer": "no_Adam_reset_direct_directions_leave_actor_Adam_untouched",
+    "other_settings": "Adam_controls_original_PPO_direct_arms_one_full_batch_score_step_critic_epochs_minibatches_unchanged",
+    "pairing": "same_four_arm_initial_weights_native_training_batch_rewards_and_first_critic_update",
+    "primary_endpoints": [
+      "fisher_adam_first",
+      "fisher_adam_final",
+      "fisher_euclidean_final",
+      "fisher_frozen_final",
+      "euclidean_adam_final",
+      "euclidean_frozen_final",
+      "adam_frozen_final",
+      "gae_frozen_final"
+    ],
+    "rejection": "restore_actor_and_Adam_keep_first_original_critic_update_if_all_13_trials_fail",
+    "root_exclusion": "forbidden",
+    "sampling": "deterministic_upper_gate_sampled_lower_training_both_lower_evaluation_modes",
+    "score": "one_full_batch_gradient_of_normalized_MC_log_probability_plus_original_entropy",
+    "seeds": "policy_50_root_env_50017_lower_noise_50019_shuffle_50_root_round",
+    "sequential_extension": "forbidden",
+    "solver": "scipy_matrix_free_CG",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "treatments": [
+      "gae",
+      "episode_mc",
+      "euclidean_mc",
+      "fisher_mc"
+    ],
+    "trial": "Adam_transactional_scaled_lr_or_direct_theta0_plus_halved_scaled_direction",
+    "utility_decision": "Fisher_minus_Adam_and_Fisher_minus_frozen_final_positive_required_for_update_repair"
+  },
+  "methods": [
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 4,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_fisher_direction_stage50_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        11693001,
+        11693002
+      ],
+      "training": [
+        11690001,
+        11690002,
+        11690003,
+        11690004,
+        11690005,
+        11690006,
+        11690007,
+        11690008
+      ]
+    }
+  },
+  "source_revision": "040604d7b21187de0fbd94f8652ecb9f158fb5f4",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 20400
+}
