@@ -1845,7 +1845,19 @@ regression tests in46.806s. Native preflight `t104127` and offline `t104128` pas
 fit steps/16 score-gradient backwards. Original baseline uses392 inputs,hidden128,
 four epochs,1024 minibatch,LR0.0003,value0.5,clip1. Short-path MSE/dispersion are
 slightly worse; no tuning follows. Only7.1KB qualification is local, all raw/weights
-remote. Full frozen utility results pending; no learned repair claim.
+remote. Full `t104129`-`t104136`:eight originals exit0 in204-216s/root on dynamic
+node001/004/005/006. Offline `t104138` passes pairs/held-out fit provenance,
+costs and independent seven-endpoint statistics. All adjusted intervals cross0.
+State-minus-time-MC final+1.00150[-2.71580,5.58814]; state-minus-frozen final
+-2.60589[-7.93005,0.86840]; state-minus-GAE-1.94994[-6.03667,2.63055].
+First gradient-dispersion reduction+0.02478[-0.54616,0.72815];4/8 roots improve.
+Prediction MSE is descriptively18.88% lower (5/8), not native utility. Method
+5836800 steps/143513 upper/204772 gate calls,4864 audits,15360 actor/15360 critic
+steps,36864 auxiliary fit steps/2048 score backwards,zero extra native steps.
+See the [result](freq_hrl_stage47_state_baseline_result_2026-09-29.md) and
+[40KB qualification](../results/pointmaze_state_baseline_stage47_v1_full_20260929_r1/qualification_summary.json).
+Do not adopt as default or claim repair/noninferiority. Next isolate episode-scale
+policy displacement under full-task credit; no seed extension or baseline tuning.
 
 ### legacy_c1_c9_matrix_snapshot
 
