@@ -1,0 +1,108 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 8400,
+    "native_trace_audits": 52,
+    "total_primitive_steps": 15600,
+    "training_primitive_steps": 7200
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      48,
+      48048
+    ],
+    "budget": "maximum_training_episode_sum_of_exact_old_to_new_conditional_Gaussian_KL",
+    "candidate_scales": "1_then_successive_halves",
+    "checkpoint_selection": "none",
+    "cost": "charge_all_executed_actor_and_critic_trial_steps_distinguish_retained_steps_and_KL_checks",
+    "credit": "original_GAE_vs_time_LOO_full_task_MC_vs_same_MC_with_episode_KL_backoff",
+    "critic": "retain_exact_first_original_GAE_critic_and_Adam_update_once",
+    "decision": "first_candidate_with_max_episode_KL_at_most_budget_no_objective_floor_or_evaluation_access",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "frozen_levels": "upper_gate_actor_and_value_parameters_fixed_state_mediated_actions_may_differ",
+    "initialization": "fixed_task_clock_Stage42_warmup16_and_Adam_no_new_warmup",
+    "interval": "two_sided_percentile_bonferroni_6_equal_root_paired_means",
+    "kl_budget": 0.1,
+    "limits": "empirical_training_history_KL_not_population_trajectory_KL_or_native_reward_guarantee",
+    "max_backtracks": 12,
+    "methods": [
+      "task_clock"
+    ],
+    "optimizer": "accepted_actual_scaled_lr_Adam_state_retained_original_lr_restored_for_next_round",
+    "other_settings": "original_PPO_epochs_minibatches_clip_entropy_gradclip_unchanged_no_state_baseline",
+    "pairing": "exact_three_arm_initial_actor_critic_Adam_batches_rewards_and_first_critic_update",
+    "primary_endpoints": [
+      "bounded_mc_first",
+      "bounded_mc_final",
+      "bounded_gae_final",
+      "bounded_frozen_final",
+      "mc_frozen_final",
+      "gae_frozen_final"
+    ],
+    "rejection": "restore_actor_and_Adam_keep_first_original_critic_update_if_all_13_trials_fail",
+    "root_exclusion": "forbidden",
+    "sampling": "deterministic_upper_gate_sampled_lower_training_both_lower_evaluation_modes",
+    "seeds": "policy_48_root_env_48017_lower_noise_48019_shuffle_48_root_round_each_trial",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "treatments": [
+      "gae",
+      "episode_mc",
+      "episode_kl"
+    ],
+    "trial": "restore_all_lower_actor_critic_and_Adam_states_reseed_same_shuffle_rerun_original_PPO_scaled_actor_lr_only",
+    "utility_decision": "bounded_minus_MC_final_and_bounded_minus_frozen_positive_needed_for_learning_repair"
+  },
+  "methods": [
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 4,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_episode_kl_stage48_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        11293001,
+        11293002
+      ],
+      "training": [
+        11290001,
+        11290002,
+        11290003,
+        11290004,
+        11290005,
+        11290006,
+        11290007,
+        11290008
+      ]
+    }
+  },
+  "source_revision": "a78952580f19ad4c3b06d811f6996d5920413a77",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 15600
+}
