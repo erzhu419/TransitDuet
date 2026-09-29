@@ -64,12 +64,12 @@ def worker_rollout(job, *, specification=spec):
     return None if batch is None else batch.lower, row, raw["reward"] if phase == "train" else None
 
 
-def train(root, *, preflight, output, specification=spec, rollout_worker=worker_rollout, update_fn=None):
+def train(root, *, preflight, output, specification=spec, rollout_worker=worker_rollout, update_fn=None, source_index=0):
     spec = specification
     args, opt = spec.arguments(root, preflight=preflight), spec.options(preflight=preflight)
     roles = spec.seed_roles(root, preflight=preflight)
     sources = {m: json.loads(spec.source_result(root, m, preflight=preflight).read_text()) for m in spec.METHODS}
-    before = {m: load_pair(sources[m], root=root, method=m, preflight=preflight)[0] for m in spec.METHODS}
+    before = {m: load_pair(sources[m], root=root, method=m, preflight=preflight)[source_index] for m in spec.METHODS}
     reference = before[spec.METHODS[0]]
     frozen = joint.inference_weights(reference)
     for model in before.values():
@@ -154,12 +154,13 @@ def train(root, *, preflight, output, specification=spec, rollout_worker=worker_
     budget = spec.budget(preflight=preflight)
     if counts["train"]["primitive_steps"] != budget["training_primitive_steps"] or counts["eval"]["primitive_steps"] != budget["evaluation_primitive_steps"]:
         raise ValueError("episode credit native accounting changed")
-    warm = spec.warmup_iterations(preflight=preflight)
+    warm = spec.warmup_iterations(preflight=preflight) + source_index
     result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
         "preflight": preflight, "options": opt, "seed_roles": roles, "budget": budget, "inference_counts": counts,
         "training": training, "evaluation_rows": evaluation, "first_batch_pairs": pairs,
         "first_batch_pair_details": pair_details,
         "source_checkpoints": {m: sources[m]["snapshots"][str(warm)]["checkpoint"] for m in spec.METHODS},
+        "source_checkpoint_iteration": warm,
         "checkpoints": checkpoints, "expected_steps_per_update": expected_steps, "fixed_upper_gate_networks": "passed",
         "native_trace_audits": budget["native_trace_audits"], "wall_seconds": time.monotonic() - started}
     write_json(output, result)

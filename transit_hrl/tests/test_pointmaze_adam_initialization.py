@@ -144,7 +144,8 @@ class AdamInitializationTest(unittest.TestCase):
         opt, budget, method = spec.options(preflight=False), spec.budget(preflight=False), spec.METHODS[0]
         for cell in results:
             root = cell["root"]
-            cell.update(protocol=spec.EXPERIMENT_PROTOCOL, contract=spec.contract(), seed_roles=spec.seed_roles(root, preflight=False), budget=budget)
+            cell.update(protocol=spec.EXPERIMENT_PROTOCOL, contract=spec.contract(), seed_roles=spec.seed_roles(root, preflight=False),
+                        budget=budget, source_checkpoint_iteration=spec.warmup_iterations(preflight=False) + 1)
             template = cell["training"][method]["episode_kl"]
             histories = cell["training"][method] = {t: copy.deepcopy(template) for t in spec.TREATMENTS}
             for treatment, history in histories.items():
@@ -172,7 +173,8 @@ class AdamInitializationTest(unittest.TestCase):
                     for mode, rows in stage.items():
                         for row, seed in zip(rows, cell["seed_roles"]["evaluation"]):
                             row.update({k: value for k in spec.METRICS})
-                            row.update(seed=seed, policy_seed=spec.policy_seed(root, seed), **spec.rollout_arguments(root, seed, phase="eval", mode=mode))
+                            row.update(upper_inference_calls=1, seed=seed, policy_seed=spec.policy_seed(root, seed),
+                                       **spec.rollout_arguments(root, seed, phase="eval", mode=mode))
             cell["native_trace_audits"] = budget["native_trace_audits"]
             cell["inference_counts"] = {phase: {"primitive_steps": budget[k], "lower_inference_calls": budget[k],
                 "upper_inference_calls": budget[k] // 1200, "gate_inference_calls": budget[k] // 1200}
@@ -191,6 +193,10 @@ class AdamInitializationTest(unittest.TestCase):
         self.assertEqual(summary["retained_optimizer_steps"]["actor_optimizer_steps"], 1024)
         with self.assertRaisesRegex(ValueError, "roster incomplete"):
             experiment.aggregate(results[:-1], preflight=False)
+        changed = copy.deepcopy(results)
+        changed[0]["source_checkpoint_iteration"] -= 1
+        with self.assertRaisesRegex(ValueError, "source iteration"):
+            experiment.aggregate(changed, preflight=False)
         changed = copy.deepcopy(results)
         changed[0]["training"]["task_clock"]["mc_fresh"][1]["optimizer_initialization"]["reset"] = True
         with self.assertRaisesRegex(ValueError, "initialization or continuity"):

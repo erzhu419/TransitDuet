@@ -1903,6 +1903,12 @@ original critic updates and all trial costs. Four first batches/rewards/critic
 updates paired,step-count continuity checked. Nine frozen native contrasts include
 reset-credit interaction and all final arms minus frozen. Full7680000 steps/6400
 audits,pre20400/68. No utility claim pending qualified native results.
+Version1 is retired before native dispatch:unit `t104184` passes24/26 and exposes
+a null intervention at critic-only warmup. Nine source records confirm warmup
+actor steps0;first learning actor steps40/full or4/pre. Version2 uses fixed
+checkpoint17/pre3 with genuinely nonempty actor Adam,not an outcome-selected
+checkpoint;fresh seed base11500000/pre11490000. One fixture upper-call count
+also corrected. No version1 performance result exists.
 
 ### legacy_c1_c9_matrix_snapshot
 

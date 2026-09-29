@@ -30,13 +30,15 @@ def worker_rollout(job):
 
 def train(root, *, preflight, output):
     return episodes.train(root, preflight=preflight, output=output, specification=spec,
-                          rollout_worker=worker_rollout, update_fn=update)
+                          rollout_worker=worker_rollout, update_fn=update, source_index=1)
 
 
 def aggregate(results, *, preflight):
     summary = bounded.aggregate(results, preflight=preflight, specification=spec)
     cells = {r["root"]: r for r in results}
     for root_row in summary["root_rows"]:
+        if cells[root_row["root"]]["source_checkpoint_iteration"] != spec.warmup_iterations(preflight=preflight) + 1:
+            raise ValueError("Adam initialization source iteration changed")
         histories = cells[root_row["root"]]["training"][spec.METHODS[0]]
         source = histories["gae"][0]["optimizer_initialization"]["source_steps"]
         if not source or any(step <= 0 for step in source):

@@ -4,7 +4,7 @@ import numpy as np
 from scripts import pointmaze_episode_kl_stage48_spec as previous
 
 ROOT = previous.ROOT
-EXPERIMENT_PROTOCOL = "pointmaze_adam_initialization_stage49_v1"
+EXPERIMENT_PROTOCOL = "pointmaze_adam_initialization_stage49_v2"
 RUNNER_SCRIPT = "scripts/run_pointmaze_adam_initialization_stage49.py"
 POLICY = "adam_initialization"
 METHODS = previous.METHODS
@@ -27,7 +27,7 @@ BOOTSTRAP_DRAWS, BOOTSTRAP_SEED = 65536, (49, 49049)
 
 def seed_roles(root, *, preflight):
     index = roots(preflight=preflight).index(root)
-    base = 11_390_000 if preflight else 11_400_000 + index * 10000
+    base = 11_490_000 if preflight else 11_500_000 + index * 10000
     opt = options(preflight=preflight)
     count = opt["learning_iterations"] * opt["rollouts_per_iteration"]
     return {"training": list(range(base + 1, base + 1 + count)),
@@ -70,7 +70,7 @@ def contrasts(means, *, preflight, diagnostics=None):
 
 def contract():
     return {**previous.contract(), "methods": list(METHODS), "treatments": list(TREATMENTS),
-        "initialization": "fixed_task_clock_Stage42_warmup16_pre2_no_new_warmup",
+        "initialization": "fixed_task_clock_Stage42_first_GAE_update_checkpoint17_pre3_no_new_warmup",
         "credit": "2x2_original_GAE_vs_time_LOO_full_task_MC_by_inherited_vs_fresh_actor_Adam",
         "optimizer_initialization": "clear_actor_Adam_state_once_at_first_update_fresh_arms_only_keep_parameter_groups",
         "critic": "never_reset_critic_Adam_retain_first_original_GAE_update_each_round",
