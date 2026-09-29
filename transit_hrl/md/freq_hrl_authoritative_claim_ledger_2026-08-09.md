@@ -1877,7 +1877,22 @@ this correction. Preflight `t104170` and offline `t104171` qualify52 trace audit
 exact first batches/critic/MC candidates,15600 steps/208 upper/480 gate calls.
 Execute112 actor/112 critic steps,retain48/48,26 KL checks. Both KL updates accept
 scale1/16; first maximum episode KL3.29034 to0.03982. Only9KB compact JSON local;
-raw/weights remote. Mechanism feasibility is qualified, utility results pending.
+raw/weights remote. Preflight establishes mechanism feasibility; full outcomes follow.
+
+Full `t104173`-`t104180`:eight originals exit0 in255-267s/root; offline
+`t104181` qualifies pairs,first critic/MC candidate identity,trial costs and six
+fixed native endpoints. All Bonferroni6 intervals cross0: bounded-minus-MC final
++3.32956[-1.70999,7.12213]; bounded-minus-GAE+3.43164[-0.74270,8.22505];
+bounded-minus-frozen-0.03777[-0.63381,0.46097]. All128 bounded updates accept,
+maximum deployed training-episode KL0.09836<=0.1. LR scales1/2048-1/256,
+75/128 at1/1024:constraint feasibility,not learning repair. Execute65120 actor/
+65120 critic steps,retain15360/15360,1372 bounded trials and2396 KL checks.
+Method5836800 steps/140983 upper/203892 gate calls,4864 audits,zero extra native
+steps. Only the [59KiB qualification](../results/pointmaze_episode_kl_stage48_v1_full_20260929_r1/qualification_summary.json)
+is local. See [result](freq_hrl_stage48_episode_kl_result_2026-09-29.md).
+Keep experimental; no supported repair/noninferiority. Next isolate inherited
+versus fresh Adam state at the same episode-KL budget with GAE/frozen controls;
+no budget tuning or seed extension follows this result.
 
 ### legacy_c1_c9_matrix_snapshot
 
