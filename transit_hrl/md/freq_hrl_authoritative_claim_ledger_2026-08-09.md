@@ -1915,7 +1915,20 @@ preflight `t104188` and offline `t104194` pass68 audits,20400 steps/334 upper/
 636 gate calls,280 executed actor/280 critic steps,64/64 retained,51 KL checks.
 All eight updates accept,max KL0.08634. Inherited actor Adam starts at step4;
 fresh starts empty,ends at16 versus inherited20 after two rounds. Reset is
-non-null and occurs once;utility remains untested. Only12KB summary local.
+non-null and occurs once. Only12KB preflight summary local.
+Full `t104195`-`t104202`:eight originals exit0 in509-545s/root,offline `t104893`
+qualifies pairs,source/reset continuity,trial costs and nine fixed endpoint CIs.
+All Bonferroni9 intervals cross0. Fresh-minus-inherited MC final
++0.00450[-0.00307,0.01192];fresh MC-minus-frozen+0.34231[-0.10406,0.88964];
+credit/reset interaction+0.21261[-0.04957,0.91342]. All512 updates accept,max
+KL0.09989,LR scales1/2048-1/256. Inherited Adam40->680,fresh empty->640;
+execute218440 actor/218440 critic steps,retain20480/20480,5461 trials/6485 checks.
+Method7680000 steps/183777 upper/267883 gate calls,6400 audits,zero extra native
+steps. See [result](freq_hrl_stage49_adam_initialization_result_2026-09-29.md) and
+[compact qualification](../results/pointmaze_adam_initialization_stage49_v2_full_20260929_r1/qualification_summary.json).
+No supported reset repair or noninferiority;do not adopt as default. Next isolate
+a Fisher/curvature-aware full-task score direction under fixed episode KL with
+MC/GAE/frozen controls. No optimizer-state/KL tuning or seed extension.
 
 ### legacy_c1_c9_matrix_snapshot
 
