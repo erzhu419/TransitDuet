@@ -178,7 +178,7 @@ def check_sampling(rows, root, seeds, *, phase, mode, specification=spec):
             raise ValueError("episode credit paired sampling changed")
 
 
-def aggregate(results, *, preflight, specification=spec):
+def aggregate(results, *, preflight, specification=spec, step_counts=None):
     spec = specification
     roots = spec.roots(preflight=preflight)
     cells = {r["root"]: r for r in results}
@@ -215,8 +215,10 @@ def aggregate(results, *, preflight, specification=spec):
                     raise ValueError("episode credit training roster incomplete")
                 for row in history:
                     steps = cell["expected_steps_per_update"][method]
+                    expected = ({"actor_optimizer_steps": steps, "value_optimizer_steps": steps}
+                                if step_counts is None else step_counts(row, steps))
                     if (row["actor_credit"] != treatment or row["critic_credit"] != "original_task_option_gae"
-                            or row["actor_optimizer_steps"] != steps or row["value_optimizer_steps"] != steps
+                            or any(row[k] != expected[k] for k in totals)
                             or row["native_episodes"] != opt["rollouts_per_iteration"]):
                         raise ValueError("episode credit optimizer or target accounting changed")
                     begin = (row["iteration"] - 1) * opt["rollouts_per_iteration"]

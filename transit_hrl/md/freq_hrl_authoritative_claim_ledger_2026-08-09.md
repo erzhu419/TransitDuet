@@ -1859,6 +1859,17 @@ See the [result](freq_hrl_stage47_state_baseline_result_2026-09-29.md) and
 Do not adopt as default or claim repair/noninferiority. Next isolate episode-scale
 policy displacement under full-task credit; no seed extension or baseline tuning.
 
+### stage48_full_task_episode_kl_backoff
+
+The [Stage-48 protocol](freq_hrl_stage48_episode_kl_protocol_2026-09-29.md)
+isolates an empirical complete-training-episode KL budget on full-task MC
+actor updates. Restart each original PPO trial from actor/critic/Adam state
+with halved actor LR until maximum episode KL<=0.1,up to13 trials. Keep the
+first original critic update; charge all rejected actor/critic steps separately
+from retained steps. GAE/MC/frozen controls and exact first candidate pairing.
+Six fixed native utility endpoints,5836800 steps/4864 audits; no utility claim
+before qualification/results. No tuning or seed extension.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
