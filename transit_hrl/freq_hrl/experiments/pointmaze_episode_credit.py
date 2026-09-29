@@ -19,7 +19,8 @@ from .pointmaze_root_response import raw_directory, write_json
 from scripts import pointmaze_episode_credit_stage46_spec as spec
 
 
-def update(model, batch, task_rewards, treatment):
+def update(model, batch, task_rewards, treatment, *, specification=spec, actor_advantage=None):
+    spec = specification
     if treatment not in spec.TREATMENTS:
         raise ValueError("unregistered actor credit treatment")
     rewards = np.asarray(task_rewards, dtype=np.float64)
@@ -29,11 +30,12 @@ def update(model, batch, task_rewards, treatment):
     advantage, returns = model._gae(batch.reward, batch.done, batch.duration, batch.old_value,
                                     batch.next_value, batch.terminal)
     episode_advantage = score_targets(rewards).reshape(-1).astype(np.float32)
-    actor_advantage = advantage if treatment == "gae" else episode_advantage
+    if actor_advantage is None:
+        actor_advantage = advantage if treatment == "gae" else episode_advantage
     normalized, episode_normalized = model._normalize(advantage), model._normalize(episode_advantage)
     metrics = model._update_level(level="lower", batch=batch, actor=model.lower_actor, value_net=model.lower_value,
         actor_optimizer=model.lower_actor_optimizer, value_optimizer=model.lower_value_optimizer,
-        actor_advantage=None if treatment == "gae" else episode_advantage)
+        actor_advantage=None if treatment == "gae" else actor_advantage)
     return {"actor_optimizer_steps": int(metrics["lower_actor_optimizer_steps"]),
             "value_optimizer_steps": int(metrics["lower_value_optimizer_steps"]),
             "actor_advantage_mean": float(actor_advantage.mean()), "actor_advantage_std": float(actor_advantage.std()),
@@ -44,7 +46,8 @@ def update(model, batch, task_rewards, treatment):
             "critic_credit": "original_task_option_gae", "actor_credit": treatment}
 
 
-def worker_rollout(job):
+def worker_rollout(job, *, specification=spec):
+    spec = specification
     weights, seed, method, phase, mode, path = job
     model, args, _, _ = joint._WORKER
     model.load_state_dict(weights)
@@ -61,7 +64,8 @@ def worker_rollout(job):
     return None if batch is None else batch.lower, row, raw["reward"] if phase == "train" else None
 
 
-def train(root, *, preflight, output):
+def train(root, *, preflight, output, specification=spec, rollout_worker=worker_rollout, update_fn=None):
+    spec = specification
     args, opt = spec.arguments(root, preflight=preflight), spec.options(preflight=preflight)
     roles = spec.seed_roles(root, preflight=preflight)
     sources = {m: json.loads(spec.source_result(root, m, preflight=preflight).read_text()) for m in spec.METHODS}
@@ -75,14 +79,14 @@ def train(root, *, preflight, output):
     raw, started = raw_directory(output), time.monotonic()
     keys = ("primitive_steps", "upper_inference_calls", "lower_inference_calls", "gate_inference_calls")
     counts = {phase: dict.fromkeys(keys, 0) for phase in ("train", "eval")}
-    evaluation, training, pairs, checkpoints, expected_steps = {}, {}, {}, {}, {}
+    evaluation, training, pairs, checkpoints, expected_steps, pair_details = {}, {}, {}, {}, {}, {}
     with ProcessPoolExecutor(max_workers=opt["workers"], mp_context=mp.get_context("spawn"), initializer=joint.init_worker,
                              initargs=(reference.config, args, "learned_history", "task_option")) as pool:
         def episodes(model, method, policy, phase, mode, seeds, iteration):
             directory = raw / policy.replace(":", "/") / str(iteration) / mode
             directory.mkdir(parents=True, exist_ok=True)
             weights = joint.inference_weights(model)
-            outputs = list(pool.map(worker_rollout, [(weights, seed, method, phase, mode,
+            outputs = list(pool.map(rollout_worker, [(weights, seed, method, phase, mode,
                            str(directory / f"episode_{seed}.npz")) for seed in seeds]))
             rows = [row for _, row, _ in outputs]
             joint.audit_trajectories(rows, args=args, method="learned_history", raw_path=directory)
@@ -107,7 +111,7 @@ def train(root, *, preflight, output):
 
         snapshot(reference, "frozen", "frozen", 0)
         for method in spec.METHODS:
-            training[method], first, first_critic = {}, None, None
+            training[method], pair_details[method], first, first_critic = {}, {}, None, None
             config = before[method].config
             size = opt["rollouts_per_iteration"] * args.horizon
             expected_steps[method] = max(1, int(config.epochs)) * math.ceil(size / max(1, min(int(config.minibatch_size), size)))
@@ -127,9 +131,11 @@ def train(root, *, preflight, output):
                             pairs[method] = first_batch_pair(first[0], batch)
                             np.testing.assert_array_equal(first[1], rewards)
                             pairs[method]["native_task_rewards"] = "passed"
+                            pair_details[method][treatment] = pairs[method]
                     old_actor = copy.deepcopy(model.lower_actor)
                     np.random.seed(spec.shuffle_seed(root, iteration))
-                    metrics = update(model, batch, rewards, treatment)
+                    metrics = (update(model, batch, rewards, treatment) if update_fn is None else
+                               update_fn(model, batch, rewards, treatment, root=root, iteration=iteration))
                     if iteration == 1:
                         critic = (model.lower_value.state_dict(), model.lower_value_optimizer.state_dict())
                         if treatment == "gae":
@@ -148,10 +154,11 @@ def train(root, *, preflight, output):
     budget = spec.budget(preflight=preflight)
     if counts["train"]["primitive_steps"] != budget["training_primitive_steps"] or counts["eval"]["primitive_steps"] != budget["evaluation_primitive_steps"]:
         raise ValueError("episode credit native accounting changed")
-    warm = spec.previous.source.options(preflight=preflight)["warmup_iterations"]
+    warm = spec.warmup_iterations(preflight=preflight)
     result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
         "preflight": preflight, "options": opt, "seed_roles": roles, "budget": budget, "inference_counts": counts,
         "training": training, "evaluation_rows": evaluation, "first_batch_pairs": pairs,
+        "first_batch_pair_details": pair_details,
         "source_checkpoints": {m: sources[m]["snapshots"][str(warm)]["checkpoint"] for m in spec.METHODS},
         "checkpoints": checkpoints, "expected_steps_per_update": expected_steps, "fixed_upper_gate_networks": "passed",
         "native_trace_audits": budget["native_trace_audits"], "wall_seconds": time.monotonic() - started}
@@ -159,7 +166,8 @@ def train(root, *, preflight, output):
     return result
 
 
-def check_sampling(rows, root, seeds, *, phase, mode):
+def check_sampling(rows, root, seeds, *, phase, mode, specification=spec):
+    spec = specification
     if [r["seed"] for r in rows] != seeds:
         raise ValueError("episode credit paired seed roster changed")
     for row in rows:
@@ -170,7 +178,8 @@ def check_sampling(rows, root, seeds, *, phase, mode):
             raise ValueError("episode credit paired sampling changed")
 
 
-def aggregate(results, *, preflight):
+def aggregate(results, *, preflight, specification=spec):
+    spec = specification
     roots = spec.roots(preflight=preflight)
     cells = {r["root"]: r for r in results}
     if len(cells) != len(results) or set(cells) != set(roots):
@@ -196,9 +205,10 @@ def aggregate(results, *, preflight):
                 raise ValueError("episode credit treatment roster incomplete")
             diagnostics[method] = {}
             histories = cell["training"][method]
-            for key in ("critic_target_mean", "critic_target_std", "task_return_mean", "gae_mc_normalized_mse", "gae_mc_normalized_dot"):
-                if histories["gae"][0][key] != histories["episode_mc"][0][key]:
-                    raise ValueError("episode credit paired initial targets differ")
+            for treatment in spec.TREATMENTS[1:]:
+                for key in ("critic_target_mean", "critic_target_std", "task_return_mean", "gae_mc_normalized_mse", "gae_mc_normalized_dot"):
+                    if histories["gae"][0][key] != histories[treatment][0][key]:
+                        raise ValueError("episode credit paired initial targets differ")
             for treatment in spec.TREATMENTS:
                 history = histories[treatment]
                 if [r["iteration"] for r in history] != list(range(1, opt["learning_iterations"] + 1)):
@@ -211,7 +221,7 @@ def aggregate(results, *, preflight):
                         raise ValueError("episode credit optimizer or target accounting changed")
                     begin = (row["iteration"] - 1) * opt["rollouts_per_iteration"]
                     seeds = cell["seed_roles"]["training"][begin:begin + opt["rollouts_per_iteration"]]
-                    check_sampling(row["rollout_sampling"], root, seeds, phase="train", mode="training")
+                    check_sampling(row["rollout_sampling"], root, seeds, phase="train", mode="training", specification=spec)
                     if row["primitive_steps"] != len(seeds) * horizon or row["inference_counts"]["lower_inference_calls"] != row["primitive_steps"]:
                         raise ValueError("episode credit training step accounting changed")
                     train_counts["primitive_steps"] += row["primitive_steps"]
@@ -234,7 +244,7 @@ def aggregate(results, *, preflight):
                 if set(stages) != set(spec.MODES):
                     raise ValueError("episode credit deployment roster incomplete")
                 for mode, rows in stages.items():
-                    check_sampling(rows, root, cell["seed_roles"]["evaluation"], phase="eval", mode=mode)
+                    check_sampling(rows, root, cell["seed_roles"]["evaluation"], phase="eval", mode=mode, specification=spec)
                     for row in rows:
                         if row["episode_length"] != horizon:
                             raise ValueError("episode credit evaluation horizon changed")
@@ -247,7 +257,7 @@ def aggregate(results, *, preflight):
                 or train_counts["primitive_steps"] != budget["training_primitive_steps"] or eval_counts["primitive_steps"] != budget["evaluation_primitive_steps"]):
             raise ValueError("episode credit inference accounting changed")
         root_rows.append({"root": root, "means": means, "diagnostics": diagnostics,
-                          "endpoints": spec.contrasts(means, preflight=preflight)})
+                          "endpoints": spec.contrasts(means, preflight=preflight, diagnostics=cell)})
     summary = {"status": "preflight_passed" if preflight else "complete", "protocol": spec.EXPERIMENT_PROTOCOL,
         "contract": spec.contract(), "root_rows": root_rows, "optimizer_steps": totals,
         "native_trace_audits": sum(r["native_trace_audits"] for r in results), "verification_primitive_steps": 0,

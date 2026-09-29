@@ -28,6 +28,10 @@ def snapshots(*, preflight):
     return (1, options(preflight=preflight)["learning_iterations"])
 
 
+def warmup_iterations(*, preflight):
+    return previous.source.options(preflight=preflight)["warmup_iterations"]
+
+
 def seed_roles(root, *, preflight):
     index = roots(preflight=preflight).index(root)
     base = 11_090_000 if preflight else 11_100_000 + index * 10000
@@ -61,7 +65,7 @@ def budget(*, preflight):
             "total_primitive_steps": (train + evaluate) * horizon, "native_trace_audits": train + evaluate}
 
 
-def contrasts(means, *, preflight):
+def contrasts(means, *, preflight, diagnostics=None):
     first, final = (means[str(i)]["lower_sampled"] for i in snapshots(preflight=preflight))
     reference = means["0"]["lower_sampled"]["frozen"]["episode_return"]
     values = {}

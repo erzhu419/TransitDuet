@@ -1829,6 +1829,17 @@ No supported learning repair/noninferiority. Next freeze a state-conditioned
 full-task baseline with episode-held-out fits, retaining GAE/LOO/frozen utility
 controls. No seed extension, selection, tuning or new training follows.
 
+### stage47_episode_held_out_state_baseline
+
+The [Stage-47 protocol](freq_hrl_stage47_state_baseline_protocol_2026-09-29.md)
+isolates causal state-conditioned full-task baselines against time-LOO MC and
+original GAE, with the fixed task-clock warmup source and frozen utility control.
+Entire query episodes are excluded from fit labels and normalization. Original
+PPO/critic updates stay fixed. Seven frozen contrasts include first episode-score
+dispersion, which cannot establish utility. Full5836800 steps/4864 offline audits,
+pre15600/52; auxiliary fits/backwards counted separately, zero extra native
+verification. Pending qualification and native results; no learned repair claim.
+
 ### legacy_c1_c9_matrix_snapshot
 
 This snapshot may be used only to trace historical claim changes. Its individual rows require record-level re-adjudication before manuscript use.
