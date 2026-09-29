@@ -1,0 +1,114 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 10800,
+    "native_trace_audits": 68,
+    "total_primitive_steps": 20400,
+    "training_primitive_steps": 9600
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      49,
+      49049
+    ],
+    "budget": "all_four_arms_same_maximum_training_episode_Gaussian_KL_at_most_0.1",
+    "candidate_scales": "1_then_successive_halves",
+    "checkpoint_selection": "none",
+    "cost": "charge_all_executed_actor_and_critic_trial_steps_distinguish_retained_steps_and_KL_checks",
+    "credit": "2x2_original_GAE_vs_time_LOO_full_task_MC_by_inherited_vs_fresh_actor_Adam",
+    "critic": "never_reset_critic_Adam_retain_first_original_GAE_update_each_round",
+    "decision": "first_candidate_with_max_episode_KL_at_most_budget_no_objective_floor_or_evaluation_access",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "factorial_decision": "credit_specific_reset_effect_requires_positive_registered_difference_in_differences",
+    "frozen_levels": "upper_gate_actor_and_value_parameters_fixed_state_mediated_actions_may_differ",
+    "initialization": "fixed_task_clock_Stage42_first_GAE_update_checkpoint17_pre3_no_new_warmup",
+    "interval": "two_sided_percentile_bonferroni_9_equal_root_paired_means",
+    "kl_budget": 0.1,
+    "limits": "same_KL_upper_bound_not_equal_realized_KL_empirical_history_not_population_bound_initial_reset_not_per_round",
+    "max_backtracks": 12,
+    "methods": [
+      "task_clock"
+    ],
+    "optimizer": "no_later_resets_accept_actual_scaled_lr_Adam_path_restore_nominal_lr_next_round",
+    "optimizer_initialization": "clear_actor_Adam_state_once_at_first_update_fresh_arms_only_keep_parameter_groups",
+    "other_settings": "original_PPO_epochs_minibatches_clip_entropy_gradclip_unchanged_no_state_baseline",
+    "pairing": "same_initial_actor_critic_critic_Adam_first_native_batches_rewards_and_first_critic_update_all_four",
+    "primary_endpoints": [
+      "fresh_mc_inherited_mc_first",
+      "fresh_mc_inherited_mc_final",
+      "fresh_gae_inherited_gae_final",
+      "fresh_mc_fresh_gae_final",
+      "credit_reset_interaction_final",
+      "fresh_mc_frozen_final",
+      "inherited_mc_frozen_final",
+      "fresh_gae_frozen_final",
+      "inherited_gae_frozen_final"
+    ],
+    "rejection": "restore_actor_and_Adam_keep_first_original_critic_update_if_all_13_trials_fail",
+    "root_exclusion": "forbidden",
+    "sampling": "deterministic_upper_gate_sampled_lower_training_both_lower_evaluation_modes",
+    "seeds": "policy_49_root_env_49017_lower_noise_49019_shuffle_49_root_round_each_trial",
+    "sequential_extension": "forbidden",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "treatments": [
+      "gae",
+      "gae_fresh",
+      "episode_mc",
+      "mc_fresh"
+    ],
+    "trial": "restore_all_lower_actor_critic_and_Adam_states_reseed_same_shuffle_rerun_original_PPO_scaled_actor_lr_only",
+    "utility_decision": "fresh_MC_minus_inherited_MC_final_and_fresh_MC_minus_frozen_positive_needed_for_reset_repair"
+  },
+  "methods": [
+    "task_clock"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 4,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_adam_initialization_stage49_v2",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        11493001,
+        11493002
+      ],
+      "training": [
+        11490001,
+        11490002,
+        11490003,
+        11490004,
+        11490005,
+        11490006,
+        11490007,
+        11490008
+      ]
+    }
+  },
+  "source_revision": "70c1ddc2e91190247f100d1a3654f33b42f7f2cc",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 20400
+}
