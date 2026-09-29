@@ -1,0 +1,34 @@
+{
+  "record_version": 1,
+  "project": "TransitDuet/FreqDuet",
+  "prepared_at": "2026-09-14T02:48:24+08:00",
+  "name": "snapshotactorrel_action_rush_ep200_wu10_3x20seed",
+  "source_path": "/home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet/results_freqduet/snapshotactorrel_action_rush_ep200_wu10_3x20seed",
+  "allocated_bytes_before_delete": 1001828352,
+  "manifest_key": "snapshotactorrel_action_rush_ep200_wu10",
+  "manifest_status": "complete_invalid_config_not_action_override",
+  "manifest_note": "Invalid for intended action-override test because snapshotactorrel_hiro inherited apply_mode=terminal_bias from the current main root; diagnostics showed snapshot_value_override_mean=0. Keep only as config-inheritance diagnostic, not as performance evidence.",
+  "current_package_direct_source": false,
+  "scheduler_t93706_t93753_reference": false,
+  "remote_backup_path": "/home/erzhu419/wsl_cleanup_backup_before_delete_20260914/home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet/results_freqduet/snapshotactorrel_action_rush_ep200_wu10_3x20seed/",
+  "decision": "archive_full_directory_then_delete_local",
+  "evidence": {
+    "manifest": "/home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet/paper_manifest.yaml",
+    "package_manifest": "/home/erzhu419/mine_code/TransitDuet/FreqDuet/freqduet/results_freqduet/paper_package/current/package_manifest.json",
+    "scheduler_task_count": 48,
+    "scheduler_task_cwds": [
+      "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl"
+    ],
+    "scheduler_task_statuses_at_preflight": [
+      "running"
+    ],
+    "scheduler_stage_input_paths": [
+      "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl",
+      "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts"
+    ]
+  },
+  "backup_verification": "rsync -ani --delete produced empty output",
+  "local_deletion": "completed_exact_directory_removal",
+  "backup_verified_at": "2026-09-14T03:39:43+08:00",
+  "local_deleted_at": "2026-09-14T03:45:34+08:00"
+}

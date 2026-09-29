@@ -1,0 +1,16 @@
+_extends: F_freqduet_terminal_paper_main_hiro.yaml
+_name: F_freqduet_terminal_paper_main_fixedselector_balanced_hiro
+
+# Balanced no-regret selector between paper-main V1 and a no-holding
+# fixed-headway expert. This mirrors the historical fixedselector_balanced
+# guard but anchors the learned branch to the canonical paper-main V1 alias.
+fixed_expert_selector:
+  enable: true
+  start_ep: 40
+  count_start: selector_start
+  min_observations: 2
+  probe_period: 8
+  probe_mode: alternate
+  epsilon: 0.02
+  ema_alpha: 0.25
+  margin: 0.0

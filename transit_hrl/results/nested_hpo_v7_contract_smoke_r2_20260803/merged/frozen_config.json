@@ -1,0 +1,52 @@
+{
+  "checkpoint_validation_seeds": [
+    57721
+  ],
+  "code_revision": "11512773e315757cddcb408373ec32b0832da579",
+  "final_design_complete": false,
+  "heldout_test_access_status": "not_loaded",
+  "heldout_test_seeds": [],
+  "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+  "scenarios": [
+    "persistent_shift"
+  ],
+  "search_budget_candidates_per_policy": {
+    "freq_hrl": 1
+  },
+  "selected": {
+    "freq_hrl": {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "learning_gate_status": "ineligible",
+      "parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "robust_selection_score": -7.190594425661632e-05,
+      "trained_checkpoint_fraction": 0.0,
+      "tuning_utility_mean": -7.190594425661632e-05,
+      "validation_learning_gain_mean": 0.0
+    }
+  },
+  "selection_objective_version": "log_growth_drawdown_utility_v3",
+  "source_identity_status": "verified",
+  "source_manifest_sha256": "38325880f9f640e19a5ff6acd8fd37066a9ce8408ba6c2037557a3f3c8600688",
+  "stage": "pilot",
+  "status": "not_freezable_learning_gate",
+  "top_candidates": {
+    "freq_hrl": [
+      "ppo_lr1e4_std15"
+    ]
+  },
+  "training_replicate_seeds": [
+    2026
+  ],
+  "tuning_protocol_version": "nested_validation_hpo_v1",
+  "tuning_validation_seeds": [
+    68207
+  ]
+}

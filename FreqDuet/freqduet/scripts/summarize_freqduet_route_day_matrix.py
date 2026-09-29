@@ -109,24 +109,25 @@ def summary_table(per_seed: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame
     return pd.DataFrame(rows)
 
 
-def paired_deltas(per_seed: pd.DataFrame) -> pd.DataFrame:
+def paired_deltas(per_seed: pd.DataFrame, primary_method: str = "main") -> pd.DataFrame:
     rows = []
     key_cols = ["scenario_id", "day_type", "seed"]
     metrics = ["wait", "cv", "overshoot", "composite"]
     for keys, group in per_seed.groupby(key_cols, sort=False):
-        if "main" not in set(group["method"]):
+        if primary_method not in set(group["method"]):
             continue
-        main = group[group["method"].eq("main")].iloc[0]
-        for baseline in sorted(set(group["method"]) - {"main"}):
+        primary = group[group["method"].eq(primary_method)].iloc[0]
+        for baseline in sorted(set(group["method"]) - {primary_method}):
             base = group[group["method"].eq(baseline)].iloc[0]
             row = dict(zip(key_cols, keys))
             row.update({
-                "route_id": str(main["route_id"]),
-                "route_family": str(main["route_family"]),
+                "primary": primary_method,
+                "route_id": str(primary["route_id"]),
+                "route_family": str(primary["route_family"]),
                 "baseline": baseline,
             })
             for metric in metrics:
-                row[f"delta_{metric}"] = float(main[metric]) - float(base[metric])
+                row[f"delta_{metric}"] = float(primary[metric]) - float(base[metric])
             rows.append(row)
     return pd.DataFrame(rows)
 
@@ -158,6 +159,7 @@ def main() -> None:
     parser.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
     parser.add_argument("--learned-per-seed", default=None)
     parser.add_argument("--external-per-seed", default=None)
+    parser.add_argument("--primary-method", default="main")
     parser.add_argument("--out-dir", required=True)
     args = parser.parse_args()
 
@@ -177,7 +179,7 @@ def main() -> None:
     summary_table(per_seed, ["scenario_id", "day_type", "method"]).to_csv(
         out_dir / "route_day_scenario_method_summary.csv", index=False)
 
-    deltas = paired_deltas(per_seed)
+    deltas = paired_deltas(per_seed, primary_method=str(args.primary_method))
     deltas.to_csv(out_dir / "route_day_paired_deltas.csv", index=False)
     delta_summary(deltas, ["baseline"]).to_csv(out_dir / "route_day_overall_delta_summary.csv", index=False)
     delta_summary(deltas, ["route_family", "day_type", "baseline"]).to_csv(
@@ -190,6 +192,7 @@ def main() -> None:
             "external_per_seed": str(resolve(args.external_per_seed)) if args.external_per_seed else None,
             "n_rows": int(len(per_seed)),
             "methods": sorted(per_seed["method"].dropna().astype(str).unique().tolist()),
+            "primary_method": str(args.primary_method),
             "n_scenarios": int(per_seed["scenario_id"].nunique()),
             "day_types": sorted(per_seed["day_type"].dropna().astype(str).unique().tolist()),
         }, f, indent=2)

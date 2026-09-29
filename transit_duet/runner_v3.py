@@ -2,32 +2,39 @@
 runner_v3.py
 ============
 TransitDuet v3: bi-level bus control with switchable cross-level coupling
-(``coupling_mode``: ``hiro`` | ``haar`` | ``channels``). Used by every paper
+(``coupling_mode``: ``timetable`` | ``hiro`` | ``haar`` | ``channels``). Used by every paper
 result in the current paper pipeline (Tables I/II + every figure); the legacy
 ``runner_v2.py`` is retained only as a frozen reference of the channels-mode
 v2 baseline and is not used by any active script (see ``scripts/README.md``).
 
 Coupling modes (all share the same lower-level RE-SAC Lagrangian holding
 controller; they differ only in how the upper output δ_t is consumed):
+  timetable The upper output is a rolling timetable decision: a planned
+            same-direction dispatch-headway shift for the next trip. The
+            environment launches from planned dispatch times, not from the
+            baseline timetable gate. This is the revised main paper result
+            (H_timetable_disc).
   hiro      The upper output is a per-dispatch target-headway shift; the
             lower's Lagrangian cost penalises deviation from
-            (h_target + δ_t). Launch time is unchanged. This is the main
-            paper result (H_hiro).
+            (h_target + δ_t). Launch time is unchanged. This remains as the
+            target-headway-only ablation (H_hiro).
   channels  v2 channels-mode: δ_t directly perturbs launch time; the upper
             still gets holding-feedback in its state, so behaves like v2.
   haar      v2 channels-mode launch shift PLUS a clipped upper advantage
             injected into the lower's reward as a HAAR-style cross-advantage
             bonus, gated by a PIPER reachability classifier.
 
-Mechanism (HIRO mode):
+Mechanism (timetable mode):
   Upper outputs δ_t for the next dispatch event (one decision per dispatch,
   ~264 events per simulated service day in our calibrated corridor; not a
-  fixed-period 300 s timer). The lower then tracks the resulting target
-  headway via Lagrangian holding control; CS-BAPR + HoldFB close the
-  upper--lower loop and θ-OGD adaptively penalises fleet overshoot.
+  fixed-period 300 s timer). In timetable mode δ_t maps to a planned
+  same-direction dispatch headway; the next trip receives a planned launch
+  time and the lower tracks that planned headway via Lagrangian holding
+  control. CS-BAPR + HoldFB close the upper--lower loop and θ-OGD adaptively
+  penalises fleet overshoot.
 
 Usage:
-    python -u runner_v3.py --config configs_ablation/H_hiro.yaml \
+    python -u runner_v3.py --config configs_ablation/H_timetable_disc.yaml \
         [--episodes 300] [--seed 42] [--gpu]
 """
 
@@ -78,12 +85,15 @@ def load_config(path):
     if '_extends' in cfg:
         parent_path = cfg.pop('_extends')
         base_dir = os.path.dirname(os.path.abspath(path))
-        parent_full = os.path.join(base_dir, '..', parent_path) if not os.path.isabs(parent_path) else parent_path
-        if not os.path.exists(parent_full):
-            parent_full = os.path.join(base_dir, parent_path)
-        if not os.path.exists(parent_full):
-            # try relative to script dir
-            parent_full = os.path.join(str(SCRIPT_DIR), parent_path)
+        if os.path.isabs(parent_path):
+            candidates = [parent_path]
+        else:
+            candidates = [
+                os.path.join(base_dir, parent_path),
+                os.path.join(base_dir, '..', parent_path),
+                os.path.join(str(SCRIPT_DIR), parent_path),
+            ]
+        parent_full = next((p for p in candidates if os.path.exists(p)), candidates[-1])
         parent = load_config(parent_full)
         cfg = _deep_merge(parent, cfg)
     return cfg
@@ -132,6 +142,16 @@ class DiagnosticLog:
         'hold_fb_dir0_mean', 'hold_fb_dir1_mean',
         'hold_penalty_mean',
         'theta_wait', 'theta_fleet', 'theta_cv',
+        # passenger-time and timetable feasibility metrics
+        'avg_holding_sec', 'total_holding_sec',
+        'avg_onboard_time_min', 'avg_total_passenger_time_min',
+        'n_arrived_passengers',
+        'planned_dispatch_headway_mean', 'planned_dispatch_headway_std',
+        'planned_dispatch_headway_cv',
+        'actual_dispatch_headway_mean', 'actual_dispatch_headway_std',
+        'actual_dispatch_headway_cv',
+        'planned_shift_mean', 'planned_shift_std',
+        'dispatch_lateness_mean', 'dispatch_lateness_max',
         # CS-BAPR belief
         'surprise', 'belief_window', 'belief_cp_prob', 'belief_entropy',
         # v2j belief-weighted MORL
@@ -219,6 +239,13 @@ class TransitDuetV2Runner:
         self.env.enable_plot = False
         self.env._n_fleet_target = config['upper']['N_fleet']
         self.env.demand_noise = config['env'].get('demand_noise', 0.0)
+        lower_cfg = config['lower']
+        coupling_cfg = config['coupling']
+        coupling_mode_cfg = coupling_cfg.get('coupling_mode', 'channels')
+        self.env.configure_control(
+            dispatch_mode='timetable' if coupling_mode_cfg == 'timetable' else 'legacy',
+            lower_context=lower_cfg.get('use_timetable_context', False),
+            timetable=coupling_cfg.get('timetable', {}))
 
         state_dim = self.env.state_dim
 
@@ -233,10 +260,12 @@ class TransitDuetV2Runner:
         self._current_N_fleet = self.N_fleet_default  # set per-episode in elastic mode
         self.upper_state_dim = upper_cfg.get('state_dim', 10)
 
+        self.upper_action_bins = upper_cfg.get('action_bins', None)
         self.upper_trainer = RESACUpperTrainer(
             state_dim=self.upper_state_dim, action_dim=1,
             hidden_dim=upper_cfg.get('hidden_dim', 64),
             action_low=[-self.delta_max], action_high=[self.delta_max],
+            action_bins=self.upper_action_bins,
             ensemble_size=upper_cfg.get('ensemble_size', 10),
             beta=upper_cfg.get('resac_beta', -2.0),
             lr=upper_cfg.get('lr', 3e-4),
@@ -246,7 +275,6 @@ class TransitDuetV2Runner:
             device=device)
 
         # ── Lower policy ──
-        lower_cfg = config['lower']
         self.replay_buffer = CostReplayBuffer(config['training']['replay_buffer_size'])
         self.lower_trainer = RESACLagrangianTrainer(
             state_dim=state_dim, action_dim=1,
@@ -257,6 +285,7 @@ class TransitDuetV2Runner:
             beta=lower_cfg.get('resac_beta', -2.0),
             beta_ood=lower_cfg.get('beta_ood', 0.01),
             weight_reg=lower_cfg.get('weight_reg', 0.01),
+            action_bins=lower_cfg.get('action_bins', None),
             lr=lower_cfg['lr'], lambda_lr=lower_cfg['lambda_lr'],
             gamma=lower_cfg['gamma'], soft_tau=lower_cfg['soft_tau'],
             auto_entropy=lower_cfg['auto_entropy'],
@@ -264,7 +293,6 @@ class TransitDuetV2Runner:
             device=device)
 
         # ── Coupling ──
-        coupling_cfg = config['coupling']
         # Ablation flags (for paper experiments)
         self.ablate_holding_feedback = coupling_cfg.get('ablate_holding_feedback', False)
         self.ablate_csbapr = coupling_cfg.get('ablate_csbapr', False)
@@ -278,12 +306,16 @@ class TransitDuetV2Runner:
             lr=coupling_cfg.get('measurement_lr', 0.01))
         self.alpha_holding = coupling_cfg.get('alpha_holding', 0.5)
         self.upper_warmup = coupling_cfg.get('upper_warmup_eps', 30)
+        self.timetable_reward_cfg = (
+            coupling_cfg.get('timetable', {}).get('reward', {}))
 
         # ─── v3 cross-level coupling mode ───
         # 'channels' (default v2 behaviour: HoldFB + hindsight credit, action = launch shift)
         # 'haar'     (HAAR + PIPER: inject β·clip(A_U,-c,c)·f_k into lower reward via tap_signal)
         # 'hiro'     (HIRO/SHIRO style: δ_t reinterpreted as target-headway shift, lower's
         #             Lagrangian cost becomes goal-conditioned; no upper advantage flow)
+        # 'timetable' (rolling timetable optimization: δ_t changes the next same-direction
+        #              planned dispatch headway and planned launch time)
         self.coupling_mode = coupling_cfg.get('coupling_mode', 'channels')
         haar_cfg = coupling_cfg.get('haar', {})
         self.haar_beta = float(haar_cfg.get('beta', 0.5))
@@ -325,6 +357,7 @@ class TransitDuetV2Runner:
         self.updates_per_episode = lower_cfg.get('updates_per_episode', 30)
         self.upper_batch_size = upper_cfg.get('batch_size', 64)
         self.upper_updates = upper_cfg.get('updates_per_episode', 10)
+        self.freeze_lower_training = bool(lower_cfg.get('freeze_training', False))
 
         # Episode bookkeeping
         self._episode_upper_transitions = []
@@ -345,6 +378,39 @@ class TransitDuetV2Runner:
         self.history = defaultdict(list)
         self.resume_from_ep = 0  # set by maybe_resume() before train()
         self.diag = None  # created after resume decision in train()
+        self._maybe_warmstart_lower(lower_cfg)
+
+    def _resolve_seeded_path(self, path_pattern):
+        seed = self.cfg.get('seed', 42)
+        rendered = str(path_pattern).format(seed=seed)
+        p = Path(rendered)
+        if not p.is_absolute():
+            p = SCRIPT_DIR / p
+        if any(ch in str(p) for ch in ['*', '?', '[']):
+            matches = sorted(p.parent.glob(p.name))
+            if not matches:
+                return None
+            import re
+
+            def ep_key(path):
+                m = re.search(r'ep(\d+)', path.name)
+                return int(m.group(1)) if m else -1
+            return max(matches, key=ep_key)
+        return p
+
+    def _maybe_warmstart_lower(self, lower_cfg):
+        warmstart = lower_cfg.get('warmstart_from', None)
+        if not warmstart:
+            return
+        path = self._resolve_seeded_path(warmstart)
+        if path is not None and path.exists():
+            self.lower_trainer.load(str(path))
+            print(f"  [Lower] warm-started from {path}")
+            return
+        msg = f"lower warm-start checkpoint not found for pattern: {warmstart}"
+        if lower_cfg.get('require_warmstart', False):
+            raise FileNotFoundError(msg)
+        print(f"  [Lower] warning: {msg}; continuing without warm-start")
 
     # ────────────────── Upper callback ──────────────────
 
@@ -572,7 +638,10 @@ class TransitDuetV2Runner:
         # N(target_mean, σ_tgt) so the lower's training distribution can be
         # importance-corrected back toward the EMA "deployment" upper.
         log_mu = None
-        if self.tpc_enable and self.target_upper_trainer is not None:
+        upper_is_discrete = bool(getattr(self.upper_trainer.policy_net, 'is_discrete', False))
+        episode_training = bool(getattr(self, '_episode_training', True))
+        if (episode_training and self.tpc_enable and self.target_upper_trainer is not None
+                and not upper_is_discrete):
             target_mean_arr = self.target_upper_trainer.policy_net.get_action(
                 s_upper, deterministic=True)
             target_mean = float(target_mean_arr[0])
@@ -595,8 +664,58 @@ class TransitDuetV2Runner:
                 np.log(1.0 - self.tpc_eps + 1e-12) + log_p_target))
         else:
             delta_t = float(self.upper_trainer.policy_net.get_action(
-                s_upper, deterministic=False)[0])
+                s_upper, deterministic=not episode_training)[0])
         self._ep_upper_deltas.append(delta_t)
+
+        if self.coupling_mode == 'timetable':
+            h_cfg = self.cfg.get('coupling', {}).get('timetable', {})
+            base_hw = float(h_cfg.get('base_headway', 360.0))
+            min_hw = float(h_cfg.get('min_headway', 180.0))
+            max_hw = float(h_cfg.get('max_headway', 600.0))
+            planned_hw = float(np.clip(base_hw + delta_t, min_hw, max_hw))
+            trip.planned_headway = planned_hw
+            trip.target_headway = planned_hw
+
+            if self._prev_upper_state is not None:
+                prev_s, prev_a, prev_tid, prev_dir = self._prev_upper_state
+                self._episode_upper_transitions.append({
+                    's': prev_s, 'a': prev_a, 'tid': prev_tid,
+                    'ns': s_upper.copy(), 'done': False,
+                })
+
+            self._prev_upper_state = (
+                s_upper.copy(),
+                np.array([delta_t], dtype=np.float32),
+                trip.launch_turn, trip.direction)
+
+            dir_key = 'up' if trip.direction else 'down'
+            self._ep_dispatch_times[dir_key].append({
+                'tid': trip.launch_turn,
+                'scheduled': getattr(trip, 'baseline_launch_time', trip.launch_time),
+                'delta_t': float(delta_t),
+                'planned_headway': planned_hw,
+                'planned_launch': getattr(trip, 'planned_launch_time', None),
+                'launch_shift': None,
+                'effective_launch': getattr(trip, 'planned_launch_time', None),
+            })
+
+            hour = 6 + int(getattr(trip, 'baseline_launch_time', trip.launch_time)) // 3600
+            period = 'peak' if (7 <= hour <= 9 or 17 <= hour <= 19) else (
+                'off' if 9 < hour < 17 else 'trans')
+            self._ep_trip_records.append({
+                'tid': trip.launch_turn,
+                'dir': int(trip.direction),
+                'hour': hour,
+                'period': period,
+                'delta_t': round(delta_t, 1),
+                'base_hw': round(base_hw, 0),
+                'eff_hw': round(planned_hw, 0),
+                's_hold_mean': round(s_upper[5] * 60, 1),
+                's_hold_std': round(s_upper[6] * 60, 1),
+                'planned_launch': getattr(trip, 'planned_launch_time', None),
+                'baseline_launch': getattr(trip, 'baseline_launch_time', trip.launch_time),
+            })
+            return planned_hw
 
         # Action channel:
         #   default (channels/haar): δ_t directly shifts launch time, target_headway
@@ -694,6 +813,7 @@ class TransitDuetV2Runner:
         self.env.reset()
         self.holding_feedback.clear()
         self._current_ep = ep
+        self._episode_training = bool(training)
         self._episode_upper_transitions = []
         self._prev_upper_state = None
         self._ep_lower_actions = []
@@ -713,9 +833,10 @@ class TransitDuetV2Runner:
             self._current_N_fleet = self.N_fleet_default
         self.env._n_fleet_target = self._current_N_fleet
 
-        upper_active = ep >= self.upper_warmup and training
+        upper_control_active = ep >= self.upper_warmup
+        upper_train_active = training and upper_control_active
         self.env._upper_policy_callback = (
-            self._upper_callback_v2 if upper_active else None)
+            self._upper_callback_v2 if upper_control_active else None)
 
         state_dict, reward_dict, _ = self.env.initialize_state()
         action_dict = {k: None for k in range(self.env.max_agent_num)}
@@ -725,6 +846,7 @@ class TransitDuetV2Runner:
 
         while not self.env.done:
             for key in state_dict:
+                action_dict.setdefault(key, None)
                 if len(state_dict[key]) == 1:
                     if action_dict[key] is None:
                         obs = np.array(state_dict[key][0], dtype=np.float32)
@@ -741,7 +863,8 @@ class TransitDuetV2Runner:
                         cost = self.env.cost.get(key, 0.0)
 
                         # Track for diagnostics
-                        act_val = float(action_dict[key]) if action_dict[key] is not None else 0.0
+                        act_val = (float(np.asarray(action_dict[key]).reshape(-1)[0])
+                                   if action_dict[key] is not None else 0.0)
                         self._ep_lower_actions.append(act_val)
                         self._ep_lower_rewards.append(float(reward))
 
@@ -804,6 +927,8 @@ class TransitDuetV2Runner:
         # v2j: belief-weighted multi-objective scalarization (Option 1 BAMOR)
         sys_r, adj_w = self.compute_belief_weighted_reward(z, N_fleet)
         self._last_adj_weights = adj_w
+        env_metrics = self.env.episode_metrics
+        trip_by_id = {tt.launch_turn: tt for tt in self.env.timetables}
 
         # Compute per-trip gap deviation using ACTUAL launch times from env
         trip_gap_devs = {}
@@ -843,6 +968,8 @@ class TransitDuetV2Runner:
             dev_mean, dev_std = 0.0, 1.0
 
         backfilled = []
+        upper_reward_by_tid = {}
+        upper_penalty_by_tid = {}
         for trans in self._episode_upper_transitions:
             tid = trans['tid']
             if self.ablate_hindsight_credit:
@@ -851,7 +978,40 @@ class TransitDuetV2Runner:
             else:
                 gap_dev = trip_gap_devs.get(tid, dev_mean)
                 credit = -(gap_dev - dev_mean) / dev_std * 0.5
-            r = sys_r + credit
+            timetable_penalty = 0.0
+            if self.coupling_mode == 'timetable' and self.timetable_reward_cfg:
+                cfg = self.timetable_reward_cfg
+                tt = trip_by_id.get(tid)
+                stats = self.holding_feedback.get_trip_stats(tid)
+                hold_mean = abs(float(stats['mean'])) if stats else float(
+                    env_metrics.get('avg_holding_sec', 0.0))
+                action_mag = abs(float(np.asarray(trans['a']).reshape(-1)[0]))
+                lateness = float(getattr(
+                    tt, 'dispatch_lateness',
+                    env_metrics.get('dispatch_lateness_mean', 0.0)))
+                shift = abs(float(getattr(
+                    tt, 'planned_shift',
+                    env_metrics.get('planned_shift_mean', 0.0))))
+                total_time = float(env_metrics.get('avg_total_passenger_time_min', 0.0))
+                onboard_time = float(env_metrics.get('avg_onboard_time_min', 0.0))
+
+                timetable_penalty = (
+                    float(cfg.get('holding_weight', 0.0)) *
+                    hold_mean / max(float(cfg.get('holding_scale', 60.0)), 1e-6)
+                    + float(cfg.get('total_time_weight', 0.0)) *
+                    total_time / max(float(cfg.get('total_time_scale', 30.0)), 1e-6)
+                    + float(cfg.get('onboard_weight', 0.0)) *
+                    onboard_time / max(float(cfg.get('onboard_scale', 30.0)), 1e-6)
+                    + float(cfg.get('lateness_weight', 0.0)) *
+                    lateness / max(float(cfg.get('lateness_scale', 300.0)), 1e-6)
+                    + float(cfg.get('shift_weight', 0.0)) *
+                    shift / max(float(cfg.get('shift_scale', 900.0)), 1e-6)
+                    + float(cfg.get('action_weight', 0.0)) *
+                    action_mag / max(float(cfg.get('action_scale', 120.0)), 1e-6)
+                )
+            r = sys_r + credit - timetable_penalty
+            upper_reward_by_tid[tid] = r
+            upper_penalty_by_tid[tid] = timetable_penalty
             backfilled.append({
                 's': trans['s'], 'a': trans['a'], 'r': r,
                 'ns': trans['ns'], 'done': trans['done'], 'tid': tid,
@@ -877,7 +1037,8 @@ class TransitDuetV2Runner:
             rec['gap_dev'] = round(gap_dev, 3)
             rec['penalty'] = round(gap_dev, 3)  # now gap-based
             credit = -(gap_dev - dev_mean) / dev_std * 0.5
-            rec['reward'] = round(sys_r + credit, 3)
+            rec['timetable_penalty'] = round(upper_penalty_by_tid.get(tid, 0.0), 3)
+            rec['reward'] = round(upper_reward_by_tid.get(tid, sys_r + credit), 3)
 
         # ══════════════ CS-BAPR: Belief Update ══════════════
         # Detect non-stationarity from upper-level timetable changes
@@ -898,7 +1059,7 @@ class TransitDuetV2Runner:
             base_alpha, max_boost=self.belief_alpha_boost_max)
         # Temporarily set alpha for this episode's training
         # (auto-entropy will correct it over time, this just gives a nudge)
-        if not self.ablate_csbapr and surprise > 0.5 and upper_active:
+        if not self.ablate_csbapr and surprise > 0.5 and upper_train_active:
             self.lower_trainer.alpha = min(boosted_alpha,
                                            self.lower_trainer.maximum_alpha)
 
@@ -911,7 +1072,7 @@ class TransitDuetV2Runner:
         # We snapshot the current upper at end of warmup; subsequent Polyak
         # averaging keeps this "deployment" copy as a slow-moving anchor for
         # importance reweighting on the lower SAC.
-        if (self.tpc_enable and upper_active
+        if (self.tpc_enable and upper_train_active
                 and self.target_upper_trainer is None):
             self.target_upper_trainer = copy.deepcopy(self.upper_trainer)
             print(f"  [TPC] initialised EMA target upper at ep {ep}")
@@ -923,11 +1084,12 @@ class TransitDuetV2Runner:
         # Each completed trip k gets a per-trip bonus β · clip(A_U(s_k, δ_k), -c, c) · f_k
         # where A_U is the upper advantage and f_k is the reachability gate.
         haar_tap_signal = None
-        if self.coupling_mode == 'haar' and upper_active:
+        if self.coupling_mode == 'haar' and upper_train_active:
             haar_tap_signal = self._build_haar_tap_signal(trip_gap_devs)
 
         # Lower
-        if training and len(self.replay_buffer) > self.batch_size:
+        if (training and not self.freeze_lower_training
+                and len(self.replay_buffer) > self.batch_size):
             for _ in range(self.updates_per_episode):
                 lower_m = self.lower_trainer.update(
                     self.replay_buffer, self.batch_size, reward_scale=1.0,
@@ -936,11 +1098,11 @@ class TransitDuetV2Runner:
 
         # Train reachability classifier (HAAR mode only)
         if (self.coupling_mode == 'haar' and self.haar_use_reach_gate
-                and upper_active and self.reach_net is not None):
+                and upper_train_active and self.reach_net is not None):
             self._train_reach_classifier(trip_gap_devs)
 
         # Upper
-        if upper_active:
+        if upper_train_active:
             for trans in self._episode_upper_transitions:
                 self.upper_trainer.replay_buffer.push(
                     trans['s'], trans['a'], trans['r'], trans['ns'], trans['done'])
@@ -977,7 +1139,6 @@ class TransitDuetV2Runner:
         for tid in self.holding_feedback._trip_actions:
             hold_pens.append(self.holding_feedback.holding_penalty(tid))
         hp_stat = _stat(hold_pens)
-
         row = {
             'ep': ep, 'stage': stage,
             'wall_env_s': round(env_time, 1),
@@ -989,7 +1150,7 @@ class TransitDuetV2Runner:
             'ep_reward': round(episode_reward, 3),
             'ep_cost': round(episode_cost, 3),
             'ep_steps': episode_steps,
-            'n_dispatches': len(self._ep_upper_deltas) if upper_active else 0,
+            'n_dispatches': len(self._ep_upper_deltas) if upper_control_active else 0,
             # lower policy
             'lower_action_mean': round(la_stat['mean'], 2),
             'lower_action_std': round(la_stat['std'], 2),
@@ -1039,6 +1200,22 @@ class TransitDuetV2Runner:
             'theta_wait': float(theta_w[0]),
             'theta_fleet': float(theta_w[1]),
             'theta_cv': float(theta_w[2]),
+            # passenger-time and timetable feasibility metrics
+            'avg_holding_sec': round(env_metrics.get('avg_holding_sec', 0.0), 3),
+            'total_holding_sec': round(env_metrics.get('total_holding_sec', 0.0), 3),
+            'avg_onboard_time_min': round(env_metrics.get('avg_onboard_time_min', 0.0), 3),
+            'avg_total_passenger_time_min': round(env_metrics.get('avg_total_passenger_time_min', 0.0), 3),
+            'n_arrived_passengers': int(env_metrics.get('n_arrived_passengers', 0)),
+            'planned_dispatch_headway_mean': round(env_metrics.get('planned_dispatch_headway_mean', 0.0), 3),
+            'planned_dispatch_headway_std': round(env_metrics.get('planned_dispatch_headway_std', 0.0), 3),
+            'planned_dispatch_headway_cv': round(env_metrics.get('planned_dispatch_headway_cv', 0.0), 4),
+            'actual_dispatch_headway_mean': round(env_metrics.get('actual_dispatch_headway_mean', 0.0), 3),
+            'actual_dispatch_headway_std': round(env_metrics.get('actual_dispatch_headway_std', 0.0), 3),
+            'actual_dispatch_headway_cv': round(env_metrics.get('actual_dispatch_headway_cv', 0.0), 4),
+            'planned_shift_mean': round(env_metrics.get('planned_shift_mean', 0.0), 3),
+            'planned_shift_std': round(env_metrics.get('planned_shift_std', 0.0), 3),
+            'dispatch_lateness_mean': round(env_metrics.get('dispatch_lateness_mean', 0.0), 3),
+            'dispatch_lateness_max': round(env_metrics.get('dispatch_lateness_max', 0.0), 3),
             # CS-BAPR belief
             'surprise': round(surprise, 4),
             'belief_window': round(self.belief_tracker.effective_window, 2),
@@ -1142,7 +1319,7 @@ class TransitDuetV2Runner:
         fields = ['ep', 'tid', 'dir', 'hour', 'period', 'delta_t',
                   'base_hw', 'eff_hw', 's_hold_mean', 's_hold_std',
                   'hold_mean', 'hold_std', 'hold_max', 'hold_n',
-                  'gap_dev', 'penalty', 'reward']
+                  'gap_dev', 'penalty', 'timetable_penalty', 'reward']
 
         with open(trip_csv, 'a', newline='') as f:
             w = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
@@ -1219,7 +1396,8 @@ class TransitDuetV2Runner:
               f"δ∈[-{self.delta_max},+{self.delta_max}] | α_hold={self.alpha_holding} | "
               f"dev={self.device}")
         print(f"  Lower: state={self.env.state_dim}  K={self.lower_trainer.ensemble_size}  "
-              f"batch={self.batch_size}  updates/ep={self.updates_per_episode}")
+              f"batch={self.batch_size}  updates/ep={0 if self.freeze_lower_training else self.updates_per_episode}"
+              f"{'  frozen' if self.freeze_lower_training else ''}")
         print(f"  Upper: state={self.upper_state_dim}  K={self.upper_trainer.ensemble_size}  "
               f"batch={self.upper_batch_size}  updates/ep={self.upper_updates}")
         print(f"  Diag CSV: {self.diag.csv_path}")

@@ -35,48 +35,54 @@ os.chdir(str(PROJECT_DIR))
 #  Experiment plan
 # ═══════════════════════════════════════════════════════════════
 
-# Paper main result is TransitDuet HIRO (goal-conditioned coupling) trained
-# with runner_v3.py. The legacy A_full / channels-mode runner_v2.py
-# configurations are kept only for the ablation alternative-coupling rows.
-MAIN_CONFIG = 'configs_ablation/H_hiro.yaml'
+# Paper revision main result: rolling timetable optimization with a discrete
+# upper dispatch-headway decision and discrete lower holding actions.
+MAIN_EXP = 'H_timetable_v4'
+MAIN_CONFIG = f'configs_ablation/{MAIN_EXP}.yaml'
 
-# HIRO-mode ablations (Section 5.2 / Table III). Each removes or disables
-# one mechanism of the goal-conditioned coupling.
+# Legacy target-headway-only ablations retained for reviewer comparison.
 HIRO_ABLATIONS = ['H_hiro_no_tpc', 'H_hiro_no_holdfb', 'H_hiro_no_csbapr',
                   'H_hiro_no_hindsight', 'H_hiro_no_morl',
                   'H_hiro_fixed_fleet', 'H_hiro_no_demand_noise']
 
-# Coupling-mode comparison rows (Section 5.1): channels (H_tpc) and HAAR.
-COUPLING_VARIANTS = ['H_tpc', 'H_haar']
+# Coupling-mode and timetable ablation rows.
+COUPLING_VARIANTS = ['H_hiro', 'H_timetable_continuous',
+                     'H_timetable_no_context', 'H_tpc', 'H_haar']
+FIXED_TIMETABLE_GRID = ['H_fixed_timetable_300', 'H_fixed_timetable_330',
+                        'H_fixed_timetable', 'H_fixed_timetable_390',
+                        'H_fixed_timetable_420']
 
 BASELINES = ['cmaes', 'ga', 'fixed']  # search-based + static baselines
 
-SEEDS = [42, 123, 456]
+SEEDS = [42, 123, 456, 789, 1001, 1002, 1003, 1004, 1005, 1006]
 
-# Tier 1: main results + coupling-comparison rows + baselines
-# Tier 2: HIRO-mode ablations + generalization
+# Tier 1: main results + timetable/coupling comparison rows + baselines
+# Tier 2: legacy target-headway-only ablations + generalization
 def build_jobs(tier, episodes, quick):
     jobs = []
     eps = 50 if quick else episodes
 
     if tier in (0, 1):
-        # Tier 1: main (H_hiro + Pareto)
+        # Tier 1: main timetable-optimization run
         for seed in SEEDS:
             jobs.append({
-                'name': f'H_hiro_seed{seed}',
+                'name': f'{MAIN_EXP}_seed{seed}',
                 'cmd': ['python', '-u', 'runner_v3.py',
                         '--config', MAIN_CONFIG,
                         '--episodes', str(eps),
                         '--seed', str(seed),
                         '--gpu',
                         '--eval_pareto', '--n_eval', '5'],
-                'log_dir': f'logs/H_hiro_seed{seed}',
+                'log_dir': f'logs/{MAIN_EXP}_seed{seed}',
                 'time_est': 55 if not quick else 10,
             })
 
-        # Tier 1: coupling-mode comparison (H_tpc, H_haar)
+        # Tier 1: coupling-mode and timetable ablation comparison.
+        # H_timetable_independent_assembly is run by run_paper_round3.sh after
+        # H_fixed_timetable has produced a lower checkpoint, so it is not
+        # included in this parallel launcher.
         for seed in SEEDS:
-            for variant in COUPLING_VARIANTS:
+            for variant in COUPLING_VARIANTS + FIXED_TIMETABLE_GRID:
                 jobs.append({
                     'name': f'{variant}_seed{seed}',
                     'cmd': ['python', '-u', 'runner_v3.py',
@@ -109,7 +115,7 @@ def build_jobs(tier, episodes, quick):
                 })
 
     if tier in (0, 2):
-        # Tier 2: HIRO-mode ablations
+        # Tier 2: legacy target-headway-only ablations
         for seed in SEEDS:
             for ablation in HIRO_ABLATIONS:
                 jobs.append({

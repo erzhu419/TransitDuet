@@ -9,20 +9,36 @@ from there in a fixed stage order.
 
 | Script | Purpose | Used by stage |
 |---|---|---|
-| `launcher.py` | Train all 8 H_hiro / 2 coupling-variant / 3 baseline runs ✕ 3 seeds | `train` |
-| `per_ckpt_eval.py` | 6-checkpoint × 20-eval validation eval for H_hiro + variants + ablations (`runner_v3`, `--config configs_ablation/<exp>.yaml`) | `eval_main` |
+| `launcher.py` | Train `H_timetable_v4`, timetable variants, fixed-grid runs, coupling variants, and baselines | `train` |
+| `submit_round3_scheduler.sh` | Submit the same training/eval jobs through scheduler nodes; dry-run by default | manual/scheduler |
+| `per_ckpt_eval.py` | 6-checkpoint × 20-eval validation eval for timetable main + variants + ablations (`runner_v3`, `--config configs_ablation/<exp>.yaml`) | `eval_main` |
 | `eval_baseline.py` | Validation eval for GA + CMA-ES baselines | `eval_base` |
 | `eval_fixed_baseline.py` | Validation eval for the Fixed-headway baseline | `eval_base` |
-| `eval_pareto_hiro.py` | Pareto frontier (9 fleets × 5 eval) from validation-best H_hiro ckpts; writes `logs/H_hiro_seed*/pareto_frontier.json` | `pareto` |
+| `run_baseline_rule.py` / `eval_rule_baseline.py` | Daganzo-style and Xuan-style classical holding baselines | `train`, `eval_base` |
+| `eval_pareto_hiro.py` | Pareto frontier (9 fleets × 5 eval) from validation-best main ckpts; writes `logs/H_timetable_v4_seed*/pareto_frontier.json` | `pareto` |
 | `generalization_eval.py` | Cross-σ + demand-shift generalisation eval (`runner_v3` + validation-best ckpts); writes `logs/eval_generalization/{cross_sigma,demand_shift}/*.json` | `genrl` |
-| `composite_score.py` | Aggregate composite-cost CSV (per-episode formula, then 3-seed mean ± std) | `agg` |
+| `composite_score.py` | Aggregate composite-cost CSV (per-episode formula, then 10-seed mean ± std) | `agg` |
 | `make_result_figures.py` | Fig 2 (training curves) + Fig 3 (ablation bars) + Fig 4 (Pareto) + Fig 7 (generalisation) | `figs` |
-| `make_mechanism_figures.py` | Fig 5 (θ evolution) + Fig 6 (λ convergence) + δ-utilisation, all from H_hiro diagnostics | `figs` |
+| `make_mechanism_figures.py` | Fig 5 (θ evolution) + Fig 6 (λ convergence) + timetable-action utilisation, all from `H_timetable_v4` diagnostics | `figs` |
 
 All paper protocol parameters (`--eps 49,99,149,199,249,299`, `--n_eval 20`,
-`--seeds 42,123,456`) are passed by `run_paper_round3.sh` and are also the
+`--seeds 42,123,456,789,1001,1002,1003,1004,1005,1006`) are passed by `run_paper_round3.sh` and are also the
 defaults of each individual script, so a single-script invocation also
 matches the paper.
+
+To dispatch the main training matrix through scheduler nodes instead of the
+interactive shell:
+
+```bash
+DRY_RUN=0 DISPATCH=1 STAGE=train bash scripts/submit_round3_scheduler.sh
+```
+
+The independent-assembly ablation depends on the fixed-timetable lower
+checkpoint, so submit it only after `H_fixed_timetable` has finished:
+
+```bash
+DRY_RUN=0 DISPATCH=1 STAGE=independent bash scripts/submit_round3_scheduler.sh
+```
 
 ## Deprecated (do not use; kept for provenance only)
 

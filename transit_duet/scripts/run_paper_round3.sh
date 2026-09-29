@@ -6,10 +6,10 @@
 # manual reach-into-archive steps.
 #
 # Stages (each can be skipped via flags below):
-#   1. train      Train H_hiro main + coupling variants + 7 ablations + 3 baselines.
+#   1. train      Train H_timetable_v4 main + variants + ablations + baselines.
 #   2. eval_main  Per-checkpoint held-out eval (6 ckpts/exp x 20 eval episodes; pick best by composite).
 #   3. eval_base  Validation-best eval for fixed/GA/CMA-ES baselines.
-#   4. pareto     Pareto frontier from the validation-best H_hiro checkpoint per seed.
+#   4. pareto     Pareto frontier from the validation-best main checkpoint per seed.
 #   5. genrl      Cross-sigma + demand-shift generalisation eval.
 #   6. agg        Aggregate all numbers into machine-readable CSVs.
 #   7. figs       Regenerate all paper figures from the CSVs.
@@ -17,7 +17,7 @@
 # Outputs land at:
 #   logs/<exp>_seed<N>/                              training history + ckpts
 #   logs/eval_per_ckpt/<exp>/<exp>_per_ckpt.csv      per-ckpt eval CSVs
-#   logs/<exp>_seed<N>/pareto_frontier.json          Pareto JSONs (H_hiro only)
+#   logs/<exp>_seed<N>/pareto_frontier.json          Pareto JSONs (main policy)
 #   logs/eval_generalization/{cross_sigma,demand_shift}/*.json
 #   logs_remote/eval_per_ckpt/<exp>/                 mirror for figure scripts
 #   results_remote/round3_composite.csv              aggregated composite table
@@ -39,7 +39,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 EPISODES=300
-SEEDS=(42 123 456)
+SEEDS=(42 123 456 789 1001 1002 1003 1004 1005 1006)
 EVAL_EPS=49,99,149,199,249,299
 N_EVAL=20
 GEN_SIGMAS=0.5,1.0,1.5,2.0,3.0
@@ -70,11 +70,18 @@ stage_active() {
   return 0
 }
 
-H_HIRO_ABLATIONS=(H_hiro H_hiro_no_tpc H_hiro_no_holdfb H_hiro_no_csbapr \
+MAIN_EXP=H_timetable_v4
+TIMETABLE_VARIANTS=(H_hiro H_timetable_continuous H_timetable_no_context)
+INDEPENDENT_ASSEMBLY=H_timetable_v4_independent_assembly
+FIXED_TIMETABLE_GRID=(H_fixed_timetable_300 H_fixed_timetable_330 \
+                      H_fixed_timetable H_fixed_timetable_390 \
+                      H_fixed_timetable_420)
+H_HIRO_ABLATIONS=(H_hiro_no_tpc H_hiro_no_holdfb H_hiro_no_csbapr \
                   H_hiro_no_hindsight H_hiro_no_morl \
                   H_hiro_fixed_fleet H_hiro_no_demand_noise)
 COUPLING_VARIANTS=(H_haar H_tpc)
 BASELINES=(fixed ga cmaes)
+RULE_BASELINES=(rule_daganzo rule_xuan)
 
 echo "=========================================================="
 echo " TransitDuet round-3 reproducibility pipeline"
@@ -87,13 +94,28 @@ if stage_active train; then
   echo ">>> stage 1/7: train"
   python scripts/launcher.py --tier "$TIER" --episodes "$EPISODES" \
     $([[ $QUICK -eq 1 ]] && echo --quick)
+  if [[ $TIER -ne 2 ]]; then
+    echo ">>> stage 1/7b: train classical holding rule baselines"
+    for variant in "${RULE_BASELINES[@]}"; do
+      for seed in "${SEEDS[@]}"; do
+        python -u run_baseline_rule.py \
+          --upper "$variant" --episodes "$EPISODES" --seed "$seed"
+      done
+    done
+    echo ">>> stage 1/7c: train independent-assembly timetable upper"
+    for seed in "${SEEDS[@]}"; do
+      python -u runner_v3.py \
+        --config "configs_ablation/${INDEPENDENT_ASSEMBLY}.yaml" \
+        --episodes "$EPISODES" --seed "$seed" --gpu
+    done
+  fi
 fi
 
 ## ----------------- 2. eval_main (per-ckpt) ------------------
 if stage_active eval_main; then
-  echo ">>> stage 2/7: per-ckpt held-out eval (H_hiro + variants + ablations)"
+  echo ">>> stage 2/7: per-ckpt held-out eval (${MAIN_EXP} + variants + ablations)"
   if [[ $TIER -ne 2 ]]; then
-    for exp in H_hiro "${COUPLING_VARIANTS[@]}"; do
+    for exp in "$MAIN_EXP" "${TIMETABLE_VARIANTS[@]}" "$INDEPENDENT_ASSEMBLY" "${FIXED_TIMETABLE_GRID[@]}" "${COUPLING_VARIANTS[@]}"; do
       python scripts/per_ckpt_eval.py \
         --exp "$exp" --config "configs_ablation/$exp.yaml" \
         --seeds "$(IFS=,; echo "${SEEDS[*]}")" \
@@ -101,7 +123,7 @@ if stage_active eval_main; then
     done
   fi
   if [[ $TIER -ne 1 ]]; then
-    for exp in "${H_HIRO_ABLATIONS[@]:1}"; do
+    for exp in "${H_HIRO_ABLATIONS[@]}"; do
       python scripts/per_ckpt_eval.py \
         --exp "$exp" --config "configs_ablation/$exp.yaml" \
         --seeds "$(IFS=,; echo "${SEEDS[*]}")" \
@@ -124,13 +146,19 @@ if stage_active eval_base; then
         --eps "$EVAL_EPS" --n_eval "$N_EVAL"
     fi
   done
+  for variant in "${RULE_BASELINES[@]}"; do
+    for seed in "${SEEDS[@]}"; do
+      python eval_rule_baseline.py \
+        --variant "$variant" --seed "$seed" --n_eval "$N_EVAL"
+    done
+  done
 fi
 
 ## ----------------------- 4. pareto -------------------------
 if stage_active pareto; then
-  echo ">>> stage 4/7: Pareto frontier from validation-best H_hiro ckpts"
+  echo ">>> stage 4/7: Pareto frontier from validation-best ${MAIN_EXP} ckpts"
   python scripts/eval_pareto_hiro.py \
-    --exp H_hiro --seeds "$(IFS=,; echo "${SEEDS[*]}")" \
+    --exp "$MAIN_EXP" --seeds "$(IFS=,; echo "${SEEDS[*]}")" \
     --n_eval "$PARETO_NEPS"
 fi
 
@@ -138,7 +166,7 @@ fi
 if stage_active genrl; then
   echo ">>> stage 5/7: generalisation eval (cross-sigma + demand-shift)"
   python scripts/generalization_eval.py --mode all \
-    --exp H_hiro --sigmas "$GEN_SIGMAS" \
+    --exp "$MAIN_EXP" --sigmas "$GEN_SIGMAS" \
     --seeds "$(IFS=,; echo "${SEEDS[*]}")" \
     --n_eps "$GEN_NEPS"
 fi
@@ -156,15 +184,15 @@ if stage_active agg; then
   mkdir -p logs_remote/eval_per_ckpt logs_remote/eval_generalization
 
   ## (a) per-ckpt eval CSVs (Table I/II + Fig 3)
-  for exp in "${H_HIRO_ABLATIONS[@]}" "${COUPLING_VARIANTS[@]}"; do
+  for exp in "$MAIN_EXP" "${TIMETABLE_VARIANTS[@]}" "$INDEPENDENT_ASSEMBLY" "${FIXED_TIMETABLE_GRID[@]}" "${H_HIRO_ABLATIONS[@]}" "${COUPLING_VARIANTS[@]}"; do
     [[ -d "logs/eval_per_ckpt/$exp" ]] || continue
     rm -rf "logs_remote/eval_per_ckpt/$exp"
     cp -r "logs/eval_per_ckpt/$exp" "logs_remote/eval_per_ckpt/"
   done
 
-  ## (b) H_hiro / coupling-variant training diagnostics (Fig 2 training curves)
+  ## (b) main / timetable-variant training diagnostics (Fig 2 training curves)
   ##     and Pareto JSONs (Fig 4 + Table III).
-  for exp in "${H_HIRO_ABLATIONS[@]}" "${COUPLING_VARIANTS[@]}"; do
+  for exp in "$MAIN_EXP" "${TIMETABLE_VARIANTS[@]}" "$INDEPENDENT_ASSEMBLY" "${FIXED_TIMETABLE_GRID[@]}" "${H_HIRO_ABLATIONS[@]}" "${COUPLING_VARIANTS[@]}"; do
     for s in "${SEEDS[@]}"; do
       src="logs/${exp}_seed${s}"
       [[ -d "$src" ]] || continue
@@ -203,7 +231,7 @@ fi
 echo "=========================================================="
 echo " Done. Key outputs:"
 echo "  - logs/eval_per_ckpt/<exp>/<exp>_per_ckpt.csv"
-echo "  - logs/H_hiro_seed<N>/pareto_frontier.json"
+echo "  - logs/${MAIN_EXP}_seed<N>/pareto_frontier.json"
 echo "  - logs/eval_generalization/{cross_sigma,demand_shift}/*.json"
 echo "  - results_remote/round3_composite.csv"
 echo "  - paper/figures/*.pdf"

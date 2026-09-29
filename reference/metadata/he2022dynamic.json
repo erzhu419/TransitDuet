@@ -1,0 +1,1656 @@
+{
+  "key": "he2022dynamic",
+  "entry_type": "article",
+  "current": {
+    "author": "He, Sheng-Xue and He, Jian-Jia and Liang, Shi-Dong and Dong, June Qiong and Yuan, Peng-Cheng",
+    "title": "A dynamic holding approach to stabilizing a bus line based on the {Q}-learning algorithm with multistage look-ahead",
+    "journal": "Transp Sci",
+    "volume": "56",
+    "number": "1",
+    "pages": "31--51",
+    "year": "2022",
+    "doi": "10.1287/trsc.2021.1048"
+  },
+  "verified": {
+    "source": "crossref",
+    "title": "A Dynamic Holding Approach to Stabilizing a Bus Line Based on the Q-Learning Algorithm with Multistage Look-Ahead",
+    "author": [
+      "He, Sheng-Xue",
+      "He, Jian-Jia",
+      "Liang, Shi-Dong",
+      "Dong, June Qiong",
+      "Yuan, Peng-Cheng"
+    ],
+    "year": "2022",
+    "container": "Transportation Science",
+    "volume": "56",
+    "number": "1",
+    "pages": "31--51",
+    "doi": "10.1287/trsc.2021.1048",
+    "type": "journal-article",
+    "url": "https://doi.org/10.1287/trsc.2021.1048",
+    "links": [
+      {
+        "URL": "https://pubsonline.informs.org/doi/pdf/10.1287/trsc.2021.1048",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "publisher": "Institute for Operations Research and the Management Sciences (INFORMS)"
+  },
+  "crossref_raw": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          2,
+          25
+        ]
+      ],
+      "date-time": "2026-02-25T12:36:51Z",
+      "timestamp": 1772023011874,
+      "version": "3.50.1"
+    },
+    "reference-count": 36,
+    "publisher": "Institute for Operations Research and the Management Sciences (INFORMS)",
+    "issue": "1",
+    "content-domain": {
+      "domain": [],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [
+      "Transportation Science"
+    ],
+    "published-print": {
+      "date-parts": [
+        [
+          2022,
+          1
+        ]
+      ]
+    },
+    "abstract": "<jats:p> The unreliable service and the unstable operation of a high-frequency bus line are shown as bus bunching and the uneven distribution of headways along the bus line. Although many control strategies, such as the static and dynamic holding strategies, have been proposed to solve the above problems, many of them take on some oversimplified assumptions about the real bus line operation. So it is hard for them to continuously adapt to the evolving complex system. In view of this dynamic setting, we present an adaptive holding method that combines the classic approximate dynamic programming (ADP) with the multistage look-ahead mechanism. The holding time, the only control means used in this study, will be determined by estimating its impact on the operation stability of the bus line system in the remaining observation period. The multistage look-ahead mechanism introduced into the classic Q-learning algorithm of the ADP model makes it easy that the algorithm gets through its earlier unstable phase more quickly and easily. During the implementation of the new holding approach, the past experiences of holding operations can be cumulated effectively into an artificial neural network used to approximate the unavailable Q-factor. The use of a detailed simulation system in the new approach makes it possible to take into account most of the possible causes of instability. The numerical experiments show that the new holding approach can stabilize the system by producing evenly distributed headway and removing bus bunching thoroughly. Compared with the terminal station holding strategies, the new method brings a more reliable bus line with shorter waiting times for passengers. </jats:p>",
+    "DOI": "10.1287/trsc.2021.1048",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2021,
+          11,
+          30
+        ]
+      ],
+      "date-time": "2021-11-30T19:23:33Z",
+      "timestamp": 1638300213000
+    },
+    "page": "31-51",
+    "source": "Crossref",
+    "is-referenced-by-count": 9,
+    "title": [
+      "A Dynamic Holding Approach to Stabilizing a Bus Line Based on the Q-Learning Algorithm with Multistage Look-Ahead"
+    ],
+    "prefix": "10.1287",
+    "volume": "56",
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-9609-2832",
+        "authenticated-orcid": false,
+        "given": "Sheng-Xue",
+        "family": "He",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Jian-Jia",
+        "family": "He",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Shi-Dong",
+        "family": "Liang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "June Qiong",
+        "family": "Dong",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Business, State University of New York at Oswego, Oswego, New York, 13126"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Peng-Cheng",
+        "family": "Yuan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "member": "109",
+    "reference": [
+      {
+        "key": "B1",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1002/atr.5670200106"
+      },
+      {
+        "key": "B2",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/S0965-8564(97)00019-0"
+      },
+      {
+        "key": "B3",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2015.09.003"
+      },
+      {
+        "key": "B4",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.8.2.102"
+      },
+      {
+        "key": "B5",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2011.11.001"
+      },
+      {
+        "key": "B6",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trc.2009.05.016"
+      },
+      {
+        "key": "B7",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1108/9780585475301"
+      },
+      {
+        "key": "B8",
+        "doi-asserted-by": "crossref",
+        "unstructured": "Daganzo CF (1997b) Schedule instability and control. Daganzo CF, ed. Fundamentals of Transportation and Traffic Operations (Elsevier, New York), 304–309.",
+        "DOI": "10.1108/9780585475301"
+      },
+      {
+        "key": "B9",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2009.04.002"
+      },
+      {
+        "key": "B12",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2010.06.005"
+      },
+      {
+        "key": "B12a",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2012.04.005"
+      },
+      {
+        "key": "B13",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.3141/2090-07"
+      },
+      {
+        "key": "B14",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/S0968-090X(99)00019-4"
+      },
+      {
+        "key": "B15",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.35.1.1.10143"
+      },
+      {
+        "key": "B16",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trc.2016.08.013"
+      },
+      {
+        "key": "B17",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.3141/1857-06"
+      },
+      {
+        "key": "B18",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.cie.2015.03.004"
+      },
+      {
+        "key": "B19",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trc.2019.08.001"
+      },
+      {
+        "key": "B20",
+        "unstructured": "Haykin S (2009) Neural Networks and Learning Machines, 3rd ed. (Pearson Prentice Hall, Upper Saddle River, NJ)."
+      },
+      {
+        "key": "B21",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.35.3.215.10150"
+      },
+      {
+        "key": "B22",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/opre.22.5.1008"
+      },
+      {
+        "issue": "663",
+        "key": "B23",
+        "first-page": "41",
+        "author": "Koffman D",
+        "year": "1978",
+        "journal-title": "Transportation Res. Record"
+      },
+      {
+        "key": "B24",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1002/atr.5670380105"
+      },
+      {
+        "key": "B26",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trc.2013.06.004"
+      },
+      {
+        "key": "B27",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.8.3.248"
+      },
+      {
+        "key": "B29",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.6.1.52"
+      },
+      {
+        "key": "B30",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2018.06.001"
+      },
+      {
+        "key": "B31",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-540-73312-6_16"
+      },
+      {
+        "key": "B32",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1061/(ASCE)0733-947X(1990)116:4(517)"
+      },
+      {
+        "key": "B33",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.3141/1793-05"
+      },
+      {
+        "key": "B34",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1080/15472450590934642"
+      },
+      {
+        "key": "B35",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1007/978-3-540-73312-6_17"
+      },
+      {
+        "key": "B36",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/0191-2615(80)90034-X"
+      },
+      {
+        "key": "B37",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/0191-2607(86)90079-8"
+      },
+      {
+        "key": "B38",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1016/j.trb.2011.07.009"
+      },
+      {
+        "key": "B39",
+        "doi-asserted-by": "publisher",
+        "DOI": "10.1287/trsc.1060.0170"
+      }
+    ],
+    "container-title": [
+      "Transportation Science"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://pubsonline.informs.org/doi/pdf/10.1287/trsc.2021.1048",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2023,
+          4,
+          2
+        ]
+      ],
+      "date-time": "2023-04-02T19:46:10Z",
+      "timestamp": 1680464770000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://pubsonline.informs.org/doi/10.1287/trsc.2021.1048"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2022,
+          1
+        ]
+      ]
+    },
+    "references-count": 36,
+    "journal-issue": {
+      "issue": "1",
+      "published-print": {
+        "date-parts": [
+          [
+            2022,
+            1
+          ]
+        ]
+      }
+    },
+    "alternative-id": [
+      "10.1287/trsc.2021.1048"
+    ],
+    "URL": "https://doi.org/10.1287/trsc.2021.1048",
+    "relation": {},
+    "ISSN": [
+      "0041-1655",
+      "1526-5447"
+    ],
+    "issn-type": [
+      {
+        "value": "0041-1655",
+        "type": "print"
+      },
+      {
+        "value": "1526-5447",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          1
+        ]
+      ]
+    }
+  },
+  "arxiv_raw": null,
+  "openalex_raw": {
+    "id": "https://openalex.org/W3216817380",
+    "doi": "https://doi.org/10.1287/trsc.2021.1048",
+    "title": "A Dynamic Holding Approach to Stabilizing a Bus Line Based on the Q-Learning Algorithm with Multistage Look-Ahead",
+    "display_name": "A Dynamic Holding Approach to Stabilizing a Bus Line Based on the Q-Learning Algorithm with Multistage Look-Ahead",
+    "publication_year": 2021,
+    "publication_date": "2021-11-30",
+    "ids": {
+      "openalex": "https://openalex.org/W3216817380",
+      "doi": "https://doi.org/10.1287/trsc.2021.1048",
+      "mag": "3216817380"
+    },
+    "language": "en",
+    "primary_location": {
+      "id": "doi:10.1287/trsc.2021.1048",
+      "is_oa": false,
+      "landing_page_url": "https://doi.org/10.1287/trsc.2021.1048",
+      "pdf_url": null,
+      "source": {
+        "id": "https://openalex.org/S130252234",
+        "display_name": "Transportation Science",
+        "issn_l": "0041-1655",
+        "issn": [
+          "0041-1655",
+          "1526-5447"
+        ],
+        "is_oa": false,
+        "is_in_doaj": false,
+        "is_core": true,
+        "host_organization": "https://openalex.org/P4310315699",
+        "host_organization_name": "Institute for Operations Research and the Management Sciences",
+        "host_organization_lineage": [
+          "https://openalex.org/P4310315699"
+        ],
+        "host_organization_lineage_names": [
+          "Institute for Operations Research and the Management Sciences"
+        ],
+        "type": "journal"
+      },
+      "license": null,
+      "license_id": null,
+      "version": "publishedVersion",
+      "is_accepted": true,
+      "is_published": true,
+      "raw_source_name": "Transportation Science",
+      "raw_type": "journal-article"
+    },
+    "type": "article",
+    "indexed_in": [
+      "crossref"
+    ],
+    "open_access": {
+      "is_oa": false,
+      "oa_status": "closed",
+      "oa_url": null,
+      "any_repository_has_fulltext": false
+    },
+    "authorships": [
+      {
+        "author_position": "first",
+        "author": {
+          "id": "https://openalex.org/A5008865667",
+          "display_name": "Shengxue He",
+          "orcid": "https://orcid.org/0000-0001-9609-2832"
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I148128674",
+            "display_name": "University of Shanghai for Science and Technology",
+            "ror": "https://ror.org/00ay9v204",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Sheng-Xue He",
+        "raw_affiliation_strings": [
+          "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+        ],
+        "raw_orcid": "https://orcid.org/0000-0001-9609-2832",
+        "affiliations": [
+          {
+            "raw_affiliation_string": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;",
+            "institution_ids": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5057033970",
+          "display_name": "Jianjia He",
+          "orcid": "https://orcid.org/0000-0001-5987-3605"
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I148128674",
+            "display_name": "University of Shanghai for Science and Technology",
+            "ror": "https://ror.org/00ay9v204",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Jian-Jia He",
+        "raw_affiliation_strings": [
+          "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;",
+            "institution_ids": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5065666262",
+          "display_name": "Shidong Liang",
+          "orcid": "https://orcid.org/0000-0002-2191-6187"
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I148128674",
+            "display_name": "University of Shanghai for Science and Technology",
+            "ror": "https://ror.org/00ay9v204",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Shi-Dong Liang",
+        "raw_affiliation_strings": [
+          "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;",
+            "institution_ids": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5113460875",
+          "display_name": "June Dong",
+          "orcid": null
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I43742981",
+            "display_name": "State University of New York at Oswego",
+            "ror": "https://ror.org/01597g643",
+            "country_code": "US",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I43742981"
+            ]
+          }
+        ],
+        "countries": [
+          "US"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "June Qiong Dong",
+        "raw_affiliation_strings": [
+          "School of Business, State University of New York at Oswego, Oswego, New York, 13126"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "School of Business, State University of New York at Oswego, Oswego, New York, 13126",
+            "institution_ids": [
+              "https://openalex.org/I43742981"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "last",
+        "author": {
+          "id": "https://openalex.org/A5046620462",
+          "display_name": "PengCheng Yuan",
+          "orcid": "https://orcid.org/0000-0002-0944-0489"
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I148128674",
+            "display_name": "University of Shanghai for Science and Technology",
+            "ror": "https://ror.org/00ay9v204",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Peng-Cheng Yuan",
+        "raw_affiliation_strings": [
+          "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "Business School, University of Shanghai for Science and Technology, Shanghai 200093, China;",
+            "institution_ids": [
+              "https://openalex.org/I148128674"
+            ]
+          }
+        ]
+      }
+    ],
+    "institutions": [],
+    "countries_distinct_count": 2,
+    "institutions_distinct_count": 2,
+    "corresponding_author_ids": [],
+    "corresponding_institution_ids": [],
+    "apc_list": null,
+    "apc_paid": null,
+    "fwci": 1.5157,
+    "has_fulltext": false,
+    "cited_by_count": 9,
+    "citation_normalized_percentile": {
+      "value": 0.84754579,
+      "is_in_top_1_percent": false,
+      "is_in_top_10_percent": false
+    },
+    "cited_by_percentile_year": {
+      "min": 89,
+      "max": 98
+    },
+    "biblio": {
+      "volume": "56",
+      "issue": "1",
+      "first_page": "31",
+      "last_page": "51"
+    },
+    "is_retracted": false,
+    "is_paratext": false,
+    "is_xpac": false,
+    "primary_topic": {
+      "id": "https://openalex.org/T10698",
+      "display_name": "Transportation Planning and Optimization",
+      "score": 1.0,
+      "subfield": {
+        "id": "https://openalex.org/subfields/3313",
+        "display_name": "Transportation"
+      },
+      "field": {
+        "id": "https://openalex.org/fields/33",
+        "display_name": "Social Sciences"
+      },
+      "domain": {
+        "id": "https://openalex.org/domains/2",
+        "display_name": "Social Sciences"
+      }
+    },
+    "topics": [
+      {
+        "id": "https://openalex.org/T10698",
+        "display_name": "Transportation Planning and Optimization",
+        "score": 1.0,
+        "subfield": {
+          "id": "https://openalex.org/subfields/3313",
+          "display_name": "Transportation"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/33",
+          "display_name": "Social Sciences"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/2",
+          "display_name": "Social Sciences"
+        }
+      },
+      {
+        "id": "https://openalex.org/T11942",
+        "display_name": "Transportation and Mobility Innovations",
+        "score": 0.9983000159263611,
+        "subfield": {
+          "id": "https://openalex.org/subfields/2203",
+          "display_name": "Automotive Engineering"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/22",
+          "display_name": "Engineering"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/3",
+          "display_name": "Physical Sciences"
+        }
+      },
+      {
+        "id": "https://openalex.org/T10524",
+        "display_name": "Traffic control and management",
+        "score": 0.996999979019165,
+        "subfield": {
+          "id": "https://openalex.org/subfields/2207",
+          "display_name": "Control and Systems Engineering"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/22",
+          "display_name": "Engineering"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/3",
+          "display_name": "Physical Sciences"
+        }
+      }
+    ],
+    "keywords": [
+      {
+        "id": "https://openalex.org/keywords/headway",
+        "display_name": "Headway",
+        "score": 0.7653927206993103
+      },
+      {
+        "id": "https://openalex.org/keywords/line",
+        "display_name": "Line (geometry)",
+        "score": 0.5843485593795776
+      },
+      {
+        "id": "https://openalex.org/keywords/computer-science",
+        "display_name": "Computer science",
+        "score": 0.5300241112709045
+      },
+      {
+        "id": "https://openalex.org/keywords/stability",
+        "display_name": "Stability (learning theory)",
+        "score": 0.5059639811515808
+      },
+      {
+        "id": "https://openalex.org/keywords/algorithm",
+        "display_name": "Algorithm",
+        "score": 0.4725453853607178
+      },
+      {
+        "id": "https://openalex.org/keywords/dynamic-programming",
+        "display_name": "Dynamic programming",
+        "score": 0.45007988810539246
+      },
+      {
+        "id": "https://openalex.org/keywords/service",
+        "display_name": "Service (business)",
+        "score": 0.42935508489608765
+      },
+      {
+        "id": "https://openalex.org/keywords/simulation",
+        "display_name": "Simulation",
+        "score": 0.26522743701934814
+      },
+      {
+        "id": "https://openalex.org/keywords/mathematics",
+        "display_name": "Mathematics",
+        "score": 0.08862379193305969
+      },
+      {
+        "id": "https://openalex.org/keywords/machine-learning",
+        "display_name": "Machine learning",
+        "score": 0.08826464414596558
+      }
+    ],
+    "concepts": [
+      {
+        "id": "https://openalex.org/C2779240695",
+        "wikidata": "https://www.wikidata.org/wiki/Q4383682",
+        "display_name": "Headway",
+        "level": 2,
+        "score": 0.7653927206993103
+      },
+      {
+        "id": "https://openalex.org/C198352243",
+        "wikidata": "https://www.wikidata.org/wiki/Q37105",
+        "display_name": "Line (geometry)",
+        "level": 2,
+        "score": 0.5843485593795776
+      },
+      {
+        "id": "https://openalex.org/C41008148",
+        "wikidata": "https://www.wikidata.org/wiki/Q21198",
+        "display_name": "Computer science",
+        "level": 0,
+        "score": 0.5300241112709045
+      },
+      {
+        "id": "https://openalex.org/C112972136",
+        "wikidata": "https://www.wikidata.org/wiki/Q7595718",
+        "display_name": "Stability (learning theory)",
+        "level": 2,
+        "score": 0.5059639811515808
+      },
+      {
+        "id": "https://openalex.org/C11413529",
+        "wikidata": "https://www.wikidata.org/wiki/Q8366",
+        "display_name": "Algorithm",
+        "level": 1,
+        "score": 0.4725453853607178
+      },
+      {
+        "id": "https://openalex.org/C37404715",
+        "wikidata": "https://www.wikidata.org/wiki/Q380679",
+        "display_name": "Dynamic programming",
+        "level": 2,
+        "score": 0.45007988810539246
+      },
+      {
+        "id": "https://openalex.org/C2780378061",
+        "wikidata": "https://www.wikidata.org/wiki/Q25351891",
+        "display_name": "Service (business)",
+        "level": 2,
+        "score": 0.42935508489608765
+      },
+      {
+        "id": "https://openalex.org/C44154836",
+        "wikidata": "https://www.wikidata.org/wiki/Q45045",
+        "display_name": "Simulation",
+        "level": 1,
+        "score": 0.26522743701934814
+      },
+      {
+        "id": "https://openalex.org/C33923547",
+        "wikidata": "https://www.wikidata.org/wiki/Q395",
+        "display_name": "Mathematics",
+        "level": 0,
+        "score": 0.08862379193305969
+      },
+      {
+        "id": "https://openalex.org/C119857082",
+        "wikidata": "https://www.wikidata.org/wiki/Q2539",
+        "display_name": "Machine learning",
+        "level": 1,
+        "score": 0.08826464414596558
+      },
+      {
+        "id": "https://openalex.org/C2524010",
+        "wikidata": "https://www.wikidata.org/wiki/Q8087",
+        "display_name": "Geometry",
+        "level": 1,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C162324750",
+        "wikidata": "https://www.wikidata.org/wiki/Q8134",
+        "display_name": "Economics",
+        "level": 0,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C136264566",
+        "wikidata": "https://www.wikidata.org/wiki/Q159810",
+        "display_name": "Economy",
+        "level": 1,
+        "score": 0.0
+      }
+    ],
+    "mesh": [],
+    "locations_count": 2,
+    "locations": [
+      {
+        "id": "doi:10.1287/trsc.2021.1048",
+        "is_oa": false,
+        "landing_page_url": "https://doi.org/10.1287/trsc.2021.1048",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S130252234",
+          "display_name": "Transportation Science",
+          "issn_l": "0041-1655",
+          "issn": [
+            "0041-1655",
+            "1526-5447"
+          ],
+          "is_oa": false,
+          "is_in_doaj": false,
+          "is_core": true,
+          "host_organization": "https://openalex.org/P4310315699",
+          "host_organization_name": "Institute for Operations Research and the Management Sciences",
+          "host_organization_lineage": [
+            "https://openalex.org/P4310315699"
+          ],
+          "host_organization_lineage_names": [
+            "Institute for Operations Research and the Management Sciences"
+          ],
+          "type": "journal"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "publishedVersion",
+        "is_accepted": true,
+        "is_published": true,
+        "raw_source_name": "Transportation Science",
+        "raw_type": "journal-article"
+      },
+      {
+        "id": "pmh:oai:RePEc:inm:ortrsc:v:56:y:2022:i:1:p:31-51",
+        "is_oa": false,
+        "landing_page_url": "http://doi.org/10.1287/trsc.2021.1048",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S4306401271",
+          "display_name": "RePEc: Research Papers in Economics",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": false,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I77793887",
+          "host_organization_name": "Federal Reserve Bank of St. Louis",
+          "host_organization_lineage": [
+            "https://openalex.org/I77793887"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "submittedVersion",
+        "is_accepted": false,
+        "is_published": false,
+        "raw_source_name": null,
+        "raw_type": "article"
+      }
+    ],
+    "best_oa_location": null,
+    "sustainable_development_goals": [],
+    "awards": [],
+    "funders": [],
+    "has_content": {
+      "grobid_xml": false,
+      "pdf": false
+    },
+    "content_urls": null,
+    "referenced_works_count": 34,
+    "referenced_works": [
+      "https://openalex.org/W20051474",
+      "https://openalex.org/W1569512666",
+      "https://openalex.org/W1600175910",
+      "https://openalex.org/W1704464939",
+      "https://openalex.org/W1972922866",
+      "https://openalex.org/W1974488516",
+      "https://openalex.org/W1990084320",
+      "https://openalex.org/W1995333595",
+      "https://openalex.org/W2020147040",
+      "https://openalex.org/W2023210180",
+      "https://openalex.org/W2034628819",
+      "https://openalex.org/W2047034108",
+      "https://openalex.org/W2055237722",
+      "https://openalex.org/W2060882291",
+      "https://openalex.org/W2062905113",
+      "https://openalex.org/W2067909423",
+      "https://openalex.org/W2069082145",
+      "https://openalex.org/W2071277963",
+      "https://openalex.org/W2086738228",
+      "https://openalex.org/W2089577733",
+      "https://openalex.org/W2090672779",
+      "https://openalex.org/W2099488522",
+      "https://openalex.org/W2118780114",
+      "https://openalex.org/W2124597594",
+      "https://openalex.org/W2125990328",
+      "https://openalex.org/W2136029015",
+      "https://openalex.org/W2138064221",
+      "https://openalex.org/W2138081204",
+      "https://openalex.org/W2147014452",
+      "https://openalex.org/W2151721306",
+      "https://openalex.org/W2226899132",
+      "https://openalex.org/W2509335305",
+      "https://openalex.org/W2809790777",
+      "https://openalex.org/W2968621332"
+    ],
+    "related_works": [
+      "https://openalex.org/W3011309105",
+      "https://openalex.org/W1990084320",
+      "https://openalex.org/W2363400661",
+      "https://openalex.org/W2051775676",
+      "https://openalex.org/W2140196366",
+      "https://openalex.org/W44667219",
+      "https://openalex.org/W4313172028",
+      "https://openalex.org/W2345649773",
+      "https://openalex.org/W2902251460",
+      "https://openalex.org/W2101995674"
+    ],
+    "abstract_inverted_index": {
+      "The": [
+        0,
+        100,
+        132,
+        191,
+        216
+      ],
+      "unreliable": [
+        1
+      ],
+      "service": [
+        2
+      ],
+      "and": [
+        3,
+        17,
+        35,
+        160,
+        234
+      ],
+      "the": [
+        4,
+        18,
+        24,
+        33,
+        44,
+        56,
+        71,
+        89,
+        96,
+        103,
+        119,
+        123,
+        128,
+        138,
+        143,
+        150,
+        163,
+        166,
+        170,
+        188,
+        199,
+        211,
+        221,
+        227,
+        241,
+        246
+      ],
+      "unstable": [
+        5,
+        156
+      ],
+      "operation": [
+        6,
+        120
+      ],
+      "of": [
+        7,
+        21,
+        48,
+        77,
+        122,
+        142,
+        165,
+        173,
+        193,
+        210,
+        214
+      ],
+      "a": [
+        8,
+        194,
+        250
+      ],
+      "high-frequency": [
+        9
+      ],
+      "bus": [
+        10,
+        15,
+        25,
+        58,
+        124,
+        236,
+        253
+      ],
+      "line": [
+        11,
+        59,
+        125,
+        254
+      ],
+      "are": [
+        12
+      ],
+      "shown": [
+        13
+      ],
+      "as": [
+        14,
+        32
+      ],
+      "bunching": [
+        16,
+        237
+      ],
+      "uneven": [
+        19
+      ],
+      "distribution": [
+        20
+      ],
+      "headways": [
+        22
+      ],
+      "along": [
+        23
+      ],
+      "line.": [
+        26
+      ],
+      "Although": [
+        27
+      ],
+      "many": [
+        28,
+        47
+      ],
+      "control": [
+        29,
+        105
+      ],
+      "strategies,": [
+        30,
+        38,
+        245
+      ],
+      "such": [
+        31
+      ],
+      "static": [
+        34
+      ],
+      "dynamic": [
+        36,
+        79,
+        92
+      ],
+      "holding": [
+        37,
+        85,
+        101,
+        168,
+        174,
+        223,
+        244
+      ],
+      "have": [
+        39
+      ],
+      "been": [
+        40
+      ],
+      "proposed": [
+        41
+      ],
+      "to": [
+        42,
+        67,
+        70,
+        186,
+        205
+      ],
+      "solve": [
+        43
+      ],
+      "above": [
+        45
+      ],
+      "problems,": [
+        46
+      ],
+      "them": [
+        49,
+        66
+      ],
+      "take": [
+        50,
+        206
+      ],
+      "on": [
+        51,
+        118
+      ],
+      "some": [
+        52
+      ],
+      "oversimplified": [
+        53
+      ],
+      "assumptions": [
+        54
+      ],
+      "about": [
+        55
+      ],
+      "real": [
+        57
+      ],
+      "operation.": [
+        60
+      ],
+      "So": [
+        61
+      ],
+      "it": [
+        62,
+        147,
+        203
+      ],
+      "is": [
+        63
+      ],
+      "hard": [
+        64
+      ],
+      "for": [
+        65,
+        259
+      ],
+      "continuously": [
+        68
+      ],
+      "adapt": [
+        69
+      ],
+      "evolving": [
+        72
+      ],
+      "complex": [
+        73
+      ],
+      "system.": [
+        74
+      ],
+      "In": [
+        75
+      ],
+      "view": [
+        76
+      ],
+      "this": [
+        78,
+        109
+      ],
+      "setting,": [
+        80
+      ],
+      "we": [
+        81
+      ],
+      "present": [
+        82
+      ],
+      "an": [
+        83,
+        181
+      ],
+      "adaptive": [
+        84
+      ],
+      "method": [
+        86,
+        248
+      ],
+      "that": [
+        87,
+        149,
+        220
+      ],
+      "combines": [
+        88
+      ],
+      "classic": [
+        90,
+        139
+      ],
+      "approximate": [
+        91,
+        187
+      ],
+      "programming": [
+        93
+      ],
+      "(ADP)": [
+        94
+      ],
+      "with": [
+        95,
+        240,
+        255
+      ],
+      "multistage": [
+        97,
+        133
+      ],
+      "look-ahead": [
+        98,
+        134
+      ],
+      "mechanism.": [
+        99
+      ],
+      "time,": [
+        102
+      ],
+      "only": [
+        104
+      ],
+      "means": [
+        106
+      ],
+      "used": [
+        107,
+        185
+      ],
+      "in": [
+        108,
+        127,
+        198
+      ],
+      "study,": [
+        110
+      ],
+      "will": [
+        111
+      ],
+      "be": [
+        112,
+        177
+      ],
+      "determined": [
+        113
+      ],
+      "by": [
+        114,
+        229
+      ],
+      "estimating": [
+        115
+      ],
+      "its": [
+        116,
+        154
+      ],
+      "impact": [
+        117
+      ],
+      "stability": [
+        121
+      ],
+      "system": [
+        126,
+        197,
+        228
+      ],
+      "remaining": [
+        129
+      ],
+      "observation": [
+        130
+      ],
+      "period.": [
+        131
+      ],
+      "mechanism": [
+        135
+      ],
+      "introduced": [
+        136
+      ],
+      "into": [
+        137,
+        180,
+        207
+      ],
+      "Q-learning": [
+        140
+      ],
+      "algorithm": [
+        141,
+        151
+      ],
+      "ADP": [
+        144
+      ],
+      "model": [
+        145
+      ],
+      "makes": [
+        146,
+        202
+      ],
+      "easy": [
+        148
+      ],
+      "gets": [
+        152
+      ],
+      "through": [
+        153
+      ],
+      "earlier": [
+        155
+      ],
+      "phase": [
+        157
+      ],
+      "more": [
+        158,
+        251
+      ],
+      "quickly": [
+        159
+      ],
+      "easily.": [
+        161
+      ],
+      "During": [
+        162
+      ],
+      "implementation": [
+        164
+      ],
+      "new": [
+        167,
+        200,
+        222,
+        247
+      ],
+      "approach,": [
+        169
+      ],
+      "past": [
+        171
+      ],
+      "experiences": [
+        172
+      ],
+      "operations": [
+        175
+      ],
+      "can": [
+        176,
+        225
+      ],
+      "cumulated": [
+        178
+      ],
+      "effectively": [
+        179
+      ],
+      "artificial": [
+        182
+      ],
+      "neural": [
+        183
+      ],
+      "network": [
+        184
+      ],
+      "unavailable": [
+        189
+      ],
+      "Q-factor.": [
+        190
+      ],
+      "use": [
+        192
+      ],
+      "detailed": [
+        195
+      ],
+      "simulation": [
+        196
+      ],
+      "approach": [
+        201,
+        224
+      ],
+      "possible": [
+        204,
+        212
+      ],
+      "account": [
+        208
+      ],
+      "most": [
+        209
+      ],
+      "causes": [
+        213
+      ],
+      "instability.": [
+        215
+      ],
+      "numerical": [
+        217
+      ],
+      "experiments": [
+        218
+      ],
+      "show": [
+        219
+      ],
+      "stabilize": [
+        226
+      ],
+      "producing": [
+        230
+      ],
+      "evenly": [
+        231
+      ],
+      "distributed": [
+        232
+      ],
+      "headway": [
+        233
+      ],
+      "removing": [
+        235
+      ],
+      "thoroughly.": [
+        238
+      ],
+      "Compared": [
+        239
+      ],
+      "terminal": [
+        242
+      ],
+      "station": [
+        243
+      ],
+      "brings": [
+        249
+      ],
+      "reliable": [
+        252
+      ],
+      "shorter": [
+        256
+      ],
+      "waiting": [
+        257
+      ],
+      "times": [
+        258
+      ],
+      "passengers.": [
+        260
+      ]
+    },
+    "counts_by_year": [
+      {
+        "year": 2026,
+        "cited_by_count": 1
+      },
+      {
+        "year": 2025,
+        "cited_by_count": 2
+      },
+      {
+        "year": 2024,
+        "cited_by_count": 4
+      },
+      {
+        "year": 2023,
+        "cited_by_count": 1
+      },
+      {
+        "year": 2022,
+        "cited_by_count": 1
+      }
+    ],
+    "updated_date": "2026-05-21T06:26:12.895304",
+    "created_date": "2025-10-10T00:00:00"
+  },
+  "status": "verified",
+  "notes": [],
+  "title_similarity": 1.0,
+  "pdf_status": "downloaded",
+  "pdf_url": "https://arxiv.org/pdf/2006.08706.pdf",
+  "pdf_path": "reference/pdfs/he2022dynamic.pdf",
+  "pdf_notes": []
+}

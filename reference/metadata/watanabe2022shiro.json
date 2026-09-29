@@ -1,0 +1,962 @@
+{
+  "key": "watanabe2022shiro",
+  "entry_type": "article",
+  "current": {
+    "title": "{SHIRO}: soft hierarchical reinforcement learning",
+    "author": "Watanabe, Kandai and Strong, Mathew and Eldar, Omer",
+    "journal": "arXiv preprint",
+    "year": "2022",
+    "eprint": "2212.12786",
+    "archiveprefix": "arXiv"
+  },
+  "verified": {
+    "source": "arxiv",
+    "title": "SHIRO: Soft Hierarchical Reinforcement Learning",
+    "author": [
+      "Kandai Watanabe",
+      "Mathew Strong",
+      "Omer Eldar"
+    ],
+    "year": "2022",
+    "eprint": "2212.12786v1",
+    "pdf_url": "https://arxiv.org/pdf/2212.12786v1.pdf",
+    "url": "http://arxiv.org/abs/2212.12786v1"
+  },
+  "crossref_raw": null,
+  "arxiv_raw": {
+    "source": "arxiv",
+    "title": "SHIRO: Soft Hierarchical Reinforcement Learning",
+    "author": [
+      "Kandai Watanabe",
+      "Mathew Strong",
+      "Omer Eldar"
+    ],
+    "year": "2022",
+    "eprint": "2212.12786v1",
+    "pdf_url": "https://arxiv.org/pdf/2212.12786v1.pdf",
+    "url": "http://arxiv.org/abs/2212.12786v1"
+  },
+  "openalex_raw": {
+    "id": "https://openalex.org/W4312226159",
+    "doi": "https://doi.org/10.48550/arxiv.2212.12786",
+    "title": "SHIRO: Soft Hierarchical Reinforcement Learning",
+    "display_name": "SHIRO: Soft Hierarchical Reinforcement Learning",
+    "relevance_score": 134.59444,
+    "publication_year": 2022,
+    "publication_date": "2022-12-24",
+    "ids": {
+      "openalex": "https://openalex.org/W4312226159",
+      "doi": "https://doi.org/10.48550/arxiv.2212.12786"
+    },
+    "language": "en",
+    "primary_location": {
+      "id": "pmh:oai:arXiv.org:2212.12786",
+      "is_oa": true,
+      "landing_page_url": "http://arxiv.org/abs/2212.12786",
+      "pdf_url": "https://arxiv.org/pdf/2212.12786",
+      "source": {
+        "id": "https://openalex.org/S4306400194",
+        "display_name": "arXiv (Cornell University)",
+        "issn_l": null,
+        "issn": null,
+        "is_oa": true,
+        "is_in_doaj": false,
+        "is_core": false,
+        "host_organization": "https://openalex.org/I205783295",
+        "host_organization_name": "Cornell University",
+        "host_organization_lineage": [
+          "https://openalex.org/I205783295"
+        ],
+        "host_organization_lineage_names": [],
+        "type": "repository"
+      },
+      "license": null,
+      "license_id": null,
+      "version": "submittedVersion",
+      "is_accepted": false,
+      "is_published": false,
+      "raw_source_name": "",
+      "raw_type": "text"
+    },
+    "type": "preprint",
+    "indexed_in": [
+      "arxiv",
+      "datacite"
+    ],
+    "open_access": {
+      "is_oa": true,
+      "oa_status": "green",
+      "oa_url": "https://arxiv.org/pdf/2212.12786",
+      "any_repository_has_fulltext": true
+    },
+    "authorships": [
+      {
+        "author_position": "first",
+        "author": {
+          "id": "https://openalex.org/A5065508982",
+          "display_name": "Kandai Watanabe",
+          "orcid": "https://orcid.org/0000-0002-1460-648X"
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Watanabe, Kandai",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5080541467",
+          "display_name": "Mathew Strong",
+          "orcid": null
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Strong, Mathew",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "last",
+        "author": {
+          "id": "https://openalex.org/A5048406269",
+          "display_name": "Omer Eldar",
+          "orcid": null
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Eldar, Omer",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      }
+    ],
+    "institutions": [],
+    "countries_distinct_count": 0,
+    "institutions_distinct_count": 0,
+    "corresponding_author_ids": [],
+    "corresponding_institution_ids": [],
+    "apc_list": null,
+    "apc_paid": null,
+    "fwci": null,
+    "has_fulltext": false,
+    "cited_by_count": 0,
+    "citation_normalized_percentile": null,
+    "cited_by_percentile_year": null,
+    "biblio": {
+      "volume": null,
+      "issue": null,
+      "first_page": null,
+      "last_page": null
+    },
+    "is_retracted": false,
+    "is_paratext": false,
+    "is_xpac": false,
+    "primary_topic": {
+      "id": "https://openalex.org/T10462",
+      "display_name": "Reinforcement Learning in Robotics",
+      "score": 0.9961000084877014,
+      "subfield": {
+        "id": "https://openalex.org/subfields/1702",
+        "display_name": "Artificial Intelligence"
+      },
+      "field": {
+        "id": "https://openalex.org/fields/17",
+        "display_name": "Computer Science"
+      },
+      "domain": {
+        "id": "https://openalex.org/domains/3",
+        "display_name": "Physical Sciences"
+      }
+    },
+    "topics": [
+      {
+        "id": "https://openalex.org/T10462",
+        "display_name": "Reinforcement Learning in Robotics",
+        "score": 0.9961000084877014,
+        "subfield": {
+          "id": "https://openalex.org/subfields/1702",
+          "display_name": "Artificial Intelligence"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/17",
+          "display_name": "Computer Science"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/3",
+          "display_name": "Physical Sciences"
+        }
+      }
+    ],
+    "keywords": [
+      {
+        "id": "https://openalex.org/keywords/reinforcement-learning",
+        "display_name": "Reinforcement learning",
+        "score": 0.860508918762207
+      },
+      {
+        "id": "https://openalex.org/keywords/entropy",
+        "display_name": "Entropy (arrow of time)",
+        "score": 0.6301865577697754
+      },
+      {
+        "id": "https://openalex.org/keywords/computer-science",
+        "display_name": "Computer science",
+        "score": 0.625203013420105
+      },
+      {
+        "id": "https://openalex.org/keywords/novelty",
+        "display_name": "Novelty",
+        "score": 0.6115843057632446
+      },
+      {
+        "id": "https://openalex.org/keywords/artificial-intelligence",
+        "display_name": "Artificial intelligence",
+        "score": 0.5185330510139465
+      },
+      {
+        "id": "https://openalex.org/keywords/kullback–leibler-divergence",
+        "display_name": "Kullback–Leibler divergence",
+        "score": 0.5083336234092712
+      },
+      {
+        "id": "https://openalex.org/keywords/benchmark",
+        "display_name": "Benchmark (surveying)",
+        "score": 0.4639975428581238
+      },
+      {
+        "id": "https://openalex.org/keywords/machine-learning",
+        "display_name": "Machine learning",
+        "score": 0.43604621291160583
+      },
+      {
+        "id": "https://openalex.org/keywords/mathematical-optimization",
+        "display_name": "Mathematical optimization",
+        "score": 0.3320423662662506
+      },
+      {
+        "id": "https://openalex.org/keywords/mathematics",
+        "display_name": "Mathematics",
+        "score": 0.21449080109596252
+      }
+    ],
+    "concepts": [
+      {
+        "id": "https://openalex.org/C97541855",
+        "wikidata": "https://www.wikidata.org/wiki/Q830687",
+        "display_name": "Reinforcement learning",
+        "level": 2,
+        "score": 0.860508918762207
+      },
+      {
+        "id": "https://openalex.org/C106301342",
+        "wikidata": "https://www.wikidata.org/wiki/Q4117933",
+        "display_name": "Entropy (arrow of time)",
+        "level": 2,
+        "score": 0.6301865577697754
+      },
+      {
+        "id": "https://openalex.org/C41008148",
+        "wikidata": "https://www.wikidata.org/wiki/Q21198",
+        "display_name": "Computer science",
+        "level": 0,
+        "score": 0.625203013420105
+      },
+      {
+        "id": "https://openalex.org/C2778738651",
+        "wikidata": "https://www.wikidata.org/wiki/Q16546687",
+        "display_name": "Novelty",
+        "level": 2,
+        "score": 0.6115843057632446
+      },
+      {
+        "id": "https://openalex.org/C154945302",
+        "wikidata": "https://www.wikidata.org/wiki/Q11660",
+        "display_name": "Artificial intelligence",
+        "level": 1,
+        "score": 0.5185330510139465
+      },
+      {
+        "id": "https://openalex.org/C171752962",
+        "wikidata": "https://www.wikidata.org/wiki/Q255166",
+        "display_name": "Kullback–Leibler divergence",
+        "level": 2,
+        "score": 0.5083336234092712
+      },
+      {
+        "id": "https://openalex.org/C185798385",
+        "wikidata": "https://www.wikidata.org/wiki/Q1161707",
+        "display_name": "Benchmark (surveying)",
+        "level": 2,
+        "score": 0.4639975428581238
+      },
+      {
+        "id": "https://openalex.org/C119857082",
+        "wikidata": "https://www.wikidata.org/wiki/Q2539",
+        "display_name": "Machine learning",
+        "level": 1,
+        "score": 0.43604621291160583
+      },
+      {
+        "id": "https://openalex.org/C126255220",
+        "wikidata": "https://www.wikidata.org/wiki/Q141495",
+        "display_name": "Mathematical optimization",
+        "level": 1,
+        "score": 0.3320423662662506
+      },
+      {
+        "id": "https://openalex.org/C33923547",
+        "wikidata": "https://www.wikidata.org/wiki/Q395",
+        "display_name": "Mathematics",
+        "level": 0,
+        "score": 0.21449080109596252
+      },
+      {
+        "id": "https://openalex.org/C205649164",
+        "wikidata": "https://www.wikidata.org/wiki/Q1071",
+        "display_name": "Geography",
+        "level": 0,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C121332964",
+        "wikidata": "https://www.wikidata.org/wiki/Q413",
+        "display_name": "Physics",
+        "level": 0,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C27206212",
+        "wikidata": "https://www.wikidata.org/wiki/Q34178",
+        "display_name": "Theology",
+        "level": 1,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C13280743",
+        "wikidata": "https://www.wikidata.org/wiki/Q131089",
+        "display_name": "Geodesy",
+        "level": 1,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C138885662",
+        "wikidata": "https://www.wikidata.org/wiki/Q5891",
+        "display_name": "Philosophy",
+        "level": 0,
+        "score": 0.0
+      },
+      {
+        "id": "https://openalex.org/C62520636",
+        "wikidata": "https://www.wikidata.org/wiki/Q944",
+        "display_name": "Quantum mechanics",
+        "level": 1,
+        "score": 0.0
+      }
+    ],
+    "mesh": [],
+    "locations_count": 2,
+    "locations": [
+      {
+        "id": "pmh:oai:arXiv.org:2212.12786",
+        "is_oa": true,
+        "landing_page_url": "http://arxiv.org/abs/2212.12786",
+        "pdf_url": "https://arxiv.org/pdf/2212.12786",
+        "source": {
+          "id": "https://openalex.org/S4306400194",
+          "display_name": "arXiv (Cornell University)",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I205783295",
+          "host_organization_name": "Cornell University",
+          "host_organization_lineage": [
+            "https://openalex.org/I205783295"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "submittedVersion",
+        "is_accepted": false,
+        "is_published": false,
+        "raw_source_name": "",
+        "raw_type": "text"
+      },
+      {
+        "id": "doi:10.48550/arxiv.2212.12786",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.48550/arxiv.2212.12786",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S4306400194",
+          "display_name": "arXiv (Cornell University)",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I205783295",
+          "host_organization_name": "Cornell University",
+          "host_organization_lineage": [
+            "https://openalex.org/I205783295"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": null,
+        "license_id": null,
+        "version": null,
+        "is_accepted": false,
+        "is_published": null,
+        "raw_source_name": null,
+        "raw_type": "Preprint"
+      }
+    ],
+    "best_oa_location": {
+      "id": "pmh:oai:arXiv.org:2212.12786",
+      "is_oa": true,
+      "landing_page_url": "http://arxiv.org/abs/2212.12786",
+      "pdf_url": "https://arxiv.org/pdf/2212.12786",
+      "source": {
+        "id": "https://openalex.org/S4306400194",
+        "display_name": "arXiv (Cornell University)",
+        "issn_l": null,
+        "issn": null,
+        "is_oa": true,
+        "is_in_doaj": false,
+        "is_core": false,
+        "host_organization": "https://openalex.org/I205783295",
+        "host_organization_name": "Cornell University",
+        "host_organization_lineage": [
+          "https://openalex.org/I205783295"
+        ],
+        "host_organization_lineage_names": [],
+        "type": "repository"
+      },
+      "license": null,
+      "license_id": null,
+      "version": "submittedVersion",
+      "is_accepted": false,
+      "is_published": false,
+      "raw_source_name": "",
+      "raw_type": "text"
+    },
+    "sustainable_development_goals": [
+      {
+        "display_name": "Peace, Justice and strong institutions",
+        "id": "https://metadata.un.org/sdg/16",
+        "score": 0.800000011920929
+      }
+    ],
+    "awards": [],
+    "funders": [],
+    "has_content": {
+      "grobid_xml": false,
+      "pdf": false
+    },
+    "content_urls": null,
+    "referenced_works_count": 0,
+    "referenced_works": [],
+    "related_works": [
+      "https://openalex.org/W2381242807",
+      "https://openalex.org/W3126131230",
+      "https://openalex.org/W2347541121",
+      "https://openalex.org/W2080951048",
+      "https://openalex.org/W4288804799",
+      "https://openalex.org/W3032237421",
+      "https://openalex.org/W2390346111",
+      "https://openalex.org/W2163103544",
+      "https://openalex.org/W2551182807",
+      "https://openalex.org/W3033899355"
+    ],
+    "abstract_inverted_index": {
+      "Hierarchical": [
+        0
+      ],
+      "Reinforcement": [
+        1
+      ],
+      "Learning": [
+        2
+      ],
+      "(HRL)": [
+        3
+      ],
+      "algorithms": [
+        4
+      ],
+      "have": [
+        5
+      ],
+      "been": [
+        6
+      ],
+      "demonstrated": [
+        7
+      ],
+      "to": [
+        8,
+        29,
+        71,
+        79,
+        94,
+        111,
+        134,
+        146,
+        162
+      ],
+      "perform": [
+        9
+      ],
+      "well": [
+        10
+      ],
+      "on": [
+        11,
+        140,
+        187
+      ],
+      "high-dimensional": [
+        12
+      ],
+      "decision": [
+        13
+      ],
+      "making": [
+        14,
+        177
+      ],
+      "and": [
+        15,
+        42,
+        68,
+        165,
+        196
+      ],
+      "robotic": [
+        16,
+        192
+      ],
+      "control": [
+        17,
+        193
+      ],
+      "tasks.": [
+        18
+      ],
+      "However,": [
+        19
+      ],
+      "because": [
+        20
+      ],
+      "they": [
+        21
+      ],
+      "solely": [
+        22
+      ],
+      "optimize": [
+        23
+      ],
+      "for": [
+        24,
+        57
+      ],
+      "rewards,": [
+        25
+      ],
+      "the": [
+        26,
+        31,
+        38,
+        75,
+        80,
+        88,
+        95,
+        99,
+        106,
+        115,
+        123,
+        136,
+        150,
+        159,
+        167,
+        170,
+        173
+      ],
+      "agent": [
+        27
+      ],
+      "tends": [
+        28
+      ],
+      "search": [
+        30
+      ],
+      "same": [
+        32
+      ],
+      "space": [
+        33
+      ],
+      "redundantly.": [
+        34
+      ],
+      "This": [
+        35
+      ],
+      "problem": [
+        36
+      ],
+      "reduces": [
+        37
+      ],
+      "speed": [
+        39
+      ],
+      "of": [
+        40,
+        77,
+        84,
+        91,
+        122,
+        138,
+        169,
+        190
+      ],
+      "learning": [
+        41,
+        178
+      ],
+      "achieved": [
+        43
+      ],
+      "reward.": [
+        44
+      ],
+      "In": [
+        45
+      ],
+      "this": [
+        46,
+        85
+      ],
+      "work,": [
+        47
+      ],
+      "we": [
+        48
+      ],
+      "present": [
+        49
+      ],
+      "an": [
+        50,
+        131
+      ],
+      "Off-Policy": [
+        51
+      ],
+      "HRL": [
+        52,
+        100
+      ],
+      "algorithm": [
+        53,
+        61
+      ],
+      "that": [
+        54,
+        105,
+        172
+      ],
+      "maximizes": [
+        55
+      ],
+      "entropy": [
+        56,
+        78,
+        93,
+        107,
+        139,
+        145
+      ],
+      "efficient": [
+        58
+      ],
+      "exploration.": [
+        59
+      ],
+      "The": [
+        60,
+        82
+      ],
+      "learns": [
+        62
+      ],
+      "a": [
+        63,
+        155,
+        188
+      ],
+      "temporally": [
+        64
+      ],
+      "abstracted": [
+        65
+      ],
+      "low-level": [
+        66,
+        124,
+        160
+      ],
+      "policy": [
+        67,
+        125
+      ],
+      "is": [
+        69,
+        87,
+        126
+      ],
+      "able": [
+        70
+      ],
+      "explore": [
+        72
+      ],
+      "broadly": [
+        73
+      ],
+      "through": [
+        74
+      ],
+      "addition": [
+        76
+      ],
+      "high-level.": [
+        81
+      ],
+      "novelty": [
+        83
+      ],
+      "work": [
+        86
+      ],
+      "theoretical": [
+        89
+      ],
+      "motivation": [
+        90
+      ],
+      "adding": [
+        92,
+        144
+      ],
+      "RL": [
+        96
+      ],
+      "objective": [
+        97
+      ],
+      "in": [
+        98,
+        142,
+        158
+      ],
+      "setting.": [
+        101
+      ],
+      "We": [
+        102,
+        129
+      ],
+      "empirically": [
+        103
+      ],
+      "show": [
+        104
+      ],
+      "can": [
+        108
+      ],
+      "be": [
+        109
+      ],
+      "added": [
+        110
+      ],
+      "both": [
+        112
+      ],
+      "levels": [
+        113
+      ],
+      "if": [
+        114
+      ],
+      "Kullback-Leibler": [
+        116
+      ],
+      "(KL)": [
+        117
+      ],
+      "divergence": [
+        118
+      ],
+      "between": [
+        119
+      ],
+      "consecutive": [
+        120
+      ],
+      "updates": [
+        121
+      ],
+      "sufficiently": [
+        127
+      ],
+      "small.": [
+        128
+      ],
+      "performed": [
+        130
+      ],
+      "ablative": [
+        132
+      ],
+      "study": [
+        133
+      ],
+      "analyze": [
+        135
+      ],
+      "effects": [
+        137
+      ],
+      "hierarchy,": [
+        141
+      ],
+      "which": [
+        143
+      ],
+      "high-level": [
+        147,
+        174
+      ],
+      "emerged": [
+        148
+      ],
+      "as": [
+        149
+      ],
+      "most": [
+        151
+      ],
+      "desirable": [
+        152
+      ],
+      "configuration.": [
+        153
+      ],
+      "Furthermore,": [
+        154
+      ],
+      "higher": [
+        156
+      ],
+      "temperature": [
+        157
+      ],
+      "leads": [
+        161
+      ],
+      "Q-value": [
+        163
+      ],
+      "overestimation": [
+        164
+      ],
+      "increases": [
+        166
+      ],
+      "stochasticity": [
+        168
+      ],
+      "environment": [
+        171
+      ],
+      "operates": [
+        175
+      ],
+      "on,": [
+        176
+      ],
+      "more": [
+        179
+      ],
+      "challenging.": [
+        180
+      ],
+      "Our": [
+        181
+      ],
+      "method,": [
+        182
+      ],
+      "SHIRO,": [
+        183
+      ],
+      "surpasses": [
+        184
+      ],
+      "state-of-the-art": [
+        185
+      ],
+      "performance": [
+        186
+      ],
+      "range": [
+        189
+      ],
+      "simulated": [
+        191
+      ],
+      "benchmark": [
+        194
+      ],
+      "tasks": [
+        195
+      ],
+      "requires": [
+        197
+      ],
+      "minimal": [
+        198
+      ],
+      "tuning.": [
+        199
+      ]
+    },
+    "counts_by_year": [],
+    "updated_date": "2026-07-01T06:00:48.157686",
+    "created_date": "2025-10-10T00:00:00"
+  },
+  "status": "verified",
+  "notes": [],
+  "title_similarity": 1.0,
+  "pdf_status": "downloaded",
+  "pdf_url": "https://arxiv.org/pdf/2212.12786.pdf",
+  "pdf_path": "reference/pdfs/watanabe2022shiro.pdf",
+  "pdf_notes": []
+}

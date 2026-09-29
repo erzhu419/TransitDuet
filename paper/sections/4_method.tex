@@ -1,19 +1,12 @@
 \section{TransitDuet framework}
 \label{sec:method}
 
-This section presents the TransitDuet architecture and its constituent algorithms.
-\Cref{fig:arch} gives an overview of the bi-level system.
-\Cref{sec:arch} motivates the decoupled dual-network design.
-\Cref{sec:upper} and \Cref{sec:lower} detail the upper-level timetable policy and lower-level holding control policy, respectively.
-\Cref{sec:tap} describes the goal-conditioned cross-level coupling that links the two levels across timescales.
-\Cref{sec:meas_proj} describes the measurement-driven scheme that adaptively penalises fleet-overshoot at the upper level.
-\Cref{sec:training} assembles the full training procedure.
-\Cref{sec:tpc} introduces the target-policy-corrected lower SAC (TPC) training fix that closes the gap to a hand-tuned fixed timetable.
+TransitDuet comprises an upper timetable policy and a lower holding policy linked by a dynamic timetable channel. \Cref{fig:arch} summarizes the architecture; the following subsections specify policy training, cross-level coupling, adaptive fleet-overshoot penalties, and the target-headway-only ablation.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.92\textwidth]{figures/architecture.png}
-    \caption{TransitDuet bi-level architecture. The upper policy $\piU$ acts at each dispatch event (timescale: minutes), choosing a per-dispatch goal shift $\delta_t$ that adjusts the lower's target headway from $\htarget$ to $\htarget + \delta_t$. The lower policy $\piL$ acts at each station arrival (timescale: seconds), choosing a holding duration that drives the realised headway toward this goal. The coupling is goal-conditioned (HIRO-style): no upper signal is injected into the lower's transitions or reward beyond the shifted target. TPC importance-weighted training of the lower SAC corrects for any residual covariate shift induced by changing target headways during upper exploration.}
+    \includegraphics[width=0.92\textwidth]{figures/architecture_user_supplied.jpg}
+    \caption{TransitDuet bi-level architecture. The upper policy $\piU$ acts after each dispatch event (timescale: minutes), selecting a planned-headway adjustment for the next same-direction trip. The simulator converts the resulting planned headway into a planned launch time. The lower policy $\piL$ acts at each station arrival (timescale: seconds), selecting a holding duration that drives the realized headway toward the dynamic timetable. A target-headway-only channel is retained as an ablation.}
     \label{fig:arch}
 \end{figure}
 
@@ -21,140 +14,109 @@ This section presents the TransitDuet architecture and its constituent algorithm
 \subsection{Architecture overview}
 \label{sec:arch}
 
-TransitDuet comprises two independent policy networks operating at different timescales and over different state-action spaces .
-The upper policy $\piU$ is a lightweight Gaussian MLP that selects a per-dispatch headway shift at each dispatch event.
-The lower policy $\piL$ is a RE-SAC--Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
+TransitDuet comprises two independent policy networks operating at different timescales and over different state-action spaces.
+The upper policy $\piU$ is a lightweight categorical multilayer perceptron (MLP) that selects a planned-headway adjustment for the next same-direction dispatch.
+The lower policy $\piL$ is a discrete RE-SAC--Lagrangian controller that selects holding durations at every station arrival, with parameters shared across all buses in the fleet.
 
 A key design choice is that the two networks share no encoder parameters.
 This stands in contrast to the shared-body, dual-head architecture of RoboDuet \citep{pan2024roboduet}, which couples an upper style policy and a lower tracking policy through a common proprioceptive encoder.
-Shared encoders are appropriate when the two levels observe the same state at each time step---as in synchronous robot locomotion---but are ill-suited here for two reasons.
+Shared encoders are appropriate when the two levels observe the same state at each time step, as in synchronous robot locomotion, but are ill-suited here for two reasons.
 First, $\sU$ and $\sL$ live in different spaces: $\sU$ encodes route-level demand forecasts and fleet status, whereas $\sL$ encodes per-bus headway deviation, passenger load, and local occupancy.
 Second, the two levels are triggered asynchronously.
 The upper policy acts once per dispatch event (roughly once per $\htarget$ seconds), while the lower policy acts at every station arrival of every active bus, producing hundreds of decisions per upper-level step.
-Forcing these heterogeneous signals through a shared trunk would create conflicting gradient directions.
+Forcing these heterogeneous signals through a shared trunk may create conflicting gradient directions.
 
-The coupling between the two levels is instead a goal-conditioned action channel: the upper sets the lower's headway target each dispatch, as described in \cref{sec:tap}.
-This clean separation lets us train both networks with off-policy soft actor-critic: a RE-SAC ensemble Q upper that reuses each per-dispatch transition many times via a replay buffer, and the same RE-SAC ensemble structure augmented with a Lagrangian dual variable at the lower level for headway-constraint satisfaction.
+The two levels communicate through a dynamic timetable channel. The upper selects a planned-headway adjustment that the simulator converts into a planned headway and launch time for the next dispatch, as described in \cref{sec:tap}.
+Both networks are trained with off-policy soft actor-critic. The RE-SAC upper reuses per-dispatch transitions from a replay buffer, while the lower uses the same ensemble structure with a Lagrangian dual variable that penalizes headway deviation.
 
 %% ====================================================================
 \subsection{Upper-level timetable policy}
 \label{sec:upper}
 
-The upper policy $\piU$ maps the route-level state $\sU$ to a scalar headway-shift $\aU = \delta_t \in [-120, 120]$\,s.
-The bus's scheduled launch time stays at the baseline value ($t_{\text{base}}$ from an $H = 360$\,s schedule), and the target headway communicated to the lower controller is reset for that trip to $\htarget + \delta_t$. The lower's Lagrangian cost (Section~\ref{sec:lower}) is then computed against this dispatch-specific target, so $\delta_t$ acts as a goal in the sense of HIRO~\citep{nachum2018data}.
+The upper policy $\piU$ maps the route-level state $\sU$ to a discrete planned-headway adjustment $\Delta h \in \{-60,-30,0,30,60\}$\,s.
+After a trip is dispatched, this adjustment defines the planned headway and planned launch time of the next same-direction trip according to \Cref{eq:timetable_action}.
+The lower's Lagrangian cost (Section~\ref{sec:lower}) is then computed against this dispatch-specific planned headway.
 
 \paragraph{Network architecture.}
-The policy is parameterized as a two-layer MLP with 64 hidden units per layer and ReLU activations:
+The policy is parameterized as a two-layer MLP with 64 hidden units per layer and rectified linear unit (ReLU) activations, followed by categorical logits over the five timetable actions:
 \begin{equation}
 \label{eq:upper_net}
-    \mu_{\phi}(\sU) = \sigma\!\bigl(W_3 \, \mathrm{ReLU}(W_2 \, \mathrm{ReLU}(W_1 \sU + b_1) + b_2) + b_3\bigr),
+    \ell_{\phi}(\sU) = W_3 \, \mathrm{ReLU}(W_2 \, \mathrm{ReLU}(W_1 \sU + b_1) + b_2) + b_3 .
 \end{equation}
-where $\sigma(\cdot)$ denotes the element-wise sigmoid function and $\phi$ collects all weights and biases.
-The sigmoid output is affinely mapped to the action range:
+The action distribution is
 \begin{equation}
 \label{eq:upper_action_method}
-    \aU = -120 + 240\, \mu_{\phi}(\sU) \in [-120, 120]\;\text{s}.
-\end{equation}
-Exploration is achieved by additive Gaussian noise with a learnable log-standard-deviation $\log \sigma_{\phi}$ shared across states:
-\begin{equation}
-\label{eq:upper_explore}
-    \aU \sim \mathcal{N}\!\bigl(\mu_{\phi}(\sU),\; \sigma_{\phi}^2\bigr).
+    \piU(\Delta h \mid \sU) =
+    \mathrm{Categorical}\!\left(\mathrm{softmax}(\ell_{\phi}(\sU))\right).
 \end{equation}
 
 \paragraph{Off-policy SAC training (RE-SAC upper).}
-The upper policy is trained as an off-policy soft actor-critic with an ensemble of $K{=}10$ Q-networks and a lower-confidence-bound (LCB) value used in the policy improvement step --- the same RE-SAC-style structure~\citep{resac2026} used at the lower level (\cref{sec:lower}), without the Lagrangian. Each dispatch event $i$ contributes a transition $(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U}}^{(i)}, s_{\mathrm{U},i+1}, d_i)$ to a 50k-capacity replay buffer; the per-dispatch reward $R_{\mathrm{U}}^{(i)}$ is the hindsight-credited reward of \Cref{eq:hindsight_reward} (\cref{sec:tap}). The ensemble Q-networks are trained against a single shared mean-target to prevent ensemble divergence,
+The upper policy is trained as an off-policy soft actor-critic with an ensemble of $K{=}10$ Q-networks and a lower-confidence-bound (LCB) value in the policy-improvement step. This is the same RE-SAC-style structure~\citep{resac2026} used at the lower level (\cref{sec:lower}), without the Lagrangian. Each dispatch event $i$ contributes a transition $(s_{\mathrm{U},i}, a_{\mathrm{U},i}, R_{\mathrm{U}}^{(i)}, s_{\mathrm{U},i+1}, d_i)$ to a 50k-capacity replay buffer. The per-dispatch reward $R_{\mathrm{U}}^{(i)}$ is the hindsight-credited reward of \Cref{eq:hindsight_reward} (\cref{sec:tap}). The ensemble Q-networks are trained against a single shared mean target to prevent ensemble divergence,
+{\footnotesize
 \begin{equation}
 \label{eq:upper_q_target}
-\begin{aligned}
-    y_i = R_{\mathrm{U}}^{(i)} + \gamma\,(1 - d_i)\,\Bigl(\,
-      &\tfrac{1}{K}\sum_{k=1}^{K} \bar{Q}_{k}(s_{\mathrm{U},i+1}, \tilde{a})\\[-2pt]
-      &-\, \alpha_{\mathrm{U}} \log\piU(\tilde{a}\mid s_{\mathrm{U},i+1})\Bigr),
-\end{aligned}
+    y_i = R_{\mathrm{U}}^{(i)} + \gamma(1-d_i)\!\left(\frac{1}{K}\sum_{k=1}^{K}\bar{Q}_{k}(s_{\mathrm{U},i+1},\tilde{a}) - \alpha_{\mathrm{U}}\log\piU(\tilde{a}\mid s_{\mathrm{U},i+1})\right).
 \end{equation}
-where $\bar{Q}_{k}$ is the $k$-th target network, $\tilde{a} \sim \piU(\cdot\mid s_{\mathrm{U},i+1})$, and the target is clamped to $[-50, 50]$; the per-Q MSE is augmented with a small ensemble-spread penalty $\beta_{\mathrm{ood}} \cdot \mathrm{std}_k(Q_k)$ that encourages the ensemble to disagree on out-of-distribution actions. The policy is improved by maximising the LCB value:
+}
+where $\bar{Q}_{k}$ is the $k$-th target network and $\tilde{a} \sim \piU(\cdot\mid s_{\mathrm{U},i+1})$. The target is clamped to $[-50, 50]$. For the categorical policy, the target value is the probability-weighted expectation over the five action bins. The per-Q mean-squared-error (MSE) loss is augmented with a small ensemble-spread penalty $\beta_{\mathrm{ood}} \cdot \mathrm{std}_k(Q_k)$ that encourages the ensemble to disagree on out-of-distribution actions. The policy is improved by maximizing the LCB value:
+{\footnotesize
 \begin{equation}
 \label{eq:upper_policy_loss}
-\begin{aligned}
-    \mathcal{L}_{\piU}(\phi) = \mathbb{E}_{s\sim\mathcal{D}_{\mathrm{U}},\,a\sim\piU}\!\Bigl[\,
-      &\alpha_{\mathrm{U}}\,\log\piU(a\mid s)\\[-2pt]
-      &-\,\bigl(\bar{Q}(s,a) + \beta_{\mathrm{LCB}}\,\sigma_Q(s,a)\bigr)\Bigr],
-\end{aligned}
+    \mathcal{L}_{\piU}(\phi) = \mathbb{E}_{s\sim\mathcal{D}_{\mathrm{U}},\,a\sim\piU}\!\left[\alpha_{\mathrm{U}}\log\piU(a\mid s) - \bigl(\bar{Q}(s,a) + \beta_{\mathrm{LCB}}\sigma_Q(s,a)\bigr)\right].
 \end{equation}
-where $\beta_{\mathrm{LCB}} = -2$, so the LCB value $\bar{Q} + \beta_{\mathrm{LCB}}\sigma_Q$ subtracts twice the ensemble disagreement from the mean. Auto-entropy adjusts $\alpha_{\mathrm{U}}$ toward the target entropy $-\dim(\aU) = -1$, capped at $\alpha_{\max}^{\mathrm{U}} = 0.05$ in the goal-conditioned configuration (the upper action is a 1-dimensional headway shift, so the entropy target $-\dim(\aU) = -1$ saturates quickly without a low cap). The choice of an off-policy SAC upper rather than an on-policy estimator is deliberate: dispatches are scarce ($M\!\approx\!264$ per episode), so a replay buffer reuses each transition many times across gradient updates.
+}
+where $\beta_{\mathrm{LCB}} = -2$, so the LCB value $\bar{Q} + \beta_{\mathrm{LCB}}\sigma_Q$ subtracts twice the ensemble disagreement from the mean. Auto-entropy adjusts $\alpha_{\mathrm{U}}$ toward the categorical target entropy. We use an off-policy SAC upper because dispatches are scarce ($M\!\approx\!264$ per episode), allowing a replay buffer to reuse each transition across gradient updates.
 
 %% ====================================================================
 \subsection{Lower-level holding control policy}
 \label{sec:lower}
 
-The lower policy $\piL$ selects a signed holding adjustment $\aL \in [-a_{\max}, a_{\max}]$ at each station arrival, where $a_{\max} = 60$\,s. A positive $\aL$ holds the bus at the station for $\aL$ extra seconds beyond the minimum dwell, while a negative $\aL$ shortens the next inter-station idle by $|\aL|$ seconds (capped by the realised idle slack); the simulator clips the realised holding to $[0, a_{\max}]$ so a release action that would advance the bus past its physical readiness has no effect.
-It is trained with a distributional soft actor-critic augmented by a Lagrangian cost term for headway-deviation constraint enforcement \citep{haarnoja2018soft}.
-All buses share the same policy parameters, enabling fleet-wide generalization.
+The lower policy $\piL$ selects a non-negative holding action from the grid $\{0,3,6,9,12,15,20,30\}$ seconds at each station arrival.
+It is trained with a discrete soft actor-critic controller augmented by a Lagrangian cost term for headway-deviation control \citep{haarnoja2018soft}.
+All buses share the same policy parameters, allowing the controller to operate across the fleet from bus-specific input states.
 
-\paragraph{Gaussian policy with tanh squashing.}
-A two-layer MLP with 64 hidden units per layer and ReLU activations produces a mean $\mu_{\psi}(\sL)$ and log-standard-deviation $\log \sigma_{\psi}(\sL)$.
-The raw sample $u \sim \mathcal{N}(\mu_{\psi}, \sigma_{\psi}^2)$ is squashed through a $\tanh$ transform and rescaled:
-\begin{equation}
-\label{eq:lower_action_method}
-    \aL = a_{\max}\,\tanh(u).
-\end{equation}
-The log-probability accounts for the change of variables:
-\begin{equation}
-\label{eq:log_prob}
-\begin{aligned}
-    \log \piL(\aL \mid \sL) =\, &\log \mathcal{N}(u;\, \mu_{\psi},\, \sigma_{\psi}^2)\\
-    &- \log\bigl(1 - \tanh^2(u)\bigr) - \log a_{\max}.
-\end{aligned}
-\end{equation}
+\paragraph{Categorical holding policy.}
+A two-layer MLP with 64 hidden units per layer and ReLU activations produces categorical logits over the eight holding bins. The discrete formulation avoids asking the actor to learn distinctions smaller than the simulator time resolution and makes the action interface match practical holding commands.
 
 \paragraph{Reward Q-ensemble (RE-SAC, $K{=}10$).}
-Rather than the standard twin-Q double-clipped critic of SAC, the lower uses the RE-SAC critic of \citet{resac2026}, which replaces the double-clip with an ensemble of $K{=}10$ independently-initialised Q-networks $\{Q_{\omega_k}\}_{k=1}^{K}$, each a two-layer MLP with 64 hidden units, and uses a lower-confidence bound rather than the min-of-twin for policy improvement. To prevent ensemble divergence, all members are trained against a single shared mean target,
+Rather than the standard twin-Q double-clipped critic of SAC, the lower uses the RE-SAC critic of Zhang and Zheng~\citep{resac2026}. It replaces the double clip with an ensemble of $K{=}10$ independently initialized Q-networks $\{Q_{\omega_k}\}_{k=1}^{K}$, each a two-layer MLP with 64 hidden units. It also uses a lower-confidence bound rather than the minimum of the two critics for policy improvement. To prevent ensemble divergence, all members are trained against a single shared mean target,
+{\footnotesize
 \begin{equation}
 \label{eq:lower_q_target}
-\begin{aligned}
-    y = r + \gamma\,\Bigl(\,
-      &\tfrac{1}{K}\sum_{k=1}^{K} Q_{\bar{\omega}_k}(\sL', \aL')\\[-2pt]
-      &-\, \alpha \log \piL(\aL' \mid \sL')\Bigr),
-\end{aligned}
+    y = r + \gamma\!\left(\frac{1}{K}\sum_{k=1}^{K}Q_{\bar{\omega}_k}(\sL',\aL') - \alpha\log\piL(\aL'\mid\sL')\right).
 \end{equation}
+}
 with $\aL' \sim \piL(\cdot \mid \sL')$,
-and the per-$Q_k$ loss is augmented with a small ensemble-spread regulariser,
+and the per-$Q_k$ loss is augmented with a small ensemble-spread regularizer,
+{\footnotesize
 \begin{equation}
 \label{eq:lower_q_loss}
-\begin{aligned}
-    \mathcal{L}_Q(\omega_k) =\, &\E_{(\sL,\aL,r,\sL') \sim \D}\!\Bigl[\bigl(Q_{\omega_k}(\sL,\aL) - y\bigr)^2\Bigr]\\
-    &+ \beta_{\mathrm{ood}}\,\mathrm{std}_k\bigl(Q_{\omega_k}(\sL,\aL)\bigr),
-\end{aligned}
+    \mathcal{L}_Q(\omega_k) = \E_{(\sL,\aL,r,\sL')\sim\D}\!\left[\bigl(Q_{\omega_k}(\sL,\aL)-y\bigr)^2\right] + \beta_{\mathrm{ood}}\,\mathrm{std}_k\bigl(Q_{\omega_k}(\sL,\aL)\bigr).
 \end{equation}
+}
 with $\beta_{\mathrm{ood}} = 0.1$,
 which encourages members to disagree on out-of-distribution actions. Target parameters $\bar{\omega}_k$ track $\omega_k$ via Polyak averaging with $\tau = 0.005$. Policy improvement is performed against the ensemble lower-confidence bound (LCB),
 \begin{equation}
 \label{eq:lower_lcb}
     \bar{Q}(s, a) = \tfrac{1}{K}\sum_{k} Q_{\omega_k}(s, a),\qquad \sigma_Q(s, a) = \mathrm{std}_k\bigl(Q_{\omega_k}(s, a)\bigr).
 \end{equation}
-A standard SAC twin-Q critic corresponds to the special case $K{=}2$ without the LCB; we adopt the $K{=}10$ ensemble to obtain calibrated uncertainty for the lower's actor loss below.
+A standard SAC twin-Q critic corresponds to the special case $K{=}2$ without the LCB; we use the $K{=}10$ ensemble to represent uncertainty in the lower actor loss below.
 
 \paragraph{Cost Q-network and Lagrangian relaxation.}
-A separate single-MLP cost critic $Q^c_{\xi}(\sL, \aL)$ (same hidden width 64) estimates the expected cumulative headway-deviation cost. The lower-level actor loss balances entropy, the ensemble LCB value, and the constraint:
+A separate single-MLP cost critic $Q^c_{\xi}(\sL, \aL)$ (same hidden width 64) estimates discounted cumulative headway-deviation cost. The lower-level actor loss balances entropy, the ensemble LCB value, and the constraint:
+{\footnotesize
 \begin{equation}
 \label{eq:lower_policy_loss}
-\begin{aligned}
-    \mathcal{L}_{\piL}(\psi) = \E_{\sL \sim \D,\, \aL \sim \piL}\!\Bigl[\,
-      &\alpha \log \piL(\aL \mid \sL)\\[-2pt]
-      &-\, \bigl(\bar{Q}(\sL, \aL) + \beta_{\mathrm{LCB}}\,\sigma_Q(\sL, \aL)\bigr)\\
-      &+\, \lambda\, Q^c_{\xi}(\sL, \aL)\Bigr],
-\end{aligned}
+    \mathcal{L}_{\piL}(\psi) = \E_{\sL\sim\D,\,\aL\sim\piL}\!\left[\alpha\log\piL(\aL\mid\sL) - \bigl(\bar{Q}(\sL,\aL)+\beta_{\mathrm{LCB}}\sigma_Q(\sL,\aL)\bigr) + \lambda Q^c_{\xi}(\sL,\aL)\right].
 \end{equation}
-with $\beta_{\mathrm{LCB}} = -2$ (the policy is improved against the lower confidence bound) and $\lambda \geq 0$ the Lagrange multiplier. The dual is updated to satisfy the cost-limit constraint $\climit$:
+}
+with $\beta_{\mathrm{LCB}} = -2$ (the policy is improved against the lower confidence bound) and $\lambda \geq 0$ the Lagrange multiplier. The dual update uses the mean immediate cost in the current replay batch, $\bar{c}_{\mathcal{B}}$, rather than the discounted critic value itself:
 \begin{equation}
 \label{eq:lambda_update}
-\begin{aligned}
-    \lambda \leftarrow \exp\!\Bigl[\mathrm{clamp}\!\bigl(
-      &\log\lambda + \eta_{\lambda}\,(\E[Q^c_{\xi}] - \climit),\\[-2pt]
-      &-10,\; 5\bigr)\Bigr],
-\end{aligned}
+    \lambda \leftarrow \exp\!\left[\mathrm{clamp}\!\left(\log\lambda + \eta_{\lambda}\bigl(\bar{c}_{\mathcal{B}}-\climit\bigr),\,-5,\,1.5\right)\right].
 \end{equation}
-with $\eta_{\lambda} = 10^{-4}$.
-Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability.
+Here $\bar{c}_{\mathcal{B}}=|\mathcal{B}|^{-1}\sum_{(\sL,\aL)\in\mathcal{B}}c(\sL,\aL)$, $\climit=0.5$, and $\eta_{\lambda}=10^{-4}$.
+Updating in log-space ensures $\lambda > 0$ and the clamp prevents numerical instability. The realized immediate cost, rather than the multiplier trajectory or $Q^c_{\xi}$, is the quantity used to assess empirical constraint behavior.
 
 \paragraph{Auto-entropy tuning.}
 The temperature $\alpha$ is adjusted to maintain a target entropy $\bar{\mathcal{H}} = -\dim(\aL) = -1$:
@@ -162,53 +124,53 @@ The temperature $\alpha$ is adjusted to maintain a target entropy $\bar{\mathcal
 \label{eq:alpha_update}
     \alpha \leftarrow \min\!\Bigl(\alpha_{\max}^{\mathrm{L}},\; \exp\!\bigl(\log\alpha - \eta_{\alpha}\,(\log \piL(\aL \mid \sL) + \bar{\mathcal{H}})\bigr)\Bigr),
 \end{equation}
-with $\alpha_{\max}^{\mathrm{L}} = 0.1$ to prevent entropy collapse and to let the goal-conditioned coupling settle as the policy gains confidence.
+with $\alpha_{\max}^{\mathrm{L}} = 0.08$ to prevent entropy collapse while the timetable and holding policies co-adapt.
 
 %% ====================================================================
-\subsection{Cross-level coupling: goal-conditioned design}
+\subsection{Cross-level coupling: dynamic timetable design}
 \label{sec:tap}
 
-Following the goal-conditioned hierarchical RL design of HIRO~\citep{nachum2018data} and SHIRO~\citep{watanabe2022shiro}, TransitDuet couples the two policies through a single goal channel on the action side, complemented by two auxiliary signals (state and reward) used only in the upper direction. The upper outputs a target-headway shift; the lower's Lagrangian cost is then a function of how closely the realised headway tracks the resulting goal headway. There is no upper-advantage injection into the lower reward; the lower remains a constraint-aware controller whose constraint target is set by the upper. This turned out to be more reliable than two architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}): a direct cross-advantage augmentation in the spirit of HAAR~\citep{li2019hierarchical} with a PIPER-style reachability gate~\citep{singh2024piper}, and a three-channel coupling that uses $\delta_t$ as a launch-time perturbation with hindsight reward credit instead of a goal shift.
+TransitDuet couples the two policies through a dynamic timetable channel. The upper selects a planned-headway adjustment for the next same-direction trip. The environment converts the resulting planned headway into a planned launch time, and the lower's Lagrangian cost is computed against the planned headway associated with the dispatched trip. A goal-conditioned target-headway channel is retained as an ablation because it changes the lower reference headway without changing planned dispatch times.
 
-\paragraph{Goal channel: target-headway shift.}
-At each dispatch event, the upper outputs $\delta_t \in [-120, 120]$\,s. In contrast to a direct timetable perturbation that would shift the bus's effective launch time, $\delta_t$ instead reinterprets the lower's target headway from $\htarget$ (the baseline $360$\,s value) to $\htarget + \delta_t$ for the duration of that trip. The launch schedule itself is left untouched, while the lower's Lagrangian constraint becomes
+\paragraph{Timetable channel: planned dispatch headway.}
+At each dispatch event, the upper outputs $\Delta h_k$ and sets $h^{\mathrm{plan}}_k$ and $\tau^{\mathrm{plan}}_k$ via \Cref{eq:timetable_action}. The lower's Lagrangian constraint becomes
 \begin{equation}
 \label{eq:goal_constraint}
-    \E_{\tau \sim \pi_{\mathrm{L}}}\!\!\left[\,\big|H_{\mathrm{real}}(\tau) - (\htarget + \delta_t)\big|\right] \;\leq\; \chigh,
+    \E_{\tau \sim \pi_{\mathrm{L}}}\!\!\left[\,\big|H_{\mathrm{real}}(\tau) - h^{\mathrm{plan}}_k\big|\right] \;\leq\; \chigh,
 \end{equation}
-where $H_{\mathrm{real}}(\tau)$ is the realised inter-bus headway over the trip lifecycle $\tau$. The upper policy thus learns to steer the lower's constraint target rather than to inject noise into its observations. By construction, an active upper policy can only adjust the goal that an already-trained lower controller is asked to satisfy; this preserves the lower's training distribution and avoids the covariate shift that destabilises three-channel coupling under heavy upper exploration.
+where $H_{\mathrm{real}}(\tau)$ is the realized inter-bus headway over the trip lifecycle $\tau$. The upper policy thereby defines an executable rolling timetable rather than only a soft tracking target.
 
 \paragraph{State channel: holding feedback (HoldFB).}
-The upper state $\sU$ contains a 3-dimensional holding-feedback block at indices 5--7 (Eq.~\ref{eq:upper_state}; Section~\ref{sec:aux}) carrying a rolling 10-trip summary of the lower policy's recent holding decisions: $[\bar{h}^{\mathrm{up}}_{\mathrm{hold}}, \sigma^{\mathrm{up}}_{\mathrm{hold}}, \bar{h}^{\mathrm{down}}_{\mathrm{hold}}]$ normalised to the action range. Through this channel, the upper policy observes how aggressively the lower controller is intervening to satisfy the goal and adapts $\delta_t$ to avoid setting goals that systematically force the lower into prolonged over-holding.
+The upper state $\sU$ contains a 3-dimensional holding-feedback block at indices 5--7 (Eq.~\ref{eq:upper_state}; Section~\ref{sec:aux}). It carries a rolling 10-trip summary of the lower policy's recent holding decisions: $[\bar{h}^{\mathrm{up}}_{\mathrm{hold}}, \sigma^{\mathrm{up}}_{\mathrm{hold}}, \bar{h}^{\mathrm{down}}_{\mathrm{hold}}]$, normalized to the action range. This channel exposes the intensity of lower-level intervention to the upper policy, allowing it to adapt $\Delta h_k$ in response to sustained holding.
 
 \paragraph{Reward channel: trip-lifecycle hindsight credit.}
-At episode end, we compute the realised inter-dispatch gap $g_i$ for each dispatch $i$ from the actual launch times of each bus, and form a per-dispatch deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$ where $(\bar{g}, \sigma_g)$ are the per-direction mean and standard deviation. The upper reward at dispatch $i$ is then composed of the episode-level system reward and a per-dispatch hindsight credit:
+At episode end, we compute the realized inter-dispatch gap $g_i$ for each dispatch $i$ from the actual launch times of each bus. We then form a per-dispatch deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$, where $(\bar{g}, \sigma_g)$ are the per-direction mean and standard deviation. The upper reward at dispatch $i$ combines the episode-level system reward with a per-dispatch hindsight credit:
 \begin{equation}
 \label{eq:hindsight_reward}
     R_{\mathrm{U}}^{(i)} = R_{\mathrm{sys}}(\zvec) - \alpha_{\mathrm{H}} \cdot \frac{\Delta_i - \bar{\Delta}}{\sigma_{\Delta}}, \qquad \alpha_{\mathrm{H}} = 0.5,
 \end{equation}
-where $R_{\mathrm{sys}}$ is the belief-weighted multi-objective reward (Eq.~\ref{eq:morl_reward}) and the second term recentres the deviation across the episode so that goals whose realised lifecycles produced more regular gaps than the episode average earn positive credit. This is upper-only credit assignment; no signal flows back into the lower transitions.
+where $R_{\mathrm{sys}}$ is the belief-weighted multi-objective reward (Eq.~\ref{eq:morl_reward}). The second term recenters the deviation across the episode, so goals whose realized lifecycles produced more regular gaps than the episode average earn positive credit. This is upper-only credit assignment; no signal flows back into the lower transitions.
 
 \paragraph{Lower-level reward.}
-The lower's reward is unchanged from Section~\ref{sec:lower}: the standard environment reward augmented by the headway-deviation cost handled by the Lagrangian. The only effect of upper coupling on the lower is via Eq.~\ref{eq:goal_constraint}, which redirects the constraint target each dispatch. We deliberately do not inject upper-level reward signals into lower transitions; we tested a literal HAAR-style reverse cross-advantage augmentation (with and without a PIPER reachability gate) and found that even with a clipped advantage and the gate engaged, mean composite cost was 4\% worse and seed variance 1.7$\times$ higher than the goal-conditioned coupling reported here.
+The lower reward is unchanged from Section~\ref{sec:lower}: it is the standard environment reward augmented by the Lagrangian headway-deviation cost. Upper coupling redirects the constraint target in Eq.~\ref{eq:goal_constraint} to the current trip's planned headway. We do not inject upper-level reward signals into lower transitions. Advantage-based auxiliary-reward and target-headway-only channels are retained as comparison rows \citep{li2019hierarchical,singh2024piper}.
 
 \paragraph{Training-stage schedule.}
-Cross-level coupling is gated by a simple two-stage schedule. During the first $e_{\mathrm{warm}} = 30$ episodes the upper policy is inactive ($\delta_t = 0$ so the lower trains against the baseline target $\htarget$); from episode $e_{\mathrm{warm}}$ onward the upper activates and the goal channel engages. The state and reward channels operate only on the upper side and so are inactive during warmup by construction.
+Cross-level coupling is gated by a two-stage schedule. During the first $e_{\mathrm{warm}} = 15$ episodes, the upper policy is inactive and the lower trains against a fixed 300-second rolling timetable. From episode $e_{\mathrm{warm}}$ onward, the upper activates and selects planned-headway adjustments. The state and reward channels operate only on the upper side and are inactive during warmup by construction.
 
 %% ====================================================================
-\subsection{Measurement-driven adaptive penalty for fleet utilisation}
+\subsection{Measurement-driven adaptive penalty for fleet utilization}
 \label{sec:meas_proj}
 
-The upper policy must respect operational targets on fleet size, average passenger waiting time, and bus bunching rate.
-Rather than adding fixed penalty terms to the reward (which requires hand-tuning a coefficient per metric), we use an adaptive scheme inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}: a measurement-driven online gradient descent ($\thetavec$-OGD) on the reward-weight vector, which adapts the relative penalty strengths to the realised episode statistics. Unlike full ApproPO, our scheme does not solve a nested best-response oracle and therefore does not provide ApproPO's feasibility guarantees; in practice it reweights the reward toward the directions where the recent measurement is furthest from its target, and we observe in \cref{sec:experiments} that fleet overshoot stabilises at a small bounded value but is not driven to zero.
+The upper policy must respect operational targets on fleet size, average passenger waiting time, and headway regularity.
+Rather than adding fixed penalty terms to the reward, we use an adaptive scheme inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}. A measurement-driven online gradient descent ($\thetavec$-OGD) update of the reward-weight vector adjusts relative penalty strengths from realized episode statistics. Unlike full ApproPO, our scheme does not solve a nested best-response oracle and does not provide ApproPO's feasibility guarantees. It reweights the reward toward the measurements furthest from their targets. In the reported experiments, fleet overshoot remains bounded but is not driven to zero (\cref{sec:experiments}).
 
 \paragraph{Measurement vector.}
 At the end of each episode, we compute a three-dimensional measurement vector:
 \begin{equation}
 \label{eq:measurement_method}
-    \zvec = \bigl[\bar{w},\; n_{\mathrm{peak}},\; b_{\mathrm{rate}}\bigr] \in \R^3,
+    \zvec = \bigl[\bar{w},\; n_{\mathrm{peak}},\; \mathrm{CV}_{h}\bigr] \in \R^3,
 \end{equation}
-where $\bar{w}$ is the average passenger waiting time, $n_{\mathrm{peak}}$ is the peak fleet size (maximum number of buses simultaneously in service), and $b_{\mathrm{rate}}$ is the bunching rate (fraction of arrivals with headway below a threshold).
+where $\bar{w}$ is the average passenger waiting time, $n_{\mathrm{peak}}$ is the peak fleet size (maximum number of buses simultaneously in service), and $\mathrm{CV}_{h}$ is the coefficient of variation of realized headways.
 
 \paragraph{Weight vector and reward modulation.}
 A weight vector $\thetavec \in \R^3$, initialized as $\thetavec_0 = [-0.5,\, -0.3,\, -0.2]$, modulates the upper-level reward:
@@ -216,7 +178,7 @@ A weight vector $\thetavec \in \R^3$, initialized as $\thetavec_0 = [-0.5,\, -0.
 \label{eq:upper_reward}
 \begin{aligned}
     R_{\mathrm{U}} &= \thetavec^\top \mathbf{p},\\
-    \mathbf{p} &= \bigl[\bar{w},\; (\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2,\; b_{\mathrm{rate}}\bigr].
+    \mathbf{p} &= \bigl[\bar{w},\; (\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2,\; \mathrm{CV}_{h}\bigr].
 \end{aligned}
 \end{equation}
 The quadratic penalty on fleet overshoot $(\max(0,\, n_{\mathrm{peak}} - \Nfleet))^2$ ensures that small violations incur proportionally less cost than large ones, providing a smooth gradient.
@@ -225,38 +187,38 @@ The quadratic penalty on fleet overshoot $(\max(0,\, n_{\mathrm{peak}} - \Nfleet
 The weight vector is updated by online gradient descent (OGD) on a loss that drives each measurement toward its target:
 \begin{equation}
 \label{eq:ogd_loss}
-    \ell_t = \bigl[-\bar{w}_t,\; -\max(0,\, n_{\mathrm{peak},t} - \Nfleet),\; -b_{\mathrm{rate},t}\bigr],
+    \ell_t = \bigl[-\bar{w}_t,\; -\max(0,\, n_{\mathrm{peak},t} - \Nfleet),\; -\mathrm{CV}_{h,t}\bigr],
 \end{equation}
 \begin{equation}
 \label{eq:ogd_update}
     \thetavec_{t+1} = \Pi_{\mathcal{B}}\!\bigl(\thetavec_t + \eta_t \, \ell_t\bigr), \quad \eta_t = \frac{\eta_0}{\sqrt{t}},
 \end{equation}
 where $\Pi_{\mathcal{B}}$ projects onto the unit ball $\{\thetavec : \|\thetavec\|_2 \leq 1\}$ and $\eta_0$ is the base learning rate.
-The $1/\sqrt{t}$ schedule is motivated by standard online-convex-optimisation regret analysis (where projected OGD on a convex loss enjoys an $O(\sqrt{T})$ regret bound and a sublinear cumulative-constraint-violation guarantee). We do not claim the same guarantee holds for our learned policy: the inner optimisation here is a non-convex SAC update on a replay buffer rather than the convex best-response oracle that ApproPO requires, and we do not project onto an occupancy-measure feasibility set. We therefore use $\thetavec$-OGD as a stabilising adaptive penalty whose schedule is principled in its OCO origin but whose feasibility properties on the resulting deep-RL policy are empirical (\cref{fig:theta_evolution}, \cref{fig:lambda_convergence}) rather than provable.
+The $1/\sqrt{t}$ schedule follows standard online convex optimization analysis, in which projected OGD on a convex loss has an $O(\sqrt{T})$ regret bound and sublinear cumulative constraint violation. We do not claim the same guarantee for the learned policy. The inner optimization is a non-convex SAC update on a replay buffer rather than the convex best-response oracle required by ApproPO, and we do not project onto an occupancy-measure feasibility set. We therefore use $\thetavec$-OGD as an adaptive penalty whose feasibility properties for the resulting deep-RL policy are empirical rather than provable.
 
-The simplification relative to ApproPO is deliberate: because the upper policy is trained off-policy with the $\thetavec$-modulated reward, repeated SAC gradient updates on the replay buffer act as an approximate best-response step, eliminating the inner optimization loop that ApproPO requires --- at the cost of the formal guarantee discussed above.
+The simplification relative to ApproPO is deliberate. Because the upper policy is trained off-policy with the $\thetavec$-modulated reward, repeated SAC gradient updates on the replay buffer act as an approximate best-response step. This eliminates the inner optimization loop that ApproPO requires, at the cost of the formal guarantee discussed above.
 
 %% ====================================================================
 \subsection{Training procedure}
 \label{sec:training}
 
-\Cref{alg:training} presents the full TransitDuet training loop, which coordinates the upper-warmup schedule with the upper and lower policy updates, the cross-level coupling channels of \cref{sec:tap}, and the measurement projection.
+\Cref{alg:training} presents the full TransitDuet training loop, which coordinates the upper-warmup schedule with the upper and lower policy updates, the cross-level coupling channels of \cref{sec:tap}, and the measurement-driven reward update.
 
 \begin{algorithm}[t]
 \caption{TransitDuet training procedure}
 \label{alg:training}
 \begin{algorithmic}[1]
-\REQUIRE Episode budget $E$, upper warmup $e_{\mathrm{warm}} = 30$, lower update frequency $f_{\mathrm{L}}$, batch size $B$, hindsight credit weight $\alpha_{\mathrm{H}}$
-\STATE Initialise upper policy $\piU$, lower policy $\piL$ (RE-SAC ensemble of $K{=}10$ reward critics + single cost critic), replay buffer $\D$, Lagrange multiplier $\lambda$, entropy temperature $\alpha$, $\thetavec$-OGD weights, EMA target upper $\bar{\piU}$
+\REQUIRE Episode budget $E$, upper warmup $e_{\mathrm{warm}} = 15$, lower update frequency $f_{\mathrm{L}}$, batch size $B$, hindsight credit weight $\alpha_{\mathrm{H}}$
+    \STATE Initialize upper policy $\piU$, lower policy $\piL$ (RE-SAC ensemble of $K{=}10$ reward critics + single cost critic), replay buffer $\D$, Lagrange multiplier $\lambda$, entropy temperature $\alpha$, $\thetavec$-OGD weights, exponential-moving-average (EMA) target upper $\bar{\piU}$
 \FOR{episode $e = 1, \ldots, E$}
     \STATE Reset simulation; sample $\Nfleet \sim \mathrm{Uniform}\{8, \ldots, 16\}$ if elastic
     \STATE $\mathcal{T}_{\mathrm{U}} \leftarrow \emptyset$, $\mathcal{T}_{\mathrm{L}} \leftarrow \emptyset$
     \WHILE{episode not done}
         \IF{dispatch event triggered}
             \IF{$e \leq e_{\mathrm{warm}}$}
-                \STATE Set $\delta_t = 0$ (baseline timetable; upper inactive)
+                \STATE Use fixed $300$\,s planned headway (upper inactive)
             \ELSE
-                \STATE Sample $\delta_t$ from the TPC behaviour mixture (\cref{sec:tpc}); set the trip's target headway $\leftarrow \htarget + \delta_t$ (launch time unchanged)
+                \STATE Sample $\Delta h_k \sim \piU(\cdot\mid\sU)$; set $h^{\mathrm{plan}}_k$ and $\tau^{\mathrm{plan}}_k$ via \cref{eq:timetable_action}
                 \STATE Record $(s_{\mathrm{U},i}, a_{\mathrm{U},i})$ in $\mathcal{T}_{\mathrm{U}}$
             \ENDIF
         \ENDIF
@@ -264,30 +226,31 @@ The simplification relative to ApproPO is deliberate: because the upper policy i
             \STATE Observe $\sL$; sample $\aL \sim \piL(\cdot \mid \sL)$; apply holding $\aL$
             \STATE Observe $r_{\mathrm{L}}, c_{\mathrm{L}}, \sL'$; store $(\sL, \aL, r_{\mathrm{L}}, c_{\mathrm{L}}, \sL')$ in $\D$ and $\mathcal{T}_{\mathrm{L}}$
             \IF{step $\bmod\; f_{\mathrm{L}} = 0$ \AND $|\D| \geq B$}
-                \STATE Sample $B$ transitions; compute TPC IS weights against $\bar{\piU}$
-                \STATE Update $\piL$ critics, policy, $\lambda$, $\alpha$ via weighted SAC losses
+                \STATE Sample $B$ transitions; use unit weights in the main timetable configuration
+                \STATE If running a continuous or target-headway-only TPC variant, replace the unit weights with importance-sampling weights against $\bar{\piU}$
+                \STATE Update $\piL$ critics, policy, $\lambda$, $\alpha$ via SAC losses
                 \STATE Soft-update lower target networks
             \ENDIF
         \ENDIF
     \ENDWHILE
     \STATE Compute episode measurements $\zvec$, system reward $R_{\mathrm{sys}}$, and per-dispatch hindsight credits via \cref{eq:hindsight_reward}
     \STATE Backfill upper transitions in $\mathcal{T}_{\mathrm{U}}$ with $R_{\mathrm{U}}^{(i)}$, push them to the upper replay buffer, and run $f_{\mathrm{U}}$ RE-SAC gradient updates (\cref{eq:upper_q_target}--\ref{eq:upper_policy_loss}) on a sampled mini-batch
-    \STATE Polyak-update EMA target upper $\bar{\piU}$; update $\thetavec$ via OGD on $\zvec$
+    \STATE Polyak-update the EMA target upper $\bar{\piU}$; update $\thetavec$ via OGD on $\zvec$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
-\paragraph{Lower-only warmup ($e \leq e_{\mathrm{warm}} = 30$).}
-The upper policy is forced to $\delta_t = 0$ for every dispatch and the lower policy trains in isolation against the baseline timetable. This warmup is critical: without it, the upper policy would receive auxiliary-channel feedback (HoldFB and hindsight credit) from a random lower policy, which amounts to noise and destabilises upper-level learning. We set $e_{\mathrm{warm}} = 30$ episodes.
+\paragraph{Lower-only warmup ($e \leq e_{\mathrm{warm}} = 15$).}
+The upper policy is forced to $\Delta h_k = 0$ for every dispatch, and the lower policy trains in isolation against the baseline timetable. This warmup prevents the upper policy from receiving HoldFB and hindsight-credit signals from an untrained lower policy. We set $e_{\mathrm{warm}} = 15$ episodes.
 
 \paragraph{Coupled training ($e > e_{\mathrm{warm}}$).}
-The upper policy activates and the goal channel of \cref{sec:tap} engages: each dispatch's target headway is reset to $\htarget + \delta_t$, and the lower's Lagrangian cost is computed against this dispatch-specific target. The state and reward channels are upper-only and are inactive during warmup by construction. We do not anneal a coupling coefficient; the channel operates at its designed strength from activation onward, with TPC's IS reweighting (\cref{sec:tpc}) handling any residual covariate shift from changing target headways during upper exploration.
+The upper policy activates and the timetable channel of \cref{sec:tap} engages. After a trip is dispatched, the upper selects a planned-headway adjustment for the next same-direction trip. The simulator converts the resulting planned headway into a planned launch time, and the lower Lagrangian cost is computed against that trip-specific planned headway. The state and reward channels are upper-only and are inactive during warmup by construction. We do not anneal a coupling coefficient; the timetable channel operates at its configured strength from activation onward.
 
 \paragraph{Computational cost.}
-The lower policy update dominates computation due to the $K{=}10$ Q-ensemble and cost-critic gradient steps.
-Each lower update performs $K{+}3$ backward passes ($K$ ensemble reward critics, one cost critic, one policy, one entropy temperature) on GPU-batched samples from $\D$; the ensemble is implemented as a single batched forward+backward, so wall-clock cost grows sub-linearly with $K$.
-The upper policy update is much cheaper: each episode contributes $M \approx 264$ dispatch transitions to a 50k-capacity replay buffer, and we run $f_{\mathrm{U}} = 10$ RE-SAC gradient updates per episode on a 64-sample mini-batch.
-The TPC IS-weight computation and Polyak target update add $O(M + B)$ scalar/forward-pass operations per episode and are not a bottleneck.
+The lower policy update dominates computation because of the $K{=}10$ Q-ensemble and cost-critic gradient steps.
+Each lower update performs $K{+}3$ backward passes ($K$ ensemble reward critics, one cost critic, one policy, and one entropy temperature) on graphics-processing-unit (GPU)-batched samples from $\D$. The ensemble is implemented as a single batched forward and backward pass, so wall-clock cost grows sublinearly with $K$.
+Each episode contributes $M \approx 264$ upper transitions to a 50k-capacity replay buffer. We run $f_{\mathrm{U}} = 10$ RE-SAC gradient updates per episode on a 64-sample mini-batch.
+When TPC is enabled for ablation variants, the importance-sampling (IS) weight computation and Polyak target update add $O(M + B)$ scalar/forward-pass operations per episode and are not a bottleneck.
 
 %% ====================================================================
 \subsection{Auxiliary mechanisms}
@@ -296,21 +259,21 @@ The TPC IS-weight computation and Polyak target update add $O(M + B)$ scalar/for
 This subsection collects four secondary mechanisms that interact with the bi-level core. They are isolated as separate ablation rows in Section~\ref{sec:ablation}.
 
 \paragraph{Holding feedback (HoldFB).}
-The upper state $\sU$ contains a 3-dimensional holding-feedback block (state indices 5--7) consisting of the lower's rolling holding statistics $[\bar{h}_{\text{hold}}^{\text{up}}, \sigma_{\text{hold}}^{\text{up}}, \bar{h}_{\text{hold}}^{\text{down}}]$ over a window of the last 10 completed trips, normalised to the action range. This conveys to the upper policy how heavily the lower controller is intervening, allowing $\delta_t$ adjustments that reduce systematic over-holding. The $-$HoldFB ablation zeros out these three state dimensions.
+The upper state $\sU$ contains a 3-dimensional holding-feedback block (state indices 5--7) consisting of the lower rolling holding statistics $[\bar{h}_{\text{hold}}^{\text{up}}, \sigma_{\text{hold}}^{\text{up}}, \bar{h}_{\text{hold}}^{\text{down}}]$ over the last 10 completed trips, normalized to the action range. This block reports the intensity of lower-level intervention to the upper policy. The $-$HoldFB ablation zeros out these three state dimensions.
 
-\paragraph{Belief-weighted MORL (MORL).}
-The upper reward is a scalarisation of three measurement components:
+\paragraph{Belief-weighted multi-objective reinforcement learning (MORL).}
+The upper reward is a scalarization of three measurement components:
 \begin{equation}
 \label{eq:morl_reward}
     R_{\mathrm{U}} = -\bigl[w_{\mathrm{wait}}\,\tfrac{\text{wait}}{10} + w_{\mathrm{fleet}}\,\tfrac{\mathrm{overshoot}^2}{\Nfleet} + w_{\mathrm{cv}}\,\mathrm{CV}\bigr],
 \end{equation}
-where $\boldsymbol{w} = (w_{\mathrm{wait}}, w_{\mathrm{fleet}}, w_{\mathrm{cv}})$ is computed from $\thetavec$-OGD weights modulated by the CS-BAPR belief: under high changepoint probability, mass is shifted from wait/CV to fleet (safety), while during stable windows the converse shift toward wait/CV (quality) is applied. The $-$MORL ablation replaces $\boldsymbol{w}$ with the fixed weights $(0.5, 0.25, 0.25)$.
+where $\boldsymbol{w} = (w_{\mathrm{wait}}, w_{\mathrm{fleet}}, w_{\mathrm{cv}})$ is computed from $\thetavec$-OGD weights modulated by the changepoint-sensitive Bayesian adaptive policy response (CS-BAPR) belief. Under high changepoint probability, mass is shifted from wait/CV to fleet (safety), while during stable windows the converse shift toward wait/CV (quality) is applied. The $-$MORL ablation replaces $\boldsymbol{w}$ with the fixed weights $(0.5, 0.25, 0.25)$.
 
 \paragraph{CS-BAPR belief tracker.}
-A Bayesian online changepoint detector tracks the run length of the upper reward stream and the standard deviation of the lower's $Q$-ensemble. When the changepoint posterior exceeds 0.1 (signalling a regime shift in demand or fleet realisation) the lower's entropy temperature $\alpha$ is transiently boosted by up to $2\times$ to encourage exploration in the new regime. The $-$CS-BAPR ablation disables this boost; the belief weights in MORL also degenerate to the long-run $\thetavec$-OGD weights without any short-term modulation.
+A Bayesian online changepoint detector tracks the run length of the upper reward stream and the standard deviation of the lower $Q$-ensemble. When the changepoint posterior exceeds 0.1, signaling a regime shift in demand or fleet realization, the lower entropy temperature $\alpha$ is transiently boosted by up to $2\times$ to support exploration in the new regime. The $-$CS-BAPR ablation disables this boost; the belief weights in MORL also revert to the long-run $\thetavec$-OGD weights without short-term modulation.
 
 \paragraph{Hindsight credit assignment.}
-We summarise the hindsight credit term used by the upper reward; the full derivation is given in \cref{sec:tap} (Eq.~\ref{eq:hindsight_reward}). At episode end we compute the realised inter-dispatch gap $g_i$ per direction, normalise it to a deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$, and recentre across the episode so the average dispatch gets zero credit. The $-$Hindsight ablation drops this term and uses only the episode-level reward, weakening per-dispatch credit assignment.
+We summarize the hindsight credit term used by the upper reward; the full derivation is given in \cref{sec:tap} (Eq.~\ref{eq:hindsight_reward}). At episode end, we compute the realized inter-dispatch gap $g_i$ per direction, normalize it to a deviation $\Delta_i = |g_i - \bar{g}|/\sigma_g$, and recenter it across the episode so that the average dispatch receives zero credit. The $-$Hindsight ablation drops this term and uses only the episode-level reward.
 
 \paragraph{Elastic fleet (Elastic) and demand stochasticity (DemandNoise).}
 Two environment-side mechanisms further shape training: $\Nfleet \sim \mathrm{Uniform}\{8, 9, \ldots, 16\}$ is sampled per episode (Elastic), and the per-hour demand multiplier is sampled from $\mathcal{N}(1, 0.15^2)$ clipped to $[0.3, 2.0]$ (DemandNoise). The $-$Elastic and $-$DemandNoise ablations fix $\Nfleet = 12$ and remove the demand multiplier, respectively, reducing TransitDuet to a deterministic-environment specialist.
@@ -319,15 +282,13 @@ Two environment-side mechanisms further shape training: $\Nfleet \sim \mathrm{Un
 \subsection{Target-policy-corrected lower SAC (TPC)}
 \label{sec:tpc}
 
-Joint bi-level RL exposes a previously overlooked failure mode that, in our setting, lets a hand-tuned constant-headway timetable beat the bi-level controller on every mean metric: the lower policy is trained alongside an exploring upper policy, so the lower's training distribution is biased by per-dispatch offsets that do not appear at deployment.
-Even when the upper learns to output $\delta_t \approx 0$ (effectively recovering the Fixed schedule), the lower's holding habits no longer match what a Fixed-schedule deployment requires.
-We address this directly via importance reweighting on the lower's SAC objective.
+TPC is retained for the continuous and target-headway-only variants, where exploratory upper actions can shift the lower's training distribution away from the deterministic deployment policy. The final rolling-timetable configuration uses categorical timetable actions and does not rely on TPC, but we include the mechanism because it is part of the ablation suite.
 
-\paragraph{Mixed behaviour policy.}
-Once the upper policy activates ($e > e_{\mathrm{warm}}$), each dispatch samples $\delta_t$ from a mixture
+\paragraph{Mixed behavior policy.}
+For continuous upper variants, once the upper policy activates ($e > e_{\mathrm{warm}}$), each dispatch samples $\delta_t$ from a mixture
 $\mu = \epsilon \, \piU(\cdot \mid s_{\mathrm U}) + (1-\epsilon) \, \mathcal{N}\!\left(\bar{\mu}_{\mathrm U}(s_{\mathrm U}),\, \sigma_{\mathrm{tgt}}^2\right)$,
-with $\epsilon = 0.25$ exploratory probability and target Gaussian std $\sigma_{\mathrm{tgt}} = 20$\,s centred at the deterministic mean $\bar{\mu}_{\mathrm U}$ of an exponential moving average of the upper policy ($\tau = 0.005$ Polyak rate).
-The behaviour log-prob $\log \mu(\delta_t \mid s_{\mathrm U})$ and the dispatch metadata $(s_{\mathrm U}, \delta_t, \log \mu)$ are stored alongside each lower transition for later use.
+with $\epsilon = 0.25$ exploratory probability and target Gaussian standard deviation $\sigma_{\mathrm{tgt}} = 20$\,s centered at the deterministic mean $\bar{\mu}_{\mathrm U}$ of an exponential moving average of the upper policy ($\tau = 0.005$ Polyak rate).
+The behavior log-prob $\log \mu(\delta_t \mid s_{\mathrm U})$ and the dispatch metadata $(s_{\mathrm U}, \delta_t, \log \mu)$ are stored alongside each lower transition for later use.
 
 \paragraph{Importance-weighted lower SAC.}
 For every sampled lower transition, the per-sample importance weight
@@ -337,14 +298,11 @@ w_t = \min\!\left(\frac{\bar{\pi}_{\mathrm U}(\delta_{t} \mid s_{\mathrm U,t})}{
 ($w_{\max} = 5$) corrects each loss contribution toward the EMA "deployment" upper distribution.
 The weighted Q, policy, cost-critic, and Lagrangian losses become $L_Q = \mathbb{E}_t[w_t (Q(s_t, a_t) - y_t)^2]$,
 $L_\pi = \mathbb{E}_t[w_t (\alpha \log \pi_{\mathrm L}(a_t\mid s_t) - Q^{\mathrm{LCB}}(s_t, a_t) + \lambda Q^c(s_t, a_t))]$, and analogously for the cost critic and Lagrangian update.
-We monitor effective sample size $\mathrm{ESS}/B = (\sum_t w_t)^2 / (B \sum_t w_t^2)$ to detect weight collapse; in our runs it remains above $0.4$ throughout training.
+We monitor the effective sample size (ESS), $\mathrm{ESS}/B = (\sum_t w_t)^2 / (B \sum_t w_t^2)$, to detect weight collapse.
 
-\paragraph{Validation-based checkpoint selection.}
-The EMA target tracks the current upper with $\tau = 0.005$, which over hundreds of episodes drifts toward the upper's exploratory mode and gradually weakens the IS correction.
-We mitigate this with explicit checkpoint selection: every $50$ episodes we save $(\piU, \piL)$ to disk; after training we evaluate every checkpoint on $60$ fresh validation episodes (independent of the training data) and report the deployment policy as the per-seed checkpoint with the lowest composite cost.
-Across our three seeds the selected checkpoints are episode~$99$, $49$, and $249$ respectively, consistent with the expected drift pattern.
+\paragraph{Pre-specified final checkpoint.}
+Every $50$ episodes we save $(\piU, \piL)$ to disk. The final evaluation uses the checkpoint saved after the pre-specified 300-episode training budget (episode 299). Independent held-out episodes are never used to select a checkpoint, tune parameters, or choose a timetable.
 
 \paragraph{Convergence considerations.}
-The lower-only warmup ensures that the coupling channels engage only after the lower has reached a reasonable holding policy under the baseline timetable.
-We initially explored a continuous coupling-coefficient ramp (a $\beta$ schedule that grows from $0$ to a target value over a hundred episodes) but found that the simpler binary-activation schedule combined with TPC's IS reweighting was both more reliable and easier to tune.
-We did not observe sensitivity to the precise values of $e_1$ and $e_2$ within a factor of two of the defaults, but setting $e_1$ too small (before the lower policy converges to a stable holding strategy) consistently degraded final performance, as confirmed by the ablation study in \cref{sec:experiments}.
+The lower-only warmup delays activation of the coupling channels until the lower has trained under the baseline timetable.
+We use a binary warmup schedule instead of a continuous coupling-coefficient ramp to simplify reproducibility and auditing. The timetable ablations test whether the state-context additions and discrete actions are sufficient without TPC in the main configuration.

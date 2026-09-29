@@ -5,6 +5,8 @@ CPU-only baselines using a hand-tuned proportional headway-keeping rule for the
 lower (holding) controller, with three upper-level options:
 
     --upper rule_fixed   :  fixed timetable (H=360), no upper search
+    --upper rule_daganzo :  Daganzo-style headway equalization holding
+    --upper rule_xuan    :  Xuan-style two-headway holding with fixed timetable
     --upper rule_ga      :  GA optimises a peak/off-peak/transition headway triple
     --upper rule_cmaes   :  CMA-ES optimises the same triple
     --upper rule_mpc     :  receding-horizon MPC re-plans the next K headways
@@ -50,14 +52,27 @@ from upper.upper_ga import GAUpperPolicy
 HMAX_HOLD = 60.0
 
 
-def rule_holding_action(obs, target_headway):
+def rule_holding_action(obs, target_headway, rule='proportional'):
     """
     obs layout (env/bus.py): [bus_id, station_id, hour, direction,
                               forward_headway, backward_headway,
                               passengers_factor, headway_dev, *speeds]
     """
     forward_headway = float(obs[4])
-    hold = target_headway - forward_headway
+    backward_headway = float(obs[5])
+    if rule == 'daganzo':
+        # Daganzo-style equalization: hold when the following gap is larger
+        # than the forward gap, which increases the forward spacing and gives
+        # the following bus time to close the service gap.
+        hold = 0.5 * (backward_headway - forward_headway)
+    elif rule == 'xuan':
+        # Xuan-style two-headway rule: combine target tracking with the
+        # backward-headway signal. This is a same-simulator proxy rather than
+        # an exact reproduction of the original paper's full controller.
+        hold = 0.7 * (target_headway - forward_headway) + \
+            0.3 * (backward_headway - target_headway)
+    else:
+        hold = target_headway - forward_headway
     return float(np.clip(hold, 0.0, HMAX_HOLD))
 
 
@@ -73,7 +88,8 @@ def hour_to_slot(hour, peak=(7, 9, 17, 19)):
 # ---------------------------------------------------------------------------
 # Episode runner
 # ---------------------------------------------------------------------------
-def run_episode(env, target_triple_or_callback, mpc_replan_fn=None):
+def run_episode(env, target_triple_or_callback, mpc_replan_fn=None,
+                lower_rule='proportional'):
     """
     Run one simulation episode under the rule-based lower.
 
@@ -114,14 +130,16 @@ def run_episode(env, target_triple_or_callback, mpc_replan_fn=None):
                 if bus.bus_id == int(obs[0]) and bus.on_route:
                     last_target[key] = float(getattr(bus, '_target_headway', 360.0))
                     break
-            action_dict[key] = rule_holding_action(obs, last_target[key])
+            action_dict[key] = rule_holding_action(
+                obs, last_target[key], rule=lower_rule)
             if len(obs_list) == 2:
                 state_dict[key] = state_dict[key][1:]
 
         state_dict, reward_dict, cost_dict, done = env.step(action_dict, render=False)
 
     z = env.measurement_vector  # [avg_wait_min, peak_fleet, headway_cv]
-    return z
+    metrics = dict(env.episode_metrics)
+    return z, metrics
 
 
 def composite(z, n_fleet):
@@ -175,7 +193,8 @@ def mpc_plan(current_hour, last_dispatch_time_per_dir, episode_budget_n,
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--upper', type=str, required=True,
-                        choices=['rule_fixed', 'rule_ga', 'rule_cmaes', 'rule_mpc'])
+                        choices=['rule_fixed', 'rule_daganzo', 'rule_xuan',
+                                 'rule_ga', 'rule_cmaes', 'rule_mpc'])
     parser.add_argument('--episodes', type=int, default=300)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--demand_noise', type=float, default=0.15)
@@ -195,8 +214,17 @@ def main():
     log_dir.mkdir(parents=True, exist_ok=True)
 
     # ------------------ choose upper-level scheme ------------------
+    lower_rule = 'proportional'
     if args.upper == 'rule_fixed':
         upper = None
+        params = (360.0, 360.0, 360.0)
+    elif args.upper == 'rule_daganzo':
+        upper = None
+        lower_rule = 'daganzo'
+        params = (360.0, 360.0, 360.0)
+    elif args.upper == 'rule_xuan':
+        upper = None
+        lower_rule = 'xuan'
         params = (360.0, 360.0, 360.0)
     elif args.upper == 'rule_ga':
         upper = GAUpperPolicy(action_low=[180., 300., 240.],
@@ -217,6 +245,19 @@ def main():
 
     history = {'avg_wait': [], 'cv': [], 'overshoot': [], 'composite': [],
                'params': [], 'wall_s': []}
+    metric_keys = [
+        'avg_holding_sec', 'total_holding_sec',
+        'avg_onboard_time_min', 'avg_total_passenger_time_min',
+        'n_arrived_passengers',
+        'planned_dispatch_headway_mean', 'planned_dispatch_headway_std',
+        'planned_dispatch_headway_cv',
+        'actual_dispatch_headway_mean', 'actual_dispatch_headway_std',
+        'actual_dispatch_headway_cv',
+        'planned_shift_mean', 'planned_shift_std',
+        'dispatch_lateness_mean', 'dispatch_lateness_max',
+    ]
+    for key in metric_keys:
+        history[key] = []
     best = {'composite': float('inf'), 'params': None, 'episode': -1, 'z': None}
 
     for ep in range(args.episodes):
@@ -227,7 +268,7 @@ def main():
             n_f = args.N_fleet
         env._n_fleet_target = n_f
 
-        if args.upper == 'rule_fixed':
+        if args.upper in ('rule_fixed', 'rule_daganzo', 'rule_xuan'):
             params = (360.0, 360.0, 360.0)
         elif args.upper in ('rule_ga', 'rule_cmaes'):
             params = upper.suggest()
@@ -246,7 +287,7 @@ def main():
             )
             params = chosen_triple
 
-        z = run_episode(env, params)
+        z, metrics = run_episode(env, params, lower_rule=lower_rule)
         comp = composite(z, n_f)
 
         if args.upper in ('rule_ga', 'rule_cmaes'):
@@ -259,6 +300,8 @@ def main():
         history['composite'].append(float(comp))
         history['params'].append([float(x) for x in params])
         history['wall_s'].append(round(time.time() - t0, 1))
+        for key in metric_keys:
+            history[key].append(float(metrics.get(key, 0.0)))
 
         if comp < best['composite']:
             best = {'composite': float(comp), 'params': list(params),

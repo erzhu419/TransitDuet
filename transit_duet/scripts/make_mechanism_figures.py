@@ -7,7 +7,7 @@ Generate the three mechanism-analysis figures referenced by the paper:
   fig:lambda_convergence — lower-level Lagrangian multiplier
   fig:delta_utilization  — per-episode upper action mean ± std
 
-Reads 3-seed H_hiro diagnostics from logs_remote/ and writes PDFs
+Reads H_timetable_v4 diagnostics from logs_remote/ and writes PDFs
 to paper/figures/.
 """
 
@@ -21,8 +21,9 @@ LOGS = ROOT / 'logs_remote'
 OUT = ROOT.parent / 'paper' / 'figures'
 OUT.mkdir(parents=True, exist_ok=True)
 
-SEEDS = [42, 123, 456]
+SEEDS = [42, 123, 456, 789, 1001, 1002, 1003, 1004, 1005, 1006]
 SEED_COLORS = {42: '#1f77b4', 123: '#ff7f0e', 456: '#2ca02c'}
+MAIN_EXP = 'H_timetable_v4'
 
 plt.rcParams.update({
     'font.size': 9,
@@ -36,7 +37,7 @@ plt.rcParams.update({
 })
 
 
-def load_dfs(name='H_hiro'):
+def load_dfs(name=MAIN_EXP):
     out = {}
     for s in SEEDS:
         p = LOGS / f'{name}_seed{s}' / 'diagnostics.csv'
@@ -80,10 +81,12 @@ def fig_lambda(dfs):
     stack = np.stack([smooth(dfs[s]['lower_lambda'], 10).values for s in SEEDS])
     m = stack.mean(axis=0)
     sd = stack.std(axis=0)
-    ax.plot(eps, m, color='#d62728', linewidth=1.5, label=r'$\lambda$ (mean $\pm$ std, 3 seeds)')
+    ax.plot(eps, m, color='#d62728', linewidth=1.5,
+            label=rf'$\lambda$ (mean $\pm$ std, {len(SEEDS)} seeds)')
     ax.fill_between(eps, m - sd, m + sd, alpha=0.2, color='#d62728')
-    ax.axhline(0.57, linestyle='--', color='gray', linewidth=0.8,
-               label=r'converged $\lambda = 0.57$')
+    tail = m[-min(30, len(m)):]
+    ax.axhline(float(np.mean(tail)), linestyle='--', color='gray', linewidth=0.8,
+               label=rf'late mean $\lambda = {float(np.mean(tail)):.2f}$')
     ax.set_xlabel('Episode')
     ax.set_ylabel(r'Lagrangian $\lambda$')
     ax.set_xlim(0, eps[-1])
@@ -118,7 +121,7 @@ def fig_delta(dfs):
 
 
 def main():
-    dfs = load_dfs('H_hiro')
+    dfs = load_dfs(MAIN_EXP)
     fig_theta(dfs)
     fig_lambda(dfs)
     fig_delta(dfs)

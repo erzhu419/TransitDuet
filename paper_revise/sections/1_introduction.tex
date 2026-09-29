@@ -1,0 +1,51 @@
+\section{Introduction}
+\label{sec:intro}
+
+High-frequency bus systems face a persistent coordination challenge.
+Timetables are planned offline to balance fleet utilisation against passenger demand, yet the headways they prescribe degrade within minutes once buses encounter stochastic traffic and boarding delays.
+Real-time holding control can restore regularity, but only within the headway structure it inherits.
+When the timetable itself is poorly matched to demand, dispatching too few buses in the peak or too many in the off-peak, holding alone may not recover acceptable service.
+Planning and control are thus coupled: the quality of one layer bounds the achievable performance of the other.
+
+Despite this coupling, existing work treats the two problems separately.
+The timetable optimisation literature formulates headway or frequency design as mixed-integer programmes solved offline \citep{gkiotsalitis2021bus}, while the holding control literature trains reinforcement learning (RL) agents that take the timetable as given \citep{wang2020real,zhang2026single}.
+Joint optimisation would seem a natural application of hierarchical reinforcement learning (HRL), yet three gaps prevent a straightforward application.
+
+\paragraph{Asynchrony between planning and control.}
+HRL frameworks such as the options framework \citep{sutton1999between} and goal-conditioned methods such as HIRO \citep{nachum2018data} assume that the upper level sets subgoals or options that can be evaluated through a lower-level execution segment.
+In bus operations, the upper policy acts at dispatch events (once per bus departure), while the lower policy acts at every station arrival across all active buses.
+The two levels observe different state spaces: the upper level sees route-level demand forecasts and fleet status, whereas the lower level sees per-bus headway deviations and passenger loads.
+They also interact through delayed feedback spanning an entire trip lifecycle.
+More importantly, several dispatch goals are active concurrently: one upper decision may set the planned launch time of a future trip while buses dispatched under earlier goals continue to move and hold at stations.
+Thus the issue is not only the absence of a shared clock, but also the need to optimise and credit overlapping timetable edits.
+
+\paragraph{Cross-advantage under asynchrony.}
+Pan et al.~\citep{pan2024roboduet} recently introduced cross-advantage augmentation for bi-level robot locomotion, where an upper style policy and a lower tracking policy execute synchronously on the same state.
+Their augmented advantage $\AUaug = \AU + \beta \AL$ directly sums the two advantages at each time step.
+This mechanism is not directly applicable when the two levels operate on different timescales with different state and action spaces: no single time step jointly defines $\AU$ and $\AL$.
+Generalising cross-level coupling to this asynchronous, multi-timescale setting requires propagating execution outcomes over the variable-length trip lifecycle induced by each dispatch.
+It also requires exposing lower-level holding statistics to the upper policy through state augmentation rather than reward backflow.
+
+\paragraph{Fleet and regularity constraints.}
+Bus operations also impose feasibility-style constraints, including a fleet-size budget $\Nfleet$ and bounded headway deviation.
+Fixed-coefficient reward shaping may not accommodate these constraints reliably.
+Constrained RL methods such as reward constrained policy optimisation (RCPO) \citep{tessler2019reward} address single-level constraint satisfaction but do not account for constraints that span a bi-level structure, where the upper level controls resource allocation and the lower level controls service regularity.
+
+\medskip
+
+We propose TransitDuet, a bi-level reinforcement learning framework designed to address these three gaps.
+The upper policy $\piU$ selects a discrete planned-headway adjustment for the next same-direction trip; the simulator converts the resulting planned headway into a planned launch time, so the upper directly modifies the rolling timetable. The lower policy $\piL$ is a soft actor-critic (SAC) with Lagrangian penalties \citep{haarnoja2018soft} that selects holding times at each station arrival, with parameters shared across buses.
+Two auxiliary upper-only signals---a holding-feedback state channel and a per-dispatch hindsight credit---provide cross-level credit assignment without injecting upper signals into the lower transitions.
+Fleet-size feasibility is maintained through $\thetavec$-weighted online gradient descent on a measurement vector, inspired by the ApproPO framework \citep{miryoosefi2019reinforcement}, while headway uniformity enters the lower-level objective through Lagrangian relaxation.
+
+\paragraph{Contributions.}
+The specific contributions of this paper are:
+\begin{enumerate}
+    \item Dynamic timetable--holding formulation. We cast rolling bus timetable optimisation and holding control as a bi-level Markov decision process with heterogeneous state-action spaces and asynchronous transitions.
+    \item Discrete timetable and holding policies. The upper policy chooses from a finite dispatch-headway adjustment grid, and the lower policy chooses from a finite holding-time grid augmented with adjacent planned-dispatch context. This discretisation matches operational command granularity and isolates the value of dynamic timetable decisions against fixed-headway baselines.
+    \item Adaptive constraint handling via $\thetavec$-weighted online gradient descent (OGD) and Lagrangian relaxation. At the upper level, measurement-driven OGD adjusts the reward weight on fleet overshoot. At the lower level, a dual variable penalises headway deviation. OGD removes the need to hand-tune an overshoot coefficient but provides no worst-case feasibility guarantee.
+    \item Empirical evaluation on a calibrated corridor with ten random seeds, reporting both service-quality metrics (waiting time, headway CV, total passenger time) and timetable-execution diagnostics (planned-headway variability, dispatch lateness).
+\end{enumerate}
+
+\paragraph{Results preview.}
+We evaluate on a high-frequency bus corridor with 22 stations, 264 daily trips, demand stochasticity $\sigma_{\mathrm{demand}} = 0.15$, and elastic fleet $\Nfleet \in [8, 16]$ sampled per episode. All learned methods use the same simulator and random-seed protocol, with the target-headway-only model reported as an ablation rather than as the main TransitDuet configuration.

@@ -25,7 +25,8 @@ from run_baseline_rule import (
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--variant', required=True,
-                    choices=['rule_fixed', 'rule_ga', 'rule_cmaes', 'rule_mpc'])
+                    choices=['rule_fixed', 'rule_daganzo', 'rule_xuan',
+                             'rule_ga', 'rule_cmaes', 'rule_mpc'])
     ap.add_argument('--seed', type=int, default=42)
     ap.add_argument('--n_eval', type=int, default=20)
     ap.add_argument('--fleet_min', type=int, default=8)
@@ -36,8 +37,15 @@ def main():
 
     log_dir = SCRIPT_DIR / 'logs' / f'baseline_{args.variant}_seed{args.seed}'
     best = json.load(open(log_dir / 'best.json'))
+    lower_rule = 'proportional'
     if args.variant == 'rule_fixed':
         params = (360.0, 360.0, 360.0)
+    elif args.variant == 'rule_daganzo':
+        params = (360.0, 360.0, 360.0)
+        lower_rule = 'daganzo'
+    elif args.variant == 'rule_xuan':
+        params = (360.0, 360.0, 360.0)
+        lower_rule = 'xuan'
     elif args.variant == 'rule_mpc':
         # MPC re-plans each dispatch: build a per-dispatch callable
         mpc_candidates = []
@@ -55,6 +63,18 @@ def main():
 
     np.random.seed(args.eval_seed)
     waits, cvs, overs, comps = [], [], [], []
+    metric_keys = [
+        'avg_holding_sec', 'total_holding_sec',
+        'avg_onboard_time_min', 'avg_total_passenger_time_min',
+        'n_arrived_passengers',
+        'planned_dispatch_headway_mean', 'planned_dispatch_headway_std',
+        'planned_dispatch_headway_cv',
+        'actual_dispatch_headway_mean', 'actual_dispatch_headway_std',
+        'actual_dispatch_headway_cv',
+        'planned_shift_mean', 'planned_shift_std',
+        'dispatch_lateness_mean', 'dispatch_lateness_max',
+    ]
+    metric_series = {k: [] for k in metric_keys}
     for ep in range(args.n_eval):
         n = int(np.random.randint(args.fleet_min, args.fleet_max + 1))
         env._n_fleet_target = n
@@ -63,12 +83,14 @@ def main():
             chosen = mpc_plan(current_hour=12, last_dispatch_time_per_dir=None,
                               episode_budget_n=n, current_demand_proxy=demand_proxy,
                               candidates=mpc_candidates)
-            z = run_episode(env, chosen)
+            z, metrics = run_episode(env, chosen)
         else:
-            z = run_episode(env, params)
+            z, metrics = run_episode(env, params, lower_rule=lower_rule)
         waits.append(float(z[0])); cvs.append(float(z[2]))
         overs.append(max(0, float(z[1]) - n))
         comps.append(composite(z, n))
+        for key in metric_keys:
+            metric_series[key].append(float(metrics.get(key, 0.0)))
 
     print(f"\n{args.variant} held-out (n={args.n_eval}, params={params if args.variant != 'rule_mpc' else 'MPC re-plan'}):")
     print(f"  wait      = {np.mean(waits):.2f} ± {np.std(waits):.2f}")
@@ -86,6 +108,9 @@ def main():
         'overshoot_mean': float(np.mean(overs)), 'overshoot_std': float(np.std(overs)),
         'composite_mean': float(np.mean(comps)), 'composite_std': float(np.std(comps)),
     }
+    for key, vals in metric_series.items():
+        out[f'{key}_mean'] = float(np.mean(vals))
+        out[f'{key}_std'] = float(np.std(vals))
     (log_dir / 'eval_holdout.json').write_text(json.dumps(out, indent=1))
 
 

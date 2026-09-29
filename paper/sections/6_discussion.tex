@@ -1,69 +1,20 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{Why the goal-conditioned coupling design works.}
-The goal channel of \cref{sec:tap} keeps the upper--lower interaction unidirectional and well-aligned: the upper sets a target headway, and the lower's existing constraint-aware controller is asked to track it. Two architectural alternatives we evaluated end-to-end (Section~\ref{sec:main_results}) clarify why this works better in our setting. A literal cross-advantage augmentation (HAAR~\citep{li2019hierarchical} with a PIPER reachability gate~\citep{singh2024piper}) injects scale-mismatched, high-variance per-trip upper advantages into the lower's transitions, which our reachability gate dampens but does not fully neutralise; we observe a $5.5\%$ composite-cost regression and $\sim 6\times$ higher seed variance relative to the goal-conditioned design. A three-channel coupling that uses $\delta_t$ as a direct launch-time perturbation (with hindsight reward credit replacing the goal shift) keeps the lower's training distribution exposed to upper exploration noise, leading to a similar composite-cost gap and pronounced mid-training drift.
-The two auxiliary upper-only signals --- the holding-feedback state channel and the per-dispatch hindsight credit --- support upper credit assignment without introducing such noise. Without HoldFB, the upper policy is blind to how aggressively the lower is compensating; without the hindsight credit, the upper receives only the episode-level system reward and cannot distinguish a dispatch whose realised gap was regular from one that produced bunching.
+\paragraph{Why a timetable channel is needed.}
+The target-headway-only variant makes the upper decision useful to the lower controller, but it does so by changing the lower target headway rather than planned dispatch times. That distinction matters: a target-headway setter can influence realized service through holding, but it does not itself optimize a timetable. In TransitDuet, the upper action selects a planned-headway adjustment for the next same-direction trip. The simulator converts this adjustment into a planned launch time. This makes the upper decision auditable through planned shifts, planned dispatch headways, and dispatch lateness, while the lower controller executes a dynamic timetable rather than inferring one indirectly.
 
-\paragraph{Connection to RoboDuet and goal-conditioned HRL.}
-TransitDuet draws on two lines of work: RoboDuet~\citep{pan2024roboduet}, which introduced cross-advantage augmentation for synchronous bi-level robot control, and the goal-conditioned hierarchical RL family pioneered by HIRO~\citep{nachum2018data} and extended by SHIRO~\citep{watanabe2022shiro}.
-\Cref{tab:analogy} makes the structural analogy explicit.
-The key technical choice is to replace cross-advantage backflow with a goal channel: instead of two policies exchanging advantage estimates at each time step, one policy sets the constraint target that the other policy tracks under its existing optimisation framework.
-This choice is motivated by the asynchrony in our setting (RoboDuet assumes a shared state clock) and validated empirically by the comparison to the HAAR-style alternative.
+\paragraph{Relation to conventional HRL.}
+TransitDuet can be partially interpreted as a goal-conditioned lower controller because each active bus tracks the planned headway associated with its dispatched trip. A conventional option view does not specify a rolling timetable generator. In TransitDuet, the upper action selects the planned-headway adjustment that determines a future dispatch time. Several planned headways remain active at once, and their effects overlap through shared fleet availability and station-level holding. The challenge is therefore not only that the two levels lack a common clock, but also that multiple timetable goals execute concurrently and credit must be assigned back to asynchronous dispatch-time decisions.
 
-\begin{table}[H]
-\centering
-\caption{Structural analogy between RoboDuet and TransitDuet.}
-\label{tab:analogy}
-\small
-\begin{tabular}{@{}p{0.20\textwidth}p{0.27\textwidth}p{0.45\textwidth}@{}}
-\toprule
-Aspect & RoboDuet & TransitDuet \\
-\midrule
-Upper policy     & Locomotion style selector    & Timetable planner ($\piU$) \\
-Lower policy     & Joint-level tracking controller & Holding controller ($\piL$) \\
-Upper action     & Style parameters             & Per-dispatch headway shift $\delta_t \in [-120, 120]$\,s \\
-Lower action     & Joint torques                & Holding duration (s) \\
-Coupling         & Synchronous cross-advantage  & Goal channel: lower's target headway reset to $\htarget + \delta_t$ each dispatch \\
-Timescale        & Shared clock (same $\Delta t$) & Heterogeneous ($300$\,s vs.\ $1$\,s) \\
-Constraint       & Joint-limit penalties        & Fleet ($\thetavec$-OGD) + headway (Lagrangian) \\
-Activation schedule & Fixed $\beta$              & Lower-only warmup ($e \leq 30$) then full coupling \\
-\bottomrule
-\end{tabular}
-\end{table}
+\paragraph{Interpreting joint training.}
+The independent-assembly ablation is included because joint training is not automatically superior. If a fixed-timetable lower can be trained first and then paired with a timetable upper without loss, the right contribution is a jointly trainable framework rather than a claim that joint optimization is always necessary. Conversely, if the jointly trained version improves total passenger time or dispatch feasibility, the result supports the stronger claim that the lower's adaptation to the rolling timetable is part of the gain.
+
+\paragraph{Holding-delay trade-off.}
+Bus holding methods can reduce out-of-vehicle wait and headway CV by increasing onboard delay. The evaluation therefore treats average holding time, onboard passenger time, and total passenger time as first-class metrics. A method that improves wait but worsens total passenger time should not be presented as an unqualified service improvement.
+
+\paragraph{Baseline scope.}
+The comparison includes timetable-search and bus-holding baselines. Daganzo-style and Xuan-style rules are standard analytical reference points for holding control. Holding-only SAC and same-simulator RL/MARL-style proxies compare TransitDuet with recent RL holding mechanisms without claiming exact reproduction of papers that use different networks, simulators, or demand models. This framing is deliberately conservative: same-simulator proxies test representative mechanisms, not whether TransitDuet supersedes every published implementation.
 
 \paragraph{Limitations.}
-Several limitations qualify the present results and motivate future work.
-
-Single-route scope.
-TransitDuet is evaluated on a single bidirectional corridor.
-Real transit networks involve multiple interacting routes with shared terminals, transfer passengers, and fleet rebalancing across lines.
-Extending the framework to a multi-route setting would require the upper policy to allocate a shared fleet across routes, substantially expanding the action space and introducing inter-route coordination constraints.
-
-Simplified demand model.
-Passenger arrivals follow stationary OD rates within each time period.
-In practice, demand is non-stationary, exhibits day-of-week and seasonal variation, and responds endogenously to service quality (e.g., passengers abandoning a stop after excessive waits).
-Incorporating demand elasticity and real-time demand forecasting would improve realism but introduce additional model complexity.
-
-No real-world deployment.
-All experiments are conducted in a stochastic microsimulation.
-While the simulator reproduces key phenomena---bunching, load-dependent dwell times, stochastic travel times---it abstracts away traffic signal interactions, driver behavior heterogeneity, and vehicle breakdowns.
-Sim-to-real transfer would require domain randomization or a calibrated digital twin.
-
-Computational cost.
-Each episode requires approximately 7\,s of environment simulation time plus training overhead.
-At 300 episodes with 3 seeds, the total wall-clock time is approximately 14 hours per seed on a single 12\,GB GPU.
-While acceptable for research, real-time retraining for schedule disruptions would require further acceleration, for instance through model distillation or warm-starting from a pre-trained policy.
-
-Baseline coverage and seed budget.
-Our external baselines (Fixed, GA, CMA-ES) cover the static-timetable and population-search families that the bus-planning literature most commonly compares against, but they do not include MPC / rolling-horizon optimisation, time-of-day MILP, or RL approaches that train the upper but not the lower in a bi-level fashion. The cost of integrating these baselines under the same shared-lower protocol used in this paper is substantial (per-candidate lower training, or replacing the lower with an MPC-internal model), and we leave this comparison for future work along with raising the seed count from $n{=}3$ to $n{=}10$ and reporting paired significance tests on a fixed evaluation seed set.
-
-Approximate unified protocol with the search baselines.
-The protocol described in \cref{sec:exp_setup} is a near-unified comparison rather than an exact one. Three residual differences are worth flagging explicitly. (i) The search baselines run a 20-episode lower-only warmup before the upper search starts, so their total simulator budget is 320 episodes versus TransitDuet's 300; we have aligned the lower hyperparameters (hidden width, $\lambda_{\mathrm{lr}} = 10^{-4}$, $\alpha_{\max}^{\mathrm L} = 0.1$, ensemble size, $\beta_{\mathrm{LCB}}$) so the lower controller architecture is identical across methods, but the budget asymmetry remains. (ii) For GA and CMA-ES we evaluate at the validation-best lower checkpoint paired with the search's final upper triple; this is not a strict checkpoint-pair selection, and a tighter implementation would re-evaluate at matched (lower\_ep, upper\_search\_iter) pairs. (iii) The Rule-MPC and Rule-GA / Rule-CMA-ES baselines in \Cref{tab:main_results} are reported at $n{=}1$ seed and should be treated as sanity checks rather than head-to-head comparisons. We do not claim that these residual differences shift the qualitative ranking, but a fully strict re-comparison would require an additional round of from-scratch baseline training and is left for the camera-ready or extended version of this work.
-
-\paragraph{Scalability considerations.}
-Scaling to multi-route networks introduces two challenges.
-First, the upper-level action space grows combinatorially with the number of routes, since headway targets must be set jointly to respect shared fleet constraints.
-Factored action representations or attention-based architectures over route embeddings could mitigate this.
-Second, the lower-level parameter sharing, which currently treats all buses on a single route identically, would need to incorporate route-specific context to generalize across heterogeneous lines.
-Graph neural networks operating on the transit network topology offer a promising direction for encoding such structure.
+The current experiments remain single-corridor simulations. Real transit networks introduce interlining, shared terminals, transfer passengers, driver relief constraints, and fleet rebalancing across routes. Scaling the timetable upper to such settings will require factored or graph-structured action representations. The simulator also abstracts away signal priority, incidents, driver heterogeneity, and endogenous passenger abandonment. Finally, the timetable experiments should be read as evidence from a ten-seed evaluation on one calibrated corridor; stronger external-validity claims require additional routes and paired tests on common held-out rollouts.

@@ -1,0 +1,487 @@
+{
+  "cell_summaries": [
+    {
+      "assets": 3,
+      "best_checkpoint_inner_validation_score": 0.0004912608105372911,
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "candidate_parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "cell_status": "valid",
+      "checkpoint_selection_protocol": "disjoint_validation_paths",
+      "checkpoint_validation_seeds": [
+        57721
+      ],
+      "elapsed_sec": 2.011335800169036,
+      "environment_steps_checkpoint_validation": 320,
+      "environment_steps_train": 256,
+      "environment_steps_tuning_validation": 64,
+      "evaluation_role": "tuning_validation",
+      "heldout_test_access_status": "not_loaded",
+      "heldout_test_seeds": [],
+      "initial_checkpoint_validation_score": -0.00022715973642139812,
+      "iterations": 4,
+      "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+      "metric_contract_version": "trading_metrics_v2",
+      "optimizer_seed": 2026,
+      "parameter_count": 29455,
+      "policy_mode": "freq_hrl",
+      "rollout_seed_roots": [
+        42
+      ],
+      "scenario": "persistent_shift",
+      "selected_checkpoint_iteration": 3,
+      "selection_objective_version": "log_growth_drawdown_utility_v3",
+      "selection_utility_mean": -0.00015749400152910342,
+      "selection_utility_min": -0.00015749400152910342,
+      "selection_utility_std": 0.0,
+      "steps": 64,
+      "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+      "training_replicate_seed": 2026,
+      "tuning_protocol_version": "nested_validation_hpo_v1",
+      "tuning_seed_count": 1,
+      "tuning_validation_seeds": [
+        68207
+      ],
+      "validation_learning_gain": 0.0007184205469586893
+    },
+    {
+      "assets": 3,
+      "best_checkpoint_inner_validation_score": -0.0024067056986791413,
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "candidate_parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "cell_status": "valid",
+      "checkpoint_selection_protocol": "disjoint_validation_paths",
+      "checkpoint_validation_seeds": [
+        57721
+      ],
+      "elapsed_sec": 2.029046299867332,
+      "environment_steps_checkpoint_validation": 320,
+      "environment_steps_train": 256,
+      "environment_steps_tuning_validation": 64,
+      "evaluation_role": "tuning_validation",
+      "heldout_test_access_status": "not_loaded",
+      "heldout_test_seeds": [],
+      "initial_checkpoint_validation_score": -0.002459509456642213,
+      "iterations": 4,
+      "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+      "metric_contract_version": "trading_metrics_v2",
+      "optimizer_seed": 2026,
+      "parameter_count": 29713,
+      "policy_mode": "flat_ppo",
+      "rollout_seed_roots": [
+        42
+      ],
+      "scenario": "persistent_shift",
+      "selected_checkpoint_iteration": 3,
+      "selection_objective_version": "log_growth_drawdown_utility_v3",
+      "selection_utility_mean": -0.00239945119939487,
+      "selection_utility_min": -0.00239945119939487,
+      "selection_utility_std": 0.0,
+      "steps": 64,
+      "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+      "training_replicate_seed": 2026,
+      "tuning_protocol_version": "nested_validation_hpo_v1",
+      "tuning_seed_count": 1,
+      "tuning_validation_seeds": [
+        68207
+      ],
+      "validation_learning_gain": 5.2803757963071785e-05
+    },
+    {
+      "assets": 3,
+      "best_checkpoint_inner_validation_score": -0.000352365254452649,
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "candidate_parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "cell_status": "valid",
+      "checkpoint_selection_protocol": "disjoint_validation_paths",
+      "checkpoint_validation_seeds": [
+        57721
+      ],
+      "elapsed_sec": 4.600882299942896,
+      "environment_steps_checkpoint_validation": 320,
+      "environment_steps_train": 256,
+      "environment_steps_tuning_validation": 64,
+      "evaluation_role": "tuning_validation",
+      "heldout_test_access_status": "not_loaded",
+      "heldout_test_seeds": [],
+      "initial_checkpoint_validation_score": -0.000352365254452649,
+      "iterations": 4,
+      "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+      "metric_contract_version": "trading_metrics_v2",
+      "optimizer_seed": 2026,
+      "parameter_count": 29236,
+      "policy_mode": "flat_gru_ppo",
+      "rollout_seed_roots": [
+        42
+      ],
+      "scenario": "persistent_shift",
+      "selected_checkpoint_iteration": -1,
+      "selection_objective_version": "log_growth_drawdown_utility_v3",
+      "selection_utility_mean": -0.0003153001566768381,
+      "selection_utility_min": -0.0003153001566768381,
+      "selection_utility_std": 0.0,
+      "steps": 64,
+      "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+      "training_replicate_seed": 2026,
+      "tuning_protocol_version": "nested_validation_hpo_v1",
+      "tuning_seed_count": 1,
+      "tuning_validation_seeds": [
+        68207
+      ],
+      "validation_learning_gain": 0.0
+    },
+    {
+      "assets": 3,
+      "best_checkpoint_inner_validation_score": -0.0009139538333863878,
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "candidate_parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "cell_status": "valid",
+      "checkpoint_selection_protocol": "disjoint_validation_paths",
+      "checkpoint_validation_seeds": [
+        57721
+      ],
+      "elapsed_sec": 2.185820199549198,
+      "environment_steps_checkpoint_validation": 320,
+      "environment_steps_train": 256,
+      "environment_steps_tuning_validation": 64,
+      "evaluation_role": "tuning_validation",
+      "heldout_test_access_status": "not_loaded",
+      "heldout_test_seeds": [],
+      "initial_checkpoint_validation_score": -0.0009428861701336715,
+      "iterations": 4,
+      "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+      "metric_contract_version": "trading_metrics_v2",
+      "optimizer_seed": 2026,
+      "parameter_count": 29250,
+      "policy_mode": "generic_hrl_ppo",
+      "rollout_seed_roots": [
+        42
+      ],
+      "scenario": "persistent_shift",
+      "selected_checkpoint_iteration": 3,
+      "selection_objective_version": "log_growth_drawdown_utility_v3",
+      "selection_utility_mean": -0.000416781328192485,
+      "selection_utility_min": -0.000416781328192485,
+      "selection_utility_std": 0.0,
+      "steps": 64,
+      "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+      "training_replicate_seed": 2026,
+      "tuning_protocol_version": "nested_validation_hpo_v1",
+      "tuning_seed_count": 1,
+      "tuning_validation_seeds": [
+        68207
+      ],
+      "validation_learning_gain": 2.8932336747283663e-05
+    },
+    {
+      "assets": 3,
+      "best_checkpoint_inner_validation_score": 0.00022753144714880401,
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "candidate_parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.5,
+        "learning_rate": 0.0001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "cell_status": "valid",
+      "checkpoint_selection_protocol": "disjoint_validation_paths",
+      "checkpoint_validation_seeds": [
+        57721
+      ],
+      "elapsed_sec": 6.3834457998164,
+      "environment_steps_checkpoint_validation": 320,
+      "environment_steps_train": 256,
+      "environment_steps_tuning_validation": 64,
+      "evaluation_role": "tuning_validation",
+      "heldout_test_access_status": "not_loaded",
+      "heldout_test_seeds": [],
+      "initial_checkpoint_validation_score": -0.00014874270819523666,
+      "iterations": 4,
+      "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+      "metric_contract_version": "trading_metrics_v2",
+      "optimizer_seed": 2026,
+      "parameter_count": 28659,
+      "policy_mode": "generic_hrl_gru_ppo",
+      "rollout_seed_roots": [
+        42
+      ],
+      "scenario": "persistent_shift",
+      "selected_checkpoint_iteration": 3,
+      "selection_objective_version": "log_growth_drawdown_utility_v3",
+      "selection_utility_mean": 0.0003201491010399321,
+      "selection_utility_min": 0.0003201491010399321,
+      "selection_utility_std": 0.0,
+      "steps": 64,
+      "training_path_protocol": "fresh_deterministic_path_per_root_and_iteration_v2",
+      "training_replicate_seed": 2026,
+      "tuning_protocol_version": "nested_validation_hpo_v1",
+      "tuning_seed_count": 1,
+      "tuning_validation_seeds": [
+        68207
+      ],
+      "validation_learning_gain": 0.0003762741553440407
+    }
+  ],
+  "frozen_config": {
+    "checkpoint_validation_seeds": [
+      57721
+    ],
+    "final_design_complete": false,
+    "heldout_test_access_status": "not_loaded",
+    "heldout_test_seeds": [],
+    "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+    "scenarios": [
+      "persistent_shift"
+    ],
+    "search_budget_candidates_per_policy": {
+      "flat_gru_ppo": 1,
+      "flat_ppo": 1,
+      "freq_hrl": 1,
+      "generic_hrl_gru_ppo": 1,
+      "generic_hrl_ppo": 1
+    },
+    "selected": {
+      "flat_gru_ppo": {
+        "candidate_family": "ppo",
+        "candidate_id": "ppo_lr1e4_std15",
+        "learning_gate_status": "ineligible",
+        "parameters": {
+          "epochs": 4,
+          "hidden_dim": 64,
+          "init_log_std": -1.5,
+          "learning_rate": 0.0001,
+          "minibatch_size": 512,
+          "reward_scale": 100.0
+        },
+        "robust_selection_score": -0.0003153001566768381,
+        "trained_checkpoint_fraction": 0.0,
+        "tuning_utility_mean": -0.0003153001566768381,
+        "validation_learning_gain_mean": 0.0
+      },
+      "flat_ppo": {
+        "candidate_family": "ppo",
+        "candidate_id": "ppo_lr1e4_std15",
+        "learning_gate_status": "eligible",
+        "parameters": {
+          "epochs": 4,
+          "hidden_dim": 64,
+          "init_log_std": -1.5,
+          "learning_rate": 0.0001,
+          "minibatch_size": 512,
+          "reward_scale": 100.0
+        },
+        "robust_selection_score": -0.00239945119939487,
+        "trained_checkpoint_fraction": 1.0,
+        "tuning_utility_mean": -0.00239945119939487,
+        "validation_learning_gain_mean": 5.2803757963071785e-05
+      },
+      "freq_hrl": {
+        "candidate_family": "ppo",
+        "candidate_id": "ppo_lr1e4_std15",
+        "learning_gate_status": "eligible",
+        "parameters": {
+          "epochs": 4,
+          "hidden_dim": 64,
+          "init_log_std": -1.5,
+          "learning_rate": 0.0001,
+          "minibatch_size": 512,
+          "reward_scale": 100.0
+        },
+        "robust_selection_score": -0.00015749400152910342,
+        "trained_checkpoint_fraction": 1.0,
+        "tuning_utility_mean": -0.00015749400152910342,
+        "validation_learning_gain_mean": 0.0007184205469586893
+      },
+      "generic_hrl_gru_ppo": {
+        "candidate_family": "ppo",
+        "candidate_id": "ppo_lr1e4_std15",
+        "learning_gate_status": "eligible",
+        "parameters": {
+          "epochs": 4,
+          "hidden_dim": 64,
+          "init_log_std": -1.5,
+          "learning_rate": 0.0001,
+          "minibatch_size": 512,
+          "reward_scale": 100.0
+        },
+        "robust_selection_score": 0.0003201491010399321,
+        "trained_checkpoint_fraction": 1.0,
+        "tuning_utility_mean": 0.0003201491010399321,
+        "validation_learning_gain_mean": 0.0003762741553440407
+      },
+      "generic_hrl_ppo": {
+        "candidate_family": "ppo",
+        "candidate_id": "ppo_lr1e4_std15",
+        "learning_gate_status": "eligible",
+        "parameters": {
+          "epochs": 4,
+          "hidden_dim": 64,
+          "init_log_std": -1.5,
+          "learning_rate": 0.0001,
+          "minibatch_size": 512,
+          "reward_scale": 100.0
+        },
+        "robust_selection_score": -0.000416781328192485,
+        "trained_checkpoint_fraction": 1.0,
+        "tuning_utility_mean": -0.000416781328192485,
+        "validation_learning_gain_mean": 2.8932336747283663e-05
+      }
+    },
+    "selection_objective_version": "log_growth_drawdown_utility_v3",
+    "stage": "pilot",
+    "status": "not_freezable_learning_gate",
+    "top_candidates": {
+      "flat_gru_ppo": [
+        "ppo_lr1e4_std15"
+      ],
+      "flat_ppo": [
+        "ppo_lr1e4_std15"
+      ],
+      "freq_hrl": [
+        "ppo_lr1e4_std15"
+      ],
+      "generic_hrl_gru_ppo": [
+        "ppo_lr1e4_std15"
+      ],
+      "generic_hrl_ppo": [
+        "ppo_lr1e4_std15"
+      ]
+    },
+    "training_replicate_seeds": [
+      2026
+    ],
+    "tuning_protocol_version": "nested_validation_hpo_v1",
+    "tuning_validation_seeds": [
+      68207
+    ]
+  },
+  "leaderboard": [
+    {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "independent_training_replicates": 1,
+      "learning_gate_status": "eligible",
+      "policy_mode": "freq_hrl",
+      "rank": 1,
+      "robust_selection_score": -0.00015749400152910342,
+      "scenario_count": 1,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_ci95_high": -0.00015749400152910342,
+      "tuning_utility_ci95_low": -0.00015749400152910342,
+      "tuning_utility_mean": -0.00015749400152910342,
+      "tuning_utility_std_across_replicates": 0.0,
+      "validation_learning_gain_mean": 0.0007184205469586893
+    },
+    {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "independent_training_replicates": 1,
+      "learning_gate_status": "eligible",
+      "policy_mode": "flat_ppo",
+      "rank": 1,
+      "robust_selection_score": -0.00239945119939487,
+      "scenario_count": 1,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_ci95_high": -0.00239945119939487,
+      "tuning_utility_ci95_low": -0.00239945119939487,
+      "tuning_utility_mean": -0.00239945119939487,
+      "tuning_utility_std_across_replicates": 0.0,
+      "validation_learning_gain_mean": 5.2803757963071785e-05
+    },
+    {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "independent_training_replicates": 1,
+      "learning_gate_status": "ineligible",
+      "policy_mode": "flat_gru_ppo",
+      "rank": 1,
+      "robust_selection_score": -0.0003153001566768381,
+      "scenario_count": 1,
+      "trained_checkpoint_fraction": 0.0,
+      "tuning_utility_ci95_high": -0.0003153001566768381,
+      "tuning_utility_ci95_low": -0.0003153001566768381,
+      "tuning_utility_mean": -0.0003153001566768381,
+      "tuning_utility_std_across_replicates": 0.0,
+      "validation_learning_gain_mean": 0.0
+    },
+    {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "independent_training_replicates": 1,
+      "learning_gate_status": "eligible",
+      "policy_mode": "generic_hrl_ppo",
+      "rank": 1,
+      "robust_selection_score": -0.000416781328192485,
+      "scenario_count": 1,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_ci95_high": -0.000416781328192485,
+      "tuning_utility_ci95_low": -0.000416781328192485,
+      "tuning_utility_mean": -0.000416781328192485,
+      "tuning_utility_std_across_replicates": 0.0,
+      "validation_learning_gain_mean": 2.8932336747283663e-05
+    },
+    {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e4_std15",
+      "independent_training_replicates": 1,
+      "learning_gate_status": "eligible",
+      "policy_mode": "generic_hrl_gru_ppo",
+      "rank": 1,
+      "robust_selection_score": 0.0003201491010399321,
+      "scenario_count": 1,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_ci95_high": 0.0003201491010399321,
+      "tuning_utility_ci95_low": 0.0003201491010399321,
+      "tuning_utility_mean": 0.0003201491010399321,
+      "tuning_utility_std_across_replicates": 0.0,
+      "validation_learning_gain_mean": 0.0003762741553440407
+    }
+  ],
+  "summary": {
+    "cell_count": 5,
+    "expected_cell_count": 5,
+    "final_design_status": "incomplete",
+    "heldout_test_access_count": 0,
+    "learning_gate_status": "not_supported",
+    "matrix_coverage_status": "complete",
+    "policy_mode_count": 5,
+    "scenario_count": 1,
+    "stage": "pilot",
+    "training_replicate_count": 1,
+    "tuning_protocol_status": "valid"
+  }
+}

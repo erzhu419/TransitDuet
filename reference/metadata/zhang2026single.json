@@ -1,0 +1,2084 @@
+{
+  "key": "zhang2026single",
+  "entry_type": "article",
+  "current": {
+    "author": "Zhang, Yifan and Zheng, Liang and Zhang, Qifan and Tang, Hewei",
+    "title": "Single agent robust deep reinforcement learning for bus fleet control",
+    "journal": "Transp Saf Environ",
+    "volume": "00",
+    "number": "0",
+    "pages": "tdag005",
+    "year": "2026",
+    "doi": "10.1093/tse/tdag005"
+  },
+  "verified": {
+    "source": "manual-tse",
+    "title": "Single agent robust deep reinforcement learning for bus fleet control",
+    "author": [
+      "Zhang, Yifan",
+      "Zheng, Liang",
+      "Zhang, Qifan",
+      "Tang, Hewei"
+    ],
+    "year": "2026",
+    "container": "Transportation Safety and Environment",
+    "volume": "00",
+    "number": "0",
+    "pages": "tdag005",
+    "doi": "10.1093/tse/tdag005",
+    "url": "https://doi.org/10.1093/tse/tdag005"
+  },
+  "crossref_raw": {
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          7,
+          14
+        ]
+      ],
+      "date-time": "2026-07-14T04:14:23Z",
+      "timestamp": 1784002463320,
+      "version": "3.55.0"
+    },
+    "reference-count": 27,
+    "publisher": "Oxford University Press (OUP)",
+    "issue": "2",
+    "license": [
+      {
+        "start": {
+          "date-parts": [
+            [
+              2026,
+              3,
+              20
+            ]
+          ],
+          "date-time": "2026-03-20T00:00:00Z",
+          "timestamp": 1773964800000
+        },
+        "content-version": "vor",
+        "delay-in-days": 78,
+        "URL": "https://creativecommons.org/licenses/by/4.0/"
+      }
+    ],
+    "funder": [
+      {
+        "DOI": "10.13039/501100001809",
+        "name": "National Natural Science Foundation of China",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "72371251"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "72371251"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/501100001809",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/501100019092",
+        "name": "Natural Science Foundation for Distinguished Young Scholars of Hunan Province",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "2024JJ2080"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "2024JJ2080"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/501100019092",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      },
+      {
+        "DOI": "10.13039/501100019091",
+        "name": "Key Research and Development Program of Hunan Province of China",
+        "doi-asserted-by": "publisher",
+        "award": [
+          "2024JK2007"
+        ],
+        "award-info": [
+          {
+            "award-number": [
+              "2024JK2007"
+            ]
+          }
+        ],
+        "id": [
+          {
+            "id": "10.13039/501100019091",
+            "id-type": "DOI",
+            "asserted-by": "publisher"
+          }
+        ]
+      }
+    ],
+    "content-domain": {
+      "domain": [],
+      "crossmark-restriction": false
+    },
+    "short-container-title": [],
+    "published-print": {
+      "date-parts": [
+        [
+          2026,
+          6,
+          22
+        ]
+      ]
+    },
+    "abstract": "<jats:title>Abstract</jats:title>\n                  <jats:p>Bus bunching remains a critical challenge in urban transit systems, primarily driven by the stochastic nature of traffic conditions and passenger demand. Recently, a popular method to address this issue is multi-agent reinforcement learning (MARL) applied in an idealized loop-line environment. However, such a method generally suffers from high computational costs and sample inefficiency. Moreover, they often fail to capture the dynamics of realistic bus systems, which are typically governed by heterogeneous trip lined and variable fleet sizes. In this study, we propose a robust single-agent reinforcement learning (RL) framework for bus holding control in a bidirectional timetabled bus line, explicitly designed to circumvent the data imbalance and convergence issues associated with MARL. Our key contribution focuses on transforming the inherently multi-agent problem into a single-agent formulation by explicitly encoding categorical identifiers—such as vehicle, station and trip IDs alongside traditional numerical features (e.g., headway, occupancy and segment velocity) together as the state representation. This feature space augmentation enables the single-agent to operate effectively in a higher-dimensional space, analogous to projecting linearly inseparable inputs into a higher-dimensional space to achieve separability. Additionally, we introduce a structured ‘ridge-shaped’ reward function that incentivizes the alignment with both uniform headways and scheduled departure intervals. Compared to the other three benchmark methods, our proposed RL algorithm achieves significantly more stable and higher rewards ($-430$K comparing with $-530$K) under stochastic passenger demands and inter-station travel time. These experimental results suggest that the proposed single-agent RL approach, informed by categorical identifiers in the state representation and realistic schedule-aware design in the ridge-shaped reward function, can effectively mitigate bus bunching in non-loop settings. This paradigm offers a robust and scalable alternative to those conventional MARL-based control frameworks, particularly in environments where agent-specific experience distributions are inherently imbalanced.</jats:p>",
+    "DOI": "10.1093/tse/tdag005",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          18
+        ]
+      ],
+      "date-time": "2026-03-18T12:48:58Z",
+      "timestamp": 1773838138000
+    },
+    "source": "Crossref",
+    "is-referenced-by-count": 1,
+    "title": [
+      "Single agent robust deep reinforcement learning for bus fleet control"
+    ],
+    "prefix": "10.1093",
+    "volume": "8",
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0009-0009-8132-7075",
+        "authenticated-orcid": false,
+        "given": "Yifan",
+        "family": "Zhang",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "School of Traffic & Transportation Engineering, Central South University , Changsha ,",
+            "place": [
+              "China"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Liang",
+        "family": "Zheng",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Traffic & Transportation Engineering, Central South University , Changsha ,",
+            "place": [
+              "China"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Qifan",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Faculty of IT, Monash University Malaysia , 47500 Subang Jaya ,",
+            "place": [
+              "Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hewei",
+        "family": "Tang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "The University of Hong Kong Department of Mathematics (host) and School of Computing & Data Science, , Hong Kong SAR ,",
+            "place": [
+              "China"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "member": "286",
+    "published-online": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          20
+        ]
+      ]
+    },
+    "reference": [
+      {
+        "key": "2026062212122353500_bib1"
+      },
+      {
+        "key": "2026062212122353500_bib2",
+        "doi-asserted-by": "crossref",
+        "first-page": "766",
+        "DOI": "10.1080/01441647.2024.2313969",
+        "article-title": "Bus bunching: a comprehensive review from demand, supply, and decision-making perspectives",
+        "volume": "44",
+        "author": "Rezazada",
+        "year": "2024",
+        "journal-title": "Trans Rev"
+      },
+      {
+        "key": "2026062212122353500_bib3",
+        "doi-asserted-by": "crossref",
+        "first-page": "175",
+        "DOI": "10.1016/j.trb.2017.06.019",
+        "article-title": "Modelling bus bunching and holding control with vehicle overtaking and distributed passenger boarding behaviour",
+        "volume": "104",
+        "author": "Wu",
+        "year": "2017",
+        "journal-title": "Transp Res Part B: Methodol"
+      },
+      {
+        "key": "2026062212122353500_bib4",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.24963/ijcai.2021/60",
+        "article-title": "Reducing bus bunching with asynchronous multi-agent reinforcement learning",
+        "volume-title": "Proceedings of the Thirtieth International Joint Conference on Artificial Intelligence (IJCAI-21)",
+        "author": "Wang",
+        "year": "2021"
+      },
+      {
+        "key": "2026062212122353500_bib5",
+        "doi-asserted-by": "crossref",
+        "first-page": "102661",
+        "DOI": "10.1016/j.trc.2020.102661",
+        "article-title": "Dynamic holding control to avoid bus bunching: A multi-agent deep reinforcement learning framework",
+        "volume": "116",
+        "author": "Wang",
+        "year": "2020",
+        "journal-title": "Transp Res Part C: Emerg Technol"
+      },
+      {
+        "key": "2026062212122353500_bib6",
+        "volume-title": "Public Transit Planning and Operation: Modeling Practice and Behavior",
+        "author": "Ceder",
+        "edition": "2nd edn"
+      },
+      {
+        "key": "2026062212122353500_bib7",
+        "article-title": "Maximum entropy RL (provably) solves some robust RL problems",
+        "volume-title": "International Conference on Learning Representations (ICLR)",
+        "author": "Eysenbach",
+        "year": "2022"
+      },
+      {
+        "key": "2026062212122353500_bib8",
+        "doi-asserted-by": "crossref",
+        "first-page": "100",
+        "DOI": "10.3141/2274-11",
+        "article-title": "Bus-holding control strategies: Simulation-based evaluation and guidelines for implementation",
+        "volume": "2274",
+        "author": "Cats",
+        "year": "2012",
+        "journal-title": "Transp Res Record"
+      },
+      {
+        "key": "2026062212122353500_bib9",
+        "doi-asserted-by": "crossref",
+        "first-page": "4",
+        "DOI": "10.1111/mice.12446",
+        "article-title": "Dynamic headway control for high-frequency bus lines based on speed guidance and intersection signal adjustment",
+        "volume": "35",
+        "author": "Bie",
+        "year": "2020",
+        "journal-title": "Comput-Aided Civ Inf Eng"
+      },
+      {
+        "key": "2026062212122353500_bib10",
+        "doi-asserted-by": "crossref",
+        "first-page": "107986",
+        "DOI": "10.1016/j.engappai.2024.107986",
+        "article-title": "A robust integrated multi-strategy bus control system via deep reinforcement learning",
+        "volume": "133",
+        "author": "Nie",
+        "year": "2024",
+        "journal-title": "Eng Appl Artif Intel"
+      },
+      {
+        "key": "2026062212122353500_bib11",
+        "doi-asserted-by": "crossref",
+        "first-page": "757",
+        "DOI": "10.1016/j.trc.2009.05.016",
+        "article-title": "Hybrid predictive control for real-time optimization of public transport systems’ operations based on evolutionary multi-objective optimization",
+        "volume": "18",
+        "author": "Cortés",
+        "year": "2010",
+        "journal-title": "Transp Res Part C: Emerg Technol"
+      },
+      {
+        "key": "2026062212122353500_bib12",
+        "doi-asserted-by": "crossref",
+        "first-page": "574",
+        "DOI": "10.1177/0361198118822292",
+        "article-title": "Frequency and vehicle capacity determination using a dynamic transit assignment model",
+        "volume": "2673",
+        "author": "Cats",
+        "year": "2019",
+        "journal-title": "Transp Res Record: J Transp Res Board"
+      },
+      {
+        "key": "2026062212122353500_bib13",
+        "doi-asserted-by": "publisher",
+        "first-page": "203",
+        "DOI": "10.1111/mice.13064",
+        "article-title": "Robust nonlinear decision mapping approach for online bus speed control under uncertainty",
+        "volume": "39",
+        "author": "Zheng",
+        "year": "2024",
+        "journal-title": "Comput-Aided Civ Inf Eng"
+      },
+      {
+        "key": "2026062212122353500_bib14",
+        "doi-asserted-by": "crossref",
+        "first-page": "104870",
+        "DOI": "10.1016/j.trc.2024.104870",
+        "article-title": "Bi-objective robust nonlinear decision approach for en-route bus speed control considering implementation errors and traffic uncertainties",
+        "volume": "169",
+        "author": "Liu",
+        "year": "2024",
+        "journal-title": "Transp Res Part C: Emerg Technol"
+      },
+      {
+        "key": "2026062212122353500_bib15",
+        "first-page": "1259",
+        "article-title": "Deep reinforcement learning for event-driven multi-agent decision processes, Vol. 20",
+        "author": "Menda",
+        "year": "2019"
+      },
+      {
+        "key": "2026062212122353500_bib16",
+        "doi-asserted-by": "crossref",
+        "first-page": "9675",
+        "DOI": "10.1109/TITS.2024.3362813",
+        "article-title": "Mitigating bus bunching via hierarchical multi-agent reinforcement learning",
+        "volume": "25",
+        "author": "Yu",
+        "year": "2024",
+        "journal-title": "IEEE Trans Intel Transp Syst"
+      },
+      {
+        "key": "2026062212122353500_bib17",
+        "doi-asserted-by": "crossref",
+        "first-page": "3658",
+        "DOI": "10.3390/smartcities7060141",
+        "article-title": "Robust reinforcement learning strategies with evolving curriculum for efficient bus operations in smart cities",
+        "volume": "7",
+        "author": "Tang",
+        "year": "2024",
+        "journal-title": "Smart Cities"
+      },
+      {
+        "key": "2026062212122353500_bib18",
+        "article-title": "Soft Actor-Critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor",
+        "author": "Haarnoja",
+        "year": "2018"
+      },
+      {
+        "key": "2026062212122353500_bib19",
+        "doi-asserted-by": "crossref",
+        "first-page": "103652",
+        "DOI": "10.1016/j.trd.2023.103652",
+        "article-title": "Optimization of single-line electric bus scheduling with skip-stop operation",
+        "volume": "117",
+        "author": "Tang",
+        "year": "2023",
+        "journal-title": "Transp Res Part D: Trans Environ"
+      },
+      {
+        "key": "2026062212122353500_bib20",
+        "article-title": "Optimisation of a new hybrid transit service with modular autonomous vehicles",
+        "volume": "20",
+        "author": "Tang",
+        "year": "2024",
+        "journal-title": "Transp A: Transp Sci"
+      },
+      {
+        "key": "2026062212122353500_bib21",
+        "doi-asserted-by": "crossref",
+        "first-page": "1217",
+        "DOI": "10.1080/15568318.2022.2161079",
+        "article-title": "Optimal selection of vehicle types for an electric bus route with shifting departure times",
+        "volume": "17",
+        "author": "Tang",
+        "year": "2023",
+        "journal-title": "Int J Sustain Transp"
+      },
+      {
+        "key": "2026062212122353500_bib22",
+        "doi-asserted-by": "crossref",
+        "first-page": "1422",
+        "DOI": "10.1177/03611981211027157",
+        "article-title": "Public transport fleet replacement optimization using multi-type battery-powered electric buses",
+        "volume": "2675",
+        "author": "Tang",
+        "year": "2021",
+        "journal-title": "Transp Res Record"
+      },
+      {
+        "key": "2026062212122353500_bib23",
+        "doi-asserted-by": "crossref",
+        "first-page": "325",
+        "DOI": "10.1080/15568318.2020.1765053",
+        "article-title": "Optimal operational strategies for single bus lines using network-based method",
+        "volume": "15",
+        "author": "Tang",
+        "year": "2021",
+        "journal-title": "Int J Sustain Transp"
+      },
+      {
+        "key": "2026062212122353500_bib24",
+        "doi-asserted-by": "crossref",
+        "first-page": "1897",
+        "DOI": "10.1007/s10479-024-05963-0",
+        "article-title": "Robust simulation-based optimization for multiobjective problems with constraints",
+        "volume": "346",
+        "author": "Zheng",
+        "year": "2024",
+        "journal-title": "Ann Oper Res"
+      },
+      {
+        "key": "2026062212122353500_bib25",
+        "doi-asserted-by": "crossref",
+        "first-page": "249",
+        "DOI": "10.1016/j.ejor.2021.08.040",
+        "article-title": "Biobjective robust simulation-based optimization for unconstrained problems",
+        "volume": "299",
+        "author": "Zheng",
+        "year": "2022",
+        "journal-title": "Eur J Oper Res"
+      },
+      {
+        "key": "2026062212122353500_bib26",
+        "doi-asserted-by": "crossref",
+        "first-page": "267",
+        "DOI": "10.1016/j.trb.2010.06.005",
+        "article-title": "Reducing bunching with bus-to-bus cooperation",
+        "volume": "45",
+        "author": "Daganzo",
+        "year": "2011",
+        "journal-title": "Transp Res Part B: Methodol"
+      },
+      {
+        "key": "2026062212122353500_bib27",
+        "first-page": "4912",
+        "article-title": "Soft actor-critic algorithms and applications",
+        "volume-title": "Proceedings of the 37th International Conference on Machine Learning (ICML), vol. 119 of PMLR",
+        "author": "Haarnoja",
+        "year": "2020"
+      }
+    ],
+    "container-title": [
+      "Transportation Safety and Environment"
+    ],
+    "original-title": [],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://academic.oup.com/tse/advance-article-pdf/doi/10.1093/tse/tdag005/67434129/tdag005.pdf",
+        "content-type": "application/pdf",
+        "content-version": "am",
+        "intended-application": "syndication"
+      },
+      {
+        "URL": "https://academic.oup.com/tse/article-pdf/8/2/tdag005/67434129/tdag005.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "syndication"
+      },
+      {
+        "URL": "https://academic.oup.com/tse/article-pdf/8/2/tdag005/67434129/tdag005.pdf",
+        "content-type": "unspecified",
+        "content-version": "vor",
+        "intended-application": "similarity-checking"
+      }
+    ],
+    "deposited": {
+      "date-parts": [
+        [
+          2026,
+          6,
+          22
+        ]
+      ],
+      "date-time": "2026-06-22T16:12:30Z",
+      "timestamp": 1782144750000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://academic.oup.com/tse/article/doi/10.1093/tse/tdag005/8530551"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [
+        [
+          2026
+        ]
+      ]
+    },
+    "references-count": 27,
+    "journal-issue": {
+      "issue": "2",
+      "published-print": {
+        "date-parts": [
+          [
+            2026,
+            6,
+            22
+          ]
+        ]
+      }
+    },
+    "URL": "https://doi.org/10.1093/tse/tdag005",
+    "relation": {},
+    "ISSN": [
+      "2631-4428"
+    ],
+    "issn-type": [
+      {
+        "value": "2631-4428",
+        "type": "electronic"
+      }
+    ],
+    "subject": [],
+    "published-other": {
+      "date-parts": [
+        [
+          2026
+        ]
+      ]
+    },
+    "published": {
+      "date-parts": [
+        [
+          2026
+        ]
+      ]
+    },
+    "article-number": "tdag005"
+  },
+  "arxiv_raw": null,
+  "openalex_raw": {
+    "id": "https://openalex.org/W4414449644",
+    "doi": "https://doi.org/10.1093/tse/tdag005",
+    "title": "Single agent robust deep reinforcement learning for bus fleet control",
+    "display_name": "Single agent robust deep reinforcement learning for bus fleet control",
+    "publication_year": 2026,
+    "publication_date": "2026-01-01",
+    "ids": {
+      "openalex": "https://openalex.org/W4414449644",
+      "doi": "https://doi.org/10.1093/tse/tdag005"
+    },
+    "language": "en",
+    "primary_location": {
+      "id": "doi:10.1093/tse/tdag005",
+      "is_oa": true,
+      "landing_page_url": "https://doi.org/10.1093/tse/tdag005",
+      "pdf_url": null,
+      "source": {
+        "id": "https://openalex.org/S4210220334",
+        "display_name": "Transportation Safety and Environment",
+        "issn_l": "2631-4428",
+        "issn": [
+          "2631-4428"
+        ],
+        "is_oa": true,
+        "is_in_doaj": true,
+        "is_core": true,
+        "host_organization": "https://openalex.org/P4310311648",
+        "host_organization_name": "Oxford University Press",
+        "host_organization_lineage": [
+          "https://openalex.org/P4310311648",
+          "https://openalex.org/P4310311647"
+        ],
+        "host_organization_lineage_names": [
+          "Oxford University Press",
+          "University of Oxford"
+        ],
+        "type": "journal"
+      },
+      "license": "cc-by",
+      "license_id": "https://openalex.org/licenses/cc-by",
+      "version": "publishedVersion",
+      "is_accepted": true,
+      "is_published": true,
+      "raw_source_name": "Transportation Safety and Environment",
+      "raw_type": "journal-article"
+    },
+    "type": "article",
+    "indexed_in": [
+      "arxiv",
+      "crossref",
+      "datacite",
+      "doaj"
+    ],
+    "open_access": {
+      "is_oa": true,
+      "oa_status": "gold",
+      "oa_url": "https://doi.org/10.1093/tse/tdag005",
+      "any_repository_has_fulltext": true
+    },
+    "authorships": [
+      {
+        "author_position": "first",
+        "author": {
+          "id": null,
+          "display_name": "Yifan Zhang",
+          "orcid": "https://orcid.org/0009-0009-8132-7075"
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I139660479",
+            "display_name": "Central South University",
+            "ror": "https://ror.org/00f1zfq44",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I139660479"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": true,
+        "raw_author_name": "Yifan Zhang",
+        "raw_affiliation_strings": [
+          "School of Traffic & Transportation Engineering, Central South University , Changsha ,"
+        ],
+        "raw_orcid": "https://orcid.org/0009-0009-8132-7075",
+        "affiliations": [
+          {
+            "raw_affiliation_string": "School of Traffic & Transportation Engineering, Central South University , Changsha ,",
+            "institution_ids": [
+              "https://openalex.org/I139660479"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": null,
+          "display_name": "Liang Zheng",
+          "orcid": null
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I139660479",
+            "display_name": "Central South University",
+            "ror": "https://ror.org/00f1zfq44",
+            "country_code": "CN",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I139660479"
+            ]
+          }
+        ],
+        "countries": [
+          "CN"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Liang Zheng",
+        "raw_affiliation_strings": [
+          "School of Traffic & Transportation Engineering, Central South University , Changsha ,"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "School of Traffic & Transportation Engineering, Central South University , Changsha ,",
+            "institution_ids": [
+              "https://openalex.org/I139660479"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": null,
+          "display_name": "Qifan Zhang",
+          "orcid": null
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I11662577",
+            "display_name": "Monash University Malaysia",
+            "ror": "https://ror.org/00yncr324",
+            "country_code": "MY",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I11662577"
+            ]
+          }
+        ],
+        "countries": [
+          "MY"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Qifan Zhang",
+        "raw_affiliation_strings": [
+          "Faculty of IT, Monash University Malaysia , 47500 Subang Jaya ,"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "Faculty of IT, Monash University Malaysia , 47500 Subang Jaya ,",
+            "institution_ids": [
+              "https://openalex.org/I11662577"
+            ]
+          }
+        ]
+      },
+      {
+        "author_position": "last",
+        "author": {
+          "id": null,
+          "display_name": "Hewei Tang",
+          "orcid": null
+        },
+        "institutions": [
+          {
+            "id": "https://openalex.org/I889458895",
+            "display_name": "University of Hong Kong",
+            "ror": "https://ror.org/02zhqgq86",
+            "country_code": "HK",
+            "type": "education",
+            "lineage": [
+              "https://openalex.org/I889458895"
+            ]
+          }
+        ],
+        "countries": [
+          "HK"
+        ],
+        "is_corresponding": false,
+        "raw_author_name": "Hewei Tang",
+        "raw_affiliation_strings": [
+          "The University of Hong Kong Department of Mathematics (host) and School of Computing & Data Science, , Hong Kong SAR ,"
+        ],
+        "raw_orcid": null,
+        "affiliations": [
+          {
+            "raw_affiliation_string": "The University of Hong Kong Department of Mathematics (host) and School of Computing & Data Science, , Hong Kong SAR ,",
+            "institution_ids": [
+              "https://openalex.org/I889458895"
+            ]
+          }
+        ]
+      }
+    ],
+    "institutions": [],
+    "countries_distinct_count": 3,
+    "institutions_distinct_count": 3,
+    "corresponding_author_ids": [],
+    "corresponding_institution_ids": [
+      "https://openalex.org/I139660479"
+    ],
+    "apc_list": {
+      "value": 1500,
+      "currency": "USD",
+      "value_usd": 1500
+    },
+    "apc_paid": {
+      "value": 1500,
+      "currency": "USD",
+      "value_usd": 1500
+    },
+    "fwci": 5.4978,
+    "has_fulltext": false,
+    "cited_by_count": 1,
+    "citation_normalized_percentile": {
+      "value": 0.90673087,
+      "is_in_top_1_percent": false,
+      "is_in_top_10_percent": true
+    },
+    "cited_by_percentile_year": {
+      "min": 94,
+      "max": 97
+    },
+    "biblio": {
+      "volume": "8",
+      "issue": "2",
+      "first_page": null,
+      "last_page": null
+    },
+    "is_retracted": false,
+    "is_paratext": false,
+    "is_xpac": false,
+    "primary_topic": {
+      "id": "https://openalex.org/T10524",
+      "display_name": "Traffic control and management",
+      "score": 0.9846000075340271,
+      "subfield": {
+        "id": "https://openalex.org/subfields/2207",
+        "display_name": "Control and Systems Engineering"
+      },
+      "field": {
+        "id": "https://openalex.org/fields/22",
+        "display_name": "Engineering"
+      },
+      "domain": {
+        "id": "https://openalex.org/domains/3",
+        "display_name": "Physical Sciences"
+      }
+    },
+    "topics": [
+      {
+        "id": "https://openalex.org/T10524",
+        "display_name": "Traffic control and management",
+        "score": 0.9846000075340271,
+        "subfield": {
+          "id": "https://openalex.org/subfields/2207",
+          "display_name": "Control and Systems Engineering"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/22",
+          "display_name": "Engineering"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/3",
+          "display_name": "Physical Sciences"
+        }
+      },
+      {
+        "id": "https://openalex.org/T11099",
+        "display_name": "Autonomous Vehicle Technology and Safety",
+        "score": 0.9398000240325928,
+        "subfield": {
+          "id": "https://openalex.org/subfields/2203",
+          "display_name": "Automotive Engineering"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/22",
+          "display_name": "Engineering"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/3",
+          "display_name": "Physical Sciences"
+        }
+      }
+    ],
+    "keywords": [
+      {
+        "id": "https://openalex.org/keywords/reinforcement-learning",
+        "display_name": "Reinforcement learning",
+        "score": 0.7682999968528748
+      },
+      {
+        "id": "https://openalex.org/keywords/schedule",
+        "display_name": "Schedule",
+        "score": 0.6401000022888184
+      },
+      {
+        "id": "https://openalex.org/keywords/train",
+        "display_name": "Train",
+        "score": 0.6330000162124634
+      },
+      {
+        "id": "https://openalex.org/keywords/headway",
+        "display_name": "Headway",
+        "score": 0.51910001039505
+      },
+      {
+        "id": "https://openalex.org/keywords/scalability",
+        "display_name": "Scalability",
+        "score": 0.5030999779701233
+      },
+      {
+        "id": "https://openalex.org/keywords/convergence",
+        "display_name": "Convergence (economics)",
+        "score": 0.4925999939441681
+      },
+      {
+        "id": "https://openalex.org/keywords/function",
+        "display_name": "Function (biology)",
+        "score": 0.4681999981403351
+      },
+      {
+        "id": "https://openalex.org/keywords/state",
+        "display_name": "State (computer science)",
+        "score": 0.4636000096797943
+      },
+      {
+        "id": "https://openalex.org/keywords/state-space",
+        "display_name": "State space",
+        "score": 0.45980000495910645
+      }
+    ],
+    "concepts": [
+      {
+        "id": "https://openalex.org/C97541855",
+        "wikidata": "https://www.wikidata.org/wiki/Q830687",
+        "display_name": "Reinforcement learning",
+        "level": 2,
+        "score": 0.7682999968528748
+      },
+      {
+        "id": "https://openalex.org/C41008148",
+        "wikidata": "https://www.wikidata.org/wiki/Q21198",
+        "display_name": "Computer science",
+        "level": 0,
+        "score": 0.7121999859809875
+      },
+      {
+        "id": "https://openalex.org/C68387754",
+        "wikidata": "https://www.wikidata.org/wiki/Q7271585",
+        "display_name": "Schedule",
+        "level": 2,
+        "score": 0.6401000022888184
+      },
+      {
+        "id": "https://openalex.org/C190839683",
+        "wikidata": "https://www.wikidata.org/wiki/Q2448197",
+        "display_name": "Train",
+        "level": 2,
+        "score": 0.6330000162124634
+      },
+      {
+        "id": "https://openalex.org/C2779240695",
+        "wikidata": "https://www.wikidata.org/wiki/Q4383682",
+        "display_name": "Headway",
+        "level": 2,
+        "score": 0.51910001039505
+      },
+      {
+        "id": "https://openalex.org/C48044578",
+        "wikidata": "https://www.wikidata.org/wiki/Q727490",
+        "display_name": "Scalability",
+        "level": 2,
+        "score": 0.5030999779701233
+      },
+      {
+        "id": "https://openalex.org/C2777303404",
+        "wikidata": "https://www.wikidata.org/wiki/Q759757",
+        "display_name": "Convergence (economics)",
+        "level": 2,
+        "score": 0.4925999939441681
+      },
+      {
+        "id": "https://openalex.org/C14036430",
+        "wikidata": "https://www.wikidata.org/wiki/Q3736076",
+        "display_name": "Function (biology)",
+        "level": 2,
+        "score": 0.4681999981403351
+      },
+      {
+        "id": "https://openalex.org/C48103436",
+        "wikidata": "https://www.wikidata.org/wiki/Q599031",
+        "display_name": "State (computer science)",
+        "level": 2,
+        "score": 0.4636000096797943
+      },
+      {
+        "id": "https://openalex.org/C72434380",
+        "wikidata": "https://www.wikidata.org/wiki/Q230930",
+        "display_name": "State space",
+        "level": 2,
+        "score": 0.45980000495910645
+      },
+      {
+        "id": "https://openalex.org/C2775924081",
+        "wikidata": "https://www.wikidata.org/wiki/Q55608371",
+        "display_name": "Control (management)",
+        "level": 2,
+        "score": 0.4228000044822693
+      },
+      {
+        "id": "https://openalex.org/C539828613",
+        "wikidata": "https://www.wikidata.org/wiki/Q178512",
+        "display_name": "Public transport",
+        "level": 2,
+        "score": 0.42160001397132874
+      },
+      {
+        "id": "https://openalex.org/C154504017",
+        "wikidata": "https://www.wikidata.org/wiki/Q853614",
+        "display_name": "Identifier",
+        "level": 2,
+        "score": 0.4106000065803528
+      },
+      {
+        "id": "https://openalex.org/C126255220",
+        "wikidata": "https://www.wikidata.org/wiki/Q141495",
+        "display_name": "Mathematical optimization",
+        "level": 1,
+        "score": 0.38909998536109924
+      },
+      {
+        "id": "https://openalex.org/C26517878",
+        "wikidata": "https://www.wikidata.org/wiki/Q228039",
+        "display_name": "Key (lock)",
+        "level": 2,
+        "score": 0.3720000088214874
+      },
+      {
+        "id": "https://openalex.org/C50644808",
+        "wikidata": "https://www.wikidata.org/wiki/Q192776",
+        "display_name": "Artificial neural network",
+        "level": 2,
+        "score": 0.36629998683929443
+      },
+      {
+        "id": "https://openalex.org/C125411270",
+        "wikidata": "https://www.wikidata.org/wiki/Q18653",
+        "display_name": "Encoding (memory)",
+        "level": 2,
+        "score": 0.35670000314712524
+      },
+      {
+        "id": "https://openalex.org/C5274069",
+        "wikidata": "https://www.wikidata.org/wiki/Q2285707",
+        "display_name": "Categorical variable",
+        "level": 2,
+        "score": 0.35659998655319214
+      },
+      {
+        "id": "https://openalex.org/C91575142",
+        "wikidata": "https://www.wikidata.org/wiki/Q1971426",
+        "display_name": "Optimal control",
+        "level": 2,
+        "score": 0.3296000063419342
+      },
+      {
+        "id": "https://openalex.org/C79487989",
+        "wikidata": "https://www.wikidata.org/wiki/Q934680",
+        "display_name": "Vehicle dynamics",
+        "level": 2,
+        "score": 0.32170000672340393
+      },
+      {
+        "id": "https://openalex.org/C126042441",
+        "wikidata": "https://www.wikidata.org/wiki/Q1324888",
+        "display_name": "Frame (networking)",
+        "level": 2,
+        "score": 0.30799999833106995
+      },
+      {
+        "id": "https://openalex.org/C120314980",
+        "wikidata": "https://www.wikidata.org/wiki/Q180634",
+        "display_name": "Distributed computing",
+        "level": 1,
+        "score": 0.304500013589859
+      },
+      {
+        "id": "https://openalex.org/C13662910",
+        "wikidata": "https://www.wikidata.org/wiki/Q193139",
+        "display_name": "Trajectory",
+        "level": 2,
+        "score": 0.303600013256073
+      },
+      {
+        "id": "https://openalex.org/C185798385",
+        "wikidata": "https://www.wikidata.org/wiki/Q1161707",
+        "display_name": "Benchmark (surveying)",
+        "level": 2,
+        "score": 0.2777999937534332
+      },
+      {
+        "id": "https://openalex.org/C118974865",
+        "wikidata": "https://www.wikidata.org/wiki/Q7300773",
+        "display_name": "Real-time Control System",
+        "level": 3,
+        "score": 0.2720000147819519
+      },
+      {
+        "id": "https://openalex.org/C170131372",
+        "wikidata": "https://www.wikidata.org/wiki/Q7617811",
+        "display_name": "Stochastic control",
+        "level": 3,
+        "score": 0.27090001106262207
+      },
+      {
+        "id": "https://openalex.org/C154945302",
+        "wikidata": "https://www.wikidata.org/wiki/Q11660",
+        "display_name": "Artificial intelligence",
+        "level": 1,
+        "score": 0.26409998536109924
+      },
+      {
+        "id": "https://openalex.org/C64543145",
+        "wikidata": "https://www.wikidata.org/wiki/Q162942",
+        "display_name": "Intersection (aeronautics)",
+        "level": 2,
+        "score": 0.2630000114440918
+      },
+      {
+        "id": "https://openalex.org/C92757383",
+        "wikidata": "https://www.wikidata.org/wiki/Q382497",
+        "display_name": "Affine transformation",
+        "level": 2,
+        "score": 0.26179999113082886
+      },
+      {
+        "id": "https://openalex.org/C114809511",
+        "wikidata": "https://www.wikidata.org/wiki/Q1412924",
+        "display_name": "Flow network",
+        "level": 2,
+        "score": 0.2572000026702881
+      },
+      {
+        "id": "https://openalex.org/C79403827",
+        "wikidata": "https://www.wikidata.org/wiki/Q3988",
+        "display_name": "Real-time computing",
+        "level": 1,
+        "score": 0.25049999356269836
+      }
+    ],
+    "mesh": [],
+    "locations_count": 3,
+    "locations": [
+      {
+        "id": "doi:10.1093/tse/tdag005",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.1093/tse/tdag005",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S4210220334",
+          "display_name": "Transportation Safety and Environment",
+          "issn_l": "2631-4428",
+          "issn": [
+            "2631-4428"
+          ],
+          "is_oa": true,
+          "is_in_doaj": true,
+          "is_core": true,
+          "host_organization": "https://openalex.org/P4310311648",
+          "host_organization_name": "Oxford University Press",
+          "host_organization_lineage": [
+            "https://openalex.org/P4310311648",
+            "https://openalex.org/P4310311647"
+          ],
+          "host_organization_lineage_names": [
+            "Oxford University Press",
+            "University of Oxford"
+          ],
+          "type": "journal"
+        },
+        "license": "cc-by",
+        "license_id": "https://openalex.org/licenses/cc-by",
+        "version": "publishedVersion",
+        "is_accepted": true,
+        "is_published": true,
+        "raw_source_name": "Transportation Safety and Environment",
+        "raw_type": "journal-article"
+      },
+      {
+        "id": "pmh:oai:arXiv.org:2508.20784",
+        "is_oa": true,
+        "landing_page_url": "http://arxiv.org/abs/2508.20784",
+        "pdf_url": "https://arxiv.org/pdf/2508.20784",
+        "source": {
+          "id": "https://openalex.org/S4393918464",
+          "display_name": "ArXiv.org",
+          "issn_l": "2331-8422",
+          "issn": [
+            "2331-8422"
+          ],
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": null,
+          "host_organization_name": null,
+          "host_organization_lineage": [],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": null,
+        "license_id": null,
+        "version": "submittedVersion",
+        "is_accepted": false,
+        "is_published": false,
+        "raw_source_name": null,
+        "raw_type": "text"
+      },
+      {
+        "id": "doi:10.48550/arxiv.2508.20784",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.48550/arxiv.2508.20784",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S4306400194",
+          "display_name": "arXiv (Cornell University)",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I205783295",
+          "host_organization_name": "Cornell University",
+          "host_organization_lineage": [
+            "https://openalex.org/I205783295"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": "cc-by",
+        "license_id": "https://openalex.org/licenses/cc-by",
+        "version": null,
+        "is_accepted": false,
+        "is_published": null,
+        "raw_source_name": null,
+        "raw_type": "Preprint"
+      }
+    ],
+    "best_oa_location": {
+      "id": "doi:10.1093/tse/tdag005",
+      "is_oa": true,
+      "landing_page_url": "https://doi.org/10.1093/tse/tdag005",
+      "pdf_url": null,
+      "source": {
+        "id": "https://openalex.org/S4210220334",
+        "display_name": "Transportation Safety and Environment",
+        "issn_l": "2631-4428",
+        "issn": [
+          "2631-4428"
+        ],
+        "is_oa": true,
+        "is_in_doaj": true,
+        "is_core": true,
+        "host_organization": "https://openalex.org/P4310311648",
+        "host_organization_name": "Oxford University Press",
+        "host_organization_lineage": [
+          "https://openalex.org/P4310311648",
+          "https://openalex.org/P4310311647"
+        ],
+        "host_organization_lineage_names": [
+          "Oxford University Press",
+          "University of Oxford"
+        ],
+        "type": "journal"
+      },
+      "license": "cc-by",
+      "license_id": "https://openalex.org/licenses/cc-by",
+      "version": "publishedVersion",
+      "is_accepted": true,
+      "is_published": true,
+      "raw_source_name": "Transportation Safety and Environment",
+      "raw_type": "journal-article"
+    },
+    "sustainable_development_goals": [],
+    "awards": [
+      {
+        "id": "https://openalex.org/G3982103712",
+        "display_name": null,
+        "funder_award_id": "2024JJ2080",
+        "funder_id": "https://openalex.org/F4320330215",
+        "funder_display_name": "Natural Science Foundation for Distinguished Young Scholars of Hunan Province"
+      },
+      {
+        "id": "https://openalex.org/G4350369526",
+        "display_name": null,
+        "funder_award_id": "2024JK2007",
+        "funder_id": "https://openalex.org/F4320330214",
+        "funder_display_name": "Key Research and Development Program of Hunan Province of China"
+      },
+      {
+        "id": "https://openalex.org/G8670701261",
+        "display_name": null,
+        "funder_award_id": "72371251",
+        "funder_id": "https://openalex.org/F4320321001",
+        "funder_display_name": "National Natural Science Foundation of China"
+      }
+    ],
+    "funders": [
+      {
+        "id": "https://openalex.org/F4320321001",
+        "display_name": "National Natural Science Foundation of China",
+        "ror": "https://ror.org/01h0zpd94"
+      },
+      {
+        "id": "https://openalex.org/F4320330214",
+        "display_name": "Key Research and Development Program of Hunan Province of China",
+        "ror": null
+      },
+      {
+        "id": "https://openalex.org/F4320330215",
+        "display_name": "Natural Science Foundation for Distinguished Young Scholars of Hunan Province",
+        "ror": null
+      }
+    ],
+    "has_content": {
+      "pdf": false,
+      "grobid_xml": false
+    },
+    "content_urls": null,
+    "referenced_works_count": 0,
+    "referenced_works": [],
+    "related_works": [],
+    "abstract_inverted_index": {
+      "Abstract": [
+        0
+      ],
+      "Bus": [
+        1
+      ],
+      "bunching": [
+        2,
+        262
+      ],
+      "remains": [
+        3
+      ],
+      "a": [
+        4,
+        24,
+        44,
+        84,
+        96,
+        125,
+        165,
+        175,
+        184,
+        269
+      ],
+      "critical": [
+        5
+      ],
+      "challenge": [
+        6
+      ],
+      "in": [
+        7,
+        37,
+        95,
+        164,
+        245,
+        253,
+        263,
+        281
+      ],
+      "urban": [
+        8
+      ],
+      "transit": [
+        9
+      ],
+      "systems,": [
+        10,
+        66
+      ],
+      "primarily": [
+        11
+      ],
+      "driven": [
+        12
+      ],
+      "by": [
+        13,
+        71,
+        128,
+        242
+      ],
+      "the": [
+        14,
+        61,
+        105,
+        120,
+        151,
+        159,
+        191,
+        203,
+        236,
+        246,
+        254
+      ],
+      "stochastic": [
+        15,
+        224
+      ],
+      "nature": [
+        16
+      ],
+      "of": [
+        17,
+        63
+      ],
+      "traffic": [
+        18
+      ],
+      "conditions": [
+        19
+      ],
+      "and": [
+        20,
+        52,
+        75,
+        108,
+        136,
+        146,
+        197,
+        216,
+        227,
+        249,
+        271
+      ],
+      "passenger": [
+        21,
+        225
+      ],
+      "demand.": [
+        22
+      ],
+      "Recently,": [
+        23
+      ],
+      "popular": [
+        25
+      ],
+      "method": [
+        26,
+        45
+      ],
+      "to": [
+        27,
+        59,
+        103,
+        161,
+        169,
+        178,
+        202,
+        274
+      ],
+      "address": [
+        28
+      ],
+      "this": [
+        29,
+        80
+      ],
+      "issue": [
+        30
+      ],
+      "is": [
+        31
+      ],
+      "multi-agent": [
+        32,
+        122
+      ],
+      "reinforcement": [
+        33,
+        87
+      ],
+      "learning": [
+        34,
+        88
+      ],
+      "(MARL)": [
+        35
+      ],
+      "applied": [
+        36
+      ],
+      "an": [
+        38
+      ],
+      "idealized": [
+        39
+      ],
+      "loop-line": [
+        40
+      ],
+      "environment.": [
+        41
+      ],
+      "However,": [
+        42
+      ],
+      "such": [
+        43
+      ],
+      "generally": [
+        46
+      ],
+      "suffers": [
+        47
+      ],
+      "from": [
+        48
+      ],
+      "high": [
+        49
+      ],
+      "computational": [
+        50
+      ],
+      "costs": [
+        51
+      ],
+      "sample": [
+        53
+      ],
+      "inefficiency.": [
+        54
+      ],
+      "Moreover,": [
+        55
+      ],
+      "they": [
+        56
+      ],
+      "often": [
+        57
+      ],
+      "fail": [
+        58
+      ],
+      "capture": [
+        60
+      ],
+      "dynamics": [
+        62
+      ],
+      "realistic": [
+        64,
+        250
+      ],
+      "bus": [
+        65,
+        92,
+        99,
+        261
+      ],
+      "which": [
+        67
+      ],
+      "are": [
+        68,
+        287
+      ],
+      "typically": [
+        69
+      ],
+      "governed": [
+        70
+      ],
+      "heterogeneous": [
+        72
+      ],
+      "trip": [
+        73,
+        137
+      ],
+      "lined": [
+        74
+      ],
+      "variable": [
+        76
+      ],
+      "fleet": [
+        77
+      ],
+      "sizes.": [
+        78
+      ],
+      "In": [
+        79
+      ],
+      "study,": [
+        81
+      ],
+      "we": [
+        82,
+        182
+      ],
+      "propose": [
+        83
+      ],
+      "robust": [
+        85,
+        270
+      ],
+      "single-agent": [
+        86,
+        126,
+        160,
+        238
+      ],
+      "(RL)": [
+        89
+      ],
+      "framework": [
+        90
+      ],
+      "for": [
+        91
+      ],
+      "holding": [
+        93
+      ],
+      "control": [
+        94,
+        278
+      ],
+      "bidirectional": [
+        97
+      ],
+      "timetabled": [
+        98
+      ],
+      "line,": [
+        100
+      ],
+      "explicitly": [
+        101,
+        129
+      ],
+      "designed": [
+        102
+      ],
+      "circumvent": [
+        104
+      ],
+      "data": [
+        106
+      ],
+      "imbalance": [
+        107
+      ],
+      "convergence": [
+        109
+      ],
+      "issues": [
+        110
+      ],
+      "associated": [
+        111
+      ],
+      "with": [
+        112,
+        193,
+        221
+      ],
+      "MARL.": [
+        113
+      ],
+      "Our": [
+        114
+      ],
+      "key": [
+        115
+      ],
+      "contribution": [
+        116
+      ],
+      "focuses": [
+        117
+      ],
+      "on": [
+        118
+      ],
+      "transforming": [
+        119
+      ],
+      "inherently": [
+        121,
+        288
+      ],
+      "problem": [
+        123
+      ],
+      "into": [
+        124,
+        174
+      ],
+      "formulation": [
+        127
+      ],
+      "encoding": [
+        130
+      ],
+      "categorical": [
+        131,
+        243
+      ],
+      "identifiers—such": [
+        132
+      ],
+      "as": [
+        133,
+        150
+      ],
+      "vehicle,": [
+        134
+      ],
+      "station": [
+        135
+      ],
+      "IDs": [
+        138
+      ],
+      "alongside": [
+        139
+      ],
+      "traditional": [
+        140
+      ],
+      "numerical": [
+        141
+      ],
+      "features": [
+        142
+      ],
+      "(e.g.,": [
+        143
+      ],
+      "headway,": [
+        144
+      ],
+      "occupancy": [
+        145
+      ],
+      "segment": [
+        147
+      ],
+      "velocity)": [
+        148
+      ],
+      "together": [
+        149
+      ],
+      "state": [
+        152,
+        247
+      ],
+      "representation.": [
+        153
+      ],
+      "This": [
+        154,
+        266
+      ],
+      "feature": [
+        155
+      ],
+      "space": [
+        156,
+        177
+      ],
+      "augmentation": [
+        157
+      ],
+      "enables": [
+        158
+      ],
+      "operate": [
+        162
+      ],
+      "effectively": [
+        163,
+        259
+      ],
+      "higher-dimensional": [
+        166,
+        176
+      ],
+      "space,": [
+        167
+      ],
+      "analogous": [
+        168
+      ],
+      "projecting": [
+        170
+      ],
+      "linearly": [
+        171
+      ],
+      "inseparable": [
+        172
+      ],
+      "inputs": [
+        173
+      ],
+      "achieve": [
+        179
+      ],
+      "separability.": [
+        180
+      ],
+      "Additionally,": [
+        181
+      ],
+      "introduce": [
+        183
+      ],
+      "structured": [
+        185
+      ],
+      "‘ridge-shaped’": [
+        186
+      ],
+      "reward": [
+        187,
+        256
+      ],
+      "function": [
+        188
+      ],
+      "that": [
+        189,
+        235
+      ],
+      "incentivizes": [
+        190
+      ],
+      "alignment": [
+        192
+      ],
+      "both": [
+        194
+      ],
+      "uniform": [
+        195
+      ],
+      "headways": [
+        196
+      ],
+      "scheduled": [
+        198
+      ],
+      "departure": [
+        199
+      ],
+      "intervals.": [
+        200
+      ],
+      "Compared": [
+        201
+      ],
+      "other": [
+        204
+      ],
+      "three": [
+        205
+      ],
+      "benchmark": [
+        206
+      ],
+      "methods,": [
+        207
+      ],
+      "our": [
+        208
+      ],
+      "proposed": [
+        209,
+        237
+      ],
+      "RL": [
+        210,
+        239
+      ],
+      "algorithm": [
+        211
+      ],
+      "achieves": [
+        212
+      ],
+      "significantly": [
+        213
+      ],
+      "more": [
+        214
+      ],
+      "stable": [
+        215
+      ],
+      "higher": [
+        217
+      ],
+      "rewards": [
+        218
+      ],
+      "($-430$K": [
+        219
+      ],
+      "comparing": [
+        220
+      ],
+      "$-530$K)": [
+        222
+      ],
+      "under": [
+        223
+      ],
+      "demands": [
+        226
+      ],
+      "inter-station": [
+        228
+      ],
+      "travel": [
+        229
+      ],
+      "time.": [
+        230
+      ],
+      "These": [
+        231
+      ],
+      "experimental": [
+        232
+      ],
+      "results": [
+        233
+      ],
+      "suggest": [
+        234
+      ],
+      "approach,": [
+        240
+      ],
+      "informed": [
+        241
+      ],
+      "identifiers": [
+        244
+      ],
+      "representation": [
+        248
+      ],
+      "schedule-aware": [
+        251
+      ],
+      "design": [
+        252
+      ],
+      "ridge-shaped": [
+        255
+      ],
+      "function,": [
+        257
+      ],
+      "can": [
+        258
+      ],
+      "mitigate": [
+        260
+      ],
+      "non-loop": [
+        264
+      ],
+      "settings.": [
+        265
+      ],
+      "paradigm": [
+        267
+      ],
+      "offers": [
+        268
+      ],
+      "scalable": [
+        272
+      ],
+      "alternative": [
+        273
+      ],
+      "those": [
+        275
+      ],
+      "conventional": [
+        276
+      ],
+      "MARL-based": [
+        277
+      ],
+      "frameworks,": [
+        279
+      ],
+      "particularly": [
+        280
+      ],
+      "environments": [
+        282
+      ],
+      "where": [
+        283
+      ],
+      "agent-specific": [
+        284
+      ],
+      "experience": [
+        285
+      ],
+      "distributions": [
+        286
+      ],
+      "imbalanced.": [
+        289
+      ]
+    },
+    "counts_by_year": [
+      {
+        "year": 2026,
+        "cited_by_count": 1
+      }
+    ],
+    "updated_date": "2026-07-17T09:13:05.818461",
+    "created_date": "2025-09-24T00:00:00"
+  },
+  "status": "verified",
+  "notes": [],
+  "title_similarity": 1.0,
+  "pdf_status": "existing",
+  "pdf_url": "/home/erzhu419/mine_code/TransitDuet/reference/pdfs/zhang2026single.pdf",
+  "pdf_path": "reference/pdfs/zhang2026single.pdf",
+  "pdf_notes": []
+}

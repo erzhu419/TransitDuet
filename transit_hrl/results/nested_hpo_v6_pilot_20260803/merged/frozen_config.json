@@ -1,0 +1,158 @@
+{
+  "checkpoint_validation_seeds": [
+    57721,
+    57727,
+    57731,
+    57737,
+    57751
+  ],
+  "code_revision": "8d228c2fac012acb41cad7aa9b3a8ec035b1e687",
+  "final_design_complete": false,
+  "heldout_test_access_status": "not_loaded",
+  "heldout_test_seeds": [],
+  "learned_baseline_implementation_version": "learned_baselines_v5_causal_gru_controls_2026_08_03",
+  "scenarios": [
+    "stationary_low_noise",
+    "persistent_shift",
+    "ood_period"
+  ],
+  "search_budget_candidates_per_policy": {
+    "flat_ppo": 8,
+    "flat_sac": 8,
+    "flat_td3": 8,
+    "freq_hrl": 8,
+    "generic_hrl_ppo": 8
+  },
+  "selected": {
+    "flat_ppo": {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr3e4_std05",
+      "learning_gate_status": "ineligible",
+      "parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -0.5,
+        "learning_rate": 0.0003,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "robust_selection_score": -0.007713787263779033,
+      "trained_checkpoint_fraction": 0.4444444444444444,
+      "tuning_utility_mean": 0.0038627231851673777,
+      "validation_learning_gain_mean": 0.009017672133783874
+    },
+    "flat_sac": {
+      "candidate_family": "offpolicy",
+      "candidate_id": "off_lr1e4_w2048_b64",
+      "learning_gate_status": "eligible",
+      "parameters": {
+        "batch_size": 64,
+        "hidden_dim": 64,
+        "learning_rate": 0.0001,
+        "replay_capacity": 100000,
+        "reward_scale": 100.0,
+        "updates_per_step": 1,
+        "warmup_steps": 2048
+      },
+      "robust_selection_score": 0.04850113239351359,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_mean": 0.04975550070621713,
+      "validation_learning_gain_mean": 0.11313911137324584
+    },
+    "flat_td3": {
+      "candidate_family": "offpolicy",
+      "candidate_id": "off_lr3e4_w1024_b64",
+      "learning_gate_status": "eligible",
+      "parameters": {
+        "batch_size": 64,
+        "hidden_dim": 64,
+        "learning_rate": 0.0003,
+        "replay_capacity": 100000,
+        "reward_scale": 100.0,
+        "updates_per_step": 1,
+        "warmup_steps": 1024
+      },
+      "robust_selection_score": 0.022251883222011267,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_mean": 0.03496447836648637,
+      "validation_learning_gain_mean": 0.0951563424103417
+    },
+    "freq_hrl": {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e3_std10",
+      "learning_gate_status": "eligible",
+      "parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.0,
+        "learning_rate": 0.001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "robust_selection_score": 0.08097956878315214,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_mean": 0.08489739485952717,
+      "validation_learning_gain_mean": 0.08590602933611945
+    },
+    "generic_hrl_ppo": {
+      "candidate_family": "ppo",
+      "candidate_id": "ppo_lr1e3_std10",
+      "learning_gate_status": "eligible",
+      "parameters": {
+        "epochs": 4,
+        "hidden_dim": 64,
+        "init_log_std": -1.0,
+        "learning_rate": 0.001,
+        "minibatch_size": 512,
+        "reward_scale": 100.0
+      },
+      "robust_selection_score": 0.07183045433433612,
+      "trained_checkpoint_fraction": 1.0,
+      "tuning_utility_mean": 0.07440964785586217,
+      "validation_learning_gain_mean": 0.07302888183806976
+    }
+  },
+  "selection_objective_version": "log_growth_drawdown_utility_v3",
+  "source_identity_status": "verified",
+  "source_manifest_sha256": "cc0a3405570087215835262e34a599baaafce6d9fcc99d1ac41ce9cff6675e51",
+  "stage": "pilot",
+  "status": "not_freezable_learning_gate",
+  "top_candidates": {
+    "flat_ppo": [
+      "ppo_lr3e4_std05"
+    ],
+    "flat_sac": [
+      "off_lr1e4_w2048_b64",
+      "off_lr3e4_w4096_b64",
+      "off_lr1e4_w1024_b64"
+    ],
+    "flat_td3": [
+      "off_lr3e4_w1024_b64",
+      "off_lr3e4_w4096_b64",
+      "off_lr1e4_w1024_b64"
+    ],
+    "freq_hrl": [
+      "ppo_lr1e3_std10",
+      "ppo_lr1e3_std15",
+      "ppo_lr3e4_std10"
+    ],
+    "generic_hrl_ppo": [
+      "ppo_lr1e3_std10",
+      "ppo_lr1e3_std15",
+      "ppo_lr3e4_std05"
+    ]
+  },
+  "training_replicate_seeds": [
+    2026,
+    2039,
+    2053
+  ],
+  "tuning_protocol_version": "nested_validation_hpo_v1",
+  "tuning_validation_seeds": [
+    68207,
+    68209,
+    68213,
+    68219,
+    68227
+  ]
+}

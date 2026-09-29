@@ -1,0 +1,89 @@
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage[margin=1in, left=1.25in, right=1.25in, top=1in, bottom=1in]{geometry}
+\usepackage{booktabs}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[linktoc=all, bookmarksdepth=3, pdfstartview=FitH]{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan}
+\urlstyle{same}
+\usepackage{multirow}
+\usepackage[table,dvipsnames]{xcolor}
+\usepackage{subcaption}
+\usepackage{caption}
+\captionsetup[figure]{name=Figure, labelsep=space}
+\captionsetup[table]{labelsep=space}
+\usepackage{enumitem}
+\usepackage[numbers]{natbib}
+\usepackage{cleveref}
+
+\usepackage{placeins}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{14pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {1.0ex plus .2ex minus .1ex}{0.4ex}%
+  {\normalfont\normalsize}}
+\makeatother
+\renewcommand{\algorithmicrequire}{\textup{Require:}}
+\renewcommand{\algorithmicensure}{\textup{Ensure:}}
+\renewcommand{\algorithmicif}{\textup{if}}
+\renewcommand{\algorithmicthen}{\textup{then}}
+\renewcommand{\algorithmicelse}{\textup{else}}
+\renewcommand{\algorithmicelsif}{\textup{else if}}
+\renewcommand{\algorithmicendif}{\textup{end if}}
+\renewcommand{\algorithmicfor}{\textup{for}}
+\renewcommand{\algorithmicforall}{\textup{for all}}
+\renewcommand{\algorithmicdo}{\textup{do}}
+\renewcommand{\algorithmicendfor}{\textup{end for}}
+\renewcommand{\algorithmicwhile}{\textup{while}}
+\renewcommand{\algorithmicendwhile}{\textup{end while}}
+
+% Math commands
+\input{math_commands}
+
+\title{TransitDuet: bi-level reinforcement learning for dynamic bus timetable optimisation and holding control}
+
+% \author{Anonymous Authors}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\input{sections/0_abstract}
+
+{\small
+\noindent\textbf{Keywords:} bus timetable optimisation; bus holding control; hierarchical reinforcement learning; reinforcement learning; constrained reinforcement learning
+}
+
+% Highlights submitted as a separate file (research_highlights.tex).
+
+\input{sections/1_introduction}
+\input{sections/2_related_work}
+\input{sections/3_problem}
+\input{sections/4_method}
+\input{sections/5_experiments}
+\input{sections/6_discussion}
+\input{sections/7_conclusion}
+
+\appendix
+\input{sections/A_appendix}
+% Keep all figures and tables out of the reference list.
+\clearpage
+\FloatBarrier
+
+\bibliographystyle{vancouver}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,901 @@
+{
+  "key": "singh2024piper",
+  "entry_type": "article",
+  "current": {
+    "title": "{PIPER}: primitive-informed preference-based hierarchical reinforcement learning via hindsight relabeling",
+    "author": "Singh, Utsav and Suttle, Wesley A. and Sadler, Brian M. and Namboodiri, Vinay P. and Bedi, Amrit Singh",
+    "journal": "arXiv preprint",
+    "year": "2024",
+    "eprint": "2404.13423",
+    "archiveprefix": "arXiv"
+  },
+  "verified": {
+    "source": "arxiv",
+    "title": "PIPER: Primitive-Informed Preference-based Hierarchical Reinforcement Learning via Hindsight Relabeling",
+    "author": [
+      "Utsav Singh",
+      "Wesley A. Suttle",
+      "Brian M. Sadler",
+      "Vinay P. Namboodiri",
+      "Amrit Singh Bedi"
+    ],
+    "year": "2024",
+    "eprint": "2404.13423v2",
+    "pdf_url": "https://arxiv.org/pdf/2404.13423v2.pdf",
+    "url": "http://arxiv.org/abs/2404.13423v2"
+  },
+  "crossref_raw": null,
+  "arxiv_raw": {
+    "source": "arxiv",
+    "title": "PIPER: Primitive-Informed Preference-based Hierarchical Reinforcement Learning via Hindsight Relabeling",
+    "author": [
+      "Utsav Singh",
+      "Wesley A. Suttle",
+      "Brian M. Sadler",
+      "Vinay P. Namboodiri",
+      "Amrit Singh Bedi"
+    ],
+    "year": "2024",
+    "eprint": "2404.13423v2",
+    "pdf_url": "https://arxiv.org/pdf/2404.13423v2.pdf",
+    "url": "http://arxiv.org/abs/2404.13423v2"
+  },
+  "openalex_raw": {
+    "id": "https://openalex.org/W4395064989",
+    "doi": "https://doi.org/10.48550/arxiv.2404.13423",
+    "title": "PIPER: Primitive-Informed Preference-based Hierarchical Reinforcement Learning via Hindsight Relabeling",
+    "display_name": "PIPER: Primitive-Informed Preference-based Hierarchical Reinforcement Learning via Hindsight Relabeling",
+    "relevance_score": 252.92122,
+    "publication_year": 2024,
+    "publication_date": "2024-04-20",
+    "ids": {
+      "openalex": "https://openalex.org/W4395064989",
+      "doi": "https://doi.org/10.48550/arxiv.2404.13423"
+    },
+    "language": "en",
+    "primary_location": {
+      "id": "pmh:oai:arXiv.org:2404.13423",
+      "is_oa": true,
+      "landing_page_url": "http://arxiv.org/abs/2404.13423",
+      "pdf_url": "https://arxiv.org/pdf/2404.13423",
+      "source": {
+        "id": "https://openalex.org/S4306400194",
+        "display_name": "arXiv (Cornell University)",
+        "issn_l": null,
+        "issn": null,
+        "is_oa": true,
+        "is_in_doaj": false,
+        "is_core": false,
+        "host_organization": "https://openalex.org/I205783295",
+        "host_organization_name": "Cornell University",
+        "host_organization_lineage": [
+          "https://openalex.org/I205783295"
+        ],
+        "host_organization_lineage_names": [],
+        "type": "repository"
+      },
+      "license": "cc-by-nc-sa",
+      "license_id": "https://openalex.org/licenses/cc-by-nc-sa",
+      "version": "submittedVersion",
+      "is_accepted": false,
+      "is_published": false,
+      "raw_source_name": "",
+      "raw_type": "text"
+    },
+    "type": "preprint",
+    "indexed_in": [
+      "arxiv",
+      "datacite"
+    ],
+    "open_access": {
+      "is_oa": true,
+      "oa_status": "green",
+      "oa_url": "https://arxiv.org/pdf/2404.13423",
+      "any_repository_has_fulltext": true
+    },
+    "authorships": [
+      {
+        "author_position": "first",
+        "author": {
+          "id": "https://openalex.org/A5059521481",
+          "display_name": "Utsav Singh",
+          "orcid": null
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Singh, Utsav",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5056599663",
+          "display_name": "Wesley A. Suttle",
+          "orcid": "https://orcid.org/0000-0003-1234-7151"
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Suttle, Wesley A.",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5053858045",
+          "display_name": "Brian M. Sadler",
+          "orcid": "https://orcid.org/0000-0002-9564-3812"
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Sadler, Brian M.",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "middle",
+        "author": {
+          "id": "https://openalex.org/A5007109424",
+          "display_name": "Vinay P. Namboodiri",
+          "orcid": "https://orcid.org/0000-0001-5262-9722"
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Namboodiri, Vinay P.",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      },
+      {
+        "author_position": "last",
+        "author": {
+          "id": "https://openalex.org/A5039563144",
+          "display_name": "Amrit Singh Bedi",
+          "orcid": "https://orcid.org/0000-0002-8807-2695"
+        },
+        "institutions": [],
+        "countries": [],
+        "is_corresponding": false,
+        "raw_author_name": "Bedi, Amrit Singh",
+        "raw_affiliation_strings": [],
+        "raw_orcid": null,
+        "affiliations": []
+      }
+    ],
+    "institutions": [],
+    "countries_distinct_count": 0,
+    "institutions_distinct_count": 0,
+    "corresponding_author_ids": [],
+    "corresponding_institution_ids": [],
+    "apc_list": null,
+    "apc_paid": null,
+    "fwci": null,
+    "has_fulltext": true,
+    "cited_by_count": 0,
+    "citation_normalized_percentile": null,
+    "cited_by_percentile_year": null,
+    "biblio": {
+      "volume": null,
+      "issue": null,
+      "first_page": null,
+      "last_page": null
+    },
+    "is_retracted": false,
+    "is_paratext": false,
+    "is_xpac": false,
+    "primary_topic": {
+      "id": "https://openalex.org/T10667",
+      "display_name": "Emotion and Mood Recognition",
+      "score": 0.9688000082969666,
+      "subfield": {
+        "id": "https://openalex.org/subfields/3205",
+        "display_name": "Experimental and Cognitive Psychology"
+      },
+      "field": {
+        "id": "https://openalex.org/fields/32",
+        "display_name": "Psychology"
+      },
+      "domain": {
+        "id": "https://openalex.org/domains/2",
+        "display_name": "Social Sciences"
+      }
+    },
+    "topics": [
+      {
+        "id": "https://openalex.org/T10667",
+        "display_name": "Emotion and Mood Recognition",
+        "score": 0.9688000082969666,
+        "subfield": {
+          "id": "https://openalex.org/subfields/3205",
+          "display_name": "Experimental and Cognitive Psychology"
+        },
+        "field": {
+          "id": "https://openalex.org/fields/32",
+          "display_name": "Psychology"
+        },
+        "domain": {
+          "id": "https://openalex.org/domains/2",
+          "display_name": "Social Sciences"
+        }
+      }
+    ],
+    "keywords": [
+      {
+        "id": "https://openalex.org/keywords/hindsight-bias",
+        "display_name": "Hindsight bias",
+        "score": 0.8833420276641846
+      },
+      {
+        "id": "https://openalex.org/keywords/preference",
+        "display_name": "Preference",
+        "score": 0.7081380486488342
+      },
+      {
+        "id": "https://openalex.org/keywords/reinforcement",
+        "display_name": "Reinforcement",
+        "score": 0.6154041290283203
+      },
+      {
+        "id": "https://openalex.org/keywords/reinforcement-learning",
+        "display_name": "Reinforcement learning",
+        "score": 0.5786295533180237
+      },
+      {
+        "id": "https://openalex.org/keywords/artificial-intelligence",
+        "display_name": "Artificial intelligence",
+        "score": 0.4009997248649597
+      },
+      {
+        "id": "https://openalex.org/keywords/psychology",
+        "display_name": "Psychology",
+        "score": 0.3674790859222412
+      },
+      {
+        "id": "https://openalex.org/keywords/computer-science",
+        "display_name": "Computer science",
+        "score": 0.3550495505332947
+      },
+      {
+        "id": "https://openalex.org/keywords/cognitive-psychology",
+        "display_name": "Cognitive psychology",
+        "score": 0.26149481534957886
+      },
+      {
+        "id": "https://openalex.org/keywords/mathematics",
+        "display_name": "Mathematics",
+        "score": 0.2401120960712433
+      },
+      {
+        "id": "https://openalex.org/keywords/social-psychology",
+        "display_name": "Social psychology",
+        "score": 0.18554461002349854
+      },
+      {
+        "id": "https://openalex.org/keywords/statistics",
+        "display_name": "Statistics",
+        "score": 0.10942065715789795
+      }
+    ],
+    "concepts": [
+      {
+        "id": "https://openalex.org/C10347200",
+        "wikidata": "https://www.wikidata.org/wiki/Q1960297",
+        "display_name": "Hindsight bias",
+        "level": 2,
+        "score": 0.8833420276641846
+      },
+      {
+        "id": "https://openalex.org/C2781249084",
+        "wikidata": "https://www.wikidata.org/wiki/Q908656",
+        "display_name": "Preference",
+        "level": 2,
+        "score": 0.7081380486488342
+      },
+      {
+        "id": "https://openalex.org/C67203356",
+        "wikidata": "https://www.wikidata.org/wiki/Q1321905",
+        "display_name": "Reinforcement",
+        "level": 2,
+        "score": 0.6154041290283203
+      },
+      {
+        "id": "https://openalex.org/C97541855",
+        "wikidata": "https://www.wikidata.org/wiki/Q830687",
+        "display_name": "Reinforcement learning",
+        "level": 2,
+        "score": 0.5786295533180237
+      },
+      {
+        "id": "https://openalex.org/C154945302",
+        "wikidata": "https://www.wikidata.org/wiki/Q11660",
+        "display_name": "Artificial intelligence",
+        "level": 1,
+        "score": 0.4009997248649597
+      },
+      {
+        "id": "https://openalex.org/C15744967",
+        "wikidata": "https://www.wikidata.org/wiki/Q9418",
+        "display_name": "Psychology",
+        "level": 0,
+        "score": 0.3674790859222412
+      },
+      {
+        "id": "https://openalex.org/C41008148",
+        "wikidata": "https://www.wikidata.org/wiki/Q21198",
+        "display_name": "Computer science",
+        "level": 0,
+        "score": 0.3550495505332947
+      },
+      {
+        "id": "https://openalex.org/C180747234",
+        "wikidata": "https://www.wikidata.org/wiki/Q23373",
+        "display_name": "Cognitive psychology",
+        "level": 1,
+        "score": 0.26149481534957886
+      },
+      {
+        "id": "https://openalex.org/C33923547",
+        "wikidata": "https://www.wikidata.org/wiki/Q395",
+        "display_name": "Mathematics",
+        "level": 0,
+        "score": 0.2401120960712433
+      },
+      {
+        "id": "https://openalex.org/C77805123",
+        "wikidata": "https://www.wikidata.org/wiki/Q161272",
+        "display_name": "Social psychology",
+        "level": 1,
+        "score": 0.18554461002349854
+      },
+      {
+        "id": "https://openalex.org/C105795698",
+        "wikidata": "https://www.wikidata.org/wiki/Q12483",
+        "display_name": "Statistics",
+        "level": 1,
+        "score": 0.10942065715789795
+      }
+    ],
+    "mesh": [],
+    "locations_count": 2,
+    "locations": [
+      {
+        "id": "pmh:oai:arXiv.org:2404.13423",
+        "is_oa": true,
+        "landing_page_url": "http://arxiv.org/abs/2404.13423",
+        "pdf_url": "https://arxiv.org/pdf/2404.13423",
+        "source": {
+          "id": "https://openalex.org/S4306400194",
+          "display_name": "arXiv (Cornell University)",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I205783295",
+          "host_organization_name": "Cornell University",
+          "host_organization_lineage": [
+            "https://openalex.org/I205783295"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": "cc-by-nc-sa",
+        "license_id": "https://openalex.org/licenses/cc-by-nc-sa",
+        "version": "submittedVersion",
+        "is_accepted": false,
+        "is_published": false,
+        "raw_source_name": "",
+        "raw_type": "text"
+      },
+      {
+        "id": "doi:10.48550/arxiv.2404.13423",
+        "is_oa": true,
+        "landing_page_url": "https://doi.org/10.48550/arxiv.2404.13423",
+        "pdf_url": null,
+        "source": {
+          "id": "https://openalex.org/S4306400194",
+          "display_name": "arXiv (Cornell University)",
+          "issn_l": null,
+          "issn": null,
+          "is_oa": true,
+          "is_in_doaj": false,
+          "is_core": false,
+          "host_organization": "https://openalex.org/I205783295",
+          "host_organization_name": "Cornell University",
+          "host_organization_lineage": [
+            "https://openalex.org/I205783295"
+          ],
+          "host_organization_lineage_names": [],
+          "type": "repository"
+        },
+        "license": null,
+        "license_id": null,
+        "version": null,
+        "is_accepted": false,
+        "is_published": null,
+        "raw_source_name": null,
+        "raw_type": "Preprint"
+      }
+    ],
+    "best_oa_location": {
+      "id": "pmh:oai:arXiv.org:2404.13423",
+      "is_oa": true,
+      "landing_page_url": "http://arxiv.org/abs/2404.13423",
+      "pdf_url": "https://arxiv.org/pdf/2404.13423",
+      "source": {
+        "id": "https://openalex.org/S4306400194",
+        "display_name": "arXiv (Cornell University)",
+        "issn_l": null,
+        "issn": null,
+        "is_oa": true,
+        "is_in_doaj": false,
+        "is_core": false,
+        "host_organization": "https://openalex.org/I205783295",
+        "host_organization_name": "Cornell University",
+        "host_organization_lineage": [
+          "https://openalex.org/I205783295"
+        ],
+        "host_organization_lineage_names": [],
+        "type": "repository"
+      },
+      "license": "cc-by-nc-sa",
+      "license_id": "https://openalex.org/licenses/cc-by-nc-sa",
+      "version": "submittedVersion",
+      "is_accepted": false,
+      "is_published": false,
+      "raw_source_name": "",
+      "raw_type": "text"
+    },
+    "sustainable_development_goals": [],
+    "awards": [],
+    "funders": [],
+    "has_content": {
+      "pdf": true,
+      "grobid_xml": false
+    },
+    "content_urls": {
+      "pdf": "https://content.openalex.org/works/W4395064989.pdf"
+    },
+    "referenced_works_count": 0,
+    "referenced_works": [],
+    "related_works": [
+      "https://openalex.org/W3197854638",
+      "https://openalex.org/W3140454661",
+      "https://openalex.org/W4245029315",
+      "https://openalex.org/W2139970489",
+      "https://openalex.org/W1492315459",
+      "https://openalex.org/W1512434910",
+      "https://openalex.org/W2540910169",
+      "https://openalex.org/W3089780453",
+      "https://openalex.org/W3148904318",
+      "https://openalex.org/W3012552522"
+    ],
+    "abstract_inverted_index": {
+      "In": [
+        0
+      ],
+      "this": [
+        1,
+        29,
+        38
+      ],
+      "work,": [
+        2
+      ],
+      "we": [
+        3,
+        79,
+        112
+      ],
+      "introduce": [
+        4
+      ],
+      "PIPER:": [
+        5
+      ],
+      "Primitive-Informed": [
+        6
+      ],
+      "Preference-based": [
+        7
+      ],
+      "Hierarchical": [
+        8
+      ],
+      "reinforcement": [
+        9,
+        139
+      ],
+      "learning": [
+        10,
+        20,
+        140
+      ],
+      "via": [
+        11
+      ],
+      "Hindsight": [
+        12
+      ],
+      "Relabeling,": [
+        13
+      ],
+      "a": [
+        14,
+        23,
+        66
+      ],
+      "novel": [
+        15
+      ],
+      "approach": [
+        16,
+        48,
+        85
+      ],
+      "that": [
+        17,
+        116,
+        133
+      ],
+      "leverages": [
+        18
+      ],
+      "preference-based": [
+        19
+      ],
+      "to": [
+        21,
+        32,
+        51,
+        81,
+        103,
+        120,
+        131,
+        158
+      ],
+      "learn": [
+        22
+      ],
+      "reward": [
+        24,
+        30,
+        39
+      ],
+      "model,": [
+        25
+      ],
+      "and": [
+        26,
+        61,
+        108,
+        141
+      ],
+      "subsequently": [
+        27
+      ],
+      "uses": [
+        28
+      ],
+      "model": [
+        31
+      ],
+      "relabel": [
+        33
+      ],
+      "higher-level": [
+        34,
+        118
+      ],
+      "replay": [
+        35
+      ],
+      "buffers.": [
+        36
+      ],
+      "Since": [
+        37,
+        72
+      ],
+      "is": [
+        40,
+        49,
+        55,
+        76
+      ],
+      "unaffected": [
+        41
+      ],
+      "by": [
+        42,
+        97
+      ],
+      "lower": [
+        43
+      ],
+      "primitive": [
+        44
+      ],
+      "behavior,": [
+        45
+      ],
+      "our": [
+        46,
+        87
+      ],
+      "relabeling-based": [
+        47
+      ],
+      "able": [
+        50
+      ],
+      "mitigate": [
+        52
+      ],
+      "non-stationarity,": [
+        53
+      ],
+      "which": [
+        54,
+        90
+      ],
+      "common": [
+        56
+      ],
+      "in": [
+        57,
+        101,
+        137,
+        148
+      ],
+      "existing": [
+        58
+      ],
+      "hierarchical": [
+        59,
+        138
+      ],
+      "approaches,": [
+        60
+      ],
+      "demonstrates": [
+        62
+      ],
+      "impressive": [
+        63
+      ],
+      "performance": [
+        64
+      ],
+      "across": [
+        65
+      ],
+      "range": [
+        67
+      ],
+      "of": [
+        68
+      ],
+      "challenging": [
+        69
+      ],
+      "sparse-reward": [
+        70,
+        150
+      ],
+      "tasks.": [
+        71
+      ],
+      "obtaining": [
+        73
+      ],
+      "human": [
+        74
+      ],
+      "feedback": [
+        75,
+        92
+      ],
+      "typically": [
+        77
+      ],
+      "impractical,": [
+        78
+      ],
+      "propose": [
+        80,
+        113
+      ],
+      "replace": [
+        82
+      ],
+      "the": [
+        83,
+        98
+      ],
+      "human-in-the-loop": [
+        84
+      ],
+      "with": [
+        86
+      ],
+      "primitive-in-the-loop": [
+        88
+      ],
+      "approach,": [
+        89
+      ],
+      "generates": [
+        91
+      ],
+      "using": [
+        93
+      ],
+      "sparse": [
+        94
+      ],
+      "rewards": [
+        95
+      ],
+      "provided": [
+        96
+      ],
+      "environment.": [
+        99
+      ],
+      "Moreover,": [
+        100
+      ],
+      "order": [
+        102
+      ],
+      "prevent": [
+        104
+      ],
+      "infeasible": [
+        105
+      ],
+      "subgoal": [
+        106
+      ],
+      "prediction": [
+        107
+      ],
+      "avoid": [
+        109
+      ],
+      "degenerate": [
+        110
+      ],
+      "solutions,": [
+        111
+      ],
+      "primitive-informed": [
+        114
+      ],
+      "regularization": [
+        115
+      ],
+      "conditions": [
+        117
+      ],
+      "policies": [
+        119
+      ],
+      "generate": [
+        121
+      ],
+      "feasible": [
+        122
+      ],
+      "subgoals": [
+        123
+      ],
+      "for": [
+        124
+      ],
+      "lower-level": [
+        125
+      ],
+      "policies.": [
+        126
+      ],
+      "We": [
+        127
+      ],
+      "perform": [
+        128
+      ],
+      "extensive": [
+        129
+      ],
+      "experiments": [
+        130
+      ],
+      "show": [
+        132
+      ],
+      "PIPER": [
+        134
+      ],
+      "mitigates": [
+        135
+      ],
+      "non-stationarity": [
+        136
+      ],
+      "achieves": [
+        142
+      ],
+      "greater": [
+        143
+      ],
+      "than": [
+        144
+      ],
+      "50$\\%$": [
+        145
+      ],
+      "success": [
+        146
+      ],
+      "rates": [
+        147
+      ],
+      "challenging,": [
+        149
+      ],
+      "robotic": [
+        151
+      ],
+      "environments,": [
+        152
+      ],
+      "where": [
+        153
+      ],
+      "most": [
+        154
+      ],
+      "other": [
+        155
+      ],
+      "baselines": [
+        156
+      ],
+      "fail": [
+        157
+      ],
+      "achieve": [
+        159
+      ],
+      "any": [
+        160
+      ],
+      "significant": [
+        161
+      ],
+      "progress.": [
+        162
+      ]
+    },
+    "counts_by_year": [],
+    "updated_date": "2026-07-01T06:00:48.157686",
+    "created_date": "2024-04-24T00:00:00"
+  },
+  "status": "verified",
+  "notes": [],
+  "title_similarity": 1.0,
+  "pdf_status": "downloaded",
+  "pdf_url": "https://arxiv.org/pdf/2404.13423.pdf",
+  "pdf_path": "reference/pdfs/singh2024piper.pdf",
+  "pdf_notes": []
+}

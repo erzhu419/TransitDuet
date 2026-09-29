@@ -35,11 +35,14 @@ class _NullDiag:
 def load_ckpt(exp_dir: Path, ep: int, config_path: Path, device: str):
     """
     Load a checkpoint using runner_v3, which honours coupling_mode
-    {channels, haar, hiro} from the config. Using runner_v2 here would
-    silently fall back to channels-mode and evaluate HIRO checkpoints
-    under launch-time-shift semantics rather than goal-shift semantics.
+    {timetable, channels, haar, hiro} from the config. Using runner_v2 here
+    would silently fall back to channels-mode and evaluate newer checkpoints
+    under the wrong coupling semantics.
     """
     cfg = load_config(str(config_path))
+    m = re.search(r'_seed(\d+)$', exp_dir.name)
+    if m:
+        cfg['seed'] = int(m.group(1))
     runner = TransitDuetV2Runner(cfg, device=device)
     runner.log_dir = str(exp_dir)
     ckpt_dir = exp_dir / 'checkpoints'
@@ -59,6 +62,17 @@ def composite(wait, cv, overshoot, n_fleet):
 
 def eval_runner(runner, n_eps: int, base_seed: int):
     waits, cvs, overs, ns = [], [], [], []
+    extra_keys = [
+        'avg_holding_sec', 'avg_onboard_time_min',
+        'avg_total_passenger_time_min',
+        'planned_dispatch_headway_mean', 'planned_dispatch_headway_std',
+        'planned_dispatch_headway_cv',
+        'actual_dispatch_headway_mean', 'actual_dispatch_headway_std',
+        'actual_dispatch_headway_cv',
+        'planned_shift_mean', 'planned_shift_std',
+        'dispatch_lateness_mean', 'dispatch_lateness_max',
+    ]
+    extra = {k: [] for k in extra_keys}
     rng = np.random.RandomState(base_seed)
     for i in range(n_eps):
         N = int(rng.randint(runner.fleet_min, runner.fleet_max + 1))
@@ -68,9 +82,11 @@ def eval_runner(runner, n_eps: int, base_seed: int):
         cvs.append(float(row['headway_cv']))
         overs.append(float(row['fleet_overshoot']))
         ns.append(N)
+        for k in extra_keys:
+            extra[k].append(float(row.get(k, 0.0)))
     waits, cvs, overs, ns = map(np.array, (waits, cvs, overs, ns))
     composites = waits / 10.0 + (overs ** 2) / np.maximum(ns, 1) + cvs
-    return {
+    out = {
         'wait_mean': float(waits.mean()), 'wait_std': float(waits.std()),
         'cv_mean': float(cvs.mean()), 'cv_std': float(cvs.std()),
         'overshoot_mean': float(overs.mean()), 'overshoot_std': float(overs.std()),
@@ -78,6 +94,11 @@ def eval_runner(runner, n_eps: int, base_seed: int):
         'composite_std': float(composites.std()),
         'n_eps': n_eps,
     }
+    for k, vals in extra.items():
+        arr = np.array(vals, dtype=float)
+        out[f'{k}_mean'] = float(arr.mean())
+        out[f'{k}_std'] = float(arr.std())
+    return out
 
 
 def main():

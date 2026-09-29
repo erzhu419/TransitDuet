@@ -36,6 +36,10 @@ PARENT_CONFIGS = {
     "main": "F_freqduet_terminal_paper_main_hiro.yaml",
     "nofreq": "F_freqduet_terminal_final_nofreq_hiro.yaml",
     "noleakage": "F_freqduet_terminal_final_noleakage_hiro.yaml",
+    "fixedselector_balanced": "F_freqduet_terminal_main_fixedselector_balanced_hiro.yaml",
+    "fixedfallback_noharm": "F_freqduet_terminal_main_fixedfallback_noharm_hiro.yaml",
+    "paper_fixedselector_balanced": "F_freqduet_terminal_paper_main_fixedselector_balanced_hiro.yaml",
+    "paper_fixedfallback_noharm": "F_freqduet_terminal_paper_main_fixedfallback_noharm_hiro.yaml",
 }
 DAY_TYPES = ("Wkdy", "Sat", "Sun")
 
@@ -360,6 +364,7 @@ def build_config(
         "env": {
             "path": env_rel_path,
             "route_sigma": 1.5,
+            "effective_trip_num": "all",
             "demand_noise": 0.0,
             "demand_scale": float(day_scale),
             "demand_hourly_multipliers": {
@@ -370,6 +375,11 @@ def build_config(
             "od_noise": 0.0,
             "peak_shift_choices": [0],
             "peak_shift_probs": [1.0],
+        },
+        "frequency": {
+            "harmonic_period_s": float(
+                max(service_end_hour - service_start_hour + 1, 1) * 3600
+            ),
         },
     }
 
@@ -489,11 +499,16 @@ def main() -> None:
     main_configs = [
         row["config"] for row in manifest_rows if row["method"] == "main"
     ]
+    learned_configs = [row["config"] for row in manifest_rows]
+    (setup_dir / "learned_configs.txt").write_text(",".join(learned_configs) + "\n")
+    (setup_dir / "external_main_configs.txt").write_text(",".join(main_configs) + "\n")
     print(f"Selected route envs: {len(selected)}")
     print(f"Wrote configs: {len(manifest_rows)}")
     print(f"Wrote manifest: {setup_dir / 'config_manifest.csv'}")
+    print(f"Wrote learned configs: {setup_dir / 'learned_configs.txt'}")
+    print(f"Wrote external baseline configs: {setup_dir / 'external_main_configs.txt'}")
     print("Learned configs CSV:")
-    print(",".join(row["config"] for row in manifest_rows))
+    print(",".join(learned_configs))
     print("External baseline configs CSV:")
     print(",".join(main_configs))
 

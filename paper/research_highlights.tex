@@ -11,11 +11,12 @@
 \end{center}
 
 \begin{itemize}
-  \item Proposes bi-level reinforcement learning for joint bus planning and holding.
-  \item Coordinates asynchronous dispatch and stop decisions with goal-conditioned coupling.
-  \item Adapts fleet and headway penalties through online and Lagrangian learning.
-  \item Reduces composite cost by 8.2\% over fixed timetables and 4.7\% over CMA-ES.
-  \item Produces fleet-budget Pareto fronts from one policy under stochastic demand.
+  \setlength{\itemsep}{0.35em}
+  \item Introduces a bi-level reinforcement learning (RL) framework for rolling bus timetable optimization and station holding control.
+  \item Maps upper-level planned-headway adjustments to rolling planned dispatch headways and launch times.
+  \item Couples asynchronous dispatch planning and holding via a dynamic timetable, holding feedback, and upper-only hindsight credit.
+  \item Reports delay-aware service metrics, including holding time, onboard time, total passenger time, and dispatch lateness.
+  \item Achieves lower mean composite cost than target-headway-only, fixed-timetable, classical holding, and same-simulator RL proxy baselines in the reported ten-seed comparison.
 \end{itemize}
 
 \end{document}

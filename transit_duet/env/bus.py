@@ -46,6 +46,8 @@ class Bus(object):
         self.reward = None # 奖励值
         self.cost = None  # Lagrangian cost (headway deviation²)
         self._target_headway = 360.0  # set by sim via drive()
+        self._lower_context = []
+        self.last_applied_action = 0.0
 
         self.alight_num = 0. # 下车人数
         self.board_num = 0. # 上车人数
@@ -156,8 +158,10 @@ class Bus(object):
         self.last_station_dis = 0
         self.next_station_dis = self.current_route.distance
 
-    def drive(self, current_time, action, bus_all, debug, target_headway=360.0):
+    def drive(self, current_time, action, bus_all, debug, target_headway=360.0,
+              lower_context=None):
         self._target_headway = target_headway
+        self._lower_context = list(lower_context or [])
         # absolute_distance & last_station_dis is divided by 1000 as kilometers rather than meters. forward_headway & backward_headway
         # is divided by 60 minutes rather than seconds. passengers on bus, boarding passengers and alighting passengers are divided by self.capacity
         # step_length = 0, which means how long a bus moves in a time step, calculated by speeding up and original velocity.
@@ -236,6 +240,7 @@ class Bus(object):
                 len(self.next_station.waiting_passengers) * 1.5 + self.current_route.distance / self.current_route.speed_limit,
                 headway_dev,  # NEW: normalized deviation from target
             ]
+            self.obs.extend(self._lower_context)
             all_route = self.routes_list[:len(self.routes_list) // 2] if self.direction else self.routes_list[len(self.routes_list) // 2:]
             speed_list = [all_route[i].speed_limit for i in range(len(all_route))]
             self.obs.extend(speed_list)
@@ -266,13 +271,19 @@ class Bus(object):
 
     def _start_dwelling(self, action):
         dwell_time = self._normalize_action(action)
+        # Holding is a non-negative operational duration. Continuous legacy
+        # policies may emit negative values, which must not become release actions.
+        if dwell_time is not None:
+            dwell_time = max(0.0, dwell_time)
 
         if (self.trip_id in [0, 1] and action is None) or dwell_time is None or dwell_time == 0:
             self.dwelling_time = 0
+            self.last_applied_action = 0.0
         else:
             self.dwelling_time = dwell_time
             # v2: record applied holding action for feedback to upper level
             self.applied_actions.append(float(dwell_time))
+            self.last_applied_action = float(dwell_time)
 
         self.state = BusState.DWELLING
 
@@ -394,6 +405,8 @@ class Bus(object):
         self.board_num = 0.
         self.alight_num = 0.
         self.applied_actions = []  # v2: reset per-trip action tracking
+        self.last_applied_action = 0.0
+        self._lower_context = []
         self.in_station = False
         self.forward_bus = None
         self.backward_bus = None
@@ -404,4 +417,3 @@ class Bus(object):
         self.state = BusState.TRAVEL
         self.on_route = True
         self.trip_turn = len(self.trip_id_list)
-

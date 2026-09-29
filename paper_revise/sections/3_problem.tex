@@ -1,0 +1,171 @@
+\section{Problem formulation}
+\label{sec:problem}
+
+We formulate dynamic timetable optimisation and holding control as a bi-level Markov decision process (MDP) for a single bus route with time-varying passenger demand. The upper level makes rolling dispatch-time decisions by selecting a planned-headway adjustment for the next same-direction trip. The lower level executes the resulting dynamic timetable through real-time holding decisions.
+This section defines the problem variables, action spaces, measurements, and interaction structure used in the experiments. The learning architecture and training mechanisms are specified in \Cref{sec:method}.
+
+%% ---------------------------------------------------------------
+\subsection{Bus transit system model}
+\label{sec:transit_model}
+
+We consider a single bidirectional bus route consisting of $M$ stations indexed $\{1,\dots,M\}$.
+Service is provided according to a timetable that dispatches a total of 264~trips per day, alternating between the two directions.
+Passenger demand is drawn from time-varying origin--destination (OD) matrices that capture morning, midday, and evening peaks.
+At any point in time, at most $\Nfleet^{\max}=25$ buses may be concurrently in service; each trip is characterized by a baseline launch time, a planned launch time, an actual launch time, and a travel direction.
+The planned same-direction dispatch headway is the timetable lever, while per-station holding times constitute the real-time control lever.
+
+%% ---------------------------------------------------------------
+\subsection{Bi-level MDP formulation}
+\label{sec:bilevel_mdp}
+
+We decompose the joint optimisation into two coupled MDPs that share a common environment but differ in observation granularity, action semantics, and decision frequency.
+
+\subsubsection{Upper-level MDP (dynamic timetable planning)}
+\label{sec:upper_mdp}
+
+The upper-level policy $\piU$ selects a planned-headway adjustment for the next same-direction dispatch.
+It is invoked after each successful dispatch event ($M \approx 264$ events per episode, $\approx 132$ per direction; one episode is one full service day), so its sampling cadence is event-driven rather than a fixed wall-clock timer.
+
+\paragraph{State.}
+The upper state encodes system-level summary statistics and the holding-feedback (HoldFB) block that closes the lower-to-upper loop (\Cref{sec:tap}):
+{\small
+\begin{equation}
+  \label{eq:upper_state}
+  \begin{aligned}
+    \sU = \bigl[\,
+      &\underbrace{\tfrac{\text{hour}}{24},\,
+                   \tfrac{\text{demand}}{1000},\,
+                   \tfrac{\text{fleet\_on\_route}}{\Nfleet^{\max}},\,
+                   \tfrac{\text{prev\_headway}}{600},\,
+                   \text{holding\_ratio}}_{\text{system summary, dims 0--4}},\\[-1pt]
+      &\underbrace{\tfrac{\bar{h}^{\mathrm{up}}_{\mathrm{hold}}}{60},\,
+                   \tfrac{\sigma^{\mathrm{up}}_{\mathrm{hold}}}{60},\,
+                   \tfrac{\bar{h}^{\mathrm{down}}_{\mathrm{hold}}}{60}}_{\text{HoldFB, dims 5--7}},\,
+       \underbrace{\tfrac{\htarget}{600},\,\mathrm{dir},\,\tfrac{\Nfleet}{20}}_{\text{trip context, dims 8--10}}
+    \,\bigr] \;\in\; \R^{11}.
+  \end{aligned}
+\end{equation}
+}
+where each component is normalised to facilitate learning. Dims 5--7 are the rolling holding statistics over the last 10 completed trips (see~\Cref{sec:tap}); the $-$HoldFB ablation in~\Cref{sec:ablation} zeroes these three dimensions. Dim 10 is the per-episode elastic fleet budget $\Nfleet \in [8, 16]$, which the policy must condition on when choosing planned headways under different fleet budgets.
+
+\paragraph{Action.}
+After trip $k-1$ in a direction is dispatched at actual time $\tau^{\mathrm{act}}_{k-1}$, the upper policy selects a scalar planned-headway adjustment:
+\begin{equation}
+  \label{eq:upper_action}
+  \aU = \Delta h_k \in \{-60,-30,0,30,60\}\;\text{s}.
+\end{equation}
+The planned headway and planned launch time are
+\begin{equation}
+  \label{eq:timetable_action}
+  h^{\mathrm{plan}}_k =
+  \mathrm{clip}(300 + \Delta h_k, 240, 360),\qquad
+  \tau^{\mathrm{plan}}_k =
+  \max(\tau^{\mathrm{act}}_{k-1}+h^{\mathrm{plan}}_k,\; t+60).
+\end{equation}
+The baseline timetable is retained only as a reference for reporting planned shifts $\tau^{\mathrm{plan}}_k-\tau^{\mathrm{base}}_k$; it no longer constrains dispatch once the dynamic timetable policy is active.
+If fleet availability or the soft fleet ceiling delays a planned dispatch, the realised lateness is recorded as $\tau^{\mathrm{act}}_k-\tau^{\mathrm{plan}}_k$.
+The lower controller then receives $h^{\mathrm{plan}}_k$ as the trip-specific headway target.
+
+\paragraph{Reward.}
+The upper reward is computed at the episode level from a measurement vector (defined in \Cref{sec:constraints}).
+Because each upper action influences the system over an extended horizon through the downstream holding decisions it induces, assigning credit to individual dispatch events is nontrivial; we defer the reward construction to~\Cref{sec:method}.
+
+\subsubsection{Lower-level MDP (holding control)}
+\label{sec:lower_mdp}
+
+The lower-level policy $\piL$ decides how long each bus should dwell beyond its minimum stop time at every station.
+A decision is triggered at each station arrival for each active bus, producing a high volume of decision epochs throughout the day.
+
+\paragraph{State.}
+The lower state captures the local context of an individual bus:
+\begin{equation}
+  \label{eq:lower_state}
+  \begin{aligned}
+    \sL = \bigl[\,
+      &\text{bus\_id},\,
+       \text{station\_id},\,
+       \text{hour},\,
+       \text{direction},\\
+      &h_{\mathrm{fwd}},\,
+       h_{\mathrm{bwd}},\,
+       \hat{d},\,
+       \Delta h,\,
+       a_{\mathrm{last}},\,
+       h^{\mathrm{plan}}_k,\,
+       h^{\mathrm{plan}}_{k-1},\,
+       h^{\mathrm{plan}}_{k+1},\,
+       \rho_{\mathrm{station}},\,
+       v_1,\dots,v_K
+    \,\bigr] \;\in\; \R^{13+K},
+  \end{aligned}
+\end{equation}
+where $h_{\mathrm{fwd}}$ and $h_{\mathrm{bwd}}$ denote the forward and backward headways, $\hat{d}$ is the estimated dwell time, $\Delta h$ is the deviation of the current headway from the planned trip headway, $a_{\mathrm{last}}$ is the previous holding action, $h^{\mathrm{plan}}_{k-1:k+1}$ encode adjacent planned dispatch gaps, $\rho_{\mathrm{station}}$ is station progress, and $v_1,\dots,v_K$ are recent inter-station speeds that encode local traffic conditions.
+
+\paragraph{Action.}
+The lower action is a scalar holding time selected from the operational grid used by the final policy:
+\begin{equation}
+  \label{eq:lower_action}
+  \aL \;\in\; \{0,3,6,9,12,15,20,30\}\;\text{seconds}.
+\end{equation}
+
+\paragraph{Reward and cost.}
+The immediate lower reward is a function of headway deviation from the target set by the upper level.
+We define the per-step cost as
+\begin{equation}
+  \label{eq:lower_cost}
+  c(\sL,\aL) = \min\!\Bigl(\frac{(h_{\mathrm{fwd}} - \htarget)^{2}}{(\htarget)^{2}},\;1\Bigr),
+\end{equation}
+which penalises headway irregularity in a scale-invariant manner and is clipped at~1 for numerical stability.
+
+%% ---------------------------------------------------------------
+\subsection{Constraint specification}
+\label{sec:constraints}
+
+The bi-level MDP is subject to two soft constraints, both evaluated through a measurement vector collected at the end of each episode.
+
+\paragraph{Measurement vector.}
+At the conclusion of a service day, we compute:
+\begin{equation}
+  \label{eq:measurement}
+  \zvec = \bigl[\,\text{avg\_wait\_min},\;\text{peak\_fleet},\;\text{headway\_CV}\,\bigr].
+\end{equation}
+
+\paragraph{Soft constraint (fleet budget).}
+The peak number of buses simultaneously on route should respect the per-episode fleet budget $\Nfleet \in [\Nfleet^{\min}, \Nfleet^{\max}]$ sampled at episode start. We enforce this softly via an overshoot$^2$ penalty in the upper reward:
+\begin{equation}
+  \label{eq:soft_fleet}
+  \mathrm{overshoot}(\zvec, \Nfleet) = \max(0,\, \text{peak\_fleet} - \Nfleet)^2,
+\end{equation}
+weighted by an adaptive coefficient maintained by $\thetavec$-OGD (see~\Cref{sec:meas_proj}). To prevent unbounded violation under noisy demand, the environment imposes an outer ceiling $\Nfleet^{\max} + 3$ buses, which bounds but does not zero out the realised overshoot.
+
+\paragraph{Soft constraint (headway uniformity).}
+The expected per-step cost must remain below a threshold:
+\begin{equation}
+  \label{eq:soft_constraint}
+  \E_{\piU,\piL}\!\bigl[\,c(\sL,\aL)\,\bigr] \;\leq\; \climit,
+\end{equation}
+which encourages even spacing of buses along the route.
+Satisfaction of this constraint is enforced via Lagrangian relaxation within the lower-level policy (see \Cref{sec:method}).
+
+%% ---------------------------------------------------------------
+\subsection{Timescale separation}
+\label{sec:timescale}
+
+The principal characteristic of the bi-level formulation is the pronounced separation of timescales between the two decision layers.
+The upper policy $\piU$ acts at dispatch events, which occur roughly every five~minutes on average.
+The lower policy $\piL$, by contrast, acts at every station arrival for every active bus, a frequency on the order of once every 30~seconds system-wide when multiple buses are in service.
+Consequently, hundreds of lower-level decisions may intervene between two consecutive upper-level decisions, and the two layers never act simultaneously.
+
+This asynchrony distinguishes our setting from the semi-Markov options framework~\citep{sutton1999between} and feudal reinforcement learning~\citep{dayan1992feudal,vezhnevets2017feudal}, which assume that (i)~the manager and worker share a common state space or a fixed abstraction thereof, and (ii)~the manager selects a subgoal that the worker executes to completion before the manager acts again.
+Neither assumption holds here: the upper state $\sU\in\R^{11}$ summarises fleet-level statistics plus the HoldFB block whereas the lower state $\sL\in\R^{13+K}$ encodes bus-level kinematics, timetable context, and local traffic conditions, and both policies issue decisions driven by environment events rather than by a synchronous clock or a predefined option duration.
+
+More concretely, a single upper action (a planned-headway adjustment $\Delta h_k$) determines the planned launch time for the next dispatch while many buses traverse multiple stations under independent lower-level control. The upper policy cannot pause and wait for all induced lower decisions to conclude.
+Standard HRL methods that propagate value or advantage across levels therefore require modification to handle the fully asynchronous, event-driven interaction between $\piU$ and $\piL$.
+We address this challenge through a dynamic-timetable coupling, detailed in \Cref{sec:method}.
+
+\paragraph{Relation to goal-conditioned options.}
+One can view a dispatched bus as carrying an active goal, namely its planned headway $h^{\mathrm{plan}}_k$, and the lower policy is indeed conditioned on that goal.
+However, this interpretation alone does not express the part of the problem that TransitDuet optimises.
+The upper action is not an option assigned to a bus and terminated when that bus reaches a goal. It is a rolling timetable adjustment that determines the planned launch time of a future trip, sometimes before the corresponding vehicle is available, while other buses continue executing previously planned trips.
+Multiple planned headways are therefore active concurrently, and their effects interact through station-level holding, fleet availability, and dispatch lateness.
+A conventional goal-conditioned option model with a shared $\pi(\aL\mid\sL,o_i)$ can represent the lower tracking controller, but it does not by itself specify how future dispatch times are generated, how timetable feasibility is audited, or how credit from passenger wait, onboard delay, and fleet overshoot is assigned back to asynchronous dispatch-time decisions.

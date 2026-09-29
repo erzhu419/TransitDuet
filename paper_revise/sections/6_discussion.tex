@@ -1,0 +1,20 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Necessity of the timetable channel.}
+The target-headway-only variant makes the upper decision useful to the lower controller by changing the lower target headway, but it does not alter planned dispatch times. That distinction matters: a target-headway setter can influence realised service through holding, but it does not itself optimise a timetable. In TransitDuet, the upper action defines a planned-headway adjustment that the simulator converts into a planned launch time. This makes the upper decision auditable through planned shifts, planned dispatch headways, and dispatch lateness, while the lower controller executes a dynamic timetable rather than inferring one indirectly.
+
+\paragraph{Relation to conventional HRL.}
+TransitDuet can be partially interpreted as a goal-conditioned lower controller because each active bus tracks the planned headway associated with its dispatched trip. A conventional option view does not, however, specify a rolling timetable generator. In TransitDuet, several planned headways remain active concurrently, and their effects overlap through shared fleet availability and station-level holding. The challenge is therefore not only that the two levels lack a common clock, but also that multiple timetable goals execute concurrently and credit must be assigned back to asynchronous dispatch-time decisions.
+
+\paragraph{Interpreting joint training.}
+The independent-assembly ablation is included because joint training is not automatically superior. If a fixed-timetable lower can be trained first and then paired with a timetable upper without loss, the appropriate contribution claim is a jointly trainable framework rather than that joint optimisation is always necessary. Conversely, if the jointly trained version improves total passenger time or dispatch feasibility, the result supports the stronger claim that the lower's adaptation to the rolling timetable is part of the gain.
+
+\paragraph{Holding-delay trade-off.}
+Bus holding methods can reduce out-of-vehicle wait and headway CV by increasing onboard delay. The evaluation therefore treats average holding time, onboard passenger time, and total passenger time as first-class metrics. A method that improves wait but worsens total passenger time should not be presented as an unqualified service improvement.
+
+\paragraph{Baseline scope.}
+The comparison includes timetable-search and bus-holding baselines. Daganzo-style and Xuan-style rules are standard analytical reference points for holding control. Holding-only SAC and same-simulator RL/MARL-style proxies compare TransitDuet with recent RL holding mechanisms without claiming exact reproduction of papers that use different networks, simulators, or demand models. This framing is deliberately conservative: same-simulator proxies test representative mechanisms, not whether TransitDuet supersedes every published implementation.
+
+\paragraph{Limitations.}
+The current experiments remain single-corridor simulations. Real transit networks introduce interlining, shared terminals, transfer passengers, driver relief constraints, and fleet rebalancing across routes. Scaling the timetable upper to such settings will require factored or graph-structured action representations. The simulator also abstracts away signal priority, incidents, driver heterogeneity, and endogenous passenger abandonment. Finally, the timetable experiments should be read as evidence from a ten-seed evaluation on one calibrated corridor; stronger external-validity claims require additional routes and paired tests on common held-out rollouts.

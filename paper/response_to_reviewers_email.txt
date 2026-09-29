@@ -1,0 +1,152 @@
+Dear Editor and Reviewers,
+
+We sincerely thank the reviewers for their careful reading and constructive comments. The comments helped us identify two central issues in the previous manuscript: the upper level was described too strongly as timetable optimization even though it mainly changed a target headway, and the evaluation did not sufficiently isolate the effect of dynamic timetable decisions or report passenger delay trade-offs. We have substantially revised the manuscript, implementation, experiments, and related-work coverage accordingly. In the revised version, the upper level now directly writes rolling planned dispatch times, while the lower level executes the resulting dynamic timetable through station-level holding. We also added new ablations, classical holding baselines, RL/MARL-style proxy baselines, passenger-delay metrics, timetable-feasibility metrics, and a more conservative discussion of joint training and limitations.
+
+Below we respond point by point.
+
+Reviewer 1, Comment 1
+
+The reviewer notes that the previous method did not directly optimize dispatch times, vehicle schedules, or a timetable, because scheduled times remained unchanged and the upper level only adjusted the target headway used by the lower controller. The reviewer suggests framing the contribution more narrowly as adaptive target-headway tuning.
+
+Response:
+
+We agree with this criticism. In the previous version, the main method was indeed closer to adaptive target-headway tuning than to direct timetable optimization. We have therefore made a substantive methodological revision rather than only changing the wording.
+
+In the revised TransitDuet, the upper policy directly selects the planned headway for the next same-direction dispatch. The simulator converts this upper-level decision into a planned launch time, and that planned launch time is used by the dispatch logic. The baseline timetable is retained only as a reporting reference for planned shift and timetable deviation; it no longer constrains dispatch once the dynamic timetable policy is active. The lower policy then tracks the trip-specific planned headway through station holding.
+
+We revised the abstract, introduction, problem formulation, method section, discussion, and conclusion to make this distinction explicit. We also retained the previous target-headway-only configuration as an ablation rather than presenting it as the main method. In the revised experiments, the rolling-timetable policy is the main TransitDuet configuration, while the old target-headway-only variant is reported separately.
+
+Reviewer 1, Comment 2
+
+The reviewer states that the value of dynamic target headways is not isolated and asks for a strict ablation with a fixed target headway using the same lower SAC controller, as well as the variance of the target-headway sequence and its relationship to realized headway CV.
+
+Response:
+
+We agree, and we added the requested isolation experiments and diagnostics.
+
+First, the revised experiments include the previous target-headway-only variant as a direct ablation. This tests the old mechanism in which the upper changes only the lower controller's reference headway without writing planned launch times.
+
+Second, we added fixed-timetable SAC baselines using the same lower SAC controller. These include a 360-second fixed timetable and a best fixed-timetable setting selected from fixed headways of 300, 330, 360, 390, and 420 seconds. This isolates whether dynamic planned dispatch times add value beyond a strong holding-only SAC controller.
+
+Third, we added timetable-variability diagnostics with an explicit statistical definition. For each final-window episode, planner variability is the within-episode standard deviation of planned dispatch headways, measured in seconds. For the final rolling-timetable policy, the mean planned-headway standard deviation is 42.34 seconds across 300 episode-level observations from ten seeds. We report its relationship separately with station-level headway CV and actual dispatch-headway CV. The former has no monotonic pooled relationship (Pearson r = 0.041; Spearman rho = -0.012), whereas the latter has a strong relationship (Pearson r = 0.994; Spearman rho = 0.981). We therefore do not interpret planner variability alone as proof of improved end-to-end regularity. Rather, the dispatch result verifies that the planned sequence is executed in the realized dispatch process, while the controlled target-headway-only and fixed-timetable ablations identify the value of dynamic timetable decisions.
+
+The independently held-out main comparison shows that the rolling-timetable policy achieves a composite cost of 1.431, compared with 1.467 for the target-headway-only variant and 1.525 for the fixed-timetable SAC baseline with a 300-second timetable. We therefore now isolate the contribution of dynamic timetable decisions rather than attributing all gains to adaptive target tracking.
+
+Reviewer 1, Comment 3
+
+The reviewer notes that the evaluation omits holding cost and onboard delay, and that a method could reduce out-of-vehicle waiting time and headway CV by holding buses longer while increasing onboard passenger delay. The reviewer asks that the paper at least report average holding time.
+
+Response:
+
+We agree, and we have expanded the evaluation metrics accordingly.
+
+The revised manuscript now reports average holding time, onboard passenger time, and total passenger time in addition to waiting time, headway CV, fleet overshoot, and the composite objective. These metrics are included in the main comparison table and are discussed explicitly in the experiments and discussion sections.
+
+This addition changes the interpretation of the results. For example, the classical Daganzo-style and Xuan-style holding proxies apply much longer average holding, 45.17 seconds and 48.24 seconds respectively, and yield higher total passenger time than the revised TransitDuet policy. By contrast, the final rolling-timetable policy has average holding of 13.52 seconds and total passenger time of 16.15 minutes. The fixed-timetable SAC baseline with a 300-second timetable uses more holding, 21.89 seconds, and has higher total passenger time, 17.10 minutes. We therefore no longer evaluate the method only through out-of-vehicle waiting and regularity; we explicitly report the wait-delay trade-off.
+
+Reviewer 1, Comment 4
+
+The reviewer states that the comparison is incomplete and should include simple classical baselines and recent RL benchmarks, including Daganzo 2009, Xuan et al. 2011, and recent RL/MARL holding studies.
+
+Response:
+
+We agree and have broadened the comparison substantially.
+
+The revised experiments include Daganzo-style holding and Xuan-style two-headway holding baselines as classical analytical references. We also added holding-only SAC fixed-timetable baselines, including a best fixed-timetable SAC baseline, to test whether a strong lower controller alone can explain the gains.
+
+For recent RL/MARL comparisons, we added a same-simulator advantage-based auxiliary-reward RL proxy motivated by recent bus holding and MARL studies. We do not claim this is an exact reproduction or a substitute for the original published implementations, because those studies use different networks, simulators, demand assumptions, and control actions. The manuscript now labels it consistently as a proxy. Its limited role is to test a representative RL coupling mechanism under the same environment and metrics; the direct, reproducible benchmark claims are limited to our fixed-timetable SAC and classical holding baselines.
+
+In the independently held-out main comparison, the final rolling-timetable TransitDuet policy achieves a composite cost of 1.431. The advantage-based RL proxy has composite cost 1.492, the fixed-timetable SAC baseline with a 300-second timetable has 1.525, Daganzo-style holding has 1.930, and Xuan-style holding has 1.954. These additional baselines address the reviewer's concern that the original comparison was too narrow and mostly non-RL.
+
+Reviewer 1, Comment 5
+
+The reviewer states that the bus holding review is limited, that the manuscript discusses timetable optimization too extensively relative to holding and bunching control, and that it misses several recent works including Wang and Sun 2021 and 2023, He et al. 2022, Yu et al. 2024, Xu et al. 2025, and Li et al. 2026.
+
+Response:
+
+We agree and revised the related-work section accordingly.
+
+The revised related-work section now begins with reinforcement learning for bus holding control and explicitly discusses analytical holding baselines, value-based RL, asynchronous MARL, distributional MARL, multi-objective MARL, hierarchical MARL, graph-aware deep RL, systematic RL configuration evaluation, and language-model-assisted reward generation for bus holding. We added and verified the suggested references, including Wang and Sun 2021, Wang and Sun 2023, He et al. 2022, Yu et al. 2024, Xu et al. 2025, and Li et al. 2026. We also added related works on cooperative bus holding and stop-skipping and on robust bus fleet control where relevant.
+
+We also revised the positioning. The manuscript now explains that TransitDuet is not simply an offline timetable optimization method and not simply a holding controller. It addresses the interface between rolling timetable decisions and execution-level holding. This clearer positioning is reflected in the introduction, related work, experiments, and discussion.
+
+Reviewer 2, Major Comment 1
+
+The reviewer asks for a more detailed discussion of current HRL limitations and of how TransitDuet differs from standard option-based or goal-conditioned HRL. The reviewer notes that the main distinction may not be only a common clock or synchronous execution, but the concurrent execution of multiple goals. The reviewer asks why a goal-conditioned options formulation with a shared lower policy conditioned on a bus's active option would be insufficient.
+
+Response:
+
+We thank the reviewer for this helpful clarification. We agree that the issue is not merely the lack of a common clock. The more important distinction is that multiple timetable goals are active concurrently and interact through shared fleet availability, station-level holding, and dispatch lateness.
+
+We revised the introduction, problem formulation, method section, and discussion to make this point explicit. A goal-conditioned lower controller can represent one part of TransitDuet: a dispatched bus carries a planned headway, and the lower holding policy is conditioned on that planned headway. However, this interpretation does not capture the rolling timetable generator. In the revised method, the upper action writes the planned launch time of a future trip, sometimes before the corresponding vehicle is available, while buses dispatched under earlier planned headways continue to operate. Several planned headways are therefore active at the same time, and their effects overlap through fleet constraints and holding decisions.
+
+We now state that a conventional goal-conditioned options formulation can describe the lower tracking controller, but it does not by itself specify how future dispatch times are generated, how timetable feasibility is audited, or how passenger wait, onboard delay, fleet overshoot, and dispatch lateness are credited back to asynchronous dispatch-time decisions. This is why the revised framework uses a dynamic timetable channel, holding-feedback state, and per-dispatch hindsight credit rather than presenting TransitDuet as a direct application of standard options.
+
+Reviewer 2, Major Comment 2
+
+The reviewer questions whether the paper truly demonstrates that target-headway planning and holding control must be optimized jointly. The reviewer suggests an ablation comparing independently trained upper and lower models assembled after training with the jointly trained TransitDuet model.
+
+Response:
+
+We agree with this concern and have added the requested independent-assembly ablation.
+
+In the new training-window diagnostic ablation, the lower controller is first trained under a fixed timetable, then frozen and paired with a trained timetable upper. This tests whether TransitDuet's gains require joint adaptation or whether an independently trained tracking controller is sufficient. The jointly trained rolling-timetable policy achieves composite cost 1.634, whereas the independent-assembly variant has composite cost 1.929. The independently held-out main comparison is reported separately and does not use this diagnostic as its main performance evidence. This gap supports the value of joint adaptation in our setting.
+
+At the same time, we have moderated the claim. The revised manuscript no longer argues that joint training is universally necessary. Instead, it describes TransitDuet as a jointly trainable framework and reports the independent-assembly result as empirical evidence that, in this corridor and simulator, adapting the lower controller to the rolling timetable improves performance. We also added a discussion paragraph noting that if a fixed-timetable lower controller can be paired with a timetable upper without loss in other settings, then the appropriate claim is complementarity between adaptive planning and execution-level control rather than a universal necessity of joint training.
+
+Reviewer 2, Minor Comment 1
+
+The reviewer states that Figure 6 was interpreted as showing stabilization of lambda, but the figure did not show a clear plateau; moreover, lambda convergence would not demonstrate constraint satisfaction. The reviewer recommends moderating the interpretation and supplementing it with actual constraint cost.
+
+Response:
+
+We agree. We have removed the over-strong interpretation that the lambda trajectory alone demonstrates convergence or constraint satisfaction. The revised text treats the Lagrangian multiplier as an adaptive penalty signal rather than direct evidence of feasibility.
+
+We now report the actual lower-level constraint quantity as well as operational metrics. The immediate cost is the clipped squared deviation of the forward headway from the trip-specific planned headway, and the budget is c_limit = 0.5. Across the final 30 training episodes for each of ten seeds, the final rolling-timetable policy has mean immediate cost E[c] = 0.161 +/- 0.046; the largest episode-level mean is 0.482, and none of the 300 episode-level means exceeds 0.5. We also clarify that this is an empirical training-window diagnostic, not a formal feasibility guarantee. Fleet overshoot, headway CV, holding time, passenger time, and dispatch lateness remain reported separately because they quantify operational trade-offs rather than substitute for the Lagrangian cost.
+
+Reviewer 2, Minor Comment 2
+
+The reviewer notes an inconsistency in the lower-level action-space description. The action was first described as a non-negative holding duration in [0, 60], but later text used a symmetric range with negative actions, implying release actions or reduced inter-station idle. The reviewer asks for clarification because the experimental setup has no such inter-station idle component and therefore should have zero as the lower bound.
+
+Response:
+
+We agree and have corrected this inconsistency.
+
+The final experimental configuration uses a non-negative discrete holding action. The lower policy chooses from the operational holding grid 0, 3, 6, 9, 12, 15, 20, and 30 seconds. There are no negative holding or release actions in the revised main method. We removed the misleading symmetric action-space description from the main formulation and clarified in the problem formulation, method section, appendix, and hyperparameter table that the lower action is a non-negative holding duration. Any discussion of negative actions or inter-station idle has been removed from the main experimental setup.
+
+Reviewer 2, Minor Comment 3
+
+The reviewer states that it was not clear what belongs in Section 3 versus Section 4, because several design choices specific to TransitDuet appeared in the problem formulation, making it difficult to distinguish problem-specific assumptions from methodology design choices.
+
+Response:
+
+We agree and have reorganized the presentation.
+
+The revised Section 3 is now explicitly framed as the problem formulation. It defines the transit system, the two coupled decision processes, the state and action domains, the soft constraints, and the timescale separation. It also includes a short relation to goal-conditioned options because that point is part of defining what the problem formulation does and does not capture.
+
+The revised Section 4 is now the TransitDuet framework. It introduces the architecture, upper timetable policy, lower holding policy, dynamic timetable coupling, holding-feedback channel, hindsight credit, adaptive fleet-overshoot penalty, training schedule, auxiliary mechanisms, and implementation details. We added an explicit opening paragraph in Section 3 stating that learning architecture and training mechanisms are introduced separately in Section 4. This should make the boundary between problem assumptions and algorithmic design clearer.
+
+Reviewer 1, Final-version Suggestion 1
+
+The reviewer recommends evaluating selected checkpoints on a separate set of independent held-out test episodes and reporting variability across seeds, rather than reporting the main results from the final 30 training episodes.
+
+Response:
+
+We agree and have replaced the main-result protocol accordingly. Each learned method is trained for the pre-specified 300-episode budget, and the final checkpoint saved at episode 299 is evaluated after training. Checkpoint selection is therefore independent of test outcomes.
+
+For each of ten training seeds, the checkpoint is evaluated on 50 new stochastic held-out episodes generated with a seed-specific fleet schedule and evaluation random seeds that do not overlap with the training rollouts. No held-out episode is used to choose a checkpoint, tune a parameter, or select a timetable. The revised main table reports the mean across the ten seed-level test means, and a companion variability table reports the corresponding sample standard deviations across seeds. The training-window results are now clearly retained only as diagnostic analyses rather than as the main comparison.
+
+Reviewer 1, Final-version Suggestion 2
+
+The reviewer recommends providing brief implementation details, parameter settings, and tuning procedures for the Daganzo-style, Xuan-style, and RL proxy baselines.
+
+Response:
+
+We agree and added a baseline implementation and tuning paragraph to the experimental setup and a detailed appendix subsection. The Daganzo-style and Xuan-style baselines use the same stochastic simulator, a fixed 360-second timetable, and a non-negative holding range of 0 to 60 seconds. The appendix gives their exact headway-feedback equations and coefficients: the Daganzo-style rule applies half of the backward-minus-forward headway difference, and the Xuan-style rule applies 0.7 times the target-minus-forward headway plus 0.3 times the backward-minus-target headway, with the target set to 360 seconds.
+
+The RL proxy uses the same simulator, lower-policy state and categorical holding action representation, network widths, critic ensemble size, training budget, and seeds as TransitDuet. The appendix lists its distinct settings, including the reachability-gated auxiliary reward, coefficient, clipping level, classifier learning rate, threshold, and the disabled temporal policy correction. Rule coefficients and RL-proxy-specific settings were fixed before the independent held-out evaluation, with no seed-specific adjustment or held-out-test tuning. We also make clear that the Daganzo-style and Xuan-style controllers are same-simulator proxies and that the RL proxy is not an exact reproduction of prior published systems.
+
+We again thank the reviewers for the detailed and constructive feedback. The revision changes both the method and the evidence base: the upper level now directly optimizes rolling planned dispatch times, the previous target-headway-only version is treated as an ablation, and the evaluation now includes delay-aware metrics, classical holding rules, RL/MARL-style comparisons, fixed-timetable SAC baselines, independent assembly, and timetable-variability diagnostics.
+
+Sincerely,
+The authors

@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.distributions import Normal
+from torch.distributions import Categorical, Normal
 import numpy as np
 from collections import deque
 import random
@@ -149,6 +149,82 @@ class BoundedGaussianPolicy(nn.Module):
         return lp.cpu().numpy().squeeze()
 
 
+class CategoricalPolicy(nn.Module):
+    """Categorical policy over a fixed scalar action grid."""
+
+    is_discrete = True
+
+    def __init__(self, state_dim, action_bins, hidden_dim=64):
+        super().__init__()
+        if not action_bins:
+            raise ValueError("action_bins must contain at least one value")
+        self.register_buffer(
+            'action_bins',
+            torch.tensor(action_bins, dtype=torch.float32).view(1, -1))
+        self.fc1 = nn.Linear(state_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.logits = nn.Linear(hidden_dim, len(action_bins))
+
+    def forward(self, state):
+        x = F.relu(self.fc1(state))
+        x = F.relu(self.fc2(x))
+        return self.logits(x)
+
+    def _dist(self, state):
+        return Categorical(logits=self.forward(state))
+
+    def evaluate(self, state, epsilon=1e-8):
+        dist = self._dist(state)
+        idx = dist.sample()
+        action = self.action_bins.squeeze(0)[idx].unsqueeze(-1)
+        log_prob = dist.log_prob(idx).unsqueeze(-1)
+        probs = torch.softmax(dist.logits, dim=-1).clamp_min(epsilon)
+        return action, log_prob, idx, dist.logits, probs
+
+    def evaluate_all(self, state, epsilon=1e-8):
+        logits = self.forward(state)
+        probs = torch.softmax(logits, dim=-1).clamp_min(epsilon)
+        log_probs = torch.log(probs)
+        actions = self.action_bins.expand(state.shape[0], -1)
+        return actions, probs, log_probs
+
+    def get_action(self, state, deterministic=False):
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        state = state.to(next(self.parameters()).device)
+        with torch.no_grad():
+            logits = self.forward(state)
+            if deterministic:
+                idx = torch.argmax(logits, dim=-1)
+            else:
+                idx = Categorical(logits=logits).sample()
+            action = self.action_bins.squeeze(0)[idx]
+        return action.view(-1).cpu().numpy()
+
+    def log_prob(self, state, action):
+        if isinstance(state, np.ndarray):
+            state = torch.from_numpy(state).float()
+        if isinstance(action, np.ndarray):
+            action = torch.from_numpy(action).float()
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        if action.dim() == 0:
+            action = action.view(1, 1)
+        elif action.dim() == 1:
+            action = action.view(-1, 1)
+        state = state.to(next(self.parameters()).device)
+        action = action.to(next(self.parameters()).device)
+        with torch.no_grad():
+            logits = self.forward(state)
+            bins = self.action_bins.to(action.device)
+            idx = torch.argmin((action - bins).abs(), dim=-1)
+            lp = torch.log_softmax(logits, dim=-1).gather(
+                1, idx.view(-1, 1)).squeeze(-1)
+        return lp.cpu().numpy().squeeze()
+
+
 class EnsembleQNetwork(nn.Module):
     """Ensemble of K Q-networks (same as lower)."""
 
@@ -194,6 +270,7 @@ class RESACUpperTrainer:
 
     def __init__(self, state_dim=5, action_dim=3, hidden_dim=64,
                  action_low=None, action_high=None,
+                 action_bins=None,
                  ensemble_size=10, beta=-2.0, beta_ood=0.01,
                  weight_reg=0.01,
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
@@ -211,10 +288,18 @@ class RESACUpperTrainer:
         # Replay buffer for dispatch transitions
         self.replay_buffer = UpperReplayBuffer(replay_capacity)
 
+        self.action_bins = action_bins
+        self.discrete = action_bins is not None
+
         # Policy
-        self.policy_net = BoundedGaussianPolicy(
-            state_dim, action_dim, hidden_dim,
-            action_low, action_high).to(device)
+        if self.discrete:
+            self.policy_net = CategoricalPolicy(
+                state_dim, action_bins, hidden_dim).to(device)
+            action_dim = 1
+        else:
+            self.policy_net = BoundedGaussianPolicy(
+                state_dim, action_dim, hidden_dim,
+                action_low, action_high).to(device)
 
         # Ensemble Q
         self.q_net = EnsembleQNetwork(
@@ -231,9 +316,22 @@ class RESACUpperTrainer:
         if auto_entropy:
             self.log_alpha = torch.zeros(1, requires_grad=True, device=device)
             self.alpha_optimizer = optim.Adam([self.log_alpha], lr=lr)
-            self.target_entropy = -float(action_dim)
+            if self.discrete:
+                self.target_entropy = 0.98 * np.log(len(action_bins))
+            else:
+                self.target_entropy = -float(action_dim)
         self.alpha = 0.1
         self.maximum_alpha = maximum_alpha
+
+    def _q_values_for_bins(self, q_net, state):
+        actions, probs, log_probs = self.policy_net.evaluate_all(state)
+        batch_size, n_actions = actions.shape
+        s_rep = state.unsqueeze(1).expand(-1, n_actions, -1).reshape(
+            batch_size * n_actions, -1)
+        a_rep = actions.reshape(batch_size * n_actions, 1)
+        q = q_net(s_rep, a_rep).reshape(
+            self.ensemble_size, batch_size, n_actions)
+        return q, probs, log_probs, actions
 
     def update(self, batch_size=64):
         """One gradient step from replay buffer."""
@@ -249,14 +347,20 @@ class RESACUpperTrainer:
 
         # ── Critic update ──
         with torch.no_grad():
-            next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
-            target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
-            # Shared mean target → prevents ensemble divergence
-            target_q_mean = target_q_all.mean(dim=0)  # [B]
-            target_q_mean = target_q_mean - self.alpha * next_log_prob.squeeze(-1)
+            if self.discrete:
+                target_q_all, next_probs, next_log_probs, _ = \
+                    self._q_values_for_bins(self.target_q_net, next_state)
+                target_q_mean = target_q_all.mean(dim=0)  # [B, A]
+                target_v = (next_probs * (
+                    target_q_mean - self.alpha * next_log_probs)).sum(dim=-1)
+            else:
+                next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
+                target_q_all = self.target_q_net(next_state, next_action)  # [K, B]
+                # Shared mean target → prevents ensemble divergence
+                target_v = target_q_all.mean(dim=0) - self.alpha * next_log_prob.squeeze(-1)
             r = reward.squeeze(-1)
             d = done.squeeze(-1)
-            shared_target = r + (1.0 - d) * self.gamma * target_q_mean
+            shared_target = r + (1.0 - d) * self.gamma * target_v
             shared_target = shared_target.clamp(-50.0, 50.0)
 
         predicted_q = self.q_net(state, action)
@@ -273,13 +377,29 @@ class RESACUpperTrainer:
         self.q_optimizer.step()
 
         # ── Policy update ──
-        new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
-        q_all = self.q_net(state, new_action)
-        q_mean = q_all.mean(dim=0)
-        q_std = q_all.std(dim=0)
-        q_lcb = q_mean + self.beta * q_std
+        if self.discrete:
+            q_all_bins, probs, log_probs, _ = self._q_values_for_bins(
+                self.q_net, state)
+            q_mean = q_all_bins.mean(dim=0)
+            q_std = q_all_bins.std(dim=0)
+            q_lcb = q_mean + self.beta * q_std
+            policy_loss = (probs * (
+                self.alpha * log_probs - q_lcb)).sum(dim=-1).mean()
+            entropy_signal = (log_probs * probs).sum(
+                dim=-1, keepdim=True).detach()
+            q_mean_metric = q_mean.mean()
+            q_std_metric = q_std.mean()
+        else:
+            new_action, log_prob, _, _, _ = self.policy_net.evaluate(state)
+            q_all = self.q_net(state, new_action)
+            q_mean = q_all.mean(dim=0)
+            q_std = q_all.std(dim=0)
+            q_lcb = q_mean + self.beta * q_std
 
-        policy_loss = (self.alpha * log_prob.squeeze(-1) - q_lcb).mean()
+            policy_loss = (self.alpha * log_prob.squeeze(-1) - q_lcb).mean()
+            entropy_signal = log_prob.detach()
+            q_mean_metric = q_mean.mean()
+            q_std_metric = q_std.mean()
 
         self.policy_optimizer.zero_grad()
         policy_loss.backward()
@@ -289,7 +409,7 @@ class RESACUpperTrainer:
         # ── Alpha update ──
         if self.auto_entropy:
             alpha_loss = -(self.log_alpha *
-                           (log_prob + self.target_entropy).detach()).mean()
+                           (entropy_signal + self.target_entropy)).mean()
             self.alpha_optimizer.zero_grad()
             alpha_loss.backward()
             self.alpha_optimizer.step()
@@ -300,8 +420,8 @@ class RESACUpperTrainer:
             tp.data.copy_(tp.data * (1 - self.soft_tau) + p.data * self.soft_tau)
 
         return {
-            'upper_q_mean': q_mean.mean().item(),
-            'upper_q_std': q_std.mean().item(),
+            'upper_q_mean': q_mean_metric.item(),
+            'upper_q_std': q_std_metric.item(),
             'upper_policy_loss': policy_loss.item(),
             'upper_q_loss': q_loss.item(),
             'upper_q_mse': q_mse.item(),

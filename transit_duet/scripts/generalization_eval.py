@@ -2,15 +2,15 @@
 """
 generalization_eval.py
 ======================
-Evaluate validation-selected H_hiro checkpoints across out-of-distribution
+Evaluate validation-selected TransitDuet checkpoints across out-of-distribution
 travel-time stochasticity, and contrast a no-demand-noise variant against
 the noisy training distribution. Uses ``runner_v3`` (the runner that
-honours coupling_mode {channels, haar, hiro}); under ``runner_v2`` HIRO
-checkpoints would be silently re-evaluated under launch-time-shift semantics
-rather than goal-shift, breaking the comparison.
+honours coupling_mode {timetable, channels, haar, hiro}); under ``runner_v2``
+newer checkpoints would be silently re-evaluated under the wrong coupling
+semantics.
 
 Modes:
-  (a) cross_sigma --- the H_hiro policy (trained at sigma_route=1.5) is
+  (a) cross_sigma --- the main policy (trained at sigma_route=1.5) is
       evaluated at sigma_route in {0.5, 1.0, 1.5, 2.0, 3.0}, including the
       training value 1.5 itself, so that Section V-F's table has a self-
       consistent row at the training distribution.
@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -85,6 +86,9 @@ def load_runner_at_ckpt(exp_dir: Path, ep: int | None,
     otherwise call maybe_resume() (latest ckpt).
     """
     cfg = load_config(str(config_path))
+    m = re.search(r'_seed(\d+)$', exp_dir.name)
+    if m:
+        cfg['seed'] = int(m.group(1))
     runner = TransitDuetV2Runner(cfg, device=device)
     runner.log_dir = str(exp_dir)
     if ep is not None:
@@ -139,7 +143,7 @@ def summarize(metrics: dict) -> dict:
 
 
 def mode_cross_sigma(args):
-    """H_hiro (trained at sigma=1.5) eval across sigma_route values."""
+    """Main policy (trained at sigma=1.5) eval across sigma_route values."""
     sigmas = [float(s) for s in args.sigmas.split(',')]
     seeds = [int(s) for s in args.seeds.split(',')]
     exp = args.exp
@@ -215,11 +219,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--mode', choices=['cross_sigma', 'demand_shift', 'all'],
                     default='all')
-    ap.add_argument('--exp', default='H_hiro',
-                    help='experiment for cross_sigma (default H_hiro)')
+    ap.add_argument('--exp', default='H_timetable_v4',
+                    help='experiment for cross_sigma (default H_timetable_v4)')
     ap.add_argument('--sigmas', default='0.5,1.0,1.5,2.0,3.0',
                     help='including the training value 1.5 by default')
-    ap.add_argument('--seeds', default='42,123,456')
+    ap.add_argument('--seeds', default='42,123,456,789,1001,1002,1003,1004,1005,1006')
     ap.add_argument('--n_eps', type=int, default=10)
     ap.add_argument('--device', default='cuda:0')
     ap.add_argument('--overwrite', action='store_true')

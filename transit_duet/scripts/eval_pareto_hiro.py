@@ -3,13 +3,13 @@
 eval_pareto_hiro.py
 ===================
 Generate the Pareto frontier (wait vs N_fleet) for the validation-best
-H_hiro checkpoint of each seed. Section V-D of the paper claims this
+TransitDuet checkpoint of each seed. Section V-D of the paper claims this
 frontier is produced by ``one trained TransitDuet policy''; this script
 makes that claim mechanically reproducible by:
 
   1. Reading the per-ckpt CSV (logs/eval_per_ckpt/<exp>/<exp>_per_ckpt.csv)
      to identify the validation-best checkpoint per seed.
-  2. Restoring that checkpoint with runner_v3 (HIRO coupling).
+  2. Restoring that checkpoint with runner_v3 (the config's coupling mode).
   3. For each N_fleet in [8, 16], running n_eval episodes at the held-out
      evaluation distribution.
   4. Writing logs/<exp>_seed<N>/pareto_frontier.json which
@@ -17,12 +17,12 @@ makes that claim mechanically reproducible by:
 
 This replaces the older flow of relying on training-time --eval_pareto
 runs that wrote to A_full_seed*; we now (a) anchor on the validation-best
-ckpt rather than the training-end ckpt, and (b) read from H_hiro_seed*
-rather than the archived A_full_seed*.
+ckpt rather than the training-end ckpt, and (b) read from the configured
+main experiment directories rather than archived A_full_seed* logs.
 
 Usage:
     python scripts/eval_pareto_hiro.py
-    python scripts/eval_pareto_hiro.py --exp H_hiro --seeds 42,123,456 \
+    python scripts/eval_pareto_hiro.py --exp H_timetable_v4 --seeds 42,123,456 \
         --n_eval 5 --device cuda:0
 """
 
@@ -86,7 +86,7 @@ def eval_at_fleet(runner, n_fleet: int, n_eps: int, seed: int) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--exp', default='H_hiro')
+    ap.add_argument('--exp', default='H_timetable_v4')
     ap.add_argument('--config', default=None,
                     help='default: configs_ablation/<exp>.yaml')
     ap.add_argument('--seeds', default='42,123,456')
@@ -112,6 +112,7 @@ def main():
             continue
 
         cfg = load_config(str(config_path))
+        cfg['seed'] = seed
         runner = TransitDuetV2Runner(cfg, device=args.device)
         runner.log_dir = str(exp_dir)
         lower_p = exp_dir / 'checkpoints' / f'lower_ep{ep}.pt'

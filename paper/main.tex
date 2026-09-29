@@ -20,12 +20,17 @@
 \usepackage[table,dvipsnames]{xcolor}
 \usepackage{subcaption}
 \usepackage{caption}
-\captionsetup[figure]{name=Fig., labelsep=period}
+\captionsetup[figure]{name=Figure, labelsep=space}
+\captionsetup[table]{labelsep=space}
 \usepackage{enumitem}
 \usepackage[numbers]{natbib}
 \usepackage{cleveref}
 
+\usepackage{placeins}
 \makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{14pt}
+\setlength{\@fpbot}{0pt plus 1fil}
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
   {1.0ex plus .2ex minus .1ex}{0.4ex}%
   {\normalfont\normalsize}}
@@ -47,10 +52,7 @@
 % Math commands
 \input{math_commands}
 
-% Placeholder command for TBD results
-\newcommand{\tbd}[1][]{\textcolor{red}{[TBD#1]}}
-
-\title{TransitDuet: bi-level reinforcement learning for joint bus target-headway planning and holding control}
+\title{TransitDuet: bi-level reinforcement learning for dynamic bus timetable optimization and holding control}
 
 % \author{Anonymous Authors}
 \author{}
@@ -61,7 +63,13 @@
 
 \input{sections/0_abstract}
 
-\noindent Keywords: bus holding control; target-headway planning; hierarchical reinforcement learning; multi-timescale control; constrained optimization.
+{\small
+\begin{sloppypar}
+\noindent \textbf{Keywords:} bus timetable optimization, bus holding control, hierarchical reinforcement learning (HRL), reinforcement learning (RL), constrained reinforcement learning
+\end{sloppypar}
+}
+
+% Research highlights are supplied separately in research_highlights.tex.
 
 \input{sections/1_introduction}
 \input{sections/2_related_work}
@@ -74,7 +82,16 @@
 \appendix
 \input{sections/A_appendix}
 
-\bibliographystyle{gbt7714-numerical}
+\section*{Acknowledgements}
+\begin{sloppypar}
+This work was supported by the National Natural Science Foundation of China (Grant No. 72371251), the Natural Science Foundation for Distinguished Young Scholars of Hunan Province (Grant No. 2024JJ2080), and the Key Research and Development Program of Hunan Province of China (Grant No. 2024JK2007).
+\end{sloppypar}
+
+% Keep all figures and tables out of the reference list.
+\clearpage
+\FloatBarrier
+
+\bibliographystyle{vancouver}
 \bibliography{references}
 
 \end{document}

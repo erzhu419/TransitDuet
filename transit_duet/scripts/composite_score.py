@@ -3,7 +3,7 @@
 composite_score.py
 ==================
 Compute the composite cost used by TransitDuet (the training
-objective), aggregated over the last K training episodes × 3 seeds.
+objective), aggregated over the last K training episodes × 10 seeds.
 
   composite_per_episode = wait_min/10 + fleet_overshoot^2 / N_fleet + headway_cv
 
@@ -59,7 +59,13 @@ def composite_row(df_tail: pd.DataFrame) -> dict:
 
 
 def aggregate(logs_dir: Path, last_k: int = 30):
-    ablations = ['H_hiro', 'H_hiro_no_holdfb', 'H_hiro_no_csbapr',
+    ablations = ['H_timetable_v4', 'H_timetable_v5_stable_300',
+                 'H_hiro', 'H_timetable_continuous',
+                 'H_timetable_no_context', 'H_timetable_v4_independent_assembly',
+                 'H_fixed_timetable_300', 'H_fixed_timetable_330',
+                 'H_fixed_timetable', 'H_fixed_timetable_390',
+                 'H_fixed_timetable_420',
+                 'H_hiro_no_holdfb', 'H_hiro_no_csbapr',
                  'H_hiro_no_hindsight', 'H_hiro_no_morl',
                  'H_hiro_fixed_fleet', 'H_hiro_no_demand_noise',
                  'H_hiro_no_tpc']
@@ -84,6 +90,30 @@ def aggregate(logs_dir: Path, last_k: int = 30):
             vals = [r[k] for r in per_seed]
             agg[f'{k}_mean'] = np.mean(vals)
             agg[f'{k}_std'] = np.std(vals)
+        extra_cols = [
+            'avg_holding_sec', 'avg_onboard_time_min',
+            'avg_total_passenger_time_min',
+            'planned_dispatch_headway_std',
+            'actual_dispatch_headway_cv',
+            'planned_shift_std',
+            'dispatch_lateness_mean',
+        ]
+        for col in extra_cols:
+            vals = []
+            for d in sorted(logs_dir.glob(f'{ab}_seed*')):
+                csv = d / 'diagnostics.csv'
+                if not csv.exists():
+                    continue
+                df = pd.read_csv(csv)
+                if col not in df.columns:
+                    continue
+                if 'ep' in df.columns:
+                    df = df[df['ep'] < EVAL_EP_MARKER]
+                if len(df) >= last_k:
+                    vals.append(float(df.iloc[-last_k:][col].astype(float).mean()))
+            if vals:
+                agg[f'{col}_mean'] = np.mean(vals)
+                agg[f'{col}_std'] = np.std(vals)
         rows.append(agg)
     return pd.DataFrame(rows)
 
@@ -100,10 +130,10 @@ def print_table(df: pd.DataFrame):
               f"{r['cv_mean']:5.3f}±{r['cv_std']:5.3f}  "
               f"{r['composite_mean']:5.3f}±{r['composite_std']:5.3f}")
     print("=" * 86)
-    base = df[df.ablation == 'H_hiro']
+    base = df[df.ablation == 'H_timetable_v4']
     if len(base):
         c0 = base['composite_mean'].iloc[0]
-        print(f"\nRelative to H_hiro ({c0:.3f}):")
+        print(f"\nRelative to H_timetable_v4 ({c0:.3f}):")
         for _, r in df.iterrows():
             delta = (r['composite_mean'] - c0) / c0 * 100
             sign = '+' if delta >= 0 else ''

@@ -1,0 +1,11 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We have presented TransitDuet, a bi-level reinforcement learning framework for dynamic bus timetable optimisation and real-time holding control.
+The dynamic timetable channel (Section~\ref{sec:tap}) links dispatch planning and station holding: the upper policy selects planned-headway adjustments, and the lower policy regulates holding actions against the resulting trip-specific targets.
+Fleet-size feasibility is maintained through online gradient descent penalty adaptation at the upper level, while Lagrangian relaxation preserves headway regularity at the lower level.
+
+On a calibrated 22-station corridor with stochastic demand and elastic fleet budgets, TransitDuet achieves a mean composite cost 3.2\% below the target-headway-only variant and 11.5\% below the best fixed-timetable baseline, with a mean total passenger time of 18.15 minutes across ten random seeds.
+Timetable ablations confirm that the discrete action grid, lower-state context, and joint training each contribute to these gains.
+
+Future work should test TransitDuet on multi-route networks with shared fleets and transfer coordination. Deployment through a calibrated digital twin with domain randomisation could assess robustness to traffic signals and driver heterogeneity. Real-time demand forecasting and passenger-demand elasticity would further connect service quality to ridership.
