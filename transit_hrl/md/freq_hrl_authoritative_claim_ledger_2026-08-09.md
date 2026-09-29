@@ -1838,7 +1838,14 @@ Entire query episodes are excluded from fit labels and normalization. Original
 PPO/critic updates stay fixed. Seven frozen contrasts include first episode-score
 dispersion, which cannot establish utility. Full5836800 steps/4864 offline audits,
 pre15600/52; auxiliary fits/backwards counted separately, zero extra native
-verification. Pending qualification and native results; no learned repair claim.
+verification. Implementation `5dec9f0dc7`, pre-outcome freeze `3c298a924b`.
+Scheduler `t104126` on node004 passes14 held-out/RNG/critic-identity and Stage46
+regression tests in46.806s. Native preflight `t104127` and offline `t104128` pass:
+15600 steps/333 upper/503 gate calls,52 audits,48 actor/48 critic steps,32 auxiliary
+fit steps/16 score-gradient backwards. Original baseline uses392 inputs,hidden128,
+four epochs,1024 minibatch,LR0.0003,value0.5,clip1. Short-path MSE/dispersion are
+slightly worse; no tuning follows. Only7.1KB qualification is local, all raw/weights
+remote. Full frozen utility results pending; no learned repair claim.
 
 ### legacy_c1_c9_matrix_snapshot
 
