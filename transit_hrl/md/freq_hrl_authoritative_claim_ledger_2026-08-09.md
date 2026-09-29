@@ -1909,6 +1909,13 @@ actor steps0;first learning actor steps40/full or4/pre. Version2 uses fixed
 checkpoint17/pre3 with genuinely nonempty actor Adam,not an outcome-selected
 checkpoint;fresh seed base11500000/pre11490000. One fixture upper-call count
 also corrected. No version1 performance result exists.
+Implementation fix `70c1ddc2e9`,version2 pre-outcome freeze `9ceff8d06e`.
+Unit `t104187` passes26 tests in92.633s,including Stage46-48 regressions. Native
+preflight `t104188` and offline `t104194` pass68 audits,20400 steps/334 upper/
+636 gate calls,280 executed actor/280 critic steps,64/64 retained,51 KL checks.
+All eight updates accept,max KL0.08634. Inherited actor Adam starts at step4;
+fresh starts empty,ends at16 versus inherited20 after two rounds. Reset is
+non-null and occurs once;utility remains untested. Only12KB summary local.
 
 ### legacy_c1_c9_matrix_snapshot
 
