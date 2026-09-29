@@ -1,0 +1,352 @@
+{
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      50,
+      50050
+    ],
+    "budget": "all_four_arms_maximum_training_episode_sum_exact_Gaussian_KL_at_most_0.1",
+    "candidate_scales": "1_then_successive_halves",
+    "cg_iterations": 10,
+    "cg_rtol": 0.000001,
+    "checkpoint_selection": "none",
+    "cost": "all_executed_Adam_steps_score_backward_HVP_CG_iterations_parameter_proposals_and_KL_checks_separate_from_retained",
+    "credit": "GAE_Adam_vs_time_LOO_full_task_MC_Adam_vs_same_MC_Euclidean_vs_same_MC_Fisher",
+    "critic": "original_GAE_critic_and_Adam_update_once_for_direct_directions_same_first_update_as_Adam_controls",
+    "curvature_decision": "also_Fisher_minus_Euclidean_final_positive_required_for_curvature_specific_benefit",
+    "decision": "first_exact_max_episode_KL_feasible_no_surrogate_floor_or_evaluation_access",
+    "direction": "Euclidean_g_or_truncated_solve_of_F_plus_damping_I_times_d_equals_g",
+    "evidence_role": "conditional_development_on_reused_roots_not_independent_confirmation",
+    "fisher": "float64_Hessian_of_full_batch_mean_old_to_new_conditional_Gaussian_KL_at_old_actor",
+    "fisher_damping": 0.1,
+    "frozen_levels": "upper_gate_actor_and_value_parameters_fixed_state_mediated_actions_may_differ",
+    "initial_scale": "sqrt_2_KL_budget_over_horizon_times_undamped_d_F_d",
+    "initialization": "fixed_task_clock_Stage42_warmup16_and_Adam_no_new_warmup",
+    "interval": "two_sided_percentile_bonferroni_8_equal_root_paired_means",
+    "kl_budget": 0.1,
+    "limits": "reused_roots_development_not_confirmation_equal_KL_upper_bound_not_equal_realized_KL_no_population_guarantee",
+    "max_backtracks": 12,
+    "methods": [
+      "task_clock"
+    ],
+    "optimizer": "no_Adam_reset_direct_directions_leave_actor_Adam_untouched",
+    "other_settings": "Adam_controls_original_PPO_direct_arms_one_full_batch_score_step_critic_epochs_minibatches_unchanged",
+    "pairing": "same_four_arm_initial_weights_native_training_batch_rewards_and_first_critic_update",
+    "primary_endpoints": [
+      "fisher_adam_first",
+      "fisher_adam_final",
+      "fisher_euclidean_final",
+      "fisher_frozen_final",
+      "euclidean_adam_final",
+      "euclidean_frozen_final",
+      "adam_frozen_final",
+      "gae_frozen_final"
+    ],
+    "rejection": "restore_actor_and_Adam_keep_first_original_critic_update_if_all_13_trials_fail",
+    "root_exclusion": "forbidden",
+    "sampling": "deterministic_upper_gate_sampled_lower_training_both_lower_evaluation_modes",
+    "score": "one_full_batch_gradient_of_normalized_MC_log_probability_plus_original_entropy",
+    "seeds": "policy_50_root_env_50017_lower_noise_50019_shuffle_50_root_round",
+    "sequential_extension": "forbidden",
+    "solver": "scipy_matrix_free_CG",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "treatments": [
+      "gae",
+      "episode_mc",
+      "euclidean_mc",
+      "fisher_mc"
+    ],
+    "trial": "Adam_transactional_scaled_lr_or_direct_theta0_plus_halved_scaled_direction",
+    "utility_decision": "Fisher_minus_Adam_and_Fisher_minus_frozen_final_positive_required_for_update_repair"
+  },
+  "direction_computation": {
+    "cg_iterations": 20,
+    "fisher_vector_products": 26,
+    "kl_check_calls": 41,
+    "parameter_proposals": 8,
+    "retained_actor_steps": 32,
+    "retained_parameter_updates": 4,
+    "retained_value_steps": 64,
+    "score_backward_calls": 4
+  },
+  "method_cost": {
+    "gate_inference_calls": 676,
+    "lower_inference_calls": 20400,
+    "primitive_steps": 20400,
+    "upper_inference_calls": 491
+  },
+  "native_trace_audits": 68,
+  "optimizer_steps": {
+    "actor_optimizer_steps": 136,
+    "value_optimizer_steps": 168
+  },
+  "protocol": "pointmaze_fisher_direction_stage50_v1",
+  "root_rows": [
+    {
+      "diagnostics": {
+        "task_clock": {
+          "episode_mc": {
+            "actor_optimizer_steps": 72,
+            "first": {
+              "actor_advantage_mean": -8.138021030390519e-7,
+              "actor_advantage_std": 43.303253173828125,
+              "critic_target_mean": 5.279323577880859,
+              "critic_target_std": 4.10562801361084,
+              "gae_mc_normalized_dot": 0.48648732900619507,
+              "gae_mc_normalized_mse": 1.027025580406189,
+              "task_return_mean": 112.54756861927801
+            },
+            "value_optimizer_steps": 72
+          },
+          "euclidean_mc": {
+            "actor_optimizer_steps": 0,
+            "first": {
+              "actor_advantage_mean": -8.138021030390519e-7,
+              "actor_advantage_std": 43.303253173828125,
+              "critic_target_mean": 5.279323577880859,
+              "critic_target_std": 4.10562801361084,
+              "gae_mc_normalized_dot": 0.48648732900619507,
+              "gae_mc_normalized_mse": 1.027025580406189,
+              "task_return_mean": 112.54756861927801
+            },
+            "value_optimizer_steps": 16
+          },
+          "fisher_mc": {
+            "actor_optimizer_steps": 0,
+            "first": {
+              "actor_advantage_mean": -8.138021030390519e-7,
+              "actor_advantage_std": 43.303253173828125,
+              "critic_target_mean": 5.279323577880859,
+              "critic_target_std": 4.10562801361084,
+              "gae_mc_normalized_dot": 0.48648732900619507,
+              "gae_mc_normalized_mse": 1.027025580406189,
+              "task_return_mean": 112.54756861927801
+            },
+            "value_optimizer_steps": 16
+          },
+          "gae": {
+            "actor_optimizer_steps": 64,
+            "first": {
+              "actor_advantage_mean": 5.140302658081055,
+              "actor_advantage_std": 4.004939079284668,
+              "critic_target_mean": 5.279323577880859,
+              "critic_target_std": 4.10562801361084,
+              "gae_mc_normalized_dot": 0.48648732900619507,
+              "gae_mc_normalized_mse": 1.027025580406189,
+              "task_return_mean": 112.54756861927801
+            },
+            "value_optimizer_steps": 64
+          }
+        }
+      },
+      "direction_diagnostics": {
+        "episode_mc": {
+          "accepted_updates": 2,
+          "first_geometry": null,
+          "max_cg_relative_residual": 0,
+          "max_deployed_episode_kl": 0.07903945843886286,
+          "selected_scales": [
+            0.0625,
+            0.125
+          ]
+        },
+        "euclidean_mc": {
+          "accepted_updates": 2,
+          "first_geometry": {
+            "cg_info": 0,
+            "cg_iterations": 0,
+            "cg_relative_residual": 0,
+            "direction_norm": 0.4014322595709579,
+            "fisher_vector_products": 1,
+            "gradient_norm": 0.4014322595709579,
+            "initial_coefficient": 0.008769378600856685,
+            "mean_fisher_quadratic": 8.669041866350728,
+            "predicted_mean_episode_kl": 0.10000000000000003,
+            "score_backward_calls": 1,
+            "score_direction_dot": 0.16114785902424492
+          },
+          "max_cg_relative_residual": 0,
+          "max_deployed_episode_kl": 0.045023165265523885,
+          "selected_scales": [
+            0.5,
+            0.5
+          ]
+        },
+        "fisher_mc": {
+          "accepted_updates": 2,
+          "first_geometry": {
+            "cg_info": 10,
+            "cg_iterations": 10,
+            "cg_relative_residual": 0.12706957102844668,
+            "direction_norm": 0.28006457441528376,
+            "fisher_vector_products": 12,
+            "gradient_norm": 0.4014322595709579,
+            "initial_coefficient": 0.17961627884350104,
+            "mean_fisher_quadratic": 0.020664140756632497,
+            "predicted_mean_episode_kl": 0.10000000000000002,
+            "score_backward_calls": 1,
+            "score_direction_dot": 0.028507757339960672
+          },
+          "max_cg_relative_residual": 0.12706957102844668,
+          "max_deployed_episode_kl": 0.035986722460173225,
+          "selected_scales": [
+            0.5,
+            0.5
+          ]
+        },
+        "gae": {
+          "accepted_updates": 2,
+          "first_geometry": null,
+          "max_cg_relative_residual": 0,
+          "max_deployed_episode_kl": 0.04910718159017509,
+          "selected_scales": [
+            0.125,
+            0.125
+          ]
+        }
+      },
+      "endpoints": {
+        "adam_frozen_final": -0.6575638954702754,
+        "euclidean_adam_final": -0.9828770529391875,
+        "euclidean_frozen_final": -1.6404409484094629,
+        "fisher_adam_final": -0.39164950262636467,
+        "fisher_adam_first": -1.7823193480764417,
+        "fisher_euclidean_final": 0.5912275503128228,
+        "fisher_frozen_final": -1.04921339809664,
+        "gae_frozen_final": -5.136536183107978
+      },
+      "means": {
+        "0": {
+          "deterministic": {
+            "frozen": {
+              "charged_utility": 144.57443386618132,
+              "episode_return": 153.07443386618132,
+              "tracking_squared_error_integral": 1.8483271664021526,
+              "upper_inference_calls": 8.5
+            }
+          },
+          "lower_sampled": {
+            "frozen": {
+              "charged_utility": 146.75840397554924,
+              "episode_return": 155.75840397554924,
+              "tracking_squared_error_integral": 1.9688509705599988,
+              "upper_inference_calls": 9
+            }
+          }
+        },
+        "1": {
+          "deterministic": {
+            "task_clock:episode_mc": {
+              "charged_utility": 141.0087648922481,
+              "episode_return": 149.5087648922481,
+              "tracking_squared_error_integral": 1.957367256716232,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:euclidean_mc": {
+              "charged_utility": 140.09694558516736,
+              "episode_return": 148.59694558516736,
+              "tracking_squared_error_integral": 2.0095417793951578,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:fisher_mc": {
+              "charged_utility": 143.13127684392265,
+              "episode_return": 151.63127684392265,
+              "tracking_squared_error_integral": 1.8436165435024707,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:gae": {
+              "charged_utility": 141.54353399453174,
+              "episode_return": 150.04353399453174,
+              "tracking_squared_error_integral": 1.9295239360472887,
+              "upper_inference_calls": 8.5
+            }
+          },
+          "lower_sampled": {
+            "task_clock:episode_mc": {
+              "charged_utility": 144.9891370976476,
+              "episode_return": 153.9891370976476,
+              "tracking_squared_error_integral": 1.8506073325433188,
+              "upper_inference_calls": 9
+            },
+            "task_clock:euclidean_mc": {
+              "charged_utility": 145.82603618894484,
+              "episode_return": 154.82603618894484,
+              "tracking_squared_error_integral": 1.8241667652246332,
+              "upper_inference_calls": 9
+            },
+            "task_clock:fisher_mc": {
+              "charged_utility": 143.20681774957117,
+              "episode_return": 152.20681774957117,
+              "tracking_squared_error_integral": 1.8947855329836143,
+              "upper_inference_calls": 9
+            },
+            "task_clock:gae": {
+              "charged_utility": 143.11581914817663,
+              "episode_return": 152.11581914817663,
+              "tracking_squared_error_integral": 1.9283093943256868,
+              "upper_inference_calls": 9
+            }
+          }
+        },
+        "2": {
+          "deterministic": {
+            "task_clock:episode_mc": {
+              "charged_utility": 138.92467389430095,
+              "episode_return": 147.42467389430095,
+              "tracking_squared_error_integral": 2.089350378805331,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:euclidean_mc": {
+              "charged_utility": 140.20400493230179,
+              "episode_return": 148.70400493230179,
+              "tracking_squared_error_integral": 2.006157423396033,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:fisher_mc": {
+              "charged_utility": 145.39048634604353,
+              "episode_return": 153.89048634604353,
+              "tracking_squared_error_integral": 1.781591312043159,
+              "upper_inference_calls": 8.5
+            },
+            "task_clock:gae": {
+              "charged_utility": 142.17532933220025,
+              "episode_return": 150.67532933220025,
+              "tracking_squared_error_integral": 1.9077718127864893,
+              "upper_inference_calls": 8.5
+            }
+          },
+          "lower_sampled": {
+            "task_clock:episode_mc": {
+              "charged_utility": 146.10084008007897,
+              "episode_return": 155.10084008007897,
+              "tracking_squared_error_integral": 1.8374578260854402,
+              "upper_inference_calls": 9
+            },
+            "task_clock:euclidean_mc": {
+              "charged_utility": 145.11796302713978,
+              "episode_return": 154.11796302713978,
+              "tracking_squared_error_integral": 1.8534942840214859,
+              "upper_inference_calls": 9
+            },
+            "task_clock:fisher_mc": {
+              "charged_utility": 145.7091905774526,
+              "episode_return": 154.7091905774526,
+              "tracking_squared_error_integral": 1.943084202924315,
+              "upper_inference_calls": 9
+            },
+            "task_clock:gae": {
+              "charged_utility": 141.62186779244126,
+              "episode_return": 150.62186779244126,
+              "tracking_squared_error_integral": 1.999645904360868,
+              "upper_inference_calls": 9
+            }
+          }
+        }
+      },
+      "root": 310001
+    }
+  ],
+  "run_name": "pointmaze_fisher_direction_stage50_preflight_20260930_r1",
+  "status": "preflight_passed",
+  "verification_primitive_steps": 0
+}
