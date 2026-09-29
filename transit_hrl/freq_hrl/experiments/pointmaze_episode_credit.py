@@ -19,7 +19,7 @@ from .pointmaze_root_response import raw_directory, write_json
 from scripts import pointmaze_episode_credit_stage46_spec as spec
 
 
-def update(model, batch, task_rewards, treatment, *, specification=spec, actor_advantage=None):
+def update(model, batch, task_rewards, treatment, *, specification=spec, actor_advantage=None, actor_updates_enabled=True):
     spec = specification
     if treatment not in spec.TREATMENTS:
         raise ValueError("unregistered actor credit treatment")
@@ -35,7 +35,7 @@ def update(model, batch, task_rewards, treatment, *, specification=spec, actor_a
     normalized, episode_normalized = model._normalize(advantage), model._normalize(episode_advantage)
     metrics = model._update_level(level="lower", batch=batch, actor=model.lower_actor, value_net=model.lower_value,
         actor_optimizer=model.lower_actor_optimizer, value_optimizer=model.lower_value_optimizer,
-        actor_advantage=None if treatment == "gae" else actor_advantage)
+        actor_advantage=None if treatment == "gae" else actor_advantage, actor_updates_enabled=actor_updates_enabled)
     return {"actor_optimizer_steps": int(metrics["lower_actor_optimizer_steps"]),
             "value_optimizer_steps": int(metrics["lower_value_optimizer_steps"]),
             "actor_advantage_mean": float(actor_advantage.mean()), "actor_advantage_std": float(actor_advantage.std()),
