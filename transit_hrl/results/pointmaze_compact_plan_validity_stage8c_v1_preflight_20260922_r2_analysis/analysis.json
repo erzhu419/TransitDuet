@@ -1,0 +1,136 @@
+{
+  "analysis_version": "pointmaze_compact_plan_validity_stage8c_analysis_v1",
+  "cell_count": 1,
+  "claim_boundary": "held-out local branch-value prediction only; no deployed-trigger or closed-loop performance claim",
+  "confidence": 0.95,
+  "decision": "stage9_not_authorized",
+  "independent_optimizer_root_count": 1,
+  "intervals": {
+    "candidate_spearman_vs_current": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.15384615384615385,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_spearman_vs_dynamic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.1608391608391609,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_utility_vs_current": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -3.5213173307287876e-06,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_utility_vs_dynamic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -3.335195972842264e-06,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "controller_learning_gain": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -2.526698774597208,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "delayed_renewal_value": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 1.611208572116496e-08,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__causal_dynamic_quadratic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -1.184963951725293e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__causal_validity_interactions": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -1.5184835490095194e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__current_compact_quadratic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -1.1663518159366407e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__causal_dynamic_quadratic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.2937062937062937,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__causal_validity_interactions": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.4545454545454546,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__current_compact_quadratic": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.30069930069930073,
+      "n": 1,
+      "status": "inconclusive"
+    }
+  },
+  "matrix": "preflight",
+  "primary_endpoint": "causal_validity_interactions_selected_utility_minus_current_compact_quadratic",
+  "protocol_version": "pointmaze_compact_plan_validity_stage8c_v1",
+  "qualification_checks": {
+    "candidate_rank_beats_current_only": false,
+    "candidate_rank_beats_generic_dynamic": false,
+    "candidate_rank_is_positive": false,
+    "candidate_selected_utility_is_positive": false,
+    "candidate_utility_beats_current_only": false,
+    "controller_learned": false,
+    "delayed_renewal_has_value": false
+  },
+  "root_summaries": {
+    "207001": {
+      "candidate_spearman_vs_current": -0.15384615384615385,
+      "candidate_spearman_vs_dynamic": -0.1608391608391609,
+      "candidate_utility_vs_current": -3.5213173307287876e-06,
+      "candidate_utility_vs_dynamic": -3.335195972842264e-06,
+      "controller_learning_gain": -2.526698774597208,
+      "delayed_renewal_value": 1.611208572116496e-08,
+      "selected_utility__causal_dynamic_quadratic": -1.184963951725293e-05,
+      "selected_utility__causal_validity_interactions": -1.5184835490095194e-05,
+      "selected_utility__current_compact_quadratic": -1.1663518159366407e-05,
+      "spearman__causal_dynamic_quadratic": -0.2937062937062937,
+      "spearman__causal_validity_interactions": -0.4545454545454546,
+      "spearman__current_compact_quadratic": -0.30069930069930073
+    }
+  },
+  "stage9_authorized": false,
+  "statistical_unit": "optimizer_seed_root"
+}

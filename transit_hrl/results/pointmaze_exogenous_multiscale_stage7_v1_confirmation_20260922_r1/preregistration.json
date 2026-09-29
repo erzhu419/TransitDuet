@@ -1,0 +1,1369 @@
+{
+  "algorithm_revision": "4ed9e8e131235f0f99844e8ea8bfeb737a68276f",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_exogenous_history",
+      194007
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194007
+    ],
+    [
+      "hrl_exogenous_history",
+      194007
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194007
+    ],
+    [
+      "flat_exogenous_history",
+      194013
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194013
+    ],
+    [
+      "hrl_exogenous_history",
+      194013
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194013
+    ],
+    [
+      "flat_exogenous_history",
+      194031
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194031
+    ],
+    [
+      "hrl_exogenous_history",
+      194031
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194031
+    ],
+    [
+      "flat_exogenous_history",
+      194043
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194043
+    ],
+    [
+      "hrl_exogenous_history",
+      194043
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194043
+    ],
+    [
+      "flat_exogenous_history",
+      194067
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194067
+    ],
+    [
+      "hrl_exogenous_history",
+      194067
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194067
+    ],
+    [
+      "flat_exogenous_history",
+      194089
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194089
+    ],
+    [
+      "hrl_exogenous_history",
+      194089
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194089
+    ],
+    [
+      "flat_exogenous_history",
+      194113
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194113
+    ],
+    [
+      "hrl_exogenous_history",
+      194113
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194113
+    ],
+    [
+      "flat_exogenous_history",
+      194127
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194127
+    ],
+    [
+      "hrl_exogenous_history",
+      194127
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194127
+    ],
+    [
+      "flat_exogenous_history",
+      194141
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194141
+    ],
+    [
+      "hrl_exogenous_history",
+      194141
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194141
+    ],
+    [
+      "flat_exogenous_history",
+      194159
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194159
+    ],
+    [
+      "hrl_exogenous_history",
+      194159
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194159
+    ],
+    [
+      "flat_exogenous_history",
+      194173
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194173
+    ],
+    [
+      "hrl_exogenous_history",
+      194173
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194173
+    ],
+    [
+      "flat_exogenous_history",
+      194191
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194191
+    ],
+    [
+      "hrl_exogenous_history",
+      194191
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194191
+    ],
+    [
+      "flat_exogenous_history",
+      194207
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194207
+    ],
+    [
+      "hrl_exogenous_history",
+      194207
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194207
+    ],
+    [
+      "flat_exogenous_history",
+      194221
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194221
+    ],
+    [
+      "hrl_exogenous_history",
+      194221
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194221
+    ],
+    [
+      "flat_exogenous_history",
+      194239
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194239
+    ],
+    [
+      "hrl_exogenous_history",
+      194239
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194239
+    ],
+    [
+      "flat_exogenous_history",
+      194257
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194257
+    ],
+    [
+      "hrl_exogenous_history",
+      194257
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194257
+    ]
+  ],
+  "claim_gate": {
+    "hierarchy_x_multiscale_success_interaction": "positive_ci",
+    "hrl_multiscale_absolute_success_ci_lower": ">=0.50",
+    "hrl_multiscale_final_vs_untrained_return": "positive_ci",
+    "hrl_multiscale_final_vs_untrained_success": "positive_ci",
+    "hrl_multiscale_vs_flat_multiscale_success": "positive_ci",
+    "hrl_multiscale_vs_hrl_history_success": "positive_ci",
+    "primary_endpoint": "tracking_success_rate",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "evidence_stage": "confirmation",
+  "methods": [
+    "flat_exogenous_history",
+    "flat_exogenous_multiscale_all",
+    "hrl_exogenous_history",
+    "hrl_exogenous_multiscale_all"
+  ],
+  "optimizer_seeds": [
+    194007,
+    194013,
+    194031,
+    194043,
+    194067,
+    194089,
+    194113,
+    194127,
+    194141,
+    194159,
+    194173,
+    194191,
+    194207,
+    194221,
+    194239,
+    194257
+  ],
+  "options": {
+    "194007": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1900211,
+        1900223,
+        1900227,
+        1900229,
+        1900233,
+        1900239,
+        1900241,
+        1900251,
+        1900257,
+        1900263,
+        1900269,
+        1900271,
+        1900277,
+        1900281,
+        1900283,
+        1900293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1900101,
+        1900103,
+        1900107,
+        1900109,
+        1900127,
+        1900131,
+        1900137,
+        1900149,
+        1900151,
+        1900163,
+        1900167,
+        1900173,
+        1900179,
+        1900181,
+        1900191,
+        1900197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1900011,
+        1900017,
+        1900023,
+        1900039,
+        1900041,
+        1900053,
+        1900067,
+        1900071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194013": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1901211,
+        1901223,
+        1901227,
+        1901229,
+        1901233,
+        1901239,
+        1901241,
+        1901251,
+        1901257,
+        1901263,
+        1901269,
+        1901271,
+        1901277,
+        1901281,
+        1901283,
+        1901293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1901101,
+        1901103,
+        1901107,
+        1901109,
+        1901127,
+        1901131,
+        1901137,
+        1901149,
+        1901151,
+        1901163,
+        1901167,
+        1901173,
+        1901179,
+        1901181,
+        1901191,
+        1901197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1901011,
+        1901017,
+        1901023,
+        1901039,
+        1901041,
+        1901053,
+        1901067,
+        1901071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194031": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1902211,
+        1902223,
+        1902227,
+        1902229,
+        1902233,
+        1902239,
+        1902241,
+        1902251,
+        1902257,
+        1902263,
+        1902269,
+        1902271,
+        1902277,
+        1902281,
+        1902283,
+        1902293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1902101,
+        1902103,
+        1902107,
+        1902109,
+        1902127,
+        1902131,
+        1902137,
+        1902149,
+        1902151,
+        1902163,
+        1902167,
+        1902173,
+        1902179,
+        1902181,
+        1902191,
+        1902197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1902011,
+        1902017,
+        1902023,
+        1902039,
+        1902041,
+        1902053,
+        1902067,
+        1902071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194043": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1903211,
+        1903223,
+        1903227,
+        1903229,
+        1903233,
+        1903239,
+        1903241,
+        1903251,
+        1903257,
+        1903263,
+        1903269,
+        1903271,
+        1903277,
+        1903281,
+        1903283,
+        1903293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1903101,
+        1903103,
+        1903107,
+        1903109,
+        1903127,
+        1903131,
+        1903137,
+        1903149,
+        1903151,
+        1903163,
+        1903167,
+        1903173,
+        1903179,
+        1903181,
+        1903191,
+        1903197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1903011,
+        1903017,
+        1903023,
+        1903039,
+        1903041,
+        1903053,
+        1903067,
+        1903071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194067": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1904211,
+        1904223,
+        1904227,
+        1904229,
+        1904233,
+        1904239,
+        1904241,
+        1904251,
+        1904257,
+        1904263,
+        1904269,
+        1904271,
+        1904277,
+        1904281,
+        1904283,
+        1904293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1904101,
+        1904103,
+        1904107,
+        1904109,
+        1904127,
+        1904131,
+        1904137,
+        1904149,
+        1904151,
+        1904163,
+        1904167,
+        1904173,
+        1904179,
+        1904181,
+        1904191,
+        1904197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1904011,
+        1904017,
+        1904023,
+        1904039,
+        1904041,
+        1904053,
+        1904067,
+        1904071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194089": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1905211,
+        1905223,
+        1905227,
+        1905229,
+        1905233,
+        1905239,
+        1905241,
+        1905251,
+        1905257,
+        1905263,
+        1905269,
+        1905271,
+        1905277,
+        1905281,
+        1905283,
+        1905293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1905101,
+        1905103,
+        1905107,
+        1905109,
+        1905127,
+        1905131,
+        1905137,
+        1905149,
+        1905151,
+        1905163,
+        1905167,
+        1905173,
+        1905179,
+        1905181,
+        1905191,
+        1905197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1905011,
+        1905017,
+        1905023,
+        1905039,
+        1905041,
+        1905053,
+        1905067,
+        1905071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194113": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1906211,
+        1906223,
+        1906227,
+        1906229,
+        1906233,
+        1906239,
+        1906241,
+        1906251,
+        1906257,
+        1906263,
+        1906269,
+        1906271,
+        1906277,
+        1906281,
+        1906283,
+        1906293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1906101,
+        1906103,
+        1906107,
+        1906109,
+        1906127,
+        1906131,
+        1906137,
+        1906149,
+        1906151,
+        1906163,
+        1906167,
+        1906173,
+        1906179,
+        1906181,
+        1906191,
+        1906197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1906011,
+        1906017,
+        1906023,
+        1906039,
+        1906041,
+        1906053,
+        1906067,
+        1906071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194127": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1907211,
+        1907223,
+        1907227,
+        1907229,
+        1907233,
+        1907239,
+        1907241,
+        1907251,
+        1907257,
+        1907263,
+        1907269,
+        1907271,
+        1907277,
+        1907281,
+        1907283,
+        1907293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1907101,
+        1907103,
+        1907107,
+        1907109,
+        1907127,
+        1907131,
+        1907137,
+        1907149,
+        1907151,
+        1907163,
+        1907167,
+        1907173,
+        1907179,
+        1907181,
+        1907191,
+        1907197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1907011,
+        1907017,
+        1907023,
+        1907039,
+        1907041,
+        1907053,
+        1907067,
+        1907071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194141": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1908211,
+        1908223,
+        1908227,
+        1908229,
+        1908233,
+        1908239,
+        1908241,
+        1908251,
+        1908257,
+        1908263,
+        1908269,
+        1908271,
+        1908277,
+        1908281,
+        1908283,
+        1908293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1908101,
+        1908103,
+        1908107,
+        1908109,
+        1908127,
+        1908131,
+        1908137,
+        1908149,
+        1908151,
+        1908163,
+        1908167,
+        1908173,
+        1908179,
+        1908181,
+        1908191,
+        1908197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1908011,
+        1908017,
+        1908023,
+        1908039,
+        1908041,
+        1908053,
+        1908067,
+        1908071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194159": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1909211,
+        1909223,
+        1909227,
+        1909229,
+        1909233,
+        1909239,
+        1909241,
+        1909251,
+        1909257,
+        1909263,
+        1909269,
+        1909271,
+        1909277,
+        1909281,
+        1909283,
+        1909293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1909101,
+        1909103,
+        1909107,
+        1909109,
+        1909127,
+        1909131,
+        1909137,
+        1909149,
+        1909151,
+        1909163,
+        1909167,
+        1909173,
+        1909179,
+        1909181,
+        1909191,
+        1909197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1909011,
+        1909017,
+        1909023,
+        1909039,
+        1909041,
+        1909053,
+        1909067,
+        1909071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194173": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1910211,
+        1910223,
+        1910227,
+        1910229,
+        1910233,
+        1910239,
+        1910241,
+        1910251,
+        1910257,
+        1910263,
+        1910269,
+        1910271,
+        1910277,
+        1910281,
+        1910283,
+        1910293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1910101,
+        1910103,
+        1910107,
+        1910109,
+        1910127,
+        1910131,
+        1910137,
+        1910149,
+        1910151,
+        1910163,
+        1910167,
+        1910173,
+        1910179,
+        1910181,
+        1910191,
+        1910197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1910011,
+        1910017,
+        1910023,
+        1910039,
+        1910041,
+        1910053,
+        1910067,
+        1910071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194191": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1911211,
+        1911223,
+        1911227,
+        1911229,
+        1911233,
+        1911239,
+        1911241,
+        1911251,
+        1911257,
+        1911263,
+        1911269,
+        1911271,
+        1911277,
+        1911281,
+        1911283,
+        1911293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1911101,
+        1911103,
+        1911107,
+        1911109,
+        1911127,
+        1911131,
+        1911137,
+        1911149,
+        1911151,
+        1911163,
+        1911167,
+        1911173,
+        1911179,
+        1911181,
+        1911191,
+        1911197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1911011,
+        1911017,
+        1911023,
+        1911039,
+        1911041,
+        1911053,
+        1911067,
+        1911071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194207": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1912211,
+        1912223,
+        1912227,
+        1912229,
+        1912233,
+        1912239,
+        1912241,
+        1912251,
+        1912257,
+        1912263,
+        1912269,
+        1912271,
+        1912277,
+        1912281,
+        1912283,
+        1912293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1912101,
+        1912103,
+        1912107,
+        1912109,
+        1912127,
+        1912131,
+        1912137,
+        1912149,
+        1912151,
+        1912163,
+        1912167,
+        1912173,
+        1912179,
+        1912181,
+        1912191,
+        1912197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1912011,
+        1912017,
+        1912023,
+        1912039,
+        1912041,
+        1912053,
+        1912067,
+        1912071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194221": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1913211,
+        1913223,
+        1913227,
+        1913229,
+        1913233,
+        1913239,
+        1913241,
+        1913251,
+        1913257,
+        1913263,
+        1913269,
+        1913271,
+        1913277,
+        1913281,
+        1913283,
+        1913293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1913101,
+        1913103,
+        1913107,
+        1913109,
+        1913127,
+        1913131,
+        1913137,
+        1913149,
+        1913151,
+        1913163,
+        1913167,
+        1913173,
+        1913179,
+        1913181,
+        1913191,
+        1913197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1913011,
+        1913017,
+        1913023,
+        1913039,
+        1913041,
+        1913053,
+        1913067,
+        1913071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194239": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1914211,
+        1914223,
+        1914227,
+        1914229,
+        1914233,
+        1914239,
+        1914241,
+        1914251,
+        1914257,
+        1914263,
+        1914269,
+        1914271,
+        1914277,
+        1914281,
+        1914283,
+        1914293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1914101,
+        1914103,
+        1914107,
+        1914109,
+        1914127,
+        1914131,
+        1914137,
+        1914149,
+        1914151,
+        1914163,
+        1914167,
+        1914173,
+        1914179,
+        1914181,
+        1914191,
+        1914197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1914011,
+        1914017,
+        1914023,
+        1914039,
+        1914041,
+        1914053,
+        1914067,
+        1914071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "194257": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1915211,
+        1915223,
+        1915227,
+        1915229,
+        1915233,
+        1915239,
+        1915241,
+        1915251,
+        1915257,
+        1915263,
+        1915269,
+        1915271,
+        1915277,
+        1915281,
+        1915283,
+        1915293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1915101,
+        1915103,
+        1915107,
+        1915109,
+        1915127,
+        1915131,
+        1915137,
+        1915149,
+        1915151,
+        1915163,
+        1915167,
+        1915173,
+        1915179,
+        1915181,
+        1915191,
+        1915197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1915011,
+        1915017,
+        1915023,
+        1915039,
+        1915041,
+        1915053,
+        1915067,
+        1915071
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": false,
+  "protocol": "pointmaze_exogenous_multiscale_stage7_v1_confirmation",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_exogenous_frequency_routing_stage6_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

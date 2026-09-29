@@ -1,0 +1,98 @@
+{
+  "absolute": {
+    "flat_goal_ppo": {
+      "episode_return": {
+        "ci_lower": 68.5719413168712,
+        "ci_upper": 90.2922381921257,
+        "confidence": 0.95,
+        "mean": 79.43208975449845,
+        "n": 8
+      },
+      "final_goal_distance": {
+        "ci_lower": 0.8493705851468367,
+        "ci_upper": 1.0430299999681192,
+        "confidence": 0.95,
+        "mean": 0.946200292557478,
+        "n": 8
+      },
+      "success": {
+        "ci_lower": 0.18256860010763065,
+        "ci_upper": 0.41118139989236935,
+        "confidence": 0.95,
+        "mean": 0.296875,
+        "n": 8
+      }
+    },
+    "hrl_goal_ppo": {
+      "episode_return": {
+        "ci_lower": 62.5122501256557,
+        "ci_upper": 88.8772584122105,
+        "confidence": 0.95,
+        "mean": 75.6947542689331,
+        "n": 8
+      },
+      "final_goal_distance": {
+        "ci_lower": 0.8156700717876499,
+        "ci_upper": 1.0925543730487282,
+        "confidence": 0.95,
+        "mean": 0.954112222418189,
+        "n": 8
+      },
+      "success": {
+        "ci_lower": 0.15242250938380303,
+        "ci_upper": 0.44132749061619697,
+        "confidence": 0.95,
+        "mean": 0.296875,
+        "n": 8
+      }
+    }
+  },
+  "analysis_version": "pointmaze_goal_control_stage2_analysis_v2",
+  "cell_count": 16,
+  "confidence": 0.95,
+  "evaluation_row_count": 256,
+  "hrl_vs_flat": {
+    "baseline": "flat_goal_ppo",
+    "candidate": "hrl_goal_ppo",
+    "episode_return": {
+      "ci_lower": -16.24545462494123,
+      "ci_upper": 8.770783653810529,
+      "confidence": 0.95,
+      "mean_improvement": -3.7373354855653522,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "final_goal_distance": {
+      "ci_lower": -0.1462181416260961,
+      "ci_upper": 0.1303942819046739,
+      "confidence": 0.95,
+      "mean_improvement": -0.007911929860711098,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "joint_status": "inconclusive",
+    "success": {
+      "ci_lower": -0.13682604128338913,
+      "ci_upper": 0.13682604128338913,
+      "confidence": 0.95,
+      "mean_improvement": 0.0,
+      "n": 8,
+      "status": "inconclusive"
+    }
+  },
+  "independent_training_replicate_count": 8,
+  "multiscale_admission_status": "blocked",
+  "ordinary_hrl_learning_status": "not_supported",
+  "ordinary_hrl_min_success_rate": 0.5,
+  "protocol_version": "pointmaze_goal_control_stage2_v2",
+  "runtime_versions": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "numpy": "2.1.3",
+    "pettingzoo": "1.26.1",
+    "python": "3.10.14",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  }
+}

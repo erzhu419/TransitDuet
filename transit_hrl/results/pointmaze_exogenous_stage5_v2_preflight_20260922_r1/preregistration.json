@@ -1,0 +1,87 @@
+{
+  "algorithm_revision": "a4a64730a9542e690650d3a39856a5324ec51fcc",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_exogenous_history",
+      174001
+    ],
+    [
+      "hrl_exogenous_history",
+      174001
+    ]
+  ],
+  "claim_gate": {
+    "hrl_final_vs_untrained_episode_return": "positive_ci",
+    "hrl_final_vs_untrained_tracking_success": "positive_ci",
+    "hrl_tracking_success_ci_lower": ">=0.50",
+    "hrl_vs_flat": "reported_not_gating"
+  },
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_exogenous_history",
+    "hrl_exogenous_history"
+  ],
+  "optimizer_seeds": [
+    174001
+  ],
+  "options": {
+    "174001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1690211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1690101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1690011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_exogenous_control_stage5_v2_confirmation",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_exogenous_control_stage5_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

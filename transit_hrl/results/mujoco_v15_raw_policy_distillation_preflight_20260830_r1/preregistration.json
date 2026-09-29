@@ -1,0 +1,174 @@
+{
+  "anchor_run_name": "mujoco_v14_29_fresh_anchor_bank_20260830_r1",
+  "candidates": [
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 0.5,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 0.75,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 0.75
+    },
+    {
+      "blend": 0.4,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.5,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 1.0
+    },
+    {
+      "blend": 0.6,
+      "ridge": 0.01,
+      "slow_alpha": 1.0,
+      "transfer_strength": 1.0
+    }
+  ],
+  "design_roots": [
+    2617714361,
+    2320213826,
+    1621012606,
+    523802056,
+    2871897286,
+    1194129291,
+    702322608,
+    1650629248
+  ],
+  "development_protocol_version": "mujoco_v15_raw_policy_distillation_preflight_v3",
+  "distill_roots": [
+    586756208,
+    1062465530,
+    3980369529,
+    2087212635
+  ],
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_v14_29_raw_policy_distillation_development_not_confirmatory",
+  "frozen_algorithm_revision": "2b83e63b652c502001bdc1a4107d00193e95965d",
+  "launcher_source_revision": "f0f569954bd1f06a705b55750ba4fc640851bab8",
+  "optimizer_seeds": [
+    2978317753
+  ],
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 18,
+    "ram_mb_per_task": 8192,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "design": "pooled_and_two_disjoint_root_folds_require_reward_floor_and_zero_normalized_violation_on_responsibility_raw_lower_latent_lower_effective_upper_and_latent_upper_frequency_endpoints",
+    "failure": "no_design_candidate_or_validation_failure_is_an_abstention",
+    "student": "ridge_fit_of_the_upper_mlp_output_head_then_lower_head_fit_on_counterfactual_states_and_exact_complements_of_the_fitted_upper",
+    "teacher": "strictly_causal_previous_macro_total_action_ema_projected_to_the_exact_upper_lower_action_feasibility_intersection",
+    "validation": "one_evaluation_of_the_design_selected_candidate_only"
+  },
+  "status": "frozen_before_v15_development_outcome_access",
+  "validation_roots": [
+    1271831274,
+    1856364544,
+    1978685983,
+    3984224271,
+    2932771227,
+    2732972439,
+    1573218729,
+    1141712102
+  ]
+}

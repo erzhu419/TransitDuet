@@ -1,0 +1,129 @@
+{
+  "actor_state_limit_per_level": 32768,
+  "actor_step_rms_values": [
+    1e-07,
+    1e-06,
+    1e-05,
+    3e-05,
+    0.0001
+  ],
+  "actor_update_scope": "output_bias",
+  "anchor_run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "critic_collection_mode": "paired_output_bias",
+  "critic_ensemble_seeds": [
+    174059501,
+    3501542227,
+    2143749919,
+    424079015
+  ],
+  "critic_epochs": 40,
+  "critic_hidden_dim": 64,
+  "critic_holdout_roots": [
+    371680227,
+    2176047177,
+    737671614,
+    4162047907
+  ],
+  "critic_intervention_bias_rms": 0.25,
+  "critic_intervention_variants": [
+    "control",
+    "lower_minus",
+    "lower_plus",
+    "upper_minus",
+    "upper_plus"
+  ],
+  "critic_learning_rate": 0.001,
+  "critic_minibatch_size": 1024,
+  "critic_minimum_action_permutation_mse_increase": 0.0,
+  "critic_minimum_holdout_r2": 0.0,
+  "critic_train_roots": [
+    463108515,
+    2353291356,
+    1264983659,
+    3414767292,
+    4280113228,
+    59188085,
+    1560150663,
+    1828934118
+  ],
+  "cvar_alpha": 0.5,
+  "design_roots": [
+    1079377154,
+    3664811967,
+    4030572148,
+    1867246542,
+    3660996657,
+    684879,
+    1041872867,
+    116551589,
+    2420590201,
+    527332615,
+    2474663098,
+    1269883029,
+    3927231003,
+    494977800,
+    2246035766,
+    2662853794
+  ],
+  "development_protocol_version": "mujoco_v14_25_bias_matched_critic_preflight_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_v14_24_bias_matched_actor_update_preflight_not_confirmatory",
+  "lower_cost_return_horizon_decisions": 32,
+  "minimum_gradient_median_cosine": 0.0,
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "risk_mode": "mode_mean",
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 24,
+    "ram_mb_per_task": 16384,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "actor_direction": "upper_and_lower_output_bias_only_action_cost_gradient_matching_the_intervention_estimand",
+    "critic": "four_bootstrap_action_conditioned_cost_critics_per_policy_level",
+    "critic_data": "deterministic_control_upper_plus_minus_and_lower_plus_minus_output_bias_interventions_paired_by_environment_path",
+    "critic_gate": "upper_and_lower_holdout_r2_above_zero_true_action_prediction_better_than_fixed_permuted_action_prediction_and_median_actor_gradient_cosine_above_zero",
+    "design_paths": "sixteen_fresh_unintervened_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "intervention": "level_isolated_antithetic_raw_actor_mean_bias_with_rms_0p25",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "target": "upper_eight_decision_and_lower_thirty_two_decision_duration_discounted_native_cost_returns",
+    "validation_paths": "sixteen_independent_unintervened_roots_crossed_with_four_modes"
+  },
+  "source_revision": "f69d3422be09db1fde0a76d95fc77208b3a00838",
+  "status": "frozen_before_v14_25_preflight_outcome_access",
+  "upper_cost_return_horizon_decisions": 8,
+  "validation_roots": [
+    1015224266,
+    3451284626,
+    1370140012,
+    916302353,
+    1265040662,
+    4282145080,
+    4046390775,
+    363991780,
+    2900859644,
+    1956794319,
+    2864471245,
+    1735278240,
+    1127361720,
+    3989817577,
+    1556045787,
+    1062515032
+  ]
+}

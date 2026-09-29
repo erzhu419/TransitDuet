@@ -1,0 +1,497 @@
+{
+  "anchor_cell_count": 45,
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "group_replay1_trust1_outer1_eps1e3_bt4_strict_control",
+    "group_replay1_trust1_outer1_restore1_eps1e3_bt4_f2",
+    "group_replay1_trust1_outer1_restore1_eps1e3_bt4_f3",
+    "group_replay1_trust1_outer1_restore1_eps5e3_bt4_f2",
+    "group_replay1_trust1_outer1_restore1_eps5e3_bt4_f3",
+    "group_replay1_trust1_outer1_restore1_eps5e3_bt8_f3"
+  ],
+  "cell_count": 45,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "dea6a59a66d9d1f0b1473bb45fcbd9f2c5817e9896c8c157fff33b106603e00e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "e201283f3c1f71d90549ec38ca057ed07615010f3166ccee5f4d7ba5fd9c7b66",
+      "optimizer_seed": 2182280623,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_2182280623"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "90966bf341283a3db6ee732a3cc5a7b3c80fa3e727f016f30fd3bce2c6d3d646",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "d87eda30231a8bc5f063eab7203a3e3879eee5fc13b271f63ddd167b0e615c5e",
+      "optimizer_seed": 4016970853,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_4016970853"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "e95526cb0d3a7d9aceb4af650608798faf5b76325ff46aef1acacd4056ca86bd",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "7ccbc7d3dadeffae4e2c1f535b8b9d5ab72a2e44ce27851eb299b2953efcc95d",
+      "optimizer_seed": 2829355830,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_2829355830"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "a17a94c39a987437ff004e74465562a01d41f8517e86c7340e6a40161b9f816a",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "7ae92327aa49eacbdb0e3f5b431a159c1e80e954840e85281ee98bf41129c72e",
+      "optimizer_seed": 2069740444,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_2069740444"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "858d886107023db1ed0f92312f3fd8be12005ce8340d58ee567484bee9e7c15b",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "771143c48afe04c077131e77ea728fd6b8a4f5767888523248dd4d47b82c734b",
+      "optimizer_seed": 1282433932,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_1282433932"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "42b01781be782e09e0d5c4911aa9cc4a4521d2d09493f354af1eee00c6ff22ce",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "43979988c9a34d591210d42ea7abf048c1fca86a31aabf4efbb2cb0d1518c8b1",
+      "optimizer_seed": 975280645,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_975280645"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "c7f7e748f3cae4d3b3d7e59ee8fa13346c025a9ee288f10c825dbbe17f042212",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "724cf5c4f1458f6e68e18af918a5f3baea1a34f6c86bc6e4546606dc410b57bc",
+      "optimizer_seed": 2798338935,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_2798338935"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "e4732e5166520ab4425ce805890c5ea0017443e0ec997403132eac3797a2caa5",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "c668d6d27dcf9567a87a50d2110fd8aee3cfb49969afb456bfd1b7fb4daf5c95",
+      "optimizer_seed": 23627913,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_23627913"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "5ccac4cd65ab5d36a19d9224754ec7737069ebdad3041815081001d58ac11870",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "d74e84f4c22b5b607b6073453cc89cb1ef976941dc4c0fd6e2cbb38a9cf2a0d6",
+      "optimizer_seed": 3508173532,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_3508173532"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "8589a3d1455e8a03d27dbb2f24ef05d2ca4bb82ff6fbc1c7cbf58c912d5ab0a3",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "480df0997abeb53abb540418b0c0c68d5abb1065b77dfe2434ee121bbd832e73",
+      "optimizer_seed": 3799486943,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_3799486943"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "e8cfbe9d6bd630df8a8b9fb66a31997535b01da522ecea3e3be3c4fcc4c06933",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "657e2667a4f4f673a3cdafa631b09254c9fcecd4abafc476ff8c1c1c4ad55cec",
+      "optimizer_seed": 4004573542,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_4004573542"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "12362a49e8ec1a3744c63a6bd8fc4ce5f2a7cfc61816b40dd7191c5001a2bf08",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "2ba127a69053ea636bc6d0b2c5b791316e9c7256a4d9e8859f00436512ed26b6",
+      "optimizer_seed": 1167085633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_1167085633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "b378349db653ab5c2c70218f2bfcb79dd1452606d5d1439deb1b64fe86cc6727",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "4755018ccf1257f9aa092a6322946bdd602cf45af16e36eba39b73b0278a2512",
+      "optimizer_seed": 1775539633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_1775539633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "2cf72361c929ab1ec81a08d95eb5b230f49c30800404ac71077c6e9d3eee404b",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "23ea79089f9600e91f081f76e0263c4e2cf7da0c2089cfde4683909b7ec4c08d",
+      "optimizer_seed": 3810522536,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_3810522536"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "330d28974cd898ddc0ea7c7e304e442ac5599b60b7e2919483c99d4422c81cb5",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "4eb682a3597857defa562950661051c176f66b1dc7ef47ea3af8337ef9246595",
+      "optimizer_seed": 1442147348,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/HalfCheetah-v5/replicate_1442147348"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "f06e39a79f2187ceb5e173659c1041e6dcde8b4251df63dc286c4e33e3fc9325",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "1588e08a38b29254d2a060e6c670cb02ab1d52d5687bba191b1d73830473162f",
+      "optimizer_seed": 2182280623,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_2182280623"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "b71c3b9971a8419249d80d6f873db627f775174c0013ef238bf18092ad0d48e6",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "3f21a8fa7bbe651475803053c2a27fb56a0fd844867725ec5e3ca286b8ac495a",
+      "optimizer_seed": 4016970853,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_4016970853"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "507bf4f96ee09fc2bc4512b4dc140db781425e3da066211b23af8ebe98227229",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "82fffdcf4e6113335e9f529ac45b38d9444be448ff85795bd9f661bbb674b0f1",
+      "optimizer_seed": 2829355830,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_2829355830"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "49b9ebe3acc62a954981546f0cd74178b7cb6d5c3bc08504748546f6c88c3c91",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "378d5c1a9c3e819f8e1fe92b018e5c9c5a15454cb3f2d3d54eff039ee65bc87f",
+      "optimizer_seed": 2069740444,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_2069740444"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "19125ac422d8222dfc87c84c070065adee48cd630508719e4fee288f0e2e9dae",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "38a68cfe92217b39a2fe23ed5f739931f36851b8d6663bbf790b507c48d4308d",
+      "optimizer_seed": 1282433932,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_1282433932"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "0880c6f491f959a64afae847c3ad3b70685f73a88c761c95c47452eeaa8b3d49",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "699d392131e1f830086a90947ad0fce30f98cb3483f8146c2527f24b63b04320",
+      "optimizer_seed": 975280645,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_975280645"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "29e7205d83027c68c6c048a79e1935131d5f58996c77034554fdcb408d951997",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "2820e63e46de2204c51891a92c089b3b3a52b99901378c09277f09f520341343",
+      "optimizer_seed": 2798338935,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_2798338935"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "205ba74c0d9564702faf7106de39189de84c4e56fbf66a1b09d3dbee07dbd00f",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "7f31c5dafbb324771ac93235b47bdb6bc35bc87fe82deeee3c8ac0ba089b6361",
+      "optimizer_seed": 23627913,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_23627913"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "63728327d83047256b0132d1a4ea102ed8e39c137d999cee044b3fdc00597a0b",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "626e14417f6978949e7a59fa0eec3b54ef8d4b8331855ce998ffbb5aa2df52fe",
+      "optimizer_seed": 3508173532,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_3508173532"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "11be1ec0646f0ae88a3fbd561e9e2acb2b863ba40c82c549ec3f81079d2e7757",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "10741e0c244445aeceff372ecee95ebb84bd4dd2d153f4fa33c1cb5163152976",
+      "optimizer_seed": 3799486943,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_3799486943"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "806676a3108c494c93a898fc789f117c06afc0bf38b281612d26713c69ec0e62",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "0eef2e6acc646464fe3395f1cd69e048e1ef41f83415d07989b73572ec8c0d4f",
+      "optimizer_seed": 4004573542,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_4004573542"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "e8de7bad21a06c3eea05c10c186e869436727e0dbb220df6b4699f92c937692c",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "81cc75bbb3a8919d5e0976c8ab41ada3780e3dd4637abe6ee9e60691636236a9",
+      "optimizer_seed": 1167085633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_1167085633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "a9e3a8b8d78330d26b4b91e5bd7d8045c7cf1c223766a503de298b42f3d55456",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "ea902df605c0cc7b6c8c0513348075ed34c1b314c9516ff9665d84cfa19f71a5",
+      "optimizer_seed": 1775539633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_1775539633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "bfb920b40481a8cd4001a756d448536533a21d732a44e112c9d2f81495c77f85",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "d647912ce4973c61de0a3c4e763f6017b42e2eef9c933e7a8866aaba221804aa",
+      "optimizer_seed": 3810522536,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_3810522536"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "47f70724f4d7e0c9077fe4be4e95eea4b0740768b42b294f29e36891921662fa",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "02ceb32a41f2a8769890db2fd84085221bc0a829e0b6630c5f7f0bf43a7bedee",
+      "optimizer_seed": 1442147348,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Hopper-v5/replicate_1442147348"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "47b6f272acb926be90a0d3b455980ac45e665df2830faf68d67a6adecd26aab9",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "de7caf41ed2eb81f3b06c2b99e2fd9245648ae4ae43ad950c6f4d13adc52605f",
+      "optimizer_seed": 2182280623,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_2182280623"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "afe6c47c02e8805260e3de532b587a9753ad0e5eaf14c9cc2a76b22de5ec5f8a",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "d09ef2f1ea8935f1b031192b2f2c765c446a36664cd06d5dc466ec045a6e51f8",
+      "optimizer_seed": 4016970853,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_4016970853"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "f79f159abcc3766c64eb248f97dd8e160e76a70bb55e273db70db709ad439eaa",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "a0346764b361bb112bd2228e9d40d7b5c3f04968f575b645828131926739c98e",
+      "optimizer_seed": 2829355830,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_2829355830"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "1e0510bc838331d7842435fb64bf39e94cb65408b336ba97012b6f57f0ce278c",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "3354c4aa5d09041b20c72704617b16f47f40a4ba5ea6d39f7987f0a94fe4e3c6",
+      "optimizer_seed": 2069740444,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_2069740444"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "6e217acf1682b5acb6d00d84d12958164197c016cb224c4c30310b603663cb38",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "07b60d9353889cf3d6c6dc2c44500c169334ec500b5428ffc4f916b3a2999ec8",
+      "optimizer_seed": 1282433932,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_1282433932"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "675f5d5a8d88a03bc1b3bf51e37024a88390b558a7667f648a95cb8fa36e4f1f",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "cb77032d950bbbfc4f429831c0b0398051f9d1dec9e56cf16be03ca31ebff9ca",
+      "optimizer_seed": 975280645,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_975280645"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "250717f0f20dcd23718596c90859a761c5b324401ffc3fed7d70df2ffa437907",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "820d7147bdfb28844d4c5f8b9a432b7250916953959dc20b96a09f6ac383d232",
+      "optimizer_seed": 2798338935,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_2798338935"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "30188e9ab11d86258484e171b1112a442da2bbafe1fe529e953d266f6b42ae0b",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "3383c114c4f2e542d6cf71ec4d5767b4e7a2a038ced10a7cfa7eb24b297b93f5",
+      "optimizer_seed": 23627913,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_23627913"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "f0e4d676f49ca577c47d4795cbad191a8f2139f004ea72f6f4104e196f37460a",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "61c2f2d097d6476ef866d5d182255f251a75c3aa9c9dc2263b6d5875375d1142",
+      "optimizer_seed": 3508173532,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_3508173532"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "b7916f3b0109347a990a89cab3fd590b7bf25f5ba413d87c8a3c199605d2b1a2",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "b52f0362b06297d326d44771a4ec2e875dc2125d454ff771c847517bca2db992",
+      "optimizer_seed": 3799486943,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_3799486943"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "9e453583d9c9c44f867af20dda51aa399b72a5cb1dc3ea720075c3369dd134c3",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "9cfd7ad7aed31fc2e6a96cae1e84db1e97568ff3db6fc720952301513388d13d",
+      "optimizer_seed": 4004573542,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_4004573542"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "c54a1922f1dd189563922d77ac697a52f11c149a7b103241fc94b9fd1df88989",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "a239b40851814ea859f79a3ddc94a3f996e23b320dadee608622674bc9c49af0",
+      "optimizer_seed": 1167085633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_1167085633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "3b0ce0e6730266981478b9d1af17f9edd8e57563c307c015b488e25fc2415016",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6a3882401b79a577bbcfd544071d934eaf8ec0f1b812b2bc8658f4947baed48d",
+      "optimizer_seed": 1775539633,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_1775539633"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "466e545128158bb6c8bfa667cfb0e0d11536fe3a8b69217a18176c22307f609a",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "7eade939e5c07fac100ea27324120e2dcd7cbc7250cbd87237ac9ee8fe3113c0",
+      "optimizer_seed": 3810522536,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_3810522536"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "2137264b92f076ddd6abd3669e77b49af3c651a40574c61d56444f609e6d9856",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c1fa336c919ae23e8acb9a86e59d8f19ada104760668ded286a4135040298cc2",
+      "optimizer_seed": 1442147348,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_15_restoration_multiseed_development_20260810_r1/anchors/Walker2d-v5/replicate_1442147348"
+    }
+  ],
+  "continuation_cell_count": 0,
+  "development_protocol_version": "mujoco_v14_15_closed_loop_restoration_filter_screen_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": false,
+  "optimizer_seeds": [
+    2182280623,
+    4016970853,
+    2829355830,
+    2069740444,
+    1282433932,
+    975280645,
+    2798338935,
+    23627913,
+    3508173532,
+    3799486943,
+    4004573542,
+    1167085633,
+    1775539633,
+    3810522536,
+    1442147348
+  ],
+  "phases": [
+    "anchor"
+  ],
+  "status": "development_scope_complete_unanalyzed"
+}

@@ -1,0 +1,69 @@
+{
+  "analysis_version": "mujoco_v14_21_distributional_actor_preflight_v1",
+  "cell_count": 3,
+  "cells": [
+    {
+      "design_baseline_merit": 0.055401662049861584,
+      "design_candidate_merit": 0.0070354321555939625,
+      "design_eligible_candidate_count": 3,
+      "environment": "HalfCheetah-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": -1.0,
+      "selected_source": "ranked_antithetic_gradient",
+      "selected_step_rms": 1e-07,
+      "validation_baseline_merit": 0.05540166204986167,
+      "validation_candidate_merit": 0.08756019930717152,
+      "validation_frequency_violation_count": 15,
+      "validation_relative_merit_reduction": -0.5804615974944409,
+      "validation_reward_violation_count": 3,
+      "validation_supported": false,
+      "validation_worst_frequency_violation": 0.10288682745496791
+    },
+    {
+      "design_baseline_merit": 0.05540166204986149,
+      "design_candidate_merit": 0.05532116642303088,
+      "design_eligible_candidate_count": 9,
+      "environment": "Hopper-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": -1.0,
+      "selected_source": "ranked_antithetic_gradient",
+      "selected_step_rms": 1e-06,
+      "validation_baseline_merit": 0.055401662049861675,
+      "validation_candidate_merit": 0.0553435221714012,
+      "validation_frequency_violation_count": 20,
+      "validation_relative_merit_reduction": 0.001049424806211601,
+      "validation_reward_violation_count": 0,
+      "validation_supported": true,
+      "validation_worst_frequency_violation": 0.0526181331729596
+    },
+    {
+      "design_baseline_merit": 0.055401662049861494,
+      "design_candidate_merit": 0.05511154086561676,
+      "design_eligible_candidate_count": 9,
+      "environment": "Walker2d-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": -1.0,
+      "selected_source": "ranked_antithetic_gradient",
+      "selected_step_rms": 1e-06,
+      "validation_baseline_merit": 0.05540166204986165,
+      "validation_candidate_merit": 0.05492867406299075,
+      "validation_frequency_violation_count": 20,
+      "validation_relative_merit_reduction": 0.008537433163019697,
+      "validation_reward_violation_count": 0,
+      "validation_supported": true,
+      "validation_worst_frequency_violation": 0.05274086000659728
+    }
+  ],
+  "evidence_role": "post_v14_20_distributional_actor_mechanism_preflight_not_confirmatory",
+  "selection_contract": {
+    "actor_scope": "joint_upper_lower_deterministic_output_heads",
+    "design_paths": "sixteen_frozen_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "risk_aggregation": "four_disturbance_mode_means",
+    "search": "eight_fixed_antithetic_rademacher_directions_and_rank_gradient",
+    "validation_paths": "sixteen_independent_frozen_roots_crossed_with_four_modes"
+  },
+  "status": "distributional_actor_restoration_preflight_not_supported",
+  "supported_cell_count": 2
+}

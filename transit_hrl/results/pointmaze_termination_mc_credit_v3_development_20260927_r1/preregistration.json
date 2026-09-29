@@ -1,0 +1,247 @@
+{
+  "algorithm_revision": "1fc6dc8ffff597362bfa02bbb962b5915f5a3609",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "evidence_role": "post_failure_development_only",
+  "optimizer_roots": [
+    209011,
+    209061
+  ],
+  "options": {
+    "209011": {
+      "branch_fit": [
+        2180201,
+        2180211,
+        2180223,
+        2180227,
+        2180233,
+        2180239,
+        2180251,
+        2180257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2180101,
+        2180103,
+        2180109,
+        2180127,
+        2180131,
+        2180137,
+        2180149,
+        2180151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "termination_hidden_dim": 64,
+      "termination_iterations": 18,
+      "termination_learning_rate": 0.0003,
+      "threshold_quantile": 0.75,
+      "train": [
+        2180011,
+        2180017,
+        2180023,
+        2180029,
+        2180041,
+        2180047,
+        2180059,
+        2180061
+      ],
+      "trigger_eval": [
+        2180301,
+        2180307,
+        2180311,
+        2180313,
+        2180317,
+        2180331,
+        2180337,
+        2180347,
+        2180349,
+        2180353,
+        2180359,
+        2180367,
+        2180373,
+        2180379,
+        2180383,
+        2180389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "209061": {
+      "branch_fit": [
+        2184201,
+        2184211,
+        2184223,
+        2184227,
+        2184233,
+        2184239,
+        2184251,
+        2184257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2184101,
+        2184103,
+        2184109,
+        2184127,
+        2184131,
+        2184137,
+        2184149,
+        2184151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "termination_hidden_dim": 64,
+      "termination_iterations": 18,
+      "termination_learning_rate": 0.0003,
+      "threshold_quantile": 0.75,
+      "train": [
+        2184011,
+        2184017,
+        2184023,
+        2184029,
+        2184041,
+        2184047,
+        2184059,
+        2184061
+      ],
+      "trigger_eval": [
+        2184301,
+        2184307,
+        2184311,
+        2184313,
+        2184317,
+        2184331,
+        2184337,
+        2184347,
+        2184349,
+        2184353,
+        2184359,
+        2184367,
+        2184373,
+        2184379,
+        2184383,
+        2184389
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "preflight": false,
+  "protocol": "pointmaze_termination_mc_credit_v3_development",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "stochastic_repetitions": 4,
+  "termination_gae_lambda": 1.0
+}

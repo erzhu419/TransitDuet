@@ -1,0 +1,31 @@
+{
+  "candidate_count": 16,
+  "development_protocol_version": "mujoco_v18_2_state_conditioned_actor_v1",
+  "evidence_role": "grouped_reused_path_state_conditioned_actor_selection_not_confirmatory",
+  "frozen_core_revision": "6ebf63c77c5c8ecf2e0784b7361eb90a6d71caf9",
+  "frozen_source_manifest_sha256": "d5842e0972d59182be55881b52de9b4ac074b5b355aa1b4c929e4b7f0a849099",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "scheduler_contract": {
+    "binding_reason": "v18.1 states, v17.8 references, and v17.12 targets remain server-only on node003",
+    "cpu": 16,
+    "ram_mb": 32768,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false,
+    "workers": 16
+  },
+  "selection_contract": {
+    "advancement_gate": "120/120 valid, 113/113 reference-feasible paths preserved, all seven actor-floor paths and both floor seed groups recovered, target normalized MSE at most 0.75, reference correction RMS at most 0.01, and nonzero post-clipping correction on all floor paths",
+    "candidate_set": "the complete frozen 16-member two-hidden-layer MLP grid; every candidate receives exact full-horizon responsibility oracles",
+    "claim_boundary": "grouped reused-path state-conditioned distillation only; no reward, closed-loop, fresh-seed, online-learning, or manuscript claim",
+    "failure_rule": "if no candidate passes, do not tune this panel further; diagnose the remaining state/action support before defining another mechanism",
+    "fresh_access_rule": "no fresh path is read; a complete reused-panel gate only authorizes a separately frozen closed-loop validation",
+    "grouping": "eight leave-one-seed-out folds; all five disturbance modes of the held seed remain outside that fold's training data",
+    "input": "unchanged v17.8 total-action references, v18.1 causal lower-policy states, and seven separate v17.12 nearest-feasible targets",
+    "online_features": "current lower-policy state plus current and past upper/lower action proposals; actor-floor labels and oracle targets are never features",
+    "selection_order": "joint-feasible path count, actor-floor recovery, reference-feasible preservation, complete floor seed groups, target fidelity, reference correction, correction magnitude, then candidate id"
+  },
+  "state_dataset_run": "mujoco_v18_1_state_actor_dataset_20260831_r1",
+  "status": "registered_before_v18_2_target_access",
+  "target_run": "mujoco_v17_12_nearest_feasible_action_oracle_20260831_r1"
+}

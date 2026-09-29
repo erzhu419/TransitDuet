@@ -1,0 +1,44 @@
+{
+  "anchor_cell_count": 1,
+  "arms": [
+    "native_pd_cvar_projection"
+  ],
+  "cell_count": 2,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "f9bff3a9cf99fb8d4a589b8be797b464ec90c3518967880822d264278d13ccfc",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "3e886a76ee2f1a348f3d1e7e6c4e3d14038e23307c219f48bf2e2de9702b2d90",
+      "optimizer_seed": 4196455150,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_17_native_pd_cvar_smoke_20260830_r1/anchors/HalfCheetah-v5/replicate_4196455150"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "f9bff3a9cf99fb8d4a589b8be797b464ec90c3518967880822d264278d13ccfc",
+      "arm": "native_pd_cvar_projection",
+      "checkpoint_file_sha256": "03878b2299661ea0441d0feabea3bdd216f0b0ad4649636a6b5b185c524b1953",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "3e886a76ee2f1a348f3d1e7e6c4e3d14038e23307c219f48bf2e2de9702b2d90",
+      "optimizer_seed": 4196455150,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_17_native_pd_cvar_smoke_20260830_r1/cells/HalfCheetah-v5/native_pd_cvar_projection/replicate_4196455150"
+    }
+  ],
+  "continuation_cell_count": 1,
+  "development_protocol_version": "mujoco_v14_17_native_pd_cvar_screen_v1",
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": false,
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "status": "development_scope_complete_unanalyzed"
+}

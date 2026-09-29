@@ -1,0 +1,63 @@
+{
+  "arms": [
+    "native_pd_cvar_projection"
+  ],
+  "cell_count": 2,
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "node_counts": {
+    "node002": 2
+  },
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "run_name": "mujoco_v14_17_native_pd_cvar_smoke_20260830_r1",
+  "scheduler_snapshots": [],
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 4,
+  "task_attempt_lineage": {
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_17_native_pd_cvar_smoke_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-4196455150": {
+      "attempts": [
+        {
+          "finished_at": 1788052299.213686,
+          "id": "t84388",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788051913.8221726,
+          "status": "done",
+          "submitted_at": 1788051886.7690387
+        }
+      ],
+      "selected_task_id": "t84388",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_17_native_pd_cvar_smoke_20260830_r1/continuation/HalfCheetah-v5/native_pd_cvar_projection/rep-4196455150": {
+      "attempts": [
+        {
+          "finished_at": 1788058920.1160462,
+          "id": "t84389",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788052388.9000287,
+          "status": "done",
+          "submitted_at": 1788051886.8065789
+        }
+      ],
+      "selected_task_id": "t84389",
+      "selection": "only_attempt"
+    }
+  },
+  "task_ids": [
+    "t84388",
+    "t84389"
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "anchor_cell_count": 1,
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "relative_s050_asym_u003_l008_s13_r05_k1",
+    "relative_s050_asym_u003_l008_s13_r05_k4",
+    "relative_s050_asym_u003_l008_s13_r05_k8",
+    "relative_s050_asym_u003_l008_s13_r05_k16",
+    "relative_s050_asym_u003_l008_s310_r05_k8",
+    "relative_s050_asym_u003_l008_s310_r10_k8"
+  ],
+  "cell_count": 10,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "iterative_projection_pretrain_anchor",
+      "checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/anchors/HalfCheetah-v5/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "e985a9eb30c4395f69de5857b4ccc0cd9ba79e2a1056a24770c1c90774f4f59b",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "99ce7897fde5c2990fdffd870abdc0e6ea98f242d734cb5fc82f6ff908f6cf39",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/mean_s000_control/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "f219c8da452999528d93994072ec69c30c1d4cca8f7b9f08ae24352717fc9314",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "97b2182c16582f95f5dfb935f9ee8fff3b017d7f8465d61e5f90444505d72a7a",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s13_r05_k1",
+      "checkpoint_file_sha256": "9f85cb8683068da532f156e675ca0e30455ea66c04f1c78c46a6551a9ce6010e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s13_r05_k1/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s13_r05_k4",
+      "checkpoint_file_sha256": "367e190f39914d0b4298b25e315ad44106628b8f56490990ce99194fdee0b575",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s13_r05_k4/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s13_r05_k8",
+      "checkpoint_file_sha256": "6f3c948cf5830e8957f92175499035df32d74f35d026fde401a0a073c7c0b3d1",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s13_r05_k8/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s13_r05_k16",
+      "checkpoint_file_sha256": "4da5a1b086f8694bdde4827291418d3aca5079876d7a9d5bb323bec4e54f6207",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s13_r05_k16/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s310_r05_k8",
+      "checkpoint_file_sha256": "df9c233e4f10590974c504d629361890f777254d0c82069d8b7080db68a6d56e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s310_r05_k8/replicate_2619431165"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "8bc432c706502eaf3110edf54eb1316344079c082f5c6f7aff8cd279f9709f91",
+      "arm": "relative_s050_asym_u003_l008_s310_r10_k8",
+      "checkpoint_file_sha256": "fe3227fa7dd65547a6a237940b811000142953cc464d78847dc4513f7a86c710",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5a2f0d611ca76fc8bf5ed46e79d403314540cea775894ab52856c2ca0dd9e1fb",
+      "optimizer_seed": 2619431165,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_11_iterative_projection_preflight_20260809_r1/cells/HalfCheetah-v5/relative_s050_asym_u003_l008_s310_r10_k8/replicate_2619431165"
+    }
+  ],
+  "continuation_cell_count": 9,
+  "development_protocol_version": "mujoco_v14_11_iterative_projection_screen_v1",
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": false,
+  "optimizer_seeds": [
+    2619431165
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "status": "development_scope_complete_unanalyzed"
+}

@@ -1,0 +1,62 @@
+{
+  "analysis_version": "mujoco_v15_raw_policy_distillation_analysis_v1",
+  "cell_count": 3,
+  "cells": [
+    {
+      "design_eligible_candidate_count": 4,
+      "environment": "HalfCheetah-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": {
+        "blend": 0.5,
+        "ridge": 0.01,
+        "slow_alpha": 0.5,
+        "transfer_strength": 1.0
+      },
+      "selected_index": 4,
+      "status": "no_complete_raw_policy_candidate",
+      "validation_frequency_violation_merit": 0.0,
+      "validation_reward_maximum_normalized_violation": 0.013683565983085733,
+      "validation_supported": false,
+      "validation_worst_frequency_violation": 0.0
+    },
+    {
+      "design_eligible_candidate_count": 6,
+      "environment": "Hopper-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": {
+        "blend": 0.4,
+        "ridge": 0.01,
+        "slow_alpha": 0.75,
+        "transfer_strength": 0.75
+      },
+      "selected_index": 6,
+      "status": "raw_policy_distillation_preflight_supported",
+      "validation_frequency_violation_merit": 0.0,
+      "validation_reward_maximum_normalized_violation": 0.0,
+      "validation_supported": true,
+      "validation_worst_frequency_violation": 0.0
+    },
+    {
+      "design_eligible_candidate_count": 0,
+      "environment": "Walker2d-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": null,
+      "selected_index": null,
+      "status": "no_complete_raw_policy_candidate",
+      "validation_frequency_violation_merit": null,
+      "validation_reward_maximum_normalized_violation": null,
+      "validation_supported": false,
+      "validation_worst_frequency_violation": null
+    }
+  ],
+  "evidence_role": "post_v14_29_raw_policy_distillation_development_not_confirmatory",
+  "selection_contract": {
+    "design": "pooled_and_two_disjoint_root_folds_require_reward_floor_and_zero_normalized_violation_on_responsibility_raw_lower_latent_lower_effective_upper_and_latent_upper_frequency_endpoints",
+    "failure": "no_design_candidate_or_validation_failure_is_an_abstention",
+    "student": "ridge_fit_of_the_upper_mlp_output_head_then_lower_head_fit_on_counterfactual_states_and_exact_complements_of_the_fitted_upper",
+    "teacher": "strictly_causal_previous_macro_total_action_ema_projected_to_the_exact_upper_lower_action_feasibility_intersection",
+    "validation": "one_evaluation_of_the_design_selected_candidate_only"
+  },
+  "status": "raw_policy_distillation_preflight_not_supported",
+  "validation_supported_count": 1
+}

@@ -1,0 +1,75 @@
+{
+  "algorithm_revision": "f9ab0b4a532d1bc0c31466b24d4dcbc70634e585",
+  "artifact_contract": "result_json_only_v1",
+  "cell_count": 15,
+  "nodes": {
+    "node001": 3,
+    "node004": 4,
+    "node005": 4,
+    "node006": 4
+  },
+  "protocol": "pointmaze_frequency_routing_stage4_v2",
+  "run_name": "pointmaze_routing_stage4_v2_preflight_20260920_r1",
+  "tasks": {
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/clean/hrl_causal_filter/124007": {
+      "node": "node005",
+      "task_id": "t99439"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/clean/hrl_history/124007": {
+      "node": "node006",
+      "task_id": "t99438"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/clean/hrl_multiscale_all/124007": {
+      "node": "node004",
+      "task_id": "t99440"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/clean/hrl_multiscale_routed/124007": {
+      "node": "node006",
+      "task_id": "t99441"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/clean/hrl_multiscale_swapped/124007": {
+      "node": "node005",
+      "task_id": "t99442"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/fast_observation_noise/hrl_causal_filter/124007": {
+      "node": "node004",
+      "task_id": "t99444"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/fast_observation_noise/hrl_history/124007": {
+      "node": "node001",
+      "task_id": "t99443"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/fast_observation_noise/hrl_multiscale_all/124007": {
+      "node": "node006",
+      "task_id": "t99445"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/fast_observation_noise/hrl_multiscale_routed/124007": {
+      "node": "node005",
+      "task_id": "t99446"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/fast_observation_noise/hrl_multiscale_swapped/124007": {
+      "node": "node001",
+      "task_id": "t99447"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/slow_drift_fast_action/hrl_causal_filter/124007": {
+      "node": "node006",
+      "task_id": "t99449"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/slow_drift_fast_action/hrl_history/124007": {
+      "node": "node004",
+      "task_id": "t99448"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/slow_drift_fast_action/hrl_multiscale_all/124007": {
+      "node": "node005",
+      "task_id": "t99450"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/slow_drift_fast_action/hrl_multiscale_routed/124007": {
+      "node": "node001",
+      "task_id": "t99451"
+    },
+    "Freq-HRL/pointmaze_frequency_routing_stage4_v2/pointmaze_routing_stage4_v2_preflight_20260920_r1/slow_drift_fast_action/hrl_multiscale_swapped/124007": {
+      "node": "node004",
+      "task_id": "t99452"
+    }
+  }
+}

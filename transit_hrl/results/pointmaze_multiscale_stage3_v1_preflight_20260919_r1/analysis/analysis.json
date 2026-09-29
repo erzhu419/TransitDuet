@@ -1,0 +1,513 @@
+{
+  "analysis_version": "pointmaze_multiscale_goal_stage3_analysis_v1",
+  "cell_count": 8,
+  "claim_boundary": "Freq-HRL requires a positive primary-stress success increment, a positive hierarchy-by-multiscale success interaction, and clean success noninferiority; flat representation gains are reported separately.",
+  "claim_gate": {
+    "clean_success_noninferiority": "not_supported",
+    "stress_factorial_interaction_success": "inconclusive",
+    "stress_hrl_multiscale_vs_hrl_history_success": "inconclusive"
+  },
+  "clean_success_noninferiority": {
+    "ci_lower": -Infinity,
+    "ci_upper": Infinity,
+    "confidence": 0.95,
+    "margin": 0.1,
+    "mean_improvement": 0.0,
+    "n": 1,
+    "status": "not_supported"
+  },
+  "confidence": 0.95,
+  "evaluation_row_count": 8,
+  "freq_hrl_mainline_status": "not_supported",
+  "independent_training_replicate_count": 1,
+  "primary_stress_scenario": "mixed_causal_stress",
+  "protocol_version": "pointmaze_multiscale_goal_stage3_v1",
+  "runtime_versions": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "numpy": "2.1.3",
+    "pettingzoo": "1.26.1",
+    "python": "3.10.14",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scenarios": {
+    "clean": {
+      "absolute": {
+        "flat_history": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 24.716678930964417,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.9112204313278198,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "flat_multiscale": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 23.994529831233116,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.9970811605453491,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "hrl_history": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 24.313078704446095,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.9572895765304565,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "hrl_multiscale": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 24.201744659573674,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.9717800617218018,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        }
+      },
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.6108150548588789,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.07137024402618408,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "flat_representation": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.7221490997313005,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.0858607292175293,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "freq_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.2072148283405575,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.025301098823547363,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "freq_routing_increment": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.1113340448724216,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.014490485191345215,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "hierarchy_on_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.4036002265183214,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.04606914520263672,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      }
+    },
+    "mixed_causal_stress": {
+      "absolute": {
+        "flat_history": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 31.25948323341757,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.498628169298172,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "flat_multiscale": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 31.36267715113058,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.49028217792510986,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "hrl_history": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 30.78247133690969,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.4906386733055115,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        },
+        "hrl_multiscale": {
+          "episode_return": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 30.769717422493535,
+            "n": 1
+          },
+          "final_goal_distance": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.4917960464954376,
+            "n": 1
+          },
+          "success": {
+            "ci_lower": -Infinity,
+            "ci_upper": Infinity,
+            "confidence": 0.95,
+            "mean": 0.0,
+            "n": 1
+          }
+        }
+      },
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.11594783212916582,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.009503364562988281,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "flat_representation": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.10319391771301056,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.008345991373062134,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "freq_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.5929597286370445,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.0015138685703277588,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "freq_routing_increment": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.012753914416155254,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.0011573731899261475,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      },
+      "hierarchy_on_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": -0.4770118965078787,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.007989495992660522,
+          "n": 1,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "success": {
+          "ci_lower": -Infinity,
+          "ci_upper": Infinity,
+          "confidence": 0.95,
+          "mean_improvement": 0.0,
+          "n": 1,
+          "status": "inconclusive"
+        }
+      }
+    }
+  }
+}

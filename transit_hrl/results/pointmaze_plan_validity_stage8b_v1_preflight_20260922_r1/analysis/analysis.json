@@ -1,0 +1,235 @@
+{
+  "analysis_version": "pointmaze_plan_validity_stage8b_analysis_v1",
+  "cell_count": 1,
+  "claim_boundary": "paired local branch value and predictor ranking only; no deployed-trigger or closed-loop performance claim",
+  "confidence": 0.95,
+  "decision": "stage9_not_authorized",
+  "independent_optimizer_root_count": 1,
+  "intervals": {
+    "category_mean__distractor_change_010ms": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.00023562615577810142,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "category_mean__force_pulse_010ms": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.00011605294876249062,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "category_mean__neutral_matched": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.0001038579107667803,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "category_mean__regime_lag_010ms": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 2.6386559338842375e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "category_mean__regime_lag_100ms": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 3.9160712037134005e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "category_mean__regime_lag_250ms": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.0,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "controller_learning_gain": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -3.7371190911031715,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "history_selected_utility_vs_plan_state": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.0,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "oracle_regime_selected_utility_increment": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.0,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "oracle_regime_spearman_increment": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.0,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "regime_250_vs_010": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -2.6386559338842375e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "regime_250_vs_distractor": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.00023562615577810142,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "regime_250_vs_force": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.00011605294876249062,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__age_only": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -5.802647438124531e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__causal_history": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -5.802647438124531e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__causal_history_plus_regime": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -5.802647438124531e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__change_magnitude": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.00017583955227029602,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "selected_utility__plan_state": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -5.802647438124531e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__age_only": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.6,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__causal_history": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.48571428571428577,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__causal_history_plus_regime": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.48571428571428577,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__change_magnitude": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.7714285714285715,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "spearman__plan_state": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.2571428571428572,
+      "n": 1,
+      "status": "inconclusive"
+    }
+  },
+  "primary_endpoint": "renew_ise_advantage_keep_minus_renew",
+  "protocol_version": "pointmaze_counterfactual_plan_validity_stage8b_v1",
+  "qualification_checks": {
+    "causal_history_predicts_renewal_value": false,
+    "causal_history_selection_has_positive_local_value": false,
+    "controller_learned": false,
+    "history_selection_beats_current_plan_state": false,
+    "regime_value_exceeds_distractor": false,
+    "regime_value_exceeds_force_pulse": false,
+    "renewal_has_value_after_250ms": false,
+    "value_emerges_after_causal_consequence": false
+  },
+  "root_summaries": {
+    "206001": {
+      "category_mean__distractor_change_010ms": -0.00023562615577810142,
+      "category_mean__force_pulse_010ms": -0.00011605294876249062,
+      "category_mean__neutral_matched": -0.0001038579107667803,
+      "category_mean__regime_lag_010ms": 2.6386559338842375e-05,
+      "category_mean__regime_lag_100ms": 3.9160712037134005e-05,
+      "category_mean__regime_lag_250ms": 0.0,
+      "controller_learning_gain": -3.7371190911031715,
+      "history_selected_utility_vs_plan_state": 0.0,
+      "oracle_regime_selected_utility_increment": 0.0,
+      "oracle_regime_spearman_increment": 0.0,
+      "regime_250_vs_010": -2.6386559338842375e-05,
+      "regime_250_vs_distractor": 0.00023562615577810142,
+      "regime_250_vs_force": 0.00011605294876249062,
+      "selected_utility__age_only": -5.802647438124531e-05,
+      "selected_utility__causal_history": -5.802647438124531e-05,
+      "selected_utility__causal_history_plus_regime": -5.802647438124531e-05,
+      "selected_utility__change_magnitude": -0.00017583955227029602,
+      "selected_utility__plan_state": -5.802647438124531e-05,
+      "spearman__age_only": -0.6,
+      "spearman__causal_history": -0.48571428571428577,
+      "spearman__causal_history_plus_regime": -0.48571428571428577,
+      "spearman__change_magnitude": -0.7714285714285715,
+      "spearman__plan_state": -0.2571428571428572
+    }
+  },
+  "stage9_authorized": false,
+  "statistical_unit": "optimizer_seed_root"
+}

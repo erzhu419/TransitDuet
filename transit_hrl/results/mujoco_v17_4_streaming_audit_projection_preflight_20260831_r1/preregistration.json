@@ -1,0 +1,89 @@
+{
+  "artifact_contract": {
+    "server_only": [
+      "checkpoint.pt",
+      "training_history.json"
+    ],
+    "synced": [
+      "cell_summary.json",
+      "evaluation_rows.csv",
+      "server_artifact_location.json"
+    ]
+  },
+  "development_protocol_version": "mujoco_v17_4_streaming_audit_projection_preflight_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evaluation_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed",
+    "ood_chirp"
+  ],
+  "evaluation_seeds": [
+    4009024190,
+    2843731921,
+    4003206626,
+    547164892,
+    2802248628,
+    2335590642,
+    1716353770,
+    294864529
+  ],
+  "evidence_role": "paired_streaming_audit_projection_development_not_confirmatory",
+  "frozen_algorithm_revision": "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c",
+  "frozen_source_manifest_sha256": "f371ecffe5182d83c778ba42033ae7f44f50881aa635924ff8f406eaa7927ab6",
+  "launcher_source_revision": "7c2e20dfbb34f777cbbe18f5e449ffb9fcdbf926",
+  "optimizer_seeds": [
+    3105897127
+  ],
+  "router_alpha": 0.2,
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 1024,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "claim_boundary": "single-optimizer paired development evidence only; no reward, training, cross-seed, or publication claim",
+    "expansion_rule": "advance to fresh optimizer multiseed only if all three environments pass",
+    "failure_rule": "any mechanics, feasibility, or frequency failure stops expansion",
+    "feasibility_gate": "mean current-step upper-budget feasibility is at least 0.99 and maximum reported upper-budget violation RMS is at most 1e-7",
+    "frequency_gate": "every environment requires candidate upper HPF8 power at most 0.075^2; candidate lower LPF32 power at most 0.0475^2 and at least 10% below control; normalized joint merit must improve by at least 10%",
+    "mechanics_gate": "all reward, executed-action, and latent-policy traces match exactly; explicit transition structure is valid; router and responsibility reconstruction RMS are at most 1e-7",
+    "paired_intervention": "the same frozen checkpoint and heldout path is evaluated at strengths zero and one",
+    "training": "one strength-zero policy with complete FIR audit state is trained once per environment",
+    "unit": "environment_by_single_fresh_optimizer_seed"
+  },
+  "selection_seeds": [
+    394517701,
+    3530217567,
+    942310045,
+    4024287184
+  ],
+  "status": "frozen_before_v17_4_training_or_heldout_access",
+  "train_seeds": [
+    3713326665,
+    1307281748,
+    3265003748,
+    2195722866
+  ],
+  "training_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed"
+  ]
+}

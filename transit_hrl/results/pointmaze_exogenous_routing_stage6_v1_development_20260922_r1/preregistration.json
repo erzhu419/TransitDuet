@@ -1,0 +1,846 @@
+{
+  "algorithm_revision": "4ed9e8e131235f0f99844e8ea8bfeb737a68276f",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_exogenous_history",
+      184007
+    ],
+    [
+      "flat_exogenous_filtered",
+      184007
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184007
+    ],
+    [
+      "hrl_exogenous_history",
+      184007
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184007
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184007
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184007
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184007
+    ],
+    [
+      "flat_exogenous_history",
+      184013
+    ],
+    [
+      "flat_exogenous_filtered",
+      184013
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184013
+    ],
+    [
+      "hrl_exogenous_history",
+      184013
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184013
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184013
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184013
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184013
+    ],
+    [
+      "flat_exogenous_history",
+      184031
+    ],
+    [
+      "flat_exogenous_filtered",
+      184031
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184031
+    ],
+    [
+      "hrl_exogenous_history",
+      184031
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184031
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184031
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184031
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184031
+    ],
+    [
+      "flat_exogenous_history",
+      184043
+    ],
+    [
+      "flat_exogenous_filtered",
+      184043
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184043
+    ],
+    [
+      "hrl_exogenous_history",
+      184043
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184043
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184043
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184043
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184043
+    ],
+    [
+      "flat_exogenous_history",
+      184067
+    ],
+    [
+      "flat_exogenous_filtered",
+      184067
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184067
+    ],
+    [
+      "hrl_exogenous_history",
+      184067
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184067
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184067
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184067
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184067
+    ],
+    [
+      "flat_exogenous_history",
+      184089
+    ],
+    [
+      "flat_exogenous_filtered",
+      184089
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184089
+    ],
+    [
+      "hrl_exogenous_history",
+      184089
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184089
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184089
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184089
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184089
+    ],
+    [
+      "flat_exogenous_history",
+      184113
+    ],
+    [
+      "flat_exogenous_filtered",
+      184113
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184113
+    ],
+    [
+      "hrl_exogenous_history",
+      184113
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184113
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184113
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184113
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184113
+    ],
+    [
+      "flat_exogenous_history",
+      184127
+    ],
+    [
+      "flat_exogenous_filtered",
+      184127
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      184127
+    ],
+    [
+      "hrl_exogenous_history",
+      184127
+    ],
+    [
+      "hrl_exogenous_filtered",
+      184127
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      184127
+    ],
+    [
+      "hrl_exogenous_multiscale_routed",
+      184127
+    ],
+    [
+      "hrl_exogenous_multiscale_swapped",
+      184127
+    ]
+  ],
+  "claim_gate": {
+    "hierarchy_x_multiscale_success_interaction": "positive_ci",
+    "primary_endpoint": "tracking_success_rate",
+    "routed_absolute_success_ci_lower": ">=0.50",
+    "routed_final_vs_untrained_return": "positive_ci",
+    "routed_final_vs_untrained_success": "positive_ci",
+    "routed_vs_all_band_success": "positive_ci",
+    "routed_vs_causal_filter_success": "positive_ci",
+    "routed_vs_history_success": "positive_ci",
+    "routed_vs_swapped_success": "positive_ci",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "evidence_stage": "development",
+  "methods": [
+    "flat_exogenous_history",
+    "flat_exogenous_filtered",
+    "flat_exogenous_multiscale_all",
+    "hrl_exogenous_history",
+    "hrl_exogenous_filtered",
+    "hrl_exogenous_multiscale_all",
+    "hrl_exogenous_multiscale_routed",
+    "hrl_exogenous_multiscale_swapped"
+  ],
+  "optimizer_seeds": [
+    184007,
+    184013,
+    184031,
+    184043,
+    184067,
+    184089,
+    184113,
+    184127
+  ],
+  "options": {
+    "184007": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1800211,
+        1800223,
+        1800227,
+        1800229,
+        1800233,
+        1800239,
+        1800241,
+        1800251,
+        1800257,
+        1800263,
+        1800269,
+        1800271,
+        1800277,
+        1800281,
+        1800283,
+        1800293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1800101,
+        1800103,
+        1800107,
+        1800109,
+        1800127,
+        1800131,
+        1800137,
+        1800149,
+        1800151,
+        1800163,
+        1800167,
+        1800173,
+        1800179,
+        1800181,
+        1800191,
+        1800197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1800011,
+        1800017,
+        1800023,
+        1800039,
+        1800041,
+        1800053,
+        1800067,
+        1800071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184013": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1801211,
+        1801223,
+        1801227,
+        1801229,
+        1801233,
+        1801239,
+        1801241,
+        1801251,
+        1801257,
+        1801263,
+        1801269,
+        1801271,
+        1801277,
+        1801281,
+        1801283,
+        1801293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1801101,
+        1801103,
+        1801107,
+        1801109,
+        1801127,
+        1801131,
+        1801137,
+        1801149,
+        1801151,
+        1801163,
+        1801167,
+        1801173,
+        1801179,
+        1801181,
+        1801191,
+        1801197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1801011,
+        1801017,
+        1801023,
+        1801039,
+        1801041,
+        1801053,
+        1801067,
+        1801071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184031": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1802211,
+        1802223,
+        1802227,
+        1802229,
+        1802233,
+        1802239,
+        1802241,
+        1802251,
+        1802257,
+        1802263,
+        1802269,
+        1802271,
+        1802277,
+        1802281,
+        1802283,
+        1802293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1802101,
+        1802103,
+        1802107,
+        1802109,
+        1802127,
+        1802131,
+        1802137,
+        1802149,
+        1802151,
+        1802163,
+        1802167,
+        1802173,
+        1802179,
+        1802181,
+        1802191,
+        1802197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1802011,
+        1802017,
+        1802023,
+        1802039,
+        1802041,
+        1802053,
+        1802067,
+        1802071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184043": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1803211,
+        1803223,
+        1803227,
+        1803229,
+        1803233,
+        1803239,
+        1803241,
+        1803251,
+        1803257,
+        1803263,
+        1803269,
+        1803271,
+        1803277,
+        1803281,
+        1803283,
+        1803293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1803101,
+        1803103,
+        1803107,
+        1803109,
+        1803127,
+        1803131,
+        1803137,
+        1803149,
+        1803151,
+        1803163,
+        1803167,
+        1803173,
+        1803179,
+        1803181,
+        1803191,
+        1803197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1803011,
+        1803017,
+        1803023,
+        1803039,
+        1803041,
+        1803053,
+        1803067,
+        1803071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184067": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1804211,
+        1804223,
+        1804227,
+        1804229,
+        1804233,
+        1804239,
+        1804241,
+        1804251,
+        1804257,
+        1804263,
+        1804269,
+        1804271,
+        1804277,
+        1804281,
+        1804283,
+        1804293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1804101,
+        1804103,
+        1804107,
+        1804109,
+        1804127,
+        1804131,
+        1804137,
+        1804149,
+        1804151,
+        1804163,
+        1804167,
+        1804173,
+        1804179,
+        1804181,
+        1804191,
+        1804197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1804011,
+        1804017,
+        1804023,
+        1804039,
+        1804041,
+        1804053,
+        1804067,
+        1804071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184089": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1805211,
+        1805223,
+        1805227,
+        1805229,
+        1805233,
+        1805239,
+        1805241,
+        1805251,
+        1805257,
+        1805263,
+        1805269,
+        1805271,
+        1805277,
+        1805281,
+        1805283,
+        1805293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1805101,
+        1805103,
+        1805107,
+        1805109,
+        1805127,
+        1805131,
+        1805137,
+        1805149,
+        1805151,
+        1805163,
+        1805167,
+        1805173,
+        1805179,
+        1805181,
+        1805191,
+        1805197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1805011,
+        1805017,
+        1805023,
+        1805039,
+        1805041,
+        1805053,
+        1805067,
+        1805071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184113": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1806211,
+        1806223,
+        1806227,
+        1806229,
+        1806233,
+        1806239,
+        1806241,
+        1806251,
+        1806257,
+        1806263,
+        1806269,
+        1806271,
+        1806277,
+        1806281,
+        1806283,
+        1806293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1806101,
+        1806103,
+        1806107,
+        1806109,
+        1806127,
+        1806131,
+        1806137,
+        1806149,
+        1806151,
+        1806163,
+        1806167,
+        1806173,
+        1806179,
+        1806181,
+        1806191,
+        1806197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1806011,
+        1806017,
+        1806023,
+        1806039,
+        1806041,
+        1806053,
+        1806067,
+        1806071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "184127": {
+      "checkpoint_evaluation_interval": 96,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1807211,
+        1807223,
+        1807227,
+        1807229,
+        1807233,
+        1807239,
+        1807241,
+        1807251,
+        1807257,
+        1807263,
+        1807269,
+        1807271,
+        1807277,
+        1807281,
+        1807283,
+        1807293
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1807101,
+        1807103,
+        1807107,
+        1807109,
+        1807127,
+        1807131,
+        1807137,
+        1807149,
+        1807151,
+        1807163,
+        1807167,
+        1807173,
+        1807179,
+        1807181,
+        1807191,
+        1807197
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1807011,
+        1807017,
+        1807023,
+        1807039,
+        1807041,
+        1807053,
+        1807067,
+        1807071
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": false,
+  "protocol": "pointmaze_exogenous_frequency_routing_stage6_v1",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_exogenous_frequency_routing_stage6_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "analysis_version": "pointmaze_compact_plan_validity_stage8c_analysis_v1",
+  "cell_count": 8,
+  "claim_boundary": "held-out local branch-value prediction only; no deployed-trigger or closed-loop performance claim",
+  "confidence": 0.95,
+  "decision": "budgeted_trigger_development_authorized",
+  "independent_optimizer_root_count": 8,
+  "intervals": {
+    "candidate_spearman_vs_current": {
+      "ci_lower": 0.31072211108187037,
+      "ci_upper": 0.45576824826504897,
+      "confidence": 0.95,
+      "mean": 0.38324517967345967,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_spearman_vs_dynamic": {
+      "ci_lower": 0.07616956090379491,
+      "ci_upper": 0.219676311565772,
+      "confidence": 0.95,
+      "mean": 0.14792293623478345,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_utility_vs_current": {
+      "ci_lower": 0.030865830693476072,
+      "ci_upper": 0.04979240196916921,
+      "confidence": 0.95,
+      "mean": 0.04032911633132264,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_utility_vs_dynamic": {
+      "ci_lower": 0.00828657153984237,
+      "ci_upper": 0.030665214474315958,
+      "confidence": 0.95,
+      "mean": 0.019475893007079165,
+      "n": 8,
+      "status": "supported"
+    },
+    "controller_learning_gain": {
+      "ci_lower": 18.64354052007831,
+      "ci_upper": 25.454875380378382,
+      "confidence": 0.95,
+      "mean": 22.049207950228347,
+      "n": 8,
+      "status": "supported"
+    },
+    "delayed_renewal_value": {
+      "ci_lower": 0.08657635584294604,
+      "ci_upper": 0.1118663396249786,
+      "confidence": 0.95,
+      "mean": 0.09922134773396232,
+      "n": 8,
+      "status": "supported"
+    },
+    "selected_utility__causal_dynamic_quadratic": {
+      "ci_lower": 0.12079537785775556,
+      "ci_upper": 0.1551058639262478,
+      "confidence": 0.95,
+      "mean": 0.1379506208920017,
+      "n": 8,
+      "status": "supported"
+    },
+    "selected_utility__causal_validity_interactions": {
+      "ci_lower": 0.14090890350422744,
+      "ci_upper": 0.17394412429393427,
+      "confidence": 0.95,
+      "mean": 0.15742651389908086,
+      "n": 8,
+      "status": "supported"
+    },
+    "selected_utility__current_compact_quadratic": {
+      "ci_lower": 0.1010009484274746,
+      "ci_upper": 0.13319384670804188,
+      "confidence": 0.95,
+      "mean": 0.11709739756775824,
+      "n": 8,
+      "status": "supported"
+    },
+    "spearman__causal_dynamic_quadratic": {
+      "ci_lower": 0.5078037493684803,
+      "ci_upper": 0.7083243702273286,
+      "confidence": 0.95,
+      "mean": 0.6080640597979045,
+      "n": 8,
+      "status": "supported"
+    },
+    "spearman__causal_validity_interactions": {
+      "ci_lower": 0.6979009366762265,
+      "ci_upper": 0.8140730553891493,
+      "confidence": 0.95,
+      "mean": 0.7559869960326879,
+      "n": 8,
+      "status": "supported"
+    },
+    "spearman__current_compact_quadratic": {
+      "ci_lower": 0.28834211645458874,
+      "ci_upper": 0.4571415162638677,
+      "confidence": 0.95,
+      "mean": 0.3727418163592282,
+      "n": 8,
+      "status": "supported"
+    }
+  },
+  "matrix": "formal_development",
+  "primary_endpoint": "causal_validity_interactions_selected_utility_minus_current_compact_quadratic",
+  "protocol_version": "pointmaze_compact_plan_validity_stage8c_v1",
+  "qualification_checks": {
+    "candidate_rank_beats_current_only": true,
+    "candidate_rank_beats_generic_dynamic": true,
+    "candidate_rank_is_positive": true,
+    "candidate_selected_utility_is_positive": true,
+    "candidate_utility_beats_current_only": true,
+    "controller_learned": true,
+    "delayed_renewal_has_value": true
+  },
+  "root_summaries": {
+    "207011": {
+      "candidate_spearman_vs_current": 0.2981492234919128,
+      "candidate_spearman_vs_dynamic": 0.2657439981689329,
+      "candidate_utility_vs_current": 0.03769420971212578,
+      "candidate_utility_vs_dynamic": 0.03102316917210346,
+      "controller_learning_gain": 28.38332139975482,
+      "delayed_renewal_value": 0.11538809035781095,
+      "selected_utility__causal_dynamic_quadratic": 0.1550098266345592,
+      "selected_utility__causal_validity_interactions": 0.18603299580666266,
+      "selected_utility__current_compact_quadratic": 0.14833878609453688,
+      "spearman__causal_dynamic_quadratic": 0.5287545352819504,
+      "spearman__causal_validity_interactions": 0.7944985334508833,
+      "spearman__current_compact_quadratic": 0.4963493099589705
+    },
+    "207023": {
+      "candidate_spearman_vs_current": 0.34794937438540563,
+      "candidate_spearman_vs_dynamic": 0.03621507409040026,
+      "candidate_utility_vs_current": 0.026578281542805463,
+      "candidate_utility_vs_dynamic": 0.0060858539796275896,
+      "controller_learning_gain": 23.6148472880391,
+      "delayed_renewal_value": 0.07579441833509523,
+      "selected_utility__causal_dynamic_quadratic": 0.11791999996547103,
+      "selected_utility__causal_validity_interactions": 0.12400585394509862,
+      "selected_utility__current_compact_quadratic": 0.09742757240229316,
+      "spearman__causal_dynamic_quadratic": 0.6357958784035809,
+      "spearman__causal_validity_interactions": 0.6720109524939811,
+      "spearman__current_compact_quadratic": 0.3240615781085755
+    },
+    "207037": {
+      "candidate_spearman_vs_current": 0.48351446203926624,
+      "candidate_spearman_vs_dynamic": 0.10890568308975623,
+      "candidate_utility_vs_current": 0.04307212579778502,
+      "candidate_utility_vs_dynamic": 0.015991467053599995,
+      "controller_learning_gain": 20.93007678356969,
+      "delayed_renewal_value": 0.10136560130557667,
+      "selected_utility__causal_dynamic_quadratic": 0.15619760034105779,
+      "selected_utility__causal_validity_interactions": 0.17218906739465778,
+      "selected_utility__current_compact_quadratic": 0.12911694159687276,
+      "spearman__causal_dynamic_quadratic": 0.7067336221220033,
+      "spearman__causal_validity_interactions": 0.8156393052117595,
+      "spearman__current_compact_quadratic": 0.3321248431724933
+    },
+    "207049": {
+      "candidate_spearman_vs_current": 0.3573825489132276,
+      "candidate_spearman_vs_dynamic": 0.12349466786477215,
+      "candidate_utility_vs_current": 0.032755791474440354,
+      "candidate_utility_vs_dynamic": 0.007471205178175677,
+      "controller_learning_gain": 23.4701612144181,
+      "delayed_renewal_value": 0.0955960029347702,
+      "selected_utility__causal_dynamic_quadratic": 0.14163469527323047,
+      "selected_utility__causal_validity_interactions": 0.14910590045140615,
+      "selected_utility__current_compact_quadratic": 0.1163501089769658,
+      "spearman__causal_dynamic_quadratic": 0.6550051286833272,
+      "spearman__causal_validity_interactions": 0.7784997965480993,
+      "spearman__current_compact_quadratic": 0.4211172476348717
+    },
+    "207061": {
+      "candidate_spearman_vs_current": 0.37720533383066024,
+      "candidate_spearman_vs_dynamic": 0.14274164151775126,
+      "candidate_utility_vs_current": 0.03383102621059164,
+      "candidate_utility_vs_dynamic": 0.01768511984877849,
+      "controller_learning_gain": 18.33501822029485,
+      "delayed_renewal_value": 0.11348321838790096,
+      "selected_utility__causal_dynamic_quadratic": 0.13739562792638993,
+      "selected_utility__causal_validity_interactions": 0.15508074777516842,
+      "selected_utility__current_compact_quadratic": 0.12124972156457678,
+      "spearman__causal_dynamic_quadratic": 0.648960911803601,
+      "spearman__causal_validity_interactions": 0.7917025533213523,
+      "spearman__current_compact_quadratic": 0.41449721949069207
+    },
+    "207073": {
+      "candidate_spearman_vs_current": 0.5198471567596894,
+      "candidate_spearman_vs_dynamic": 0.13947899359126503,
+      "candidate_utility_vs_current": 0.0528981647951689,
+      "candidate_utility_vs_dynamic": 0.018195584661116204,
+      "controller_learning_gain": 15.602846966084755,
+      "delayed_renewal_value": 0.11465036102118425,
+      "selected_utility__causal_dynamic_quadratic": 0.15742242350141877,
+      "selected_utility__causal_validity_interactions": 0.17561800816253498,
+      "selected_utility__current_compact_quadratic": 0.12271984336736608,
+      "spearman__causal_dynamic_quadratic": 0.6705475823132482,
+      "spearman__causal_validity_interactions": 0.8100265759045132,
+      "spearman__current_compact_quadratic": 0.2901794191448238
+    },
+    "207089": {
+      "candidate_spearman_vs_current": 0.26614602760164124,
+      "candidate_spearman_vs_dynamic": 0.08223589400155984,
+      "candidate_utility_vs_current": 0.03523069910769086,
+      "candidate_utility_vs_dynamic": 0.01276508056243833,
+      "controller_learning_gain": 20.47431176282929,
+      "delayed_renewal_value": 0.09624920688240124,
+      "selected_utility__causal_dynamic_quadratic": 0.139161668269623,
+      "selected_utility__causal_validity_interactions": 0.15192674883206134,
+      "selected_utility__current_compact_quadratic": 0.11669604972437048,
+      "spearman__causal_dynamic_quadratic": 0.677604396256485,
+      "spearman__causal_validity_interactions": 0.7598402902580449,
+      "spearman__current_compact_quadratic": 0.49369426265640365
+    },
+    "207101": {
+      "candidate_spearman_vs_current": 0.41576731036587433,
+      "candidate_spearman_vs_dynamic": 0.28456753755382996,
+      "candidate_utility_vs_current": 0.06057263200997311,
+      "candidate_utility_vs_dynamic": 0.046589663600793585,
+      "controller_learning_gain": 25.58307996683618,
+      "delayed_renewal_value": 0.0812438826469591,
+      "selected_utility__causal_dynamic_quadratic": 0.09886312522426344,
+      "selected_utility__causal_validity_interactions": 0.14545278882505702,
+      "selected_utility__current_compact_quadratic": 0.08488015681508392,
+      "spearman__causal_dynamic_quadratic": 0.3411104235190397,
+      "spearman__causal_validity_interactions": 0.6256779610728697,
+      "spearman__current_compact_quadratic": 0.20991065070699536
+    }
+  },
+  "stage9_authorized": true,
+  "statistical_unit": "optimizer_seed_root"
+}

@@ -1,0 +1,29 @@
+{
+  "candidate_count": 900,
+  "development_protocol_version": "mujoco_v17_13_causal_actor_adapter_v1",
+  "evidence_role": "grouped_reused_path_causal_actor_target_distillation_not_confirmatory",
+  "frozen_core_revision": "f7b2254d960824ff02b6b6fc69dd6f1202ee2093",
+  "frozen_source_manifest_sha256": "a4bdf5eb8c436114ee28556bbc978910b4c1cfcd10bf9a29caf747c48cae27d2",
+  "scheduler_contract": {
+    "binding_reason": "v17.8 paths and v17.12 targets remain server-only on node003",
+    "cpu": 32,
+    "oracle_workers": 32,
+    "ram_mb": 32768,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "advancement_gate": "120/120 valid, 113/113 reference-feasible paths preserved, all seven actor-floor paths and both actor-floor seed groups recovered, target normalized MSE at most 0.75, reference-feasible correction RMS at most 0.01, and nonzero post-clipping target and adapter action change on every floor path",
+    "claim_boundary": "reused-path causal action-adapter development only; no reward, online policy-learning, fresh-seed, or manuscript performance claim",
+    "fresh_access_rule": "no fresh path is read by this selector; a complete reused-path gate only authorizes a separately frozen closed-loop fresh validation",
+    "grouping": "eight leave-one-evaluation-seed-out folds; all five disturbance modes for the held seed remain outside fitting",
+    "input": "unchanged server-only v17.8 action paths plus the seven server-only v17.12 nearest-feasible total-action targets",
+    "learner": "environment-specific path-balanced weighted causal FIR residual adapters using only current and past upper/lower actor proposals",
+    "prefilter": "union of frozen target-fidelity, preservation, and balanced rankings; only that fixed-size union receives expensive full-horizon oracles",
+    "shared_candidate": "one window, ridge penalty, actor-floor path weight, output gain, and correction trust limit selected jointly across environments"
+  },
+  "source_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "source_target_run": "mujoco_v17_12_nearest_feasible_action_oracle_20260831_r1",
+  "status": "registered_before_v17_13_target_access"
+}

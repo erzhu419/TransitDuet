@@ -1,0 +1,93 @@
+{
+  "actor_optimizer_steps_train": 16,
+  "best_score": 0.006287179752527956,
+  "capacity_actual_parameter_count": 4973,
+  "capacity_ratio": 1.0134501732219279,
+  "capacity_target_parameter_count": 4907,
+  "checkpoint_min_delta": 0.001,
+  "checkpoint_plateau_tail_iterations": 1,
+  "checkpoint_selection_protocol": "trailing_mean_material_improvement_v1",
+  "checkpoint_selection_score": 0.006287179752527956,
+  "checkpoint_smoothing_window": 3,
+  "checkpoint_validation_observation_count": 5,
+  "code_revision": "",
+  "config": {
+    "action_dim": 6,
+    "clip_ratio": 0.2,
+    "device": "cpu",
+    "entropy_coef": 0.001,
+    "epochs": 4,
+    "gae_lambda": 0.95,
+    "gamma": 0.995,
+    "hidden_dim": 32,
+    "init_log_std": -0.7,
+    "learning_rate": 0.0003,
+    "max_grad_norm": 1.0,
+    "minibatch_size": 512,
+    "raw_feature_dim": 0,
+    "raw_history_window": 0,
+    "state_dim": 40,
+    "state_encoder": "mlp",
+    "value_coef": 0.5
+  },
+  "critic_optimizer_steps_train": 16,
+  "disturbance_mode": "mixed",
+  "domain": "mujoco",
+  "environment": "HalfCheetah-v5",
+  "eval_seeds": [
+    107
+  ],
+  "frequency_routing_enabled": false,
+  "gradient_updates_train": 32,
+  "heldout_test_access_status": "loaded_after_checkpoint_selection",
+  "initial_validation_score": 0.001163036743022195,
+  "iterations": 4,
+  "last_material_improvement_iteration": 2,
+  "leakage_constraint_enabled": false,
+  "method": "flat_ppo",
+  "policy": "flat_ppo",
+  "protocol_version": "freq_hrl_mujoco_shared_core_v1",
+  "rollout_seed_roots": [
+    101
+  ],
+  "selected_checkpoint_iteration": 2,
+  "selected_checkpoint_raw_score": 0.007926661625500547,
+  "selection_seeds": [
+    103
+  ],
+  "source_identity_status": "unregistered_local",
+  "source_manifest_sha256": "efd69e5fa76e926edd6f13dab6497efc44a29d2af5b9cf934958e6345a2913e2",
+  "steps": 64,
+  "summary": {
+    "LowerLFDriftAbs_mean": 0.015044747468178457,
+    "LowerLFDrift_mean": 0.6135454187305177,
+    "UpperHFPowerAbs_mean": 0.0,
+    "UpperHFPower_mean": 0.0,
+    "action_energy_mean": 0.024520999416411605,
+    "action_smoothness_mean": 0.005007759392325116,
+    "control_reward_sum_mean": -0.9416063972748816,
+    "episode_length_mean": 64.0,
+    "episode_return_mean": -1.1593992732478433,
+    "forward_reward_sum_mean": -0.21779287597296143,
+    "lower_transition_count_mean": 64.0,
+    "n": 1,
+    "protocol_valid_mean": 1.0,
+    "reward_mean_mean": -0.01811561364449755,
+    "upper_decision_count_mean": 64.0,
+    "upper_transition_count_mean": 64.0
+  },
+  "temperature_optimizer_steps_train": 0,
+  "temporal_hierarchy_enabled": false,
+  "train_seeds": [
+    101
+  ],
+  "trainer": "canonical_joint_flat_ppo_v1",
+  "trajectory_contract": {
+    "credit": "one task-return GAE shared by all action coordinates",
+    "critic": "one state-value function",
+    "decision_rate": "one joint action per primitive environment step",
+    "policy_ratio": "one joint diagonal-Gaussian PPO ratio"
+  },
+  "upper_period": 8,
+  "validation_learning_gain": 0.005124143009505761
+}

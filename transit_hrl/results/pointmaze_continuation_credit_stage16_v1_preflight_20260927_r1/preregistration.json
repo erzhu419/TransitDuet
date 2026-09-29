@@ -1,0 +1,31 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "frozen_stage12; path_crossfitted_value; short_only_control; fixed_alpha100_zero_threshold",
+  "evidence_role": "crossfitted_continuation_development_only",
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_seed": 2,
+  "preflight": true,
+  "protocol": "pointmaze_continuation_credit_stage16_v1_development",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_timing_pair_stage12_v1_development",
+  "source_revision": "0bab1e9e489d8e82a20dd5c18dc610285fe22d38"
+}

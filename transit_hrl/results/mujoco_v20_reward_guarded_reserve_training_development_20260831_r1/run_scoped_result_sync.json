@@ -1,0 +1,591 @@
+{
+  "artifact_contract": "small_results_only_v1",
+  "cell_count": 144,
+  "nodes": {
+    "node001": 24,
+    "node002": 25,
+    "node003": 25,
+    "node004": 22,
+    "node005": 24,
+    "node006": 24
+  },
+  "run_name": "mujoco_v20_reward_guarded_reserve_training_development_20260831_r1",
+  "tasks": {
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-1357059719": {
+      "node": "node003",
+      "task_id": "t87159"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-1578548752": {
+      "node": "node005",
+      "task_id": "t87171"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-1667063007": {
+      "node": "node005",
+      "task_id": "t87231"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-184116694": {
+      "node": "node005",
+      "task_id": "t87135"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-1951942280": {
+      "node": "node005",
+      "task_id": "t87255"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-204024486": {
+      "node": "node005",
+      "task_id": "t87195"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-2944402381": {
+      "node": "node005",
+      "task_id": "t87243"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-3161196872": {
+      "node": "node003",
+      "task_id": "t87123"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-3798039993": {
+      "node": "node005",
+      "task_id": "t87207"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-424835688": {
+      "node": "node005",
+      "task_id": "t87183"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-4260783900": {
+      "node": "node002",
+      "task_id": "t87147"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/raw_context_long/rep-609520533": {
+      "node": "node005",
+      "task_id": "t87219"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-1357059719": {
+      "node": "node006",
+      "task_id": "t87162"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-1578548752": {
+      "node": "node006",
+      "task_id": "t87174"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-1667063007": {
+      "node": "node006",
+      "task_id": "t87234"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-184116694": {
+      "node": "node006",
+      "task_id": "t87138"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-1951942280": {
+      "node": "node006",
+      "task_id": "t87258"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-204024486": {
+      "node": "node006",
+      "task_id": "t87198"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-2944402381": {
+      "node": "node006",
+      "task_id": "t87246"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-3161196872": {
+      "node": "node004",
+      "task_id": "t87126"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-3798039993": {
+      "node": "node006",
+      "task_id": "t87210"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-424835688": {
+      "node": "node006",
+      "task_id": "t87186"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-4260783900": {
+      "node": "node006",
+      "task_id": "t87150"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_guarded_010/rep-609520533": {
+      "node": "node006",
+      "task_id": "t87222"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-1357059719": {
+      "node": "node001",
+      "task_id": "t87161"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-1578548752": {
+      "node": "node004",
+      "task_id": "t87173"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-1667063007": {
+      "node": "node004",
+      "task_id": "t87233"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-184116694": {
+      "node": "node005",
+      "task_id": "t87137"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-1951942280": {
+      "node": "node004",
+      "task_id": "t87257"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-204024486": {
+      "node": "node004",
+      "task_id": "t87197"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-2944402381": {
+      "node": "node004",
+      "task_id": "t87245"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-3161196872": {
+      "node": "node003",
+      "task_id": "t87125"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-3798039993": {
+      "node": "node004",
+      "task_id": "t87209"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-424835688": {
+      "node": "node004",
+      "task_id": "t87185"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-4260783900": {
+      "node": "node004",
+      "task_id": "t87149"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_delayed_scalarized_010/rep-609520533": {
+      "node": "node004",
+      "task_id": "t87221"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-1357059719": {
+      "node": "node003",
+      "task_id": "t87160"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-1578548752": {
+      "node": "node004",
+      "task_id": "t87172"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-1667063007": {
+      "node": "node003",
+      "task_id": "t87232"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-184116694": {
+      "node": "node003",
+      "task_id": "t87136"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-1951942280": {
+      "node": "node003",
+      "task_id": "t87256"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-204024486": {
+      "node": "node003",
+      "task_id": "t87196"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-2944402381": {
+      "node": "node003",
+      "task_id": "t87244"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-3161196872": {
+      "node": "node005",
+      "task_id": "t87124"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-3798039993": {
+      "node": "node005",
+      "task_id": "t87208"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-424835688": {
+      "node": "node003",
+      "task_id": "t87184"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-4260783900": {
+      "node": "node003",
+      "task_id": "t87148"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/HalfCheetah-v5/terminal_reserve_long_consistency_000/rep-609520533": {
+      "node": "node003",
+      "task_id": "t87220"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-1357059719": {
+      "node": "node002",
+      "task_id": "t87163"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-1578548752": {
+      "node": "node002",
+      "task_id": "t87175"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-1667063007": {
+      "node": "node002",
+      "task_id": "t87235"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-184116694": {
+      "node": "node004",
+      "task_id": "t87139"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-1951942280": {
+      "node": "node002",
+      "task_id": "t87259"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-204024486": {
+      "node": "node002",
+      "task_id": "t87199"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-2944402381": {
+      "node": "node002",
+      "task_id": "t87247"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-3161196872": {
+      "node": "node006",
+      "task_id": "t87127"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-3798039993": {
+      "node": "node002",
+      "task_id": "t87211"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-424835688": {
+      "node": "node002",
+      "task_id": "t87187"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-4260783900": {
+      "node": "node002",
+      "task_id": "t87151"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/raw_context_long/rep-609520533": {
+      "node": "node002",
+      "task_id": "t87223"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-1357059719": {
+      "node": "node003",
+      "task_id": "t87166"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-1578548752": {
+      "node": "node003",
+      "task_id": "t87178"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-1667063007": {
+      "node": "node003",
+      "task_id": "t87238"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-184116694": {
+      "node": "node003",
+      "task_id": "t87142"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-1951942280": {
+      "node": "node003",
+      "task_id": "t87262"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-204024486": {
+      "node": "node003",
+      "task_id": "t87202"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-2944402381": {
+      "node": "node003",
+      "task_id": "t87250"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-3161196872": {
+      "node": "node003",
+      "task_id": "t87130"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-3798039993": {
+      "node": "node003",
+      "task_id": "t87214"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-424835688": {
+      "node": "node003",
+      "task_id": "t87190"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-4260783900": {
+      "node": "node003",
+      "task_id": "t87154"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_guarded_010/rep-609520533": {
+      "node": "node003",
+      "task_id": "t87226"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-1357059719": {
+      "node": "node005",
+      "task_id": "t87165"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-1578548752": {
+      "node": "node005",
+      "task_id": "t87177"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-1667063007": {
+      "node": "node005",
+      "task_id": "t87237"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-184116694": {
+      "node": "node005",
+      "task_id": "t87141"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-1951942280": {
+      "node": "node005",
+      "task_id": "t87261"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-204024486": {
+      "node": "node005",
+      "task_id": "t87201"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-2944402381": {
+      "node": "node005",
+      "task_id": "t87249"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-3161196872": {
+      "node": "node005",
+      "task_id": "t87129"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-3798039993": {
+      "node": "node005",
+      "task_id": "t87213"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-424835688": {
+      "node": "node005",
+      "task_id": "t87189"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-4260783900": {
+      "node": "node005",
+      "task_id": "t87153"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_delayed_scalarized_010/rep-609520533": {
+      "node": "node005",
+      "task_id": "t87225"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-1357059719": {
+      "node": "node001",
+      "task_id": "t87164"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-1578548752": {
+      "node": "node001",
+      "task_id": "t87176"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-1667063007": {
+      "node": "node001",
+      "task_id": "t87236"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-184116694": {
+      "node": "node001",
+      "task_id": "t87140"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-1951942280": {
+      "node": "node001",
+      "task_id": "t87260"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-204024486": {
+      "node": "node001",
+      "task_id": "t87200"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-2944402381": {
+      "node": "node001",
+      "task_id": "t87248"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-3161196872": {
+      "node": "node002",
+      "task_id": "t87128"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-3798039993": {
+      "node": "node001",
+      "task_id": "t87212"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-424835688": {
+      "node": "node003",
+      "task_id": "t87188"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-4260783900": {
+      "node": "node001",
+      "task_id": "t87152"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Hopper-v5/terminal_reserve_long_consistency_000/rep-609520533": {
+      "node": "node001",
+      "task_id": "t87224"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-1357059719": {
+      "node": "node004",
+      "task_id": "t87167"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-1578548752": {
+      "node": "node004",
+      "task_id": "t87179"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-1667063007": {
+      "node": "node004",
+      "task_id": "t87239"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-184116694": {
+      "node": "node004",
+      "task_id": "t87143"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-1951942280": {
+      "node": "node004",
+      "task_id": "t87263"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-204024486": {
+      "node": "node004",
+      "task_id": "t87203"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-2944402381": {
+      "node": "node004",
+      "task_id": "t87251"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-3161196872": {
+      "node": "node001",
+      "task_id": "t87131"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-3798039993": {
+      "node": "node004",
+      "task_id": "t87215"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-424835688": {
+      "node": "node004",
+      "task_id": "t87191"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-4260783900": {
+      "node": "node004",
+      "task_id": "t87155"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/raw_context_long/rep-609520533": {
+      "node": "node002",
+      "task_id": "t87227"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-1357059719": {
+      "node": "node001",
+      "task_id": "t87170"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-1578548752": {
+      "node": "node001",
+      "task_id": "t87182"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-1667063007": {
+      "node": "node001",
+      "task_id": "t87242"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-184116694": {
+      "node": "node001",
+      "task_id": "t87146"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-1951942280": {
+      "node": "node001",
+      "task_id": "t87266"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-204024486": {
+      "node": "node001",
+      "task_id": "t87206"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-2944402381": {
+      "node": "node001",
+      "task_id": "t87254"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-3161196872": {
+      "node": "node001",
+      "task_id": "t87134"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-3798039993": {
+      "node": "node001",
+      "task_id": "t87218"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-424835688": {
+      "node": "node001",
+      "task_id": "t87194"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-4260783900": {
+      "node": "node001",
+      "task_id": "t87158"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_guarded_010/rep-609520533": {
+      "node": "node001",
+      "task_id": "t87230"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-1357059719": {
+      "node": "node002",
+      "task_id": "t87169"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-1578548752": {
+      "node": "node002",
+      "task_id": "t87181"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-1667063007": {
+      "node": "node002",
+      "task_id": "t87241"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-184116694": {
+      "node": "node002",
+      "task_id": "t87145"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-1951942280": {
+      "node": "node002",
+      "task_id": "t87265"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-204024486": {
+      "node": "node002",
+      "task_id": "t87205"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-2944402381": {
+      "node": "node002",
+      "task_id": "t87253"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-3161196872": {
+      "node": "node002",
+      "task_id": "t87133"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-3798039993": {
+      "node": "node002",
+      "task_id": "t87217"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-424835688": {
+      "node": "node002",
+      "task_id": "t87193"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-4260783900": {
+      "node": "node002",
+      "task_id": "t87157"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_delayed_scalarized_010/rep-609520533": {
+      "node": "node002",
+      "task_id": "t87229"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-1357059719": {
+      "node": "node006",
+      "task_id": "t87168"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-1578548752": {
+      "node": "node006",
+      "task_id": "t87180"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-1667063007": {
+      "node": "node006",
+      "task_id": "t87240"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-184116694": {
+      "node": "node006",
+      "task_id": "t87144"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-1951942280": {
+      "node": "node006",
+      "task_id": "t87264"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-204024486": {
+      "node": "node006",
+      "task_id": "t87204"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-2944402381": {
+      "node": "node006",
+      "task_id": "t87252"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-3161196872": {
+      "node": "node006",
+      "task_id": "t87132"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-3798039993": {
+      "node": "node006",
+      "task_id": "t87216"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-424835688": {
+      "node": "node006",
+      "task_id": "t87192"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-4260783900": {
+      "node": "node006",
+      "task_id": "t87156"
+    },
+    "Freq-HRL/mujoco-v20-reward-guarded-reserve-training-v1/mujoco_v20_reward_guarded_reserve_training_development_20260831_r1/Walker2d-v5/terminal_reserve_long_consistency_000/rep-609520533": {
+      "node": "node006",
+      "task_id": "t87228"
+    }
+  }
+}

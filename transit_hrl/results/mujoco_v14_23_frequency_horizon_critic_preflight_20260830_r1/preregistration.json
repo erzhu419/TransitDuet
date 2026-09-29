@@ -1,0 +1,122 @@
+{
+  "actor_state_limit_per_level": 32768,
+  "actor_step_rms_values": [
+    1e-08,
+    3e-08,
+    1e-07,
+    3e-07,
+    1e-06
+  ],
+  "anchor_run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "critic_ensemble_seeds": [
+    174059501,
+    3501542227,
+    2143749919,
+    424079015
+  ],
+  "critic_epochs": 40,
+  "critic_hidden_dim": 64,
+  "critic_holdout_roots": [
+    2914010057,
+    1696852596,
+    2009467421,
+    458117594
+  ],
+  "critic_learning_rate": 0.001,
+  "critic_minibatch_size": 1024,
+  "critic_minimum_action_permutation_mse_increase": 0.0,
+  "critic_minimum_holdout_r2": 0.0,
+  "critic_train_roots": [
+    3619826213,
+    2313128229,
+    1593139171,
+    3888234081,
+    3139057849,
+    3504254337,
+    989587494,
+    3103217913,
+    1354268184,
+    805670046,
+    357650441,
+    3555814958
+  ],
+  "cvar_alpha": 0.5,
+  "design_roots": [
+    3313214588,
+    860409329,
+    3134492136,
+    276095621,
+    286787529,
+    2197176711,
+    595980720,
+    2986238767,
+    3336654733,
+    934753863,
+    3834356617,
+    3224158205,
+    2532697319,
+    123040806,
+    2498332680,
+    876927083
+  ],
+  "development_protocol_version": "mujoco_v14_23_frequency_horizon_critic_preflight_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_v14_22_frequency_horizon_action_cost_preflight_not_confirmatory",
+  "lower_cost_return_horizon_decisions": 32,
+  "minimum_gradient_median_cosine": 0.0,
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "risk_mode": "mode_mean",
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 24,
+    "ram_mb_per_task": 16384,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "actor_direction": "equal_block_rms_upper_lower_deterministic_action_cost_gradient_on_current_closed_loop_design_occupancy",
+    "critic": "four_bootstrap_action_conditioned_cost_critics_per_policy_level",
+    "critic_data": "sampled_current_policy_paths_with_twelve_train_roots_and_four_independent_holdout_roots_crossed_with_four_modes",
+    "critic_gate": "upper_and_lower_holdout_r2_above_zero_true_action_prediction_better_than_fixed_permuted_action_prediction_and_median_actor_gradient_cosine_above_zero",
+    "design_paths": "sixteen_fresh_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "target_change": "upper_eight_decision_and_lower_thirty_two_decision_duration_discounted_native_cost_returns_aligned_to_frequency_windows",
+    "validation_paths": "sixteen_independent_fresh_roots_crossed_with_four_modes"
+  },
+  "source_revision": "f787e1d1c700104422f097e0939ee3a868e7291e",
+  "status": "frozen_before_v14_23_preflight_outcome_access",
+  "upper_cost_return_horizon_decisions": 8,
+  "validation_roots": [
+    3855229228,
+    4193760088,
+    3676052749,
+    1024603506,
+    503912165,
+    3392112073,
+    1011003024,
+    1701550806,
+    215445838,
+    2859058148,
+    2435984734,
+    3885123317,
+    1976185965,
+    735329059,
+    284076891,
+    3081620131
+  ]
+}

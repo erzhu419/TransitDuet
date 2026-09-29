@@ -1,0 +1,202 @@
+{
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "l2_path_v1416_comparator",
+    "native_pd_cvar_select",
+    "cvar_projection",
+    "native_pd_cvar_projection"
+  ],
+  "cell_count": 9,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "node_counts": {
+    "node001": 2,
+    "node002": 2,
+    "node003": 1,
+    "node004": 2,
+    "node005": 2
+  },
+  "optimizer_seeds": [
+    4196455150,
+    3082324697,
+    1915709332
+  ],
+  "phases": [
+    "anchor"
+  ],
+  "run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "scheduler_snapshots": [],
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 4,
+  "task_attempt_lineage": {
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-1915709332": {
+      "attempts": [
+        {
+          "finished_at": 1788062307.036833,
+          "id": "t84651",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node001",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.1014175,
+          "status": "done",
+          "submitted_at": 1788061924.2420573
+        }
+      ],
+      "selected_task_id": "t84651",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-3082324697": {
+      "attempts": [
+        {
+          "finished_at": 1788062307.0362291,
+          "id": "t84650",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node004",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.0683782,
+          "status": "done",
+          "submitted_at": 1788061924.2109354
+        }
+      ],
+      "selected_task_id": "t84650",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-4196455150": {
+      "attempts": [
+        {
+          "finished_at": 1788062307.0357776,
+          "id": "t84649",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.0681143,
+          "status": "done",
+          "submitted_at": 1788061924.1760385
+        }
+      ],
+      "selected_task_id": "t84649",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-1915709332": {
+      "attempts": [
+        {
+          "finished_at": 1788062134.9381723,
+          "id": "t84654",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node004",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.1183262,
+          "status": "done",
+          "submitted_at": 1788061924.3376367
+        }
+      ],
+      "selected_task_id": "t84654",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-3082324697": {
+      "attempts": [
+        {
+          "finished_at": 1788062134.937778,
+          "id": "t84653",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.1420915,
+          "status": "done",
+          "submitted_at": 1788061924.3060448
+        }
+      ],
+      "selected_task_id": "t84653",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-4196455150": {
+      "attempts": [
+        {
+          "finished_at": 1788062192.8345973,
+          "id": "t84652",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061945.8501449,
+          "status": "done",
+          "submitted_at": 1788061924.2736626
+        }
+      ],
+      "selected_task_id": "t84652",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-1915709332": {
+      "attempts": [
+        {
+          "finished_at": 1788062192.8368738,
+          "id": "t84657",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.101249,
+          "status": "done",
+          "submitted_at": 1788061924.4323707
+        }
+      ],
+      "selected_task_id": "t84657",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-3082324697": {
+      "attempts": [
+        {
+          "finished_at": 1788062192.8363435,
+          "id": "t84656",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.101803,
+          "status": "done",
+          "submitted_at": 1788061924.401029
+        }
+      ],
+      "selected_task_id": "t84656",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-17-native-pd-cvar-screen-v1/mujoco_v14_18_router_mechanism_anchors_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-4196455150": {
+      "attempts": [
+        {
+          "finished_at": 1788062192.83568,
+          "id": "t84655",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node001",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788061946.079232,
+          "status": "done",
+          "submitted_at": 1788061924.3695862
+        }
+      ],
+      "selected_task_id": "t84655",
+      "selection": "only_attempt"
+    }
+  },
+  "task_ids": [
+    "t84649",
+    "t84650",
+    "t84651",
+    "t84652",
+    "t84653",
+    "t84654",
+    "t84655",
+    "t84656",
+    "t84657"
+  ]
+}

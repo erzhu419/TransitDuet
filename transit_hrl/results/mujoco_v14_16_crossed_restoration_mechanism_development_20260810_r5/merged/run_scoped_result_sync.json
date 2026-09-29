@@ -1,0 +1,1672 @@
+{
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "worst_mode_trainreplay",
+    "l2_mode_trainreplay",
+    "l2_path_trainreplay",
+    "l2_path_freeze_trainreplay",
+    "l2_path_freeze_crossreplay"
+  ],
+  "cell_count": 81,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "node_counts": {
+    "node001": 3,
+    "node002": 5,
+    "node003": 40,
+    "node004": 2,
+    "node005": 6,
+    "node006": 25
+  },
+  "optimizer_seeds": [
+    3493980176,
+    4020259488,
+    583213049
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "run_name": "mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5",
+  "scheduler_snapshots": [
+    {
+      "path": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+      "sha256": "571ca6440e1974125f38bc7c55743c4e648ddb6498a6822252f973bbdd9a1729",
+      "task_record_count": 9
+    }
+  ],
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 4,
+  "task_attempt_lineage": {
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348434.1900463,
+          "id": "t81707",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347996.9986384,
+          "status": "done",
+          "submitted_at": 1786347896.290743
+        }
+      ],
+      "selected_task_id": "t81707",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348434.1905782,
+          "id": "t81708",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347997.2329307,
+          "status": "done",
+          "submitted_at": 1786347896.3525615
+        }
+      ],
+      "selected_task_id": "t81708",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348434.1909688,
+          "id": "t81709",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node002",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347996.318693,
+          "status": "done",
+          "submitted_at": 1786347896.4081964
+        }
+      ],
+      "selected_task_id": "t81709",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348228.2554815,
+          "id": "t81710",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347996.618647,
+          "status": "done",
+          "submitted_at": 1786347896.4641078
+        }
+      ],
+      "selected_task_id": "t81710",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348228.2557569,
+          "id": "t81711",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347997.7494698,
+          "status": "done",
+          "submitted_at": 1786347896.5194
+        }
+      ],
+      "selected_task_id": "t81711",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348228.255938,
+          "id": "t81712",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node002",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786348004.1513708,
+          "status": "done",
+          "submitted_at": 1786347896.5745685
+        }
+      ],
+      "selected_task_id": "t81712",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348228.2561076,
+          "id": "t81713",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347996.6129782,
+          "status": "done",
+          "submitted_at": 1786347896.6298392
+        }
+      ],
+      "selected_task_id": "t81713",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348304.4619937,
+          "id": "t81714",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347998.943077,
+          "status": "done",
+          "submitted_at": 1786347896.6869109
+        }
+      ],
+      "selected_task_id": "t81714",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348304.7738488,
+          "id": "t81715",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node002",
+          "snapshot_source": "archived_scheduler_snapshot:/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/scheduler_archive_recovery.json",
+          "started_at": 1786347996.6297169,
+          "status": "done",
+          "submitted_at": 1786347896.7418232
+        }
+      ],
+      "selected_task_id": "t81715",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1787734364.3284607,
+          "id": "t81728",
+          "last_block_reason": "never entered training: lifetime 1385621s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.7529428,
+          "status": "failed",
+          "submitted_at": 1786347897.5508265
+        },
+        {
+          "finished_at": 1787740045.5275335,
+          "id": "t83997",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node001",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734381.587766,
+          "status": "done",
+          "submitted_at": 1786347897.5508265
+        }
+      ],
+      "selected_task_id": "t83997",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1787734366.1914384,
+          "id": "t81729",
+          "last_block_reason": "never entered training: lifetime 1385629s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.179238,
+          "status": "failed",
+          "submitted_at": 1786347897.6177683
+        },
+        {
+          "finished_at": 1787740502.4469566,
+          "id": "t83998",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734382.0264196,
+          "status": "done",
+          "submitted_at": 1786347897.6177683
+        }
+      ],
+      "selected_task_id": "t83998",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734500.092786,
+          "id": "t81730",
+          "last_block_reason": "never entered training: lifetime 1385757s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.8457198,
+          "status": "failed",
+          "submitted_at": 1786347897.6821997
+        },
+        {
+          "finished_at": 1787740400.4122262,
+          "id": "t83999",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734514.6981287,
+          "status": "done",
+          "submitted_at": 1786347897.6821997
+        }
+      ],
+      "selected_task_id": "t83999",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_crossreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1787735021.2250302,
+          "id": "t81737",
+          "last_block_reason": "log only 0B after 1386273s (very suspicious)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.1677985,
+          "status": "failed",
+          "submitted_at": 1786347898.102085
+        },
+        {
+          "finished_at": 1787741224.738678,
+          "id": "t84006",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787735040.2697642,
+          "status": "done",
+          "submitted_at": 1786347898.102085
+        }
+      ],
+      "selected_task_id": "t84006",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_crossreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1787735026.5105853,
+          "id": "t81738",
+          "last_block_reason": "log only 0B after 1386284s (very suspicious)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348728.2469838,
+          "status": "failed",
+          "submitted_at": 1786347898.1577294
+        },
+        {
+          "finished_at": 1787741115.5571988,
+          "id": "t84007",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node001",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787735042.7566695,
+          "status": "done",
+          "submitted_at": 1786347898.1577294
+        }
+      ],
+      "selected_task_id": "t84007",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_crossreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787735189.5805404,
+          "id": "t81739",
+          "last_block_reason": "log only 0B after 1386439s (very suspicious)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348733.092061,
+          "status": "failed",
+          "submitted_at": 1786347898.2118309
+        },
+        {
+          "finished_at": 1787741450.95256,
+          "id": "t84009",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787735222.9718776,
+          "status": "done",
+          "submitted_at": 1786347898.2118309
+        }
+      ],
+      "selected_task_id": "t84009",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1787734701.2346087,
+          "id": "t81734",
+          "last_block_reason": "never entered training: lifetime 1385951s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348728.3088348,
+          "status": "failed",
+          "submitted_at": 1786347897.9358099
+        },
+        {
+          "finished_at": 1787740837.5052063,
+          "id": "t84003",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node004",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734718.637385,
+          "status": "done",
+          "submitted_at": 1786347897.9358099
+        }
+      ],
+      "selected_task_id": "t84003",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1787734836.344675,
+          "id": "t81735",
+          "last_block_reason": "log only 0B after 1386086s (very suspicious)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348732.0366116,
+          "status": "failed",
+          "submitted_at": 1786347897.9917789
+        },
+        {
+          "finished_at": 1787740954.5005264,
+          "id": "t84004",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734855.5992525,
+          "status": "done",
+          "submitted_at": 1786347897.9917789
+        }
+      ],
+      "selected_task_id": "t84004",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_freeze_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734937.2925394,
+          "id": "t81736",
+          "last_block_reason": "log only 0B after 1386191s (very suspicious)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.151152,
+          "status": "failed",
+          "submitted_at": 1786347898.0461483
+        },
+        {
+          "finished_at": 1787741042.7108793,
+          "id": "t84005",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node001",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734956.7950897,
+          "status": "done",
+          "submitted_at": 1786347898.0461483
+        }
+      ],
+      "selected_task_id": "t84005",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1787734501.6223104,
+          "id": "t81731",
+          "last_block_reason": "never entered training: lifetime 1385762s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.1733906,
+          "status": "failed",
+          "submitted_at": 1786347897.746527
+        },
+        {
+          "finished_at": 1787740548.9828756,
+          "id": "t84000",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node002",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734514.7808743,
+          "status": "done",
+          "submitted_at": 1786347897.746527
+        }
+      ],
+      "selected_task_id": "t84000",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1787734602.4236763,
+          "id": "t81732",
+          "last_block_reason": "never entered training: lifetime 1385857s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.7590032,
+          "status": "failed",
+          "submitted_at": 1786347897.8105485
+        },
+        {
+          "finished_at": 1787740880.0186243,
+          "id": "t84001",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node004",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734620.9712737,
+          "status": "done",
+          "submitted_at": 1786347897.8105485
+        }
+      ],
+      "selected_task_id": "t84001",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/l2_path_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734604.0142105,
+          "id": "t81733",
+          "last_block_reason": "never entered training: lifetime 1385867s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.1850245,
+          "status": "failed",
+          "submitted_at": 1786347897.87359
+        },
+        {
+          "finished_at": 1787740837.5047936,
+          "id": "t84002",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734620.7801647,
+          "status": "done",
+          "submitted_at": 1786347897.87359
+        }
+      ],
+      "selected_task_id": "t84002",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.793396,
+          "id": "t81716",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.4255443,
+          "status": "done",
+          "submitted_at": 1786347896.7962203
+        }
+      ],
+      "selected_task_id": "t81716",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7938035,
+          "id": "t81717",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348724.7661674,
+          "status": "done",
+          "submitted_at": 1786347896.8498313
+        }
+      ],
+      "selected_task_id": "t81717",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7941039,
+          "id": "t81718",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.0792363,
+          "status": "done",
+          "submitted_at": 1786347896.9064593
+        }
+      ],
+      "selected_task_id": "t81718",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s050_projection_calibration/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7943826,
+          "id": "t81719",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348728.2634792,
+          "status": "done",
+          "submitted_at": 1786347896.9678462
+        }
+      ],
+      "selected_task_id": "t81719",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s050_projection_calibration/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7946436,
+          "id": "t81720",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348733.2484176,
+          "status": "done",
+          "submitted_at": 1786347897.0291154
+        }
+      ],
+      "selected_task_id": "t81720",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/mean_s050_projection_calibration/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.794883,
+          "id": "t81721",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.2348166,
+          "status": "done",
+          "submitted_at": 1786347897.087935
+        }
+      ],
+      "selected_task_id": "t81721",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/paired_s050_d000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7951145,
+          "id": "t81722",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.1387427,
+          "status": "done",
+          "submitted_at": 1786347897.1604083
+        }
+      ],
+      "selected_task_id": "t81722",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/paired_s050_d000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7953691,
+          "id": "t81723",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.0789673,
+          "status": "done",
+          "submitted_at": 1786347897.2428653
+        }
+      ],
+      "selected_task_id": "t81723",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/paired_s050_d000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.795627,
+          "id": "t81724",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348724.7386456,
+          "status": "done",
+          "submitted_at": 1786347897.3024282
+        }
+      ],
+      "selected_task_id": "t81724",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/worst_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1787734076.6310477,
+          "id": "t81725",
+          "last_block_reason": "never entered training: lifetime 1385335s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init); terminal state synced after remote probe was unknown for 1382309s (8788 probe cycle(s))",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348725.8834348,
+          "status": "failed",
+          "submitted_at": 1786347897.3614664
+        },
+        {
+          "finished_at": 1787739819.1112473,
+          "id": "t83994",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734381.8720136,
+          "status": "done",
+          "submitted_at": 1786347897.3614664
+        }
+      ],
+      "selected_task_id": "t83994",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/worst_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1787734238.4718192,
+          "id": "t81726",
+          "last_block_reason": "never entered training: lifetime 1385490s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348729.1849077,
+          "status": "failed",
+          "submitted_at": 1786347897.4228282
+        },
+        {
+          "finished_at": 1787740548.9824374,
+          "id": "t83995",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734381.854566,
+          "status": "done",
+          "submitted_at": 1786347897.4228282
+        }
+      ],
+      "selected_task_id": "t83995",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/HalfCheetah-v5/worst_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734244.3372655,
+          "id": "t81727",
+          "last_block_reason": "never entered training: lifetime 1385505s but peak_vram=0 and no training markers in log tail (likely OOM/silent-kill mid-init)",
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348726.036753,
+          "status": "failed",
+          "submitted_at": 1786347897.4864824
+        },
+        {
+          "finished_at": 1787738871.4682488,
+          "id": "t83996",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1787734381.6245012,
+          "status": "done",
+          "submitted_at": 1786347897.4864824
+        }
+      ],
+      "selected_task_id": "t83996",
+      "selection": "unique_successful_reroute"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3447304,
+          "id": "t81752",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348482.0348868,
+          "status": "done",
+          "submitted_at": 1786347898.9301302
+        }
+      ],
+      "selected_task_id": "t81752",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348947.1678593,
+          "id": "t81753",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348460.3527055,
+          "status": "done",
+          "submitted_at": 1786347898.9851332
+        }
+      ],
+      "selected_task_id": "t81753",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.345054,
+          "id": "t81754",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348461.3816094,
+          "status": "done",
+          "submitted_at": 1786347899.040909
+        }
+      ],
+      "selected_task_id": "t81754",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_crossreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349369.6058323,
+          "id": "t81761",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348462.2128868,
+          "status": "done",
+          "submitted_at": 1786347899.4381423
+        }
+      ],
+      "selected_task_id": "t81761",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_crossreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.796518,
+          "id": "t81762",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348466.189467,
+          "status": "done",
+          "submitted_at": 1786347899.4958472
+        }
+      ],
+      "selected_task_id": "t81762",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_crossreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7967703,
+          "id": "t81763",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348461.4432266,
+          "status": "done",
+          "submitted_at": 1786347899.5508778
+        }
+      ],
+      "selected_task_id": "t81763",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349269.3285928,
+          "id": "t81758",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348464.1672373,
+          "status": "done",
+          "submitted_at": 1786347899.2632422
+        }
+      ],
+      "selected_task_id": "t81758",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349269.6079524,
+          "id": "t81759",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348463.5142765,
+          "status": "done",
+          "submitted_at": 1786347899.3215046
+        }
+      ],
+      "selected_task_id": "t81759",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_freeze_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7962549,
+          "id": "t81760",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348459.5915134,
+          "status": "done",
+          "submitted_at": 1786347899.381711
+        }
+      ],
+      "selected_task_id": "t81760",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348947.1681535,
+          "id": "t81755",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348466.7039063,
+          "status": "done",
+          "submitted_at": 1786347899.0958805
+        }
+      ],
+      "selected_task_id": "t81755",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349269.007162,
+          "id": "t81756",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348464.1665387,
+          "status": "done",
+          "submitted_at": 1786347899.1516268
+        }
+      ],
+      "selected_task_id": "t81756",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/l2_path_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3453393,
+          "id": "t81757",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348476.1809273,
+          "status": "done",
+          "submitted_at": 1786347899.2077763
+        }
+      ],
+      "selected_task_id": "t81757",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348680.0685878,
+          "id": "t81740",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.1322703,
+          "status": "done",
+          "submitted_at": 1786347898.265718
+        }
+      ],
+      "selected_task_id": "t81740",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348680.4302876,
+          "id": "t81741",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.0157998,
+          "status": "done",
+          "submitted_at": 1786347898.320131
+        }
+      ],
+      "selected_task_id": "t81741",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348680.6981592,
+          "id": "t81742",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.8124926,
+          "status": "done",
+          "submitted_at": 1786347898.3761947
+        }
+      ],
+      "selected_task_id": "t81742",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s050_projection_calibration/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348681.0009053,
+          "id": "t81743",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.1707609,
+          "status": "done",
+          "submitted_at": 1786347898.4318724
+        }
+      ],
+      "selected_task_id": "t81743",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s050_projection_calibration/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348681.2666318,
+          "id": "t81744",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.905375,
+          "status": "done",
+          "submitted_at": 1786347898.487232
+        }
+      ],
+      "selected_task_id": "t81744",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/mean_s050_projection_calibration/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348681.5843074,
+          "id": "t81745",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.135381,
+          "status": "done",
+          "submitted_at": 1786347898.5428572
+        }
+      ],
+      "selected_task_id": "t81745",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/paired_s050_d000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348681.8530512,
+          "id": "t81746",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348461.3929214,
+          "status": "done",
+          "submitted_at": 1786347898.5978556
+        }
+      ],
+      "selected_task_id": "t81746",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/paired_s050_d000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348682.1150281,
+          "id": "t81747",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.382775,
+          "status": "done",
+          "submitted_at": 1786347898.6528976
+        }
+      ],
+      "selected_task_id": "t81747",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/paired_s050_d000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348682.4286847,
+          "id": "t81748",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.713249,
+          "status": "done",
+          "submitted_at": 1786347898.7096798
+        }
+      ],
+      "selected_task_id": "t81748",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/worst_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348947.1673746,
+          "id": "t81749",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.7555966,
+          "status": "done",
+          "submitted_at": 1786347898.7655103
+        }
+      ],
+      "selected_task_id": "t81749",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/worst_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349172.7959557,
+          "id": "t81750",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348460.0043879,
+          "status": "done",
+          "submitted_at": 1786347898.8203402
+        }
+      ],
+      "selected_task_id": "t81750",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Hopper-v5/worst_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3442926,
+          "id": "t81751",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348460.1014228,
+          "status": "done",
+          "submitted_at": 1786347898.87656
+        }
+      ],
+      "selected_task_id": "t81751",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349463.0023253,
+          "id": "t81776",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348467.685966,
+          "status": "done",
+          "submitted_at": 1786347900.2667787
+        }
+      ],
+      "selected_task_id": "t81776",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349840.287409,
+          "id": "t81777",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348593.9873786,
+          "status": "done",
+          "submitted_at": 1786347900.3212287
+        }
+      ],
+      "selected_task_id": "t81777",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734078.9615235,
+          "id": "t81778",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.8106384,
+          "status": "done",
+          "submitted_at": 1786347898.542483
+        }
+      ],
+      "selected_task_id": "t81778",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_crossreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349910.6162512,
+          "id": "t81785",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348456.7997525,
+          "status": "done",
+          "submitted_at": 1786347898.9600892
+        }
+      ],
+      "selected_task_id": "t81785",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_crossreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786353095.6660993,
+          "id": "t81786",
+          "last_block_reason": "probe unknown for 1328s, but cached success marker 'DONE' was already observed; suppressing reroute",
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4140604,
+          "status": "done",
+          "submitted_at": 1786347899.0217688
+        }
+      ],
+      "selected_task_id": "t81786",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_crossreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734078.9622304,
+          "id": "t81787",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4659069,
+          "status": "done",
+          "submitted_at": 1786347899.0815191
+        }
+      ],
+      "selected_task_id": "t81787",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349910.284896,
+          "id": "t81782",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.1565468,
+          "status": "done",
+          "submitted_at": 1786347898.7786632
+        }
+      ],
+      "selected_task_id": "t81782",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349915.950082,
+          "id": "t81783",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.9115639,
+          "status": "done",
+          "submitted_at": 1786347898.8403099
+        }
+      ],
+      "selected_task_id": "t81783",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_freeze_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734078.9620008,
+          "id": "t81784",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348595.4783,
+          "status": "done",
+          "submitted_at": 1786347898.9002008
+        }
+      ],
+      "selected_task_id": "t81784",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349840.2878485,
+          "id": "t81779",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348457.7180977,
+          "status": "done",
+          "submitted_at": 1786347898.5992253
+        }
+      ],
+      "selected_task_id": "t81779",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786353095.65754,
+          "id": "t81780",
+          "last_block_reason": "probe unknown for 1328s, but cached success marker 'DONE' was already observed; suppressing reroute",
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348591.9535615,
+          "status": "done",
+          "submitted_at": 1786347898.656707
+        }
+      ],
+      "selected_task_id": "t81780",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/l2_path_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734078.9617653,
+          "id": "t81781",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.762603,
+          "status": "done",
+          "submitted_at": 1786347898.7172089
+        }
+      ],
+      "selected_task_id": "t81781",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348682.692728,
+          "id": "t81764",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348459.1986575,
+          "status": "done",
+          "submitted_at": 1786347899.607478
+        }
+      ],
+      "selected_task_id": "t81764",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3456357,
+          "id": "t81765",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.6045883,
+          "status": "done",
+          "submitted_at": 1786347899.6624587
+        }
+      ],
+      "selected_task_id": "t81765",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.345891,
+          "id": "t81766",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4330952,
+          "status": "done",
+          "submitted_at": 1786347899.717165
+        }
+      ],
+      "selected_task_id": "t81766",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s050_projection_calibration/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348683.0013597,
+          "id": "t81767",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348468.0756018,
+          "status": "done",
+          "submitted_at": 1786347899.772271
+        }
+      ],
+      "selected_task_id": "t81767",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s050_projection_calibration/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3461351,
+          "id": "t81768",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348594.015892,
+          "status": "done",
+          "submitted_at": 1786347899.82732
+        }
+      ],
+      "selected_task_id": "t81768",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/mean_s050_projection_calibration/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3463714,
+          "id": "t81769",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.680755,
+          "status": "done",
+          "submitted_at": 1786347899.8813355
+        }
+      ],
+      "selected_task_id": "t81769",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/paired_s050_d000_control/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786348702.0309818,
+          "id": "t81770",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348466.209405,
+          "status": "done",
+          "submitted_at": 1786347899.935549
+        }
+      ],
+      "selected_task_id": "t81770",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/paired_s050_d000_control/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3466222,
+          "id": "t81771",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4205294,
+          "status": "done",
+          "submitted_at": 1786347899.99297
+        }
+      ],
+      "selected_task_id": "t81771",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/paired_s050_d000_control/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1786348844.3469515,
+          "id": "t81772",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4222472,
+          "status": "done",
+          "submitted_at": 1786347900.0495663
+        }
+      ],
+      "selected_task_id": "t81772",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/worst_mode_trainreplay/rep-3493980176": {
+      "attempts": [
+        {
+          "finished_at": 1786349269.924256,
+          "id": "t81773",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node003",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348460.0020478,
+          "status": "done",
+          "submitted_at": 1786347900.1037352
+        }
+      ],
+      "selected_task_id": "t81773",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/worst_mode_trainreplay/rep-4020259488": {
+      "attempts": [
+        {
+          "finished_at": 1786349665.1176245,
+          "id": "t81774",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348592.4877796,
+          "status": "done",
+          "submitted_at": 1786347900.1582546
+        }
+      ],
+      "selected_task_id": "t81774",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-16-crossed-restoration-mechanism-screen-v2/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/continuation/Walker2d-v5/worst_mode_trainreplay/rep-583213049": {
+      "attempts": [
+        {
+          "finished_at": 1787734078.9612317,
+          "id": "t81775",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node006",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1786348595.8582659,
+          "status": "done",
+          "submitted_at": 1786347900.2121332
+        }
+      ],
+      "selected_task_id": "t81775",
+      "selection": "only_attempt"
+    }
+  },
+  "task_ids": [
+    "t81707",
+    "t81708",
+    "t81709",
+    "t81710",
+    "t81711",
+    "t81712",
+    "t81713",
+    "t81714",
+    "t81715",
+    "t81716",
+    "t81717",
+    "t81718",
+    "t81719",
+    "t81720",
+    "t81721",
+    "t81722",
+    "t81723",
+    "t81724",
+    "t83994",
+    "t83995",
+    "t83996",
+    "t83997",
+    "t83998",
+    "t83999",
+    "t84000",
+    "t84001",
+    "t84002",
+    "t84003",
+    "t84004",
+    "t84005",
+    "t84006",
+    "t84007",
+    "t84009",
+    "t81740",
+    "t81741",
+    "t81742",
+    "t81743",
+    "t81744",
+    "t81745",
+    "t81746",
+    "t81747",
+    "t81748",
+    "t81749",
+    "t81750",
+    "t81751",
+    "t81752",
+    "t81753",
+    "t81754",
+    "t81755",
+    "t81756",
+    "t81757",
+    "t81758",
+    "t81759",
+    "t81760",
+    "t81761",
+    "t81762",
+    "t81763",
+    "t81764",
+    "t81765",
+    "t81766",
+    "t81767",
+    "t81768",
+    "t81769",
+    "t81770",
+    "t81771",
+    "t81772",
+    "t81773",
+    "t81774",
+    "t81775",
+    "t81776",
+    "t81777",
+    "t81778",
+    "t81779",
+    "t81780",
+    "t81781",
+    "t81782",
+    "t81783",
+    "t81784",
+    "t81785",
+    "t81786",
+    "t81787"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "analysis_version": "pointmaze_budgeted_trigger_stage9_analysis_v1",
+  "claim_boundary": "PointMaze development only; independent confirmation and domain transfer remain required",
+  "decision": "stage9_development_gate_failed",
+  "intervals": {
+    "candidate_early_calls_per_episode": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.5,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_current_episode_tracking_ise": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -7.536361510762646e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_fixed_episode_return": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.43849535208502743,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_fixed_episode_tracking_ise": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.133650258722823,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_jitter_episode_tracking_ise": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.006489397449985113,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "controller_learning_gain": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -4.883804872101981,
+      "n": 1,
+      "status": "inconclusive"
+    }
+  },
+  "matrix": "preflight",
+  "optimizer_root_count": 1,
+  "protocol_version": "pointmaze_budgeted_plan_trigger_stage9_v1",
+  "qualification_checks": {
+    "candidate_beats_current_only_ise": false,
+    "candidate_beats_fixed_ise": false,
+    "candidate_beats_random_ise": false,
+    "candidate_return_beats_fixed": false,
+    "controller_learned": false
+  },
+  "root_summaries": {
+    "208001": {
+      "candidate_early_calls_per_episode": 0.5,
+      "candidate_minus_current_episode_tracking_ise": -7.536361510762646e-05,
+      "candidate_minus_fixed_episode_return": 0.43849535208502743,
+      "candidate_minus_fixed_episode_tracking_ise": 0.133650258722823,
+      "candidate_minus_jitter_episode_tracking_ise": -0.006489397449985113,
+      "controller_learning_gain": -4.883804872101981
+    }
+  },
+  "statistical_unit": "optimizer_seed_root"
+}

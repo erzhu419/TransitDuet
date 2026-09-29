@@ -1,0 +1,87 @@
+{
+  "anchor_run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "cvar_alpha": 0.5,
+  "design_roots": [
+    711725209,
+    631495597,
+    572315226,
+    4229196870,
+    1365493165,
+    3330743771,
+    2153978727,
+    4101484206,
+    3910977303,
+    2981862315,
+    351468744,
+    489947276,
+    1592711096,
+    3483280035,
+    2316882609,
+    129318130
+  ],
+  "development_protocol_version": "mujoco_v14_21_distributional_actor_preflight_v1",
+  "direction_count": 8,
+  "direction_seed": 3538198271,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_v14_20_distributional_actor_mechanism_preflight_not_confirmatory",
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "perturb_rms": 1e-06,
+  "risk_mode": "mode_mean",
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 16,
+    "ram_mb_per_task": 8192,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "actor_scope": "joint_upper_lower_deterministic_output_heads",
+    "design_paths": "sixteen_frozen_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "risk_aggregation": "four_disturbance_mode_means",
+    "search": "eight_fixed_antithetic_rademacher_directions_and_rank_gradient",
+    "validation_paths": "sixteen_independent_frozen_roots_crossed_with_four_modes"
+  },
+  "source_revision": "e83a55fdd640513b9b4a744193ce0d12b58f8f30",
+  "status": "frozen_before_v14_21_preflight_outcome_access",
+  "step_rms_values": [
+    1e-08,
+    3e-08,
+    1e-07,
+    3e-07,
+    1e-06
+  ],
+  "validation_roots": [
+    1335195189,
+    3385626663,
+    4240656593,
+    3066758296,
+    2060314670,
+    357102074,
+    3729304458,
+    4257202954,
+    2983781434,
+    2794290390,
+    2912879163,
+    4124225309,
+    716353584,
+    3070994606,
+    3438016882,
+    2705664572
+  ]
+}

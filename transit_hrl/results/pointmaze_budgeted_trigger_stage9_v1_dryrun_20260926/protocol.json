@@ -1,0 +1,83 @@
+{
+  "cells": [],
+  "protocol": {
+    "algorithm_path": "causal_plan_value_trigger_one_call_per_period_variable_duration_controller",
+    "branch_fit_seeds": [
+      2159201,
+      2159211
+    ],
+    "branch_window_seconds": 0.5,
+    "candidate_future_or_regime_access": false,
+    "check_stride_steps": 5,
+    "checkpoint_evaluation_interval": 8,
+    "environment_id": "PointMaze_UMaze-v3",
+    "evidence_role": "budgeted_closed_loop_trigger_development",
+    "fast_period_seconds": 0.04,
+    "history_seconds": 0.64,
+    "horizon": 300,
+    "iterations": 2,
+    "learning_rate": 0.0003,
+    "max_events_per_class": 1,
+    "max_offset_steps": 25,
+    "maximum_subgoal_delta": 0.75,
+    "methods": [
+      "fixed",
+      "balanced_jitter",
+      "current_compact_quadratic",
+      "causal_validity_interactions"
+    ],
+    "optimizer_seed": 208001,
+    "planning_budget": "one_upper_call_per_50_step_bin",
+    "predictor_threshold_source": "branch_fit_grouped_out_of_fold_only",
+    "protocol_version": "pointmaze_budgeted_plan_trigger_stage9_v1",
+    "reference_hidden_dim": 128,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0
+    ],
+    "selection_seeds": [
+      2159101
+    ],
+    "task_options": {
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ]
+    },
+    "threshold_quantile": 0.75,
+    "train_seeds": [
+      2159011
+    ],
+    "trigger_eval_seeds": [
+      2159301,
+      2159307
+    ],
+    "upper_period_seconds": 0.5
+  },
+  "status": "dry_run"
+}

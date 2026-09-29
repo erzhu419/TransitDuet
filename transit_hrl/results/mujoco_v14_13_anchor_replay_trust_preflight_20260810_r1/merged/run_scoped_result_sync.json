@@ -1,0 +1,49 @@
+{
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "group_replay0_trust0_eps1e8_k8",
+    "group_replay1_trust0_eps1e2_k8",
+    "group_replay0_trust1_eps1e2_k8",
+    "group_replay1_trust1_eps1e8_k8",
+    "group_replay1_trust1_eps1e3_k8",
+    "group_replay1_trust1_eps5e3_k8",
+    "group_replay1_trust1_eps1e2_k8",
+    "group_replay1_trust1_eps2e2_k8",
+    "group_replay1_trust1_eps5e3_k16"
+  ],
+  "cell_count": 13,
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "node_counts": {
+    "node001": 12,
+    "node004": 1
+  },
+  "optimizer_seeds": [
+    1313726498
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "run_name": "mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1",
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 4,
+  "task_ids": [
+    "t79642",
+    "t79643",
+    "t79644",
+    "t79645",
+    "t79646",
+    "t79647",
+    "t79648",
+    "t79649",
+    "t79650",
+    "t79651",
+    "t79652",
+    "t79653",
+    "t79654"
+  ]
+}

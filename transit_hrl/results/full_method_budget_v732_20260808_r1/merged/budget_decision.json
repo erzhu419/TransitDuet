@@ -1,0 +1,31 @@
+{
+  "budget_gate_by_iterations": {
+    "128": "fail",
+    "64": "fail",
+    "96": "fail"
+  },
+  "budget_plan_sha256": "83f48bec454c51197f4d845e1dc53c9ae42e8e4b8b898601905e1436b0eb9b0d",
+  "budget_plan_version": "freq_hrl_v7_3_2_training_budget_plan_v1",
+  "cell_count": 135,
+  "code_revision": "87c04e22146a8d4f7eb633618dba673c9710f5f4",
+  "evaluated_budgets": [
+    64,
+    96,
+    128
+  ],
+  "mandatory_budgets_complete": true,
+  "optimizer_seeds": [
+    7103,
+    7111,
+    7121,
+    7127,
+    7151
+  ],
+  "protocol_version": "freq_hrl_v7_3_2_source_bound_budget_validation_v1",
+  "representative_row_count": 27,
+  "selected_iterations": null,
+  "selection_rule": "evaluate_64_and_96; select_96_if_every_representative_passes; otherwise_evaluate_128_and_select_only_if_every_representative_passes",
+  "source_identity_status": "verified",
+  "source_manifest_sha256": "ad78496bc1e4936d1299e8bc4ae12471986e863dedbc4a064e6a585470e0987d",
+  "status": "blocked_budget_limited_at_128"
+}

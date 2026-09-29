@@ -1,0 +1,25 @@
+{
+  "development_protocol_version": "mujoco_v17_12_nearest_feasible_action_v1",
+  "evidence_role": "post_router_boundary_reused_path_actor_target_oracle_not_confirmatory",
+  "frozen_core_revision": "3ca8ee6d2709e77af7b7c4d022cbeb83886d0a75",
+  "frozen_source_manifest_sha256": "718a7dd61ea62fa21b52531299a2e0d2e2b22175891f7a7fbdf03b7f58a5410a",
+  "path_count": 120,
+  "scheduler_contract": {
+    "binding_reason": "source paths remain server-only on node003",
+    "cpu": 4,
+    "ram_mb": 4096,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "advancement_gate": "all 120 frequency-only targets feasible, all 113 previously feasible paths unchanged, exactly seven nonzero actor targets, actor-floor total correction RMS at most 0.05 and maximum absolute correction at most 0.25",
+    "claim_boundary": "acausal reused-path target construction only; no online policy, reward, fresh-seed, or manuscript performance claim",
+    "deployment_diagnostic": "the seven actor-floor paths are also projected with nominal total action constrained to the environment unit box; this profile does not select the next target",
+    "frequency_projection": "Dykstra Euclidean projection of the oracle upper/lower pair onto component boxes and exact full-horizon HPF8/LPF32 balls",
+    "input": "the unchanged server-only v17.8 reused-path panel and v17.6 oracle component targets; no fresh path access",
+    "next_step": "a passing result authorizes grouped causal actor-target distillation on reused paths before any fresh validation"
+  },
+  "source_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "status": "registered_before_nearest_target_access"
+}

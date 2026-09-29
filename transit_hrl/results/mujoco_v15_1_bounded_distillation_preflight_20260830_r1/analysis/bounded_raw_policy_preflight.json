@@ -1,0 +1,60 @@
+{
+  "analysis_version": "mujoco_v15_1_bounded_distillation_analysis_v1",
+  "cell_count": 3,
+  "cells": [
+    {
+      "design_eligible_candidate_count": 0,
+      "environment": "HalfCheetah-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": null,
+      "selected_index": null,
+      "status": "no_complete_raw_policy_candidate",
+      "validation_frequency_violation_merit": null,
+      "validation_reward_maximum_normalized_violation": null,
+      "validation_supported": false,
+      "validation_worst_frequency_violation": null
+    },
+    {
+      "design_eligible_candidate_count": 58,
+      "environment": "Hopper-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": {
+        "blend": 1.0,
+        "head_delta_rms_limit": 0.02,
+        "raw_target_limit": 2.5,
+        "ridge": 0.01,
+        "router_strength": 0.5,
+        "slow_alpha": 0.5,
+        "transfer_strength": 0.75
+      },
+      "selected_index": 0,
+      "status": "raw_policy_distillation_preflight_supported",
+      "validation_frequency_violation_merit": 0.0,
+      "validation_reward_maximum_normalized_violation": 0.0,
+      "validation_supported": true,
+      "validation_worst_frequency_violation": 0.0
+    },
+    {
+      "design_eligible_candidate_count": 0,
+      "environment": "Walker2d-v5",
+      "optimizer_seed": 2978317753,
+      "selected_config": null,
+      "selected_index": null,
+      "status": "no_complete_raw_policy_candidate",
+      "validation_frequency_violation_merit": null,
+      "validation_reward_maximum_normalized_violation": null,
+      "validation_supported": false,
+      "validation_worst_frequency_violation": null
+    }
+  ],
+  "evidence_role": "post_v15_failure_saturation_bounded_distillation_development_not_confirmatory",
+  "selection_contract": {
+    "design": "pooled_and_two_disjoint_five_root_folds_require_reward_floor_and_zero_normalized_violation_on_all_five_frequency_endpoints",
+    "failure": "no_design_candidate_or_validation_failure_is_an_abstention",
+    "student": "upper_then_counterfactual_lower_actor_head_ridge_fit_with_parameter_rms_trust_region_followed_by_function_preserving_responsibility_router_selection",
+    "teacher": "strictly_causal_previous_macro_total_action_ema_with_exact_feasibility_projection_and_bounded_inverse_tanh_targets",
+    "validation": "one_evaluation_of_the_design_selected_candidate_only"
+  },
+  "status": "bounded_raw_policy_preflight_not_supported",
+  "validation_supported_count": 1
+}

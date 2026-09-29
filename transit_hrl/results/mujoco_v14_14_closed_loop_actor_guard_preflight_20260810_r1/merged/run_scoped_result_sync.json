@@ -1,0 +1,43 @@
+{
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "group_replay1_trust1_outer0_eps1e3_k8_control",
+    "group_replay1_trust1_outer0_eps5e3_k8_control",
+    "group_replay0_trust0_outer1_eps1e3_bt8",
+    "group_replay1_trust1_outer1_eps1e3_bt4",
+    "group_replay1_trust1_outer1_eps1e3_bt8",
+    "group_replay1_trust1_outer1_eps5e3_bt8"
+  ],
+  "cell_count": 10,
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "node_counts": {
+    "node003": 2,
+    "node004": 8
+  },
+  "optimizer_seeds": [
+    1195064860
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "run_name": "mujoco_v14_14_closed_loop_actor_guard_preflight_20260810_r1",
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 4,
+  "task_ids": [
+    "t79738",
+    "t79739",
+    "t79740",
+    "t79741",
+    "t79742",
+    "t79743",
+    "t79744",
+    "t79745",
+    "t79746",
+    "t79747"
+  ]
+}

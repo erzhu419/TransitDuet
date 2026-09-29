@@ -1,0 +1,185 @@
+{
+  "algorithm_revision": "67b9a12de0dd819183ebf201f7312aa97a23ea91",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "clean",
+      "flat_history",
+      94007
+    ],
+    [
+      "clean",
+      "flat_multiscale",
+      94007
+    ],
+    [
+      "clean",
+      "hrl_history",
+      94007
+    ],
+    [
+      "clean",
+      "hrl_multiscale",
+      94007
+    ],
+    [
+      "clean",
+      "flat_causal_filter",
+      94007
+    ],
+    [
+      "fast_observation_noise",
+      "flat_history",
+      94007
+    ],
+    [
+      "fast_observation_noise",
+      "flat_multiscale",
+      94007
+    ],
+    [
+      "fast_observation_noise",
+      "hrl_history",
+      94007
+    ],
+    [
+      "fast_observation_noise",
+      "hrl_multiscale",
+      94007
+    ],
+    [
+      "fast_observation_noise",
+      "flat_causal_filter",
+      94007
+    ],
+    [
+      "slow_drift_fast_action",
+      "flat_history",
+      94007
+    ],
+    [
+      "slow_drift_fast_action",
+      "flat_multiscale",
+      94007
+    ],
+    [
+      "slow_drift_fast_action",
+      "hrl_history",
+      94007
+    ],
+    [
+      "slow_drift_fast_action",
+      "hrl_multiscale",
+      94007
+    ],
+    [
+      "slow_drift_fast_action",
+      "flat_causal_filter",
+      94007
+    ],
+    [
+      "persistent_action_shift",
+      "flat_history",
+      94007
+    ],
+    [
+      "persistent_action_shift",
+      "flat_multiscale",
+      94007
+    ],
+    [
+      "persistent_action_shift",
+      "hrl_history",
+      94007
+    ],
+    [
+      "persistent_action_shift",
+      "hrl_multiscale",
+      94007
+    ],
+    [
+      "persistent_action_shift",
+      "flat_causal_filter",
+      94007
+    ]
+  ],
+  "claim_gate": {
+    "clean_success_noninferiority_margin": 0.1,
+    "primary_endpoint": "success",
+    "primary_stress": [
+      "fast_observation_noise",
+      "slow_drift_fast_action"
+    ],
+    "requires_observation_noise_superiority_to_causal_filter": true,
+    "requires_positive_factorial_interaction": true,
+    "secondary_stress": "persistent_action_shift"
+  },
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_history",
+    "flat_multiscale",
+    "hrl_history",
+    "hrl_multiscale",
+    "flat_causal_filter"
+  ],
+  "optimizer_seeds": [
+    94007
+  ],
+  "options": {
+    "94007": {
+      "checkpoint_evaluation_interval": 1,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        900211
+      ],
+      "fast_period_seconds": 0.04,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        900101
+      ],
+      "train": [
+        900011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_multiscale_goal_stage3_v2",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scenarios": [
+    "clean",
+    "fast_observation_noise",
+    "slow_drift_fast_action",
+    "persistent_action_shift"
+  ],
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

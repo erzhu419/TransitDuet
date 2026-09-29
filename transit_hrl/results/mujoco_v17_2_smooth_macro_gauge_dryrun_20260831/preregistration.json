@@ -1,0 +1,91 @@
+{
+  "alpha_arms": {
+    "alpha_005": 0.05,
+    "alpha_010": 0.1,
+    "alpha_020": 0.2
+  },
+  "artifact_contract": {
+    "server_only": [
+      "checkpoint.pt",
+      "training_history.json"
+    ],
+    "synced": [
+      "cell_summary.json",
+      "evaluation_rows.csv",
+      "server_artifact_location.json"
+    ]
+  },
+  "development_protocol_version": "mujoco_v17_2_smooth_macro_gauge_preflight_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evaluation_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed",
+    "ood_chirp"
+  ],
+  "evaluation_seeds": [
+    4109662726,
+    2350227856,
+    4239705722,
+    2492073394,
+    21969384,
+    47387049,
+    1885267174,
+    375454845
+  ],
+  "evidence_role": "paired_smooth_macro_gauge_development_not_confirmatory",
+  "frozen_algorithm_revision": "22b77b5ed820276644e6d512ebff9dd8a6b3fe77",
+  "frozen_source_manifest_sha256": "c7f6a535ff4bd1db0fdf77019882d8d96435e8cead08dc12617a5634fe072b63",
+  "launcher_source_revision": "22b77b5ed820276644e6d512ebff9dd8a6b3fe77",
+  "optimizer_seeds": [
+    2548289420
+  ],
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 1024,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "frequency_gate": "at_least_ten_percent_mean_upper_hpf8_lower_lpf32_and_joint_normalized_merit_reduction_in_all_three_environments",
+    "global_selection": "maximize_worst_environment_joint_merit_reduction_then_median_joint_merit_reduction_among_eligible_alphas",
+    "mechanics_gate": "exact_reward_executed_and_latent_trace_identity_exact_additive_reconstruction_and_bounded_component_projection",
+    "outcome_use": "development_only_freeze_one_alpha_for_fresh_leakage_active_multiseed_training_if_supported",
+    "paired_intervention": "same_frozen_checkpoint_same_heldout_paths_strength_zero_vs_one",
+    "training": "one_reward_only_strength_zero_policy_per_environment_and_alpha",
+    "unit": "environment_by_alpha_single_fresh_optimizer_seed"
+  },
+  "selection_seeds": [
+    2078100333,
+    2527831988,
+    2199604115,
+    1001230619
+  ],
+  "status": "frozen_before_v17_2_training_or_heldout_access",
+  "train_seeds": [
+    2140296180,
+    62438583,
+    2893357541,
+    3862291383
+  ],
+  "training_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed"
+  ]
+}

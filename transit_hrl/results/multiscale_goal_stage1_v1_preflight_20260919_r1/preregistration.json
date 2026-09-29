@@ -1,0 +1,164 @@
+{
+  "algorithm_revision": "e83a17f45e330ab290e98b2e1b6c40c90b7941ae",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "clean",
+      "flat_history",
+      45007
+    ],
+    [
+      "clean",
+      "flat_multiscale",
+      45007
+    ],
+    [
+      "clean",
+      "hrl_history",
+      45007
+    ],
+    [
+      "clean",
+      "hrl_multiscale",
+      45007
+    ],
+    [
+      "clean",
+      "flat_causal_filter",
+      45007
+    ],
+    [
+      "slow_target_fast_force",
+      "flat_history",
+      45007
+    ],
+    [
+      "slow_target_fast_force",
+      "flat_multiscale",
+      45007
+    ],
+    [
+      "slow_target_fast_force",
+      "hrl_history",
+      45007
+    ],
+    [
+      "slow_target_fast_force",
+      "hrl_multiscale",
+      45007
+    ],
+    [
+      "slow_target_fast_force",
+      "flat_causal_filter",
+      45007
+    ],
+    [
+      "slow_signal_fast_observation_noise",
+      "flat_history",
+      45007
+    ],
+    [
+      "slow_signal_fast_observation_noise",
+      "flat_multiscale",
+      45007
+    ],
+    [
+      "slow_signal_fast_observation_noise",
+      "hrl_history",
+      45007
+    ],
+    [
+      "slow_signal_fast_observation_noise",
+      "hrl_multiscale",
+      45007
+    ],
+    [
+      "slow_signal_fast_observation_noise",
+      "flat_causal_filter",
+      45007
+    ],
+    [
+      "band_swap",
+      "flat_history",
+      45007
+    ],
+    [
+      "band_swap",
+      "flat_multiscale",
+      45007
+    ],
+    [
+      "band_swap",
+      "hrl_history",
+      45007
+    ],
+    [
+      "band_swap",
+      "hrl_multiscale",
+      45007
+    ],
+    [
+      "band_swap",
+      "flat_causal_filter",
+      45007
+    ]
+  ],
+  "methods": [
+    "flat_history",
+    "flat_multiscale",
+    "hrl_history",
+    "hrl_multiscale",
+    "flat_causal_filter"
+  ],
+  "optimizer_seeds": [
+    45007
+  ],
+  "options": {
+    "45007": {
+      "checkpoint_evaluation_interval": 1,
+      "dt_seconds": 0.05,
+      "evaluation": [
+        100211
+      ],
+      "fast_period_seconds": 0.2,
+      "history_seconds": 3.2,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "reference_hidden_dim": 64,
+      "selection": [
+        100113
+      ],
+      "train": [
+        100011
+      ],
+      "upper_period_seconds": 0.8
+    }
+  },
+  "preflight": true,
+  "protocol": "multiscale_goal_control_stage1_v1",
+  "scenarios": [
+    "clean",
+    "slow_target_fast_force",
+    "slow_signal_fast_observation_noise",
+    "band_swap"
+  ],
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

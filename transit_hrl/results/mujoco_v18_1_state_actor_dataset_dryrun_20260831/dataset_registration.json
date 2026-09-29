@@ -1,0 +1,49 @@
+{
+  "claim_boundary": "reused-path causal state export only; no model selection, reward, fresh-seed, online-learning, or manuscript performance claim",
+  "dataset_contract": {
+    "causality": "each lower-policy state and observation is captured immediately before the corresponding action and environment transition",
+    "claim_boundary": "reused-path causal state export only; no model selection, reward, fresh-seed, online-learning, or manuscript performance claim",
+    "labels": "no v17.12 target or actor-floor label is read or stored during state export; labels remain a separate server-only selection input",
+    "source": "exact deterministic replay of the frozen v17.4 checkpoint on the unchanged 120 reused development paths",
+    "storage": "NPZ traces remain server-only on node003; only compact path markers are synchronized locally"
+  },
+  "development_protocol_version": "mujoco_v18_1_state_actor_dataset_v1",
+  "disturbance_modes": [
+    "ood_chirp"
+  ],
+  "environments": [
+    "Hopper-v5"
+  ],
+  "evidence_role": "reused_path_causal_actor_state_export_not_model_selection_or_confirmatory",
+  "frozen_core_revision": "f94f1f4a6a35d70f6b6d144bd886644e7efb2393",
+  "frozen_source_manifest_sha256": "b06a97fc8f18129a2e1a9c23a52acb01ea683d1445c672074b9a6901ece23af6",
+  "path_count": 1,
+  "reused_selection_seeds": [
+    294864529
+  ],
+  "scheduler_contract": {
+    "binding_reason": "source checkpoints and generated state arrays remain server-only on node003",
+    "cpu_per_path": 1,
+    "local_sync": "per-path JSON marker only",
+    "ram_mb_per_path": 1536,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "source_run_name": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "status": "registered_before_v18_1_causal_state_export",
+  "target_labels_accessed": false,
+  "trace_keys": [
+    "baseline_lower_action",
+    "baseline_upper_action",
+    "disturbance",
+    "episode_step",
+    "executed_action",
+    "latent_lower_action",
+    "lower_policy_state",
+    "observation",
+    "total_action",
+    "upper_decision",
+    "upper_policy_action"
+  ]
+}

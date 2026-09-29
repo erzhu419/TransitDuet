@@ -1,0 +1,607 @@
+{
+  "alpha_results": [
+    {
+      "alpha": 0.05,
+      "alpha_arm": "alpha_005",
+      "eligible_for_leakage_active_multiseed": false,
+      "median_joint_merit_relative_reduction": -0.22870312913629576,
+      "supported_environment_count": 0,
+      "worst_environment_joint_merit_relative_reduction": -1.9197068885840483
+    },
+    {
+      "alpha": 0.1,
+      "alpha_arm": "alpha_010",
+      "eligible_for_leakage_active_multiseed": false,
+      "median_joint_merit_relative_reduction": -1.5128715929051497,
+      "supported_environment_count": 0,
+      "worst_environment_joint_merit_relative_reduction": -2.0203329019904848
+    },
+    {
+      "alpha": 0.2,
+      "alpha_arm": "alpha_020",
+      "eligible_for_leakage_active_multiseed": false,
+      "median_joint_merit_relative_reduction": -1.535431904230654,
+      "supported_environment_count": 0,
+      "worst_environment_joint_merit_relative_reduction": -5.053872750292575
+    }
+  ],
+  "analysis_repair": "pre-registered transition structure and reconstruction RMS gates are recomputed directly; the legacy aggregate protocol_valid flag is retained as a diagnostic because its unregistered float32 max threshold is stricter than the frozen RMS gate",
+  "cell_count": 9,
+  "cells": [
+    {
+      "alpha": 0.05,
+      "alpha_arm": "alpha_005",
+      "candidate_summary": {
+        "joint_merit": 9.07203054982187,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0190554907445745,
+        "max_additive_clip_excess": 0.5789057612419128,
+        "max_responsibility_reconstruction_rms": 7.400528134069085e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.07525833333333333,
+        "reward": 769.3019786848783,
+        "upper_hf_power": 0.003523408213614912
+      },
+      "control_summary": {
+        "joint_merit": 7.383419423859497,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.01459329640889603,
+        "max_additive_clip_excess": 0.5789057612419128,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.07525833333333333,
+        "reward": 769.3019786848783,
+        "upper_hf_power": 0.005149554846449486
+      },
+      "environment": "HalfCheetah-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": true
+      },
+      "joint_merit_relative_reduction": -0.22870312913629576,
+      "lower_lf_relative_reduction": -0.30577014340353764,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 7.772787968818307e-11,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.31578392333383326
+    },
+    {
+      "alpha": 0.1,
+      "alpha_arm": "alpha_010",
+      "candidate_summary": {
+        "joint_merit": 7.4012769237710945,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.01487708568117654,
+        "max_additive_clip_excess": 0.6576325297355652,
+        "max_responsibility_reconstruction_rms": 7.2671510040302076e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.11728333333333332,
+        "reward": 830.1488407049634,
+        "upper_hf_power": 0.004542495402420478
+      },
+      "control_summary": {
+        "joint_merit": 2.4504838254397203,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0017878229801384163,
+        "max_additive_clip_excess": 0.6576325297355652,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.11728333333333332,
+        "reward": 830.1488407049634,
+        "upper_hf_power": 0.009326795113321212
+      },
+      "environment": "HalfCheetah-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": true
+      },
+      "joint_merit_relative_reduction": -2.0203329019904848,
+      "lower_lf_relative_reduction": -7.321341568181841,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 1.5809704934088842e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.5129628830451574
+    },
+    {
+      "alpha": 0.2,
+      "alpha_arm": "alpha_020",
+      "candidate_summary": {
+        "joint_merit": 3.6233929983305213,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.007781451350990574,
+        "max_additive_clip_excess": 0.0,
+        "max_responsibility_reconstruction_rms": 5.43800858302776e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 2.5e-05,
+        "reward": 754.728766630289,
+        "upper_hf_power": 0.0009818454053833723
+      },
+      "control_summary": {
+        "joint_merit": 0.5985248035078715,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0008245201813124669,
+        "max_additive_clip_excess": 0.0,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 2.5e-05,
+        "reward": 754.728766630289,
+        "upper_hf_power": 0.0013111115400054056
+      },
+      "environment": "HalfCheetah-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": true
+      },
+      "joint_merit_relative_reduction": -5.053872750292575,
+      "lower_lf_relative_reduction": -8.437551108335638,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 0.0,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.2511351052715742
+    },
+    {
+      "alpha": 0.05,
+      "alpha_arm": "alpha_005",
+      "candidate_summary": {
+        "joint_merit": 103.09500365400525,
+        "legacy_protocol_valid_rate": 0.95,
+        "lower_lf_power": 0.22961435611859557,
+        "max_additive_clip_excess": 0.7190704941749573,
+        "max_responsibility_reconstruction_rms": 1.7492075271107764e-08,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.22878856796017266,
+        "reward": 585.6593930257429,
+        "upper_hf_power": 0.007463632377225522
+      },
+      "control_summary": {
+        "joint_merit": 35.31005254572064,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.07315954006807417,
+        "max_additive_clip_excess": 0.7190704941749573,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.22878856796017266,
+        "reward": 585.6593930257429,
+        "upper_hf_power": 0.01622684041381501
+      },
+      "environment": "Hopper-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": true
+      },
+      "joint_merit_relative_reduction": -1.9197068885840483,
+      "lower_lf_relative_reduction": -2.138542914634809,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 1.8032937781908842e-09,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.540044014306616
+    },
+    {
+      "alpha": 0.1,
+      "alpha_arm": "alpha_010",
+      "candidate_summary": {
+        "joint_merit": 78.4793084347437,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.17340315578211135,
+        "max_additive_clip_excess": 0.6727545261383057,
+        "max_responsibility_reconstruction_rms": 1.3463416901209874e-08,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.12975189981581164,
+        "reward": 613.8971023965909,
+        "upper_hf_power": 0.009139073369532489
+      },
+      "control_summary": {
+        "joint_merit": 31.23092666426826,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.06726007337876058,
+        "max_additive_clip_excess": 0.6727545261383057,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.12975189981581164,
+        "reward": 613.8971023965909,
+        "upper_hf_power": 0.007989569021454873
+      },
+      "environment": "Hopper-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": false
+      },
+      "joint_merit_relative_reduction": -1.5128715929051497,
+      "lower_lf_relative_reduction": -1.5780994142784965,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 6.137921004789604e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": -0.14387563897261324
+    },
+    {
+      "alpha": 0.2,
+      "alpha_arm": "alpha_020",
+      "candidate_summary": {
+        "joint_merit": 63.80732995445375,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.14270385545764416,
+        "max_additive_clip_excess": 0.09199613332748413,
+        "max_responsibility_reconstruction_rms": 1.5281908293e-08,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.00856425062206093,
+        "reward": 168.00265580735694,
+        "upper_hf_power": 0.0031448461963515376
+      },
+      "control_summary": {
+        "joint_merit": 25.16625662396376,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.05303223251899512,
+        "max_additive_clip_excess": 0.09199613332748413,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.00856425062206093,
+        "reward": 168.00265580735694,
+        "upper_hf_power": 0.009346871440279224
+      },
+      "environment": "Hopper-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": true
+      },
+      "joint_merit_relative_reduction": -1.535431904230654,
+      "lower_lf_relative_reduction": -1.6908890815888318,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 8.704561203776162e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.6635402319968584
+    },
+    {
+      "alpha": 0.05,
+      "alpha_arm": "alpha_005",
+      "candidate_summary": {
+        "joint_merit": 35.9214841758646,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.08003807502136863,
+        "max_additive_clip_excess": 0.3428727388381958,
+        "max_responsibility_reconstruction_rms": 5.598972922518555e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.20668636047571304,
+        "reward": 317.45090176815336,
+        "upper_hf_power": 0.002517441233748717
+      },
+      "control_summary": {
+        "joint_merit": 36.457557408404966,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0822427084380292,
+        "max_additive_clip_excess": 0.3428727388381958,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.20668636047571304,
+        "reward": 317.45090176815336,
+        "upper_hf_power": 3.65371695735929e-05
+      },
+      "environment": "Walker2d-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": false
+      },
+      "joint_merit_relative_reduction": 0.014704035888503613,
+      "lower_lf_relative_reduction": 0.026806430120449896,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 2.9802322387695312e-08,
+          "AdditiveActionClipExcessRMS": 3.0417141722027807e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": -67.90082792751927
+    },
+    {
+      "alpha": 0.1,
+      "alpha_arm": "alpha_010",
+      "candidate_summary": {
+        "joint_merit": 58.32556011095559,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.13027709438882273,
+        "max_additive_clip_excess": 0.3662784695625305,
+        "max_responsibility_reconstruction_rms": 6.5870544878318015e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.3011074874395172,
+        "reward": 288.74835253141964,
+        "upper_hf_power": 0.0032907355965893052
+      },
+      "control_summary": {
+        "joint_merit": 39.239572063437514,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.08851416837533403,
+        "max_additive_clip_excess": 0.3662784695625305,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.3011074874395172,
+        "reward": 288.74835253141964,
+        "upper_hf_power": 5.015092387030761e-05
+      },
+      "environment": "Walker2d-v5",
+      "gates": {
+        "component_projection_bounded": false,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": false
+      },
+      "joint_merit_relative_reduction": -0.48639643716456177,
+      "lower_lf_relative_reduction": -0.471821932918105,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 2.1515882131506459e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": -64.616649557629
+    },
+    {
+      "alpha": 0.2,
+      "alpha_arm": "alpha_020",
+      "candidate_summary": {
+        "joint_merit": 28.57899526316413,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.06316800822839327,
+        "max_additive_clip_excess": 0.30282384157180786,
+        "max_responsibility_reconstruction_rms": 7.46153205241574e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.014631662745743563,
+        "reward": 306.08335105176735,
+        "upper_hf_power": 0.0032742793648440757
+      },
+      "control_summary": {
+        "joint_merit": 18.740261026129055,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.04225074228871613,
+        "max_additive_clip_excess": 0.30282384157180786,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "mean_component_clip_rate": 0.014631662745743563,
+        "reward": 306.08335105176735,
+        "upper_hf_power": 7.970771839000963e-05
+      },
+      "environment": "Walker2d-v5",
+      "gates": {
+        "component_projection_bounded": true,
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": false,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_reduction": false,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_hf_reduction": false
+      },
+      "joint_merit_relative_reduction": -0.5250051866042413,
+      "lower_lf_relative_reduction": -0.4950745195608907,
+      "optimizer_seed": 2548289420,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 2.9802322387695312e-08,
+          "AdditiveActionClipExcessRMS": 8.415914991809215e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": -40.07857345537149
+    }
+  ],
+  "claim_boundary": "development paired intervention only; no reward improvement, training-seed uncertainty, or confirmatory claim",
+  "development_protocol_version": "mujoco_v17_2_smooth_macro_gauge_preflight_v1",
+  "evidence_role": "paired_smooth_macro_gauge_development_not_confirmatory",
+  "frozen_algorithm_revision": "22b77b5ed820276644e6d512ebff9dd8a6b3fe77",
+  "frozen_source_manifest_sha256": "c7f6a535ff4bd1db0fdf77019882d8d96435e8cead08dc12617a5634fe072b63",
+  "selected_alpha": null,
+  "selected_alpha_arm": null,
+  "selection_contract": {
+    "frequency_gate": "at_least_ten_percent_mean_upper_hpf8_lower_lpf32_and_joint_normalized_merit_reduction_in_all_three_environments",
+    "global_selection": "maximize_worst_environment_joint_merit_reduction_then_median_joint_merit_reduction_among_eligible_alphas",
+    "mechanics_gate": "exact_reward_executed_and_latent_trace_identity_exact_additive_reconstruction_and_bounded_component_projection",
+    "outcome_use": "development_only_freeze_one_alpha_for_fresh_leakage_active_multiseed_training_if_supported",
+    "paired_intervention": "same_frozen_checkpoint_same_heldout_paths_strength_zero_vs_one",
+    "training": "one_reward_only_strength_zero_policy_per_environment_and_alpha",
+    "unit": "environment_by_alpha_single_fresh_optimizer_seed"
+  },
+  "status": "smooth_macro_gauge_preflight_not_supported"
+}

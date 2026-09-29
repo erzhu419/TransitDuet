@@ -1,0 +1,120 @@
+{
+  "arms": {
+    "additive_baseline": {
+      "leakage_constraint_scope": "responsibility",
+      "method": "freq_hrl_no_leakage",
+      "responsibility_mode": "additive",
+      "upper_constraint_mode": "disabled",
+      "upper_dual_lr": 0.0,
+      "upper_hf_penalty_coef": 0.0
+    },
+    "crossed_joint_beta0": {
+      "leakage_constraint_scope": "joint_behavior",
+      "method": "freq_hrl",
+      "responsibility_mode": "causal_lf_transfer",
+      "upper_constraint_mode": "disabled",
+      "upper_dual_lr": 0.0,
+      "upper_hf_penalty_coef": 0.0
+    },
+    "crossed_joint_beta0p5": {
+      "leakage_constraint_scope": "joint_behavior",
+      "method": "freq_hrl",
+      "responsibility_mode": "causal_lf_transfer",
+      "upper_constraint_mode": "static_reward_penalty",
+      "upper_dual_lr": 0.0,
+      "upper_hf_penalty_coef": 0.5
+    },
+    "crossed_joint_pd0p5": {
+      "leakage_constraint_scope": "joint_behavior",
+      "method": "freq_hrl",
+      "responsibility_mode": "causal_lf_transfer",
+      "upper_constraint_mode": "primal_dual",
+      "upper_dual_lr": 0.5,
+      "upper_hf_penalty_coef": 0.0
+    },
+    "crossed_joint_pd2": {
+      "leakage_constraint_scope": "joint_behavior",
+      "method": "freq_hrl",
+      "responsibility_mode": "causal_lf_transfer",
+      "upper_constraint_mode": "primal_dual",
+      "upper_dual_lr": 2.0,
+      "upper_hf_penalty_coef": 0.0
+    },
+    "crossed_joint_pd8": {
+      "leakage_constraint_scope": "joint_behavior",
+      "method": "freq_hrl",
+      "responsibility_mode": "causal_lf_transfer",
+      "upper_constraint_mode": "primal_dual",
+      "upper_dual_lr": 8.0,
+      "upper_hf_penalty_coef": 0.0
+    }
+  },
+  "checkpoint_constraint_penalty": 10.0,
+  "checkpoint_score_mode": "behavior_robust",
+  "checkpoint_selection_mode": "crossed_conditions",
+  "checkpoint_selection_seeds": [
+    1518484598,
+    2637913576
+  ],
+  "development_disclosure": "This v14.1 screen was designed after inspecting the failed v14 fixed-coefficient screen. It evaluates crossed-condition checkpoint selection and upper primal-dual rates using fresh development seeds. Its outcomes cannot support a confirmatory claim; any selected arm must be frozen before a fresh v15 seed namespace is generated.",
+  "development_evaluation_seeds": [
+    2696100381,
+    4165531049,
+    900204231,
+    3310622046,
+    67063853,
+    2501987370,
+    4270294130,
+    2613965647
+  ],
+  "development_protocol_version": "mujoco_v14_1_upper_pd_screen_v1",
+  "development_selection_gates": {
+    "bootstrap_draws": 20000,
+    "maximum_upper_hf_rms": 0.1,
+    "minimum_raw_lower_drift_reduction_fraction": 0.1,
+    "minimum_responsibility_drift_reduction_fraction": 0.1,
+    "return_noninferiority_margin_fraction": 0.02,
+    "selection_confidence": 0.9
+  },
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evaluation_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed",
+    "ood_chirp"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "frozen_algorithm_revision": "4c9e2cee31c03d7dcdaa8f1a1a4bc763f356606f",
+  "frozen_source_manifest_sha256": "e93d59638a36a72cb7715bfe02f1728cfc0aaf2e08fb055815930e6bcf2a9d7c",
+  "launcher_sha256": "1b55b4a25ece183bb39100f94515a39f885ad1ae26bf83c221b063612e0856e4",
+  "optimizer_seeds": [
+    2384341569,
+    2171910770,
+    909935778,
+    2373555520,
+    769629071,
+    2603186137,
+    806881874,
+    1476542116
+  ],
+  "runtime_revision": "fefa092a60534f08495d265c630977dd5e608637",
+  "spec_sha256": "3c2b27e211f88a4d0ae4fd2723041c545f5f85ebf89da6692bb25d5e43e2dfb5",
+  "status": "frozen_before_v14_1_development_outcome_access",
+  "train_seeds": [
+    1306335389,
+    2269532698,
+    352405062,
+    70448635
+  ],
+  "training_disturbance_modes": [
+    "standard",
+    "low_frequency",
+    "high_frequency",
+    "mixed"
+  ]
+}

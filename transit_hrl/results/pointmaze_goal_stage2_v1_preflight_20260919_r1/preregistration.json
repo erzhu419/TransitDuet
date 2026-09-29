@@ -1,0 +1,63 @@
+{
+  "algorithm_revision": "d8fcbc8cb03b76e023063f061315684a2a6500be",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_goal_ppo",
+      54007
+    ],
+    [
+      "hrl_goal_ppo",
+      54007
+    ]
+  ],
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_goal_ppo",
+    "hrl_goal_ppo"
+  ],
+  "optimizer_seeds": [
+    54007
+  ],
+  "options": {
+    "54007": {
+      "checkpoint_evaluation_interval": 1,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        200211
+      ],
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        200113
+      ],
+      "train": [
+        200011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_goal_control_stage2_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2048,
+    "require_node": null
+  }
+}

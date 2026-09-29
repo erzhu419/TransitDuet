@@ -1,0 +1,192 @@
+{
+  "absolute": {
+    "flat_exogenous_history": {
+      "episode_return": {
+        "ci_lower": 153.72459832242768,
+        "ci_upper": 220.19495914679547,
+        "confidence": 0.95,
+        "mean": 186.95977873461158,
+        "n": 8
+      },
+      "final_tracking_distance": {
+        "ci_lower": 0.2629425468205578,
+        "ci_upper": 0.8613629459703238,
+        "confidence": 0.95,
+        "mean": 0.5621527463954408,
+        "n": 8
+      },
+      "tracking_rmse": {
+        "ci_lower": 0.32187439349635383,
+        "ci_upper": 0.8323467188176129,
+        "confidence": 0.95,
+        "mean": 0.5771105561569834,
+        "n": 8
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.3002045544870538,
+        "ci_upper": 0.7961496121796128,
+        "confidence": 0.95,
+        "mean": 0.5481770833333333,
+        "n": 8
+      }
+    },
+    "hrl_exogenous_history": {
+      "episode_return": {
+        "ci_lower": 161.8968034322807,
+        "ci_upper": 221.32656605822962,
+        "confidence": 0.95,
+        "mean": 191.61168474525516,
+        "n": 8
+      },
+      "final_tracking_distance": {
+        "ci_lower": 0.345415584514778,
+        "ci_upper": 0.9627769143216556,
+        "confidence": 0.95,
+        "mean": 0.6540962494182168,
+        "n": 8
+      },
+      "tracking_rmse": {
+        "ci_lower": 0.3058382078531754,
+        "ci_upper": 0.8179357999623627,
+        "confidence": 0.95,
+        "mean": 0.561887003907769,
+        "n": 8
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.4240908289574975,
+        "ci_upper": 0.8078883377091691,
+        "confidence": 0.95,
+        "mean": 0.6159895833333333,
+        "n": 8
+      }
+    }
+  },
+  "absolute_learning_gate_passed": false,
+  "analysis_version": "pointmaze_exogenous_control_stage5_analysis_v1",
+  "cell_count": 16,
+  "confidence": 0.95,
+  "evaluation_row_count": 256,
+  "exogenous_hrl_learning_status": "not_supported",
+  "frequency_routing_admission_status": "blocked",
+  "hrl_vs_flat": {
+    "baseline": "flat_exogenous_history",
+    "candidate": "hrl_exogenous_history",
+    "episode_return": {
+      "ci_lower": -47.13641193498066,
+      "ci_upper": 56.44022395626786,
+      "confidence": 0.95,
+      "mean_improvement": 4.6519060106436,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "final_tracking_distance": {
+      "ci_lower": -0.5478269477633546,
+      "ci_upper": 0.3639399417178026,
+      "confidence": 0.95,
+      "mean_improvement": -0.09194350302277599,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "tracking_rmse": {
+      "ci_lower": -0.3920675127909008,
+      "ci_upper": 0.4225146172893295,
+      "confidence": 0.95,
+      "mean_improvement": 0.015223552249214345,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "tracking_success_rate": {
+      "ci_lower": -0.3129704210111142,
+      "ci_upper": 0.4485954210111142,
+      "confidence": 0.95,
+      "mean_improvement": 0.0678125,
+      "n": 8,
+      "status": "inconclusive"
+    }
+  },
+  "independent_training_replicate_count": 8,
+  "learning_gain_vs_untrained": {
+    "flat_exogenous_history": {
+      "episode_return": {
+        "ci_lower": 40.28967340628164,
+        "ci_upper": 104.66184835704112,
+        "confidence": 0.95,
+        "mean_improvement": 72.47576088166139,
+        "n": 8,
+        "status": "supported"
+      },
+      "final_tracking_distance": {
+        "ci_lower": 0.9515335815875423,
+        "ci_upper": 1.617830591226406,
+        "confidence": 0.95,
+        "mean_improvement": 1.2846820864069741,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_rmse": {
+        "ci_lower": 0.4407128705368314,
+        "ci_upper": 0.9683263204975275,
+        "confidence": 0.95,
+        "mean_improvement": 0.7045195955171795,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.12634745495191846,
+        "ci_upper": 0.6134442117147482,
+        "confidence": 0.95,
+        "mean_improvement": 0.3698958333333333,
+        "n": 8,
+        "status": "supported"
+      }
+    },
+    "hrl_exogenous_history": {
+      "episode_return": {
+        "ci_lower": 48.38501292634224,
+        "ci_upper": 109.12274994696214,
+        "confidence": 0.95,
+        "mean_improvement": 78.7538814366522,
+        "n": 8,
+        "status": "supported"
+      },
+      "final_tracking_distance": {
+        "ci_lower": 0.888417935283334,
+        "ci_upper": 1.604856749857598,
+        "confidence": 0.95,
+        "mean_improvement": 1.246637342570466,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_rmse": {
+        "ci_lower": 0.4881888577973794,
+        "ci_upper": 1.0061754354251828,
+        "confidence": 0.95,
+        "mean_improvement": 0.7471821466112811,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.24637087983575065,
+        "ci_upper": 0.6403999534975826,
+        "confidence": 0.95,
+        "mean_improvement": 0.44338541666666664,
+        "n": 8,
+        "status": "supported"
+      }
+    }
+  },
+  "ordinary_hrl_min_tracking_success_rate": 0.5,
+  "paired_learning_gain_gate_passed": true,
+  "protocol_version": "pointmaze_exogenous_control_stage5_v1",
+  "runtime_versions": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "numpy": "2.1.3",
+    "pettingzoo": "1.26.1",
+    "python": "3.10.14",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "untrained_evaluation_row_count": 256
+}

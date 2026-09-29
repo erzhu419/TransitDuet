@@ -1,0 +1,33 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "stage12_frozen; equal_shape_history; conditional_future_after_50_steps",
+  "evidence_role": "state_compression_and_conditional_noise_diagnostic_only",
+  "future_replicates": 4,
+  "noise_pairs_per_seed": 1,
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_seed": 2,
+  "preflight": true,
+  "protocol": "pointmaze_state_noise_stage18_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_timing_pair_stage12_v1_development",
+  "source_revision": "8a0ea255d6f7a4da407b49b78f9d2ac2f006e162"
+}

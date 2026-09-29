@@ -1,0 +1,131 @@
+{
+  "algorithm_revision": "78e8493c6ba4399b3d68df4da4d353aaab03104e",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "hrl_regime_history",
+      207001
+    ]
+  ],
+  "claim_gate": {
+    "authorization_scope": "stage9_budgeted_trigger_development_only",
+    "candidate_rank_beats_current_only": "positive_root_ci",
+    "candidate_rank_beats_generic_dynamic": "positive_root_ci",
+    "candidate_rank_is_positive": "positive_root_ci",
+    "candidate_selected_utility_is_positive": "positive_root_ci",
+    "candidate_utility_beats_current_only": "positive_root_ci",
+    "controller_learned": "positive_root_ci",
+    "delayed_renewal_has_value": "positive_root_ci",
+    "evidence_role": "predictor_qualification_not_closed_loop_confirmation",
+    "primary_endpoint": "causal_validity_interactions_selected_utility_minus_current_compact_quadratic",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "development_provenance": {
+    "role": "structure_selection_only_not_confirmation",
+    "source": "completed Stage-8B formal results"
+  },
+  "evidence_stage": "preflight",
+  "optimizer_seeds": [
+    207001
+  ],
+  "options": {
+    "207001": {
+      "branch_eval": [
+        2145301,
+        2145307
+      ],
+      "branch_fit": [
+        2145201,
+        2145211
+      ],
+      "branch_window_seconds": 0.5,
+      "checkpoint_evaluation_interval": 1,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 300,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 1,
+      "maximum_subgoal_delta": 0.75,
+      "predictors": [
+        "current_compact_quadratic",
+        "causal_dynamic_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2145101
+      ],
+      "selection_rate": 0.25,
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "train": [
+        2145011
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "policy": "hrl_regime_history",
+  "preflight": true,
+  "protocol": "pointmaze_compact_plan_validity_stage8c_v1_development",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_compact_plan_validity_stage8c_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

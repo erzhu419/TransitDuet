@@ -1,0 +1,113 @@
+{
+  "algorithm_revision": "35c54cdee248216ce27449c40fc61f6a5db785c5",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "hrl_regime_history",
+      206001
+    ]
+  ],
+  "claim_gate": {
+    "authorization_scope": "stage9_trigger_development_only",
+    "causal_history_predicts_renewal_value": "positive_root_ci",
+    "causal_history_selection_has_positive_local_value": "positive_root_ci",
+    "controller_learned": "positive_root_ci",
+    "evidence_role": "qualification_not_closed_loop_confirmation",
+    "history_selection_beats_current_plan_state": "positive_root_ci",
+    "primary_endpoint": "renew_ise_advantage_keep_minus_renew",
+    "regime_value_exceeds_distractor": "positive_root_ci",
+    "regime_value_exceeds_force_pulse": "positive_root_ci",
+    "renewal_has_value_after_250ms": "positive_root_ci",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root",
+    "value_emerges_after_causal_consequence": "positive_root_ci"
+  },
+  "evidence_stage": "preflight",
+  "optimizer_seeds": [
+    206001
+  ],
+  "options": {
+    "206001": {
+      "branch_eval": [
+        2125301
+      ],
+      "branch_fit": [
+        2125201
+      ],
+      "branch_window_seconds": 0.5,
+      "checkpoint_evaluation_interval": 1,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 240,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 1,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha": 1.0,
+      "selection": [
+        2125101
+      ],
+      "selection_rate": 0.25,
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "train": [
+        2125011
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "policy": "hrl_regime_history",
+  "preflight": true,
+  "protocol": "pointmaze_plan_validity_stage8b_v1_development",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_counterfactual_plan_validity_stage8b_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "analysis_version": "pointmaze_exogenous_stage5_optimizer_stability_screen_v1_analysis_v1",
+  "cell_count": 8,
+  "claim_boundary": "post_hoc_development_selection_not_evidence",
+  "eligible_candidates": [
+    "more_rollouts",
+    "dense_rank_more_rollouts"
+  ],
+  "protocol": "pointmaze_exogenous_stage5_optimizer_stability_screen_v1",
+  "selected_candidate": "more_rollouts",
+  "stage5_v2_freeze_status": "authorized",
+  "summaries": {
+    "dense_rank": {
+      "eligible": false,
+      "mean_return_gain_vs_control": 0.0,
+      "mean_root_return": 181.52331624284227,
+      "mean_root_success": 0.45166666666666666,
+      "minimum_root_return_gain_vs_untrained": 70.57321888421376,
+      "minimum_root_success_gain_vs_untrained": 0.27416666666666667,
+      "paired_success_gain_vs_control": {
+        "134113": 0.0,
+        "134127": 0.0
+      },
+      "root_results": {
+        "134113": {
+          "arm": "dense_rank",
+          "initial_return": 107.9614223618733,
+          "initial_success": 0.1675,
+          "return": 178.53464124608706,
+          "root": 134113,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 767,
+          "success": 0.44166666666666665
+        },
+        "134127": {
+          "arm": "dense_rank",
+          "initial_return": 107.99092520862993,
+          "initial_success": 0.1525,
+          "return": 184.51199123959745,
+          "root": 134127,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 767,
+          "success": 0.46166666666666667
+        }
+      },
+      "worst_root_success": 0.44166666666666665
+    },
+    "dense_rank_more_rollouts": {
+      "eligible": true,
+      "mean_return_gain_vs_control": 62.22069299841269,
+      "mean_root_return": 243.74400924125496,
+      "mean_root_success": 0.9621875,
+      "minimum_root_return_gain_vs_untrained": 130.84137415323062,
+      "minimum_root_success_gain_vs_untrained": 0.8014583333333334,
+      "paired_success_gain_vs_control": {
+        "134113": 0.5272916666666667,
+        "134127": 0.4937499999999999
+      },
+      "root_results": {
+        "134113": {
+          "arm": "dense_rank_more_rollouts",
+          "initial_return": 107.9614223618733,
+          "initial_success": 0.1675,
+          "return": 248.6557191206494,
+          "root": 134113,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 383,
+          "success": 0.9689583333333334
+        },
+        "134127": {
+          "arm": "dense_rank_more_rollouts",
+          "initial_return": 107.99092520862993,
+          "initial_success": 0.1525,
+          "return": 238.83229936186055,
+          "root": 134127,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 191,
+          "success": 0.9554166666666666
+        }
+      },
+      "worst_root_success": 0.9554166666666666
+    },
+    "more_rollouts": {
+      "eligible": true,
+      "mean_return_gain_vs_control": 62.22069299841269,
+      "mean_root_return": 243.74400924125496,
+      "mean_root_success": 0.9621875,
+      "minimum_root_return_gain_vs_untrained": 130.84137415323062,
+      "minimum_root_success_gain_vs_untrained": 0.8014583333333334,
+      "paired_success_gain_vs_control": {
+        "134113": 0.5272916666666667,
+        "134127": 0.4937499999999999
+      },
+      "root_results": {
+        "134113": {
+          "arm": "more_rollouts",
+          "initial_return": 107.9614223618733,
+          "initial_success": 0.1675,
+          "return": 248.6557191206494,
+          "root": 134113,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 383,
+          "success": 0.9689583333333334
+        },
+        "134127": {
+          "arm": "more_rollouts",
+          "initial_return": 107.99092520862993,
+          "initial_success": 0.1525,
+          "return": 238.83229936186055,
+          "root": 134127,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 191,
+          "success": 0.9554166666666666
+        }
+      },
+      "worst_root_success": 0.9554166666666666
+    },
+    "v1_control": {
+      "mean_root_return": 181.52331624284227,
+      "mean_root_success": 0.45166666666666666,
+      "minimum_root_return_gain_vs_untrained": 70.57321888421376,
+      "minimum_root_success_gain_vs_untrained": 0.27416666666666667,
+      "root_results": {
+        "134113": {
+          "arm": "v1_control",
+          "initial_return": 107.9614223618733,
+          "initial_success": 0.1675,
+          "return": 178.53464124608706,
+          "root": 134113,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 767,
+          "success": 0.44166666666666665
+        },
+        "134127": {
+          "arm": "v1_control",
+          "initial_return": 107.99092520862993,
+          "initial_success": 0.1525,
+          "return": 184.51199123959745,
+          "root": 134127,
+          "runtime_versions": {
+            "gymnasium": "1.2.0",
+            "gymnasium_robotics": "1.4.2",
+            "mujoco": "3.2.7",
+            "numpy": "2.1.3",
+            "pettingzoo": "1.26.1",
+            "python": "3.10.14",
+            "scipy": "1.13.1",
+            "torch": "2.5.1+cu121"
+          },
+          "selected_checkpoint_iteration": 767,
+          "success": 0.46166666666666667
+        }
+      },
+      "worst_root_success": 0.44166666666666665
+    }
+  }
+}

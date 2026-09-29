@@ -1,0 +1,385 @@
+{
+  "protocol": "mujoco_v25_sample_consistent_upper_development_v1",
+  "algorithm_revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b",
+  "preflight": true,
+  "cells": [
+    [
+      "HalfCheetah-v5",
+      "zero_consistency",
+      25009401
+    ],
+    [
+      "HalfCheetah-v5",
+      "raw_mean",
+      25009401
+    ],
+    [
+      "HalfCheetah-v5",
+      "raw_sample",
+      25009401
+    ],
+    [
+      "HalfCheetah-v5",
+      "action_sample",
+      25009401
+    ],
+    [
+      "Hopper-v5",
+      "zero_consistency",
+      25009401
+    ],
+    [
+      "Hopper-v5",
+      "raw_mean",
+      25009401
+    ],
+    [
+      "Hopper-v5",
+      "raw_sample",
+      25009401
+    ],
+    [
+      "Hopper-v5",
+      "action_sample",
+      25009401
+    ],
+    [
+      "Walker2d-v5",
+      "zero_consistency",
+      25009401
+    ],
+    [
+      "Walker2d-v5",
+      "raw_mean",
+      25009401
+    ],
+    [
+      "Walker2d-v5",
+      "raw_sample",
+      25009401
+    ],
+    [
+      "Walker2d-v5",
+      "action_sample",
+      25009401
+    ]
+  ],
+  "contract": {
+    "evidence_role": "development_only_not_confirmatory",
+    "primary_candidate": "action_sample",
+    "primary_control": "raw_mean",
+    "diagnostic_only": "raw_sample",
+    "isolated_change": "upper fixed-residual consistency; lower remains raw-mean; no variance-head update",
+    "selection": "retain shared per-step checkpoint scoring to isolate loss; evaluate episode return",
+    "sample_offset": "rollout action minus pre-update mean, detached once for all PPO epochs",
+    "reward_gate": "action_sample wins >=8/12 roots and >=2/4 per environment vs raw_mean; mean improves in >=2 environments; no >5% regression vs raw_mean or zero in any environment",
+    "correction_gate": "component and total correction each improve >=5% vs zero in >=2 environments; neither regresses >5% vs raw_mean or zero in any environment; Hopper total <=0.25",
+    "validity_gate": "all arms: finite metrics, zero certificate violations, fallback <=0.05 and prefix power within budgets+1e-8; paired capacity and path identity",
+    "loss_units": "raw and bounded-action MSE are not comparable and are not adoption gates",
+    "decision": "advance action_sample only if every gate passes; raw_sample cannot be selected post hoc",
+    "preflight": "12 short cells use separate roots; tests execution and finite active updates, never reward selection",
+    "limitation": "tanh derivatives rescale gradients; controlled independent Gaussian diagnostic is not an on-policy performance result"
+  },
+  "options": {
+    "zero_consistency": {
+      "method": "freq_hrl",
+      "disturbance-mode": "standard",
+      "training-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed"
+      ],
+      "evaluation-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed",
+        "ood_chirp"
+      ],
+      "train-seeds": [
+        25009402
+      ],
+      "selection-seeds": [
+        25009403
+      ],
+      "eval-seeds": [
+        25009404
+      ],
+      "steps": 64,
+      "episode-horizon": 128,
+      "iterations": 8,
+      "upper-period": 16,
+      "hidden-dim": 64,
+      "learning-rate": 0.0003,
+      "ppo-clip-ratio": 0.1,
+      "upper-projection-consistency-coef": 0.0,
+      "lower-projection-consistency-coef": 0.0,
+      "upper-projection-target-aggregation": "decision_time",
+      "upper-projection-consistency-objective": "raw_mean",
+      "projection-consistency-update-mode": "scalarized",
+      "projection-consistency-weighting": "uniform",
+      "projection-consistency-training-schedule": "constant",
+      "projection-consistency-warmup-fraction": 0.0,
+      "projection-consistency-ramp-fraction": 0.0,
+      "terminal-reserve-context": true,
+      "terminal-reserve-projection": true,
+      "terminal-reserve-upper-window": 8,
+      "terminal-reserve-lower-window": 32,
+      "lower-lf-rms-budget": 0.0475,
+      "upper-hf-rms-budget": 0.075,
+      "upper-action-scale": 1.0,
+      "lower-action-scale": 1.0,
+      "upper-action-decoder-mode": "hold",
+      "responsibility-mode": "additive",
+      "lower-action-router-mode": "direct",
+      "leakage-constraint-scope": "responsibility",
+      "leakage-cost-mode": "power_excess",
+      "upper-constraint-mode": "static_reward_penalty",
+      "upper-hf-penalty-coef": 0.0,
+      "upper-dual-lr": 0.0,
+      "lower-dual-lr": 0.0,
+      "upper-constraint-update-mode": "scalarized",
+      "lower-constraint-update-mode": "scalarized",
+      "checkpoint-selection-mode": "crossed_conditions",
+      "checkpoint-score-mode": "mean_reward",
+      "checkpoint-smoothing-window": 1,
+      "checkpoint-min-delta": 0.0,
+      "checkpoint-minimum-iteration": 3,
+      "checkpoint-evaluation-interval": 2,
+      "control-protocol-version": "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training",
+      "code-revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b"
+    },
+    "raw_mean": {
+      "method": "freq_hrl",
+      "disturbance-mode": "standard",
+      "training-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed"
+      ],
+      "evaluation-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed",
+        "ood_chirp"
+      ],
+      "train-seeds": [
+        25009402
+      ],
+      "selection-seeds": [
+        25009403
+      ],
+      "eval-seeds": [
+        25009404
+      ],
+      "steps": 64,
+      "episode-horizon": 128,
+      "iterations": 8,
+      "upper-period": 16,
+      "hidden-dim": 64,
+      "learning-rate": 0.0003,
+      "ppo-clip-ratio": 0.1,
+      "upper-projection-consistency-coef": 0.1,
+      "lower-projection-consistency-coef": 0.1,
+      "upper-projection-target-aggregation": "decision_time",
+      "upper-projection-consistency-objective": "raw_mean",
+      "projection-consistency-update-mode": "scalarized",
+      "projection-consistency-weighting": "uniform",
+      "projection-consistency-training-schedule": "delayed_linear",
+      "projection-consistency-warmup-fraction": 0.5,
+      "projection-consistency-ramp-fraction": 0.25,
+      "terminal-reserve-context": true,
+      "terminal-reserve-projection": true,
+      "terminal-reserve-upper-window": 8,
+      "terminal-reserve-lower-window": 32,
+      "lower-lf-rms-budget": 0.0475,
+      "upper-hf-rms-budget": 0.075,
+      "upper-action-scale": 1.0,
+      "lower-action-scale": 1.0,
+      "upper-action-decoder-mode": "hold",
+      "responsibility-mode": "additive",
+      "lower-action-router-mode": "direct",
+      "leakage-constraint-scope": "responsibility",
+      "leakage-cost-mode": "power_excess",
+      "upper-constraint-mode": "static_reward_penalty",
+      "upper-hf-penalty-coef": 0.0,
+      "upper-dual-lr": 0.0,
+      "lower-dual-lr": 0.0,
+      "upper-constraint-update-mode": "scalarized",
+      "lower-constraint-update-mode": "scalarized",
+      "checkpoint-selection-mode": "crossed_conditions",
+      "checkpoint-score-mode": "mean_reward",
+      "checkpoint-smoothing-window": 1,
+      "checkpoint-min-delta": 0.0,
+      "checkpoint-minimum-iteration": 3,
+      "checkpoint-evaluation-interval": 2,
+      "control-protocol-version": "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training",
+      "code-revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b"
+    },
+    "raw_sample": {
+      "method": "freq_hrl",
+      "disturbance-mode": "standard",
+      "training-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed"
+      ],
+      "evaluation-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed",
+        "ood_chirp"
+      ],
+      "train-seeds": [
+        25009402
+      ],
+      "selection-seeds": [
+        25009403
+      ],
+      "eval-seeds": [
+        25009404
+      ],
+      "steps": 64,
+      "episode-horizon": 128,
+      "iterations": 8,
+      "upper-period": 16,
+      "hidden-dim": 64,
+      "learning-rate": 0.0003,
+      "ppo-clip-ratio": 0.1,
+      "upper-projection-consistency-coef": 0.1,
+      "lower-projection-consistency-coef": 0.1,
+      "upper-projection-target-aggregation": "decision_time",
+      "upper-projection-consistency-objective": "raw_sample",
+      "projection-consistency-update-mode": "scalarized",
+      "projection-consistency-weighting": "uniform",
+      "projection-consistency-training-schedule": "delayed_linear",
+      "projection-consistency-warmup-fraction": 0.5,
+      "projection-consistency-ramp-fraction": 0.25,
+      "terminal-reserve-context": true,
+      "terminal-reserve-projection": true,
+      "terminal-reserve-upper-window": 8,
+      "terminal-reserve-lower-window": 32,
+      "lower-lf-rms-budget": 0.0475,
+      "upper-hf-rms-budget": 0.075,
+      "upper-action-scale": 1.0,
+      "lower-action-scale": 1.0,
+      "upper-action-decoder-mode": "hold",
+      "responsibility-mode": "additive",
+      "lower-action-router-mode": "direct",
+      "leakage-constraint-scope": "responsibility",
+      "leakage-cost-mode": "power_excess",
+      "upper-constraint-mode": "static_reward_penalty",
+      "upper-hf-penalty-coef": 0.0,
+      "upper-dual-lr": 0.0,
+      "lower-dual-lr": 0.0,
+      "upper-constraint-update-mode": "scalarized",
+      "lower-constraint-update-mode": "scalarized",
+      "checkpoint-selection-mode": "crossed_conditions",
+      "checkpoint-score-mode": "mean_reward",
+      "checkpoint-smoothing-window": 1,
+      "checkpoint-min-delta": 0.0,
+      "checkpoint-minimum-iteration": 3,
+      "checkpoint-evaluation-interval": 2,
+      "control-protocol-version": "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training",
+      "code-revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b"
+    },
+    "action_sample": {
+      "method": "freq_hrl",
+      "disturbance-mode": "standard",
+      "training-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed"
+      ],
+      "evaluation-disturbance-modes": [
+        "standard",
+        "low_frequency",
+        "high_frequency",
+        "mixed",
+        "ood_chirp"
+      ],
+      "train-seeds": [
+        25009402
+      ],
+      "selection-seeds": [
+        25009403
+      ],
+      "eval-seeds": [
+        25009404
+      ],
+      "steps": 64,
+      "episode-horizon": 128,
+      "iterations": 8,
+      "upper-period": 16,
+      "hidden-dim": 64,
+      "learning-rate": 0.0003,
+      "ppo-clip-ratio": 0.1,
+      "upper-projection-consistency-coef": 0.1,
+      "lower-projection-consistency-coef": 0.1,
+      "upper-projection-target-aggregation": "decision_time",
+      "upper-projection-consistency-objective": "action_sample",
+      "projection-consistency-update-mode": "scalarized",
+      "projection-consistency-weighting": "uniform",
+      "projection-consistency-training-schedule": "delayed_linear",
+      "projection-consistency-warmup-fraction": 0.5,
+      "projection-consistency-ramp-fraction": 0.25,
+      "terminal-reserve-context": true,
+      "terminal-reserve-projection": true,
+      "terminal-reserve-upper-window": 8,
+      "terminal-reserve-lower-window": 32,
+      "lower-lf-rms-budget": 0.0475,
+      "upper-hf-rms-budget": 0.075,
+      "upper-action-scale": 1.0,
+      "lower-action-scale": 1.0,
+      "upper-action-decoder-mode": "hold",
+      "responsibility-mode": "additive",
+      "lower-action-router-mode": "direct",
+      "leakage-constraint-scope": "responsibility",
+      "leakage-cost-mode": "power_excess",
+      "upper-constraint-mode": "static_reward_penalty",
+      "upper-hf-penalty-coef": 0.0,
+      "upper-dual-lr": 0.0,
+      "lower-dual-lr": 0.0,
+      "upper-constraint-update-mode": "scalarized",
+      "lower-constraint-update-mode": "scalarized",
+      "checkpoint-selection-mode": "crossed_conditions",
+      "checkpoint-score-mode": "mean_reward",
+      "checkpoint-smoothing-window": 1,
+      "checkpoint-min-delta": 0.0,
+      "checkpoint-minimum-iteration": 3,
+      "checkpoint-evaluation-interval": 2,
+      "control-protocol-version": "freq_hrl_mujoco_shared_core_v25_sample_consistent_upper_training",
+      "code-revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b"
+    }
+  },
+  "scheduler": {
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu": 1,
+    "ram_mb": 1536
+  },
+  "artifacts": {
+    "synced": [
+      "cell_summary.json",
+      "evaluation_rows.csv",
+      "server_artifact_location.json"
+    ],
+    "server_only": [
+      "checkpoint.pt",
+      "training_history.json"
+    ]
+  }
+}

@@ -1,0 +1,531 @@
+{
+  "algorithm_revision": "daacf09ac92ea5b794a516e729e023ad53797c25",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_goal_ppo",
+      64007
+    ],
+    [
+      "hrl_goal_ppo",
+      64007
+    ],
+    [
+      "flat_goal_ppo",
+      64013
+    ],
+    [
+      "hrl_goal_ppo",
+      64013
+    ],
+    [
+      "flat_goal_ppo",
+      64037
+    ],
+    [
+      "hrl_goal_ppo",
+      64037
+    ],
+    [
+      "flat_goal_ppo",
+      64049
+    ],
+    [
+      "hrl_goal_ppo",
+      64049
+    ],
+    [
+      "flat_goal_ppo",
+      64059
+    ],
+    [
+      "hrl_goal_ppo",
+      64059
+    ],
+    [
+      "flat_goal_ppo",
+      64083
+    ],
+    [
+      "hrl_goal_ppo",
+      64083
+    ],
+    [
+      "flat_goal_ppo",
+      64101
+    ],
+    [
+      "hrl_goal_ppo",
+      64101
+    ],
+    [
+      "flat_goal_ppo",
+      64121
+    ],
+    [
+      "hrl_goal_ppo",
+      64121
+    ]
+  ],
+  "evidence_stage": "development",
+  "methods": [
+    "flat_goal_ppo",
+    "hrl_goal_ppo"
+  ],
+  "optimizer_seeds": [
+    64007,
+    64013,
+    64037,
+    64049,
+    64059,
+    64083,
+    64101,
+    64121
+  ],
+  "options": {
+    "64007": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        400211,
+        400223,
+        400227,
+        400229,
+        400233,
+        400239,
+        400241,
+        400251,
+        400257,
+        400263,
+        400269,
+        400271,
+        400277,
+        400281,
+        400283,
+        400293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        400101,
+        400103,
+        400107,
+        400109,
+        400127,
+        400131,
+        400137,
+        400149,
+        400151,
+        400163,
+        400167,
+        400173,
+        400179,
+        400181,
+        400191,
+        400197
+      ],
+      "train": [
+        400011,
+        400017,
+        400023,
+        400039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64013": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        401211,
+        401223,
+        401227,
+        401229,
+        401233,
+        401239,
+        401241,
+        401251,
+        401257,
+        401263,
+        401269,
+        401271,
+        401277,
+        401281,
+        401283,
+        401293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        401101,
+        401103,
+        401107,
+        401109,
+        401127,
+        401131,
+        401137,
+        401149,
+        401151,
+        401163,
+        401167,
+        401173,
+        401179,
+        401181,
+        401191,
+        401197
+      ],
+      "train": [
+        401011,
+        401017,
+        401023,
+        401039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64037": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        402211,
+        402223,
+        402227,
+        402229,
+        402233,
+        402239,
+        402241,
+        402251,
+        402257,
+        402263,
+        402269,
+        402271,
+        402277,
+        402281,
+        402283,
+        402293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        402101,
+        402103,
+        402107,
+        402109,
+        402127,
+        402131,
+        402137,
+        402149,
+        402151,
+        402163,
+        402167,
+        402173,
+        402179,
+        402181,
+        402191,
+        402197
+      ],
+      "train": [
+        402011,
+        402017,
+        402023,
+        402039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64049": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        403211,
+        403223,
+        403227,
+        403229,
+        403233,
+        403239,
+        403241,
+        403251,
+        403257,
+        403263,
+        403269,
+        403271,
+        403277,
+        403281,
+        403283,
+        403293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        403101,
+        403103,
+        403107,
+        403109,
+        403127,
+        403131,
+        403137,
+        403149,
+        403151,
+        403163,
+        403167,
+        403173,
+        403179,
+        403181,
+        403191,
+        403197
+      ],
+      "train": [
+        403011,
+        403017,
+        403023,
+        403039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64059": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        404211,
+        404223,
+        404227,
+        404229,
+        404233,
+        404239,
+        404241,
+        404251,
+        404257,
+        404263,
+        404269,
+        404271,
+        404277,
+        404281,
+        404283,
+        404293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        404101,
+        404103,
+        404107,
+        404109,
+        404127,
+        404131,
+        404137,
+        404149,
+        404151,
+        404163,
+        404167,
+        404173,
+        404179,
+        404181,
+        404191,
+        404197
+      ],
+      "train": [
+        404011,
+        404017,
+        404023,
+        404039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64083": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        405211,
+        405223,
+        405227,
+        405229,
+        405233,
+        405239,
+        405241,
+        405251,
+        405257,
+        405263,
+        405269,
+        405271,
+        405277,
+        405281,
+        405283,
+        405293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        405101,
+        405103,
+        405107,
+        405109,
+        405127,
+        405131,
+        405137,
+        405149,
+        405151,
+        405163,
+        405167,
+        405173,
+        405179,
+        405181,
+        405191,
+        405197
+      ],
+      "train": [
+        405011,
+        405017,
+        405023,
+        405039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64101": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        406211,
+        406223,
+        406227,
+        406229,
+        406233,
+        406239,
+        406241,
+        406251,
+        406257,
+        406263,
+        406269,
+        406271,
+        406277,
+        406281,
+        406283,
+        406293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        406101,
+        406103,
+        406107,
+        406109,
+        406127,
+        406131,
+        406137,
+        406149,
+        406151,
+        406163,
+        406167,
+        406173,
+        406179,
+        406181,
+        406191,
+        406197
+      ],
+      "train": [
+        406011,
+        406017,
+        406023,
+        406039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "64121": {
+      "checkpoint_evaluation_interval": 96,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        407211,
+        407223,
+        407227,
+        407229,
+        407233,
+        407239,
+        407241,
+        407251,
+        407257,
+        407263,
+        407269,
+        407271,
+        407277,
+        407281,
+        407283,
+        407293
+      ],
+      "horizon": 300,
+      "iterations": 768,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        407101,
+        407103,
+        407107,
+        407109,
+        407127,
+        407131,
+        407137,
+        407149,
+        407151,
+        407163,
+        407167,
+        407173,
+        407179,
+        407181,
+        407191,
+        407197
+      ],
+      "train": [
+        407011,
+        407017,
+        407023,
+        407039
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": false,
+  "protocol": "pointmaze_goal_control_stage2_v2",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2048,
+    "require_node": null
+  }
+}

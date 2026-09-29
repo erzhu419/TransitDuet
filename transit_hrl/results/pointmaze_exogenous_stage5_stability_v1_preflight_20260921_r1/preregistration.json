@@ -1,0 +1,204 @@
+{
+  "algorithm_revision": "a4a64730a9542e690650d3a39856a5324ec51fcc",
+  "arms": [
+    "v1_control",
+    "dense_rank",
+    "more_rollouts",
+    "dense_rank_more_rollouts"
+  ],
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "base_protocol": "pointmaze_exogenous_control_stage5_v1",
+  "cells": [
+    [
+      "v1_control",
+      164001
+    ],
+    [
+      "dense_rank",
+      164001
+    ],
+    [
+      "more_rollouts",
+      164001
+    ],
+    [
+      "dense_rank_more_rollouts",
+      164001
+    ]
+  ],
+  "claim_boundary": "post_hoc_development_selection_not_evidence",
+  "evidence_stage": "software_preflight",
+  "optimizer_seeds": [
+    164001
+  ],
+  "options": {
+    "dense_rank/164001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "return_then_success",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1590211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1590101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1590011,
+        1590017,
+        1590023,
+        1590039
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "dense_rank_more_rollouts/164001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "return_then_success",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1590211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1590101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1590011,
+        1590017,
+        1590023,
+        1590039,
+        1590041,
+        1590053,
+        1590067,
+        1590071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "more_rollouts/164001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1590211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1590101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1590011,
+        1590017,
+        1590023,
+        1590039,
+        1590041,
+        1590053,
+        1590067,
+        1590071
+      ],
+      "upper_period_seconds": 0.25
+    },
+    "v1_control/164001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1590211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1590101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1590011,
+        1590017,
+        1590023,
+        1590039
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_exogenous_stage5_optimizer_stability_screen_v1",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  },
+  "selection_rule": {
+    "each_root_final_vs_untrained_return": ">0",
+    "each_root_final_vs_untrained_success": ">0",
+    "mean_return_gain_vs_v1_control": ">=0",
+    "no_eligible_candidate": "do_not_freeze_stage5_v2",
+    "paired_root_success_gain_minimum": 0.05,
+    "ranking": "max_worst_root_success_then_mean_success_then_mean_return"
+  }
+}

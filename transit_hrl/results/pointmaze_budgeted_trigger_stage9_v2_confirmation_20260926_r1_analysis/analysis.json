@@ -1,0 +1,132 @@
+{
+  "analysis_version": "pointmaze_budgeted_trigger_stage9_analysis_v1",
+  "claim_boundary": "PointMaze independent-seed confirmation only; domain transfer and external validity remain required",
+  "decision": "stage9_confirmation_gate_passed",
+  "intervals": {
+    "candidate_early_calls_per_episode": {
+      "ci_lower": 12.358155184978726,
+      "ci_upper": 14.032469815021274,
+      "confidence": 0.95,
+      "mean": 13.1953125,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_minus_current_episode_tracking_ise": {
+      "ci_lower": 0.15221585890626438,
+      "ci_upper": 0.36933054376101243,
+      "confidence": 0.95,
+      "mean": 0.2607732013336384,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_minus_fixed_episode_return": {
+      "ci_lower": 31.548405768082993,
+      "ci_upper": 49.77650646526305,
+      "confidence": 0.95,
+      "mean": 40.66245611667302,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_minus_fixed_episode_tracking_ise": {
+      "ci_lower": 0.40844301624068974,
+      "ci_upper": 0.6026399247196044,
+      "confidence": 0.95,
+      "mean": 0.5055414704801471,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_minus_jitter_episode_tracking_ise": {
+      "ci_lower": 0.5701108661941721,
+      "ci_upper": 0.6462601691840368,
+      "confidence": 0.95,
+      "mean": 0.6081855176891044,
+      "n": 8,
+      "status": "supported"
+    },
+    "controller_learning_gain": {
+      "ci_lower": 15.939427857862167,
+      "ci_upper": 25.78654672679807,
+      "confidence": 0.95,
+      "mean": 20.862987292330118,
+      "n": 8,
+      "status": "supported"
+    }
+  },
+  "matrix": "independent_seed_confirmation",
+  "optimizer_root_count": 8,
+  "protocol_version": "pointmaze_budgeted_plan_trigger_stage9_v1",
+  "qualification_checks": {
+    "candidate_beats_current_only_ise": true,
+    "candidate_beats_fixed_ise": true,
+    "candidate_beats_random_ise": true,
+    "candidate_return_beats_fixed": true,
+    "controller_learned": true
+  },
+  "root_summaries": {
+    "209011": {
+      "candidate_early_calls_per_episode": 13.75,
+      "candidate_minus_current_episode_tracking_ise": 0.09281445090405936,
+      "candidate_minus_fixed_episode_return": 32.13490839454566,
+      "candidate_minus_fixed_episode_tracking_ise": 0.44390627787185893,
+      "candidate_minus_jitter_episode_tracking_ise": 0.6310058246485677,
+      "controller_learning_gain": 13.7305129709289
+    },
+    "209023": {
+      "candidate_early_calls_per_episode": 14.875,
+      "candidate_minus_current_episode_tracking_ise": 0.19406992443139304,
+      "candidate_minus_fixed_episode_return": 31.39984982875582,
+      "candidate_minus_fixed_episode_tracking_ise": 0.3794648008339877,
+      "candidate_minus_jitter_episode_tracking_ise": 0.6585735459983394,
+      "controller_learning_gain": 20.487306804779635
+    },
+    "209037": {
+      "candidate_early_calls_per_episode": 14.1875,
+      "candidate_minus_current_episode_tracking_ise": 0.2762654394316735,
+      "candidate_minus_fixed_episode_return": 57.811615327004965,
+      "candidate_minus_fixed_episode_tracking_ise": 0.6889446984798583,
+      "candidate_minus_jitter_episode_tracking_ise": 0.5746279120085349,
+      "controller_learning_gain": 14.038691864006154
+    },
+    "209049": {
+      "candidate_early_calls_per_episode": 12.6875,
+      "candidate_minus_current_episode_tracking_ise": 0.5076994720323582,
+      "candidate_minus_fixed_episode_return": 39.88395653606149,
+      "candidate_minus_fixed_episode_tracking_ise": 0.49547414150760255,
+      "candidate_minus_jitter_episode_tracking_ise": 0.6738653992316975,
+      "controller_learning_gain": 29.10152606201066
+    },
+    "209061": {
+      "candidate_early_calls_per_episode": 11.875,
+      "candidate_minus_current_episode_tracking_ise": 0.3560911628061765,
+      "candidate_minus_fixed_episode_return": 53.06074187736302,
+      "candidate_minus_fixed_episode_tracking_ise": 0.6087782814253595,
+      "candidate_minus_jitter_episode_tracking_ise": 0.5680059344055084,
+      "controller_learning_gain": 24.4708662002817
+    },
+    "209073": {
+      "candidate_early_calls_per_episode": 12.4375,
+      "candidate_minus_current_episode_tracking_ise": 0.2986186679210969,
+      "candidate_minus_fixed_episode_return": 34.16045519535173,
+      "candidate_minus_fixed_episode_tracking_ise": 0.46829258483645714,
+      "candidate_minus_jitter_episode_tracking_ise": 0.6260629679697286,
+      "controller_learning_gain": 15.25365915686961
+    },
+    "209089": {
+      "candidate_early_calls_per_episode": 12.625,
+      "candidate_minus_current_episode_tracking_ise": 0.19888405890689664,
+      "candidate_minus_fixed_episode_return": 47.71654802086589,
+      "candidate_minus_fixed_episode_tracking_ise": 0.5972424401092509,
+      "candidate_minus_jitter_episode_tracking_ise": 0.5845376997219652,
+      "controller_learning_gain": 25.108795678700787
+    },
+    "209101": {
+      "candidate_early_calls_per_episode": 13.125,
+      "candidate_minus_current_episode_tracking_ise": 0.16174243423545304,
+      "candidate_minus_fixed_episode_return": 29.131573753435596,
+      "candidate_minus_fixed_episode_tracking_ise": 0.3622285387768017,
+      "candidate_minus_jitter_episode_tracking_ise": 0.5488048575284944,
+      "controller_learning_gain": 24.712539601063504
+    }
+  },
+  "statistical_unit": "optimizer_seed_root"
+}

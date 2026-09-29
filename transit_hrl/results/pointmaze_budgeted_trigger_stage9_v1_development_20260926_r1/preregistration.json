@@ -1,0 +1,922 @@
+{
+  "algorithm_revision": "91b3e6919bcffe3a75d4942b0df31ae8478d69f6",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "hrl_regime_history",
+      208011
+    ],
+    [
+      "hrl_regime_history",
+      208023
+    ],
+    [
+      "hrl_regime_history",
+      208037
+    ],
+    [
+      "hrl_regime_history",
+      208049
+    ],
+    [
+      "hrl_regime_history",
+      208061
+    ],
+    [
+      "hrl_regime_history",
+      208073
+    ],
+    [
+      "hrl_regime_history",
+      208089
+    ],
+    [
+      "hrl_regime_history",
+      208101
+    ]
+  ],
+  "claim_gate": {
+    "authorization_scope": "stage9_development_result_only",
+    "candidate_beats_current_only_ise": "positive_root_ci",
+    "candidate_beats_fixed_ise": "positive_root_ci",
+    "candidate_beats_random_ise": "positive_root_ci",
+    "candidate_return_beats_fixed": "positive_root_ci",
+    "controller_learned": "positive_root_ci",
+    "primary_endpoint": "candidate_minus_fixed_episode_tracking_ise",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "optimizer_seeds": [
+    208011,
+    208023,
+    208037,
+    208049,
+    208061,
+    208073,
+    208089,
+    208101
+  ],
+  "options": {
+    "208011": {
+      "branch_fit": [
+        2160201,
+        2160211,
+        2160223,
+        2160227,
+        2160233,
+        2160239,
+        2160251,
+        2160257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2160101,
+        2160103,
+        2160109,
+        2160127,
+        2160131,
+        2160137,
+        2160149,
+        2160151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2160011,
+        2160017,
+        2160023,
+        2160029,
+        2160041,
+        2160047,
+        2160059,
+        2160061
+      ],
+      "trigger_eval": [
+        2160301,
+        2160307,
+        2160311,
+        2160313,
+        2160317,
+        2160331,
+        2160337,
+        2160347,
+        2160349,
+        2160353,
+        2160359,
+        2160367,
+        2160373,
+        2160379,
+        2160383,
+        2160389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208023": {
+      "branch_fit": [
+        2161201,
+        2161211,
+        2161223,
+        2161227,
+        2161233,
+        2161239,
+        2161251,
+        2161257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2161101,
+        2161103,
+        2161109,
+        2161127,
+        2161131,
+        2161137,
+        2161149,
+        2161151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2161011,
+        2161017,
+        2161023,
+        2161029,
+        2161041,
+        2161047,
+        2161059,
+        2161061
+      ],
+      "trigger_eval": [
+        2161301,
+        2161307,
+        2161311,
+        2161313,
+        2161317,
+        2161331,
+        2161337,
+        2161347,
+        2161349,
+        2161353,
+        2161359,
+        2161367,
+        2161373,
+        2161379,
+        2161383,
+        2161389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208037": {
+      "branch_fit": [
+        2162201,
+        2162211,
+        2162223,
+        2162227,
+        2162233,
+        2162239,
+        2162251,
+        2162257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2162101,
+        2162103,
+        2162109,
+        2162127,
+        2162131,
+        2162137,
+        2162149,
+        2162151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2162011,
+        2162017,
+        2162023,
+        2162029,
+        2162041,
+        2162047,
+        2162059,
+        2162061
+      ],
+      "trigger_eval": [
+        2162301,
+        2162307,
+        2162311,
+        2162313,
+        2162317,
+        2162331,
+        2162337,
+        2162347,
+        2162349,
+        2162353,
+        2162359,
+        2162367,
+        2162373,
+        2162379,
+        2162383,
+        2162389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208049": {
+      "branch_fit": [
+        2163201,
+        2163211,
+        2163223,
+        2163227,
+        2163233,
+        2163239,
+        2163251,
+        2163257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2163101,
+        2163103,
+        2163109,
+        2163127,
+        2163131,
+        2163137,
+        2163149,
+        2163151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2163011,
+        2163017,
+        2163023,
+        2163029,
+        2163041,
+        2163047,
+        2163059,
+        2163061
+      ],
+      "trigger_eval": [
+        2163301,
+        2163307,
+        2163311,
+        2163313,
+        2163317,
+        2163331,
+        2163337,
+        2163347,
+        2163349,
+        2163353,
+        2163359,
+        2163367,
+        2163373,
+        2163379,
+        2163383,
+        2163389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208061": {
+      "branch_fit": [
+        2164201,
+        2164211,
+        2164223,
+        2164227,
+        2164233,
+        2164239,
+        2164251,
+        2164257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2164101,
+        2164103,
+        2164109,
+        2164127,
+        2164131,
+        2164137,
+        2164149,
+        2164151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2164011,
+        2164017,
+        2164023,
+        2164029,
+        2164041,
+        2164047,
+        2164059,
+        2164061
+      ],
+      "trigger_eval": [
+        2164301,
+        2164307,
+        2164311,
+        2164313,
+        2164317,
+        2164331,
+        2164337,
+        2164347,
+        2164349,
+        2164353,
+        2164359,
+        2164367,
+        2164373,
+        2164379,
+        2164383,
+        2164389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208073": {
+      "branch_fit": [
+        2165201,
+        2165211,
+        2165223,
+        2165227,
+        2165233,
+        2165239,
+        2165251,
+        2165257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2165101,
+        2165103,
+        2165109,
+        2165127,
+        2165131,
+        2165137,
+        2165149,
+        2165151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2165011,
+        2165017,
+        2165023,
+        2165029,
+        2165041,
+        2165047,
+        2165059,
+        2165061
+      ],
+      "trigger_eval": [
+        2165301,
+        2165307,
+        2165311,
+        2165313,
+        2165317,
+        2165331,
+        2165337,
+        2165347,
+        2165349,
+        2165353,
+        2165359,
+        2165367,
+        2165373,
+        2165379,
+        2165383,
+        2165389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208089": {
+      "branch_fit": [
+        2166201,
+        2166211,
+        2166223,
+        2166227,
+        2166233,
+        2166239,
+        2166251,
+        2166257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2166101,
+        2166103,
+        2166109,
+        2166127,
+        2166131,
+        2166137,
+        2166149,
+        2166151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2166011,
+        2166017,
+        2166023,
+        2166029,
+        2166041,
+        2166047,
+        2166059,
+        2166061
+      ],
+      "trigger_eval": [
+        2166301,
+        2166307,
+        2166311,
+        2166313,
+        2166317,
+        2166331,
+        2166337,
+        2166347,
+        2166349,
+        2166353,
+        2166359,
+        2166367,
+        2166373,
+        2166379,
+        2166383,
+        2166389
+      ],
+      "upper_period_seconds": 0.5
+    },
+    "208101": {
+      "branch_fit": [
+        2167201,
+        2167211,
+        2167223,
+        2167227,
+        2167233,
+        2167239,
+        2167251,
+        2167257
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 8,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 1200,
+      "iterations": 384,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 4,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2167101,
+        2167103,
+        2167109,
+        2167127,
+        2167131,
+        2167137,
+        2167149,
+        2167151
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2167011,
+        2167017,
+        2167023,
+        2167029,
+        2167041,
+        2167047,
+        2167059,
+        2167061
+      ],
+      "trigger_eval": [
+        2167301,
+        2167307,
+        2167311,
+        2167313,
+        2167317,
+        2167331,
+        2167337,
+        2167347,
+        2167349,
+        2167353,
+        2167359,
+        2167367,
+        2167373,
+        2167379,
+        2167383,
+        2167389
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "preflight": false,
+  "protocol": "pointmaze_budgeted_trigger_stage9_v1_development",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_budgeted_plan_trigger_stage9_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

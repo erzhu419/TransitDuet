@@ -1,0 +1,510 @@
+{
+  "protocol": "mujoco_v25_sample_consistent_upper_development_v1",
+  "preflight": false,
+  "cell_count": 48,
+  "evaluation_row_count": 1920,
+  "validity_diagnostics": {
+    "invalid_row_count": 2,
+    "invalid_cell_count": 2,
+    "reason_counts": {
+      "fallback_rate": 2
+    },
+    "max_observed": {
+      "certificate_violation_count": 0.0,
+      "fallback_rate": 0.06944444444444445,
+      "upper_prefix_power": 0.0056250006616774565,
+      "lower_prefix_power": 0.0022562526550235565
+    },
+    "failures": [
+      {
+        "environment": "Hopper-v5",
+        "arm": "zero_consistency",
+        "optimizer_seed": 4218603422,
+        "disturbance_mode": "mixed",
+        "evaluation_seed": 2161880964,
+        "reasons": [
+          "fallback_rate"
+        ],
+        "fallback_rate": 0.06944444444444445,
+        "upper_prefix_power": 0.005625000000000003,
+        "lower_prefix_power": 0.0022562500000000004
+      },
+      {
+        "environment": "Walker2d-v5",
+        "arm": "zero_consistency",
+        "optimizer_seed": 4218603422,
+        "disturbance_mode": "low_frequency",
+        "evaluation_seed": 2161880964,
+        "reasons": [
+          "fallback_rate"
+        ],
+        "fallback_rate": 0.05042016806722689,
+        "upper_prefix_power": 0.005342693134717752,
+        "lower_prefix_power": 0.0022562500210430115
+      }
+    ]
+  },
+  "environments": {
+    "HalfCheetah-v5": {
+      "means": {
+        "zero_consistency": {
+          "reward": 1677.496997654211,
+          "component": 0.2574461348123581,
+          "total": 0.194428196161356
+        },
+        "raw_mean": {
+          "reward": 1433.5717740597552,
+          "component": 0.20178363970835148,
+          "total": 0.13491272013560296
+        },
+        "raw_sample": {
+          "reward": 1647.1226778543103,
+          "component": 0.18895087769984445,
+          "total": 0.1162597127476164
+        },
+        "action_sample": {
+          "reward": 1521.5784712979798,
+          "component": 0.255383951862472,
+          "total": 0.19884693603894005
+        }
+      },
+      "reward_relative_delta": {
+        "zero_consistency": -0.09294712692437936,
+        "raw_mean": 0.06138980888902205
+      },
+      "correction_relative_reduction": {
+        "zero_consistency": {
+          "component": 0.008010153080717952,
+          "total": -0.022726847056262045
+        },
+        "raw_mean": {
+          "component": -0.26563259653553617,
+          "total": -0.4738931646999318
+        }
+      },
+      "paired_reward_wins": 2
+    },
+    "Hopper-v5": {
+      "means": {
+        "zero_consistency": {
+          "reward": 186.1782228152592,
+          "component": 0.5247533215035961,
+          "total": 0.4595165160765384
+        },
+        "raw_mean": {
+          "reward": 176.6566189113295,
+          "component": 0.4045283530836942,
+          "total": 0.2881684850106536
+        },
+        "raw_sample": {
+          "reward": 190.49498314527898,
+          "component": 0.3773944500092035,
+          "total": 0.2540899352535625
+        },
+        "action_sample": {
+          "reward": 176.25804658531618,
+          "component": 0.43893352936640906,
+          "total": 0.3622078672746
+        }
+      },
+      "reward_relative_delta": {
+        "zero_consistency": -0.05328322550262288,
+        "raw_mean": -0.002256198089092721
+      },
+      "correction_relative_reduction": {
+        "zero_consistency": {
+          "component": 0.16354311372681596,
+          "total": 0.21176311492083633
+        },
+        "raw_mean": {
+          "component": -0.08505009851706635,
+          "total": -0.25693087938193226
+        }
+      },
+      "paired_reward_wins": 2
+    },
+    "Walker2d-v5": {
+      "means": {
+        "zero_consistency": {
+          "reward": 178.05758262161075,
+          "component": 0.2060196172319555,
+          "total": 0.09275654895953939
+        },
+        "raw_mean": {
+          "reward": 176.01963163905717,
+          "component": 0.17990364175622936,
+          "total": 0.014657373183032157
+        },
+        "raw_sample": {
+          "reward": 208.44182013077653,
+          "component": 0.16724879113745103,
+          "total": 0.05819265236675095
+        },
+        "action_sample": {
+          "reward": 161.4346605857858,
+          "component": 0.13336264637782633,
+          "total": 0.042913637279498124
+        }
+      },
+      "reward_relative_delta": {
+        "zero_consistency": -0.09335700165687548,
+        "raw_mean": -0.08285991123523691
+      },
+      "correction_relative_reduction": {
+        "zero_consistency": {
+          "component": 0.35267015748468933,
+          "total": 0.5373519416055771
+        },
+        "raw_mean": {
+          "component": 0.25869957341645367,
+          "total": -1.9277849955527038
+        }
+      },
+      "paired_reward_wins": 1
+    }
+  },
+  "by_condition": {
+    "HalfCheetah-v5": {
+      "zero_consistency": {
+        "standard": {
+          "reward": 1889.087549002724,
+          "component": 0.2580911113712364,
+          "total": 0.1921386677325267
+        },
+        "low_frequency": {
+          "reward": 1869.591776819427,
+          "component": 0.25491099926603217,
+          "total": 0.1892706102294824
+        },
+        "high_frequency": {
+          "reward": 1718.7371168480809,
+          "component": 0.2612168488664661,
+          "total": 0.1977777159434565
+        },
+        "mixed": {
+          "reward": 1276.567604125303,
+          "component": 0.2574622902085802,
+          "total": 0.20024872466617316
+        },
+        "ood_chirp": {
+          "reward": 1633.5009414755204,
+          "component": 0.2555494243494757,
+          "total": 0.19270526223514128
+        }
+      },
+      "raw_mean": {
+        "standard": {
+          "reward": 1584.577833267959,
+          "component": 0.20180865396325176,
+          "total": 0.13382152973561956
+        },
+        "low_frequency": {
+          "reward": 1395.0674587134677,
+          "component": 0.20884263682094997,
+          "total": 0.14023588080153704
+        },
+        "high_frequency": {
+          "reward": 1420.3044590357101,
+          "component": 0.1966353043761304,
+          "total": 0.1319200961264774
+        },
+        "mixed": {
+          "reward": 1268.360546722053,
+          "component": 0.19465888749517962,
+          "total": 0.13341518769611516
+        },
+        "ood_chirp": {
+          "reward": 1499.5485725595865,
+          "component": 0.2069727158862457,
+          "total": 0.13517090631826562
+        }
+      },
+      "raw_sample": {
+        "standard": {
+          "reward": 1848.5668147035,
+          "component": 0.1918736454808654,
+          "total": 0.11763279287432311
+        },
+        "low_frequency": {
+          "reward": 1641.4338835622855,
+          "component": 0.18922241336109932,
+          "total": 0.1150086538902926
+        },
+        "high_frequency": {
+          "reward": 1689.2170575245398,
+          "component": 0.19009578536714372,
+          "total": 0.11860614156079187
+        },
+        "mixed": {
+          "reward": 1456.0918173855823,
+          "component": 0.18215476604210615,
+          "total": 0.1118621584822195
+        },
+        "ood_chirp": {
+          "reward": 1600.3038160956435,
+          "component": 0.19140777824800767,
+          "total": 0.1181888169304549
+        }
+      },
+      "action_sample": {
+        "standard": {
+          "reward": 1524.1271396308157,
+          "component": 0.2559518761125036,
+          "total": 0.2003004695093679
+        },
+        "low_frequency": {
+          "reward": 1505.2955535786516,
+          "component": 0.2557564958778614,
+          "total": 0.1982018052100157
+        },
+        "high_frequency": {
+          "reward": 1614.6621094262043,
+          "component": 0.25438071144375346,
+          "total": 0.19711138248829707
+        },
+        "mixed": {
+          "reward": 1495.7820115062354,
+          "component": 0.25620660456430067,
+          "total": 0.19917142795969534
+        },
+        "ood_chirp": {
+          "reward": 1468.0255423479919,
+          "component": 0.2546240713139407,
+          "total": 0.19944959502732418
+        }
+      }
+    },
+    "Hopper-v5": {
+      "zero_consistency": {
+        "standard": {
+          "reward": 205.03799008471265,
+          "component": 0.4981774952309475,
+          "total": 0.4140460792660393
+        },
+        "low_frequency": {
+          "reward": 168.1761301933966,
+          "component": 0.5356034555316225,
+          "total": 0.48915576814896033
+        },
+        "high_frequency": {
+          "reward": 204.5412763429841,
+          "component": 0.5156693501606185,
+          "total": 0.4377639225000219
+        },
+        "mixed": {
+          "reward": 167.282202357167,
+          "component": 0.5500015889628947,
+          "total": 0.49996782552248825
+        },
+        "ood_chirp": {
+          "reward": 185.85351509803567,
+          "component": 0.524314717631897,
+          "total": 0.4566489849451819
+        }
+      },
+      "raw_mean": {
+        "standard": {
+          "reward": 207.2872611800127,
+          "component": 0.3723403439211981,
+          "total": 0.24911245059115966
+        },
+        "low_frequency": {
+          "reward": 148.20681774528433,
+          "component": 0.4290050957663171,
+          "total": 0.32109522959605635
+        },
+        "high_frequency": {
+          "reward": 197.70551102254632,
+          "component": 0.38931741208837134,
+          "total": 0.2581470756691631
+        },
+        "mixed": {
+          "reward": 161.87727197464443,
+          "component": 0.4156693340051636,
+          "total": 0.30312480410539117
+        },
+        "ood_chirp": {
+          "reward": 168.20623263415973,
+          "component": 0.416309579637421,
+          "total": 0.30936286509149785
+        }
+      },
+      "raw_sample": {
+        "standard": {
+          "reward": 207.41422351884376,
+          "component": 0.3644942670603416,
+          "total": 0.22624151002624973
+        },
+        "low_frequency": {
+          "reward": 175.7994769547236,
+          "component": 0.3894232167253863,
+          "total": 0.2806242796529704
+        },
+        "high_frequency": {
+          "reward": 209.40864160210356,
+          "component": 0.36889384207077625,
+          "total": 0.23165295468794395
+        },
+        "mixed": {
+          "reward": 170.0397884615155,
+          "component": 0.3834426815053192,
+          "total": 0.27675696571079683
+        },
+        "ood_chirp": {
+          "reward": 189.81278518920845,
+          "component": 0.3807182426841943,
+          "total": 0.2551739661898517
+        }
+      },
+      "action_sample": {
+        "standard": {
+          "reward": 203.7436962642888,
+          "component": 0.4312723885330577,
+          "total": 0.3403115630496469
+        },
+        "low_frequency": {
+          "reward": 157.92732613323966,
+          "component": 0.4476884702003907,
+          "total": 0.37548346412823047
+        },
+        "high_frequency": {
+          "reward": 194.68290144628807,
+          "component": 0.42644552743296466,
+          "total": 0.3508431688291334
+        },
+        "mixed": {
+          "reward": 151.69743731970348,
+          "component": 0.4493236055245557,
+          "total": 0.37536533327071353
+        },
+        "ood_chirp": {
+          "reward": 173.23887176306093,
+          "component": 0.4399376551410764,
+          "total": 0.3690358070952758
+        }
+      }
+    },
+    "Walker2d-v5": {
+      "zero_consistency": {
+        "standard": {
+          "reward": 181.4215086188465,
+          "component": 0.202142249109081,
+          "total": 0.09201937346950743
+        },
+        "low_frequency": {
+          "reward": 187.54618057573433,
+          "component": 0.20788979099479615,
+          "total": 0.09129410516130466
+        },
+        "high_frequency": {
+          "reward": 157.82402293750695,
+          "component": 0.20479982938518962,
+          "total": 0.09479776697035044
+        },
+        "mixed": {
+          "reward": 185.5030338721738,
+          "component": 0.20786663745863615,
+          "total": 0.09305157701671278
+        },
+        "ood_chirp": {
+          "reward": 177.99316710379216,
+          "component": 0.20739957921207458,
+          "total": 0.0926199221798216
+        }
+      },
+      "raw_mean": {
+        "standard": {
+          "reward": 179.6677114834092,
+          "component": 0.17991995215609308,
+          "total": 0.014456041031497467
+        },
+        "low_frequency": {
+          "reward": 186.56387650190894,
+          "component": 0.18026233802226796,
+          "total": 0.015368182371660023
+        },
+        "high_frequency": {
+          "reward": 167.58996977981855,
+          "component": 0.17907749977949708,
+          "total": 0.01263790399830275
+        },
+        "mixed": {
+          "reward": 173.93608785235122,
+          "component": 0.18036173176241066,
+          "total": 0.015340649479790644
+        },
+        "ood_chirp": {
+          "reward": 172.34051257779794,
+          "component": 0.17989668706087802,
+          "total": 0.015484089033909895
+        }
+      },
+      "raw_sample": {
+        "standard": {
+          "reward": 196.81376212095142,
+          "component": 0.1669849809594371,
+          "total": 0.060117428685833946
+        },
+        "low_frequency": {
+          "reward": 216.4120309503332,
+          "component": 0.16960053240972808,
+          "total": 0.059266230639119025
+        },
+        "high_frequency": {
+          "reward": 209.48014303410255,
+          "component": 0.1646177553539161,
+          "total": 0.057218245976626655
+        },
+        "mixed": {
+          "reward": 205.70119789734338,
+          "component": 0.16680059108083256,
+          "total": 0.05704823534650602
+        },
+        "ood_chirp": {
+          "reward": 213.80196665115204,
+          "component": 0.16824009588334135,
+          "total": 0.057313121185669086
+        }
+      },
+      "action_sample": {
+        "standard": {
+          "reward": 146.86132214098822,
+          "component": 0.13335676292503404,
+          "total": 0.04394434486387293
+        },
+        "low_frequency": {
+          "reward": 171.44599735780292,
+          "component": 0.1332029039044461,
+          "total": 0.04105840096202918
+        },
+        "high_frequency": {
+          "reward": 139.6636136231357,
+          "component": 0.1330612268329882,
+          "total": 0.04311490694053189
+        },
+        "mixed": {
+          "reward": 168.0909716494611,
+          "component": 0.13348150917988735,
+          "total": 0.043887920085230216
+        },
+        "ood_chirp": {
+          "reward": 181.111398157541,
+          "component": 0.13371082904677592,
+          "total": 0.04256261354582641
+        }
+      }
+    }
+  },
+  "gates": {
+    "validity": false,
+    "capacity_matched": true,
+    "reward_wins": false,
+    "reward_improved_environments": false,
+    "reward_regression": false,
+    "correction_regression": false,
+    "hopper_total_correction": false,
+    "component_improved_environments": true,
+    "total_improved_environments": true
+  },
+  "status": "development_stops"
+}

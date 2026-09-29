@@ -1,0 +1,913 @@
+{
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "l2_path_v1416_comparator",
+    "native_pd_cvar_select",
+    "cvar_projection",
+    "native_pd_cvar_projection"
+  ],
+  "cell_count": 48,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "node_counts": {
+    "node005": 48
+  },
+  "optimizer_seeds": [
+    2978317753,
+    392459795,
+    2303062597,
+    422427492,
+    348909203,
+    1155514759,
+    1693716559,
+    981850268,
+    4097799577,
+    872933768,
+    1553837587,
+    3230217838,
+    2518107,
+    3022864709,
+    3592646921,
+    821573137
+  ],
+  "phases": [
+    "anchor"
+  ],
+  "run_name": "mujoco_v14_29_fresh_anchor_bank_20260830_r1",
+  "scheduler_snapshots": [],
+  "status": "run_scoped_result_sync_complete",
+  "sync_workers": 8,
+  "task_attempt_lineage": {
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-1155514759": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2791345,
+          "id": "t84880",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.2165651,
+          "status": "done",
+          "submitted_at": 1788075978.8017654
+        }
+      ],
+      "selected_task_id": "t84880",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-1553837587": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.28019,
+          "id": "t84885",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.505932,
+          "status": "done",
+          "submitted_at": 1788075978.9846978
+        }
+      ],
+      "selected_task_id": "t84885",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-1693716559": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2793407,
+          "id": "t84881",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.224006,
+          "status": "done",
+          "submitted_at": 1788075978.839087
+        }
+      ],
+      "selected_task_id": "t84881",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-2303062597": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2783682,
+          "id": "t84877",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.1726027,
+          "status": "done",
+          "submitted_at": 1788075978.686348
+        }
+      ],
+      "selected_task_id": "t84877",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-2518107": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2807128,
+          "id": "t84887",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076108.6003458,
+          "status": "done",
+          "submitted_at": 1788075979.0521219
+        }
+      ],
+      "selected_task_id": "t84887",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-2978317753": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.277772,
+          "id": "t84875",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.1582792,
+          "status": "done",
+          "submitted_at": 1788075978.6093712
+        }
+      ],
+      "selected_task_id": "t84875",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-3022864709": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2809305,
+          "id": "t84888",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076113.3699129,
+          "status": "done",
+          "submitted_at": 1788075979.0855744
+        }
+      ],
+      "selected_task_id": "t84888",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-3230217838": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2804813,
+          "id": "t84886",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.8009567,
+          "status": "done",
+          "submitted_at": 1788075979.0182118
+        }
+      ],
+      "selected_task_id": "t84886",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-348909203": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2789185,
+          "id": "t84879",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.3451078,
+          "status": "done",
+          "submitted_at": 1788075978.7620702
+        }
+      ],
+      "selected_task_id": "t84879",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-3592646921": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2811382,
+          "id": "t84889",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.2696023,
+          "status": "done",
+          "submitted_at": 1788075979.1198847
+        }
+      ],
+      "selected_task_id": "t84889",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-392459795": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2781293,
+          "id": "t84876",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.2268233,
+          "status": "done",
+          "submitted_at": 1788075978.6509407
+        }
+      ],
+      "selected_task_id": "t84876",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-4097799577": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2797534,
+          "id": "t84883",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.920105,
+          "status": "done",
+          "submitted_at": 1788075978.9150734
+        }
+      ],
+      "selected_task_id": "t84883",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-422427492": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.278677,
+          "id": "t84878",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.2342417,
+          "status": "done",
+          "submitted_at": 1788075978.7250519
+        }
+      ],
+      "selected_task_id": "t84878",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-821573137": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.281341,
+          "id": "t84890",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076116.5058017,
+          "status": "done",
+          "submitted_at": 1788075979.1534514
+        }
+      ],
+      "selected_task_id": "t84890",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-872933768": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2799623,
+          "id": "t84884",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.1666675,
+          "status": "done",
+          "submitted_at": 1788075978.9488645
+        }
+      ],
+      "selected_task_id": "t84884",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/HalfCheetah-v5/closed_loop_guard_pretrain_anchor/rep-981850268": {
+      "attempts": [
+        {
+          "finished_at": 1788076688.2795477,
+          "id": "t84882",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.3017015,
+          "status": "done",
+          "submitted_at": 1788075978.8754947
+        }
+      ],
+      "selected_task_id": "t84882",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-1155514759": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2596536,
+          "id": "t84896",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.671086,
+          "status": "done",
+          "submitted_at": 1788075979.3575165
+        }
+      ],
+      "selected_task_id": "t84896",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-1553837587": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.26064,
+          "id": "t84901",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076116.6435742,
+          "status": "done",
+          "submitted_at": 1788075979.5257185
+        }
+      ],
+      "selected_task_id": "t84901",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-1693716559": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2598536,
+          "id": "t84897",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076104.4702692,
+          "status": "done",
+          "submitted_at": 1788075979.391991
+        }
+      ],
+      "selected_task_id": "t84897",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-2303062597": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2581441,
+          "id": "t84893",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076111.2903063,
+          "status": "done",
+          "submitted_at": 1788075979.2570019
+        }
+      ],
+      "selected_task_id": "t84893",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-2518107": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.26108,
+          "id": "t84903",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.1710916,
+          "status": "done",
+          "submitted_at": 1788075979.5983763
+        }
+      ],
+      "selected_task_id": "t84903",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-2978317753": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2575605,
+          "id": "t84891",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076101.2859128,
+          "status": "done",
+          "submitted_at": 1788075979.187105
+        }
+      ],
+      "selected_task_id": "t84891",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-3022864709": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2612932,
+          "id": "t84904",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076115.443833,
+          "status": "done",
+          "submitted_at": 1788075979.6366293
+        }
+      ],
+      "selected_task_id": "t84904",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-3230217838": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2608595,
+          "id": "t84902",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.0334136,
+          "status": "done",
+          "submitted_at": 1788075979.5602067
+        }
+      ],
+      "selected_task_id": "t84902",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-348909203": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2594452,
+          "id": "t84895",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.9430287,
+          "status": "done",
+          "submitted_at": 1788075979.3242936
+        }
+      ],
+      "selected_task_id": "t84895",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-3592646921": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2615075,
+          "id": "t84905",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.931199,
+          "status": "done",
+          "submitted_at": 1788075979.671089
+        }
+      ],
+      "selected_task_id": "t84905",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-392459795": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2579198,
+          "id": "t84892",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076115.2860556,
+          "status": "done",
+          "submitted_at": 1788075979.2220972
+        }
+      ],
+      "selected_task_id": "t84892",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-4097799577": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2602484,
+          "id": "t84899",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.7849698,
+          "status": "done",
+          "submitted_at": 1788075979.4591146
+        }
+      ],
+      "selected_task_id": "t84899",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-422427492": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2592082,
+          "id": "t84894",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076112.4060535,
+          "status": "done",
+          "submitted_at": 1788075979.290619
+        }
+      ],
+      "selected_task_id": "t84894",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-821573137": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2617376,
+          "id": "t84906",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.5281653,
+          "status": "done",
+          "submitted_at": 1788075979.7048166
+        }
+      ],
+      "selected_task_id": "t84906",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-872933768": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.2604437,
+          "id": "t84900",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.0963728,
+          "status": "done",
+          "submitted_at": 1788075979.4924157
+        }
+      ],
+      "selected_task_id": "t84900",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Hopper-v5/closed_loop_guard_pretrain_anchor/rep-981850268": {
+      "attempts": [
+        {
+          "finished_at": 1788076351.260048,
+          "id": "t84898",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076104.3578932,
+          "status": "done",
+          "submitted_at": 1788075979.4257548
+        }
+      ],
+      "selected_task_id": "t84898",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-1155514759": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6160932,
+          "id": "t84912",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.5335402,
+          "status": "done",
+          "submitted_at": 1788075979.9175482
+        }
+      ],
+      "selected_task_id": "t84912",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-1553837587": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.617196,
+          "id": "t84917",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.511056,
+          "status": "done",
+          "submitted_at": 1788075980.0934482
+        }
+      ],
+      "selected_task_id": "t84917",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-1693716559": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6162946,
+          "id": "t84913",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076115.1089332,
+          "status": "done",
+          "submitted_at": 1788075979.9524167
+        }
+      ],
+      "selected_task_id": "t84913",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-2303062597": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6154451,
+          "id": "t84909",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076113.121706,
+          "status": "done",
+          "submitted_at": 1788075979.8127933
+        }
+      ],
+      "selected_task_id": "t84909",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-2518107": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.617621,
+          "id": "t84919",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.7715766,
+          "status": "done",
+          "submitted_at": 1788075980.1657674
+        }
+      ],
+      "selected_task_id": "t84919",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-2978317753": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6147633,
+          "id": "t84907",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.3273659,
+          "status": "done",
+          "submitted_at": 1788075979.7403078
+        }
+      ],
+      "selected_task_id": "t84907",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-3022864709": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.617831,
+          "id": "t84920",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076109.8612304,
+          "status": "done",
+          "submitted_at": 1788075980.200679
+        }
+      ],
+      "selected_task_id": "t84920",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-3230217838": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6174114,
+          "id": "t84918",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.5797608,
+          "status": "done",
+          "submitted_at": 1788075980.1314087
+        }
+      ],
+      "selected_task_id": "t84918",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-348909203": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6158857,
+          "id": "t84911",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076110.8855124,
+          "status": "done",
+          "submitted_at": 1788075979.8825006
+        }
+      ],
+      "selected_task_id": "t84911",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-3592646921": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6180613,
+          "id": "t84921",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076108.9773345,
+          "status": "done",
+          "submitted_at": 1788075980.2371993
+        }
+      ],
+      "selected_task_id": "t84921",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-392459795": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6151345,
+          "id": "t84908",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076104.9373727,
+          "status": "done",
+          "submitted_at": 1788075979.7766922
+        }
+      ],
+      "selected_task_id": "t84908",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-4097799577": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.61672,
+          "id": "t84915",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.5170245,
+          "status": "done",
+          "submitted_at": 1788075980.022741
+        }
+      ],
+      "selected_task_id": "t84915",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-422427492": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6156735,
+          "id": "t84910",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.2045562,
+          "status": "done",
+          "submitted_at": 1788075979.8471649
+        }
+      ],
+      "selected_task_id": "t84910",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-821573137": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.618288,
+          "id": "t84922",
+          "last_block_reason": null,
+          "last_progress_line": "DONE",
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076111.802187,
+          "status": "done",
+          "submitted_at": 1788075980.2719321
+        }
+      ],
+      "selected_task_id": "t84922",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-872933768": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6169689,
+          "id": "t84916",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076114.499959,
+          "status": "done",
+          "submitted_at": 1788075980.0578074
+        }
+      ],
+      "selected_task_id": "t84916",
+      "selection": "only_attempt"
+    },
+    "Freq-HRL/mujoco-v14-29-fresh-anchor-bank-v1/mujoco_v14_29_fresh_anchor_bank_20260830_r1/anchor/Walker2d-v5/closed_loop_guard_pretrain_anchor/rep-981850268": {
+      "attempts": [
+        {
+          "finished_at": 1788076420.6164978,
+          "id": "t84914",
+          "last_block_reason": null,
+          "last_progress_line": null,
+          "node": "node005",
+          "snapshot_source": "live_scheduler_status",
+          "started_at": 1788076105.4667776,
+          "status": "done",
+          "submitted_at": 1788075979.987007
+        }
+      ],
+      "selected_task_id": "t84914",
+      "selection": "only_attempt"
+    }
+  },
+  "task_ids": [
+    "t84875",
+    "t84876",
+    "t84877",
+    "t84878",
+    "t84879",
+    "t84880",
+    "t84881",
+    "t84882",
+    "t84883",
+    "t84884",
+    "t84885",
+    "t84886",
+    "t84887",
+    "t84888",
+    "t84889",
+    "t84890",
+    "t84891",
+    "t84892",
+    "t84893",
+    "t84894",
+    "t84895",
+    "t84896",
+    "t84897",
+    "t84898",
+    "t84899",
+    "t84900",
+    "t84901",
+    "t84902",
+    "t84903",
+    "t84904",
+    "t84905",
+    "t84906",
+    "t84907",
+    "t84908",
+    "t84909",
+    "t84910",
+    "t84911",
+    "t84912",
+    "t84913",
+    "t84914",
+    "t84915",
+    "t84916",
+    "t84917",
+    "t84918",
+    "t84919",
+    "t84920",
+    "t84921",
+    "t84922"
+  ]
+}

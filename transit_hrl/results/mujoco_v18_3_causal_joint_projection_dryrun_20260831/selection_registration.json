@@ -1,0 +1,28 @@
+{
+  "candidate_count": 2,
+  "development_protocol_version": "mujoco_v18_3_causal_joint_projection_v1",
+  "evidence_role": "reused_path_label_free_causal_joint_projection_not_confirmatory",
+  "frozen_core_revision": "212c571e630512d37682f9984727b7f4016740e8",
+  "frozen_source_manifest_sha256": "11a7a0087c9369e744b6516cd7f6571a9f2b0562eae649f7d5d89cf62052a3a2",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "scheduler_contract": {
+    "binding_reason": "v17.8 traces remain server-only on node003",
+    "cpu": 16,
+    "ram_mb": 16384,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false,
+    "workers": 16
+  },
+  "selection_contract": {
+    "advancement_gate": "120/120 valid and directly joint feasible, 120/120 exact-oracle feasible, 113/113 reference paths preserved, all seven actor-floor paths and both seed groups recovered, nonzero executed correction on all floor paths, total correction absolute maximum at most 0.05, reference correction RMS maximum at most 0.01, and actor-floor correction RMS maximum at most 0.015",
+    "candidate_set": "instantaneous per-step residual budgets and cumulative prefix-energy ledger budgets; no fitted parameter or data-selected threshold",
+    "causality": "at step t the projector uses only current proposed components, past projected components, registered causal HPF8/LPF32 definitions, and fixed budgets",
+    "claim_boundary": "label-free causal mechanism selection on reused paths only; no reward, fresh-seed, learned-policy, no-tradeoff, or manuscript claim",
+    "fresh_access_rule": "the reused-path screen never reads a fresh path; a complete pass only authorizes a separately committed closed-loop validation freeze",
+    "input": "unchanged v17.8 baseline upper/lower/total action traces; no v17.12 actor target, actor-floor label, observation, reward, or future action is available to the projector",
+    "lexicographic_action_rule": "preserve the proposed total action whenever a causal feasible split exists; otherwise project the current upper and lower components to their nearest causal feasible sets",
+    "selection_order": "valid path count, direct joint-feasible count, exact-oracle feasible count, actor-floor recovery, reference preservation, lower maximum reference correction, lower maximum actor-floor correction, then id"
+  },
+  "status": "registered_before_v18_3_reused_path_access"
+}

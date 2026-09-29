@@ -1,0 +1,437 @@
+{
+  "analysis_version": "mujoco_v16_1_audit_gauge_paired_preflight_analysis_v2",
+  "canonical_improvement_count": 1,
+  "cell_count": 9,
+  "cells": [
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.1354299556633996,
+          "audit_alpha_mean": 0.14118443852514023,
+          "canonical_merit": 0.8332489582901705,
+          "latent_merit": 1.0294904438198298,
+          "max_responsibility_reconstruction_rms": 3.1465497546832464e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 589.1642275725568,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.1354299556633996,
+          "audit_alpha_mean": 0.14118443852514023,
+          "canonical_merit": 0.8332489582901705,
+          "latent_merit": 1.0294904438198298,
+          "max_responsibility_reconstruction_rms": 3.1465497546832464e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 589.1642275725568,
+          "selected_checkpoint_iteration": 43
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.1354299556633996,
+          "audit_alpha_mean": 0.14118443852514023,
+          "canonical_merit": 0.8332489582901705,
+          "latent_merit": 1.0294904438198298,
+          "max_responsibility_reconstruction_rms": 3.1465497546832464e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 589.1642275725568,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "HalfCheetah-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1086114340,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": true
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.1291535926434215,
+          "audit_alpha_mean": 0.1400411260309425,
+          "canonical_merit": 0.6396109863584213,
+          "latent_merit": 0.8500261501706471,
+          "max_responsibility_reconstruction_rms": 3.475119987619379e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 467.38596664144717,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.1291535926434215,
+          "audit_alpha_mean": 0.1400411260309425,
+          "canonical_merit": 0.6396109863584213,
+          "latent_merit": 0.8500261501706471,
+          "max_responsibility_reconstruction_rms": 3.475119987619379e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 467.38596664144717,
+          "selected_checkpoint_iteration": 55
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.1291535926434215,
+          "audit_alpha_mean": 0.1400411260309425,
+          "canonical_merit": 0.6396109863584213,
+          "latent_merit": 0.8500261501706471,
+          "max_responsibility_reconstruction_rms": 3.475119987619379e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 467.38596664144717,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "HalfCheetah-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1653726169,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": true
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.1280252643791282,
+          "audit_alpha_mean": 0.1369874013494635,
+          "canonical_merit": 0.736999676463272,
+          "latent_merit": 0.8813013315031861,
+          "max_responsibility_reconstruction_rms": 2.998958556483836e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 227.76545454437127,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.1280252643791282,
+          "audit_alpha_mean": 0.1369874013494635,
+          "canonical_merit": 0.736999676463272,
+          "latent_merit": 0.8813013315031861,
+          "max_responsibility_reconstruction_rms": 2.998958556483836e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 227.76545454437127,
+          "selected_checkpoint_iteration": 31
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.1280252643791282,
+          "audit_alpha_mean": 0.1369874013494635,
+          "canonical_merit": 0.736999676463272,
+          "latent_merit": 0.8813013315031861,
+          "max_responsibility_reconstruction_rms": 2.998958556483836e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 227.76545454437127,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "HalfCheetah-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 2868862553,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": true
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.2679410534562058,
+          "audit_alpha_mean": 0.2674985248035081,
+          "canonical_merit": 11.60090636360479,
+          "latent_merit": 26.778512142100897,
+          "max_responsibility_reconstruction_rms": 1.8096546796498033e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 177.04924358721743,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.2679410534562058,
+          "audit_alpha_mean": 0.2674985248035081,
+          "canonical_merit": 11.60090636360479,
+          "latent_merit": 26.778512142100897,
+          "max_responsibility_reconstruction_rms": 1.8096546796498033e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 177.04924358721743,
+          "selected_checkpoint_iteration": 27
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.2679410534562058,
+          "audit_alpha_mean": 0.2674985248035081,
+          "canonical_merit": 11.60090636360479,
+          "latent_merit": 26.778512142100897,
+          "max_responsibility_reconstruction_rms": 1.8096546796498033e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 177.04924358721743,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "Hopper-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1086114340,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": false
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.2798990648812754,
+          "audit_alpha_mean": 0.2831406156948631,
+          "canonical_merit": 11.94724772993429,
+          "latent_merit": 34.03332985980287,
+          "max_responsibility_reconstruction_rms": 1.8578096056809458e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 173.63585422533225,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.2798990648812754,
+          "audit_alpha_mean": 0.2831406156948631,
+          "canonical_merit": 11.94724772993429,
+          "latent_merit": 34.03332985980287,
+          "max_responsibility_reconstruction_rms": 1.8578096056809458e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 173.63585422533225,
+          "selected_checkpoint_iteration": 23
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.2798990648812754,
+          "audit_alpha_mean": 0.2831406156948631,
+          "canonical_merit": 11.94724772993429,
+          "latent_merit": 34.03332985980287,
+          "max_responsibility_reconstruction_rms": 1.8578096056809458e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 173.63585422533225,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "Hopper-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1653726169,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": false
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.21855605865815506,
+          "audit_alpha_mean": 0.29925249160383066,
+          "canonical_merit": 8.618546028152684,
+          "latent_merit": 13.317464518032446,
+          "max_responsibility_reconstruction_rms": 1.2515188813622553e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 288.81267127382074,
+          "selected_checkpoint_iteration": 11
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.2248615483909664,
+          "audit_alpha_mean": 0.2667962914046834,
+          "canonical_merit": 9.867084908563557,
+          "latent_merit": 19.18671779004533,
+          "max_responsibility_reconstruction_rms": 1.3784530935785612e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 231.59039094724517,
+          "selected_checkpoint_iteration": 63
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.2248615483909664,
+          "audit_alpha_mean": 0.2667962914046834,
+          "canonical_merit": 9.867084908563557,
+          "latent_merit": 19.18671779004533,
+          "max_responsibility_reconstruction_rms": 1.3784530935785612e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 231.59039094724517,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": true,
+      "canonical_reduction_supported": true,
+      "canonical_relative_reduction_vs_control": 0.12653573897263992,
+      "environment": "Hopper-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 2868862553,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": true
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.3651276423713218,
+          "audit_alpha_mean": 0.3853081136321558,
+          "canonical_merit": 2.0033513270546854,
+          "latent_merit": 6.61662488705121,
+          "max_responsibility_reconstruction_rms": 1.3769814687287533e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 295.14656808205297,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.3651276423713218,
+          "audit_alpha_mean": 0.3853081136321558,
+          "canonical_merit": 2.0033513270546854,
+          "latent_merit": 6.61662488705121,
+          "max_responsibility_reconstruction_rms": 1.3769814687287533e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 295.14656808205297,
+          "selected_checkpoint_iteration": 15
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.3651276423713218,
+          "audit_alpha_mean": 0.3853081136321558,
+          "canonical_merit": 2.0033513270546854,
+          "latent_merit": 6.61662488705121,
+          "max_responsibility_reconstruction_rms": 1.3769814687287533e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 295.14656808205297,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "Walker2d-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1086114340,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": false
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.40806528568817296,
+          "audit_alpha_mean": 0.41526660636144175,
+          "canonical_merit": 1.4220748362833058,
+          "latent_merit": 10.417917048584004,
+          "max_responsibility_reconstruction_rms": 1.769377916332607e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 342.20769317860504,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.40806528568817296,
+          "audit_alpha_mean": 0.41526660636144175,
+          "canonical_merit": 1.4220748362833058,
+          "latent_merit": 10.417917048584004,
+          "max_responsibility_reconstruction_rms": 1.769377916332607e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 342.20769317860504,
+          "selected_checkpoint_iteration": 15
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.40806528568817296,
+          "audit_alpha_mean": 0.41526660636144175,
+          "canonical_merit": 1.4220748362833058,
+          "latent_merit": 10.417917048584004,
+          "max_responsibility_reconstruction_rms": 1.769377916332607e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 342.20769317860504,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "Walker2d-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 1653726169,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": false
+    },
+    {
+      "adaptive_cutoff_active": true,
+      "arm_summaries": {
+        "audit_gauge_primal_dual_reward_floor_candidate": {
+          "audit_alpha_final_mean": 0.38380827115290483,
+          "audit_alpha_mean": 0.4081102009833456,
+          "canonical_merit": 2.5151721425924407,
+          "latent_merit": 14.918132659196804,
+          "max_responsibility_reconstruction_rms": 1.8700756320540393e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 317.1481260704618,
+          "selected_checkpoint_iteration": -1
+        },
+        "audit_gauge_reward_anchor": {
+          "audit_alpha_final_mean": 0.38380827115290483,
+          "audit_alpha_mean": 0.4081102009833456,
+          "canonical_merit": 2.5151721425924407,
+          "latent_merit": 14.918132659196804,
+          "max_responsibility_reconstruction_rms": 1.8700756320540393e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 317.1481260704618,
+          "selected_checkpoint_iteration": 15
+        },
+        "audit_gauge_reward_continuation_control": {
+          "audit_alpha_final_mean": 0.38380827115290483,
+          "audit_alpha_mean": 0.4081102009833456,
+          "canonical_merit": 2.5151721425924407,
+          "latent_merit": 14.918132659196804,
+          "max_responsibility_reconstruction_rms": 1.8700756320540393e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 317.1481260704618,
+          "selected_checkpoint_iteration": -1
+        }
+      },
+      "candidate_selected_trained_checkpoint": false,
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_control": 0.0,
+      "environment": "Walker2d-v5",
+      "latent_noninferior_vs_control": true,
+      "optimizer_seed": 2868862553,
+      "reconstruction_exact": true,
+      "reward_noninferior": true,
+      "selection_constraints_feasible": false
+    }
+  ],
+  "environment_results": [
+    {
+      "canonical_improvement_count": 0,
+      "cell_count": 3,
+      "environment": "HalfCheetah-v5",
+      "environment_gate": false,
+      "median_canonical_relative_reduction": 0.0
+    },
+    {
+      "canonical_improvement_count": 1,
+      "cell_count": 3,
+      "environment": "Hopper-v5",
+      "environment_gate": false,
+      "median_canonical_relative_reduction": 0.0
+    },
+    {
+      "canonical_improvement_count": 0,
+      "cell_count": 3,
+      "environment": "Walker2d-v5",
+      "environment_gate": false,
+      "median_canonical_relative_reduction": 0.0
+    }
+  ],
+  "evidence_role": "paired_training_mechanism_development_not_confirmatory",
+  "selection_contract": {
+    "anchor": "reward_only_adaptive_gauge_with_matched_cost_critic_capacity",
+    "checkpoint_gate": "paired_selection_path_reward_floor_and_five_frequency_endpoints_with_anchor_fallback",
+    "heldout_gate": "reward_noninferiority_exact_reconstruction_latent_noninferiority_and_canonical_frequency_reduction_in_two_of_three_seeds_per_environment",
+    "outcome_use": "development_only_expand_with_new_roots_if_supported",
+    "primary_comparison": "primal_dual_vs_zero_dual_from_identical_checkpoint_and_optimizer_state",
+    "unit": "environment_by_fresh_optimizer_seed_paired_continuation"
+  },
+  "status": "audit_gauge_paired_preflight_not_supported",
+  "support_gate": false
+}

@@ -1,0 +1,56 @@
+{
+  "analysis_version": "mujoco_v14_20_zeroth_order_actor_preflight_v1",
+  "cell_count": 3,
+  "cells": [
+    {
+      "design_baseline_merit": 0.05540166204986181,
+      "design_candidate_merit": null,
+      "design_eligible_candidate_count": 0,
+      "environment": "HalfCheetah-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": null,
+      "selected_source": null,
+      "selected_step_rms": null,
+      "validation_baseline_merit": null,
+      "validation_candidate_merit": null,
+      "validation_supported": false
+    },
+    {
+      "design_baseline_merit": 0.055401662049861744,
+      "design_candidate_merit": 0.05534413845561682,
+      "design_eligible_candidate_count": 8,
+      "environment": "Hopper-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": -1.0,
+      "selected_source": "ranked_antithetic_gradient",
+      "selected_step_rms": 1e-06,
+      "validation_baseline_merit": 0.055401662049861786,
+      "validation_candidate_merit": 0.05534950072441536,
+      "validation_supported": true
+    },
+    {
+      "design_baseline_merit": 0.055401662049861786,
+      "design_candidate_merit": 0.05532976490660596,
+      "design_eligible_candidate_count": 8,
+      "environment": "Walker2d-v5",
+      "optimizer_seed": 4196455150,
+      "selected_orientation": -1.0,
+      "selected_source": "ranked_antithetic_gradient",
+      "selected_step_rms": 1e-06,
+      "validation_baseline_merit": 0.055401662049861786,
+      "validation_candidate_merit": 0.05533928140251239,
+      "validation_supported": true
+    }
+  ],
+  "evidence_role": "post_router_boundary_actor_mechanism_preflight_not_confirmatory",
+  "selection_contract": {
+    "actor_scope": "joint_upper_lower_deterministic_output_heads",
+    "design_paths": "first_two_frozen_guard_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "search": "eight_fixed_antithetic_rademacher_directions_and_rank_gradient",
+    "validation_paths": "last_two_frozen_guard_roots_crossed_with_four_modes"
+  },
+  "status": "zeroth_order_actor_restoration_preflight_not_supported",
+  "supported_cell_count": 2
+}

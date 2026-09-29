@@ -1,0 +1,33 @@
+{
+  "protocol": "mujoco_v25_action_sample_cprofile_v1",
+  "evidence_role": "efficiency_diagnostic_only_not_algorithm_evidence",
+  "algorithm_revision": "854a65a6e0b39c1174eab8c6eba00023ac1ecf5b",
+  "environment": "HalfCheetah-v5",
+  "arm": "action_sample",
+  "steps": 512,
+  "iterations": 8,
+  "roots": {
+    "optimizer": 25009501,
+    "train": [
+      25009511,
+      25009512,
+      25009513,
+      25009514
+    ],
+    "selection": [
+      25009521,
+      25009522,
+      25009523,
+      25009524
+    ],
+    "evaluation": [
+      25009531
+    ]
+  },
+  "profile_binary": "server_only",
+  "synced": [
+    "profile_summary.json",
+    "profile_top.txt",
+    "cell_summary.json"
+  ]
+}

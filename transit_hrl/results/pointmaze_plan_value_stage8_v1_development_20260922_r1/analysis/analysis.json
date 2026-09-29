@@ -1,0 +1,1775 @@
+{
+  "absolute": {
+    "hrl_regime_history": {
+      "fixed": {
+        "episode_return": {
+          "ci_lower": 892.7876818747612,
+          "ci_upper": 916.3909062668282,
+          "confidence": 0.95,
+          "mean": 904.5892940707947,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.11987751202945686,
+          "ci_upper": 0.14085340662254586,
+          "confidence": 0.95,
+          "mean": 0.13036545932600135,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.009144419418049788,
+          "ci_upper": 0.021008910758717886,
+          "confidence": 0.95,
+          "mean": 0.015076665088383838,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.3834330146103642,
+          "ci_upper": 1.6348768800698328,
+          "confidence": 0.95,
+          "mean": 1.5091549473400985,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7847246855554606,
+          "ci_upper": 0.826199793611206,
+          "confidence": 0.95,
+          "mean": 0.8054622395833333,
+          "n": 8
+        }
+      },
+      "fixed_waypoint_perturbed": {
+        "episode_return": {
+          "ci_lower": 851.0938909778982,
+          "ci_upper": 871.213289800398,
+          "confidence": 0.95,
+          "mean": 861.1535903891481,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.15325802056069002,
+          "ci_upper": 0.17996829550962182,
+          "confidence": 0.95,
+          "mean": 0.16661315803515592,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.028562979400338546,
+          "ci_upper": 0.042319793642590746,
+          "confidence": 0.95,
+          "mean": 0.03544138652146465,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.8325533698119707,
+          "ci_upper": 2.1674530119949167,
+          "confidence": 0.95,
+          "mean": 2.0000031909034437,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7066828670746855,
+          "ci_upper": 0.756298903758648,
+          "confidence": 0.95,
+          "mean": 0.7314908854166667,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_000ms": {
+        "episode_return": {
+          "ci_lower": 841.532335759629,
+          "ci_upper": 856.9341765988243,
+          "confidence": 0.95,
+          "mean": 849.2332561792266,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.20594303452143048,
+          "ci_upper": 0.22332031184755052,
+          "confidence": 0.95,
+          "mean": 0.2146316731844905,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.037737951084515504,
+          "ci_upper": 0.060170390140231976,
+          "confidence": 0.95,
+          "mean": 0.04895417061237374,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 2.249814769854297,
+          "ci_upper": 2.4543215284544373,
+          "confidence": 0.95,
+          "mean": 2.352068149154367,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.662711214069538,
+          "ci_upper": 0.6913773275971286,
+          "confidence": 0.95,
+          "mean": 0.6770442708333333,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_100ms": {
+        "episode_return": {
+          "ci_lower": 875.4302622524197,
+          "ci_upper": 897.1909095620076,
+          "confidence": 0.95,
+          "mean": 886.3105859072136,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.1372425204460074,
+          "ci_upper": 0.16981067015223958,
+          "confidence": 0.95,
+          "mean": 0.1535265952991235,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.026032081333716685,
+          "ci_upper": 0.05261746096426311,
+          "confidence": 0.95,
+          "mean": 0.0393247711489899,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.5642346358518258,
+          "ci_upper": 1.8883328619223545,
+          "confidence": 0.95,
+          "mean": 1.7262837488870901,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7440942448599057,
+          "ci_upper": 0.7940698176400942,
+          "confidence": 0.95,
+          "mean": 0.76908203125,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_250ms": {
+        "episode_return": {
+          "ci_lower": 903.0066611952811,
+          "ci_upper": 935.2383145883223,
+          "confidence": 0.95,
+          "mean": 919.1224878918017,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.08448591443549654,
+          "ci_upper": 0.11637433192682882,
+          "confidence": 0.95,
+          "mean": 0.10043012318116268,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.01710297803937348,
+          "ci_upper": 0.03988920946062652,
+          "confidence": 0.95,
+          "mean": 0.02849609375,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.1196251669753632,
+          "ci_upper": 1.4607951910129258,
+          "confidence": 0.95,
+          "mean": 1.2902101789941445,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.8223234038689633,
+          "ci_upper": 0.8805281586310365,
+          "confidence": 0.95,
+          "mean": 0.8514257812499999,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_500ms": {
+        "episode_return": {
+          "ci_lower": 873.2965161873899,
+          "ci_upper": 899.8049023923713,
+          "confidence": 0.95,
+          "mean": 886.5507092898806,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.1259889659261096,
+          "ci_upper": 0.15209037283030663,
+          "confidence": 0.95,
+          "mean": 0.1390396693782081,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.02302298554761002,
+          "ci_upper": 0.038536397343804124,
+          "confidence": 0.95,
+          "mean": 0.030779691445707073,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.5610949746603906,
+          "ci_upper": 1.8625562573883323,
+          "confidence": 0.95,
+          "mean": 1.7118256160243615,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7417961817586451,
+          "ci_upper": 0.7889069432413549,
+          "confidence": 0.95,
+          "mean": 0.7653515625,
+          "n": 8
+        }
+      },
+      "stale_plan": {
+        "episode_return": {
+          "ci_lower": 620.4917756620905,
+          "ci_upper": 694.364242102745,
+          "confidence": 0.95,
+          "mean": 657.4280088824178,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.6465992923614758,
+          "ci_upper": 0.9115606205101665,
+          "confidence": 0.95,
+          "mean": 0.7790799564358212,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.4360618673825078,
+          "ci_upper": 0.548589411026583,
+          "confidence": 0.95,
+          "mean": 0.4923256392045454,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 7.622962205999729,
+          "ci_upper": 10.542295421622653,
+          "confidence": 0.95,
+          "mean": 9.08262881381119,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.3349554681257643,
+          "ci_upper": 0.4435471360409023,
+          "confidence": 0.95,
+          "mean": 0.3892513020833333,
+          "n": 8
+        }
+      }
+    },
+    "hrl_regime_oracle_context": {
+      "fixed": {
+        "episode_return": {
+          "ci_lower": 890.484479150571,
+          "ci_upper": 913.9585866305282,
+          "confidence": 0.95,
+          "mean": 902.2215328905496,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.11768985053465371,
+          "ci_upper": 0.13993514470226825,
+          "confidence": 0.95,
+          "mean": 0.12881249761846097,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.012971061142348281,
+          "ci_upper": 0.018065633933409295,
+          "confidence": 0.95,
+          "mean": 0.015518347537878788,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.3501548951649325,
+          "ci_upper": 1.6170560558754639,
+          "confidence": 0.95,
+          "mean": 1.4836054755201982,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7911404206698377,
+          "ci_upper": 0.8344064543301623,
+          "confidence": 0.95,
+          "mean": 0.8127734375,
+          "n": 8
+        }
+      },
+      "fixed_waypoint_perturbed": {
+        "episode_return": {
+          "ci_lower": 855.3417038417166,
+          "ci_upper": 869.799651012206,
+          "confidence": 0.95,
+          "mean": 862.5706774269613,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.15364819959464057,
+          "ci_upper": 0.17459760709546948,
+          "confidence": 0.95,
+          "mean": 0.16412290334505503,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.028785209995082394,
+          "ci_upper": 0.03726939859077619,
+          "confidence": 0.95,
+          "mean": 0.03302730429292929,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.830762714477521,
+          "ci_upper": 2.054697610061989,
+          "confidence": 0.95,
+          "mean": 1.9427301622697548,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7222979683735449,
+          "ci_upper": 0.7521942191264552,
+          "confidence": 0.95,
+          "mean": 0.73724609375,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_000ms": {
+        "episode_return": {
+          "ci_lower": 846.4228887910177,
+          "ci_upper": 862.5792011594616,
+          "confidence": 0.95,
+          "mean": 854.5010449752397,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.19178306947465718,
+          "ci_upper": 0.22152061271570622,
+          "confidence": 0.95,
+          "mean": 0.2066518410951817,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.04019058336504641,
+          "ci_upper": 0.05676719756929702,
+          "confidence": 0.95,
+          "mean": 0.048478890467171715,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 2.110683909932123,
+          "ci_upper": 2.3937913751689863,
+          "confidence": 0.95,
+          "mean": 2.2522376425505546,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.6890387691070604,
+          "ci_upper": 0.712497689226273,
+          "confidence": 0.95,
+          "mean": 0.7007682291666667,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_100ms": {
+        "episode_return": {
+          "ci_lower": 885.3216447959654,
+          "ci_upper": 905.6780859542213,
+          "confidence": 0.95,
+          "mean": 895.4998653750933,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.12855810648458582,
+          "ci_upper": 0.15158267147855914,
+          "confidence": 0.95,
+          "mean": 0.14007038898157248,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.025102422683250452,
+          "ci_upper": 0.041961773970789956,
+          "confidence": 0.95,
+          "mean": 0.033532098327020206,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.452451143380298,
+          "ci_upper": 1.7241682986108644,
+          "confidence": 0.95,
+          "mean": 1.5883097209955812,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7763717299939267,
+          "ci_upper": 0.8202819158394067,
+          "confidence": 0.95,
+          "mean": 0.7983268229166667,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_250ms": {
+        "episode_return": {
+          "ci_lower": 903.2723763929024,
+          "ci_upper": 928.5284279948418,
+          "confidence": 0.95,
+          "mean": 915.9004021938721,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.09072143237417092,
+          "ci_upper": 0.10952214165359951,
+          "confidence": 0.95,
+          "mean": 0.10012178701388522,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.024488665040167494,
+          "ci_upper": 0.034471483318418365,
+          "confidence": 0.95,
+          "mean": 0.02948007417929293,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.1513221556056243,
+          "ci_upper": 1.4255087466642742,
+          "confidence": 0.95,
+          "mean": 1.2884154511349493,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.8299165491891535,
+          "ci_upper": 0.88009647164418,
+          "confidence": 0.95,
+          "mean": 0.8550065104166668,
+          "n": 8
+        }
+      },
+      "oracle_event_delay_500ms": {
+        "episode_return": {
+          "ci_lower": 877.83367849771,
+          "ci_upper": 895.8476813408711,
+          "confidence": 0.95,
+          "mean": 886.8406799192906,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.13087856162298406,
+          "ci_upper": 0.15004597139990744,
+          "confidence": 0.95,
+          "mean": 0.14046226651144575,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.02184389147975434,
+          "ci_upper": 0.03425313345711435,
+          "confidence": 0.95,
+          "mean": 0.028048512468434345,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 1.5655954660303466,
+          "ci_upper": 1.7980742848038502,
+          "confidence": 0.95,
+          "mean": 1.6818348754170984,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.7555645994528287,
+          "ci_upper": 0.7891359213805046,
+          "confidence": 0.95,
+          "mean": 0.7723502604166667,
+          "n": 8
+        }
+      },
+      "stale_plan": {
+        "episode_return": {
+          "ci_lower": 630.8237161155976,
+          "ci_upper": 693.3737274211301,
+          "confidence": 0.95,
+          "mean": 662.0987217683638,
+          "n": 8
+        },
+        "event_post_tracking_mse": {
+          "ci_lower": 0.6320119656421229,
+          "ci_upper": 0.8434178375792333,
+          "confidence": 0.95,
+          "mean": 0.7377149016106781,
+          "n": 8
+        },
+        "event_recovery_seconds_mean": {
+          "ci_lower": 0.43707989097174005,
+          "ci_upper": 0.5326514852908862,
+          "confidence": 0.95,
+          "mean": 0.48486568813131314,
+          "n": 8
+        },
+        "tracking_squared_error_integral": {
+          "ci_lower": 7.427607469418366,
+          "ci_upper": 9.764177251289855,
+          "confidence": 0.95,
+          "mean": 8.59589236035411,
+          "n": 8
+        },
+        "tracking_success_rate": {
+          "ci_lower": 0.3488705724238766,
+          "ci_upper": 0.44400703174279005,
+          "confidence": 0.95,
+          "mean": 0.3964388020833333,
+          "n": 8
+        }
+      }
+    }
+  },
+  "analysis_version": "pointmaze_plan_value_stage8_analysis_v1",
+  "causal_distinguishability_delay_seconds_max": {
+    "ci_lower": 0.009935693651721568,
+    "ci_upper": 0.01178305634827843,
+    "confidence": 0.95,
+    "mean": 0.010859375,
+    "n": 8
+  },
+  "cell_count": 16,
+  "confidence": 0.95,
+  "contrasts": {
+    "combined_oracle_reference": {
+      "baseline": {
+        "method": "hrl_regime_history",
+        "schedule": "fixed"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_000ms"
+      },
+      "episode_return": {
+        "ci_lower": -66.00093014432544,
+        "ci_upper": -34.17556804678459,
+        "confidence": 0.95,
+        "mean_improvement": -50.088249095555014,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.09867466956878654,
+        "ci_upper": -0.0538980939695741,
+        "confidence": 0.95,
+        "mean_improvement": -0.07628638176918032,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.04589837513085871,
+        "ci_upper": -0.020906075626717043,
+        "confidence": 0.95,
+        "mean_improvement": -0.03340222537878788,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -0.9563311079223891,
+        "ci_upper": -0.5298342824985232,
+        "confidence": 0.95,
+        "mean_improvement": -0.7430826952104561,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.12509260424053936,
+        "ci_upper": -0.08429541659279402,
+        "confidence": 0.95,
+        "mean_improvement": -0.10469401041666669,
+        "n": 8,
+        "status": "contradicted"
+      }
+    },
+    "current_regime_information": {
+      "baseline": {
+        "method": "hrl_regime_history",
+        "schedule": "fixed"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "fixed"
+      },
+      "episode_return": {
+        "ci_lower": -16.99062256766311,
+        "ci_upper": 12.25510020717283,
+        "confidence": 0.95,
+        "mean_improvement": -2.3677611802451395,
+        "n": 8,
+        "status": "inconclusive"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.012129175747895037,
+        "ci_upper": 0.01523509916297583,
+        "confidence": 0.95,
+        "mean_improvement": 0.0015529617075403963,
+        "n": 8,
+        "status": "inconclusive"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.0062660557886441886,
+        "ci_upper": 0.005382690889654288,
+        "confidence": 0.95,
+        "mean_improvement": -0.0004416824494949505,
+        "n": 8,
+        "status": "inconclusive"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -0.10960872084230222,
+        "ci_upper": 0.16070766448210244,
+        "confidence": 0.95,
+        "mean_improvement": 0.02554947181990011,
+        "n": 8,
+        "status": "inconclusive"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.010906882858774333,
+        "ci_upper": 0.02552927869210758,
+        "confidence": 0.95,
+        "mean_improvement": 0.007311197916666623,
+        "n": 8,
+        "status": "inconclusive"
+      }
+    },
+    "oracle_timing_100ms_delay_cost": {
+      "baseline": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_100ms"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_000ms"
+      },
+      "episode_return": {
+        "ci_lower": -46.44510899405924,
+        "ci_upper": -35.55253180564807,
+        "confidence": 0.95,
+        "mean_improvement": -40.998820399853656,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.0761557015998568,
+        "ci_upper": -0.05700720262736165,
+        "confidence": 0.95,
+        "mean_improvement": -0.06658145211360922,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.020261731338394668,
+        "ci_upper": -0.009631852941908364,
+        "confidence": 0.95,
+        "mean_improvement": -0.014946792140151516,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -0.7524386701479379,
+        "ci_upper": -0.5754171729620084,
+        "confidence": 0.95,
+        "mean_improvement": -0.6639279215549732,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.1120483145763535,
+        "ci_upper": -0.08306887292364654,
+        "confidence": 0.95,
+        "mean_improvement": -0.09755859375000002,
+        "n": 8,
+        "status": "contradicted"
+      }
+    },
+    "oracle_timing_250ms_delay_cost": {
+      "baseline": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_250ms"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_000ms"
+      },
+      "episode_return": {
+        "ci_lower": -69.33769212179986,
+        "ci_upper": -53.46102231546489,
+        "confidence": 0.95,
+        "mean_improvement": -61.399357218632375,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.12090393433668759,
+        "ci_upper": -0.09215617382590532,
+        "confidence": 0.95,
+        "mean_improvement": -0.10653005408129645,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.028443123923642892,
+        "ci_upper": -0.009554508652114687,
+        "confidence": 0.95,
+        "mean_improvement": -0.01899881628787879,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -1.0847039850846314,
+        "ci_upper": -0.8429403977465791,
+        "confidence": 0.95,
+        "mean_improvement": -0.9638221914156053,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.17100517364420703,
+        "ci_upper": -0.13747138885579308,
+        "confidence": 0.95,
+        "mean_improvement": -0.15423828125000005,
+        "n": 8,
+        "status": "contradicted"
+      }
+    },
+    "oracle_timing_500ms_delay_cost": {
+      "baseline": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_500ms"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_000ms"
+      },
+      "episode_return": {
+        "ci_lower": -38.61443053118043,
+        "ci_upper": -26.06483935692143,
+        "confidence": 0.95,
+        "mean_improvement": -32.33963494405093,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.08069271064009542,
+        "ci_upper": -0.05168643852737642,
+        "confidence": 0.95,
+        "mean_improvement": -0.06618957458373592,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.029382441436379504,
+        "ci_upper": -0.011478314561095241,
+        "confidence": 0.95,
+        "mean_improvement": -0.020430377998737374,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -0.6982474816081419,
+        "ci_upper": -0.44255805265877,
+        "confidence": 0.95,
+        "mean_improvement": -0.570402767133456,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.08437833091238223,
+        "ci_upper": -0.05878573158761774,
+        "confidence": 0.95,
+        "mean_improvement": -0.07158203124999998,
+        "n": 8,
+        "status": "contradicted"
+      }
+    },
+    "oracle_timing_same_budget": {
+      "baseline": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "fixed"
+      },
+      "candidate": {
+        "method": "hrl_regime_oracle_context",
+        "schedule": "oracle_event_delay_000ms"
+      },
+      "episode_return": {
+        "ci_lower": -54.424659818682926,
+        "ci_upper": -41.01631601193682,
+        "confidence": 0.95,
+        "mean_improvement": -47.720487915309874,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": -0.09108514209170783,
+        "ci_upper": -0.06459354486173362,
+        "confidence": 0.95,
+        "mean_improvement": -0.07783934347672072,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": -0.04210639990505846,
+        "ci_upper": -0.023814685953527395,
+        "confidence": 0.95,
+        "mean_improvement": -0.03296054292929293,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": -0.8890239181700793,
+        "ci_upper": -0.6482404158906331,
+        "confidence": 0.95,
+        "mean_improvement": -0.7686321670303562,
+        "n": 8,
+        "status": "contradicted"
+      },
+      "tracking_success_rate": {
+        "ci_lower": -0.1260518574139178,
+        "ci_upper": -0.09795855925274882,
+        "confidence": 0.95,
+        "mean_improvement": -0.11200520833333331,
+        "n": 8,
+        "status": "contradicted"
+      }
+    },
+    "plan_integrity_vs_perturbed": {
+      "baseline": {
+        "method": "hrl_regime_history",
+        "schedule": "fixed_waypoint_perturbed"
+      },
+      "candidate": {
+        "method": "hrl_regime_history",
+        "schedule": "fixed"
+      },
+      "episode_return": {
+        "ci_lower": 40.00284195297895,
+        "ci_upper": 46.868565410314396,
+        "confidence": 0.95,
+        "mean_improvement": 43.43570368164667,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": 0.02856833576960538,
+        "ci_upper": 0.04392706164870373,
+        "confidence": 0.95,
+        "mean_improvement": 0.036247698709154556,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": 0.012611379155194426,
+        "ci_upper": 0.028118063710967194,
+        "confidence": 0.95,
+        "mean_improvement": 0.02036472143308081,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": 0.41404369111229855,
+        "ci_upper": 0.5676527960143916,
+        "confidence": 0.95,
+        "mean_improvement": 0.49084824356334505,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.0662518467609697,
+        "ci_upper": 0.08169086157236362,
+        "confidence": 0.95,
+        "mean_improvement": 0.07397135416666666,
+        "n": 8,
+        "status": "supported"
+      }
+    },
+    "plan_refresh_vs_stale": {
+      "baseline": {
+        "method": "hrl_regime_history",
+        "schedule": "stale_plan"
+      },
+      "candidate": {
+        "method": "hrl_regime_history",
+        "schedule": "fixed"
+      },
+      "episode_return": {
+        "ci_lower": 215.42972030769167,
+        "ci_upper": 278.8928500690621,
+        "confidence": 0.95,
+        "mean_improvement": 247.1612851883769,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": 0.5204433003131367,
+        "ci_upper": 0.7769856939065029,
+        "confidence": 0.95,
+        "mean_improvement": 0.6487144971098198,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": 0.42387410246668145,
+        "ci_upper": 0.5306238457656418,
+        "confidence": 0.95,
+        "mean_improvement": 0.47724897411616163,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": 6.177432974155417,
+        "ci_upper": 8.969514758786767,
+        "confidence": 0.95,
+        "mean_improvement": 7.573473866471092,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.37273461744572667,
+        "ci_upper": 0.4596872575542734,
+        "confidence": 0.95,
+        "mean_improvement": 0.41621093750000004,
+        "n": 8,
+        "status": "supported"
+      }
+    }
+  },
+  "decision": "stage9_not_authorized",
+  "evaluation_row_count": 1792,
+  "independent_training_replicate_count": 8,
+  "learning_gain_vs_untrained": {
+    "hrl_regime_history": {
+      "episode_return": {
+        "ci_lower": 378.0595476645032,
+        "ci_upper": 473.4108471214469,
+        "confidence": 0.95,
+        "mean_improvement": 425.73519739297507,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": 1.3103624863578895,
+        "ci_upper": 2.2983847221383815,
+        "confidence": 0.95,
+        "mean_improvement": 1.8043736042481355,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": 0.6875316185131608,
+        "ci_upper": 0.7873530484691622,
+        "confidence": 0.95,
+        "mean_improvement": 0.7374423334911615,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": 14.773064900417879,
+        "ci_upper": 25.54523530429914,
+        "confidence": 0.95,
+        "mean_improvement": 20.15915010235851,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.580436738523166,
+        "ci_upper": 0.6552012823101673,
+        "confidence": 0.95,
+        "mean_improvement": 0.6178190104166666,
+        "n": 8,
+        "status": "supported"
+      }
+    },
+    "hrl_regime_oracle_context": {
+      "episode_return": {
+        "ci_lower": 426.59922414159877,
+        "ci_upper": 469.596111111722,
+        "confidence": 0.95,
+        "mean_improvement": 448.0976676266604,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_post_tracking_mse": {
+        "ci_lower": 1.858246671234696,
+        "ci_upper": 2.2725664633530256,
+        "confidence": 0.95,
+        "mean_improvement": 2.0654065672938606,
+        "n": 8,
+        "status": "supported"
+      },
+      "event_recovery_seconds_mean": {
+        "ci_lower": 0.72540175545433,
+        "ci_upper": 0.7964867783209225,
+        "confidence": 0.95,
+        "mean_improvement": 0.7609442668876263,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_squared_error_integral": {
+        "ci_lower": 20.791983972108063,
+        "ci_upper": 25.161637493434704,
+        "confidence": 0.95,
+        "mean_improvement": 22.976810732771384,
+        "n": 8,
+        "status": "supported"
+      },
+      "tracking_success_rate": {
+        "ci_lower": 0.6140085744154292,
+        "ci_upper": 0.6625409047512375,
+        "confidence": 0.95,
+        "mean_improvement": 0.6382747395833334,
+        "n": 8,
+        "status": "supported"
+      }
+    }
+  },
+  "primary_endpoint": "tracking_squared_error_integral",
+  "protocol_version": "pointmaze_plan_value_qualification_stage8_v1",
+  "qualification_checks": {
+    "causal_observation_precedes_quarter_second_cost": false,
+    "current_regime_information_has_value": false,
+    "history_controller_learned": true,
+    "plan_content_has_value": true,
+    "plan_refresh_has_value": true,
+    "quarter_second_delay_has_cost": false,
+    "same_budget_event_timing_has_value": false
+  },
+  "root_means": {
+    "hrl_regime_history": {
+      "fixed": {
+        "episode_return": {
+          "204907": 885.3462950308096,
+          "204913": 913.818552298995,
+          "204931": 901.0251458505586,
+          "204943": 918.6134370458,
+          "204967": 893.9000222841955,
+          "204989": 888.3284987000475,
+          "205013": 918.1229419157726,
+          "205027": 917.559459440179
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.15348777961791354,
+          "204913": 0.12307586113917068,
+          "204931": 0.13239200322883168,
+          "204943": 0.1184661988850807,
+          "204967": 0.13898737763949137,
+          "204989": 0.13764139454345625,
+          "205013": 0.12043999076607229,
+          "205027": 0.11843306878799434
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.026321180555555556,
+          "204913": 0.014744318181818181,
+          "204931": 0.014881944444444446,
+          "204943": 0.008045138888888888,
+          "204967": 0.022508680555555556,
+          "204989": 0.018534406565656567,
+          "205013": 0.006562500000000001,
+          "205027": 0.009015151515151516
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.718594996849665,
+          "204913": 1.391858466031215,
+          "204931": 1.5407895818036272,
+          "204943": 1.3723045984207598,
+          "204967": 1.6148201894933378,
+          "204989": 1.6833864502222848,
+          "205013": 1.3319820084333562,
+          "205027": 1.4195032874665405
+        },
+        "tracking_success_rate": {
+          "204907": 0.76921875,
+          "204913": 0.8246354166666667,
+          "204931": 0.7982291666666668,
+          "204943": 0.8259895833333333,
+          "204967": 0.7948958333333334,
+          "204989": 0.7761458333333333,
+          "205013": 0.83796875,
+          "205027": 0.8166145833333334
+        }
+      },
+      "fixed_waypoint_perturbed": {
+        "episode_return": {
+          "204907": 849.2543874637265,
+          "204913": 868.6848028738364,
+          "204931": 855.657667691419,
+          "204943": 870.3338360932381,
+          "204967": 854.5235427377436,
+          "204989": 843.2308738104268,
+          "205013": 876.696787595147,
+          "205027": 870.846824847647
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.184083537380018,
+          "204913": 0.1541561943390787,
+          "204931": 0.18800517706576092,
+          "204943": 0.1583345409635861,
+          "204967": 0.17094290806243842,
+          "204989": 0.1793125877263736,
+          "205013": 0.14809001680603895,
+          "205027": 0.14998030193795261
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.03651041666666667,
+          "204913": 0.022970959595959597,
+          "204931": 0.04893055555555556,
+          "204943": 0.03155381944444444,
+          "204967": 0.034340277777777775,
+          "204989": 0.04388352272727273,
+          "205013": 0.028652777777777777,
+          "205027": 0.036688762626262625
+        },
+        "tracking_squared_error_integral": {
+          "204907": 2.1579657643388233,
+          "204913": 1.825469894015829,
+          "204931": 2.2098809012949485,
+          "204943": 1.88176074959494,
+          "204967": 2.0769117110336,
+          "204989": 2.2499094417794696,
+          "205013": 1.7035183371577522,
+          "205027": 1.8946087280121842
+        },
+        "tracking_success_rate": {
+          "204907": 0.6925520833333334,
+          "204913": 0.7589583333333333,
+          "204931": 0.7169791666666667,
+          "204943": 0.7544791666666667,
+          "204967": 0.70453125,
+          "204989": 0.7040625,
+          "205013": 0.7639583333333333,
+          "205027": 0.7564062500000001
+        }
+      },
+      "oracle_event_delay_000ms": {
+        "episode_return": {
+          "204907": 841.6898871969314,
+          "204913": 851.5049511692131,
+          "204931": 853.0686173069987,
+          "204943": 865.0533286525106,
+          "204967": 836.8843659892055,
+          "204989": 840.5328293075281,
+          "205013": 849.6942961438833,
+          "205027": 855.4377736675428
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.22293960092040097,
+          "204913": 0.20755862412885695,
+          "204931": 0.21597612510382147,
+          "204943": 0.19562748782979097,
+          "204967": 0.22843130847472795,
+          "204989": 0.21086336561701824,
+          "205013": 0.22277788671220167,
+          "205027": 0.21287898668910574
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.05428472222222222,
+          "204913": 0.03424368686868687,
+          "204931": 0.06723611111111111,
+          "204943": 0.04156423611111111,
+          "204967": 0.03600868055555556,
+          "204989": 0.04631502525252525,
+          "205013": 0.04271006944444444,
+          "205027": 0.06927083333333334
+        },
+        "tracking_squared_error_integral": {
+          "204907": 2.3766421524098114,
+          "204913": 2.265264124098289,
+          "204931": 2.4133569957248158,
+          "204943": 2.1040788486569566,
+          "204967": 2.480668851483113,
+          "204989": 2.4687588930728848,
+          "205013": 2.3779929452763864,
+          "205027": 2.329782382512681
+        },
+        "tracking_success_rate": {
+          "204907": 0.6690624999999999,
+          "204913": 0.6840625,
+          "204931": 0.6842708333333333,
+          "204943": 0.7110937500000001,
+          "204967": 0.6572395833333333,
+          "204989": 0.6588020833333332,
+          "205013": 0.6742708333333334,
+          "205027": 0.6775520833333333
+        }
+      },
+      "oracle_event_delay_100ms": {
+        "episode_return": {
+          "204907": 878.5773129092097,
+          "204913": 900.7781220313983,
+          "204931": 872.1411484593792,
+          "204943": 898.7019069620501,
+          "204967": 865.194614354589,
+          "204989": 887.8682413250069,
+          "205013": 895.518493913015,
+          "205027": 891.7048473030611
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.16220684160907256,
+          "204913": 0.13187940795980202,
+          "204931": 0.1802313151918022,
+          "204943": 0.1389234719195795,
+          "204967": 0.18290514634163807,
+          "204989": 0.1393851430053092,
+          "205013": 0.14325263810740946,
+          "205027": 0.14942879825837502
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.044645833333333336,
+          "204913": 0.028112373737373738,
+          "204931": 0.07074305555555556,
+          "204943": 0.03399479166666667,
+          "204967": 0.046078125000000004,
+          "204989": 0.022157828282828283,
+          "205013": 0.02413888888888889,
+          "205027": 0.04472727272727273
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.7909159780488417,
+          "204913": 1.4857338902858805,
+          "204931": 1.9801726536764213,
+          "204943": 1.549771736389007,
+          "204967": 2.01249812073044,
+          "204989": 1.7021885459401203,
+          "205013": 1.5757014593820395,
+          "205027": 1.71328760664397
+        },
+        "tracking_success_rate": {
+          "204907": 0.7567708333333333,
+          "204913": 0.81203125,
+          "204931": 0.7369791666666667,
+          "204943": 0.8050520833333332,
+          "204967": 0.7325,
+          "204989": 0.7767708333333334,
+          "205013": 0.7823958333333334,
+          "205027": 0.75015625
+        }
+      },
+      "oracle_event_delay_250ms": {
+        "episode_return": {
+          "204907": 891.7748395318329,
+          "204913": 917.1417858369481,
+          "204931": 905.460849338953,
+          "204943": 930.6177054553214,
+          "204967": 910.5340531263744,
+          "204989": 908.3651699628506,
+          "205013": 939.6075124666113,
+          "205027": 949.4779874155229
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.13184055989546267,
+          "204913": 0.10267549245258104,
+          "204931": 0.11619675833770474,
+          "204943": 0.08799090285670672,
+          "204967": 0.10606512706467226,
+          "204989": 0.10308024800013554,
+          "205013": 0.08441787529508611,
+          "205027": 0.07117402154695235
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.04839583333333333,
+          "204913": 0.03275378787878788,
+          "204931": 0.04673611111111112,
+          "204943": 0.02208854166666667,
+          "204967": 0.030133680555555556,
+          "204989": 0.020667613636363637,
+          "205013": 0.015041666666666667,
+          "205027": 0.01215151515151515
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.5820105425204782,
+          "204913": 1.2978048012127812,
+          "204931": 1.4295319507014375,
+          "204943": 1.1726068256608617,
+          "204967": 1.3595829919584153,
+          "204989": 1.437353555043733,
+          "205013": 1.0530557087353987,
+          "205027": 0.9897350561200517
+        },
+        "tracking_success_rate": {
+          "204907": 0.7932812499999999,
+          "204913": 0.85390625,
+          "204931": 0.8295833333333333,
+          "204943": 0.87109375,
+          "204967": 0.845,
+          "204989": 0.8296354166666666,
+          "205013": 0.8919270833333333,
+          "205027": 0.8969791666666667
+        }
+      },
+      "oracle_event_delay_500ms": {
+        "episode_return": {
+          "204907": 871.7095034757442,
+          "204913": 890.9849137797673,
+          "204931": 884.8343810167847,
+          "204943": 901.1394599043394,
+          "204967": 867.1694390596368,
+          "204989": 869.9523907611524,
+          "205013": 896.5629890388634,
+          "205027": 910.0525972827568
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.1623757602931749,
+          "204913": 0.13093229990677302,
+          "204931": 0.13418827630862024,
+          "204943": 0.1266017314313286,
+          "204967": 0.15862454510920168,
+          "204989": 0.14839478582834184,
+          "205013": 0.13211674922685362,
+          "205027": 0.11908320692137106
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.030944444444444445,
+          "204913": 0.027030303030303033,
+          "204931": 0.04282638888888889,
+          "204943": 0.023609375000000002,
+          "204967": 0.040600694444444446,
+          "204989": 0.04008633207070707,
+          "205013": 0.021029513888888893,
+          "205027": 0.0201104797979798
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.8914648895158677,
+          "204913": 1.6145316488398522,
+          "204931": 1.7378140953407961,
+          "204943": 1.545623969149193,
+          "204967": 1.958245640158161,
+          "204989": 1.8837903272838374,
+          "205013": 1.564951982889966,
+          "205027": 1.4981823750172176
+        },
+        "tracking_success_rate": {
+          "204907": 0.7439583333333333,
+          "204913": 0.7927604166666667,
+          "204931": 0.7722916666666666,
+          "204943": 0.7882291666666666,
+          "204967": 0.7227083333333333,
+          "204989": 0.7324999999999999,
+          "205013": 0.7783854166666666,
+          "205027": 0.7919791666666667
+        }
+      },
+      "stale_plan": {
+        "episode_return": {
+          "204907": 641.9716063978833,
+          "204913": 672.6615912408334,
+          "204931": 710.3247063584074,
+          "204943": 683.8668882146708,
+          "204967": 634.3538649699415,
+          "204989": 578.0529012218047,
+          "205013": 705.0862749219399,
+          "205027": 633.1062377338615
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.8642750064293228,
+          "204913": 0.6148857109992414,
+          "204931": 0.574682421587841,
+          "204943": 0.6626904036643138,
+          "204967": 0.9379546759809759,
+          "204989": 0.9656247385867167,
+          "205013": 0.6950903373724001,
+          "205027": 0.9174363568657573
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.5262361111111111,
+          "204913": 0.45115214646464646,
+          "204931": 0.45115277777777774,
+          "204943": 0.46824999999999994,
+          "204967": 0.5111736111111111,
+          "204989": 0.6100325126262627,
+          "205013": 0.3884583333333333,
+          "205027": 0.5321496212121212
+        },
+        "tracking_squared_error_integral": {
+          "204907": 9.682022058082364,
+          "204913": 7.233292415417609,
+          "204931": 6.934306886606924,
+          "204943": 7.706586155630164,
+          "204967": 10.589369445546332,
+          "204989": 11.33274263996799,
+          "205013": 8.326469871396508,
+          "205027": 10.856241037841631
+        },
+        "tracking_success_rate": {
+          "204907": 0.3738020833333333,
+          "204913": 0.4107291666666667,
+          "204931": 0.4535416666666666,
+          "204943": 0.41052083333333333,
+          "204967": 0.35916666666666663,
+          "204989": 0.26427083333333334,
+          "205013": 0.474375,
+          "205027": 0.3676041666666666
+        }
+      }
+    },
+    "hrl_regime_oracle_context": {
+      "fixed": {
+        "episode_return": {
+          "204907": 897.2352962304276,
+          "204913": 905.3286470476199,
+          "204931": 893.7184377304632,
+          "204943": 896.0721207490469,
+          "204967": 922.2283673356474,
+          "204989": 885.3063001951797,
+          "205013": 924.0799255836445,
+          "205027": 893.8031682523675
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.13656855749726854,
+          "204913": 0.1297329813448331,
+          "204931": 0.13398419605940048,
+          "204943": 0.13978692954102162,
+          "204967": 0.11370738407604891,
+          "204989": 0.1415747889860816,
+          "205013": 0.10365991197868882,
+          "205027": 0.1314852314643446
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.014222222222222223,
+          "204913": 0.0165094696969697,
+          "204931": 0.013708333333333335,
+          "204943": 0.017498263888888893,
+          "204967": 0.01693229166666667,
+          "204989": 0.019071022727272728,
+          "205013": 0.009305555555555555,
+          "205027": 0.016899621212121213
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.5656390479083728,
+          "204913": 1.4334952967069006,
+          "204931": 1.540285800048486,
+          "204943": 1.5979408226000364,
+          "204967": 1.3267356306394962,
+          "204989": 1.6910670349056498,
+          "205013": 1.1939753846859817,
+          "205027": 1.519704786666662
+        },
+        "tracking_success_rate": {
+          "204907": 0.7972916666666666,
+          "204913": 0.825,
+          "204931": 0.8006249999999999,
+          "204943": 0.79609375,
+          "204967": 0.8284374999999999,
+          "204989": 0.78421875,
+          "205013": 0.8652604166666666,
+          "205027": 0.8052604166666667
+        }
+      },
+      "fixed_waypoint_perturbed": {
+        "episode_return": {
+          "204907": 860.2825223773848,
+          "204913": 863.8427073338215,
+          "204931": 847.0791429234498,
+          "204943": 864.4395679502734,
+          "204967": 868.8003180865146,
+          "204989": 854.5941209877974,
+          "205013": 875.0277058380441,
+          "205027": 866.4993339184045
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.15653764867111614,
+          "204913": 0.16312389078075054,
+          "204931": 0.186207029964451,
+          "204943": 0.16978725493941865,
+          "204967": 0.1534818822614593,
+          "204989": 0.17649320994639447,
+          "205013": 0.14943234809423228,
+          "205027": 0.15791996210261774
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.029883680555555556,
+          "204913": 0.0293844696969697,
+          "204931": 0.042506944444444444,
+          "204943": 0.03416319444444445,
+          "204967": 0.03128125,
+          "204989": 0.03437058080808081,
+          "205013": 0.03656770833333334,
+          "205027": 0.026060606060606062
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.899941122750432,
+          "204913": 1.9001646376359937,
+          "204931": 2.1540096491850234,
+          "204943": 1.9621234678796045,
+          "204967": 1.8530563690777329,
+          "204989": 2.1181002739942176,
+          "205013": 1.75165480732435,
+          "205027": 1.9027909703106833
+        },
+        "tracking_success_rate": {
+          "204907": 0.7321354166666667,
+          "204913": 0.7416666666666667,
+          "204931": 0.7084375,
+          "204943": 0.7381770833333333,
+          "204967": 0.7636458333333334,
+          "204989": 0.7188541666666667,
+          "205013": 0.7551041666666667,
+          "205027": 0.7399479166666667
+        }
+      },
+      "oracle_event_delay_000ms": {
+        "episode_return": {
+          "204907": 854.8151349616942,
+          "204913": 857.569841620764,
+          "204931": 851.8553021973025,
+          "204943": 846.1041706917656,
+          "204967": 869.4773831016499,
+          "204989": 851.3782928029809,
+          "205013": 865.1262251702285,
+          "205027": 839.682009255532
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.19723858056794819,
+          "204913": 0.20152246955248054,
+          "204931": 0.20999972709291256,
+          "204943": 0.23555702097752151,
+          "204967": 0.19153476001008607,
+          "204989": 0.19618860618653314,
+          "205013": 0.18956804659316032,
+          "205027": 0.23160551778081112
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.047961805555555556,
+          "204913": 0.03717045454545455,
+          "204931": 0.05616666666666666,
+          "204943": 0.05300347222222222,
+          "204967": 0.03685416666666667,
+          "204989": 0.04128188131313132,
+          "205013": 0.049840277777777775,
+          "205027": 0.065552398989899
+        },
+        "tracking_squared_error_integral": {
+          "204907": 2.13621721144979,
+          "204913": 2.193344740643,
+          "204931": 2.3119778901582198,
+          "204943": 2.4542857576542274,
+          "204967": 2.0755576841571175,
+          "204989": 2.2700988427969473,
+          "205013": 2.0588224608893304,
+          "205027": 2.5175965526558035
+        },
+        "tracking_success_rate": {
+          "204907": 0.6890104166666666,
+          "204913": 0.70609375,
+          "204931": 0.698125,
+          "204943": 0.691875,
+          "204967": 0.7242708333333333,
+          "204989": 0.6924479166666667,
+          "205013": 0.7179687499999999,
+          "205027": 0.6863541666666667
+        }
+      },
+      "oracle_event_delay_100ms": {
+        "episode_return": {
+          "204907": 894.9772574213882,
+          "204913": 909.3279363390109,
+          "204931": 896.994251783743,
+          "204943": 885.9634007498557,
+          "204967": 902.8412932105675,
+          "204989": 884.3357279833606,
+          "205013": 911.7103862344461,
+          "205027": 877.8486692783748
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.134467558607209,
+          "204913": 0.1250557732729597,
+          "204931": 0.13612108721925573,
+          "204943": 0.15554978259259766,
+          "204967": 0.13744228343628956,
+          "204989": 0.14942203195472112,
+          "205013": 0.12230288324284044,
+          "205027": 0.16020171152670648
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.03466145833333333,
+          "204913": 0.021876262626262626,
+          "204931": 0.04075694444444445,
+          "204943": 0.03382638888888889,
+          "204967": 0.034206597222222225,
+          "204989": 0.025323705808080806,
+          "205013": 0.024680555555555556,
+          "205027": 0.052924873737373736
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.5447273679742093,
+          "204913": 1.3939342848166603,
+          "204931": 1.5550465987269544,
+          "204943": 1.7212080275716393,
+          "204967": 1.570063987374109,
+          "204989": 1.7278791115584395,
+          "205013": 1.3661024441093723,
+          "205027": 1.8275159458332666
+        },
+        "tracking_success_rate": {
+          "204907": 0.7919791666666667,
+          "204913": 0.8267708333333333,
+          "204931": 0.7958333333333334,
+          "204943": 0.7702604166666667,
+          "204967": 0.8090104166666667,
+          "204989": 0.7820833333333334,
+          "205013": 0.8421354166666666,
+          "205027": 0.7685416666666667
+        }
+      },
+      "oracle_event_delay_250ms": {
+        "episode_return": {
+          "204907": 918.0782965948129,
+          "204913": 915.3342099858694,
+          "204931": 911.0304037232057,
+          "204943": 920.6684390387074,
+          "204967": 932.579799173314,
+          "204989": 895.9119829623268,
+          "205013": 937.6115381845129,
+          "205027": 895.9885478882276
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.1008233502016561,
+          "204913": 0.09872403070287172,
+          "204931": 0.10006493186351736,
+          "204943": 0.09842272011035734,
+          "204967": 0.0922671685622487,
+          "204989": 0.1175942175845536,
+          "205013": 0.08093400655864455,
+          "205027": 0.1121438705272324
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.025986111111111113,
+          "204913": 0.036493055555555556,
+          "204931": 0.027472222222222224,
+          "204943": 0.029225694444444447,
+          "204967": 0.02390625,
+          "204989": 0.035870896464646466,
+          "205013": 0.021027777777777777,
+          "205027": 0.035858585858585854
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.2605856949420138,
+          "204913": 1.236868059914137,
+          "204931": 1.289151105407098,
+          "204943": 1.2402710046772898,
+          "204967": 1.1839400410523482,
+          "204989": 1.5542527898554395,
+          "205013": 1.0471846385939099,
+          "205027": 1.4950702746373576
+        },
+        "tracking_success_rate": {
+          "204907": 0.85203125,
+          "204913": 0.8544270833333334,
+          "204931": 0.8491145833333333,
+          "204943": 0.8533333333333333,
+          "204967": 0.88203125,
+          "204989": 0.8175000000000001,
+          "205013": 0.9098958333333333,
+          "205027": 0.82171875
+        }
+      },
+      "oracle_event_delay_500ms": {
+        "episode_return": {
+          "204907": 884.1011475532617,
+          "204913": 886.1366659154443,
+          "204931": 890.4018558094591,
+          "204943": 886.2138075766443,
+          "204967": 894.9295358421662,
+          "204989": 871.7810363430794,
+          "205013": 905.9304195023059,
+          "205027": 875.2309708119642
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.14562366852297104,
+          "204913": 0.14364015367598032,
+          "204931": 0.13385801752375684,
+          "204943": 0.14516872086531762,
+          "204967": 0.13526763707629386,
+          "204989": 0.15570866684917772,
+          "205013": 0.1176911346737268,
+          "205027": 0.14674013290434185
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.017687500000000002,
+          "204913": 0.033844065656565656,
+          "204931": 0.026090277777777778,
+          "204943": 0.02284722222222222,
+          "204967": 0.02484201388888889,
+          "204989": 0.032085385101010104,
+          "205013": 0.02550173611111111,
+          "205027": 0.04148989898989899
+        },
+        "tracking_squared_error_integral": {
+          "204907": 1.732180635075062,
+          "204913": 1.713894465881786,
+          "204931": 1.5771138054143674,
+          "204943": 1.7095310082133481,
+          "204967": 1.6320152657647897,
+          "204989": 1.8681199047475232,
+          "205013": 1.4201472523753558,
+          "205027": 1.8016766658645555
+        },
+        "tracking_success_rate": {
+          "204907": 0.7640624999999999,
+          "204913": 0.7658854166666667,
+          "204931": 0.7884895833333334,
+          "204943": 0.77375,
+          "204967": 0.78015625,
+          "204989": 0.7427604166666666,
+          "205013": 0.80765625,
+          "205027": 0.7560416666666666
+        }
+      },
+      "stale_plan": {
+        "episode_return": {
+          "204907": 638.9637825459615,
+          "204913": 675.067618640955,
+          "204931": 695.8805776012097,
+          "204943": 681.2948009684765,
+          "204967": 671.0165688195485,
+          "204989": 590.5287138335036,
+          "205013": 705.0679646451451,
+          "205027": 638.9697470921108
+        },
+        "event_post_tracking_mse": {
+          "204907": 0.8963431745203037,
+          "204913": 0.6252707954225746,
+          "204931": 0.5691151396541572,
+          "204943": 0.6402946672815567,
+          "204967": 0.7739082956606904,
+          "204989": 0.8902429942873974,
+          "205013": 0.6787067316436611,
+          "205027": 0.8278374144150834
+        },
+        "event_recovery_seconds_mean": {
+          "204907": 0.5176371527777777,
+          "204913": 0.4593686868686869,
+          "204931": 0.4504444444444444,
+          "204943": 0.4773541666666667,
+          "204967": 0.4703055555555556,
+          "204989": 0.5820590277777777,
+          "205013": 0.3934427083333334,
+          "205027": 0.5283137626262626
+        },
+        "tracking_squared_error_integral": {
+          "204907": 10.093639586224123,
+          "204913": 7.328234522867598,
+          "204931": 6.8764083987983105,
+          "204943": 7.391229582489759,
+          "204967": 8.706224304659706,
+          "204989": 10.571005962312494,
+          "205013": 8.08986492681637,
+          "205027": 9.710531598664522
+        },
+        "tracking_success_rate": {
+          "204907": 0.3852083333333334,
+          "204913": 0.41864583333333333,
+          "204931": 0.43385416666666665,
+          "204943": 0.41515625,
+          "204967": 0.41515625,
+          "204989": 0.2733333333333333,
+          "205013": 0.4603125,
+          "205027": 0.36984374999999997
+        }
+      }
+    }
+  },
+  "stage9_authorized": false,
+  "statistical_unit": "optimizer_seed_root",
+  "untrained_evaluation_row_count": 256
+}

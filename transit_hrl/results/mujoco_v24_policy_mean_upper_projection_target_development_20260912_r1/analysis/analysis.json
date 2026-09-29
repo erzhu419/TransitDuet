@@ -1,0 +1,2259 @@
+{
+  "advance_gate": false,
+  "analysis_version": "mujoco_v24_policy_mean_upper_projection_target_development_v1",
+  "candidate_results": {
+    "terminal_reserve_policy_mean_uniform_010": {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "component_improved_environment_count": 2,
+      "environment_results": [
+        {
+          "component_reduction": {
+            "causal_first_sample": 0.10172970747556676,
+            "hindsight_macro_mean": 0.18596509283596174,
+            "zero": 0.25790898445852894
+          },
+          "environment": "HalfCheetah-v5",
+          "mean_reward": {
+            "candidate": 2005.8245499398731,
+            "causal_first_sample": 2199.1512283519596,
+            "hindsight_macro_mean": 2102.6258578838892,
+            "zero": 1995.8331143020384
+          },
+          "mean_total_action_change_rate": 0.30134375,
+          "mean_total_correction_rms": 0.0671040682500536,
+          "reward_delta": {
+            "causal_first_sample": -0.08790967893416098,
+            "hindsight_macro_mean": -0.04603829425052265,
+            "zero": 0.005006147841839363
+          },
+          "reward_wins_vs_causal_first_sample": 2,
+          "total_reduction": {
+            "causal_first_sample": 0.1148147788595093,
+            "hindsight_macro_mean": 0.30293070563863833,
+            "zero": 0.37246181088501773
+          },
+          "upper_consistency_mse": {
+            "candidate": 0.15172978930422687,
+            "causal_first_sample": 0.16694682544220996,
+            "reduction_vs_causal_first_sample": 0.09114899967505274
+          }
+        },
+        {
+          "component_reduction": {
+            "causal_first_sample": 0.10528362465996888,
+            "hindsight_macro_mean": 0.09755745696393048,
+            "zero": 0.28697636047677333
+          },
+          "environment": "Hopper-v5",
+          "mean_reward": {
+            "candidate": 200.4461684902904,
+            "causal_first_sample": 161.35879248606466,
+            "hindsight_macro_mean": 188.53650657116953,
+            "zero": 176.53479282637622
+          },
+          "mean_total_action_change_rate": 0.5187513798676682,
+          "mean_total_correction_rms": 0.24063729785231783,
+          "reward_delta": {
+            "causal_first_sample": 0.24223889756488745,
+            "hindsight_macro_mean": 0.06316899647562511,
+            "zero": 0.1354485157349762
+          },
+          "reward_wins_vs_causal_first_sample": 4,
+          "total_reduction": {
+            "causal_first_sample": 0.08473247522657212,
+            "hindsight_macro_mean": 0.19848420554924529,
+            "zero": 0.40222031845143524
+          },
+          "upper_consistency_mse": {
+            "candidate": 0.6993461665406357,
+            "causal_first_sample": 0.6499717690239777,
+            "reduction_vs_causal_first_sample": -0.0759639108492367
+          }
+        },
+        {
+          "component_reduction": {
+            "causal_first_sample": -0.3850472589984635,
+            "hindsight_macro_mean": -0.22471233746663333,
+            "zero": 0.006390292840613765
+          },
+          "environment": "Walker2d-v5",
+          "mean_reward": {
+            "candidate": 199.74461106416047,
+            "causal_first_sample": 249.8309955185344,
+            "hindsight_macro_mean": 256.89228136447383,
+            "zero": 164.47941353499618
+          },
+          "mean_total_action_change_rate": 0.44977429493349935,
+          "mean_total_correction_rms": 0.08761549197902833,
+          "reward_delta": {
+            "causal_first_sample": -0.20048106661232165,
+            "hindsight_macro_mean": -0.22245771650582738,
+            "zero": 0.21440493233313315
+          },
+          "reward_wins_vs_causal_first_sample": 1,
+          "total_reduction": {
+            "causal_first_sample": -0.34252345014882657,
+            "hindsight_macro_mean": -0.11809196954464118,
+            "zero": 0.3893529547588075
+          },
+          "upper_consistency_mse": {
+            "candidate": 0.7359626738762017,
+            "causal_first_sample": 0.5360740429750877,
+            "reduction_vs_causal_first_sample": -0.372875041275601
+          }
+        }
+      ],
+      "gates": {
+        "all_matched_arms_valid": true,
+        "component_noninferior_vs_all_controls": false,
+        "component_reduces_in_two_environments": true,
+        "hopper_correction_burden_bounded": true,
+        "reward_floor_vs_all_controls_in_every_environment": false,
+        "reward_improves_vs_causal_in_two_environments": false,
+        "reward_wins_in_every_environment": false,
+        "total_noninferior_vs_all_controls": false,
+        "total_reduces_in_two_environments": true,
+        "total_reward_wins": false,
+        "training_activity_audit_supported": false,
+        "upper_mse_noninferior_in_every_environment": false,
+        "upper_mse_reduces_in_two_environments": false
+      },
+      "reward_improved_environment_count": 1,
+      "reward_wins_vs_causal_first_sample": 7,
+      "supported": false,
+      "total_improved_environment_count": 3,
+      "upper_mse_improved_environment_count": 1
+    }
+  },
+  "cell_audit_failures": [
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "HalfCheetah-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: HalfCheetah-v5/terminal_reserve_policy_mean_uniform_010/484849350",
+      "optimizer_seed": 484849350
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "HalfCheetah-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: HalfCheetah-v5/terminal_reserve_policy_mean_uniform_010/258618141",
+      "optimizer_seed": 258618141
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "HalfCheetah-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: HalfCheetah-v5/terminal_reserve_policy_mean_uniform_010/2646551552",
+      "optimizer_seed": 2646551552
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "HalfCheetah-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: HalfCheetah-v5/terminal_reserve_policy_mean_uniform_010/3409328541",
+      "optimizer_seed": 3409328541
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Hopper-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Hopper-v5/terminal_reserve_policy_mean_uniform_010/484849350",
+      "optimizer_seed": 484849350
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Hopper-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Hopper-v5/terminal_reserve_policy_mean_uniform_010/258618141",
+      "optimizer_seed": 258618141
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Hopper-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Hopper-v5/terminal_reserve_policy_mean_uniform_010/2646551552",
+      "optimizer_seed": 2646551552
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Hopper-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Hopper-v5/terminal_reserve_policy_mean_uniform_010/3409328541",
+      "optimizer_seed": 3409328541
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Walker2d-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Walker2d-v5/terminal_reserve_policy_mean_uniform_010/484849350",
+      "optimizer_seed": 484849350
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Walker2d-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Walker2d-v5/terminal_reserve_policy_mean_uniform_010/258618141",
+      "optimizer_seed": 258618141
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Walker2d-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Walker2d-v5/terminal_reserve_policy_mean_uniform_010/2646551552",
+      "optimizer_seed": 2646551552
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "environment": "Walker2d-v5",
+      "error": "v24 policy-mean evaluation audit mismatch: Walker2d-v5/terminal_reserve_policy_mean_uniform_010/3409328541",
+      "optimizer_seed": 3409328541
+    }
+  ],
+  "cell_count": 48,
+  "cells": [
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.23237331876623046,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000000013,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.972025,
+      "recursive_fallback_rate": 0.0007250000000000001,
+      "reward": 2302.0161310305093,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.6267,
+      "total_correction_rms": 0.15825262343343724,
+      "upper_prefix_power_max": 0.005625000025593849,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.16219297511088304,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250001596509,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9792,
+      "recursive_fallback_rate": 0.0002,
+      "reward": 1928.2399013112567,
+      "selected_checkpoint_iteration": 463,
+      "total_action_change_rate": 0.47759999999999997,
+      "total_correction_rms": 0.11313361067461089,
+      "upper_prefix_power_max": 0.0056250000122670596,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.10618735962123563,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000006527,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9888,
+      "recursive_fallback_rate": 0.0001,
+      "reward": 2201.324456923196,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.25855,
+      "total_correction_rms": 0.06057546157113415,
+      "upper_prefix_power_max": 0.005625000019086251,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.20676049085569273,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500042114975,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.990475,
+      "recursive_fallback_rate": 0.000125,
+      "reward": 1551.7519679431919,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.34295,
+      "total_correction_rms": 0.09576728983285823,
+      "upper_prefix_power_max": 0.005625000009592749,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.20183017553509863,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000097275,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.978,
+      "recursive_fallback_rate": 0.00042500000000000003,
+      "reward": 2588.820400007263,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.507025,
+      "total_correction_rms": 0.11779979487986428,
+      "upper_prefix_power_max": 0.005625000011370212,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6035583808043157,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6035583808043157
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.16526466846698895,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.16526466846698895
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.22215611886491082,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000000017,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.986825,
+      "recursive_fallback_rate": 0.00030000000000000003,
+      "reward": 2294.0411329607364,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.4415,
+      "total_correction_rms": 0.10896817515541139,
+      "upper_prefix_power_max": 0.00562500003869241,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.511516352504259,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.511516352504259
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.1633976277662441,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.1633976277662441
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.03964113862349031,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000000003,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.99695,
+      "recursive_fallback_rate": 2.5e-05,
+      "reward": 2349.1997438558396,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.047299999999999995,
+      "total_correction_rms": 0.010835863038534828,
+      "upper_prefix_power_max": 0.005625000005271918,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5087273178942269,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5087273178942269
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.161964073056879,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.161964073056879
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.12087357325837558,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000000654,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9881499999999999,
+      "recursive_fallback_rate": 0.00015000000000000001,
+      "reward": 1564.5436365839992,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.298075,
+      "total_correction_rms": 0.06562792745465998,
+      "upper_prefix_power_max": 0.005625000012804529,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5269058747508097,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5269058747508097
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.17716093247872777,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.17716093247872777
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.18580910072971885,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000000013,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9777250000000001,
+      "recursive_fallback_rate": 0.00095,
+      "reward": 2670.0058502753036,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.42610000000000003,
+      "total_correction_rms": 0.10076086053760121,
+      "upper_prefix_power_max": 0.005625000019530141,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6204165721719619,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6204165721719619
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.13732162483938737,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.13732162483938737
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.33717540574556665,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000000002,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9865999999999999,
+      "recursive_fallback_rate": 0.00022500000000000002,
+      "reward": 2130.463085301225,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.656975,
+      "total_correction_rms": 0.23423052827444288,
+      "upper_prefix_power_max": 0.00562500002174663,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5045688248283113,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5045688248283113
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.12727455180720426,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.12727455180720426
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.08652198938993744,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000000292,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9930249999999999,
+      "recursive_fallback_rate": 2.5e-05,
+      "reward": 2324.372729920261,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.15084999999999998,
+      "total_correction_rms": 0.037121172284004016,
+      "upper_prefix_power_max": 0.005625000037587942,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.49567407718132017,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.49567407718132017
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.10735064608161338,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.10735064608161338
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.035477994692801426,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000000002,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9966250000000001,
+      "recursive_fallback_rate": 0.0,
+      "reward": 1285.661766038767,
+      "selected_checkpoint_iteration": 447,
+      "total_action_change_rate": 0.057975,
+      "total_correction_rms": 0.012951413420475488,
+      "upper_prefix_power_max": 0.005625000004950763,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5530868284549797,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5530868284549797
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.10903151257662103,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.10903151257662103
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.1634597330153577,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 2520.0,
+      "evaluation_policy_mean_target_delta_rms_max": 2.3266454390968154e-08,
+      "lower_prefix_power_max": 0.002256250000000819,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.023685955022162294,
+        "target_count": 65536.0
+      },
+      "projection_converged_rate": 0.9737499999999999,
+      "recursive_fallback_rate": 0.001025,
+      "reward": 1695.0703965604778,
+      "selected_checkpoint_iteration": 399,
+      "total_action_change_rate": 0.427725,
+      "total_correction_rms": 0.0835917386667814,
+      "upper_prefix_power_max": 0.005625000021953523,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.598877461066877,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.598877461066877
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.15334048575459747,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.15334048575459747
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.17769670990386846,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 2520.0,
+      "evaluation_policy_mean_target_delta_rms_max": 2.368537842047301e-08,
+      "lower_prefix_power_max": 0.0022562500000000013,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.022789545349234823,
+        "target_count": 65536.0
+      },
+      "projection_converged_rate": 0.985675,
+      "recursive_fallback_rate": 0.000175,
+      "reward": 2372.5087060825804,
+      "selected_checkpoint_iteration": 447,
+      "total_action_change_rate": 0.41305,
+      "total_correction_rms": 0.09928791829141691,
+      "upper_prefix_power_max": 0.005625000031122347,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5039947999612195,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5039947999612195
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.14047139430476818,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.14047139430476818
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.09419212131070667,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 2520.0,
+      "evaluation_policy_mean_target_delta_rms_max": 1.973413797100552e-08,
+      "lower_prefix_power_max": 0.002256250000000334,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.026277543474295246,
+        "target_count": 65536.0
+      },
+      "projection_converged_rate": 0.990375,
+      "recursive_fallback_rate": 7.500000000000001e-05,
+      "reward": 2243.081349543257,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.1787,
+      "total_correction_rms": 0.044579890504772166,
+      "upper_prefix_power_max": 0.005625000007338804,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5102083767196746,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5102083767196746
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.1542926173642627,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.1542926173642627
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.08969132566371293,
+      "environment": "HalfCheetah-v5",
+      "evaluation_policy_mean_target_count": 2520.0,
+      "evaluation_policy_mean_target_delta_rms_max": 3.534167931499317e-08,
+      "lower_prefix_power_max": 0.0022562500000017143,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.023449808399638346,
+        "target_count": 65536.0
+      },
+      "projection_converged_rate": 0.9923500000000001,
+      "recursive_fallback_rate": 2.5e-05,
+      "reward": 1712.637747573177,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.1859,
+      "total_correction_rms": 0.04095672553724396,
+      "upper_prefix_power_max": 0.005625000008522671,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5314889595101704,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5314889595101704
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.15881465979327913,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.15881465979327913
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.5138694869536914,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000055537,
+      "optimizer_seed": 258618141,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.972710334156907,
+      "recursive_fallback_rate": 0.0014752906976744184,
+      "reward": 164.071186808903,
+      "selected_checkpoint_iteration": 415,
+      "total_action_change_rate": 0.6614402641787861,
+      "total_correction_rms": 0.3631571837760569,
+      "upper_prefix_power_max": 0.005625000019791871,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.3911166375067598,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000178703,
+      "optimizer_seed": 484849350,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9717620053408014,
+      "recursive_fallback_rate": 0.0,
+      "reward": 149.20560812719853,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.5593796069471555,
+      "total_correction_rms": 0.308341098092445,
+      "upper_prefix_power_max": 0.005625000020375638,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.6027549518875548,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500010842885,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9781793604799487,
+      "recursive_fallback_rate": 0.0009192331866750472,
+      "reward": 153.3877869365444,
+      "selected_checkpoint_iteration": 383,
+      "total_action_change_rate": 0.7825321222941688,
+      "total_correction_rms": 0.5032203348771855,
+      "upper_prefix_power_max": 0.005625000007852137,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.518874668371393,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500106518787,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9655204434793611,
+      "recursive_fallback_rate": 0.0017299887654978496,
+      "reward": 239.47458943285898,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.7664616246739822,
+      "total_correction_rms": 0.43548865713782947,
+      "upper_prefix_power_max": 0.0056250000556194914,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.3654013884909534,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000005343,
+      "optimizer_seed": 258618141,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9848094619430237,
+      "recursive_fallback_rate": 0.0011697120708748616,
+      "reward": 162.75976811218658,
+      "selected_checkpoint_iteration": 431,
+      "total_action_change_rate": 0.5472593594374398,
+      "total_correction_rms": 0.23061905378190475,
+      "upper_prefix_power_max": 0.00562500000404729,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.373613491661672,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.373613491661672
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.7015007183945272,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.7015007183945272
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.33221501543367393,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250012511368,
+      "optimizer_seed": 484849350,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9829377302912612,
+      "recursive_fallback_rate": 0.00028735632183908046,
+      "reward": 164.05273628916478,
+      "selected_checkpoint_iteration": 415,
+      "total_action_change_rate": 0.45086788685000867,
+      "total_correction_rms": 0.16655449543804682,
+      "upper_prefix_power_max": 0.0056250000280928265,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.33148325823640334,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.33148325823640334
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6578380087157711,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6578380087157711
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.4563195972449967,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250451128005,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9802543637631127,
+      "recursive_fallback_rate": 0.0033146562427320116,
+      "reward": 152.76900970347873,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.6397816952394392,
+      "total_correction_rms": 0.32218315846387013,
+      "upper_prefix_power_max": 0.0056250000285690115,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3552365660871146,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3552365660871146
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5971006166946609,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5971006166946609
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.46112881047610904,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500063909867,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9845188794644386,
+      "recursive_fallback_rate": 0.0,
+      "reward": 165.85365583942854,
+      "selected_checkpoint_iteration": 415,
+      "total_action_change_rate": 0.6837308373292197,
+      "total_correction_rms": 0.332302141074685,
+      "upper_prefix_power_max": 0.005625000039685972,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.346418358712981,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.346418358712981
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6434477322909515,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6434477322909515
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.4175010318663902,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000185984,
+      "optimizer_seed": 258618141,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9841159018465598,
+      "recursive_fallback_rate": 0.0,
+      "reward": 162.9877767327783,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.6528101554660901,
+      "total_correction_rms": 0.29243219631630823,
+      "upper_prefix_power_max": 0.005625000029532089,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3766335092877853,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3766335092877853
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.37668772562756203,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.37668772562756203
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.3396387470331479,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500000056513,
+      "optimizer_seed": 484849350,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9845235929960751,
+      "recursive_fallback_rate": 0.0,
+      "reward": 149.2491431262823,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.5541555143594366,
+      "total_correction_rms": 0.24984759643473575,
+      "upper_prefix_power_max": 0.0056250000260947355,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.33587155837449245,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.33587155837449245
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3063055265665753,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3063055265665753
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.44093893294133946,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.00225625009835835,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9774935351788517,
+      "recursive_fallback_rate": 0.0011628693177351134,
+      "reward": 157.38354612426804,
+      "selected_checkpoint_iteration": 431,
+      "total_action_change_rate": 0.6563749971707936,
+      "total_correction_rms": 0.3459991770072106,
+      "upper_prefix_power_max": 0.005625000022875771,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3570300600731571,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3570300600731571
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.4456244920438621,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.4456244920438621
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.40315889089162643,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250000004734,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9778912714932003,
+      "recursive_fallback_rate": 0.0002358490566037736,
+      "reward": 284.52556030134946,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.714850264794461,
+      "total_correction_rms": 0.3126321015811019,
+      "upper_prefix_power_max": 0.005625000036617774,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.33409605181077495,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.33409605181077495
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5053202984563541,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5053202984563541
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.4245753342337418,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 236.0,
+      "evaluation_policy_mean_target_delta_rms_max": 7.832833640956476e-08,
+      "lower_prefix_power_max": 0.0022562500000053243,
+      "optimizer_seed": 258618141,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.22071697013003821,
+        "target_count": 76037.0
+      },
+      "projection_converged_rate": 0.9884948102984561,
+      "recursive_fallback_rate": 0.0,
+      "reward": 167.69435900520867,
+      "selected_checkpoint_iteration": 415,
+      "total_action_change_rate": 0.6555825354034261,
+      "total_correction_rms": 0.31809356805133887,
+      "upper_prefix_power_max": 0.005625000009727813,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.35661478838301264,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.35661478838301264
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.7885457173979376,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.7885457173979376
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.22656847351610515,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 239.0,
+      "evaluation_policy_mean_target_delta_rms_max": 3.561731591143295e-07,
+      "lower_prefix_power_max": 0.002256250394418081,
+      "optimizer_seed": 484849350,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.27446895978411645,
+        "target_count": 76613.0
+      },
+      "projection_converged_rate": 0.9927358994921145,
+      "recursive_fallback_rate": 0.0,
+      "reward": 169.628407429835,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.22627482428416434,
+      "total_correction_rms": 0.07543881227894352,
+      "upper_prefix_power_max": 0.005625000001931962,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3287295711925253,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3287295711925253
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6439941177377477,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6439941177377477
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.38612790825470966,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 239.0,
+      "evaluation_policy_mean_target_delta_rms_max": 4.861005168758462e-08,
+      "lower_prefix_power_max": 0.002256250095773533,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.20043698737621854,
+        "target_count": 75909.0
+      },
+      "projection_converged_rate": 0.9810123156939035,
+      "recursive_fallback_rate": 0.0002941176470588235,
+      "reward": 168.0573180443717,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.5772503717232306,
+      "total_correction_rms": 0.27499906633756765,
+      "upper_prefix_power_max": 0.005625000141211516,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.35187525374931283,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.35187525374931283
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6980761437444016,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6980761437444016
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.4077532182103439,
+      "environment": "Hopper-v5",
+      "evaluation_policy_mean_target_count": 316.0,
+      "evaluation_policy_mean_target_delta_rms_max": 7.832833640956476e-08,
+      "lower_prefix_power_max": 0.002256250000000004,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 68111,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.2386628349244309,
+        "target_count": 75025.0
+      },
+      "projection_converged_rate": 0.9883649805457395,
+      "recursive_fallback_rate": 0.0004216269841269841,
+      "reward": 296.4045894817462,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.6158977880598517,
+      "total_correction_rms": 0.2940177447414213,
+      "upper_prefix_power_max": 0.005625000100025672,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3811640530366276,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3811640530366276
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6667686872824561,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6667686872824561
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.2991816893953838,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250012632619,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9766875473569275,
+      "recursive_fallback_rate": 0.004761843564475237,
+      "reward": 180.19147904649216,
+      "selected_checkpoint_iteration": 383,
+      "total_action_change_rate": 0.8711078636383587,
+      "total_correction_rms": 0.25857844636269356,
+      "upper_prefix_power_max": 0.0056250000001176435,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.2251867543833442,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250061280048,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9514450857673609,
+      "recursive_fallback_rate": 0.002233404968957342,
+      "reward": 150.65644143694877,
+      "selected_checkpoint_iteration": 463,
+      "total_action_change_rate": 0.695569386695876,
+      "total_correction_rms": 0.16247532153167654,
+      "upper_prefix_power_max": 0.005625000001419379,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.22365643669330565,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500220873164,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9700975289456201,
+      "recursive_fallback_rate": 0.0028838622134247736,
+      "reward": 175.4956802580979,
+      "selected_checkpoint_iteration": 399,
+      "total_action_change_rate": 0.33615832481946145,
+      "total_correction_rms": 0.08852346479345521,
+      "upper_prefix_power_max": 0.0056250000004367745,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_consistency_000",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.13125973593812335,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500571139997,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9670550047666111,
+      "recursive_fallback_rate": 0.0006007994064535437,
+      "reward": 151.57405339844587,
+      "selected_checkpoint_iteration": 383,
+      "total_action_change_rate": 0.4404642448851187,
+      "total_correction_rms": 0.06434181047677137,
+      "upper_prefix_power_max": 0.005625000000423488,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        },
+        "upper": {
+          "active_iteration_count": 0.0,
+          "unweighted_mse_mean": 0.0,
+          "weight_max": 0.0,
+          "weight_mean": 0.0,
+          "weighted_mse_mean": 0.0
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.1304971434305077,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.00225625000000056,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9961987489596467,
+      "recursive_fallback_rate": 0.0,
+      "reward": 179.6170094522384,
+      "selected_checkpoint_iteration": 399,
+      "total_action_change_rate": 0.024992270561373438,
+      "total_correction_rms": 0.005959164068914002,
+      "upper_prefix_power_max": 0.005625000071037257,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.24124935200597974,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.24124935200597974
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.3265114857786102,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.3265114857786102
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.14753378085496716,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500641735705,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9830060605841595,
+      "recursive_fallback_rate": 9.025270758122745e-05,
+      "reward": 203.67056935555132,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.1241980085210274,
+      "total_correction_rms": 0.02945031110986266,
+      "upper_prefix_power_max": 0.005625000401666858,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.27079457469153567,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.27079457469153567
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.43891272171458695,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.43891272171458695
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.20782401591933736,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250009712574,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9634473357948131,
+      "recursive_fallback_rate": 0.002879423756719373,
+      "reward": 341.1906741439531,
+      "selected_checkpoint_iteration": 479,
+      "total_action_change_rate": 0.5273021545952179,
+      "total_correction_rms": 0.10928939944768952,
+      "upper_prefix_power_max": 0.005625000076241776,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.24699922926083673,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.24699922926083673
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.5201913752534892,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.5201913752534892
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_decision_time_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.14492911755564464,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500294752764,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9595036187011063,
+      "recursive_fallback_rate": 0.00038586514359496306,
+      "reward": 274.8457291223947,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.7942536107296059,
+      "total_correction_rms": 0.11634831071488679,
+      "upper_prefix_power_max": 0.005625000002365433,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.23731238944310462,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.23731238944310462
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.8586805891536642,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.8586805891536642
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.1524686646817916,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500034540253,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9878903022933487,
+      "recursive_fallback_rate": 0.0,
+      "reward": 284.07603842285016,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.20947439386598785,
+      "total_correction_rms": 0.0622495910270772,
+      "upper_prefix_power_max": 0.005625000066417811,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.2483649767746101,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.2483649767746101
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.22749867214588448,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.22749867214588448
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.21127083149615355,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.0022562500268450813,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9723086929912711,
+      "recursive_fallback_rate": 0.000807230537147495,
+      "reward": 234.00624830157912,
+      "selected_checkpoint_iteration": 495,
+      "total_action_change_rate": 0.4248703338011701,
+      "total_correction_rms": 0.08478771104706588,
+      "upper_prefix_power_max": 0.005625000000072152,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.26051754961008555,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.26051754961008555
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.21462972692097537,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.21462972692097537
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.2027455326429112,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250004889571,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.977532524921967,
+      "recursive_fallback_rate": 0.0006117621419955361,
+      "reward": 254.50116816378932,
+      "selected_checkpoint_iteration": 431,
+      "total_action_change_rate": 0.6523541008879122,
+      "total_correction_rms": 0.12882491113232583,
+      "upper_prefix_power_max": 0.005625000000058604,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.24248244331465685,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.24248244331465685
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.2614545940741664,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.2614545940741664
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_macro_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.14687900246526758,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 0.0,
+      "evaluation_policy_mean_target_delta_rms_max": 0.0,
+      "lower_prefix_power_max": 0.002256250027038769,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 0.0,
+        "sampled_target_delta_rms_mean": 0.0,
+        "target_count": 0.0
+      },
+      "projection_converged_rate": 0.9763158490965665,
+      "recursive_fallback_rate": 0.0,
+      "reward": 254.98567056967673,
+      "selected_checkpoint_iteration": 431,
+      "total_action_change_rate": 0.2356308655365577,
+      "total_correction_rms": 0.03758424510128902,
+      "upper_prefix_power_max": 0.005625000026973549,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.24757996169137186,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.24757996169137186
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.26746920368168503,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.26746920368168503
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.3426019621422196,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 636.0,
+      "evaluation_policy_mean_target_delta_rms_max": 5.121089861913875e-07,
+      "lower_prefix_power_max": 0.0022562507265584636,
+      "optimizer_seed": 258618141,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.21720048549151225,
+        "target_count": 68824.0
+      },
+      "projection_converged_rate": 0.984573090857781,
+      "recursive_fallback_rate": 0.0011239394952025548,
+      "reward": 215.10149508066812,
+      "selected_checkpoint_iteration": 463,
+      "total_action_change_rate": 0.21905246253999588,
+      "total_correction_rms": 0.056984154529187446,
+      "upper_prefix_power_max": 0.005625000149228,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.2236263220620458,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.2236263220620458
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.7028608457767405,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.7028608457767405
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.14234081451353278,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 600.0,
+      "evaluation_policy_mean_target_delta_rms_max": 1.112317679504334e-06,
+      "lower_prefix_power_max": 0.0022562501200944435,
+      "optimizer_seed": 484849350,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.20492343367940044,
+        "target_count": 68793.0
+      },
+      "projection_converged_rate": 0.9467054065606731,
+      "recursive_fallback_rate": 0.0002841034386439482,
+      "reward": 160.81876111338514,
+      "selected_checkpoint_iteration": 463,
+      "total_action_change_rate": 0.658268174585235,
+      "total_correction_rms": 0.09589096267946491,
+      "upper_prefix_power_max": 0.0056250000000185735,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.2536977762756578,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.2536977762756578
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.7343810823076637,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.7343810823076637
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.21837551891879886,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 626.0,
+      "evaluation_policy_mean_target_delta_rms_max": 2.9021131400241984e-06,
+      "lower_prefix_power_max": 0.002256250004380553,
+      "optimizer_seed": 2646551552,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.1951495631657784,
+        "target_count": 68816.0
+      },
+      "projection_converged_rate": 0.9590601275221597,
+      "recursive_fallback_rate": 0.005114738646417465,
+      "reward": 253.48459083669437,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.5065546716470437,
+      "total_correction_rms": 0.10200145905261601,
+      "upper_prefix_power_max": 0.005625000011921944,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.24833129155013012,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.24833129155013012
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.6648855254024966,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.6648855254024966
+        }
+      }
+    },
+    {
+      "arm": "terminal_reserve_policy_mean_uniform_010",
+      "certificate_violation_count": 0.0,
+      "component_correction_rms": 0.1703474346464981,
+      "environment": "Walker2d-v5",
+      "evaluation_policy_mean_target_count": 625.0,
+      "evaluation_policy_mean_target_delta_rms_max": 9.13488184650646e-07,
+      "lower_prefix_power_max": 0.0022562500830901,
+      "optimizer_seed": 3409328541,
+      "parameter_count": 111707,
+      "policy_mean_target_training": {
+        "active_iteration_count": 512.0,
+        "sampled_target_delta_rms_mean": 0.24658789367670023,
+        "target_count": 68783.0
+      },
+      "projection_converged_rate": 0.9649693122315872,
+      "recursive_fallback_rate": 0.0014473375172268797,
+      "reward": 169.57359722589428,
+      "selected_checkpoint_iteration": 511,
+      "total_action_change_rate": 0.41522187096172286,
+      "total_correction_rms": 0.09558539165484499,
+      "upper_prefix_power_max": 0.005625000000500084,
+      "weight_training": {
+        "lower": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.259345466580271,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.259345466580271
+        },
+        "upper": {
+          "active_iteration_count": 256.0,
+          "unweighted_mse_mean": 0.8417232420179062,
+          "weight_max": 1.0,
+          "weight_mean": 1.0,
+          "weighted_mse_mean": 0.8417232420179062
+        }
+      }
+    }
+  ],
+  "evidence_role": "fresh_root_policy_mean_upper_target_development_not_confirmatory",
+  "selected_candidate": null,
+  "selection_contract": {
+    "claim_boundary": "no confirmatory, superiority, generalization, or manuscript claim may be made from four optimizer roots",
+    "correction_gate": "component and total correction each improve at least five percent over zero in two environments, regress no more than five percent in any environment versus all three controls, and Hopper mean total correction remains at most 0.25",
+    "hindsight_diagnostic": "macro_mean remains a non-adoptable diagnostic because it uses later states in the current macro interval",
+    "isolated_change": "the v23 causal control projects the sampled lower action at the upper decision; the v24 candidate previews the same projector with the lower policy distribution mean from that same forward pass",
+    "matched_control": "all four arms use terminal-reserve projection, identical capacity, training paths, heldout paths, budgets, and checkpoint window",
+    "mechanism_gate": "only the policy-mean arm records same-state policy-mean targets, with positive sampled-versus-mean target delta during training; its upper consistency MSE improves by five percent in at least two environments and regresses by no more than five percent in any environment versus the v23 first-sample control",
+    "numerical_diagnostic": "Dykstra step-tolerance convergence is reported but is not treated as certificate feasibility; every returned action is checked separately",
+    "outcome_use": "development screen only; a pass authorizes fresh-root confirmation",
+    "question": "does a deterministic lower-policy mean evaluated at the same causal decision state reduce upper-target noise without sacrificing reward or terminal-reserve correction",
+    "reward_gate": "the candidate stays within five percent of zero, v23 causal, and hindsight controls in every environment; wins at least eight of twelve paired roots and at least two of four roots per environment versus v23; and improves mean reward versus v23 in at least two environments",
+    "safety_gate": "every arm has zero certificate violations, fallback at most 0.05, and realized prefix power within the frozen budgets",
+    "selection_rule": "advance only the policy-mean candidate if every frozen gate passes; otherwise stop. No metric-dependent parameter or threshold changes are permitted after execution",
+    "unit": "environment_by_fresh_optimizer_root"
+  },
+  "status": "v24_policy_mean_upper_projection_target_development_stops",
+  "training_audits": {
+    "terminal_reserve_consistency_000": {
+      "levels": {
+        "lower": {
+          "active_expected": false,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        },
+        "upper": {
+          "active_expected": false,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        }
+      },
+      "policy_mean_target_expected": false,
+      "policy_mean_target_gates": {
+        "activity_matches_target_estimator": true,
+        "deterministic_evaluation_matches_policy_mean": true
+      },
+      "supported": true
+    },
+    "terminal_reserve_decision_time_uniform_010": {
+      "levels": {
+        "lower": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        },
+        "upper": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        }
+      },
+      "policy_mean_target_expected": false,
+      "policy_mean_target_gates": {
+        "activity_matches_target_estimator": true,
+        "deterministic_evaluation_matches_policy_mean": true
+      },
+      "supported": true
+    },
+    "terminal_reserve_macro_mean_uniform_010": {
+      "levels": {
+        "lower": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        },
+        "upper": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        }
+      },
+      "policy_mean_target_expected": false,
+      "policy_mean_target_gates": {
+        "activity_matches_target_estimator": true,
+        "deterministic_evaluation_matches_policy_mean": true
+      },
+      "supported": true
+    },
+    "terminal_reserve_policy_mean_uniform_010": {
+      "levels": {
+        "lower": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        },
+        "upper": {
+          "active_expected": true,
+          "gates": {
+            "active_mse_positive": true,
+            "active_uniform_weights": true,
+            "activity_matches_coefficient": true
+          },
+          "supported": true
+        }
+      },
+      "policy_mean_target_expected": true,
+      "policy_mean_target_gates": {
+        "activity_matches_target_estimator": true,
+        "deterministic_evaluation_matches_policy_mean": false
+      },
+      "supported": false
+    }
+  },
+  "validity": {
+    "terminal_reserve_consistency_000": {
+      "gates": {
+        "lower_prefix_budget": true,
+        "recursive_fallback_bounded": true,
+        "upper_prefix_budget": true,
+        "zero_certificate_violations": true
+      },
+      "maximum_recursive_fallback_rate": 0.004761843564475237,
+      "minimum_projection_converged_rate": 0.9514450857673609,
+      "projection_step_tolerance_diagnostic_only": true,
+      "supported": true
+    },
+    "terminal_reserve_decision_time_uniform_010": {
+      "gates": {
+        "lower_prefix_budget": true,
+        "recursive_fallback_bounded": true,
+        "upper_prefix_budget": true,
+        "zero_certificate_violations": true
+      },
+      "maximum_recursive_fallback_rate": 0.0033146562427320116,
+      "minimum_projection_converged_rate": 0.9595036187011063,
+      "projection_step_tolerance_diagnostic_only": true,
+      "supported": true
+    },
+    "terminal_reserve_macro_mean_uniform_010": {
+      "gates": {
+        "lower_prefix_budget": true,
+        "recursive_fallback_bounded": true,
+        "upper_prefix_budget": true,
+        "zero_certificate_violations": true
+      },
+      "maximum_recursive_fallback_rate": 0.0011628693177351134,
+      "minimum_projection_converged_rate": 0.9723086929912711,
+      "projection_step_tolerance_diagnostic_only": true,
+      "supported": true
+    },
+    "terminal_reserve_policy_mean_uniform_010": {
+      "gates": {
+        "lower_prefix_budget": true,
+        "recursive_fallback_bounded": true,
+        "upper_prefix_budget": true,
+        "zero_certificate_violations": true
+      },
+      "maximum_recursive_fallback_rate": 0.005114738646417465,
+      "minimum_projection_converged_rate": 0.9467054065606731,
+      "projection_step_tolerance_diagnostic_only": true,
+      "supported": true
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "combined_candidate_count": 900,
+  "development_protocol_version": "mujoco_v17_14_exhaustive_actor_oracle_v1",
+  "evidence_role": "exhaustive_reused_path_full_grid_exact_oracle_not_confirmatory",
+  "frozen_core_revision": "5c382979eeffaf7fde19be99835ee0ddc9e9b986",
+  "frozen_source_manifest_sha256": "32dadb19d67f9b5bea6be95043d01a36ef1f4a6d39df3bdb8925c781d7f4b41d",
+  "remainder_candidate_count": 852,
+  "scheduler_contract": {
+    "binding_reason": "source paths and actor targets remain server-only on node003",
+    "cpu": 32,
+    "oracle_workers": 32,
+    "ram_mb": 32768,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "advancement_gate": "120/120 valid, 113/113 reference-feasible paths preserved, all seven actor-floor paths and both actor-floor seed groups recovered, target normalized MSE at most 0.75, reference-feasible correction RMS at most 0.01, and nonzero post-clipping target and adapter action change on every floor path",
+    "candidate_set": "all 852 members of the frozen v17.13 900-grid that did not receive a v17.13 exact oracle; no outcome-adaptive prefilter and no new hyperparameter",
+    "claim_boundary": "exhaustive full-grid reused-path development only; no reward, online learning, fresh-seed, or manuscript performance claim",
+    "combined_frontier": "the 852 new summaries are combined with the 48 registered v17.13 summaries so all 900 frozen candidates receive exact oracle outcomes",
+    "evaluation": "eight grouped leave-one-seed-out causal predictions followed by exact full-horizon responsibility oracles on every remainder candidate",
+    "failure_rule": "if no candidate passes, close this frozen 900-member linear causal FIR adapter design and move to state-conditioned policy learning",
+    "fresh_access_rule": "no fresh path is read; a complete gate only authorizes a separately frozen closed-loop fresh validation",
+    "input": "the unchanged server-only v17.8 paths, seven v17.12 targets, and registered v17.13 exact-oracle candidate summaries",
+    "selection_order": "corrected feasible path count, actor-floor recovery, reference-feasible preservation, complete floor seed groups, target fidelity, reference correction, correction magnitude, then candidate id"
+  },
+  "source_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "source_target_run": "mujoco_v17_12_nearest_feasible_action_oracle_20260831_r1",
+  "source_v17_13_selection_run": "mujoco_v17_13_causal_actor_adapter_selection_20260831_r1",
+  "status": "registered_before_v17_14_remainder_oracle_access"
+}

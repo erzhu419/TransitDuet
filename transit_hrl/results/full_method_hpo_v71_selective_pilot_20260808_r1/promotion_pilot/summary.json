@@ -1,0 +1,34 @@
+{
+  "assets": 3,
+  "best_diagnostic_candidate_id": "v71_balanced",
+  "candidate_count": 6,
+  "cell_count": 18,
+  "code_revision": "7afd538ad1d1629247ac4dcc2b470aacec36a6e0",
+  "diagnostic_only": true,
+  "frozen_config_created": false,
+  "hpo_implementation_version": "full_method_hpo_selective_paired_promotion_v7_1_2026_08_08",
+  "iterations": 8,
+  "jointly_eligible_candidate_ids": [],
+  "learning_eligible_candidate_count": 6,
+  "mechanism_eligible_candidate_count": 0,
+  "ood_period_access_status": "not_loaded",
+  "promotion_recovery_access_status": "not_loaded",
+  "source_identity_status": "verified",
+  "source_manifest_sha256": "9f57b9a88837c9f139313ff237da65fbe3c1741dc28456129ab6573113662838",
+  "status": "no_selective_candidate",
+  "steps": 120,
+  "support_scenarios": [
+    "stationary_low_noise",
+    "stationary_high_noise",
+    "localized_burst",
+    "persistent_shift"
+  ],
+  "training_replicate_count": 3,
+  "training_replicate_seeds": [
+    2026,
+    2039,
+    2053
+  ],
+  "tuning_protocol_version": "full_method_support_only_hpo_v7_1",
+  "variant_id": "freq_hrl_full_v7"
+}

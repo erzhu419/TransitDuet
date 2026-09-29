@@ -1,0 +1,30 @@
+{
+  "candidate_count": 4,
+  "development_protocol_version": "mujoco_v18_4_receding_joint_projection_v1",
+  "direct_audit_candidate_count": 4,
+  "evidence_role": "reused_path_label_free_causal_receding_projection_not_confirmatory",
+  "exact_oracle_audit_candidate_count": 1,
+  "frozen_core_revision": "7f649e23a05f3bf142255fc777bb4322931cc617",
+  "frozen_source_manifest_sha256": "c7f7f0980508d58ea167d9bd420fc88ecefafb207d8735f791169ea822015dff",
+  "reference_dataset_run": "mujoco_v17_8_causal_fir_dataset_20260831_r1",
+  "scheduler_contract": {
+    "binding_reason": "v17.8 traces remain server-only on node003",
+    "cpu": 16,
+    "ram_mb": 16384,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false,
+    "workers": 16
+  },
+  "selection_contract": {
+    "advancement_gate": "selected candidate has 120/120 valid and directly joint-feasible paths, 120/120 independently exact-oracle feasible paths, 113/113 reference paths preserved, all seven actor-floor paths and both seed groups recovered, nonzero executed correction on every floor path, total correction absolute maximum at most 0.05, reference correction RMS maximum at most 0.01, and actor-floor correction RMS maximum at most 0.015",
+    "candidate_set": "the Cartesian product of planning horizons 16/32 and fixed causal forecast modes hold/damped_velocity; velocity alpha 0.25, decay 0.75, filter definitions, budgets, bounds, and solver tolerances are fixed before reused-path access",
+    "causality": "at step t the projector uses the current proposed components, its own projected prefix, and a hold or damped-velocity forecast formed only from current and previous proposals; it executes one action pair and replans",
+    "claim_boundary": "label-free causal mechanism selection on reused paths only; no reward, fresh-seed, learned-policy, no-tradeoff, or manuscript claim",
+    "fresh_access_rule": "the reused-path screen never reads a fresh path; a complete pass only authorizes a separately committed closed-loop validation freeze",
+    "input": "unchanged v17.8 baseline upper/lower/total action traces; no v17.12 actor target, observation, reward, or future realized action is available to the projector",
+    "selection_order": "valid path count, direct joint-feasible count, direct actor-floor recovery, direct reference preservation, lower maximum reference correction, lower maximum actor-floor correction, lower global absolute correction, then candidate id",
+    "two_stage_audit": "all four candidates receive direct causal endpoint audits on all 120 paths; the lexicographically selected candidate alone is rerun for an independent full-horizon exact-oracle audit on all 120 paths; unaudited candidates are not counted as exact-oracle failures"
+  },
+  "status": "registered_before_v18_4_reused_path_access"
+}

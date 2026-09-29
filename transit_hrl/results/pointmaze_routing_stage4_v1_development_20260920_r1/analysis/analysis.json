@@ -1,0 +1,826 @@
+{
+  "analysis_version": "pointmaze_frequency_routing_stage4_analysis_v1",
+  "cell_count": 120,
+  "claim_boundary": "Selective routing is supported only if it beats all-band and swapped routing in both primary stresses, beats causal filtering under observation noise, and is clean-noninferior to all-band HRL.",
+  "claim_gate": {
+    "clean_routed_vs_all_noninferiority": "supported",
+    "observation_routed_vs_filter": "supported",
+    "primary_stress": {
+      "fast_observation_noise": {
+        "routed_vs_all": "inconclusive",
+        "routed_vs_swapped": "contradicted"
+      },
+      "slow_drift_fast_action": {
+        "routed_vs_all": "inconclusive",
+        "routed_vs_swapped": "contradicted"
+      }
+    }
+  },
+  "clean_success_noninferiority": {
+    "ci_lower": -0.09810396421147467,
+    "ci_upper": 0.14497896421147466,
+    "confidence": 0.95,
+    "margin": 0.1,
+    "mean_improvement": 0.0234375,
+    "n": 8,
+    "status": "supported"
+  },
+  "confidence": 0.95,
+  "evaluation_row_count": 1920,
+  "independent_training_replicate_count": 8,
+  "primary_stress_scenarios": [
+    "fast_observation_noise",
+    "slow_drift_fast_action"
+  ],
+  "protocol_version": "pointmaze_frequency_routing_stage4_v1",
+  "routing_attribution_status": "not_supported",
+  "runtime_versions": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "numpy": "2.1.3",
+    "pettingzoo": "1.26.1",
+    "python": "3.10.14",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scenarios": {
+    "clean": {
+      "absolute": {
+        "hrl_causal_filter": {
+          "episode_return": {
+            "ci_lower": 83.20764106873818,
+            "ci_upper": 99.4242661253733,
+            "confidence": 0.95,
+            "mean": 91.31595359705574,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.1764448972596075,
+            "ci_upper": 1.4123887908002142,
+            "confidence": 0.95,
+            "mean": 1.2944168440299109,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.22202383529907463,
+            "ci_upper": 0.5279761647009253,
+            "confidence": 0.95,
+            "mean": 0.375,
+            "n": 8
+          }
+        },
+        "hrl_history": {
+          "episode_return": {
+            "ci_lower": 78.45155381997253,
+            "ci_upper": 97.44816369497394,
+            "confidence": 0.95,
+            "mean": 87.94985875747324,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.1765559865559043,
+            "ci_upper": 1.6010190666023119,
+            "confidence": 0.95,
+            "mean": 1.388787526579108,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.22859372669682315,
+            "ci_upper": 0.45890627330317685,
+            "confidence": 0.95,
+            "mean": 0.34375,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_all": {
+          "episode_return": {
+            "ci_lower": 84.87815225569247,
+            "ci_upper": 117.80532605127354,
+            "confidence": 0.95,
+            "mean": 101.341739153483,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.988056816081212,
+            "ci_upper": 1.371554129487208,
+            "confidence": 0.95,
+            "mean": 1.17980547278421,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.3372472359848105,
+            "ci_upper": 0.6315027640151896,
+            "confidence": 0.95,
+            "mean": 0.484375,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_routed": {
+          "episode_return": {
+            "ci_lower": 98.18028739383116,
+            "ci_upper": 122.43064858396515,
+            "confidence": 0.95,
+            "mean": 110.30546798889816,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.9238658376507953,
+            "ci_upper": 1.1795629920433714,
+            "confidence": 0.95,
+            "mean": 1.0517144148470834,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.4220116434585623,
+            "ci_upper": 0.5936133565414378,
+            "confidence": 0.95,
+            "mean": 0.5078125,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_swapped": {
+          "episode_return": {
+            "ci_lower": 115.64514986103532,
+            "ci_upper": 144.92418805808032,
+            "confidence": 0.95,
+            "mean": 130.28466895955782,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.7164867858909038,
+            "ci_upper": 1.072082282412428,
+            "confidence": 0.95,
+            "mean": 0.8942845341516659,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.5831390597886937,
+            "ci_upper": 0.8387359402113063,
+            "confidence": 0.95,
+            "mean": 0.7109375,
+            "n": 8
+          }
+        }
+      },
+      "all_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_all",
+        "episode_return": {
+          "ci_lower": -2.31242608297741,
+          "ci_upper": 29.09618687499693,
+          "confidence": 0.95,
+          "mean_improvement": 13.39188039600976,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.05210555248997678,
+          "ci_upper": 0.47006966007977297,
+          "confidence": 0.95,
+          "mean_improvement": 0.2089820537948981,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": 0.013400078495203832,
+          "ci_upper": 0.26784992150479614,
+          "confidence": 0.95,
+          "mean_improvement": 0.140625,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "routed_vs_all": {
+        "baseline": "hrl_multiscale_all",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -7.540052258686112,
+          "ci_upper": 25.46750992951643,
+          "confidence": 0.95,
+          "mean_improvement": 8.963728835415159,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.07703379590506579,
+          "ci_upper": 0.333215911779319,
+          "confidence": 0.95,
+          "mean_improvement": 0.1280910579371266,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.09810396421147467,
+          "ci_upper": 0.14497896421147466,
+          "confidence": 0.95,
+          "mean_improvement": 0.0234375,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_filter": {
+        "baseline": "hrl_causal_filter",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": 5.02739213410687,
+          "ci_upper": 32.951636649577985,
+          "confidence": 0.95,
+          "mean_improvement": 18.989514391842427,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": 0.05566685088956974,
+          "ci_upper": 0.4297380074760852,
+          "confidence": 0.95,
+          "mean_improvement": 0.24270242918282747,
+          "n": 8,
+          "status": "supported"
+        },
+        "success": {
+          "ci_lower": -0.0447925417323107,
+          "ci_upper": 0.31041754173231073,
+          "confidence": 0.95,
+          "mean_improvement": 0.1328125,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": 14.318167142912475,
+          "ci_upper": 30.393051319937367,
+          "confidence": 0.95,
+          "mean_improvement": 22.35560923142492,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": 0.12318372835630487,
+          "ci_upper": 0.5509624951077445,
+          "confidence": 0.95,
+          "mean_improvement": 0.3370731117320247,
+          "n": 8,
+          "status": "supported"
+        },
+        "success": {
+          "ci_lower": 0.0245896749910037,
+          "ci_upper": 0.30353532500899627,
+          "confidence": 0.95,
+          "mean_improvement": 0.1640625,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "routed_vs_swapped": {
+        "baseline": "hrl_multiscale_swapped",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -35.59663868952599,
+          "ci_upper": -4.361763251793308,
+          "confidence": 0.95,
+          "mean_improvement": -19.979200970659647,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.3220196375366904,
+          "ci_upper": 0.0071598761458553095,
+          "confidence": 0.95,
+          "mean_improvement": -0.15742988069541752,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.37698472745827116,
+          "ci_upper": -0.029265272541728837,
+          "confidence": 0.95,
+          "mean_improvement": -0.203125,
+          "n": 8,
+          "status": "contradicted"
+        }
+      }
+    },
+    "fast_observation_noise": {
+      "absolute": {
+        "hrl_causal_filter": {
+          "episode_return": {
+            "ci_lower": 65.7725852913536,
+            "ci_upper": 86.85801823871914,
+            "confidence": 0.95,
+            "mean": 76.31530176503637,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.2409164634898269,
+            "ci_upper": 1.8340265853896773,
+            "confidence": 0.95,
+            "mean": 1.537471524439752,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.1964646749910037,
+            "ci_upper": 0.47541032500899627,
+            "confidence": 0.95,
+            "mean": 0.3359375,
+            "n": 8
+          }
+        },
+        "hrl_history": {
+          "episode_return": {
+            "ci_lower": 66.03937206629756,
+            "ci_upper": 86.30765490224827,
+            "confidence": 0.95,
+            "mean": 76.17351348427292,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.3579459125313087,
+            "ci_upper": 1.7542858349488006,
+            "confidence": 0.95,
+            "mean": 1.5561158737400547,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.17668463743504914,
+            "ci_upper": 0.33894036256495086,
+            "confidence": 0.95,
+            "mean": 0.2578125,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_all": {
+          "episode_return": {
+            "ci_lower": 81.60732197625951,
+            "ci_upper": 105.55562765578064,
+            "confidence": 0.95,
+            "mean": 93.58147481602008,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.129066570064107,
+            "ci_upper": 1.5234301174217295,
+            "confidence": 0.95,
+            "mean": 1.3262483437429182,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.29905201455651165,
+            "ci_upper": 0.48219798544348835,
+            "confidence": 0.95,
+            "mean": 0.390625,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_routed": {
+          "episode_return": {
+            "ci_lower": 90.53675133227895,
+            "ci_upper": 119.96707428589002,
+            "confidence": 0.95,
+            "mean": 105.25191280908449,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.950940919941373,
+            "ci_upper": 1.3281714358422088,
+            "confidence": 0.95,
+            "mean": 1.1395561778917909,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.42841516819104336,
+            "ci_upper": 0.6028348318089567,
+            "confidence": 0.95,
+            "mean": 0.515625,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_swapped": {
+          "episode_return": {
+            "ci_lower": 123.97217080375067,
+            "ci_upper": 140.27857863726015,
+            "confidence": 0.95,
+            "mean": 132.12537472050542,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.7230973363585292,
+            "ci_upper": 0.8853426356835769,
+            "confidence": 0.95,
+            "mean": 0.804219986021053,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.6085034482328844,
+            "ci_upper": 0.7664965517671156,
+            "confidence": 0.95,
+            "mean": 0.6875,
+            "n": 8
+          }
+        }
+      },
+      "all_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_all",
+        "episode_return": {
+          "ci_lower": 7.6637729844730895,
+          "ci_upper": 27.15214967902122,
+          "confidence": 0.95,
+          "mean_improvement": 17.407961331747156,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.022870759721876244,
+          "ci_upper": 0.48260581971614913,
+          "confidence": 0.95,
+          "mean_improvement": 0.22986752999713644,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": 0.030430789822880666,
+          "ci_upper": 0.23519421017711933,
+          "confidence": 0.95,
+          "mean_improvement": 0.1328125,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "routed_vs_all": {
+        "baseline": "hrl_multiscale_all",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -8.583952450989559,
+          "ci_upper": 31.924828437118414,
+          "confidence": 0.95,
+          "mean_improvement": 11.670437993064427,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.15113731109714967,
+          "ci_upper": 0.5245216427994044,
+          "confidence": 0.95,
+          "mean_improvement": 0.18669216585112736,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.002989042017757293,
+          "ci_upper": 0.2529890420177573,
+          "confidence": 0.95,
+          "mean_improvement": 0.125,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_filter": {
+        "baseline": "hrl_causal_filter",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": 19.08494980098633,
+          "ci_upper": 38.788272287109926,
+          "confidence": 0.95,
+          "mean_improvement": 28.936611044048128,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": 0.15592461238830607,
+          "ci_upper": 0.6399060807076165,
+          "confidence": 0.95,
+          "mean_improvement": 0.39791534654796124,
+          "n": 8,
+          "status": "supported"
+        },
+        "success": {
+          "ci_lower": 0.05655198127322242,
+          "ci_upper": 0.3028230187267776,
+          "confidence": 0.95,
+          "mean_improvement": 0.1796875,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "routed_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": 15.031149020335928,
+          "ci_upper": 43.12564962928724,
+          "confidence": 0.95,
+          "mean_improvement": 29.078399324811585,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": 0.17913993450487428,
+          "ci_upper": 0.6539794571916533,
+          "confidence": 0.95,
+          "mean_improvement": 0.4165596958482638,
+          "n": 8,
+          "status": "supported"
+        },
+        "success": {
+          "ci_lower": 0.19897796516874405,
+          "ci_upper": 0.31664703483125595,
+          "confidence": 0.95,
+          "mean_improvement": 0.2578125,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "routed_vs_swapped": {
+        "baseline": "hrl_multiscale_swapped",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -47.75860446554283,
+          "ci_upper": -5.988319357298984,
+          "confidence": 0.95,
+          "mean_improvement": -26.873461911420907,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.5764914758185646,
+          "ci_upper": -0.09418090792291106,
+          "confidence": 0.95,
+          "mean_improvement": -0.3353361918707378,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "success": {
+          "ci_lower": -0.3136017270007166,
+          "ci_upper": -0.03014827299928341,
+          "confidence": 0.95,
+          "mean_improvement": -0.171875,
+          "n": 8,
+          "status": "contradicted"
+        }
+      }
+    },
+    "slow_drift_fast_action": {
+      "absolute": {
+        "hrl_causal_filter": {
+          "episode_return": {
+            "ci_lower": 77.67754585443946,
+            "ci_upper": 101.2206425660021,
+            "confidence": 0.95,
+            "mean": 89.44909421022078,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.1411958381935141,
+            "ci_upper": 1.5293137828417935,
+            "confidence": 0.95,
+            "mean": 1.3352548105176538,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.22181398386952805,
+            "ci_upper": 0.41881101613047195,
+            "confidence": 0.95,
+            "mean": 0.3203125,
+            "n": 8
+          }
+        },
+        "hrl_history": {
+          "episode_return": {
+            "ci_lower": 74.01423101556368,
+            "ci_upper": 95.77486052264156,
+            "confidence": 0.95,
+            "mean": 84.89454576910262,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.2729046117269973,
+            "ci_upper": 1.6023231334297379,
+            "confidence": 0.95,
+            "mean": 1.4376138725783676,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.17307951658006554,
+            "ci_upper": 0.38942048341993446,
+            "confidence": 0.95,
+            "mean": 0.28125,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_all": {
+          "episode_return": {
+            "ci_lower": 78.878244342513,
+            "ci_upper": 109.10206726832874,
+            "confidence": 0.95,
+            "mean": 93.99015580542087,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.0295856834546766,
+            "ci_upper": 1.671069656995208,
+            "confidence": 0.95,
+            "mean": 1.3503276702249423,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.17386149168112525,
+            "ci_upper": 0.5136385083188748,
+            "confidence": 0.95,
+            "mean": 0.34375,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_routed": {
+          "episode_return": {
+            "ci_lower": 91.81140659891975,
+            "ci_upper": 107.39367230971393,
+            "confidence": 0.95,
+            "mean": 99.60253945431684,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 1.1111966788150045,
+            "ci_upper": 1.426178246519002,
+            "confidence": 0.95,
+            "mean": 1.2686874626670033,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.28667917013032423,
+            "ci_upper": 0.46332082986967577,
+            "confidence": 0.95,
+            "mean": 0.375,
+            "n": 8
+          }
+        },
+        "hrl_multiscale_swapped": {
+          "episode_return": {
+            "ci_lower": 127.13452018176726,
+            "ci_upper": 146.76180595960076,
+            "confidence": 0.95,
+            "mean": 136.94816307068402,
+            "n": 8
+          },
+          "final_goal_distance": {
+            "ci_lower": 0.733372923106034,
+            "ci_upper": 0.8002770349238211,
+            "confidence": 0.95,
+            "mean": 0.7668249790149275,
+            "n": 8
+          },
+          "success": {
+            "ci_lower": 0.7047540687625662,
+            "ci_upper": 0.8264959312374338,
+            "confidence": 0.95,
+            "mean": 0.765625,
+            "n": 8
+          }
+        }
+      },
+      "all_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_all",
+        "episode_return": {
+          "ci_lower": -2.77390900289468,
+          "ci_upper": 20.96512907553116,
+          "confidence": 0.95,
+          "mean_improvement": 9.09561003631824,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.1682070622653875,
+          "ci_upper": 0.34277946697223816,
+          "confidence": 0.95,
+          "mean_improvement": 0.08728620235342532,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.11633605020901036,
+          "ci_upper": 0.24133605020901036,
+          "confidence": 0.95,
+          "mean_improvement": 0.0625,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_all": {
+        "baseline": "hrl_multiscale_all",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -9.795708736461846,
+          "ci_upper": 21.02047603425381,
+          "confidence": 0.95,
+          "mean_improvement": 5.612383648895982,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.299060273468968,
+          "ci_upper": 0.462340688584846,
+          "confidence": 0.95,
+          "mean_improvement": 0.08164020755793899,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.11653901572454903,
+          "ci_upper": 0.17903901572454903,
+          "confidence": 0.95,
+          "mean_improvement": 0.03125,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_filter": {
+        "baseline": "hrl_causal_filter",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -7.1191429285817005,
+          "ci_upper": 27.426033416773805,
+          "confidence": 0.95,
+          "mean_improvement": 10.153445244096053,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.25860293819555563,
+          "ci_upper": 0.39173763389685673,
+          "confidence": 0.95,
+          "mean_improvement": 0.06656734785065055,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.10681529426848344,
+          "ci_upper": 0.21619029426848344,
+          "confidence": 0.95,
+          "mean_improvement": 0.0546875,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_history": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": 5.492129153250907,
+          "ci_upper": 23.923858217177536,
+          "confidence": 0.95,
+          "mean_improvement": 14.707993685214221,
+          "n": 8,
+          "status": "supported"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.06623907916002308,
+          "ci_upper": 0.4040918989827517,
+          "confidence": 0.95,
+          "mean_improvement": 0.16892640991136432,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "success": {
+          "ci_lower": -0.010752615203713914,
+          "ci_upper": 0.1982526152037139,
+          "confidence": 0.95,
+          "mean_improvement": 0.09375,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "routed_vs_swapped": {
+        "baseline": "hrl_multiscale_swapped",
+        "candidate": "hrl_multiscale_routed",
+        "episode_return": {
+          "ci_lower": -51.722382077839484,
+          "ci_upper": -22.968865154894885,
+          "confidence": 0.95,
+          "mean_improvement": -37.345623616367185,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "final_goal_distance": {
+          "ci_lower": -0.6748747190105286,
+          "ci_upper": -0.32885024829362286,
+          "confidence": 0.95,
+          "mean_improvement": -0.5018624836520758,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "success": {
+          "ci_lower": -0.5323517270007165,
+          "ci_upper": -0.2488982729992834,
+          "confidence": 0.95,
+          "mean_improvement": -0.390625,
+          "n": 8,
+          "status": "contradicted"
+        }
+      }
+    }
+  }
+}

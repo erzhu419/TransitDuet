@@ -1,0 +1,165 @@
+{
+  "anchor_cell_count": 1,
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "group_replay0_trust0_eps1e8_k8",
+    "group_replay1_trust0_eps1e2_k8",
+    "group_replay0_trust1_eps1e2_k8",
+    "group_replay1_trust1_eps1e8_k8",
+    "group_replay1_trust1_eps1e3_k8",
+    "group_replay1_trust1_eps5e3_k8",
+    "group_replay1_trust1_eps1e2_k8",
+    "group_replay1_trust1_eps2e2_k8",
+    "group_replay1_trust1_eps5e3_k16"
+  ],
+  "cell_count": 13,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "anchor_replay_trust_pretrain_anchor",
+      "checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/anchors/HalfCheetah-v5/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "53682a0b44af7cefdd0b4e0c4c0d48930c3ff0c33125389589d2b7bab4e84baa",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "7068bed08a5b68cc093177724ae1f50fcb6d8395405b8f4d0531569ab5fea976",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/mean_s000_control/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "7df7e2bdba3cb3ee3aacabfc4d1a9df65b290f9b44777e11cc297f4fb086b48b",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9475941839ba72f2d739e8bc8d78c5d11f95db767a3f82278f5027a11be5022f",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay0_trust0_eps1e8_k8",
+      "checkpoint_file_sha256": "6d36725f88ded5657d1556df7e58f2cda470ed513aca39356fb3218985fad353",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay0_trust0_eps1e8_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust0_eps1e2_k8",
+      "checkpoint_file_sha256": "7c75b4a110250c9404c3afb23e58fdc5c9cfb4233ee7a598272660c0d7433451",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust0_eps1e2_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay0_trust1_eps1e2_k8",
+      "checkpoint_file_sha256": "37a4389c7dc32ed96c4575ea9703ed8c937b1a330ddbcc4d6aaed544449fc0a7",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay0_trust1_eps1e2_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps1e8_k8",
+      "checkpoint_file_sha256": "1b216c70bbaf297806d4e2eae47d6c184c1154e9888904577fbaa6855b7509b6",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps1e8_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps1e3_k8",
+      "checkpoint_file_sha256": "bb942b4bfbaece444219f7101794727fd8eb8bdfd4d92b7b47791df62579cc7e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps1e3_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps5e3_k8",
+      "checkpoint_file_sha256": "97b793a4f703cbd29bc3dcf70a04e945788e9e9cf16a1e47661538e160560ec9",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps5e3_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps1e2_k8",
+      "checkpoint_file_sha256": "b94be79b5f1d3423b4649fef6e4fc888498dddbfa291f1d642cb41fdf9bff71d",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps1e2_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps2e2_k8",
+      "checkpoint_file_sha256": "b569b0d9b9d8d36cd36f6da0807d0839a3b816603bd343440a7a0afe54e11504",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps2e2_k8/replicate_1313726498"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3bd308528333ccaf63462853ffd6f9cbc873ac2bfd70de77501510ec20886310",
+      "arm": "group_replay1_trust1_eps5e3_k16",
+      "checkpoint_file_sha256": "07e17090130e0dd4a4d8241635c572f9f960bd7e2e577defef70ec34968df5ed",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "86c9d826361dc70811a9233ca2fb8735db4355eeb72ce418f6ecbf48bebc8376",
+      "optimizer_seed": 1313726498,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_13_anchor_replay_trust_preflight_20260810_r1/cells/HalfCheetah-v5/group_replay1_trust1_eps5e3_k16/replicate_1313726498"
+    }
+  ],
+  "continuation_cell_count": 12,
+  "development_protocol_version": "mujoco_v14_13_anchor_replay_trust_screen_v1",
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": false,
+  "optimizer_seeds": [
+    1313726498
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "status": "development_scope_complete_unanalyzed"
+}

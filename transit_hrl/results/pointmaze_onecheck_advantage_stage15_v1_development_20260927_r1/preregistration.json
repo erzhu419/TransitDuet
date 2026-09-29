@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "stage12_reference_policy_for_branch_labels; zero_advantage_greedy_for_deployment",
+  "evidence_role": "one_step_policy_improvement_development_only",
+  "optimizer_roots": [
+    209011,
+    209061
+  ],
+  "pairs_per_seed": 12,
+  "preflight": false,
+  "protocol": "pointmaze_onecheck_advantage_stage15_v1_development",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_timing_pair_stage12_v1_development",
+  "source_revision": "451b18e29ac4a73c01ec15946eaecbab0b942904"
+}

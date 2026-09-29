@@ -1,0 +1,117 @@
+{
+  "algorithm_revision": "454590b4280e39a6ae2ed29fdf66fb5c04903f80",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "clean",
+      "flat_history",
+      84007
+    ],
+    [
+      "clean",
+      "flat_multiscale",
+      84007
+    ],
+    [
+      "clean",
+      "hrl_history",
+      84007
+    ],
+    [
+      "clean",
+      "hrl_multiscale",
+      84007
+    ],
+    [
+      "mixed_causal_stress",
+      "flat_history",
+      84007
+    ],
+    [
+      "mixed_causal_stress",
+      "flat_multiscale",
+      84007
+    ],
+    [
+      "mixed_causal_stress",
+      "hrl_history",
+      84007
+    ],
+    [
+      "mixed_causal_stress",
+      "hrl_multiscale",
+      84007
+    ]
+  ],
+  "claim_gate": {
+    "clean_success_noninferiority_margin": 0.1,
+    "primary_endpoint": "success",
+    "primary_stress": "mixed_causal_stress",
+    "requires_positive_factorial_interaction": true
+  },
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_history",
+    "flat_multiscale",
+    "hrl_history",
+    "hrl_multiscale"
+  ],
+  "optimizer_seeds": [
+    84007
+  ],
+  "options": {
+    "84007": {
+      "checkpoint_evaluation_interval": 1,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        800211
+      ],
+      "fast_period_seconds": 0.04,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        800101
+      ],
+      "train": [
+        800011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_multiscale_goal_stage3_v1",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scenarios": [
+    "clean",
+    "mixed_causal_stress"
+  ],
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

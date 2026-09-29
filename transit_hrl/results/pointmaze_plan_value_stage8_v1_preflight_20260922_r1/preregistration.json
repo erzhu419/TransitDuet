@@ -1,0 +1,113 @@
+{
+  "algorithm_revision": "92735a4050eb175cc76d9a2418401e805fc8ca1b",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "hrl_regime_history",
+      204901
+    ],
+    [
+      "hrl_regime_oracle_context",
+      204901
+    ]
+  ],
+  "claim_gate": {
+    "causal_observation_precedes_quarter_second_cost": true,
+    "current_regime_information_has_value": "positive_root_paired_ci",
+    "evidence_role": "task_qualification_not_algorithm_confirmation",
+    "history_controller_learned": "positive_root_paired_ci",
+    "plan_content_has_value": "positive_root_paired_ci",
+    "plan_refresh_has_value": "positive_root_paired_ci",
+    "primary_endpoint": "tracking_squared_error_integral",
+    "quarter_second_delay_has_cost": "positive_root_paired_ci",
+    "same_budget_event_timing_has_value": "positive_root_paired_ci",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "evidence_stage": "preflight",
+  "methods": [
+    "hrl_regime_history",
+    "hrl_regime_oracle_context"
+  ],
+  "optimizer_seeds": [
+    204901
+  ],
+  "options": {
+    "204901": {
+      "checkpoint_evaluation_interval": 1,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        2090211
+      ],
+      "event_window_seconds": 1.0,
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 240,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "selection": [
+        2090101
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "train": [
+        2090011
+      ],
+      "upper_period_seconds": 0.5,
+      "waypoint_perturbation": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_plan_value_stage8_v1_development",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_plan_value_qualification_stage8_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

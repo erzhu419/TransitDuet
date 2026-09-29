@@ -1,0 +1,35 @@
+{
+  "claim_boundary": "reused rejected paths; oracle may select a mechanism but cannot support a paper claim",
+  "development_protocol_version": "mujoco_v17_6_full_horizon_oracle_v1",
+  "disturbance_modes": [
+    "standard"
+  ],
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evaluation_seeds": [
+    4009024190
+  ],
+  "evidence_role": "rejected_v17_4_frozen_total_path_oracle_not_confirmatory",
+  "frozen_oracle_revision": "5a6efa2dccb441334b55cabd25556fc78b55ad3b",
+  "frozen_source_manifest_sha256": "8d001993b7da2913052ce9ee91ff329410592dede1c8b2aae48da7a1054bc0d1",
+  "path_count": 3,
+  "scheduler_contract": {
+    "binding_reason": "source checkpoints remain server-only on node003",
+    "cpu_per_path": 1,
+    "ram_mb_per_path": 1024,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "solver_contract": {
+    "multiplier_bisection_steps": 18,
+    "power_tolerance": 1e-08,
+    "solver": "scipy.optimize.lsq_linear_bvls",
+    "solver_tolerance": 1e-09
+  },
+  "source_run_name": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "status": "registered_before_oracle_path_access"
+}

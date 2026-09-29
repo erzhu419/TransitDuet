@@ -1,0 +1,71 @@
+{
+  "algorithm_revision": "c64c38a7cfacebd5ba61e25a5e627e17c78323a3",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_goal_ppo",
+      74007
+    ],
+    [
+      "hrl_goal_ppo",
+      74007
+    ]
+  ],
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_goal_ppo",
+    "hrl_goal_ppo"
+  ],
+  "optimizer_seeds": [
+    74007
+  ],
+  "options": {
+    "74007": {
+      "checkpoint_evaluation_interval": 1,
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        600211
+      ],
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        600101
+      ],
+      "train": [
+        600011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_goal_control_stage2_v3",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2048,
+    "require_node": null
+  }
+}

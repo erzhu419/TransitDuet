@@ -1,0 +1,96 @@
+{
+  "analysis_version": "pointmaze_learned_termination_stage10_analysis_v1",
+  "claim_boundary": "Development comparison against revealed Stage-9 confirmation paths; fresh-seed confirmation and task transfer remain required",
+  "decision": "stage10_development_gate_failed",
+  "intervals": {
+    "baseline_minus_fixed_episode_tracking_ise": {
+      "ci_lower": -0.2058963658681182,
+      "ci_upper": 0.048622686911697605,
+      "confidence": 0.95,
+      "mean": -0.07863683947821029,
+      "n": 8,
+      "status": "inconclusive"
+    },
+    "candidate_minus_learned_termination_episode_return": {
+      "ci_lower": 41.822092865284105,
+      "ci_upper": 53.040573323418684,
+      "confidence": 0.95,
+      "mean": 47.431333094351395,
+      "n": 8,
+      "status": "supported"
+    },
+    "candidate_minus_learned_termination_episode_tracking_ise": {
+      "ci_lower": 0.534654527258266,
+      "ci_upper": 0.6337020926584488,
+      "confidence": 0.95,
+      "mean": 0.5841783099583574,
+      "n": 8,
+      "status": "supported"
+    },
+    "learned_termination_early_calls_per_episode": {
+      "ci_lower": -0.09595014269011765,
+      "ci_upper": 0.23657514269011765,
+      "confidence": 0.95,
+      "mean": 0.0703125,
+      "n": 8,
+      "status": "inconclusive"
+    }
+  },
+  "matrix": "formal_development",
+  "protocol_version": "pointmaze_learned_termination_stage10_v1",
+  "qualification_checks": {
+    "baseline_learns_vs_fixed": false,
+    "candidate_beats_learned_termination": true
+  },
+  "root_summaries": {
+    "209011": {
+      "baseline_minus_fixed_episode_tracking_ise": -0.10414676706322613,
+      "candidate_minus_learned_termination_episode_return": 40.94627455775777,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.5480530449350851,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209023": {
+      "baseline_minus_fixed_episode_tracking_ise": -0.26962143419553763,
+      "candidate_minus_learned_termination_episode_return": 54.3142843858938,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.6490862350295254,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209037": {
+      "baseline_minus_fixed_episode_tracking_ise": 0.14465792240204328,
+      "candidate_minus_learned_termination_episode_return": 50.47106831956405,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.5442867760778151,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209049": {
+      "baseline_minus_fixed_episode_tracking_ise": -0.011586193224389002,
+      "candidate_minus_learned_termination_episode_return": 37.20696819272576,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.5070603347319915,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209061": {
+      "baseline_minus_fixed_episode_tracking_ise": 0.02223674560843064,
+      "candidate_minus_learned_termination_episode_return": 55.11561476814823,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.5865415358169288,
+      "learned_termination_early_calls_per_episode": 0.5625
+    },
+    "209073": {
+      "baseline_minus_fixed_episode_tracking_ise": -0.21636938081330526,
+      "candidate_minus_learned_termination_episode_return": 45.56720478548998,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.6846619656497624,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209089": {
+      "baseline_minus_fixed_episode_tracking_ise": 0.04584521420903624,
+      "candidate_minus_learned_termination_episode_return": 42.96901748573213,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.5513972259002147,
+      "learned_termination_early_calls_per_episode": 0.0
+    },
+    "209101": {
+      "baseline_minus_fixed_episode_tracking_ise": -0.24011082274873446,
+      "candidate_minus_learned_termination_episode_return": 52.86023225949944,
+      "candidate_minus_learned_termination_episode_tracking_ise": 0.6023393615255362,
+      "learned_termination_early_calls_per_episode": 0.0
+    }
+  },
+  "statistical_unit": "optimizer_seed_root"
+}

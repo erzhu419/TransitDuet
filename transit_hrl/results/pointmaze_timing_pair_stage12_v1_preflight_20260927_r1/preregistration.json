@@ -1,0 +1,102 @@
+{
+  "algorithm_revision": "64fe6ab72b1c466f62150284393cc54c6175a796",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "evidence_role": "action_aligned_development_only",
+  "optimizer_roots": [
+    208001
+  ],
+  "options": {
+    "208001": {
+      "branch_fit": [
+        2159201,
+        2159211
+      ],
+      "branch_window_seconds": 0.5,
+      "check_stride_steps": 5,
+      "checkpoint_evaluation_interval": 1,
+      "credit_window_steps": 50,
+      "distractor_amplitude": 0.5,
+      "distractor_dwell_seconds": [
+        0.35,
+        0.85
+      ],
+      "env_id": "PointMaze_UMaze-v3",
+      "fast_period_seconds": 0.04,
+      "force_pulse_amplitude": 0.18,
+      "force_pulse_duration_seconds": [
+        0.04,
+        0.1
+      ],
+      "force_pulse_gap_seconds": [
+        0.45,
+        1.1
+      ],
+      "history_seconds": 0.64,
+      "horizon": 300,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "max_events_per_class": 1,
+      "max_offset_steps": 25,
+      "maximum_subgoal_delta": 0.75,
+      "methods": [
+        "fixed",
+        "balanced_jitter",
+        "current_compact_quadratic",
+        "causal_validity_interactions"
+      ],
+      "pairs_per_seed": 2,
+      "reference_hidden_dim": 128,
+      "regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "ridge_alpha_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0,
+        1000.0,
+        10000.0
+      ],
+      "selection": [
+        2159101
+      ],
+      "target_speed_modes": [
+        -1.25,
+        -0.55,
+        0.55,
+        1.25
+      ],
+      "threshold_quantile": 0.75,
+      "train": [
+        2159011
+      ],
+      "trigger_eval": [
+        2159301,
+        2159307
+      ],
+      "upper_period_seconds": 0.5
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_timing_pair_stage12_v1_development",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  }
+}

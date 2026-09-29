@@ -1,0 +1,59 @@
+{
+  "advancement_gate": {
+    "mean_lower_no_worse_each_environment": true,
+    "preserve_baseline_feasible_walker": 30,
+    "recovery_by_environment": {
+      "HalfCheetah-v5": 32,
+      "Hopper-v5": 24,
+      "Walker2d-v5": 6
+    },
+    "recovery_total": 65,
+    "upper_budget_all_paths": true
+  },
+  "candidate_contracts": {
+    "hold_h16": {
+      "forecast_mode": "hold",
+      "planning_horizon": 16
+    },
+    "hold_h32": {
+      "forecast_mode": "hold",
+      "planning_horizon": 32
+    },
+    "velocity_h16": {
+      "forecast_mode": "damped_velocity",
+      "planning_horizon": 16
+    },
+    "velocity_h32": {
+      "forecast_mode": "damped_velocity",
+      "planning_horizon": 32
+    }
+  },
+  "claim_boundary": "reused rejected paths may select a causal mechanism but cannot support a paper performance claim",
+  "development_protocol_version": "mujoco_v17_7_causal_mpc_diagnostic_v1",
+  "disturbance_modes": [
+    "standard"
+  ],
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evaluation_seeds": [
+    4009024190
+  ],
+  "evidence_role": "reused_v17_4_path_causal_router_selection_not_confirmatory",
+  "frozen_core_revision": "77aa6c910e558091ce41d3208e2357e405d12df2",
+  "frozen_source_manifest_sha256": "1ad935bd7527f6655ce327b92d155d920d5281c1185a56821c8af48b166d430d",
+  "oracle_run_name": "mujoco_v17_6_full_horizon_oracle_20260831_r1",
+  "path_count": 3,
+  "scheduler_contract": {
+    "binding_reason": "source checkpoints and v17.6 oracle JSON remain server-local on node003",
+    "cpu_per_path": 1,
+    "ram_mb_per_path": 1024,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "source_run_name": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "status": "registered_before_causal_candidate_path_access"
+}

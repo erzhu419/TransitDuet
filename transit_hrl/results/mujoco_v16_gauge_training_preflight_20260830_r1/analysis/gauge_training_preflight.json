@@ -1,0 +1,347 @@
+{
+  "analysis_version": "mujoco_v16_gauge_training_preflight_analysis_v1",
+  "cell_count": 9,
+  "cells": [
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 0.5618964061483805,
+          "latent_merit": 0.41127958194604364,
+          "max_responsibility_reconstruction_rms": 1.2727980678100042e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 597.0290722000684
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 1.6025532599950758,
+          "latent_merit": 0.5350149582110695,
+          "max_responsibility_reconstruction_rms": 2.8121310823957567e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": -7.474772047669307
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 0.32500716716977074,
+          "latent_merit": 0.5257692350932668,
+          "max_responsibility_reconstruction_rms": 6.028262910722492e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 628.6188941165846
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -0.7288738923559441,
+      "environment": "HalfCheetah-v5",
+      "latent_constraint_improvement": true,
+      "latent_noninferior_vs_joint": true,
+      "latent_relative_reduction_vs_gauge_reward": 0.23127461086090015,
+      "optimizer_seed": 2747832873,
+      "reconstruction_exact": true,
+      "reward_noninferior": false
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 0.5725729169783392,
+          "latent_merit": 0.4671447876959302,
+          "max_responsibility_reconstruction_rms": 2.3134536482414935e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 291.30491521610156
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 0.42478340733831826,
+          "latent_merit": 0.46114726609183876,
+          "max_responsibility_reconstruction_rms": 1.8148775848112696e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 505.31891929984204
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 0.41525083416476843,
+          "latent_merit": 0.6850711837299897,
+          "max_responsibility_reconstruction_rms": 6.0421907216502325e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 405.99866679682134
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -0.3788603655186074,
+      "environment": "HalfCheetah-v5",
+      "latent_constraint_improvement": false,
+      "latent_noninferior_vs_joint": true,
+      "latent_relative_reduction_vs_gauge_reward": -0.013005653605885254,
+      "optimizer_seed": 2863209335,
+      "reconstruction_exact": true,
+      "reward_noninferior": false
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 0.3701077054181037,
+          "latent_merit": 0.18916142297726166,
+          "max_responsibility_reconstruction_rms": 2.525816087248612e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 433.0735446934244
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 0.4646824449974886,
+          "latent_merit": 0.47152772723506214,
+          "max_responsibility_reconstruction_rms": 1.374201835517204e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 946.6130990266313
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 0.2755231652439676,
+          "latent_merit": 0.45515600365368525,
+          "max_responsibility_reconstruction_rms": 9.807225340421331e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 607.1013308814834
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -0.34329069967813536,
+      "environment": "HalfCheetah-v5",
+      "latent_constraint_improvement": true,
+      "latent_noninferior_vs_joint": true,
+      "latent_relative_reduction_vs_gauge_reward": 0.5988328743964564,
+      "optimizer_seed": 2359482451,
+      "reconstruction_exact": true,
+      "reward_noninferior": false
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 15.809081448637896,
+          "latent_merit": 16.691598872490363,
+          "max_responsibility_reconstruction_rms": 1.304877378896541e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 194.19904044613642
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 30.979748083751076,
+          "latent_merit": 6.1000612525471025,
+          "max_responsibility_reconstruction_rms": 1.3380843794686935e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 175.90511815276878
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 1.6300492749536115,
+          "latent_merit": 2.0336818032956367,
+          "max_responsibility_reconstruction_rms": 1.157698679388203e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 50.76542598398321
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -8.698529787750003,
+      "environment": "Hopper-v5",
+      "latent_constraint_improvement": false,
+      "latent_noninferior_vs_joint": false,
+      "latent_relative_reduction_vs_gauge_reward": -1.7363002077267216,
+      "optimizer_seed": 2747832873,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 11.825988273036897,
+          "latent_merit": 14.351451405582281,
+          "max_responsibility_reconstruction_rms": 1.1476936656962321e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 199.77877634501834
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 26.995971061614984,
+          "latent_merit": 13.35019360792427,
+          "max_responsibility_reconstruction_rms": 1.0724769828654181e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 186.38534630470983
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 1.8884514157757781,
+          "latent_merit": 3.1987076037204076,
+          "max_responsibility_reconstruction_rms": 1.5913271668953804e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 170.23684083808462
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -5.262267683587066,
+      "environment": "Hopper-v5",
+      "latent_constraint_improvement": false,
+      "latent_noninferior_vs_joint": false,
+      "latent_relative_reduction_vs_gauge_reward": -0.07499949641656846,
+      "optimizer_seed": 2863209335,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 14.067891065743133,
+          "latent_merit": 17.732565188611147,
+          "max_responsibility_reconstruction_rms": 1.1060448135439877e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 199.78316005147104
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 31.767873587834078,
+          "latent_merit": 24.18429196602326,
+          "max_responsibility_reconstruction_rms": 1.1174351960073695e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 167.31575884062397
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 1.6874080919567576,
+          "latent_merit": 3.264247060274478,
+          "max_responsibility_reconstruction_rms": 1.1248020203245781e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 55.624215280478566
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -7.336982104565873,
+      "environment": "Hopper-v5",
+      "latent_constraint_improvement": true,
+      "latent_noninferior_vs_joint": false,
+      "latent_relative_reduction_vs_gauge_reward": 0.2667734406480125,
+      "optimizer_seed": 2359482451,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 9.64089160378104,
+          "latent_merit": 6.620687182020542,
+          "max_responsibility_reconstruction_rms": 1.702576072733091e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 302.87642756858054
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 11.09119941137863,
+          "latent_merit": 8.252331259980766,
+          "max_responsibility_reconstruction_rms": 1.6819721304930082e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 306.0941193849442
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 2.422412224270689,
+          "latent_merit": 8.272590964037162,
+          "max_responsibility_reconstruction_rms": 1.30351322239171e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 291.70398768235566
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -2.9798724210465886,
+      "environment": "Walker2d-v5",
+      "latent_constraint_improvement": true,
+      "latent_noninferior_vs_joint": true,
+      "latent_relative_reduction_vs_gauge_reward": 0.19771916886962518,
+      "optimizer_seed": 2747832873,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 10.381833299698041,
+          "latent_merit": 11.711414308607635,
+          "max_responsibility_reconstruction_rms": 1.7307010821172324e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 317.0385653075702
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 11.553214436835221,
+          "latent_merit": 10.452875442329876,
+          "max_responsibility_reconstruction_rms": 1.79840053012472e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 288.4981974485766
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 0.9035826448170471,
+          "latent_merit": 2.7568143851571016,
+          "max_responsibility_reconstruction_rms": 9.501525745688825e-09,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 314.22446120411894
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -10.489633360322124,
+      "environment": "Walker2d-v5",
+      "latent_constraint_improvement": false,
+      "latent_noninferior_vs_joint": false,
+      "latent_relative_reduction_vs_gauge_reward": -0.12040121143902568,
+      "optimizer_seed": 2863209335,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    },
+    {
+      "arm_summaries": {
+        "gauge_primal_dual_candidate": {
+          "canonical_merit": 10.012194618466639,
+          "latent_merit": 4.010344580162319,
+          "max_responsibility_reconstruction_rms": 1.4712434423592893e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 308.73958365732994
+        },
+        "gauge_reward_only_control": {
+          "canonical_merit": 9.053185756763769,
+          "latent_merit": 4.316793728756274,
+          "max_responsibility_reconstruction_rms": 1.4199205572320422e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 304.69328681126035
+        },
+        "joint_band_primal_dual_control": {
+          "canonical_merit": 1.1404571999651818,
+          "latent_merit": 2.6933008501692495,
+          "max_responsibility_reconstruction_rms": 1.7747975660607467e-08,
+          "max_router_reconstruction_rms": 0.0,
+          "reward": 236.31752971652037
+        }
+      },
+      "canonical_reduction_supported": false,
+      "canonical_relative_reduction_vs_joint": -7.779105975018012,
+      "environment": "Walker2d-v5",
+      "latent_constraint_improvement": true,
+      "latent_noninferior_vs_joint": false,
+      "latent_relative_reduction_vs_gauge_reward": 0.07098999114841811,
+      "optimizer_seed": 2359482451,
+      "reconstruction_exact": true,
+      "reward_noninferior": true
+    }
+  ],
+  "environment_results": [
+    {
+      "cell_count": 3,
+      "environment": "HalfCheetah-v5",
+      "latent_environment_gate": true,
+      "latent_improvement_count": 2,
+      "median_latent_relative_reduction": 0.23127461086090015
+    },
+    {
+      "cell_count": 3,
+      "environment": "Hopper-v5",
+      "latent_environment_gate": false,
+      "latent_improvement_count": 1,
+      "median_latent_relative_reduction": -0.07499949641656846
+    },
+    {
+      "cell_count": 3,
+      "environment": "Walker2d-v5",
+      "latent_environment_gate": true,
+      "latent_improvement_count": 2,
+      "median_latent_relative_reduction": 0.07098999114841811
+    }
+  ],
+  "evidence_role": "training_time_mechanism_development_not_confirmatory",
+  "latent_improvement_count": 5,
+  "selection_contract": {
+    "capacity": "identical_actor_critic_architecture_and_initialization_by_seed",
+    "mechanism_control": "full_strength_total_action_gauge_with_zero_dual_learning_rate",
+    "outcome_use": "development_only_expand_with_new_seeds_if_supported",
+    "primary_comparison": "full_strength_total_action_gauge_primal_dual_vs_established_joint_band_primal_dual",
+    "support_gate": "all_cells_exact_reconstruction_reward_noninferiority_canonical_frequency_reduction_and_latent_noninferiority_plus_at_least_two_of_three_seeds_per_environment_with_latent_constraint_improvement",
+    "unit": "environment_by_optimizer_seed"
+  },
+  "status": "training_time_gauge_preflight_not_supported",
+  "support_gate": false
+}

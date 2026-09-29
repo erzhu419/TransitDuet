@@ -1,0 +1,1452 @@
+{
+  "evidence_role": "efficiency_diagnostic_only_not_algorithm_evidence",
+  "primitive_calls": 517436091,
+  "profile_file_server_only": ".server_artifacts/mujoco_v25_action_sample_cprofile_20260914_r3/cell.prof",
+  "profile_total_seconds": 787.5861275079988,
+  "top_cumulative": [
+    {
+      "cumulative_seconds": 787.685562911,
+      "file": "~",
+      "function": "<built-in method builtins.exec>",
+      "line": 0,
+      "primitive_calls": 1,
+      "self_seconds": 0.159492023,
+      "total_calls": 4058
+    },
+    {
+      "cumulative_seconds": 787.6854936210001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/runpy.py",
+      "function": "run_module",
+      "line": 199,
+      "primitive_calls": 1,
+      "self_seconds": 1.0571000000000001e-05,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 787.5467879590001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/runpy.py",
+      "function": "_run_code",
+      "line": 63,
+      "primitive_calls": 1,
+      "self_seconds": 1.4323000000000002e-05,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 787.546733903,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<module>",
+      "line": 1,
+      "primitive_calls": 1,
+      "self_seconds": 0.0008230440000000001,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 785.607778011,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "main",
+      "line": 7656,
+      "primitive_calls": 1,
+      "self_seconds": 0.00026184600000000004,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 785.5580768210001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "train_mujoco_method",
+      "line": 4273,
+      "primitive_calls": 1,
+      "self_seconds": 0.028188935000000002,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 781.898840532,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "rollout_hierarchical",
+      "line": 1312,
+      "primitive_calls": 69,
+      "self_seconds": 6.123797047,
+      "total_calls": 69
+    },
+    {
+      "cumulative_seconds": 764.645511466,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/training.py",
+      "function": "train_frequency_separated_ppo",
+      "line": 1019,
+      "primitive_calls": 1,
+      "self_seconds": 0.0039288940000000005,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 763.3316496340001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "rollout",
+      "line": 6241,
+      "primitive_calls": 64,
+      "self_seconds": 0.285761784,
+      "total_calls": 64
+    },
+    {
+      "cumulative_seconds": 675.643054364,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "project",
+      "line": 171,
+      "primitive_calls": 53384,
+      "self_seconds": 0.531235652,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 675.1118187120001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_project",
+      "line": 197,
+      "primitive_calls": 53384,
+      "self_seconds": 2.842593067,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 596.301033372,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_project_ball_intersection",
+      "line": 578,
+      "primitive_calls": 70336,
+      "self_seconds": 2.368481176,
+      "total_calls": 70336
+    },
+    {
+      "cumulative_seconds": 574.939231218,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_dykstra_ball_box",
+      "line": 653,
+      "primitive_calls": 11587,
+      "self_seconds": 486.79573891800004,
+      "total_calls": 11587
+    },
+    {
+      "cumulative_seconds": 59.464823289,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/training.py",
+      "function": "<listcomp>",
+      "line": 1506,
+      "primitive_calls": 1,
+      "self_seconds": 0.000101773,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 59.298456346,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/training.py",
+      "function": "<listcomp>",
+      "line": 1315,
+      "primitive_calls": 1,
+      "self_seconds": 0.00029097300000000003,
+      "total_calls": 1
+    },
+    {
+      "cumulative_seconds": 54.954766405,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_terminal_certificate",
+      "line": 467,
+      "primitive_calls": 106768,
+      "self_seconds": 19.460690377000002,
+      "total_calls": 106768
+    },
+    {
+      "cumulative_seconds": 43.26281565,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapreduction",
+      "line": 69,
+      "primitive_calls": 11109212,
+      "self_seconds": 12.532147106,
+      "total_calls": 11109212
+    },
+    {
+      "cumulative_seconds": 31.358556471000004,
+      "file": "~",
+      "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+      "line": 0,
+      "primitive_calls": 13824733,
+      "self_seconds": 31.358556471000004,
+      "total_calls": 13824733
+    },
+    {
+      "cumulative_seconds": 30.872568046,
+      "file": "~",
+      "function": "<method 'copy' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 107433736,
+      "self_seconds": 30.872568046,
+      "total_calls": 107433736
+    },
+    {
+      "cumulative_seconds": 29.348864035000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/utils/_contextlib.py",
+      "function": "decorate_context",
+      "line": 113,
+      "primitive_calls": 57283,
+      "self_seconds": 0.45221800700000003,
+      "total_calls": 57283
+    },
+    {
+      "cumulative_seconds": 28.256348551000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "max",
+      "line": 3080,
+      "primitive_calls": 6074420,
+      "self_seconds": 5.189870976,
+      "total_calls": 6074420
+    },
+    {
+      "cumulative_seconds": 26.392319699,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/smdp_actor_critic.py",
+      "function": "act_lower",
+      "line": 2742,
+      "primitive_calls": 53384,
+      "self_seconds": 0.6840522560000001,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 24.596144071,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "sum",
+      "line": 2349,
+      "primitive_calls": 4846702,
+      "self_seconds": 4.695306338,
+      "total_calls": 4846702
+    },
+    {
+      "cumulative_seconds": 20.933629124000003,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/receding_horizon_responsibility.py",
+      "function": "future_rolling_mean_system",
+      "line": 19,
+      "primitive_calls": 106768,
+      "self_seconds": 8.81656405,
+      "total_calls": 106768
+    },
+    {
+      "cumulative_seconds": 20.887330945000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "clip",
+      "line": 2250,
+      "primitive_calls": 5968129,
+      "self_seconds": 6.041732982,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 17.522020263,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_project_component",
+      "line": 537,
+      "primitive_calls": 20672,
+      "self_seconds": 0.14816795700000002,
+      "total_calls": 20672
+    },
+    {
+      "cumulative_seconds": 16.871022702,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapfunc",
+      "line": 51,
+      "primitive_calls": 6493552,
+      "self_seconds": 4.068436063,
+      "total_calls": 6493552
+    },
+    {
+      "cumulative_seconds": 16.406846123,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/dual_actor_critic.py",
+      "function": "forward_with_mean",
+      "line": 94,
+      "primitive_calls": 56771,
+      "self_seconds": 0.272660663,
+      "total_calls": 56771
+    },
+    {
+      "cumulative_seconds": 14.538879816000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "function": "_wrapped_call_impl",
+      "line": 1732,
+      "primitive_calls": 167614,
+      "self_seconds": 1.028794956,
+      "total_calls": 1119586
+    },
+    {
+      "cumulative_seconds": 14.489172605,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "policy_context",
+      "line": 124,
+      "primitive_calls": 220438,
+      "self_seconds": 1.491185605,
+      "total_calls": 220438
+    },
+    {
+      "cumulative_seconds": 14.332858655,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "function": "_call_impl",
+      "line": 1740,
+      "primitive_calls": 167614,
+      "self_seconds": 1.568598938,
+      "total_calls": 1119586
+    },
+    {
+      "cumulative_seconds": 14.035338379,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_nonredundant_balls",
+      "line": 624,
+      "primitive_calls": 70336,
+      "self_seconds": 5.678088013,
+      "total_calls": 70336
+    },
+    {
+      "cumulative_seconds": 13.858264792000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "mean",
+      "line": 3783,
+      "primitive_calls": 707634,
+      "self_seconds": 1.416143031,
+      "total_calls": 707634
+    },
+    {
+      "cumulative_seconds": 12.918911239000002,
+      "file": "~",
+      "function": "<method 'extend' of 'list' objects>",
+      "line": 0,
+      "primitive_calls": 497906,
+      "self_seconds": 1.3945699820000002,
+      "total_calls": 497906
+    },
+    {
+      "cumulative_seconds": 12.778557084000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "padded_history",
+      "line": 130,
+      "primitive_calls": 440876,
+      "self_seconds": 0.9161905840000001,
+      "total_calls": 440876
+    },
+    {
+      "cumulative_seconds": 12.751968827,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/leakage.py",
+      "function": "update",
+      "line": 64,
+      "primitive_calls": 266920,
+      "self_seconds": 2.199450564,
+      "total_calls": 266920
+    },
+    {
+      "cumulative_seconds": 12.442121761000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_methods.py",
+      "function": "_mean",
+      "line": 119,
+      "primitive_calls": 707634,
+      "self_seconds": 4.347615729,
+      "total_calls": 707634
+    },
+    {
+      "cumulative_seconds": 12.145651436000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/multiarray.py",
+      "function": "dot",
+      "line": 757,
+      "primitive_calls": 134551464,
+      "self_seconds": 12.145651436000001,
+      "total_calls": 134551464
+    },
+    {
+      "cumulative_seconds": 12.071477471000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/container.py",
+      "function": "forward",
+      "line": 248,
+      "primitive_calls": 167614,
+      "self_seconds": 1.040555315,
+      "total_calls": 167614
+    },
+    {
+      "cumulative_seconds": 11.327920553,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "_feature_state",
+      "line": 877,
+      "primitive_calls": 110219,
+      "self_seconds": 2.400634637,
+      "total_calls": 110219
+    },
+    {
+      "cumulative_seconds": 10.975336159000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/dual_actor_critic.py",
+      "function": "distribution",
+      "line": 85,
+      "primitive_calls": 57099,
+      "self_seconds": 0.42703443,
+      "total_calls": 57099
+    },
+    {
+      "cumulative_seconds": 10.821414439000002,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_component_feasible",
+      "line": 686,
+      "primitive_calls": 310009,
+      "self_seconds": 0.7795640260000001,
+      "total_calls": 310009
+    },
+    {
+      "cumulative_seconds": 10.483707465,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<genexpr>",
+      "line": 139,
+      "primitive_calls": 8665582,
+      "self_seconds": 3.888564364,
+      "total_calls": 8665582
+    },
+    {
+      "cumulative_seconds": 10.375610582,
+      "file": "~",
+      "function": "<method 'clip' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 5968129,
+      "self_seconds": 2.2666709860000003,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 9.544675187000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "feasible",
+      "line": 32,
+      "primitive_calls": 347633,
+      "self_seconds": 1.3322575410000002,
+      "total_calls": 347633
+    },
+    {
+      "cumulative_seconds": 8.679160012,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "all",
+      "line": 2611,
+      "primitive_calls": 1742705,
+      "self_seconds": 1.475437573,
+      "total_calls": 1742705
+    },
+    {
+      "cumulative_seconds": 8.332966540000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapreduction_any_all",
+      "line": 89,
+      "primitive_calls": 2007839,
+      "self_seconds": 2.661344822,
+      "total_calls": 2007839
+    },
+    {
+      "cumulative_seconds": 8.142987469000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "prefix_energy",
+      "line": 25,
+      "primitive_calls": 454401,
+      "self_seconds": 3.1793808990000003,
+      "total_calls": 454401
+    },
+    {
+      "cumulative_seconds": 8.108939596,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_methods.py",
+      "function": "_clip",
+      "line": 100,
+      "primitive_calls": 5968129,
+      "self_seconds": 8.108939596,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 7.996050863000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/dual_actor_critic.py",
+      "function": "forward",
+      "line": 152,
+      "primitive_calls": 110515,
+      "self_seconds": 0.287038189,
+      "total_calls": 110515
+    },
+    {
+      "cumulative_seconds": 7.720674654000001,
+      "file": "~",
+      "function": "<built-in method numpy.asarray>",
+      "line": 0,
+      "primitive_calls": 18932557,
+      "self_seconds": 7.720674654000001,
+      "total_calls": 18932557
+    },
+    {
+      "cumulative_seconds": 7.193633807,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/linear.py",
+      "function": "forward",
+      "line": 124,
+      "primitive_calls": 502842,
+      "self_seconds": 1.036836984,
+      "total_calls": 502842
+    },
+    {
+      "cumulative_seconds": 7.0517300480000005,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "router_scalar_contexts",
+      "line": 1602,
+      "primitive_calls": 110219,
+      "self_seconds": 0.12550651100000002,
+      "total_calls": 110219
+    },
+    {
+      "cumulative_seconds": 5.755891193,
+      "file": "~",
+      "function": "<built-in method torch._C._nn.linear>",
+      "line": 0,
+      "primitive_calls": 502842,
+      "self_seconds": 5.755891193,
+      "total_calls": 502842
+    },
+    {
+      "cumulative_seconds": 5.438714974000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/wrappers/common.py",
+      "function": "step",
+      "line": 112,
+      "primitive_calls": 53384,
+      "self_seconds": 0.09635932100000001,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 5.342355653,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/wrappers/common.py",
+      "function": "step",
+      "line": 389,
+      "primitive_calls": 53384,
+      "self_seconds": 0.087454347,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 5.324031939,
+      "file": "~",
+      "function": "<built-in method builtins.any>",
+      "line": 0,
+      "primitive_calls": 507537,
+      "self_seconds": 0.865053131,
+      "total_calls": 509991
+    },
+    {
+      "cumulative_seconds": 5.307214689,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/domains/mujoco/frequency_adapter.py",
+      "function": "route",
+      "line": 514,
+      "primitive_calls": 53384,
+      "self_seconds": 2.07980994,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 5.254901306000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/core.py",
+      "function": "step",
+      "line": 318,
+      "primitive_calls": 53384,
+      "self_seconds": 0.033760708,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 5.221140598000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/wrappers/common.py",
+      "function": "step",
+      "line": 277,
+      "primitive_calls": 53384,
+      "self_seconds": 0.045892483000000005,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 5.1721069570000004,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/envs/mujoco/half_cheetah_v5.py",
+      "function": "step",
+      "line": 225,
+      "primitive_calls": 53384,
+      "self_seconds": 0.421155914,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 4.794220851,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "actor_filter_contexts",
+      "line": 1535,
+      "primitive_calls": 56803,
+      "self_seconds": 0.18667578,
+      "total_calls": 56803
+    },
+    {
+      "cumulative_seconds": 4.790588638,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "<dictcomp>",
+      "line": 70,
+      "primitive_calls": 11109212,
+      "self_seconds": 4.790588638,
+      "total_calls": 11109212
+    },
+    {
+      "cumulative_seconds": 4.593112969,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/shape_base.py",
+      "function": "stack",
+      "line": 377,
+      "primitive_calls": 176966,
+      "self_seconds": 2.1691698180000003,
+      "total_calls": 176966
+    },
+    {
+      "cumulative_seconds": 4.30474443,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/distributions/normal.py",
+      "function": "log_prob",
+      "line": 80,
+      "primitive_calls": 56931,
+      "self_seconds": 2.2761156270000003,
+      "total_calls": 56931
+    },
+    {
+      "cumulative_seconds": 4.256930560000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/distributions/normal.py",
+      "function": "__init__",
+      "line": 53,
+      "primitive_calls": 57099,
+      "self_seconds": 0.282590871,
+      "total_calls": 57099
+    },
+    {
+      "cumulative_seconds": 4.192910521,
+      "file": "~",
+      "function": "<built-in method builtins.all>",
+      "line": 0,
+      "primitive_calls": 253824,
+      "self_seconds": 0.316535971,
+      "total_calls": 253824
+    },
+    {
+      "cumulative_seconds": 4.157921099,
+      "file": "~",
+      "function": "<built-in method math.sqrt>",
+      "line": 0,
+      "primitive_calls": 40706027,
+      "self_seconds": 4.157921099,
+      "total_calls": 40706027
+    },
+    {
+      "cumulative_seconds": 4.0156167830000005,
+      "file": "<frozen importlib._bootstrap>",
+      "function": "_find_and_load",
+      "line": 1022,
+      "primitive_calls": 80,
+      "self_seconds": 0.017665337,
+      "total_calls": 4888
+    },
+    {
+      "cumulative_seconds": 4.008776674,
+      "file": "<frozen importlib._bootstrap>",
+      "function": "_find_and_load_unlocked",
+      "line": 987,
+      "primitive_calls": 11,
+      "self_seconds": 0.007685567000000001,
+      "total_calls": 2161
+    },
+    {
+      "cumulative_seconds": 4.005370887000001,
+      "file": "<frozen importlib._bootstrap>",
+      "function": "_load_unlocked",
+      "line": 664,
+      "primitive_calls": 15,
+      "self_seconds": 0.008119397,
+      "total_calls": 2090
+    },
+    {
+      "cumulative_seconds": 4.0049074330000005,
+      "file": "<frozen importlib._bootstrap_external>",
+      "function": "exec_module",
+      "line": 877,
+      "primitive_calls": 15,
+      "self_seconds": 0.004540167,
+      "total_calls": 2026
+    },
+    {
+      "cumulative_seconds": 4.002159751000001,
+      "file": "<frozen importlib._bootstrap>",
+      "function": "_call_with_frames_removed",
+      "line": 233,
+      "primitive_calls": 14,
+      "self_seconds": 0.001695778,
+      "total_calls": 2685
+    },
+    {
+      "cumulative_seconds": 3.741478583,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/domains/mujoco/frequency_adapter.py",
+      "function": "deterministic_actuation_disturbance",
+      "line": 870,
+      "primitive_calls": 53416,
+      "self_seconds": 2.215623486,
+      "total_calls": 53416
+    },
+    {
+      "cumulative_seconds": 3.6343003420000004,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "cost_filter_contexts",
+      "line": 1582,
+      "primitive_calls": 53416,
+      "self_seconds": 0.125427389,
+      "total_calls": 53416
+    },
+    {
+      "cumulative_seconds": 3.40808796,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/envs/mujoco/mujoco_env.py",
+      "function": "do_simulation",
+      "line": 196,
+      "primitive_calls": 53384,
+      "self_seconds": 0.14444015000000002,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 3.3603485650000002,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<genexpr>",
+      "line": 893,
+      "primitive_calls": 4518979,
+      "self_seconds": 1.768425179,
+      "total_calls": 4518979
+    },
+    {
+      "cumulative_seconds": 3.274388456,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<genexpr>",
+      "line": 916,
+      "primitive_calls": 661314,
+      "self_seconds": 0.878417922,
+      "total_calls": 661314
+    },
+    {
+      "cumulative_seconds": 3.2276765920000003,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/gymnasium/envs/mujoco/mujoco_env.py",
+      "function": "_step_mujoco_simulation",
+      "line": 147,
+      "primitive_calls": 53384,
+      "self_seconds": 0.182335987,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 3.128555164,
+      "file": "~",
+      "function": "<built-in method builtins.__import__>",
+      "line": 0,
+      "primitive_calls": 70,
+      "self_seconds": 0.0017395590000000001,
+      "total_calls": 857
+    }
+  ],
+  "top_self": [
+    {
+      "cumulative_seconds": 574.939231218,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_dykstra_ball_box",
+      "line": 653,
+      "primitive_calls": 11587,
+      "self_seconds": 486.79573891800004,
+      "total_calls": 11587
+    },
+    {
+      "cumulative_seconds": 31.358556471000004,
+      "file": "~",
+      "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+      "line": 0,
+      "primitive_calls": 13824733,
+      "self_seconds": 31.358556471000004,
+      "total_calls": 13824733
+    },
+    {
+      "cumulative_seconds": 30.872568046,
+      "file": "~",
+      "function": "<method 'copy' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 107433736,
+      "self_seconds": 30.872568046,
+      "total_calls": 107433736
+    },
+    {
+      "cumulative_seconds": 54.954766405,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_terminal_certificate",
+      "line": 467,
+      "primitive_calls": 106768,
+      "self_seconds": 19.460690377000002,
+      "total_calls": 106768
+    },
+    {
+      "cumulative_seconds": 43.26281565,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapreduction",
+      "line": 69,
+      "primitive_calls": 11109212,
+      "self_seconds": 12.532147106,
+      "total_calls": 11109212
+    },
+    {
+      "cumulative_seconds": 12.145651436000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/multiarray.py",
+      "function": "dot",
+      "line": 757,
+      "primitive_calls": 134551464,
+      "self_seconds": 12.145651436000001,
+      "total_calls": 134551464
+    },
+    {
+      "cumulative_seconds": 20.933629124000003,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/receding_horizon_responsibility.py",
+      "function": "future_rolling_mean_system",
+      "line": 19,
+      "primitive_calls": 106768,
+      "self_seconds": 8.81656405,
+      "total_calls": 106768
+    },
+    {
+      "cumulative_seconds": 8.108939596,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_methods.py",
+      "function": "_clip",
+      "line": 100,
+      "primitive_calls": 5968129,
+      "self_seconds": 8.108939596,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 7.720674654000001,
+      "file": "~",
+      "function": "<built-in method numpy.asarray>",
+      "line": 0,
+      "primitive_calls": 18932557,
+      "self_seconds": 7.720674654000001,
+      "total_calls": 18932557
+    },
+    {
+      "cumulative_seconds": 781.898840532,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "rollout_hierarchical",
+      "line": 1312,
+      "primitive_calls": 69,
+      "self_seconds": 6.123797047,
+      "total_calls": 69
+    },
+    {
+      "cumulative_seconds": 20.887330945000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "clip",
+      "line": 2250,
+      "primitive_calls": 5968129,
+      "self_seconds": 6.041732982,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 5.755891193,
+      "file": "~",
+      "function": "<built-in method torch._C._nn.linear>",
+      "line": 0,
+      "primitive_calls": 502842,
+      "self_seconds": 5.755891193,
+      "total_calls": 502842
+    },
+    {
+      "cumulative_seconds": 14.035338379,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_nonredundant_balls",
+      "line": 624,
+      "primitive_calls": 70336,
+      "self_seconds": 5.678088013,
+      "total_calls": 70336
+    },
+    {
+      "cumulative_seconds": 28.256348551000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "max",
+      "line": 3080,
+      "primitive_calls": 6074420,
+      "self_seconds": 5.189870976,
+      "total_calls": 6074420
+    },
+    {
+      "cumulative_seconds": 4.790588638,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "<dictcomp>",
+      "line": 70,
+      "primitive_calls": 11109212,
+      "self_seconds": 4.790588638,
+      "total_calls": 11109212
+    },
+    {
+      "cumulative_seconds": 24.596144071,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "sum",
+      "line": 2349,
+      "primitive_calls": 4846702,
+      "self_seconds": 4.695306338,
+      "total_calls": 4846702
+    },
+    {
+      "cumulative_seconds": 12.442121761000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_methods.py",
+      "function": "_mean",
+      "line": 119,
+      "primitive_calls": 707634,
+      "self_seconds": 4.347615729,
+      "total_calls": 707634
+    },
+    {
+      "cumulative_seconds": 4.157921099,
+      "file": "~",
+      "function": "<built-in method math.sqrt>",
+      "line": 0,
+      "primitive_calls": 40706027,
+      "self_seconds": 4.157921099,
+      "total_calls": 40706027
+    },
+    {
+      "cumulative_seconds": 16.871022702,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapfunc",
+      "line": 51,
+      "primitive_calls": 6493552,
+      "self_seconds": 4.068436063,
+      "total_calls": 6493552
+    },
+    {
+      "cumulative_seconds": 10.483707465,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<genexpr>",
+      "line": 139,
+      "primitive_calls": 8665582,
+      "self_seconds": 3.888564364,
+      "total_calls": 8665582
+    },
+    {
+      "cumulative_seconds": 8.142987469000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "prefix_energy",
+      "line": 25,
+      "primitive_calls": 454401,
+      "self_seconds": 3.1793808990000003,
+      "total_calls": 454401
+    },
+    {
+      "cumulative_seconds": 2.9264390550000003,
+      "file": "~",
+      "function": "<built-in method mujoco._functions.mj_step>",
+      "line": 0,
+      "primitive_calls": 53384,
+      "self_seconds": 2.9264390550000003,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 675.1118187120001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_project",
+      "line": 197,
+      "primitive_calls": 53384,
+      "self_seconds": 2.842593067,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 8.332966540000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_wrapreduction_any_all",
+      "line": 89,
+      "primitive_calls": 2007839,
+      "self_seconds": 2.661344822,
+      "total_calls": 2007839
+    },
+    {
+      "cumulative_seconds": 2.964320356,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<genexpr>",
+      "line": 609,
+      "primitive_calls": 1203058,
+      "self_seconds": 2.631755945,
+      "total_calls": 1203058
+    },
+    {
+      "cumulative_seconds": 11.327920553,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "_feature_state",
+      "line": 877,
+      "primitive_calls": 110219,
+      "self_seconds": 2.400634637,
+      "total_calls": 110219
+    },
+    {
+      "cumulative_seconds": 596.301033372,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_project_ball_intersection",
+      "line": 578,
+      "primitive_calls": 70336,
+      "self_seconds": 2.368481176,
+      "total_calls": 70336
+    },
+    {
+      "cumulative_seconds": 4.30474443,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/distributions/normal.py",
+      "function": "log_prob",
+      "line": 80,
+      "primitive_calls": 56931,
+      "self_seconds": 2.2761156270000003,
+      "total_calls": 56931
+    },
+    {
+      "cumulative_seconds": 10.375610582,
+      "file": "~",
+      "function": "<method 'clip' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 5968129,
+      "self_seconds": 2.2666709860000003,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 2.229059817,
+      "file": "~",
+      "function": "<built-in method numpy.asanyarray>",
+      "line": 0,
+      "primitive_calls": 5208971,
+      "self_seconds": 2.229059817,
+      "total_calls": 5208971
+    },
+    {
+      "cumulative_seconds": 3.741478583,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/domains/mujoco/frequency_adapter.py",
+      "function": "deterministic_actuation_disturbance",
+      "line": 870,
+      "primitive_calls": 53416,
+      "self_seconds": 2.215623486,
+      "total_calls": 53416
+    },
+    {
+      "cumulative_seconds": 12.751968827,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/leakage.py",
+      "function": "update",
+      "line": 64,
+      "primitive_calls": 266920,
+      "self_seconds": 2.199450564,
+      "total_calls": 266920
+    },
+    {
+      "cumulative_seconds": 4.593112969,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/shape_base.py",
+      "function": "stack",
+      "line": 377,
+      "primitive_calls": 176966,
+      "self_seconds": 2.1691698180000003,
+      "total_calls": 176966
+    },
+    {
+      "cumulative_seconds": 5.307214689,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/domains/mujoco/frequency_adapter.py",
+      "function": "route",
+      "line": 514,
+      "primitive_calls": 53384,
+      "self_seconds": 2.07980994,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 1.9196162090000002,
+      "file": "~",
+      "function": "<built-in method builtins.max>",
+      "line": 0,
+      "primitive_calls": 10900095,
+      "self_seconds": 1.915784954,
+      "total_calls": 10900095
+    },
+    {
+      "cumulative_seconds": 3.3603485650000002,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<genexpr>",
+      "line": 893,
+      "primitive_calls": 4518979,
+      "self_seconds": 1.768425179,
+      "total_calls": 4518979
+    },
+    {
+      "cumulative_seconds": 2.0126968020000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_methods.py",
+      "function": "_count_reduce_items",
+      "line": 77,
+      "primitive_calls": 707658,
+      "self_seconds": 1.764944462,
+      "total_calls": 707658
+    },
+    {
+      "cumulative_seconds": 1.670194438,
+      "file": "~",
+      "function": "<method 'reshape' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 5438230,
+      "self_seconds": 1.670194438,
+      "total_calls": 5438230
+    },
+    {
+      "cumulative_seconds": 14.332858655,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "function": "_call_impl",
+      "line": 1740,
+      "primitive_calls": 167614,
+      "self_seconds": 1.568598938,
+      "total_calls": 1119586
+    },
+    {
+      "cumulative_seconds": 1.517319917,
+      "file": "~",
+      "function": "<method 'astype' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 2540093,
+      "self_seconds": 1.517319917,
+      "total_calls": 2540093
+    },
+    {
+      "cumulative_seconds": 14.489172605,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "policy_context",
+      "line": 124,
+      "primitive_calls": 220438,
+      "self_seconds": 1.491185605,
+      "total_calls": 220438
+    },
+    {
+      "cumulative_seconds": 8.679160012,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "all",
+      "line": 2611,
+      "primitive_calls": 1742705,
+      "self_seconds": 1.475437573,
+      "total_calls": 1742705
+    },
+    {
+      "cumulative_seconds": 13.858264792000002,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "mean",
+      "line": 3783,
+      "primitive_calls": 707634,
+      "self_seconds": 1.416143031,
+      "total_calls": 707634
+    },
+    {
+      "cumulative_seconds": 12.918911239000002,
+      "file": "~",
+      "function": "<method 'extend' of 'list' objects>",
+      "line": 0,
+      "primitive_calls": 497906,
+      "self_seconds": 1.3945699820000002,
+      "total_calls": 497906
+    },
+    {
+      "cumulative_seconds": 1.382109257,
+      "file": "~",
+      "function": "<method 'cumsum' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "primitive_calls": 454953,
+      "self_seconds": 1.382109257,
+      "total_calls": 454953
+    },
+    {
+      "cumulative_seconds": 1.3447475990000002,
+      "file": "~",
+      "function": "<method 'items' of 'dict' objects>",
+      "line": 0,
+      "primitive_calls": 13185970,
+      "self_seconds": 1.3447475990000002,
+      "total_calls": 13185970
+    },
+    {
+      "cumulative_seconds": 9.544675187000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "feasible",
+      "line": 32,
+      "primitive_calls": 347633,
+      "self_seconds": 1.3322575410000002,
+      "total_calls": 347633
+    },
+    {
+      "cumulative_seconds": 1.27387903,
+      "file": "~",
+      "function": "<built-in method torch.tanh>",
+      "line": 0,
+      "primitive_calls": 335260,
+      "self_seconds": 1.27387903,
+      "total_calls": 335260
+    },
+    {
+      "cumulative_seconds": 1.283191639,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/leakage.py",
+      "function": "evaluate_rms_leakage_budget",
+      "line": 87,
+      "primitive_calls": 266920,
+      "self_seconds": 1.15469043,
+      "total_calls": 266920
+    },
+    {
+      "cumulative_seconds": 1.237501843,
+      "file": "~",
+      "function": "<built-in method builtins.getattr>",
+      "line": 0,
+      "primitive_calls": 7116065,
+      "self_seconds": 1.146746881,
+      "total_calls": 7116129
+    },
+    {
+      "cumulative_seconds": 12.071477471000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/container.py",
+      "function": "forward",
+      "line": 248,
+      "primitive_calls": 167614,
+      "self_seconds": 1.040555315,
+      "total_calls": 167614
+    },
+    {
+      "cumulative_seconds": 1.1817526520000001,
+      "file": "~",
+      "function": "<built-in method builtins.isinstance>",
+      "line": 0,
+      "primitive_calls": 6558879,
+      "self_seconds": 1.037976021,
+      "total_calls": 6559385
+    },
+    {
+      "cumulative_seconds": 1.037921619,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<genexpr>",
+      "line": 254,
+      "primitive_calls": 1761672,
+      "self_seconds": 1.037921619,
+      "total_calls": 1761672
+    },
+    {
+      "cumulative_seconds": 7.193633807,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/linear.py",
+      "function": "forward",
+      "line": 124,
+      "primitive_calls": 502842,
+      "self_seconds": 1.036836984,
+      "total_calls": 502842
+    },
+    {
+      "cumulative_seconds": 14.538879816000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "function": "_wrapped_call_impl",
+      "line": 1732,
+      "primitive_calls": 167614,
+      "self_seconds": 1.028794956,
+      "total_calls": 1119586
+    },
+    {
+      "cumulative_seconds": 0.9421552980000001,
+      "file": "~",
+      "function": "<built-in method torch.as_tensor>",
+      "line": 0,
+      "primitive_calls": 113894,
+      "self_seconds": 0.9421552980000001,
+      "total_calls": 113894
+    },
+    {
+      "cumulative_seconds": 0.9344785520000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/shape_base.py",
+      "function": "<listcomp>",
+      "line": 463,
+      "primitive_calls": 176966,
+      "self_seconds": 0.9344785520000001,
+      "total_calls": 176966
+    },
+    {
+      "cumulative_seconds": 0.9316867110000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_clip_dispatcher",
+      "line": 2245,
+      "primitive_calls": 5968129,
+      "self_seconds": 0.9316867110000001,
+      "total_calls": 5968129
+    },
+    {
+      "cumulative_seconds": 12.778557084000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "padded_history",
+      "line": 130,
+      "primitive_calls": 440876,
+      "self_seconds": 0.9161905840000001,
+      "total_calls": 440876
+    },
+    {
+      "cumulative_seconds": 0.8849511940000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<genexpr>",
+      "line": 897,
+      "primitive_calls": 4518979,
+      "self_seconds": 0.8849511940000001,
+      "total_calls": 4518979
+    },
+    {
+      "cumulative_seconds": 3.274388456,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "<genexpr>",
+      "line": 916,
+      "primitive_calls": 661314,
+      "self_seconds": 0.878417922,
+      "total_calls": 661314
+    },
+    {
+      "cumulative_seconds": 0.871499287,
+      "file": "~",
+      "function": "<method 'all' of 'torch._C.TensorBase' objects>",
+      "line": 0,
+      "primitive_calls": 171129,
+      "self_seconds": 0.871499287,
+      "total_calls": 171129
+    },
+    {
+      "cumulative_seconds": 5.324031939,
+      "file": "~",
+      "function": "<built-in method builtins.any>",
+      "line": 0,
+      "primitive_calls": 507537,
+      "self_seconds": 0.865053131,
+      "total_calls": 509991
+    },
+    {
+      "cumulative_seconds": 0.8169175500000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "<dictcomp>",
+      "line": 91,
+      "primitive_calls": 2007839,
+      "self_seconds": 0.8169175500000001,
+      "total_calls": 2007839
+    },
+    {
+      "cumulative_seconds": 0.876141401,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/leakage.py",
+      "function": "causal_rolling_mean",
+      "line": 21,
+      "primitive_calls": 552,
+      "self_seconds": 0.8089836650000001,
+      "total_calls": 552
+    },
+    {
+      "cumulative_seconds": 2.046861203,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/domains/mujoco/frequency_adapter.py",
+      "function": "action_from_unit_box",
+      "line": 843,
+      "primitive_calls": 53384,
+      "self_seconds": 0.797948501,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 0.7830699790000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/distributions/constraints.py",
+      "function": "check",
+      "line": 368,
+      "primitive_calls": 57099,
+      "self_seconds": 0.7830699790000001,
+      "total_calls": 57099
+    },
+    {
+      "cumulative_seconds": 10.821414439000002,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "_component_feasible",
+      "line": 686,
+      "primitive_calls": 310009,
+      "self_seconds": 0.7795640260000001,
+      "total_calls": 310009
+    },
+    {
+      "cumulative_seconds": 0.7592969540000001,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_max_dispatcher",
+      "line": 3075,
+      "primitive_calls": 6074420,
+      "self_seconds": 0.7592969540000001,
+      "total_calls": 6074420
+    },
+    {
+      "cumulative_seconds": 2.602985174,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/distributions/distribution.py",
+      "function": "__init__",
+      "line": 41,
+      "primitive_calls": 57099,
+      "self_seconds": 0.7482065760000001,
+      "total_calls": 57099
+    },
+    {
+      "cumulative_seconds": 0.703234649,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<listcomp>",
+      "line": 648,
+      "primitive_calls": 70336,
+      "self_seconds": 0.703234649,
+      "total_calls": 70336
+    },
+    {
+      "cumulative_seconds": 0.7230113850000001,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/core/causal_terminal_reserve_projector.py",
+      "function": "<genexpr>",
+      "line": 588,
+      "primitive_calls": 308752,
+      "self_seconds": 0.692965601,
+      "total_calls": 308752
+    },
+    {
+      "cumulative_seconds": 26.392319699,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/rl/smdp_actor_critic.py",
+      "function": "act_lower",
+      "line": 2742,
+      "primitive_calls": 53384,
+      "self_seconds": 0.6840522560000001,
+      "total_calls": 53384
+    },
+    {
+      "cumulative_seconds": 0.674704399,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "function": "__getattr__",
+      "line": 1918,
+      "primitive_calls": 1231047,
+      "self_seconds": 0.674704399,
+      "total_calls": 1231047
+    },
+    {
+      "cumulative_seconds": 0.675779688,
+      "file": "~",
+      "function": "<built-in method _imp.create_dynamic>",
+      "line": 0,
+      "primitive_calls": 53,
+      "self_seconds": 0.669842161,
+      "total_calls": 57
+    },
+    {
+      "cumulative_seconds": 0.628786821,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/fromnumeric.py",
+      "function": "_sum_dispatcher",
+      "line": 2344,
+      "primitive_calls": 4846702,
+      "self_seconds": 0.628786821,
+      "total_calls": 4846702
+    },
+    {
+      "cumulative_seconds": 0.672997339,
+      "file": "/home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/lib/python3.10/site-packages/numpy/_core/_ufunc_config.py",
+      "function": "inner",
+      "line": 465,
+      "primitive_calls": 40382,
+      "self_seconds": 0.6140554370000001,
+      "total_calls": 40382
+    },
+    {
+      "cumulative_seconds": 0.599730192,
+      "file": "~",
+      "function": "<built-in method torch._C._get_tracing_state>",
+      "line": 0,
+      "primitive_calls": 1136994,
+      "self_seconds": 0.599730192,
+      "total_calls": 1136994
+    },
+    {
+      "cumulative_seconds": 0.5981042790000001,
+      "file": "~",
+      "function": "<method 'append' of 'list' objects>",
+      "line": 0,
+      "primitive_calls": 5774126,
+      "self_seconds": 0.5981042790000001,
+      "total_calls": 5774126
+    },
+    {
+      "cumulative_seconds": 1.228585462,
+      "file": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl/experiments/mujoco/control_validation.py",
+      "function": "_raw_projection_target",
+      "line": 826,
+      "primitive_calls": 106768,
+      "self_seconds": 0.588709543,
+      "total_calls": 106768
+    }
+  ],
+  "total_calls": 519619333,
+  "wall_seconds": 788.6765580428764
+}

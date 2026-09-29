@@ -1,0 +1,37 @@
+{
+  "artifact_contract": {
+    "server_only": [
+      "checkpoint.pt",
+      "training_history.json"
+    ],
+    "synced": [
+      "diagnostic_summary.json",
+      "diagnostic_rows.csv"
+    ]
+  },
+  "decision_rule": "continue projection work only when avoidable budget regret exceeds 1e-7; otherwise move to learned-policy feasibility constraints",
+  "diagnostic_code_revision": "50fa967174d49ccdf8134df9471d636c3cc7d30b",
+  "diagnostic_protocol_version": "mujoco_v17_5_feasibility_normalized_projection_diagnostic_v1",
+  "diagnostic_source_manifest_sha256": "e1870eb33ddb034120eb0c42e5b1164845cd8f5a777edbc1961bf9d947f75357",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "rejected_v17_4_path_reuse_development_diagnostic_not_confirmatory",
+  "optimizer_seeds": [
+    3105897127
+  ],
+  "scheduler_contract": {
+    "binding_reason": "the reused checkpoint exists only on node003 and remains server-only",
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 1024,
+    "require_node": "node003",
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "source_checkpoint_algorithm_revision": "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c",
+  "source_checkpoint_protocol_version": "freq_hrl_mujoco_shared_core_v17_4_streaming_audit_projection",
+  "source_run_name": "mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1",
+  "status": "registered_before_diagnostic_replay"
+}

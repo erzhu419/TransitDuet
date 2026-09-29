@@ -1,0 +1,259 @@
+{
+  "analysis_contract": "pre_registered_transition_structure_and_reconstruction_rms_recomputed_directly_absolute_band_budgets_and_feasibility_legacy_protocol_flag_diagnostic_only_v2",
+  "cell_count": 3,
+  "cells": [
+    {
+      "candidate_summary": {
+        "joint_merit": 2.4610436201097077,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0035564969601090657,
+        "max_additive_clip_excess": 0.12356770038604736,
+        "max_lower_budget_violation_rms": 0.03510085656365312,
+        "max_responsibility_reconstruction_rms": 6.121988932588365e-09,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 0.00863240797737971,
+        "mean_lower_budget_satisfied_rate": 0.6462874999999999,
+        "mean_upper_budget_feasible_rate": 0.9755083333333333,
+        "reward": 739.8031656381511,
+        "upper_hf_power": 0.0049767574431776075
+      },
+      "control_summary": {
+        "joint_merit": 4.188099229927704,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.00894753176621209,
+        "max_additive_clip_excess": 0.12356770038604736,
+        "max_lower_budget_violation_rms": 0.03510085656365312,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 0.00863240797737971,
+        "mean_lower_budget_satisfied_rate": 0.6462874999999999,
+        "mean_upper_budget_feasible_rate": 0.9755083333333333,
+        "reward": 739.8031656381511,
+        "upper_hf_power": 0.0012511922691996196
+      },
+      "environment": "HalfCheetah-v5",
+      "gates": {
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": true,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_absolute_budget": false,
+        "lower_lf_reduction": true,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_budget_feasibility": false,
+        "upper_hf_absolute_budget": true
+      },
+      "joint_merit_relative_reduction": 0.41237218007554444,
+      "lower_lf_relative_reduction": 0.6025164198310862,
+      "optimizer_seed": 3105897127,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 1.4901161193847656e-08,
+          "AdditiveActionClipExcessRMS": 1.5009852909197985e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": -2.977612047076674
+    },
+    {
+      "candidate_summary": {
+        "joint_merit": 10.637526846947969,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0221787328835983,
+        "max_additive_clip_excess": 0.39916175603866577,
+        "max_lower_budget_violation_rms": 0.13776335094053274,
+        "max_responsibility_reconstruction_rms": 1.795992366782423e-08,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 2.2528630347724226e-17,
+        "mean_lower_budget_satisfied_rate": 0.2827287197570771,
+        "mean_upper_budget_feasible_rate": 1.0,
+        "reward": 179.5529798970264,
+        "upper_hf_power": 0.00454284863807549
+      },
+      "control_summary": {
+        "joint_merit": 28.682193594110473,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0607934625113658,
+        "max_additive_clip_excess": 0.39916175603866577,
+        "max_lower_budget_violation_rms": 0.13776335094053274,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 2.2528630347724226e-17,
+        "mean_lower_budget_satisfied_rate": 0.2827287197570771,
+        "mean_upper_budget_feasible_rate": 1.0,
+        "reward": 179.5529798970264,
+        "upper_hf_power": 0.009774690046568857
+      },
+      "environment": "Hopper-v5",
+      "gates": {
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": true,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_absolute_budget": false,
+        "lower_lf_reduction": true,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_budget_feasibility": true,
+        "upper_hf_absolute_budget": true
+      },
+      "joint_merit_relative_reduction": 0.6291243620525505,
+      "lower_lf_relative_reduction": 0.6351789819595847,
+      "optimizer_seed": 3105897127,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 0.0,
+          "AdditiveActionClipExcessRMS": 1.1808544558844503e-09,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": false,
+      "upper_hf_relative_reduction": 0.5352437144878947
+    },
+    {
+      "candidate_summary": {
+        "joint_merit": 0.9407660668967339,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0016908052682744641,
+        "max_additive_clip_excess": 0.08017310500144958,
+        "max_lower_budget_violation_rms": 0.034290141401814786,
+        "max_responsibility_reconstruction_rms": 1.7120337136895138e-08,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 8.947007325097831e-18,
+        "mean_lower_budget_satisfied_rate": 0.9026213838434728,
+        "mean_upper_budget_feasible_rate": 1.0,
+        "reward": 282.27906558508886,
+        "upper_hf_power": 0.0010765051333661018
+      },
+      "control_summary": {
+        "joint_merit": 7.870302600780474,
+        "legacy_protocol_valid_rate": 1.0,
+        "lower_lf_power": 0.0176855280861979,
+        "max_additive_clip_excess": 0.08017310500144958,
+        "max_lower_budget_violation_rms": 0.034290141401814786,
+        "max_responsibility_reconstruction_rms": 0.0,
+        "max_router_reconstruction_rms": 0.0,
+        "max_upper_budget_violation_rms": 8.947007325097831e-18,
+        "mean_lower_budget_satisfied_rate": 0.9026213838434728,
+        "mean_upper_budget_feasible_rate": 1.0,
+        "reward": 282.27906558508886,
+        "upper_hf_power": 0.00017910787017102884
+      },
+      "environment": "Walker2d-v5",
+      "gates": {
+        "executed_action_trace_exact": true,
+        "explicit_protocol_structure_valid": true,
+        "joint_merit_reduction": true,
+        "latent_metrics_exact": true,
+        "latent_policy_trace_exact": true,
+        "lower_lf_absolute_budget": true,
+        "lower_lf_reduction": true,
+        "responsibility_reconstruction_exact": true,
+        "reward_numeric_exact": true,
+        "reward_trace_exact": true,
+        "router_reconstruction_exact": true,
+        "upper_budget_feasibility": true,
+        "upper_hf_absolute_budget": true
+      },
+      "joint_merit_relative_reduction": 0.8804663410523197,
+      "lower_lf_relative_reduction": 0.9043961107616572,
+      "optimizer_seed": 3105897127,
+      "paired_audit": {
+        "all_trace_hashes_match": true,
+        "metric_max_abs_difference": {
+          "AdditiveActionClipExcessMax": 2.2351741790771484e-08,
+          "AdditiveActionClipExcessRMS": 6.782603960863354e-10,
+          "LatentLowerLFDriftAbs": 0.0,
+          "LatentUpperHFPowerAbs": 0.0,
+          "episode_return": 0.0
+        },
+        "path_count": 40,
+        "trace_mismatches": {
+          "ExecutedActionTraceSHA256": 0,
+          "LatentPolicyTraceSHA256": 0,
+          "RewardTraceSHA256": 0
+        }
+      },
+      "supported": true,
+      "upper_hf_relative_reduction": -5.010373147411974
+    }
+  ],
+  "claim_boundary": "development paired intervention only; no reward improvement, training-seed uncertainty, or confirmatory claim",
+  "development_protocol_version": "mujoco_v17_4_streaming_audit_projection_preflight_v1",
+  "eligible_for_streaming_projection_multiseed": false,
+  "evaluation_row_count": 240,
+  "evidence_role": "paired_streaming_audit_projection_development_not_confirmatory",
+  "frozen_algorithm_revision": "91451c1ee0b3bbc488152fc1b4994a3ed5e0436c",
+  "frozen_source_manifest_sha256": "f371ecffe5182d83c778ba42033ae7f44f50881aa635924ff8f406eaa7927ab6",
+  "gate_counts": {
+    "executed_action_trace_exact": 3,
+    "explicit_protocol_structure_valid": 3,
+    "joint_merit_reduction": 3,
+    "latent_metrics_exact": 3,
+    "latent_policy_trace_exact": 3,
+    "lower_lf_absolute_budget": 1,
+    "lower_lf_reduction": 3,
+    "responsibility_reconstruction_exact": 3,
+    "reward_numeric_exact": 3,
+    "reward_trace_exact": 3,
+    "router_reconstruction_exact": 3,
+    "upper_budget_feasibility": 2,
+    "upper_hf_absolute_budget": 3
+  },
+  "paired_path_count": 120,
+  "scheduler_node_counts": {
+    "node003": 3
+  },
+  "scheduler_tasks": {
+    "Freq-HRL/mujoco-v17-4-streaming-audit-projection-preflight-v1/mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1/HalfCheetah-v5/rep-3105897127": {
+      "node": "node003",
+      "task_id": "t85521"
+    },
+    "Freq-HRL/mujoco-v17-4-streaming-audit-projection-preflight-v1/mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1/Hopper-v5/rep-3105897127": {
+      "node": "node003",
+      "task_id": "t85522"
+    },
+    "Freq-HRL/mujoco-v17-4-streaming-audit-projection-preflight-v1/mujoco_v17_4_streaming_audit_projection_preflight_20260831_r1/Walker2d-v5/rep-3105897127": {
+      "node": "node003",
+      "task_id": "t85523"
+    }
+  },
+  "selection_contract": {
+    "claim_boundary": "single-optimizer paired development evidence only; no reward, training, cross-seed, or publication claim",
+    "expansion_rule": "advance to fresh optimizer multiseed only if all three environments pass",
+    "failure_rule": "any mechanics, feasibility, or frequency failure stops expansion",
+    "feasibility_gate": "mean current-step upper-budget feasibility is at least 0.99 and maximum reported upper-budget violation RMS is at most 1e-7",
+    "frequency_gate": "every environment requires candidate upper HPF8 power at most 0.075^2; candidate lower LPF32 power at most 0.0475^2 and at least 10% below control; normalized joint merit must improve by at least 10%",
+    "mechanics_gate": "all reward, executed-action, and latent-policy traces match exactly; explicit transition structure is valid; router and responsibility reconstruction RMS are at most 1e-7",
+    "paired_intervention": "the same frozen checkpoint and heldout path is evaluated at strengths zero and one",
+    "training": "one strength-zero policy with complete FIR audit state is trained once per environment",
+    "unit": "environment_by_single_fresh_optimizer_seed"
+  },
+  "status": "streaming_audit_projection_preflight_not_supported"
+}

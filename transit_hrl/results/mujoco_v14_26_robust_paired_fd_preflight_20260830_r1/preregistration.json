@@ -1,0 +1,134 @@
+{
+  "actor_direction_source": "paired_finite_difference",
+  "actor_state_limit_per_level": 32768,
+  "actor_step_rms_values": [
+    1e-07,
+    1e-06,
+    1e-05,
+    3e-05,
+    0.0001
+  ],
+  "actor_update_scope": "output_bias",
+  "anchor_run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "critic_collection_mode": "paired_output_bias",
+  "critic_ensemble_seeds": [
+    174059501,
+    3501542227,
+    2143749919,
+    424079015
+  ],
+  "critic_epochs": 40,
+  "critic_hidden_dim": 64,
+  "critic_holdout_roots": [
+    3977343434,
+    2707398341,
+    3700120474,
+    3747428517,
+    817987063,
+    382230945,
+    1098435176,
+    2211779587
+  ],
+  "critic_intervention_bias_rms": 0.25,
+  "critic_intervention_variants": [
+    "control",
+    "lower_minus",
+    "lower_plus",
+    "upper_minus",
+    "upper_plus"
+  ],
+  "critic_learning_rate": 0.001,
+  "critic_minibatch_size": 1024,
+  "critic_minimum_action_permutation_mse_increase": 0.0,
+  "critic_minimum_holdout_r2": 0.0,
+  "critic_train_roots": [
+    2541714852,
+    3830334948,
+    2901952511,
+    1877922706,
+    749194464,
+    4087995062,
+    1654168131,
+    2045354363
+  ],
+  "cvar_alpha": 0.5,
+  "design_roots": [
+    2866239657,
+    4161094575,
+    4033735344,
+    1662612561,
+    1576919891,
+    1770205521,
+    1279217467,
+    3707314250,
+    2095263217,
+    2298735595,
+    3455777110,
+    100767080,
+    797763680,
+    1490513946,
+    2351071295,
+    3614932939
+  ],
+  "development_protocol_version": "mujoco_v14_26_robust_paired_fd_preflight_v1",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_v14_25_robust_paired_fd_actor_preflight_not_confirmatory",
+  "lower_cost_return_horizon_decisions": 32,
+  "minimum_paired_holdout_cosine": 0.0,
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "risk_mode": "mode_mean",
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 24,
+    "ram_mb_per_task": 16384,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "actor_direction": "coordinate_median_of_pathwise_antithetic_output_bias_finite_differences_with_equal_rms_upper_lower_blocks",
+    "critic": "four_bootstrap_action_conditioned_cost_critics_per_policy_level",
+    "critic_data": "deterministic_control_upper_plus_minus_and_lower_plus_minus_output_bias_interventions_paired_by_environment_path",
+    "critic_gate": "upper_and_lower_holdout_r2_and_action_permutation_gain_above_zero_plus_positive_train_holdout_paired_direction_cosine_overall_and_within_every_disturbance_mode",
+    "design_paths": "sixteen_fresh_unintervened_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "intervention": "level_isolated_antithetic_raw_actor_mean_bias_with_rms_0p25",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "target": "upper_eight_decision_and_lower_thirty_two_decision_duration_discounted_native_cost_returns",
+    "validation_paths": "sixteen_independent_unintervened_roots_crossed_with_four_modes"
+  },
+  "source_revision": "4a517c45cae3cce37909975beda4b6854bf3f864",
+  "status": "frozen_before_v14_26_preflight_outcome_access",
+  "upper_cost_return_horizon_decisions": 8,
+  "validation_roots": [
+    1558133677,
+    96888691,
+    1645388073,
+    3488787739,
+    3487742878,
+    861932601,
+    591676869,
+    714467944,
+    1277609673,
+    3135056609,
+    1693928031,
+    3864732639,
+    3129813184,
+    142496086,
+    3476378228,
+    205833719
+  ]
+}

@@ -1,0 +1,512 @@
+{
+  "analysis_version": "multiscale_goal_control_stage1_analysis_v1",
+  "band_swap_is_boundary_not_success_gate": true,
+  "cell_count": 160,
+  "confidence": 0.95,
+  "evaluation_row_count": 1280,
+  "independent_training_replicate_count": 8,
+  "mainline_hrl_increment_status": "not_supported",
+  "protocol_version": "multiscale_goal_control_stage1_v1",
+  "scenarios": {
+    "band_swap": {
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": 0.6824092306882621,
+          "ci_upper": 2.1275509916304562,
+          "confidence": 0.95,
+          "mean_improvement": 1.4049801111593592,
+          "n": 8,
+          "status": "supported"
+        },
+        "tracking_rmse": {
+          "ci_lower": 0.0019837095671245333,
+          "ci_upper": 0.0053925454518978875,
+          "confidence": 0.95,
+          "mean_improvement": 0.0036881275095112104,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "hierarchy_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -2.002275244661405,
+          "ci_upper": -0.3996115212481469,
+          "confidence": 0.95,
+          "mean_improvement": -1.200943382954776,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "joint_status": "contradicted",
+        "tracking_rmse": {
+          "ci_lower": -0.006033724269982354,
+          "ci_upper": -0.0016518096403184196,
+          "confidence": 0.95,
+          "mean_improvement": -0.003842766955150387,
+          "n": 8,
+          "status": "contradicted"
+        }
+      },
+      "multiscale_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -0.5285989695344755,
+          "ci_upper": 0.9366724259436419,
+          "confidence": 0.95,
+          "mean_improvement": 0.20403672820458318,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.0018801891630314974,
+          "ci_upper": 0.0015709102717531445,
+          "confidence": 0.95,
+          "mean_improvement": -0.00015463944563917642,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_hrl_vs_history_hrl": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": 0.6720171666308157,
+          "ci_upper": 1.8145408099797327,
+          "confidence": 0.95,
+          "mean_improvement": 1.2432789883052742,
+          "n": 8,
+          "status": "supported"
+        },
+        "joint_status": "supported",
+        "tracking_rmse": {
+          "ci_lower": 0.0018141498816746206,
+          "ci_upper": 0.005135688031147267,
+          "confidence": 0.95,
+          "mean_improvement": 0.003474918956410944,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "multiscale_vs_causal_filter": {
+        "baseline": "flat_causal_filter",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -0.6838788960770344,
+          "ci_upper": 0.4096473760947049,
+          "confidence": 0.95,
+          "mean_improvement": -0.13711575999116477,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.0011162671929342504,
+          "ci_upper": 0.002233639761491457,
+          "confidence": 0.95,
+          "mean_improvement": 0.0005586862842786033,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "representation_flat": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -0.733334972273419,
+          "ci_upper": 0.40993272656524904,
+          "confidence": 0.95,
+          "mean_improvement": -0.161701122854085,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.0012996103294504776,
+          "ci_upper": 0.0008731932232499448,
+          "confidence": 0.95,
+          "mean_improvement": -0.00021320855310026643,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      }
+    },
+    "clean": {
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": -9.241529470527798,
+          "ci_upper": 37.13958454346904,
+          "confidence": 0.95,
+          "mean_improvement": 13.949027536470624,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "tracking_rmse": {
+          "ci_lower": -0.03420197054339856,
+          "ci_upper": 0.1747487271419858,
+          "confidence": 0.95,
+          "mean_improvement": 0.07027337829929362,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "hierarchy_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -39.618491945512204,
+          "ci_upper": 6.879922305105723,
+          "confidence": 0.95,
+          "mean_improvement": -16.36928482020324,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.1910317153833209,
+          "ci_upper": 0.01578110148609499,
+          "confidence": 0.95,
+          "mean_improvement": -0.08762530694861295,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -4.497245289284374,
+          "ci_upper": -0.3432692781808613,
+          "confidence": 0.95,
+          "mean_improvement": -2.4202572837326173,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "joint_status": "contradicted",
+        "tracking_rmse": {
+          "ci_lower": -0.031178637355122007,
+          "ci_upper": -0.003525219943516674,
+          "confidence": 0.95,
+          "mean_improvement": -0.01735192864931934,
+          "n": 8,
+          "status": "contradicted"
+        }
+      },
+      "multiscale_hrl_vs_history_hrl": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -8.297994420100384,
+          "ci_upper": 37.95440629774703,
+          "confidence": 0.95,
+          "mean_improvement": 14.82820593882332,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.027384258956410626,
+          "ci_upper": 0.18158265081022867,
+          "confidence": 0.95,
+          "mean_improvement": 0.07709919592690903,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_vs_causal_filter": {
+        "baseline": "flat_causal_filter",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": 6.058805144970443,
+          "ci_upper": 8.660702263605222,
+          "confidence": 0.95,
+          "mean_improvement": 7.359753704287833,
+          "n": 8,
+          "status": "supported"
+        },
+        "joint_status": "supported",
+        "tracking_rmse": {
+          "ci_lower": 0.04686377978215573,
+          "ci_upper": 0.0641992412759647,
+          "confidence": 0.95,
+          "mean_improvement": 0.05553151052906022,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "representation_flat": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -0.8976647066370951,
+          "ci_upper": 2.6560215113424883,
+          "confidence": 0.95,
+          "mean_improvement": 0.8791784023526965,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.004061606002731437,
+          "ci_upper": 0.017713241257962233,
+          "confidence": 0.95,
+          "mean_improvement": 0.0068258176276153985,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      }
+    },
+    "slow_signal_fast_observation_noise": {
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": -0.40007606204721924,
+          "ci_upper": 40.37882109825623,
+          "confidence": 0.95,
+          "mean_improvement": 19.989372518104506,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "tracking_rmse": {
+          "ci_lower": 0.010203460834856432,
+          "ci_upper": 0.19736811403538082,
+          "confidence": 0.95,
+          "mean_improvement": 0.10378578743511863,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "hierarchy_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -44.039698704995935,
+          "ci_upper": -0.6232705877483156,
+          "confidence": 0.95,
+          "mean_improvement": -22.331484646372125,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "joint_status": "contradicted",
+        "tracking_rmse": {
+          "ci_lower": -0.21894519092208314,
+          "ci_upper": -0.017472257995649318,
+          "confidence": 0.95,
+          "mean_improvement": -0.11820872445886624,
+          "n": 8,
+          "status": "contradicted"
+        }
+      },
+      "multiscale_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -4.941598448585699,
+          "ci_upper": 0.25737419205046175,
+          "confidence": 0.95,
+          "mean_improvement": -2.342112128267619,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.0307296094779749,
+          "ci_upper": 0.0018837354304796633,
+          "confidence": 0.95,
+          "mean_improvement": -0.014422937023747619,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_hrl_vs_history_hrl": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -0.9448019650640873,
+          "ci_upper": 40.843577668273625,
+          "confidence": 0.95,
+          "mean_improvement": 19.94938785160477,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "mixed",
+        "tracking_rmse": {
+          "ci_lower": 0.008507578047796976,
+          "ci_upper": 0.20457662111210825,
+          "confidence": 0.95,
+          "mean_improvement": 0.10654209957995261,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "multiscale_vs_causal_filter": {
+        "baseline": "flat_causal_filter",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": 3.9821360685568736,
+          "ci_upper": 8.610128074644063,
+          "confidence": 0.95,
+          "mean_improvement": 6.296132071600468,
+          "n": 8,
+          "status": "supported"
+        },
+        "joint_status": "supported",
+        "tracking_rmse": {
+          "ci_lower": 0.029752312722038873,
+          "ci_upper": 0.06233468549977908,
+          "confidence": 0.95,
+          "mean_improvement": 0.04604349911090898,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "representation_flat": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -1.4464941729532175,
+          "ci_upper": 1.3665248399537422,
+          "confidence": 0.95,
+          "mean_improvement": -0.03998466649973764,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.010497024080976823,
+          "ci_upper": 0.016009648370644808,
+          "confidence": 0.95,
+          "mean_improvement": 0.0027563121448339924,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      }
+    },
+    "slow_target_fast_force": {
+      "factorial_interaction": {
+        "episode_return": {
+          "ci_lower": -7.303084156608861,
+          "ci_upper": 35.517515722081804,
+          "confidence": 0.95,
+          "mean_improvement": 14.107215782736471,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "tracking_rmse": {
+          "ci_lower": -0.027909784101188523,
+          "ci_upper": 0.17060846393371837,
+          "confidence": 0.95,
+          "mean_improvement": 0.07134933991626492,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "hierarchy_history": {
+        "baseline": "flat_history",
+        "candidate": "hrl_history",
+        "episode_return": {
+          "ci_lower": -37.891955691693624,
+          "ci_upper": 4.862760624269821,
+          "confidence": 0.95,
+          "mean_improvement": -16.5145975337119,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.18595486262417332,
+          "ci_upper": 0.008863647678329284,
+          "confidence": 0.95,
+          "mean_improvement": -0.08854560747292202,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_hrl_vs_flat_multiscale": {
+        "baseline": "flat_multiscale",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -4.52813468649807,
+          "ci_upper": -0.2866288154527874,
+          "confidence": 0.95,
+          "mean_improvement": -2.4073817509754285,
+          "n": 8,
+          "status": "contradicted"
+        },
+        "joint_status": "contradicted",
+        "tracking_rmse": {
+          "ci_lower": -0.03125015690005875,
+          "ci_upper": -0.003142378213255439,
+          "confidence": 0.95,
+          "mean_improvement": -0.017196267556657093,
+          "n": 8,
+          "status": "contradicted"
+        }
+      },
+      "multiscale_hrl_vs_history_hrl": {
+        "baseline": "hrl_history",
+        "candidate": "hrl_multiscale",
+        "episode_return": {
+          "ci_lower": -6.401103311503039,
+          "ci_upper": 36.391703405373605,
+          "confidence": 0.95,
+          "mean_improvement": 14.99530004693528,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.01912343841194908,
+          "ci_upper": 0.17928533279835004,
+          "confidence": 0.95,
+          "mean_improvement": 0.08008094719320048,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      },
+      "multiscale_vs_causal_filter": {
+        "baseline": "flat_causal_filter",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": 6.038677455105616,
+          "ci_upper": 8.694556851888816,
+          "confidence": 0.95,
+          "mean_improvement": 7.3666171534972165,
+          "n": 8,
+          "status": "supported"
+        },
+        "joint_status": "supported",
+        "tracking_rmse": {
+          "ci_lower": 0.04814548723393637,
+          "ci_upper": 0.06471776475655591,
+          "confidence": 0.95,
+          "mean_improvement": 0.05643162599524614,
+          "n": 8,
+          "status": "supported"
+        }
+      },
+      "representation_flat": {
+        "baseline": "flat_history",
+        "candidate": "flat_multiscale",
+        "episode_return": {
+          "ci_lower": -0.7643482609307757,
+          "ci_upper": 2.540516789328395,
+          "confidence": 0.95,
+          "mean_improvement": 0.8880842641988096,
+          "n": 8,
+          "status": "inconclusive"
+        },
+        "joint_status": "inconclusive",
+        "tracking_rmse": {
+          "ci_lower": -0.0017187623711250183,
+          "ci_upper": 0.01918197692499614,
+          "confidence": 0.95,
+          "mean_improvement": 0.00873160727693556,
+          "n": 8,
+          "status": "inconclusive"
+        }
+      }
+    }
+  }
+}

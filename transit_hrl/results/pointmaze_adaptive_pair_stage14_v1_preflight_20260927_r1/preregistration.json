@@ -1,0 +1,31 @@
+{
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "continuation": "frozen_stage12_trigger_on_each_arms_own_observations",
+  "evidence_role": "mechanism_diagnostic_only",
+  "optimizer_roots": [
+    208001
+  ],
+  "pairs_per_class": 1,
+  "preflight": true,
+  "protocol": "pointmaze_adaptive_pair_stage14_v1_diagnostic",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 1536,
+    "require_node": null
+  },
+  "source_protocol": "pointmaze_timing_pair_stage12_v1_development",
+  "source_revision": "161a55b99ffdf6fa1445b427fd4121c07a4868c6"
+}

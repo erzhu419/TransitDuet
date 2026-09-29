@@ -1,0 +1,845 @@
+{
+  "anchor_cell_count": 9,
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "worst_mode_trainreplay",
+    "l2_mode_trainreplay",
+    "l2_path_trainreplay",
+    "l2_path_freeze_trainreplay",
+    "l2_path_freeze_crossreplay"
+  ],
+  "cell_count": 81,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9585d6f5cef52e76467275e315b807b77787228b73b8effab4640ee8313deaff",
+      "optimizer_seed": 3493980176,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/HalfCheetah-v5/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/HalfCheetah-v5/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/HalfCheetah-v5/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "6c8a6ed0fd56e5f9954b092c52d33790a44a71648e790d2b7bd23f43ae89136a",
+      "optimizer_seed": 3493980176,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Hopper-v5/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b1624e9647a38536b1534b3a5c93e09abd889c13de80bb54de92b566da89fe49",
+      "optimizer_seed": 4020259488,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Hopper-v5/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "7afe1348f9d3bf721f78c9c43fd057f18b998e7d008847ddd7d2bb4f7159f277",
+      "optimizer_seed": 583213049,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Hopper-v5/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Walker2d-v5/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Walker2d-v5/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "closed_loop_guard_pretrain_anchor",
+      "checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/anchors/Walker2d-v5/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "c779ddb3b91943715b13ce0fe59fcf2eb844ca8f14df33eae286aff347777ac7",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b9c7a5ec27880e4e9eb584cb173614448092e7474a11e95f3805df27faa33353",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "5fffc2ee53175844abbf62ed88d1ab8f46f149ac5a26be2857d364224ee88f68",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "6d753d7eaa8eb016f6af42c46ed9e3cc4822226a5ff33ca8dcc06cb6f0fea4d2",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "43307b16d7ee1b74dd8f3983da0ee57bfc87215e74a98b891ec484452b4c7f0a",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "7e3ed78121012bf1dd201b3f9423086990520848db76ab14271a4f8bf34a1c54",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "c548ad8769c9a33f1203584fb4943573d2d10b35ce714e94083c805ecc894fbf",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "fa910b6de6dc3e161cf2a2012779b9f3020940c418de4ac0f099a8ed5fa7c224",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "b2d921a4b71e0545e04f135a7dcf80ef2007a2c4b00aef89ce61408a1cb40076",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "541fe420083b0cc958f94bd33fe5d1af2b046db5e36eb8fc70c457003e04b12b",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "f70e31949a00f0891f4465b10e71805b6cefdb0f51f4391ecee3d6af062a225d",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "8d25a6c2d62ad8a2b7f534cfd5143f685def5740eba008309c90586e785bdc83",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9585d6f5cef52e76467275e315b807b77787228b73b8effab4640ee8313deaff",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "1639c661e6d00d312912d04e86f321870bda8043c28e38f70f1f77aba8637cdc",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "092c90e6b37cd56026d3ae80a91c53afc54b7473ea3a2d5a24b18243cc7de0e1",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/worst_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "607bca124b3ebf6a5fd16e67f53fd928ac417aaa1efe16054a741ed31985505b",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/worst_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "a35a22802aaf103aa41bbe880c0595fcc9d06bc1ac863948bbaf2c39c9b84f03",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/worst_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "1e5ca5cf6802e9990009b5f02cf6acb8a4c64bddc7b95e9f9d10bbf86be8c6ef",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "7b74712cfb5b87d369188a09886cc00eb7344c02d9985448b0948f6293fbc51c",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "5129c97f6cac14675b8c3b8d9c9169d31483978c2d45c058c71f21b69ba74881",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "912742cb0c99ff088df575026d20239f92c5d81507ffe4d7e2587fc4f298f0ca",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "fd70f12aad8d9c6cfa262535025b41a730dcd099d0691b1a1ee0fd2be0d8f8c5",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9585d6f5cef52e76467275e315b807b77787228b73b8effab4640ee8313deaff",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "5129c97f6cac14675b8c3b8d9c9169d31483978c2d45c058c71f21b69ba74881",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "912742cb0c99ff088df575026d20239f92c5d81507ffe4d7e2587fc4f298f0ca",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "4f075d7100f4da1e01ccb9ad008fe2437cf786022980c8b49755f327ba0110d3",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9585d6f5cef52e76467275e315b807b77787228b73b8effab4640ee8313deaff",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "6eb0c77799683e4af857c6a4ef5c7d08edb1c5b590556564d11c9b4f106e0c9e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "82ace6b118466c3082ba97ca883e2b243d2e1ba8b0737502a40b5b11e7d6743e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "10f6ca8b89f0bf67ce9609fbb6fd7e81fe4e043ca0af367a60308976e8d20823",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "4f075d7100f4da1e01ccb9ad008fe2437cf786022980c8b49755f327ba0110d3",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9585d6f5cef52e76467275e315b807b77787228b73b8effab4640ee8313deaff",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_crossreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "4bdef56ffdae03f85dc96c70ecd696d36a57543514ba6d78af2b32301c4f4d26",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "6eb0c77799683e4af857c6a4ef5c7d08edb1c5b590556564d11c9b4f106e0c9e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "b8975a42572e63303cf957ff78eac8fed77083ce7f322c925af4692794a8c4d6",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_crossreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "6eb141b69fbd074ab46c9ee6082e4c48d49a2b124206a45000e9ebd3229bf5ce",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "82ace6b118466c3082ba97ca883e2b243d2e1ba8b0737502a40b5b11e7d6743e",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "a7d772cb4d46d5f191ac67758eb335b3960c4749387e3d3be744407ced8902ba",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/HalfCheetah-v5/l2_path_freeze_crossreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "1e88b1c8ea8284355e926ceabd4fa73d3f27895f1f7cbc36739ac7e8abd39e13",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "246999e6f644ab51910f6b408337aab9c72f78ed52723092af8a3aa5631c7aa0",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "99e81f482b769ae306af2879c79b187d87ae9b1cdb194455d5565a6986e6450d",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "f977c6a207feddec6a4feb68aa844b03660f59bbd095347aa2dbb5f504076716",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "575f8ec40200a70dc4a7d796ae6ee7392c2d70b66c3ce187eed78be945158f1f",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "49fc2cf91acf58262ac9021a6ee4e4cb2fc18f51eb12288797ee404ee210600a",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "bc26b40a64da3ecfd582726502080141761b2dfec02d5b2946891076ce43863d",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "41e845a22e52e65a73138eadfb86b03b7b6082b24352ef9789ce713175dd2ddc",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s050_projection_calibration/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "c245b1f81a016d62cc4087212988aa612838977ca8ffe0bf99d7cd3e4089ba9b",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "bdac3a1cace0feab64c1535698b771dee66193988d0f008cf5c4fccb9ecb9cc1",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s050_projection_calibration/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "c54234251ebd991309f6632939da40fe71619c534fe86ebeaeff33e8f98880d1",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b046a95a47ddcc1d391f28e56437db97a65c541e0f8f7f866a80afd5a3b7395d",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/mean_s050_projection_calibration/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "6c8a6ed0fd56e5f9954b092c52d33790a44a71648e790d2b7bd23f43ae89136a",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/paired_s050_d000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b1624e9647a38536b1534b3a5c93e09abd889c13de80bb54de92b566da89fe49",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/paired_s050_d000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "e535618b37b9d7aa0a9441b3fc9acc276526f3b9bfed457d626725a635b03fc6",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "5427e4e813cc15a9df406f1b6e60749aeeff104e0372a73a3e3b871d1c805ff3",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/paired_s050_d000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "badfe885af30ee96d62ee138421da9cb09b1e1a81c965d8cf964c82a9fd7494c",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "dc5251e3e8bf439b1f833831bcb7a684bf6859852bb66b6fef32cf8b6b6a6ba1",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/worst_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "06b32540f2fe84177b146626866a65b6be47273369378bbac335e8d65a48d22f",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "0debf72a69cfc28e13a4d70204692e2fc3c0e58200fea6efee2a14b5cf859983",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/worst_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "e12e5d47fbbef35a176b5512718ceae8a677ccc99d498df82e84c3dbdabc9651",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "c417dde0d7d3d799ce8c3a286910065e2f7410f470f24931aff5a17499faeea2",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/worst_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "2e8facc09d76c747db6ee5cd1e7cbcff5db2c96efb3b65c2007e74f8cf27b54f",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "aa85f7e8970f40f0417e2d71d05f011773c6e5fa0322d29eb19ca8ce93ca05dd",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "2b2b7737acfb74d23832d0ef370412ec54eaf3337f3ccb42634bb9fa59fc95fb",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "1d8cc7abea7bca24da554905b3499f7df64e4f9e70e4a069414053e3217e0170",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "e6f27d15340b5e148120ea2e0c941d75f2dfb3aedccaccf54d2a98478151e734",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "12b60b84ee1963337150867993e02ef0fe5b1c6ac9967163df315244d1685f64",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "2fbe0aab1193d29e913ddf92f6b41609abbaf057e37f6ab57915bac4a7b68537",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "a2818922ef6b86baa5cb1078e72c44601e5a2519c92f6fb76caf8de9c4b7bdc0",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "f1bfcf741ac4a77d157fd632a2d7a441385a0ce629eb5b8208002bf761115d48",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b1624e9647a38536b1534b3a5c93e09abd889c13de80bb54de92b566da89fe49",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "4c487048a284187f99b1b015c35249d7e5e9afeb7941c5c2cb9c211a98335e7b",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "eaf110c55ec8f9d12d110e8b78459539815b24f53e2848e420f608c408088e8b",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "0d5dfb847f7e1e49ab78ca747505059fbf058e972088bbb60270336b93d3f7d3",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "6c8a6ed0fd56e5f9954b092c52d33790a44a71648e790d2b7bd23f43ae89136a",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "a3744a38e5e591996a8e601249b173d168cf7b4decab7be1438d0a57512b1b29",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b1624e9647a38536b1534b3a5c93e09abd889c13de80bb54de92b566da89fe49",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "b5e0868ea9c62a7be3be2eedd6ba4837b93a762f0935b06d4484537cf7dc474e",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "7afe1348f9d3bf721f78c9c43fd057f18b998e7d008847ddd7d2bb4f7159f277",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "fad8879cd9924db8f5668713be61bf66186ffec1c6fcb71e6938180b3f234774",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "0d5dfb847f7e1e49ab78ca747505059fbf058e972088bbb60270336b93d3f7d3",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "6c8a6ed0fd56e5f9954b092c52d33790a44a71648e790d2b7bd23f43ae89136a",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_crossreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "3efc94ee23ac7f7a86b1ebbf4207267b70c65837276527f04d94554ff7861abc",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "a3744a38e5e591996a8e601249b173d168cf7b4decab7be1438d0a57512b1b29",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "b1624e9647a38536b1534b3a5c93e09abd889c13de80bb54de92b566da89fe49",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_crossreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "cf632c2f8cb3c7e4470caf03ea62932e99b7f6e646cda1236faa47b2902de419",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "cd4bd4cb1a85ccadc77f88ad73c00aa3ba2807e57dd5cb74eb5c489c9bbc5172",
+      "environment": "Hopper-v5",
+      "frozen_parameter_sha256": "165ef95f8db1bfa5e03a3b17334accc6657eaf4708d612742e0deb9c87f93ed4",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Hopper-v5/l2_path_freeze_crossreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "be02491df240757de0cead1278d12bc0f92ae672bec5f688193ead2545665bd9",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "66d224713e6cc3047447099eb66f2e53d194cdca5354bbe833627c16b047f3a5",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "dadaabd6d30edb1ee1275c08eda7b4470646e79b21899bf37d725ef162291ed4",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "5c9e86a783e1082535b56d4ff9369e4e1ae9e6d9235c2745cd5b6e917754bd6c",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "8fab153efc02348ff3a456720e13fc1d1e04a48f0ba7daa94b50421dce393010",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "431c843f46e94895d843efaa060fcea91000c56998328278760e9becb893fdec",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "f9713c5c4f61e2a2c5f8e20238ceb4c583a859674ee44336dfbec91e6c792c02",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "e189655a56d43532076171f712545f54776357c339e70df9b9e6b22146960dee",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s050_projection_calibration/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "440f8819cc61ca7d66e3bb45526eb6aeb53d6c82e53108e04c8386a21f5dea5b",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "a29d97b553bcf61fa666b0a0f853563863e3f4ccfb99a27f3f8aba2e45b38b5c",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s050_projection_calibration/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "b17348d523ee29b04803960934a1fcdea277f434285f970bdc9c6a7277142020",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "2885a52955be1cf2d4c54d46430ced9fbbf430620477ecaec76a6800d3bb2227",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/mean_s050_projection_calibration/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/paired_s050_d000_control/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/paired_s050_d000_control/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/paired_s050_d000_control/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "95bf3e43662e0b53c8b6412630ce611d8d104e54cc311c2d1cc328743e887803",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "ae41e9181d8cc6ad1930418aab2a13bdb563a1989b72ecfc6cc1c309eec25e95",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/worst_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "ceb4335a0a39ae9c9a6dc2d40b6409ab6db51538223203bc2bdeb0a78738d898",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "83f39863a78716ebe244ec3b7d50eb02c895ec3e2f5cdf3c4219a4ee567201bd",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/worst_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "worst_mode_trainreplay",
+      "checkpoint_file_sha256": "8e952a4757e9c2129a9a4d23ee372977fd2774f849ee6ab59dba50f12210342d",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/worst_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "0993bc1329ca6172779812ce9e1860fb4ada9937c96311a16285744064f697c1",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_mode_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "b32bb2e8c1dbee2c5901095d903f32e1609dd1c3206aea83df1a2777ef989b1a",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_mode_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "l2_mode_trainreplay",
+      "checkpoint_file_sha256": "bc661604af82ed40c785c53d08068cb534de40b6186dbcabf54c353678d470c5",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_mode_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "0993bc1329ca6172779812ce9e1860fb4ada9937c96311a16285744064f697c1",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "b32bb2e8c1dbee2c5901095d903f32e1609dd1c3206aea83df1a2777ef989b1a",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "l2_path_trainreplay",
+      "checkpoint_file_sha256": "bc661604af82ed40c785c53d08068cb534de40b6186dbcabf54c353678d470c5",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "5991dd17cbbaa4476cb04da0913d8601959a9c275ca0b423baf414e5d85f259e",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_trainreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "12e1132a410621eb6300438966b358e8c61009f2bd93b2f8187dd6f3ba9e03ce",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_trainreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "l2_path_freeze_trainreplay",
+      "checkpoint_file_sha256": "16e1b1c9d37bbb0e3c7f5e3ad5f88c119e73f5847f5d865f3b138962c3af908e",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_trainreplay/replicate_583213049"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "134afe77e78512255629043ee1f56aee774fe496458faacf17eefd0b274a5a73",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "5991dd17cbbaa4476cb04da0913d8601959a9c275ca0b423baf414e5d85f259e",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "c337e0853e47827f6e2f035a3c84fa0550848ac6881a05d46ea3d7a09ca942b2",
+      "optimizer_seed": 3493980176,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_crossreplay/replicate_3493980176"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "aaa7a2f7e80f40cdc1376666cce84b5ec336c6767ce515d132df357231ccdf50",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "12e1132a410621eb6300438966b358e8c61009f2bd93b2f8187dd6f3ba9e03ce",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "6ddcb082a7fab7badfb8af4ad86fd74b0bf0dbccb074111d8fb05e8cf0ebec17",
+      "optimizer_seed": 4020259488,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_crossreplay/replicate_4020259488"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "79e70886b51d30d360c73de182f590c69d42a02b139aa2430b9bb59bee53a56c",
+      "arm": "l2_path_freeze_crossreplay",
+      "checkpoint_file_sha256": "16e1b1c9d37bbb0e3c7f5e3ad5f88c119e73f5847f5d865f3b138962c3af908e",
+      "environment": "Walker2d-v5",
+      "frozen_parameter_sha256": "bb8863d1e04dabe0b6521ea5ee99c0b905b1882f69fb36a7b3b09b907ff6991f",
+      "optimizer_seed": 583213049,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_16_crossed_restoration_mechanism_development_20260810_r5/cells/Walker2d-v5/l2_path_freeze_crossreplay/replicate_583213049"
+    }
+  ],
+  "continuation_cell_count": 72,
+  "development_protocol_version": "mujoco_v14_16_crossed_restoration_mechanism_screen_v2",
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": true,
+  "optimizer_seeds": [
+    3493980176,
+    4020259488,
+    583213049
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "status": "development_screen_complete_unanalyzed"
+}

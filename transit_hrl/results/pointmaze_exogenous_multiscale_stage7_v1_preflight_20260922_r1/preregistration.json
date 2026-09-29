@@ -1,0 +1,102 @@
+{
+  "algorithm_revision": "4ed9e8e131235f0f99844e8ea8bfeb737a68276f",
+  "artifacts": {
+    "checkpoints": "disabled",
+    "synced": [
+      "result.json"
+    ]
+  },
+  "cells": [
+    [
+      "flat_exogenous_history",
+      194001
+    ],
+    [
+      "flat_exogenous_multiscale_all",
+      194001
+    ],
+    [
+      "hrl_exogenous_history",
+      194001
+    ],
+    [
+      "hrl_exogenous_multiscale_all",
+      194001
+    ]
+  ],
+  "claim_gate": {
+    "hierarchy_x_multiscale_success_interaction": "positive_ci",
+    "hrl_multiscale_absolute_success_ci_lower": ">=0.50",
+    "hrl_multiscale_final_vs_untrained_return": "positive_ci",
+    "hrl_multiscale_final_vs_untrained_success": "positive_ci",
+    "hrl_multiscale_vs_flat_multiscale_success": "positive_ci",
+    "hrl_multiscale_vs_hrl_history_success": "positive_ci",
+    "primary_endpoint": "tracking_success_rate",
+    "sequential_root_extension": "forbidden",
+    "statistical_unit": "optimizer_seed_root"
+  },
+  "evidence_stage": "preflight",
+  "methods": [
+    "flat_exogenous_history",
+    "flat_exogenous_multiscale_all",
+    "hrl_exogenous_history",
+    "hrl_exogenous_multiscale_all"
+  ],
+  "optimizer_seeds": [
+    194001
+  ],
+  "options": {
+    "194001": {
+      "checkpoint_evaluation_interval": 1,
+      "checkpoint_rank_mode": "success_then_return",
+      "env_id": "PointMaze_UMaze-v3",
+      "evaluation": [
+        1890211
+      ],
+      "fast_period_seconds": 0.04,
+      "force_period_seconds": [
+        0.04,
+        0.04
+      ],
+      "force_rms": 0.12,
+      "history_seconds": 0.32,
+      "horizon": 64,
+      "iterations": 2,
+      "learning_rate": 0.0003,
+      "maximum_subgoal_delta": 0.75,
+      "reference_hidden_dim": 128,
+      "selection": [
+        1890101
+      ],
+      "target_speed": 1.0,
+      "train": [
+        1890011
+      ],
+      "upper_period_seconds": 0.25
+    }
+  },
+  "preflight": true,
+  "protocol": "pointmaze_exogenous_multiscale_stage7_v1_confirmation",
+  "runtime_expectations": {
+    "gymnasium": "1.2.0",
+    "gymnasium_robotics": "1.4.2",
+    "mujoco": "3.2.7",
+    "pettingzoo": "1.26.1",
+    "scipy": "1.13.1",
+    "torch": "2.5.1+cu121"
+  },
+  "runtime_protocol": "pointmaze_exogenous_frequency_routing_stage6_v1",
+  "scheduler": {
+    "cpu_per_cell": 1,
+    "nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "ram_mb_per_cell": 2560,
+    "require_node": null
+  }
+}

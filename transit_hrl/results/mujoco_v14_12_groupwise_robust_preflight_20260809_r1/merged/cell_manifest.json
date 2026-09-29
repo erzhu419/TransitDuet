@@ -1,0 +1,143 @@
+{
+  "anchor_cell_count": 1,
+  "arms": [
+    "mean_s000_control",
+    "mean_s050_projection_calibration",
+    "paired_s050_d000_control",
+    "pooled_s050_asym_u003_l008_s310_r10_k8_a000",
+    "group_s050_asym_u003_l008_s310_r10_k8_a000",
+    "group_s050_asym_u003_l008_s310_r05_k8_a000",
+    "group_s050_asym_u003_l008_s310_r05_k16_a000",
+    "group_s050_asym_u003_l008_s310_r05_k8_a001",
+    "group_s050_asym_u003_l008_s310_r05_k8_a005",
+    "group_s050_asym_u003_l008_s310_r10_k8_a001"
+  ],
+  "cell_count": 11,
+  "cells": [
+    {
+      "anchor_checkpoint_file_sha256": null,
+      "arm": "groupwise_robust_pretrain_anchor",
+      "checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "anchor",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/anchors/HalfCheetah-v5/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "mean_s000_control",
+      "checkpoint_file_sha256": "771824b61783f4aac44c0b4895498d6995194565dec0e3bd11d7df67a9f8753c",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "d489dd77769804892b07c6ccc985b96dcba24c502206306623d480e8119d33d3",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/mean_s000_control/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "mean_s050_projection_calibration",
+      "checkpoint_file_sha256": "ee67258b5f2015b4de8d2ec5d4d062abc280a5bb6bb6377a60d5114686976fcc",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "5769b560d25f91d42695accd5c63fa5f5438285a27b542566b9f4a989ca7c865",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/mean_s050_projection_calibration/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "paired_s050_d000_control",
+      "checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/paired_s050_d000_control/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "pooled_s050_asym_u003_l008_s310_r10_k8_a000",
+      "checkpoint_file_sha256": "e771d58b6bfef8e97930f42cbc150885b2e9f667c12f602883eaff5f976b5cb9",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "625ccd973140b61a809c4d6cf02c7fb8aa1fdb349459a579958ec2b2b529d5c4",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/pooled_s050_asym_u003_l008_s310_r10_k8_a000/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r10_k8_a000",
+      "checkpoint_file_sha256": "a76d4cc744c9f69a2df0e69fe8ffc8f620a674328b4dcd253287be044ae488e2",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "9fb645cea2670bc8a6303b1d1a875b595aa1231db9f9b50e9f2b25fc078d0a10",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r10_k8_a000/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r05_k8_a000",
+      "checkpoint_file_sha256": "633f4db85771700b1d91c62b51919c48f4074facb121cba5efa28c7757ba2732",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r05_k8_a000/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r05_k16_a000",
+      "checkpoint_file_sha256": "8927accd062a1b5972cd55cb9ad3740ca5dea28f7b64cc65bda1b1d6d79fdca1",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r05_k16_a000/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r05_k8_a001",
+      "checkpoint_file_sha256": "00ace6a4dd13ae4515513189b18498c64cf002ff3b112f7620db9fa130e5e950",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r05_k8_a001/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r05_k8_a005",
+      "checkpoint_file_sha256": "1cea8d4a12788715e85761a2d9938d5b786a1223fec557c09e62948c3d67ebed",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r05_k8_a005/replicate_102499482"
+    },
+    {
+      "anchor_checkpoint_file_sha256": "2cca044ff61cf754ea242a48ca08d7a7bccaba5748ed3b4669d5fb25fc6a9fac",
+      "arm": "group_s050_asym_u003_l008_s310_r10_k8_a001",
+      "checkpoint_file_sha256": "640cf562b1a3562f208d7335ba2d5a7e1fd946947def37fb27fc927fc56dc723",
+      "environment": "HalfCheetah-v5",
+      "frozen_parameter_sha256": "427010343237652593d0d996477d75f1ec051dbcb819833bce13c9421c56fa03",
+      "optimizer_seed": 102499482,
+      "phase": "continuation",
+      "relative_dir": "results/mujoco_v14_12_groupwise_robust_preflight_20260809_r1/cells/HalfCheetah-v5/group_s050_asym_u003_l008_s310_r10_k8_a001/replicate_102499482"
+    }
+  ],
+  "continuation_cell_count": 10,
+  "development_protocol_version": "mujoco_v14_12_groupwise_robust_screen_v1",
+  "environments": [
+    "HalfCheetah-v5"
+  ],
+  "evidence_role": "development_screen_not_confirmatory",
+  "full_screen_scope": false,
+  "optimizer_seeds": [
+    102499482
+  ],
+  "phases": [
+    "anchor",
+    "continuation"
+  ],
+  "status": "development_scope_complete_unanalyzed"
+}

@@ -1,0 +1,56 @@
+{
+  "anchor_run_name": "mujoco_v14_18_router_mechanism_anchors_20260830_r1",
+  "design_roots": [
+    2233157472,
+    4009222515
+  ],
+  "development_protocol_version": "mujoco_v14_20_zeroth_order_actor_preflight_v1",
+  "direction_count": 8,
+  "direction_seed": 3538198271,
+  "environments": [
+    "HalfCheetah-v5",
+    "Hopper-v5",
+    "Walker2d-v5"
+  ],
+  "evidence_role": "post_router_boundary_actor_mechanism_preflight_not_confirmatory",
+  "optimizer_seeds": [
+    4196455150
+  ],
+  "perturb_rms": 1e-06,
+  "scheduler_contract": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 768,
+    "require_node": null,
+    "scheduler": "scheduleurm",
+    "slurm_used": false
+  },
+  "selection_contract": {
+    "actor_scope": "joint_upper_lower_deterministic_output_heads",
+    "design_paths": "first_two_frozen_guard_roots_crossed_with_four_modes",
+    "eligibility": "zero_reward_violations_merit_reduction_at_least_1e-4_and_worst_violation_within_three_times_baseline",
+    "preflight_gate": "validation_supported_in_all_three_environments",
+    "search": "eight_fixed_antithetic_rademacher_directions_and_rank_gradient",
+    "validation_paths": "last_two_frozen_guard_roots_crossed_with_four_modes"
+  },
+  "source_revision": "779470b01cafcf5c256ad7c1373ad32171e9cc8c",
+  "status": "frozen_before_v14_20_preflight_outcome_access",
+  "step_rms_values": [
+    1e-08,
+    3e-08,
+    1e-07,
+    3e-07,
+    1e-06
+  ],
+  "validation_roots": [
+    612912378,
+    3777442308
+  ]
+}

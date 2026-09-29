@@ -1,0 +1,54 @@
+{
+  "analysis_version": "pointmaze_learned_termination_stage10_analysis_v1",
+  "claim_boundary": "Development comparison against revealed Stage-9 confirmation paths; fresh-seed confirmation and task transfer remain required",
+  "decision": "stage10_preflight_software_only",
+  "intervals": {
+    "baseline_minus_fixed_episode_tracking_ise": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.1337256223379284,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_learned_termination_episode_return": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -0.00014921118031452352,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "candidate_minus_learned_termination_episode_tracking_ise": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": -7.536361510540601e-05,
+      "n": 1,
+      "status": "inconclusive"
+    },
+    "learned_termination_early_calls_per_episode": {
+      "ci_lower": -Infinity,
+      "ci_upper": Infinity,
+      "confidence": 0.95,
+      "mean": 0.0,
+      "n": 1,
+      "status": "inconclusive"
+    }
+  },
+  "matrix": "preflight",
+  "protocol_version": "pointmaze_learned_termination_stage10_v1",
+  "qualification_checks": {
+    "baseline_learns_vs_fixed": false,
+    "candidate_beats_learned_termination": false
+  },
+  "root_summaries": {
+    "208001": {
+      "baseline_minus_fixed_episode_tracking_ise": 0.1337256223379284,
+      "candidate_minus_learned_termination_episode_return": -0.00014921118031452352,
+      "candidate_minus_learned_termination_episode_tracking_ise": -7.536361510540601e-05,
+      "learned_termination_early_calls_per_episode": 0.0
+    }
+  },
+  "statistical_unit": "optimizer_seed_root"
+}
