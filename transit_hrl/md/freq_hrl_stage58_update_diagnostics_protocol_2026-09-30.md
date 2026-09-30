@@ -14,7 +14,7 @@ Implementation `2eb9c21725`; configuration-comparison correction `ca61b690bb`; f
 
 Native-archive preflight `t109180` and qualification `t109183` completed with exit 0 on node004. All four period/arm final network and optimizer identities passed. Actual cost: 32 archived episodes, 9600 lower/144 upper calls, 28 observed updates; replayed optimizer steps upper actor/value 16/48, lower actor/value 32/64. New native/evaluation/fit counts are all zero; only the compact qualification JSON was pulled.
 
-Full run `pointmaze_update_diagnostics_stage58_full_20260930_r1`: tasks `t109185`-`t109192` correspond in order to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight entered running on dynamically chosen node004/005/006 within the allowed six-node pool. Full qualification and diagnosis remain pending; no optimization intervention has been selected and Stage57's performance gates remain unchanged.
+Full run `pointmaze_update_diagnostics_stage58_full_20260930_r1`: tasks `t109185`-`t109192` correspond in order to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight completed with exit 0 on dynamically chosen node004/005/006 within the allowed six-node pool; qualification `t109196` completed with exit 0 on node004. All action and final network/Adam identities passed, with the frozen replay costs above. The [full diagnosis](freq_hrl_stage58_update_diagnostics_result_2026-09-30.md) identifies extreme first lower-actor updates at period50 and upper critics with near-zero explained variance. Next isolate first-update displacement control in an archive-only experiment before new native performance validation; Stage57's performance gates remain unchanged.
 
 ## Limitations
 
