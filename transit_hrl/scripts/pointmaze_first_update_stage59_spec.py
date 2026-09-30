@@ -10,6 +10,8 @@ PERIODS, TRAIN_POLICIES = source.PERIODS, source.TRAIN_POLICIES
 roots = source.roots
 TREATMENTS = ("plain", "conditional_kl")
 KL_BUDGET = 0.02
+NATIVE_PREREQUISITE_TREATMENT = "conditional_kl"
+IDENTITY_CHECKS = ("source_actions_check", "plain_reproduction", "critic_networks_and_Adam_pair")
 SOURCE_PREFLIGHT_RUN = "pointmaze_update_diagnostics_stage58_preflight_20260930_r1"
 SOURCE_FULL_RUN = "pointmaze_update_diagnostics_stage58_full_20260930_r1"
 

@@ -1,0 +1,17 @@
+# Stage60 Actor-Only Backtracking Protocol
+
+Stage59 held because all1280 lower Adam proposals violated conditional mean KL0.02 and every lower actor froze. Actual LR matched3e-4 and initial PPO Adam was empty. This stage changes only proposal acceptance: preserve the original Adam gradient/moment calculation, then try parameter displacement scales1,1/2,...,1/4096 and retain the first feasible candidate against the fixed full-batch sampling distribution. Restore actor and Adam exactly after each rejected candidate; an accepted scaled candidate keeps one moment update and the original LR. If all13 candidates fail, retain neither parameters nor moments. There is no gradient/critic recomputation during retries.
+
+Three paired treatments: plain PPO, exact Stage59 rejection-only control, and backtracking. Reconstruct the same Stage57 critic-only warmup and first training batch, with roots310011,310023,310037,310049,310061,310073,310089,310101; periods50/100; zero_train/joint_ppo. Root310001 is preflight only. Plain diagnostics must reproduce Stage58 and rejection-only diagnostics Stage59 exactly. All three final critic networks/Adam must match bitwise; zero_train upper remains fixed. No credit, entropy, representation, reward, root, period, optimizer-initialization or base-LR change.
+
+Full fixed reconstruction budget remains4352 episodes,5222400 lower/78336 upper archived calls,1024 warmup updates,16 clone/eight forecaster loads. Three treatments require144 observed updates,288 diagnostic distribution/value passes each and144 GAE calls. Nominal executed lower actor/value steps3840/24320 and upper actor/value192/2240. Retrying adds no Adam optimizer steps: separately report every candidate distribution, interpolation trial, snapshot and rollback check, with at most13 candidates per guarded backtracking step. New native/evaluation/fit counts0; existing Stage59 JSON reads are separate metadata I/O.
+
+Tests cover exact all-accepted PPO, scaled updates with nonempty Adam and unchanged LR, complete rejection/restore, fixed references, three-way source/critic identity and retry accounting. All tests, preflight, qualification and full replay use scheduler, dynamically placed within node001-node006 without hard pins. Full roots9CPU/12GB; tests/preflight/qualification2CPU/4GB. Pull logs and compact JSON only; weights and trajectories stay remote. Commit this protocol and source before full outcomes.
+
+## Decision And Limits
+
+Mechanical validity requires exact controls/critics, exact accounting and deployed conditional mean KL<=0.02. The backtracking treatment must retain nonzero actor steps and nonzero action-mean movement in every active case; rejection-only frozen controls do not disqualify the new treatment. Report scales, movement and clipping, not merely pass/fail. A passing first-update prerequisite is not useful-learning or reward evidence and does not automatically launch native training. A failed prerequisite remains HOLD, without budget widening, Adam reset, root selection or seed expansion. Batch KL is not a trajectory/population bound. Upper critic repair remains separate.
+
+## Execution
+
+Implementation and scheduler tests pending; no native performance task registered.
