@@ -1,0 +1,118 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "checkpoint_loads": 2,
+    "forecaster_loads": 1,
+    "native_trace_audits": 56,
+    "new_forecaster_fits": 0,
+    "primitive_steps": {
+      "eval": 7200,
+      "train": 4800,
+      "warmup": 4800
+    },
+    "supervised_steps": 0,
+    "total_primitive_steps": 16800,
+    "upper_calls": {
+      "eval": 108,
+      "train": 72,
+      "warmup": 72
+    },
+    "verification_primitive_steps": 0
+  },
+  "contract": {
+    "audit": "actual_proposed_and_executed_actions_native_credit_plan_velocity_reconstruction_rollout_networks_frozen_parent_updates_nonnull",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      57,
+      57057
+    ],
+    "calibration": "each_arm_same_budget_critic_only_on_its_own_execution_distribution_both_actors_std_frozen",
+    "credit": "lower_native_task_option_reward_upper_discounted_native_reward_minus_equal_call_cost",
+    "decision": "matched_upper_gate_joint_vs_zero_positive_both_periods_training_gain_gate_joint_vs_clone_positive_both_periods",
+    "deployment": "fixed_final_same_execution_rule_as_training_no_analytic_feedback_no_checkpoint_selection",
+    "endpoints": [
+      "period50:joint_ppo_minus_zero_train",
+      "period50:joint_ppo_minus_clone",
+      "period50:zero_train_minus_clone",
+      "period100:joint_ppo_minus_zero_train",
+      "period100:joint_ppo_minus_clone",
+      "period100:zero_train_minus_clone"
+    ],
+    "forecaster": "same_saved_Stage55_forecaster_no_fitting_or_BC",
+    "initialization": "fixed_Stage55_clone_final_each_root_period_same_four_networks_and_optimizer_states",
+    "interval": "two_sided_percentile_Bonferroni6_equal_root_paired_means",
+    "joint_ppo": "normal_residual_execution_shared_native_SMDP_PPO_upper_and_lower_learned",
+    "limits": "reused_training_roots_teacher_initialized_fixed_forecast_development_not_frequency_promotion_OOD_or_equal_total_FLOPs",
+    "optimizer": "unchanged_inherited_PPO_hyperparameters_and_matched_lower_updates_upper_updates_only_for_joint",
+    "pairing": "fresh_shared_environment_and_stepwise_lower_noise_seeds_same_initial_upper_proposals_not_identical_lower_trajectories",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "clone",
+      "zero_train",
+      "joint_ppo"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_checkpoint_period_mode_root_seed_or_budget_selection_after_outcomes",
+    "source_protocol": "pointmaze_learned_plan_stage55_v1",
+    "source_runs": [
+      "pointmaze_learned_plan_stage55_preflight_20260930_r1",
+      "pointmaze_learned_plan_stage55_full_20260930_r1"
+    ],
+    "zero_train": "infer_upper_but_execute_zero_residual_from_first_warmup_and_training_rollout_upper_actor_fixed_lower_PPO_learned"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "critic_warmup_iterations": 2,
+    "evaluation_paths": 2,
+    "learning_iterations": 2,
+    "rollouts_per_iteration": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_matched_upper_stage57_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        16095001,
+        16095002
+      ],
+      "training": [
+        16093001,
+        16093002,
+        16093003,
+        16093004
+      ],
+      "warmup": [
+        16092001,
+        16092002,
+        16092003,
+        16092004
+      ]
+    }
+  },
+  "source_revision": "6a435ce0e6a2629624bcd8daf91f02580fb6e187",
+  "source_run": "pointmaze_learned_plan_stage55_preflight_20260930_r1",
+  "total_method_steps": 16800
+}
