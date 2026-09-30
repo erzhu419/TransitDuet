@@ -1,0 +1,168 @@
+{
+  "checkpoint_loads": 2,
+  "contract": {
+    "audit": "proposed_and_executed_actions_separate_independent_plan_velocity_reconstruction_exact_frozen_networks_and_native_metrics",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      56,
+      56056
+    ],
+    "checkpoint": "fixed_final_joint_ppo_each_root_period_no_selection",
+    "cost": "both_arms_charge_all_actual_upper_and_lower_calls_no_gate_or_preview",
+    "credit": "native_episode_return_no_shaping_or_new_objective",
+    "decision": "normal_minus_zero_residual_positive_at_both_periods",
+    "endpoints": [
+      "period50:normal_minus_zero_residual",
+      "period100:normal_minus_zero_residual"
+    ],
+    "forecaster": "same_saved_Stage55_forecaster_no_refitting",
+    "interval": "two_sided_percentile_Bonferroni2_equal_root_paired_means",
+    "limits": "execution_ablation_with_coadapted_lower_conditional_on_reused_training_roots_not_frequency_or_promotion_confirmation",
+    "lower": "same_saved_joint_MLP_weights_std_and_velocity_context_rule_no_analytic_feedback_or_retraining",
+    "normal": "unchanged_Stage55_executed_residual_plan",
+    "pairing": "fresh_shared_environment_and_stepwise_lower_noise_seeds",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "normal",
+      "zero_residual"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_checkpoint_period_mode_root_seed_or_training_budget_selection_after_outcomes",
+    "source_protocol": "pointmaze_learned_plan_stage55_v1",
+    "source_runs": [
+      "pointmaze_learned_plan_stage55_preflight_20260930_r1",
+      "pointmaze_learned_plan_stage55_full_20260930_r1"
+    ],
+    "zero_residual": "infer_same_upper_then_execute_zero_four_dim_action_on_same_causal_base_forecast"
+  },
+  "forecaster_loads": 1,
+  "method_cost": {
+    "actor_context_evaluations": 4800,
+    "audit_bernstein_basis_evaluations": 1216,
+    "audit_ols_fits": 56,
+    "audit_ridge_predictions": 56,
+    "bernstein_basis_evaluations": 1216,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 4800,
+    "plan_ols_fits": 56,
+    "plan_ridge_predictions": 56,
+    "primitive_steps": 4800,
+    "reference_evaluations": 4800,
+    "upper_inference_calls": 72,
+    "upper_plan_decodes": 72
+  },
+  "native_trace_audits": 16,
+  "new_forecaster_fits": 0,
+  "optimizer_steps": 0,
+  "protocol": "pointmaze_upper_execution_stage56_v1",
+  "root_rows": [
+    {
+      "endpoints": {
+        "period100:normal_minus_zero_residual": -0.06506167687422248,
+        "period50:normal_minus_zero_residual": 0.3106187947158787
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "normal": {
+              "charged_utility": 119.12632671265877,
+              "episode_return": 125.12632671265877,
+              "executed_action_rms": 0.0644071156628881,
+              "executed_plan_delta_squared_sum": 0.2334442677978179,
+              "proposed_action_rms": 0.0644071156628881,
+              "reference_target_squared_error_integral": 0.7016640422525493,
+              "tracking_squared_error_integral": 6.480824361728419,
+              "upper_inference_calls": 6
+            },
+            "zero_residual": {
+              "charged_utility": 118.81570791794289,
+              "episode_return": 124.81570791794289,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0.06439929539381042,
+              "reference_target_squared_error_integral": 0.704883981981143,
+              "tracking_squared_error_integral": 6.558595735163936,
+              "upper_inference_calls": 6
+            }
+          },
+          "lower_sampled": {
+            "normal": {
+              "charged_utility": 138.42693356455428,
+              "episode_return": 144.42693356455428,
+              "executed_action_rms": 0.06457774182025428,
+              "executed_plan_delta_squared_sum": 0.23285379235889364,
+              "proposed_action_rms": 0.06457774182025428,
+              "reference_target_squared_error_integral": 0.7020871112132807,
+              "tracking_squared_error_integral": 5.084299915779261,
+              "upper_inference_calls": 6
+            },
+            "zero_residual": {
+              "charged_utility": 138.58279904179733,
+              "episode_return": 144.58279904179733,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0.0645856023554408,
+              "reference_target_squared_error_integral": 0.704883981981143,
+              "tracking_squared_error_integral": 5.029707201864825,
+              "upper_inference_calls": 6
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "normal": {
+              "charged_utility": 160.24956235046736,
+              "episode_return": 163.24956235046736,
+              "executed_action_rms": 0.0686351279762412,
+              "executed_plan_delta_squared_sum": 0.3175022847406631,
+              "proposed_action_rms": 0.0686351279762412,
+              "reference_target_squared_error_integral": 1.5638530432184137,
+              "tracking_squared_error_integral": 2.3590579561136336,
+              "upper_inference_calls": 3
+            },
+            "zero_residual": {
+              "charged_utility": 160.31462402734158,
+              "episode_return": 163.31462402734158,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0.06863919683671418,
+              "reference_target_squared_error_integral": 1.5757906629046476,
+              "tracking_squared_error_integral": 2.357307098341825,
+              "upper_inference_calls": 3
+            }
+          },
+          "lower_sampled": {
+            "normal": {
+              "charged_utility": 133.75431909935276,
+              "episode_return": 136.75431909935276,
+              "executed_action_rms": 0.06780454294496704,
+              "executed_plan_delta_squared_sum": 0.30901813197191597,
+              "proposed_action_rms": 0.06780454294496704,
+              "reference_target_squared_error_integral": 1.5660636838417403,
+              "tracking_squared_error_integral": 4.994120599339215,
+              "upper_inference_calls": 3
+            },
+            "zero_residual": {
+              "charged_utility": 133.4502470389691,
+              "episode_return": 136.4502470389691,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0.0678058608445895,
+              "reference_target_squared_error_integral": 1.5757906629046476,
+              "tracking_squared_error_integral": 4.993104856748385,
+              "upper_inference_calls": 3
+            }
+          }
+        }
+      },
+      "root": 310001
+    }
+  ],
+  "run_name": "pointmaze_upper_execution_stage56_preflight_20260930_r1",
+  "status": "preflight_passed",
+  "verification_primitive_steps": 0
+}
