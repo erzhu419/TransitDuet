@@ -1,0 +1,102 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "audit_regression_fits": 56,
+    "native_trace_audits": 48,
+    "plan_regression_fits": 56,
+    "reference_evaluations": 14400,
+    "total_primitive_steps": 14400,
+    "upper_inference_calls": 216
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      52,
+      52052
+    ],
+    "bounds": "clip_evaluated_reference_to_same_environment_goal_bounds_no_maze_route_or_future_access",
+    "cost": "equal_upper_lower_calls_per_period_zero_gate_or_optimizer_steps_all_plan_and_audit_regressions_counted",
+    "current_target": "per_primitive_observed_target_diagnostic_not_low_frequency_plan",
+    "decision": "curve_vs_hold_reverse_and_frozen_positive_at_both_fixed_periods_for_plan_phase_utility",
+    "dt_seconds": 0.01,
+    "forecast": "numpy_lstsq_position_on_intercept_and_past_relative_time_at_renewals_only",
+    "frozen": "original_source_lower_MLP_reference_control_all_networks_critics_optimizers_unchanged",
+    "initialization": "valid_observations_only_initial_zero_velocity_no_padding_fit",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "analytic_plan_feedback_development_not_learned_FreqHRL_confirmation_extra_OLS_compute_not_free_same_call_budget_not_equal_FLOPs",
+    "lookback_steps": 64,
+    "lower": "Stage51_fixed_LQR_gain_action_clip_source_Gaussian_std_no_velocity_feedforward",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "frozen",
+      "waypoint",
+      "target_hold",
+      "target_curve",
+      "reverse_curve",
+      "current_target"
+    ],
+    "primary_endpoints": [
+      "period50:target_hold_minus_waypoint",
+      "period50:target_curve_minus_target_hold",
+      "period50:target_curve_minus_reverse_curve",
+      "period50:target_curve_minus_frozen",
+      "period100:target_hold_minus_waypoint",
+      "period100:target_curve_minus_target_hold",
+      "period100:target_curve_minus_reverse_curve",
+      "period100:target_curve_minus_frozen"
+    ],
+    "primary_mode": "deterministic",
+    "renewal": "fixed_exogenous_period_no_gate_no_future_reference_trajectory_schedule_replay",
+    "reverse_curve": "same_OLS_and_anchor_opposite_velocity_negative_control",
+    "sampling": "deterministic_upper_lower_deterministic_and_sampled_same_noise_seeds",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_gain_or_window_tuning_no_root_extension_no_period_or_deployment_mode_selection",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "state": "separate_upper_anchor_and_lower_phase_reference_unchanged_actor_dimensions",
+    "target_curve": "same_observed_anchor_plus_OLS_target_velocity_times_option_age_seconds",
+    "target_hold": "currently_observed_target_at_renewal_held_for_the_option",
+    "upper": "same_source_upper_actor_called_once_per_fixed_renewal_all_arms",
+    "waypoint": "original_decoded_upper_anchor_held_between_calls"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_plan_alignment_stage52_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        12093001,
+        12093002
+      ]
+    }
+  },
+  "source_revision": "b398d85fb6fe67ea95315396cdfb1703771cd3f0",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 14400
+}

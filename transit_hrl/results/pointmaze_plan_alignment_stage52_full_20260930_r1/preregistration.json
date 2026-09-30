@@ -1,0 +1,263 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "audit_regression_fits": 2176,
+    "native_trace_audits": 384,
+    "plan_regression_fits": 2176,
+    "reference_evaluations": 460800,
+    "total_primitive_steps": 460800,
+    "upper_inference_calls": 6912
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      52,
+      52052
+    ],
+    "bounds": "clip_evaluated_reference_to_same_environment_goal_bounds_no_maze_route_or_future_access",
+    "cost": "equal_upper_lower_calls_per_period_zero_gate_or_optimizer_steps_all_plan_and_audit_regressions_counted",
+    "current_target": "per_primitive_observed_target_diagnostic_not_low_frequency_plan",
+    "decision": "curve_vs_hold_reverse_and_frozen_positive_at_both_fixed_periods_for_plan_phase_utility",
+    "dt_seconds": 0.01,
+    "forecast": "numpy_lstsq_position_on_intercept_and_past_relative_time_at_renewals_only",
+    "frozen": "original_source_lower_MLP_reference_control_all_networks_critics_optimizers_unchanged",
+    "initialization": "valid_observations_only_initial_zero_velocity_no_padding_fit",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "analytic_plan_feedback_development_not_learned_FreqHRL_confirmation_extra_OLS_compute_not_free_same_call_budget_not_equal_FLOPs",
+    "lookback_steps": 64,
+    "lower": "Stage51_fixed_LQR_gain_action_clip_source_Gaussian_std_no_velocity_feedforward",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "frozen",
+      "waypoint",
+      "target_hold",
+      "target_curve",
+      "reverse_curve",
+      "current_target"
+    ],
+    "primary_endpoints": [
+      "period50:target_hold_minus_waypoint",
+      "period50:target_curve_minus_target_hold",
+      "period50:target_curve_minus_reverse_curve",
+      "period50:target_curve_minus_frozen",
+      "period100:target_hold_minus_waypoint",
+      "period100:target_curve_minus_target_hold",
+      "period100:target_curve_minus_reverse_curve",
+      "period100:target_curve_minus_frozen"
+    ],
+    "primary_mode": "deterministic",
+    "renewal": "fixed_exogenous_period_no_gate_no_future_reference_trajectory_schedule_replay",
+    "reverse_curve": "same_OLS_and_anchor_opposite_velocity_negative_control",
+    "sampling": "deterministic_upper_lower_deterministic_and_sampled_same_noise_seeds",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_gain_or_window_tuning_no_root_extension_no_period_or_deployment_mode_selection",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "state": "separate_upper_anchor_and_lower_phase_reference_unchanged_actor_dimensions",
+    "target_curve": "same_observed_anchor_plus_OLS_target_velocity_times_option_age_seconds",
+    "target_hold": "currently_observed_target_at_renewal_held_for_the_option",
+    "upper": "same_source_upper_actor_called_once_per_fixed_renewal_all_arms",
+    "waypoint": "original_decoded_upper_anchor_held_between_calls"
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "evaluation_paths": 16,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_plan_alignment_stage52_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "evaluation": [
+        12103001,
+        12103002,
+        12103003,
+        12103004,
+        12103005,
+        12103006,
+        12103007,
+        12103008,
+        12103009,
+        12103010,
+        12103011,
+        12103012,
+        12103013,
+        12103014,
+        12103015,
+        12103016
+      ]
+    },
+    "310023": {
+      "evaluation": [
+        12113001,
+        12113002,
+        12113003,
+        12113004,
+        12113005,
+        12113006,
+        12113007,
+        12113008,
+        12113009,
+        12113010,
+        12113011,
+        12113012,
+        12113013,
+        12113014,
+        12113015,
+        12113016
+      ]
+    },
+    "310037": {
+      "evaluation": [
+        12123001,
+        12123002,
+        12123003,
+        12123004,
+        12123005,
+        12123006,
+        12123007,
+        12123008,
+        12123009,
+        12123010,
+        12123011,
+        12123012,
+        12123013,
+        12123014,
+        12123015,
+        12123016
+      ]
+    },
+    "310049": {
+      "evaluation": [
+        12133001,
+        12133002,
+        12133003,
+        12133004,
+        12133005,
+        12133006,
+        12133007,
+        12133008,
+        12133009,
+        12133010,
+        12133011,
+        12133012,
+        12133013,
+        12133014,
+        12133015,
+        12133016
+      ]
+    },
+    "310061": {
+      "evaluation": [
+        12143001,
+        12143002,
+        12143003,
+        12143004,
+        12143005,
+        12143006,
+        12143007,
+        12143008,
+        12143009,
+        12143010,
+        12143011,
+        12143012,
+        12143013,
+        12143014,
+        12143015,
+        12143016
+      ]
+    },
+    "310073": {
+      "evaluation": [
+        12153001,
+        12153002,
+        12153003,
+        12153004,
+        12153005,
+        12153006,
+        12153007,
+        12153008,
+        12153009,
+        12153010,
+        12153011,
+        12153012,
+        12153013,
+        12153014,
+        12153015,
+        12153016
+      ]
+    },
+    "310089": {
+      "evaluation": [
+        12163001,
+        12163002,
+        12163003,
+        12163004,
+        12163005,
+        12163006,
+        12163007,
+        12163008,
+        12163009,
+        12163010,
+        12163011,
+        12163012,
+        12163013,
+        12163014,
+        12163015,
+        12163016
+      ]
+    },
+    "310101": {
+      "evaluation": [
+        12173001,
+        12173002,
+        12173003,
+        12173004,
+        12173005,
+        12173006,
+        12173007,
+        12173008,
+        12173009,
+        12173010,
+        12173011,
+        12173012,
+        12173013,
+        12173014,
+        12173015,
+        12173016
+      ]
+    }
+  },
+  "source_revision": "b398d85fb6fe67ea95315396cdfb1703771cd3f0",
+  "source_run": "pointmaze_critic_clock_stage42_v1_full_20260928_r1",
+  "total_method_steps": 3686400
+}
