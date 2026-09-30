@@ -9,11 +9,11 @@ runtime trajectories, weights and downloaded reference PDFs remain outside Git.
 - Direct arms:4 full-batch score backwards,26 Fisher-vector products,20 CG
   iterations,8 parameter proposals. Critic pairing and cost accounting passed.
 - Full run: `pointmaze_fisher_direction_stage50_full_20260930_r1`, t106218-t106225;
-  all8 roots running on dynamically selected node001/004/005/006 at this snapshot.
-- Frozen full budget:7,680,000 native steps,6,400 audits;8 Bonferroni-adjusted
-  paired endpoints. No native performance conclusion yet.
+  all8 roots completed on dynamically selected node001/004/005/006, exit0.
+- Full qualification: t106770, node001, exit0; pairing, costs and independent
+  eight-endpoint bootstrap passed. Actual budget:7,680,000 steps,6,400 audits.
+- Decision: no supported Fisher learning repair; MC Adam harms final return
+  relative to frozen under the registered adjusted interval.
 
-Next: qualify all8 cells through the scheduler with
-`scripts/analyze_pointmaze_fisher_direction_stage50.py --run-name pointmaze_fisher_direction_stage50_full_20260930_r1`,
-pull only `qualification_summary.json`, and decide from the registered Fisher-vs-
-Adam, Fisher-vs-frozen and Fisher-vs-Euclidean final reward intervals.
+Only the96KB [full summary](../results/pointmaze_fisher_direction_stage50_full_20260930_r1/qualification_summary.json)
+was pulled. See the [result and next step](freq_hrl_stage50_fisher_direction_result_2026-09-30.md).
