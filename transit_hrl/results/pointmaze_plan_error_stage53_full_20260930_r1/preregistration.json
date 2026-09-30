@@ -1,0 +1,100 @@
+{
+  "artifacts": "compact_json_only_raw_stays_remote",
+  "budget": {
+    "exogenous_driver_regenerations": 128,
+    "new_native_steps": 0,
+    "optimizer_steps": 0,
+    "raw_trace_reads": 3072,
+    "recorded_steps_processed": 3686400
+  },
+  "contract": {
+    "alignment": "achieved_after_minus_target_before_same_as_native_reward",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      53,
+      53053
+    ],
+    "comparison": "curve_minus_hold_paired_seed_and_root",
+    "event_window": "valid_64_target_fit_history_increments_plus_future_option_target_increments",
+    "geometry": "dominant_motion_axis_change_or_non_regime_direction_reversal",
+    "identity": "total=controller+forecast+2_dot_controller_forecast_signed_cross_term",
+    "interval": "equal_root_paired_percentile_Bonferroni8",
+    "labels": "offline_only_regenerated_driver_matches_all_recorded_measurements",
+    "limits": "post_outcome_mechanism_diagnosis_not_causal_mediation_or_new_performance_confirmation",
+    "modes": [
+      "deterministic",
+      "lower_sampled"
+    ],
+    "partitions": {
+      "event": [
+        "stable",
+        "regime_only",
+        "geometry_only",
+        "mixed"
+      ],
+      "phase": [
+        "early",
+        "middle",
+        "late"
+      ],
+      "timing": [
+        "clean",
+        "history_only",
+        "future_only",
+        "both"
+      ]
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "phase": "equal_normalized_age_thirds",
+    "policies": [
+      "frozen",
+      "waypoint",
+      "target_hold",
+      "target_curve",
+      "reverse_curve",
+      "current_target"
+    ],
+    "primary": [
+      "period50:curve_minus_hold:forecast_ise",
+      "period50:curve_minus_hold:controller_ise",
+      "period50:curve_minus_hold:cross_ise",
+      "period50:curve_minus_hold:total_vector_ise",
+      "period100:curve_minus_hold:forecast_ise",
+      "period100:curve_minus_hold:controller_ise",
+      "period100:curve_minus_hold:cross_ise",
+      "period100:curve_minus_hold:total_vector_ise"
+    ],
+    "regime_effect_step": "driver_change_step_plus_one_first_changed_target_increment",
+    "roots": [
+      310011,
+      310023,
+      310037,
+      310049,
+      310061,
+      310073,
+      310089,
+      310101
+    ],
+    "selection": "no_new_paths_or_policy_gain_window_period_mode_tuning",
+    "source_run": "pointmaze_plan_alignment_stage52_full_20260930_r2",
+    "strata": "descriptive_per_episode_contributions_and_pooled_conditional_squared_errors_no_subgroup_CIs"
+  },
+  "protocol": "pointmaze_plan_error_stage53_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu": 2,
+    "ram_mb": 4096,
+    "require_node": null
+  },
+  "source_revision": "e6cc55d75eaef3961f75f4572fea64b2e7ba776c"
+}
