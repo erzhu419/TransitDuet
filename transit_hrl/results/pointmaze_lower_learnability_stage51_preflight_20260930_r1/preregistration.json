@@ -1,0 +1,114 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 8400,
+    "fitting_primitive_steps": 1200,
+    "native_trace_audits": 32,
+    "total_primitive_steps": 9600
+  },
+  "contract": {
+    "Q_diagonal": [
+      25.0,
+      25.0,
+      1.0,
+      1.0
+    ],
+    "R_diagonal": [
+      1.0,
+      1.0
+    ],
+    "action": "clip_requested_normalized_torque_then_atanh_Gaussian_mean_source_std_unchanged",
+    "action_limit": 0.95,
+    "bc_lr": 0.0003,
+    "bc_minibatch": 1024,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      51,
+      51051
+    ],
+    "cloning": "original_lower_MLP_mean_raw_action_MSE_on_frozen_A_states_only",
+    "credit": "A_normalized_MC_or_original_GAE_plus_entropy_vs_B_reward_only_full_episode_LOO_MC_gradient",
+    "credit_scaling": "A_mean_logp_advantage_B_sum_logp_raw_LOO_RTG_per_episode",
+    "decision": "waypoint_teacher_positive_for_plan_headroom_clone_vs_frozen_and_sham_positive_for_same_network_learnability",
+    "endpoints": [
+      "teacher_waypoint_minus_frozen",
+      "teacher_task_minus_frozen",
+      "clone_waypoint_minus_frozen",
+      "clone_task_minus_frozen",
+      "clone_waypoint_minus_sham_waypoint",
+      "clone_task_minus_sham_task",
+      "mc_independent_cosine",
+      "gae_independent_cosine"
+    ],
+    "feedback": "continuous_LQR_unit_mass_double_integrator_scipy_CARE_no_native_model_fit",
+    "frozen": "all_other_networks_source_std_and_original_RL_optimizers_unchanged",
+    "independence": "disjoint_A_B_evaluation_paths_same_source_actor_critic",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "conditional_development_reused_roots_teacher_failure_not_ceiling_BC_failure_not_unlearnability_cosine_not_finite_return_proof",
+    "policies": [
+      "frozen",
+      "teacher_waypoint",
+      "teacher_task",
+      "clone_waypoint",
+      "sham_waypoint",
+      "clone_task",
+      "sham_task"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_credit": "A_negative_BC_loss_gradient_vs_B_reward_only_gradient",
+    "secondary_mode": "lower_sampled",
+    "selection": "fixed_final_no_early_stopping_eval_selection_gain_search_root_exclusion_or_seed_extension",
+    "sham": "fixed_A_label_permutation_same_optimizer_budget_shuffle",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "task_teacher": "bypasses_waypoint_diagnostic_not_hierarchical_policy_claim",
+    "teacher_inputs": "waypoint_error_or_visible_current_target_minus_position_velocity_current_force_only"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "batch_paths": 2,
+    "bc_epochs": 4,
+    "evaluation_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_lower_learnability_stage51_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "A": [
+        11890001,
+        11890002
+      ],
+      "B": [
+        11891001,
+        11891002
+      ],
+      "evaluation": [
+        11893001,
+        11893002
+      ]
+    }
+  },
+  "source_revision": "40f1a9089d53ca13f31386a7f6eb11af1e010573",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 9600
+}

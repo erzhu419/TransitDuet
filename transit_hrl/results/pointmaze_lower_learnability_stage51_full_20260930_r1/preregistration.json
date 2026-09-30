@@ -1,0 +1,427 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "evaluation_primitive_steps": 268800,
+    "fitting_primitive_steps": 19200,
+    "native_trace_audits": 240,
+    "total_primitive_steps": 288000
+  },
+  "contract": {
+    "Q_diagonal": [
+      25.0,
+      25.0,
+      1.0,
+      1.0
+    ],
+    "R_diagonal": [
+      1.0,
+      1.0
+    ],
+    "action": "clip_requested_normalized_torque_then_atanh_Gaussian_mean_source_std_unchanged",
+    "action_limit": 0.95,
+    "bc_lr": 0.0003,
+    "bc_minibatch": 1024,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      51,
+      51051
+    ],
+    "cloning": "original_lower_MLP_mean_raw_action_MSE_on_frozen_A_states_only",
+    "credit": "A_normalized_MC_or_original_GAE_plus_entropy_vs_B_reward_only_full_episode_LOO_MC_gradient",
+    "credit_scaling": "A_mean_logp_advantage_B_sum_logp_raw_LOO_RTG_per_episode",
+    "decision": "waypoint_teacher_positive_for_plan_headroom_clone_vs_frozen_and_sham_positive_for_same_network_learnability",
+    "endpoints": [
+      "teacher_waypoint_minus_frozen",
+      "teacher_task_minus_frozen",
+      "clone_waypoint_minus_frozen",
+      "clone_task_minus_frozen",
+      "clone_waypoint_minus_sham_waypoint",
+      "clone_task_minus_sham_task",
+      "mc_independent_cosine",
+      "gae_independent_cosine"
+    ],
+    "feedback": "continuous_LQR_unit_mass_double_integrator_scipy_CARE_no_native_model_fit",
+    "frozen": "all_other_networks_source_std_and_original_RL_optimizers_unchanged",
+    "independence": "disjoint_A_B_evaluation_paths_same_source_actor_critic",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "conditional_development_reused_roots_teacher_failure_not_ceiling_BC_failure_not_unlearnability_cosine_not_finite_return_proof",
+    "policies": [
+      "frozen",
+      "teacher_waypoint",
+      "teacher_task",
+      "clone_waypoint",
+      "sham_waypoint",
+      "clone_task",
+      "sham_task"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_credit": "A_negative_BC_loss_gradient_vs_B_reward_only_gradient",
+    "secondary_mode": "lower_sampled",
+    "selection": "fixed_final_no_early_stopping_eval_selection_gain_search_root_exclusion_or_seed_extension",
+    "sham": "fixed_A_label_permutation_same_optimizer_budget_shuffle",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "task_teacher": "bypasses_waypoint_diagnostic_not_hierarchical_policy_claim",
+    "teacher_inputs": "waypoint_error_or_visible_current_target_minus_position_velocity_current_force_only"
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "batch_paths": 8,
+    "bc_epochs": 32,
+    "evaluation_paths": 16,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_lower_learnability_stage51_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "A": [
+        11900001,
+        11900002,
+        11900003,
+        11900004,
+        11900005,
+        11900006,
+        11900007,
+        11900008
+      ],
+      "B": [
+        11901001,
+        11901002,
+        11901003,
+        11901004,
+        11901005,
+        11901006,
+        11901007,
+        11901008
+      ],
+      "evaluation": [
+        11903001,
+        11903002,
+        11903003,
+        11903004,
+        11903005,
+        11903006,
+        11903007,
+        11903008,
+        11903009,
+        11903010,
+        11903011,
+        11903012,
+        11903013,
+        11903014,
+        11903015,
+        11903016
+      ]
+    },
+    "310023": {
+      "A": [
+        11910001,
+        11910002,
+        11910003,
+        11910004,
+        11910005,
+        11910006,
+        11910007,
+        11910008
+      ],
+      "B": [
+        11911001,
+        11911002,
+        11911003,
+        11911004,
+        11911005,
+        11911006,
+        11911007,
+        11911008
+      ],
+      "evaluation": [
+        11913001,
+        11913002,
+        11913003,
+        11913004,
+        11913005,
+        11913006,
+        11913007,
+        11913008,
+        11913009,
+        11913010,
+        11913011,
+        11913012,
+        11913013,
+        11913014,
+        11913015,
+        11913016
+      ]
+    },
+    "310037": {
+      "A": [
+        11920001,
+        11920002,
+        11920003,
+        11920004,
+        11920005,
+        11920006,
+        11920007,
+        11920008
+      ],
+      "B": [
+        11921001,
+        11921002,
+        11921003,
+        11921004,
+        11921005,
+        11921006,
+        11921007,
+        11921008
+      ],
+      "evaluation": [
+        11923001,
+        11923002,
+        11923003,
+        11923004,
+        11923005,
+        11923006,
+        11923007,
+        11923008,
+        11923009,
+        11923010,
+        11923011,
+        11923012,
+        11923013,
+        11923014,
+        11923015,
+        11923016
+      ]
+    },
+    "310049": {
+      "A": [
+        11930001,
+        11930002,
+        11930003,
+        11930004,
+        11930005,
+        11930006,
+        11930007,
+        11930008
+      ],
+      "B": [
+        11931001,
+        11931002,
+        11931003,
+        11931004,
+        11931005,
+        11931006,
+        11931007,
+        11931008
+      ],
+      "evaluation": [
+        11933001,
+        11933002,
+        11933003,
+        11933004,
+        11933005,
+        11933006,
+        11933007,
+        11933008,
+        11933009,
+        11933010,
+        11933011,
+        11933012,
+        11933013,
+        11933014,
+        11933015,
+        11933016
+      ]
+    },
+    "310061": {
+      "A": [
+        11940001,
+        11940002,
+        11940003,
+        11940004,
+        11940005,
+        11940006,
+        11940007,
+        11940008
+      ],
+      "B": [
+        11941001,
+        11941002,
+        11941003,
+        11941004,
+        11941005,
+        11941006,
+        11941007,
+        11941008
+      ],
+      "evaluation": [
+        11943001,
+        11943002,
+        11943003,
+        11943004,
+        11943005,
+        11943006,
+        11943007,
+        11943008,
+        11943009,
+        11943010,
+        11943011,
+        11943012,
+        11943013,
+        11943014,
+        11943015,
+        11943016
+      ]
+    },
+    "310073": {
+      "A": [
+        11950001,
+        11950002,
+        11950003,
+        11950004,
+        11950005,
+        11950006,
+        11950007,
+        11950008
+      ],
+      "B": [
+        11951001,
+        11951002,
+        11951003,
+        11951004,
+        11951005,
+        11951006,
+        11951007,
+        11951008
+      ],
+      "evaluation": [
+        11953001,
+        11953002,
+        11953003,
+        11953004,
+        11953005,
+        11953006,
+        11953007,
+        11953008,
+        11953009,
+        11953010,
+        11953011,
+        11953012,
+        11953013,
+        11953014,
+        11953015,
+        11953016
+      ]
+    },
+    "310089": {
+      "A": [
+        11960001,
+        11960002,
+        11960003,
+        11960004,
+        11960005,
+        11960006,
+        11960007,
+        11960008
+      ],
+      "B": [
+        11961001,
+        11961002,
+        11961003,
+        11961004,
+        11961005,
+        11961006,
+        11961007,
+        11961008
+      ],
+      "evaluation": [
+        11963001,
+        11963002,
+        11963003,
+        11963004,
+        11963005,
+        11963006,
+        11963007,
+        11963008,
+        11963009,
+        11963010,
+        11963011,
+        11963012,
+        11963013,
+        11963014,
+        11963015,
+        11963016
+      ]
+    },
+    "310101": {
+      "A": [
+        11970001,
+        11970002,
+        11970003,
+        11970004,
+        11970005,
+        11970006,
+        11970007,
+        11970008
+      ],
+      "B": [
+        11971001,
+        11971002,
+        11971003,
+        11971004,
+        11971005,
+        11971006,
+        11971007,
+        11971008
+      ],
+      "evaluation": [
+        11973001,
+        11973002,
+        11973003,
+        11973004,
+        11973005,
+        11973006,
+        11973007,
+        11973008,
+        11973009,
+        11973010,
+        11973011,
+        11973012,
+        11973013,
+        11973014,
+        11973015,
+        11973016
+      ]
+    }
+  },
+  "source_revision": "40f1a9089d53ca13f31386a7f6eb11af1e010573",
+  "source_run": "pointmaze_critic_clock_stage42_v1_full_20260928_r1",
+  "total_method_steps": 2304000
+}
