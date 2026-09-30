@@ -107,7 +107,7 @@ def audit_plan(raw, row, *, policy, period, predictor, bounds):
     else:
         for start in range(0, horizon, period):
             stop = min(start + period, horizon)
-            targets = raw["measurement"][max(0, start + 1 - spec.LOOKBACK_STEPS):start + 1, :2]
+            targets = raw["measurement"][max(0, start + 1 - spec.LOOKBACK_STEPS):start + 1, :2].astype(np.float32)
             points = plan_points(targets, policy, predictor, period, bounds)
             expected[start:stop] = points[:stop - start]
             velocity[start:stop] = (points[1:stop - start + 1] - points[:stop - start]) / spec.DT_SECONDS

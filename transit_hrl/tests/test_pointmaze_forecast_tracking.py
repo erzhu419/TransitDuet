@@ -26,10 +26,10 @@ class ForecastTrackingTest(unittest.TestCase):
         cls.predictor, cls.fitting = experiment.fit_forecaster(spec.arguments(310001, preflight=True),
             spec.seed_roles(310001, preflight=True)["fitting"])
 
-    def controller(self):
+    def controller(self, *, cost=True):
         torch.manual_seed(54)
         return FrequencySeparatedActorCriticPPO(SMDPPPOConfig(upper_state_dim=390, lower_state_dim=390,
-            upper_action_dim=2, lower_action_dim=2, hidden_dim=8, lower_cost_critic=True,
+            upper_action_dim=2, lower_action_dim=2, hidden_dim=8, lower_cost_critic=cost,
             lower_value_state_dim=392, promotion_state_dim=394))
 
     def rollout(self, policy, *, shift=0., period=100):
@@ -121,7 +121,7 @@ class ForecastTrackingTest(unittest.TestCase):
                     experiment.audit_plan(bad, row, policy=policy, period=50, predictor=self.predictor, bounds=ref.bounds)
 
     def test_complete_pipeline_and_changed_roster_rejection(self):
-        model = self.controller()
+        model = self.controller(cost=False)
         original = copy.deepcopy(joint.inference_weights(model))
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
