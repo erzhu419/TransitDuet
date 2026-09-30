@@ -80,7 +80,9 @@ class UpdateDiagnosticsTest(unittest.TestCase):
                     value_optimizer=getattr(plain, level + "_value_optimizer"), actor_updates_enabled=phase == "train")
                 observed = experiment.observed_update(instrumented, batch, level=level, phase=phase,
                     root=310001, period=50, iteration=1, episode_count=1)
-                torch.testing.assert_close(plain.state_dict(), instrumented.state_dict(), atol=0, rtol=0)
+                plain_state, observed_state = plain.state_dict(), instrumented.state_dict()
+                self.assertEqual(plain_state.pop("config"), observed_state.pop("config"))
+                torch.testing.assert_close(plain_state, observed_state, atol=0, rtol=0)
                 self.assertEqual(observed["ppo_metrics"], expected)
                 self.assertGreaterEqual(observed["kl_mean"], 0)
                 self.assertLessEqual(observed["clip_fraction"], 1)

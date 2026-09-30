@@ -182,7 +182,10 @@ def replay(root, *, preflight, output):
                 final = torch.load(c["checkpoints"][p][arm], map_location="cpu", weights_only=False)
                 if (final["protocol"], final["root"], final["period"], final["policy"]) != (spec.previous.EXPERIMENT_PROTOCOL, root, period, arm):
                     raise ValueError("Stage58 final reference checkpoint differs from Stage57")
-                torch.testing.assert_close(model.state_dict(), final["state_dict"], atol=0, rtol=0)
+                current, saved = model.state_dict(), dict(final["state_dict"])
+                if current.pop("config") != saved.pop("config"):
+                    raise ValueError("Stage58 final configuration differs from Stage57")
+                torch.testing.assert_close(current, saved, atol=0, rtol=0)
                 checks[p][arm] = "passed"
                 costs["final_checkpoint_loads"] += 1
                 print(f"reproduced {root}/period{period}/{arm}: final networks and optimizers exact", flush=True)
