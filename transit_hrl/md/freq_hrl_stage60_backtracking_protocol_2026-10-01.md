@@ -14,4 +14,4 @@ Mechanical validity requires exact controls/critics, exact accounting and deploy
 
 ## Execution
 
-Implementation and scheduler tests pending; no native performance task registered.
+Implementation `34033d5d71` is committed and pushed. Scheduler task `t110008` completed with exit0 on node005: six new backtracking tests plus ten Stage58/59 regressions, all16 passed in111.019s. Archived preflight task `t110010` also completed with exit0 on node005; all three paired controls and critic networks/Adam matched exactly. Qualification task `t110011` remains queued after an SSH launch failure. Both existing jtl110gpu/jtl110gpu2 jump ports then refused fresh connections; scheduler reported all six CPU routes unavailable. No environment or scheduler code was changed to bypass the outage. Once the existing qualification completes, inspect the compact summary before registering the frozen eight-root comparison. No full archive comparison or native performance task has been registered yet.
