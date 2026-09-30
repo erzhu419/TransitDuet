@@ -52,7 +52,8 @@ def make_model(controller, method, *, root):
 
 def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
             lower_credit="intrinsic_option", lower_sample=None, upper_sample=None, lower_seed=None,
-            lower_value_context_builder=None, lower_reference_builder=None, lower_actor_context_builder=None):
+            lower_value_context_builder=None, lower_reference_builder=None, lower_actor_context_builder=None,
+            upper_plan_decoder=None):
     if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
         raise ValueError("unregistered lower credit")
     scale = scale_for(args)
@@ -111,7 +112,11 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 clock = time.perf_counter()
                 output = model.act_upper(state, sample=sample if upper_sample is None else upper_sample)
                 upper_time += time.perf_counter() - clock
-                subgoal = adapter.decode(np.asarray(output["action"], dtype=np.float32), observation.achieved_goal)
+                if upper_plan_decoder is None:
+                    subgoal = adapter.decode(np.asarray(output["action"], dtype=np.float32), observation.achieved_goal)
+                else:
+                    subgoal = upper_plan_decoder(action=np.asarray(output["action"], dtype=np.float32),
+                        observation=observation, history=history, step=step, world_low=low, world_high=high)
                 if sample:
                     builder.begin_upper(state=state, action=output["action"], logp=output["logp"], value=output["value"])
                 decisions.append(step)
@@ -128,7 +133,7 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
             actor_context, cost_state = None, None
             if lower_actor_context_builder is not None:
                 actor_context = lower_actor_context_builder(age=step - last_plan, step=step, horizon=args.horizon)
-                cost_state = state
+                cost_state = state if model.lower_cost_value is not None else None
                 if value_state is None:
                     value_state = state
                 state = np.concatenate((state, actor_context)).astype(np.float32)
