@@ -147,6 +147,7 @@ class FirstUpdateTest(unittest.TestCase):
         self.assertEqual(8 * b["diagnostic_updates"], 96)
         self.assertEqual(spec.KL_BUDGET, .02)
         for preflight in (True, False):
+            self.assertEqual(spec.options(preflight=preflight)["learning_iterations"], 1)
             task = task_specification("unit_stage59", spec.roots(preflight=preflight)[0], preflight=preflight)
             self.assertIsNone(task["require_node"])
             self.assertEqual(task["allowed_nodes"], [f"node{i:03d}" for i in range(1, 7)])

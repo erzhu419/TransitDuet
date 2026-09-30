@@ -8,6 +8,10 @@ Full archive budget: 4352 episodes, 5222400 lower/78336 upper reconstruction cal
 
 Tests detect hook-induced changes, nonempty-Adam rollback failures, moving-reference KL mistakes, changed critic updates, archive mismatch and cost/roster errors. All tests, preflight and full replay run through scheduler on dynamic node001-node006; full roots9CPU/12GB, preflight/qualification2CPU/4GB. Only compact JSON is pulled; trajectories and weights remain remote. Freeze code, roots and budget before full outcomes.
 
+## Execution
+
+Implementation `917e79fb15`; first-update options explicitly declare one learning iteration rather than inheriting Stage57's32. Scheduler test task `t109247` contains six new tests and four Stage58 regression tests. It is queued, not executed: scheduler login probes timed out; direct HPC SSH timed out, jtl110gpu timed out during banner exchange, and jtl110gpu2 refused the connection. No tests or preflight are claimed passed. Keep the existing queued test; once connectivity is restored, require tests then native-archive preflight/qualification before registering the full frozen replay. No full/native performance tasks have been registered.
+
 ## Decision And Limits
 
 Mechanical validity requires exact source reproduction, exact paired critics, correct attempts/rollback accounting and every deployed actor KL within0.02. A native trial is held if any active guarded actor has no accepted steps or no action-mean movement. Passing this nonzero-step prerequisite does not establish useful learning; magnitude, clipping and retained steps remain diagnostic. No reward-based tuning, checkpoint/root/period selection or additional seed expansion is allowed. Training-batch conditional KL is not a trajectory/population bound, and archive-only results cannot establish reward improvement or causal attribution. Upper critic repair is a separate next intervention.

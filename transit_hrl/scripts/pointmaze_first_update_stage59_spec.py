@@ -7,11 +7,15 @@ EXPERIMENT_PROTOCOL = "pointmaze_first_update_stage59_v1"
 RUNNER_SCRIPT = "scripts/run_pointmaze_first_update_stage59.py"
 POLICY, METHODS = "first_update", ("task_clock",)
 PERIODS, TRAIN_POLICIES = source.PERIODS, source.TRAIN_POLICIES
-roots, options = source.roots, source.options
+roots = source.roots
 TREATMENTS = ("plain", "conditional_kl")
 KL_BUDGET = 0.02
 SOURCE_PREFLIGHT_RUN = "pointmaze_update_diagnostics_stage58_preflight_20260930_r1"
 SOURCE_FULL_RUN = "pointmaze_update_diagnostics_stage58_full_20260930_r1"
+
+
+def options(*, preflight):
+    return {**source.options(preflight=preflight), "learning_iterations": 1}
 
 
 def diagnostic_result(root, *, preflight):
