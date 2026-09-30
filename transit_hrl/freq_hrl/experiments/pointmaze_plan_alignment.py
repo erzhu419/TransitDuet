@@ -66,8 +66,10 @@ def audit_reference(raw, row, *, policy, period, bounds):
                 fits += 1
             if policy == "reverse_curve":
                 velocity = -velocity
-            age = np.arange(stop - start, dtype=np.float64) * spec.DT_SECONDS
-            expected[start:stop] = np.clip(target[start].astype(np.float64) + age[:, None] * velocity, *bounds)
+            age = np.arange(stop - start, dtype=np.float64)
+            # Preserve the executed multiply order, including cancellation near zero.
+            expected[start:stop] = np.clip(target[start].astype(np.float64)
+                + velocity * age[:, None] * spec.DT_SECONDS, *bounds)
     np.testing.assert_array_equal(raw["lower_reference"], expected,
                                   err_msg="executed reference differs from the causal renewal-only plan")
     return {"audit_regression_fits": fits,

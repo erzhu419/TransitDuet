@@ -11,6 +11,7 @@ import torch
 from freq_hrl.experiments import pointmaze_plan_alignment as experiment
 from freq_hrl.experiments import pointmaze_joint_renewal as joint
 from freq_hrl.experiments import pointmaze_critic_clock as clocks
+from freq_hrl.domains.mujoco.pointmaze_regime import PointMazeRegimeDriver
 from freq_hrl.rl.smdp_actor_critic import FrequencySeparatedActorCriticPPO, SMDPPPOConfig
 from scripts import pointmaze_plan_alignment_stage52_spec as spec
 from scripts.submit_pointmaze_plan_alignment_stage52_scheduleurm import task_specification
@@ -112,6 +113,40 @@ class PlanAlignmentTest(unittest.TestCase):
         bad["lower_reference"][75, 0] += .1
         with self.assertRaisesRegex(AssertionError, "causal renewal-only"):
             experiment.audit_reference(bad, row, policy="target_curve", period=50, bounds=ref.bounds)
+
+    def test_native_target_cancellation_audit_is_bitwise_exact(self):
+        root = spec.roots(preflight=False)[1]
+        args = spec.arguments(root, preflight=False)
+        reassociated_mismatches = 0
+        bounds = (-2 * np.ones(2), 2 * np.ones(2))
+        for seed in spec.seed_roles(root, preflight=False)["evaluation"]:
+            driver = PointMazeRegimeDriver(seed=seed, horizon=args.horizon,
+                dt_seconds=spec.DT_SECONDS, **joint._task_options(args))
+            measurements = np.array([np.concatenate(driver.sample(t)) for t in range(args.horizon)])
+            for period in spec.PERIODS:
+                for policy in ("target_curve", "reverse_curve"):
+                    reference, actual = experiment.CausalReference(policy), []
+                    for step, measurement in enumerate(measurements):
+                        start = max(0, step + 1 - spec.LOOKBACK_STEPS)
+                        history = SimpleNamespace(history=measurements[start:step + 1].reshape(-1))
+                        actual.append(reference(observation=SimpleNamespace(task_measurement=measurement),
+                            history=history, subgoal=np.zeros(2), age=step % period, step=step,
+                            world_low=bounds[0], world_high=bounds[1]))
+                    raw = {"measurement": measurements, "lower_reference": np.array(actual)}
+                    row = {"episode_length": args.horizon}
+                    audit = experiment.audit_reference(raw, row, policy=policy, period=period, bounds=bounds)
+                    self.assertEqual(audit["audit_regression_fits"], reference.fits)
+                    for start in range(period, args.horizon, period):
+                        velocity = experiment.fit_velocity(measurements[max(0, start + 1 - 64):start + 1, :2])
+                        velocity *= -1 if policy == "reverse_curve" else 1
+                        age_seconds = np.arange(period, dtype=np.float64) * spec.DT_SECONDS
+                        old = np.clip(measurements[start, :2].astype(np.float64)
+                            + age_seconds[:, None] * velocity, *bounds).astype(np.float32)
+                        reassociated_mismatches += np.count_nonzero(old != raw["lower_reference"][start:start + period])
+                    raw["lower_reference"][1, 0] = np.nextafter(raw["lower_reference"][1, 0], np.float32(np.inf))
+                    with self.assertRaisesRegex(AssertionError, "causal renewal-only"):
+                        experiment.audit_reference(raw, row, policy=policy, period=period, bounds=bounds)
+        self.assertGreater(reassociated_mismatches, 0)
 
     def test_native_style_pipeline_equal_costs_and_roster_failures(self):
         model = self.controller()

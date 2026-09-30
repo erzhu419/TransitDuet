@@ -1,0 +1,22 @@
+{
+  "status": "incomplete_audit_failure",
+  "cause": "audit_reassociated_velocity_age_dt_one_float32_reference_mismatch",
+  "maximum_absolute_difference": 4.440892e-16,
+  "tasks": [
+    {"root": 310011, "task": "t107139", "exit_code": 1, "opened_groups": 9, "saved_raw_paths": 139},
+    {"root": 310023, "task": "t107140", "exit_code": 1, "opened_groups": 7, "saved_raw_paths": 111},
+    {"root": 310037, "task": "t107141", "exit_code": 1, "opened_groups": 7, "saved_raw_paths": 111},
+    {"root": 310049, "task": "t107142", "exit_code": 1, "opened_groups": 9, "saved_raw_paths": 143},
+    {"root": 310061, "task": "t107143", "exit_code": 1, "opened_groups": 7, "saved_raw_paths": 111},
+    {"root": 310073, "task": "t107144", "exit_code": 0, "opened_groups": 24, "saved_raw_paths": 384},
+    {"root": 310089, "task": "t107145", "exit_code": 1, "opened_groups": 7, "saved_raw_paths": 111},
+    {"root": 310101, "task": "t107146", "exit_code": 1, "opened_groups": 9, "saved_raw_paths": 140}
+  ],
+  "reconstructed_native_steps": 1516800,
+  "reconstruction": "79 opened groups * 16 eagerly submitted full-horizon paths * 1200 steps; failures are post-rollout audits and executor shutdown waits without cancelling pending futures",
+  "saved_raw_paths": 1250,
+  "rejected_before_saving_paths": 14,
+  "raw_and_logs": "retained_server_only",
+  "recovery": "pointmaze_plan_alignment_stage52_full_20260930_r2",
+  "policy_changes": "none; auditor multiply order only; strict equality retained"
+}
