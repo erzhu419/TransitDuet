@@ -10,7 +10,9 @@ Tests detect hook-induced changes, nonempty-Adam rollback failures, moving-refer
 
 ## Execution
 
-Implementation `917e79fb15`; first-update options explicitly declare one learning iteration rather than inheriting Stage57's32. Scheduler test task `t109247` contains six new tests and four Stage58 regression tests. It is queued, not executed: scheduler login probes timed out; direct HPC SSH timed out, jtl110gpu timed out during banner exchange, and jtl110gpu2 refused the connection. No tests or preflight are claimed passed. Keep the existing queued test; once connectivity is restored, require tests then native-archive preflight/qualification before registering the full frozen replay. No full/native performance tasks have been registered.
+Implementation `917e79fb15`; one-iteration metadata correction `bed2c9b1e9`. After the SSH interruption, existing test task `t109247` completed with exit0 on node004: six new tests plus four Stage58 regressions, all10 passed in63.836s. No duplicate test task was needed.
+
+Native-archive preflight `t109679` and qualification `t109681` completed with exit0 on node004. All four period/arm source reconstructions and paired critic networks/Adam matched exactly. Reconstructed24 episodes,7200 lower/108 upper calls; executed upper actor/value16/48 and lower actor/value32/64 steps. The guarded halves retained all24 attempted actor steps, with30 guard distribution passes and48 snapshot calls; no rollback occurred in this short source. All six active actors moved, with final conditional KL0.00767-0.01732, below0.02. Zero new native/evaluation/fit steps. Only the compact qualification JSON is local. These checks permit the frozen full archive comparison, not a reward-improvement claim; no native performance task has been registered.
 
 ## Decision And Limits
 
