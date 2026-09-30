@@ -8,6 +8,14 @@ Full replay: 12288 archived episodes, 14745600 lower and 221184 upper inference 
 
 Tests, replay and qualification use scheduler's dynamic node001-node006 pool. Full roots use eight reconstruction workers plus learner, nine CPU/12 GB each; preflight and qualification two CPU/4 GB. Pull compact JSON only; archive traces, final weights and iteration diagnostics remain remote. If action or final-state reconstruction fails, fix the reconstruction rather than relax identity or reinterpret its metrics.
 
+## Execution
+
+Implementation `2eb9c21725`; configuration-comparison correction `ca61b690bb`; freeze `603cba9dea`. Initial tests `t109172` exposed string configuration fields being passed to Torch's numeric comparator. Configuration now uses exact dictionary comparison; numeric network/Adam identity remains zero tolerance. All 41 tests passed in `t109176` on node006.
+
+Native-archive preflight `t109180` and qualification `t109183` completed with exit 0 on node004. All four period/arm final network and optimizer identities passed. Actual cost: 32 archived episodes, 9600 lower/144 upper calls, 28 observed updates; replayed optimizer steps upper actor/value 16/48, lower actor/value 32/64. New native/evaluation/fit counts are all zero; only the compact qualification JSON was pulled.
+
+Full run `pointmaze_update_diagnostics_stage58_full_20260930_r1`: tasks `t109185`-`t109192` correspond in order to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight entered running on dynamically chosen node004/005/006 within the allowed six-node pool. Full qualification and diagnosis remain pending; no optimization intervention has been selected and Stage57's performance gates remain unchanged.
+
 ## Limitations
 
 This is post-hoc development diagnosis of the frozen Stage57 optimizer, not new performance confirmation. Summed conditional KL is an empirical trajectory-scale diagnostic, not a proven off-policy trajectory bound. No gate, encoder, frequency-specific, OOD or independent training-root claim is introduced; Stage55/57 decisions remain unchanged.
