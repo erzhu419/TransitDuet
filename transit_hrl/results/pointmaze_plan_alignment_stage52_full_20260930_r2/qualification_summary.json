@@ -1,0 +1,1784 @@
+{
+  "computation": {
+    "actor_optimizer_steps": 0,
+    "riccati_solves": 8,
+    "value_optimizer_steps": 0
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      52,
+      52052
+    ],
+    "bounds": "clip_evaluated_reference_to_same_environment_goal_bounds_no_maze_route_or_future_access",
+    "cost": "equal_upper_lower_calls_per_period_zero_gate_or_optimizer_steps_all_plan_and_audit_regressions_counted",
+    "current_target": "per_primitive_observed_target_diagnostic_not_low_frequency_plan",
+    "decision": "curve_vs_hold_reverse_and_frozen_positive_at_both_fixed_periods_for_plan_phase_utility",
+    "dt_seconds": 0.01,
+    "forecast": "numpy_lstsq_position_on_intercept_and_past_relative_time_at_renewals_only",
+    "frozen": "original_source_lower_MLP_reference_control_all_networks_critics_optimizers_unchanged",
+    "initialization": "valid_observations_only_initial_zero_velocity_no_padding_fit",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "analytic_plan_feedback_development_not_learned_FreqHRL_confirmation_extra_OLS_compute_not_free_same_call_budget_not_equal_FLOPs",
+    "lookback_steps": 64,
+    "lower": "Stage51_fixed_LQR_gain_action_clip_source_Gaussian_std_no_velocity_feedforward",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "frozen",
+      "waypoint",
+      "target_hold",
+      "target_curve",
+      "reverse_curve",
+      "current_target"
+    ],
+    "primary_endpoints": [
+      "period50:target_hold_minus_waypoint",
+      "period50:target_curve_minus_target_hold",
+      "period50:target_curve_minus_reverse_curve",
+      "period50:target_curve_minus_frozen",
+      "period100:target_hold_minus_waypoint",
+      "period100:target_curve_minus_target_hold",
+      "period100:target_curve_minus_reverse_curve",
+      "period100:target_curve_minus_frozen"
+    ],
+    "primary_mode": "deterministic",
+    "renewal": "fixed_exogenous_period_no_gate_no_future_reference_trajectory_schedule_replay",
+    "reverse_curve": "same_OLS_and_anchor_opposite_velocity_negative_control",
+    "sampling": "deterministic_upper_lower_deterministic_and_sampled_same_noise_seeds",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_gain_or_window_tuning_no_root_extension_no_period_or_deployment_mode_selection",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "state": "separate_upper_anchor_and_lower_phase_reference_unchanged_actor_dimensions",
+    "target_curve": "same_observed_anchor_plus_OLS_target_velocity_times_option_age_seconds",
+    "target_hold": "currently_observed_target_at_renewal_held_for_the_option",
+    "upper": "same_source_upper_actor_called_once_per_fixed_renewal_all_arms",
+    "waypoint": "original_decoded_upper_anchor_held_between_calls"
+  },
+  "method_cost": {
+    "audit_regression_fits": 17408,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 3686400,
+    "plan_regression_fits": 17408,
+    "primitive_steps": 3686400,
+    "reference_evaluations": 3686400,
+    "upper_inference_calls": 55296
+  },
+  "native_trace_audits": 3072,
+  "primary_endpoints": {
+    "period100:target_curve_minus_frozen": {
+      "ci": [
+        -36.51841097662464,
+        -15.364102832148262
+      ],
+      "effect": "negative",
+      "mean": -25.071578548218
+    },
+    "period100:target_curve_minus_reverse_curve": {
+      "ci": [
+        -37.63828580857911,
+        -16.909814459286707
+      ],
+      "effect": "negative",
+      "mean": -27.64590557864868
+    },
+    "period100:target_curve_minus_target_hold": {
+      "ci": [
+        -50.564436616601014,
+        -40.65984746777504
+      ],
+      "effect": "negative",
+      "mean": -46.02216750658859
+    },
+    "period100:target_hold_minus_waypoint": {
+      "ci": [
+        13.367712217480694,
+        24.57141040033322
+      ],
+      "effect": "positive",
+      "mean": 18.36801057078469
+    },
+    "period50:target_curve_minus_frozen": {
+      "ci": [
+        -49.30385206835266,
+        -30.636787713420233
+      ],
+      "effect": "negative",
+      "mean": -39.730593849763636
+    },
+    "period50:target_curve_minus_reverse_curve": {
+      "ci": [
+        11.93991320458079,
+        25.94770866877552
+      ],
+      "effect": "positive",
+      "mean": 18.747160720617472
+    },
+    "period50:target_curve_minus_target_hold": {
+      "ci": [
+        -4.453664907833073,
+        1.782118904117774
+      ],
+      "effect": "inconclusive",
+      "mean": -1.4406733870076067
+    },
+    "period50:target_hold_minus_waypoint": {
+      "ci": [
+        -21.974586047184495,
+        -11.431046788506876
+      ],
+      "effect": "negative",
+      "mean": -16.64152196483448
+    }
+  },
+  "protocol": "pointmaze_plan_alignment_stage52_v1",
+  "root_rows": [
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.718282557120835,
+          "target_curve": 0.718282557120835
+        },
+        "100": {
+          "reverse_curve": 0.7036888698862915,
+          "target_curve": 0.7036888698862915
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -9.421544238144293,
+        "period100:target_curve_minus_reverse_curve": -33.15826667228703,
+        "period100:target_curve_minus_target_hold": -49.408083704991896,
+        "period100:target_hold_minus_waypoint": 30.77743477991237,
+        "period50:target_curve_minus_frozen": -32.41868017927038,
+        "period50:target_curve_minus_reverse_curve": 12.158394085398186,
+        "period50:target_curve_minus_target_hold": -3.706490740173649,
+        "period50:target_hold_minus_waypoint": -7.536165924486681
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 920.3480700842579,
+              "episode_return": 944.3480700842579,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1247125037555694,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 880.9868420471927,
+              "episode_return": 904.9868420471927,
+              "reference_target_squared_error_integral": 1.2662945465523718,
+              "tracking_squared_error_integral": 1.4997029731855318,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 836.4097677825241,
+              "episode_return": 860.4097677825241,
+              "reference_target_squared_error_integral": 1.5781249000995912,
+              "tracking_squared_error_integral": 2.4992847187264737,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 848.5681618679223,
+              "episode_return": 872.5681618679223,
+              "reference_target_squared_error_integral": 1.1296728008749204,
+              "tracking_squared_error_integral": 1.9558434313694617,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 852.274652608096,
+              "episode_return": 876.274652608096,
+              "reference_target_squared_error_integral": 0.7313248195864539,
+              "tracking_squared_error_integral": 2.0501351924304174,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 859.8108185325826,
+              "episode_return": 883.8108185325826,
+              "reference_target_squared_error_integral": 1.2128651255144431,
+              "tracking_squared_error_integral": 1.8146095200811496,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 920.2063084797655,
+              "episode_return": 944.2063084797655,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1253722213735577,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 879.3177879530604,
+              "episode_return": 903.3177879530604,
+              "reference_target_squared_error_integral": 1.269873642755159,
+              "tracking_squared_error_integral": 1.5122228844446708,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 836.3225147469936,
+              "episode_return": 860.3225147469936,
+              "reference_target_squared_error_integral": 1.5781249000995912,
+              "tracking_squared_error_integral": 2.4967194296317663,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 848.5144681228301,
+              "episode_return": 872.5144681228301,
+              "reference_target_squared_error_integral": 1.1296728008749204,
+              "tracking_squared_error_integral": 1.9559848056721232,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 852.2223495863176,
+              "episode_return": 876.2223495863176,
+              "reference_target_squared_error_integral": 0.7313248195864539,
+              "tracking_squared_error_integral": 2.049134803327429,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 859.8006511715603,
+              "episode_return": 883.8006511715603,
+              "reference_target_squared_error_integral": 1.21178425888534,
+              "tracking_squared_error_integral": 1.8125286048284344,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 932.3480700842579,
+              "episode_return": 944.3480700842579,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1247125037555694,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 792.2590589332184,
+              "episode_return": 804.2590589332184,
+              "reference_target_squared_error_integral": 2.8373826546153924,
+              "tracking_squared_error_integral": 3.280550726477186,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 815.9957813673611,
+              "episode_return": 827.9957813673611,
+              "reference_target_squared_error_integral": 3.7975932787175566,
+              "tracking_squared_error_integral": 3.216974490193635,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 782.8375146950741,
+              "episode_return": 794.8375146950741,
+              "reference_target_squared_error_integral": 4.68372761294353,
+              "tracking_squared_error_integral": 3.7588262382168383,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 832.245598400066,
+              "episode_return": 844.245598400066,
+              "reference_target_squared_error_integral": 2.0626835081218116,
+              "tracking_squared_error_integral": 2.8525609123155284,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 801.4681636201536,
+              "episode_return": 813.4681636201536,
+              "reference_target_squared_error_integral": 2.780501028688602,
+              "tracking_squared_error_integral": 3.2490804374711115,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 932.2063084797655,
+              "episode_return": 944.2063084797655,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1253722213735577,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 792.7910526764126,
+              "episode_return": 804.7910526764126,
+              "reference_target_squared_error_integral": 2.8398995203527173,
+              "tracking_squared_error_integral": 3.280056763249528,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 815.8834020144493,
+              "episode_return": 827.8834020144493,
+              "reference_target_squared_error_integral": 3.7975932787175566,
+              "tracking_squared_error_integral": 3.214147747149024,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 782.8565437246334,
+              "episode_return": 794.8565437246334,
+              "reference_target_squared_error_integral": 4.68372761294353,
+              "tracking_squared_error_integral": 3.7579096411831383,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 832.2406503122795,
+              "episode_return": 844.2406503122795,
+              "reference_target_squared_error_integral": 2.0626835081218116,
+              "tracking_squared_error_integral": 2.850392128853051,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 801.712383266301,
+              "episode_return": 813.712383266301,
+              "reference_target_squared_error_integral": 2.778922701854996,
+              "tracking_squared_error_integral": 3.2408617629062126,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310011
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.6756247046370607,
+          "target_curve": 0.6756247046370607
+        },
+        "100": {
+          "reverse_curve": 0.662402343068409,
+          "target_curve": 0.662402343068409
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -25.112832534960148,
+        "period100:target_curve_minus_reverse_curve": -20.25536678942649,
+        "period100:target_curve_minus_target_hold": -43.441524443959224,
+        "period100:target_hold_minus_waypoint": 15.506251853261801,
+        "period50:target_curve_minus_frozen": -44.63945313002705,
+        "period50:target_curve_minus_reverse_curve": 27.566618573959886,
+        "period50:target_curve_minus_target_hold": 2.7696550064708845,
+        "period50:target_hold_minus_waypoint": -17.082390180069638
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 924.6915294599462,
+              "episode_return": 948.6915294599462,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0961778461303129,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 904.8095402397516,
+              "episode_return": 928.8095402397516,
+              "reference_target_squared_error_integral": 1.0373624975734885,
+              "tracking_squared_error_integral": 1.275965220799335,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 832.6034685357647,
+              "episode_return": 856.6034685357647,
+              "reference_target_squared_error_integral": 1.4749259933313703,
+              "tracking_squared_error_integral": 2.518418413201748,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 860.1700871097246,
+              "episode_return": 884.1700871097246,
+              "reference_target_squared_error_integral": 0.9210865011523521,
+              "tracking_squared_error_integral": 1.8135209139004553,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 857.4004321032537,
+              "episode_return": 881.4004321032537,
+              "reference_target_squared_error_integral": 0.6400538921656519,
+              "tracking_squared_error_integral": 1.9976623806642584,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 874.4828222833233,
+              "episode_return": 898.4828222833233,
+              "reference_target_squared_error_integral": 0.9683589628548628,
+              "tracking_squared_error_integral": 1.6736066190175825,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 924.3843180747444,
+              "episode_return": 948.3843180747444,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0988686745637857,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 903.1761892500633,
+              "episode_return": 927.1761892500633,
+              "reference_target_squared_error_integral": 1.0460077027374048,
+              "tracking_squared_error_integral": 1.298817284809381,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 832.3848017931455,
+              "episode_return": 856.3848017931455,
+              "reference_target_squared_error_integral": 1.4749259933313703,
+              "tracking_squared_error_integral": 2.5213438922258042,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 860.0591887672556,
+              "episode_return": 884.0591887672556,
+              "reference_target_squared_error_integral": 0.9210865011523521,
+              "tracking_squared_error_integral": 1.8161225843396982,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 857.2253357979896,
+              "episode_return": 881.2253357979896,
+              "reference_target_squared_error_integral": 0.6400538921656519,
+              "tracking_squared_error_integral": 2.000428414585625,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 874.1612560608387,
+              "episode_return": 898.1612560608387,
+              "reference_target_squared_error_integral": 0.9667556989000172,
+              "tracking_squared_error_integral": 1.6757985041675965,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 936.6915294599462,
+              "episode_return": 948.6915294599462,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0961778461303129,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 808.9215773677264,
+              "episode_return": 820.9215773677264,
+              "reference_target_squared_error_integral": 2.451519662843075,
+              "tracking_squared_error_integral": 2.9948445475513257,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 804.0641116221927,
+              "episode_return": 816.0641116221927,
+              "reference_target_squared_error_integral": 3.4480749061648965,
+              "tracking_squared_error_integral": 3.3117502473119886,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 783.8087448327663,
+              "episode_return": 795.8087448327663,
+              "reference_target_squared_error_integral": 4.612546993543543,
+              "tracking_squared_error_integral": 3.7190263961184433,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 827.2502692767255,
+              "episode_return": 839.2502692767255,
+              "reference_target_squared_error_integral": 2.06257220745975,
+              "tracking_squared_error_integral": 2.927248111586439,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 811.7440174234637,
+              "episode_return": 823.7440174234637,
+              "reference_target_squared_error_integral": 2.4365733489695773,
+              "tracking_squared_error_integral": 2.988265947656372,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 936.3843180747444,
+              "episode_return": 948.3843180747444,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0988686745637857,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 808.2700380588046,
+              "episode_return": 820.2700380588046,
+              "reference_target_squared_error_integral": 2.451384922872702,
+              "tracking_squared_error_integral": 3.0151645471049755,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 803.8251312624379,
+              "episode_return": 815.8251312624379,
+              "reference_target_squared_error_integral": 3.4480749061648965,
+              "tracking_squared_error_integral": 3.315055853855192,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 783.6954637821807,
+              "episode_return": 795.6954637821807,
+              "reference_target_squared_error_integral": 4.612546993543543,
+              "tracking_squared_error_integral": 3.722983961572374,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 827.0580310741448,
+              "episode_return": 839.0580310741448,
+              "reference_target_squared_error_integral": 2.06257220745975,
+              "tracking_squared_error_integral": 2.931172454233447,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 811.4706569184218,
+              "episode_return": 823.4706569184218,
+              "reference_target_squared_error_integral": 2.435754319613036,
+              "tracking_squared_error_integral": 2.995236929307629,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310023
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.6749502577581337,
+          "target_curve": 0.6749502577581337
+        },
+        "100": {
+          "reverse_curve": 0.6592817454044896,
+          "target_curve": 0.6592817454044896
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -12.903977358407246,
+        "period100:target_curve_minus_reverse_curve": -40.33994453152252,
+        "period100:target_curve_minus_target_hold": -47.55048767604501,
+        "period100:target_hold_minus_waypoint": 13.54409094176674,
+        "period50:target_curve_minus_frozen": -44.44432776892074,
+        "period50:target_curve_minus_reverse_curve": 9.956488049448012,
+        "period50:target_curve_minus_target_hold": -5.084025772949076,
+        "period50:target_hold_minus_waypoint": -19.11060800266614
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 932.9308536311216,
+              "episode_return": 956.9308536311216,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0034544404182213,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 908.0310723968714,
+              "episode_return": 932.0310723968714,
+              "reference_target_squared_error_integral": 0.9599366338534225,
+              "tracking_squared_error_integral": 1.2068081121139476,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 853.6302565785027,
+              "episode_return": 877.6302565785027,
+              "reference_target_squared_error_integral": 1.3720112514841072,
+              "tracking_squared_error_integral": 2.1791342883270266,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 863.5867446279507,
+              "episode_return": 887.5867446279507,
+              "reference_target_squared_error_integral": 1.0250387560480871,
+              "tracking_squared_error_integral": 1.7433872703529905,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 868.6707704008998,
+              "episode_return": 892.6707704008998,
+              "reference_target_squared_error_integral": 0.6449149788535345,
+              "tracking_squared_error_integral": 1.8082051327533815,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 887.7813784035659,
+              "episode_return": 911.7813784035659,
+              "reference_target_squared_error_integral": 0.9072939369549691,
+              "tracking_squared_error_integral": 1.4934323330922876,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 932.7572868323589,
+              "episode_return": 956.7572868323589,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0038796447440035,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 906.4490723160134,
+              "episode_return": 930.4490723160134,
+              "reference_target_squared_error_integral": 0.9545057065473133,
+              "tracking_squared_error_integral": 1.2278015783414022,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 853.8321630740069,
+              "episode_return": 877.8321630740069,
+              "reference_target_squared_error_integral": 1.3720112514841072,
+              "tracking_squared_error_integral": 2.174158622343316,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 863.4830069897572,
+              "episode_return": 887.4830069897572,
+              "reference_target_squared_error_integral": 1.0250387560480871,
+              "tracking_squared_error_integral": 1.7430605851267906,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 868.6690002825164,
+              "episode_return": 892.6690002825164,
+              "reference_target_squared_error_integral": 0.6449149788535345,
+              "tracking_squared_error_integral": 1.8065465092853334,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 887.6667544017637,
+              "episode_return": 911.6667544017637,
+              "reference_target_squared_error_integral": 0.9074976972659718,
+              "tracking_squared_error_integral": 1.4916943645266982,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 944.9308536311216,
+              "episode_return": 956.9308536311216,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0034544404182213,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 808.4935064943593,
+              "episode_return": 820.4935064943593,
+              "reference_target_squared_error_integral": 2.4957167775406144,
+              "tracking_squared_error_integral": 2.9368855213473943,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 835.9294736674746,
+              "episode_return": 847.9294736674746,
+              "reference_target_squared_error_integral": 3.163237571775713,
+              "tracking_squared_error_integral": 2.8358435504246917,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 795.589529135952,
+              "episode_return": 807.589529135952,
+              "reference_target_squared_error_integral": 4.645542723930343,
+              "tracking_squared_error_integral": 3.4069255760641304,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 843.140016811997,
+              "episode_return": 855.140016811997,
+              "reference_target_squared_error_integral": 1.9525953821419217,
+              "tracking_squared_error_integral": 2.553440107682346,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 829.5959258702303,
+              "episode_return": 841.5959258702303,
+              "reference_target_squared_error_integral": 2.5017845581108045,
+              "tracking_squared_error_integral": 2.7802031510338745,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 944.7572868323589,
+              "episode_return": 956.7572868323589,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0038796447440035,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 807.804126338061,
+              "episode_return": 819.804126338061,
+              "reference_target_squared_error_integral": 2.4929374184424233,
+              "tracking_squared_error_integral": 2.9468296652414154,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 836.1552859243704,
+              "episode_return": 848.1552859243704,
+              "reference_target_squared_error_integral": 3.163237571775713,
+              "tracking_squared_error_integral": 2.8292771725712003,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 795.5406662568712,
+              "episode_return": 807.5406662568712,
+              "reference_target_squared_error_integral": 4.645542723930343,
+              "tracking_squared_error_integral": 3.405649654318828,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 843.2313773584926,
+              "episode_return": 855.2313773584926,
+              "reference_target_squared_error_integral": 1.9525953821419217,
+              "tracking_squared_error_integral": 2.5494938766796382,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 829.6832261604393,
+              "episode_return": 841.6832261604393,
+              "reference_target_squared_error_integral": 2.4997861110599313,
+              "tracking_squared_error_integral": 2.7745716142913635,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310037
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.7041753895721659,
+          "target_curve": 0.7041753895721659
+        },
+        "100": {
+          "reverse_curve": 0.7175702594235919,
+          "target_curve": 0.7175702594235919
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -30.706642087649016,
+        "period100:target_curve_minus_reverse_curve": -7.873378200972297,
+        "period100:target_curve_minus_target_hold": -35.17241979518428,
+        "period100:target_hold_minus_waypoint": 16.685145878868866,
+        "period50:target_curve_minus_frozen": -58.25053128125592,
+        "period50:target_curve_minus_reverse_curve": 30.125425902982897,
+        "period50:target_curve_minus_target_hold": 3.629362139651221,
+        "period50:target_hold_minus_waypoint": -11.95238895260195
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 915.8659219363974,
+              "episode_return": 939.8659219363974,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1681731033099862,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 908.35298093853,
+              "episode_return": 932.35298093853,
+              "reference_target_squared_error_integral": 0.8503677901837561,
+              "tracking_squared_error_integral": 1.205605583544601,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 819.9770237542912,
+              "episode_return": 843.9770237542912,
+              "reference_target_squared_error_integral": 1.5562118292499152,
+              "tracking_squared_error_integral": 2.7115064322726865,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 850.1024496572741,
+              "episode_return": 874.1024496572741,
+              "reference_target_squared_error_integral": 0.9885892986272173,
+              "tracking_squared_error_integral": 1.933827805542565,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 846.4730875176228,
+              "episode_return": 870.4730875176228,
+              "reference_target_squared_error_integral": 0.6799108629686135,
+              "tracking_squared_error_integral": 2.138292102467213,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 858.4254764702248,
+              "episode_return": 882.4254764702248,
+              "reference_target_squared_error_integral": 0.8666249953224339,
+              "tracking_squared_error_integral": 1.920764608317982,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 915.8228404372427,
+              "episode_return": 939.8228404372427,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1688283719432475,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 906.9677570414347,
+              "episode_return": 930.9677570414347,
+              "reference_target_squared_error_integral": 0.8562863548652594,
+              "tracking_squared_error_integral": 1.2140357841388933,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 820.0519122137691,
+              "episode_return": 844.0519122137691,
+              "reference_target_squared_error_integral": 1.5562118292499152,
+              "tracking_squared_error_integral": 2.710264006620972,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 850.1688234322905,
+              "episode_return": 874.1688234322905,
+              "reference_target_squared_error_integral": 0.9885892986272173,
+              "tracking_squared_error_integral": 1.9336633048636234,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 846.4931731041776,
+              "episode_return": 870.4931731041776,
+              "reference_target_squared_error_integral": 0.6799108629686135,
+              "tracking_squared_error_integral": 2.1380987436857755,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 858.5212408279101,
+              "episode_return": 882.5212408279101,
+              "reference_target_squared_error_integral": 0.8683130715222394,
+              "tracking_squared_error_integral": 1.919600711974564,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 927.8659219363974,
+              "episode_return": 939.8659219363974,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1681731033099862,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 813.2516960590723,
+              "episode_return": 825.2516960590723,
+              "reference_target_squared_error_integral": 2.3068939285347794,
+              "tracking_squared_error_integral": 2.886514634586626,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 790.4184321723956,
+              "episode_return": 802.4184321723956,
+              "reference_target_squared_error_integral": 4.116437051505315,
+              "tracking_squared_error_integral": 3.7572068208992087,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 782.5450539714233,
+              "episode_return": 794.5450539714233,
+              "reference_target_squared_error_integral": 4.197755245893786,
+              "tracking_squared_error_integral": 3.6236886319720574,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 817.7174737666076,
+              "episode_return": 829.7174737666076,
+              "reference_target_squared_error_integral": 2.011347321779968,
+              "tracking_squared_error_integral": 2.9880962684009686,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 801.0323278877387,
+              "episode_return": 813.0323278877387,
+              "reference_target_squared_error_integral": 2.2366448540246378,
+              "tracking_squared_error_integral": 3.2032067166535434,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 927.8228404372427,
+              "episode_return": 939.8228404372427,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1688283719432475,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 813.3103614902554,
+              "episode_return": 825.3103614902554,
+              "reference_target_squared_error_integral": 2.302583068690476,
+              "tracking_squared_error_integral": 2.88704810170157,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 790.5768039134716,
+              "episode_return": 802.5768039134716,
+              "reference_target_squared_error_integral": 4.116437051505315,
+              "tracking_squared_error_integral": 3.7559757374021965,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 782.5892001083735,
+              "episode_return": 794.5892001083735,
+              "reference_target_squared_error_integral": 4.197755245893786,
+              "tracking_squared_error_integral": 3.624426815391991,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 817.7434894687514,
+              "episode_return": 829.7434894687514,
+              "reference_target_squared_error_integral": 2.011347321779968,
+              "tracking_squared_error_integral": 2.9890303203591397,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 800.9087518405952,
+              "episode_return": 812.9087518405952,
+              "reference_target_squared_error_integral": 2.2343982844573276,
+              "tracking_squared_error_integral": 3.2023257523984636,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310049
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.7069905692829564,
+          "target_curve": 0.7069905692829564
+        },
+        "100": {
+          "reverse_curve": 0.7394745951847768,
+          "target_curve": 0.7394745951847768
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -48.24586315076681,
+        "period100:target_curve_minus_reverse_curve": -18.12340368944649,
+        "period100:target_curve_minus_target_hold": -46.47588357265511,
+        "period100:target_hold_minus_waypoint": 16.99977968806968,
+        "period50:target_curve_minus_frozen": -24.888101550939382,
+        "period50:target_curve_minus_reverse_curve": 24.78344547437098,
+        "period50:target_curve_minus_target_hold": 0.9026354150187217,
+        "period50:target_hold_minus_waypoint": -13.198232598683944
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 920.1048284388681,
+              "episode_return": 944.1048284388681,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1506218957102536,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 877.9604659126376,
+              "episode_return": 901.9604659126376,
+              "reference_target_squared_error_integral": 1.2296048534036679,
+              "tracking_squared_error_integral": 1.5437596336053008,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 828.2889188873272,
+              "episode_return": 852.2889188873272,
+              "reference_target_squared_error_integral": 1.5324436078105848,
+              "tracking_squared_error_integral": 2.666360101654861,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 853.0723643616982,
+              "episode_return": 877.0723643616982,
+              "reference_target_squared_error_integral": 1.089859778112694,
+              "tracking_squared_error_integral": 1.917825739321267,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 852.1697289466795,
+              "episode_return": 876.1697289466795,
+              "reference_target_squared_error_integral": 0.7112092981636746,
+              "tracking_squared_error_integral": 2.1087792555373195,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 865.3679615453634,
+              "episode_return": 889.3679615453634,
+              "reference_target_squared_error_integral": 1.1848474166127736,
+              "tracking_squared_error_integral": 1.766775646459972,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 919.6446223571515,
+              "episode_return": 943.6446223571515,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1544571178448484,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 870.8703108609695,
+              "episode_return": 894.8703108609695,
+              "reference_target_squared_error_integral": 1.263915489451195,
+              "tracking_squared_error_integral": 1.6171647176401232,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 828.0079076824325,
+              "episode_return": 852.0079076824325,
+              "reference_target_squared_error_integral": 1.5324436078105848,
+              "tracking_squared_error_integral": 2.669315484700831,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 852.7586815367931,
+              "episode_return": 876.7586815367931,
+              "reference_target_squared_error_integral": 1.089859778112694,
+              "tracking_squared_error_integral": 1.9227649247714929,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 851.865380906318,
+              "episode_return": 875.865380906318,
+              "reference_target_squared_error_integral": 0.7112092981636746,
+              "tracking_squared_error_integral": 2.112795787504794,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 865.3081727685665,
+              "episode_return": 889.3081727685665,
+              "reference_target_squared_error_integral": 1.177689502790514,
+              "tracking_squared_error_integral": 1.7684760990818353,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 932.1048284388681,
+              "episode_return": 944.1048284388681,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1506218957102536,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 827.0845818141577,
+              "episode_return": 839.0845818141577,
+              "reference_target_squared_error_integral": 2.253656646407409,
+              "tracking_squared_error_integral": 2.7763642933608264,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 796.9621223528374,
+              "episode_return": 808.9621223528374,
+              "reference_target_squared_error_integral": 3.863810005289141,
+              "tracking_squared_error_integral": 3.616446942980893,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 778.8387186633909,
+              "episode_return": 790.8387186633909,
+              "reference_target_squared_error_integral": 4.784131693712956,
+              "tracking_squared_error_integral": 3.932034237204643,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 825.314602236046,
+              "episode_return": 837.314602236046,
+              "reference_target_squared_error_integral": 2.033845640012515,
+              "tracking_squared_error_integral": 3.0345801578305323,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 808.3148225479763,
+              "episode_return": 820.3148225479763,
+              "reference_target_squared_error_integral": 2.414759744036026,
+              "tracking_squared_error_integral": 3.195072048684982,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 931.6446223571515,
+              "episode_return": 943.6446223571515,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.1544571178448484,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 822.3056287038826,
+              "episode_return": 834.3056287038826,
+              "reference_target_squared_error_integral": 2.2750811924907524,
+              "tracking_squared_error_integral": 2.845798192776023,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 796.5907401559466,
+              "episode_return": 808.5907401559466,
+              "reference_target_squared_error_integral": 3.863810005289141,
+              "tracking_squared_error_integral": 3.6190397261427094,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 778.6209346501452,
+              "episode_return": 790.6209346501452,
+              "reference_target_squared_error_integral": 4.784131693712956,
+              "tracking_squared_error_integral": 3.9371754765960385,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 825.0083460044025,
+              "episode_return": 837.0083460044025,
+              "reference_target_squared_error_integral": 2.033845640012515,
+              "tracking_squared_error_integral": 3.038852265829787,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 808.0664138210606,
+              "episode_return": 820.0664138210606,
+              "reference_target_squared_error_integral": 2.40919305168684,
+              "tracking_squared_error_integral": 3.193965824405815,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310061
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.6890090926412269,
+          "target_curve": 0.6890090926412269
+        },
+        "100": {
+          "reverse_curve": 0.6981407586278516,
+          "target_curve": 0.6981407586278516
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -28.32828919837084,
+        "period100:target_curve_minus_reverse_curve": -32.76887701365081,
+        "period100:target_curve_minus_target_hold": -46.64701290309392,
+        "period100:target_hold_minus_waypoint": 10.117898701571335,
+        "period50:target_curve_minus_frozen": -41.115843415747804,
+        "period50:target_curve_minus_reverse_curve": 13.808572044302991,
+        "period50:target_curve_minus_target_hold": -3.6208252826818352,
+        "period50:target_hold_minus_waypoint": -25.5780891185035
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 924.5659616575489,
+              "episode_return": 948.5659616575489,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0864700671917988,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 896.0592803052876,
+              "episode_return": 920.0592803052876,
+              "reference_target_squared_error_integral": 1.1479181981827082,
+              "tracking_squared_error_integral": 1.3723565071622552,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 841.1348648452368,
+              "episode_return": 865.1348648452368,
+              "reference_target_squared_error_integral": 1.4609653876560822,
+              "tracking_squared_error_integral": 2.3832654671853444,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 854.9434368895398,
+              "episode_return": 878.9434368895398,
+              "reference_target_squared_error_integral": 1.036307787866165,
+              "tracking_squared_error_integral": 1.8540491100155585,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 858.5642621722217,
+              "episode_return": 882.5642621722217,
+              "reference_target_squared_error_integral": 0.6724765430083234,
+              "tracking_squared_error_integral": 1.955432051004649,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 884.1423512907252,
+              "episode_return": 908.1423512907252,
+              "reference_target_squared_error_integral": 1.0930816676682902,
+              "tracking_squared_error_integral": 1.6231010843333935,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 924.207657341831,
+              "episode_return": 948.207657341831,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0900261298889689,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 893.8661680363492,
+              "episode_return": 917.8661680363492,
+              "reference_target_squared_error_integral": 1.154232991830857,
+              "tracking_squared_error_integral": 1.3963943717134772,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 840.9963026107639,
+              "episode_return": 864.9963026107639,
+              "reference_target_squared_error_integral": 1.4609653876560822,
+              "tracking_squared_error_integral": 2.3867127013847655,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 854.6587421752579,
+              "episode_return": 878.6587421752579,
+              "reference_target_squared_error_integral": 1.036307787866165,
+              "tracking_squared_error_integral": 1.858111401997804,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 858.3298835869681,
+              "episode_return": 882.3298835869681,
+              "reference_target_squared_error_integral": 0.6724765430083234,
+              "tracking_squared_error_integral": 1.9595380398400997,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 883.5848613609463,
+              "episode_return": 907.5848613609463,
+              "reference_target_squared_error_integral": 1.09806251544202,
+              "tracking_squared_error_integral": 1.6294555514512616,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 936.5659616575489,
+              "episode_return": 948.5659616575489,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0864700671917988,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 820.1295478193383,
+              "episode_return": 832.1295478193383,
+              "reference_target_squared_error_integral": 2.318272116822541,
+              "tracking_squared_error_integral": 2.796505992609795,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 824.5701356346183,
+              "episode_return": 836.5701356346183,
+              "reference_target_squared_error_integral": 3.7250871520409703,
+              "tracking_squared_error_integral": 3.110125619285455,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 791.8012586209675,
+              "episode_return": 803.8012586209675,
+              "reference_target_squared_error_integral": 4.275650624114488,
+              "tracking_squared_error_integral": 3.493202991162207,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 838.4482715240614,
+              "episode_return": 850.4482715240614,
+              "reference_target_squared_error_integral": 1.8762778880122517,
+              "tracking_squared_error_integral": 2.682540967540698,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 828.3303728224901,
+              "episode_return": 840.3303728224901,
+              "reference_target_squared_error_integral": 2.376983089716152,
+              "tracking_squared_error_integral": 2.824369121213497,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 936.207657341831,
+              "episode_return": 948.207657341831,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0900261298889689,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 817.4798481453686,
+              "episode_return": 829.4798481453686,
+              "reference_target_squared_error_integral": 2.3281706448797506,
+              "tracking_squared_error_integral": 2.8290394632140003,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 824.4070295572176,
+              "episode_return": 836.4070295572176,
+              "reference_target_squared_error_integral": 3.7250871520409703,
+              "tracking_squared_error_integral": 3.1147935324556952,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 791.6015376894276,
+              "episode_return": 803.6015376894276,
+              "reference_target_squared_error_integral": 4.275650624114488,
+              "tracking_squared_error_integral": 3.4973830876869414,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 838.2701295262607,
+              "episode_return": 850.2701295262607,
+              "reference_target_squared_error_integral": 1.8762778880122517,
+              "tracking_squared_error_integral": 2.6867186112906354,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 827.8628007453052,
+              "episode_return": 839.8628007453052,
+              "reference_target_squared_error_integral": 2.3788967633749962,
+              "tracking_squared_error_integral": 2.830423858106249,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310073
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.6951011337975208,
+          "target_curve": 0.6951011337975208
+        },
+        "100": {
+          "reverse_curve": 0.7088371732103781,
+          "target_curve": 0.7088371732103781
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -24.125535548897687,
+        "period100:target_curve_minus_reverse_curve": -42.96574185395002,
+        "period100:target_curve_minus_target_hold": -54.38944844736113,
+        "period100:target_hold_minus_waypoint": 21.35062449681061,
+        "period50:target_curve_minus_frozen": -29.196462387497263,
+        "period50:target_curve_minus_reverse_curve": 10.659569122963717,
+        "period50:target_curve_minus_target_hold": -5.808275355598198,
+        "period50:target_hold_minus_waypoint": -15.3682540499899
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 934.9387842077986,
+              "episode_return": 958.9387842077986,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.009884705998235,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 893.1050316829873,
+              "episode_return": 917.1050316829873,
+              "reference_target_squared_error_integral": 1.1240529769466243,
+              "tracking_squared_error_integral": 1.4674424262486503,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 853.2490001725263,
+              "episode_return": 877.2490001725263,
+              "reference_target_squared_error_integral": 1.4605874981335445,
+              "tracking_squared_error_integral": 2.246889898333537,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 863.90856929549,
+              "episode_return": 887.90856929549,
+              "reference_target_squared_error_integral": 1.024274238304919,
+              "tracking_squared_error_integral": 1.7682327792257937,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 869.7168446510882,
+              "episode_return": 893.7168446510882,
+              "reference_target_squared_error_integral": 0.665005327744183,
+              "tracking_squared_error_integral": 1.8465767149702352,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 885.0850987010781,
+              "episode_return": 909.0850987010781,
+              "reference_target_squared_error_integral": 1.0340398509295108,
+              "tracking_squared_error_integral": 1.5863001792485147,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 934.7151140911697,
+              "episode_return": 958.7151140911697,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0116406715025157,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 890.9275404177502,
+              "episode_return": 914.9275404177502,
+              "reference_target_squared_error_integral": 1.133806987934539,
+              "tracking_squared_error_integral": 1.4927700747200894,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 853.2455040440166,
+              "episode_return": 877.2455040440166,
+              "reference_target_squared_error_integral": 1.4605874981335445,
+              "tracking_squared_error_integral": 2.2477982333096795,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 863.7801239057549,
+              "episode_return": 887.7801239057549,
+              "reference_target_squared_error_integral": 1.024274238304919,
+              "tracking_squared_error_integral": 1.7704066766847428,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 869.5955161837512,
+              "episode_return": 893.5955161837512,
+              "reference_target_squared_error_integral": 0.665005327744183,
+              "tracking_squared_error_integral": 1.8479554723104799,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 884.9499914363909,
+              "episode_return": 908.9499914363909,
+              "reference_target_squared_error_integral": 1.03247025489219,
+              "tracking_squared_error_integral": 1.586441865987298,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 946.9387842077986,
+              "episode_return": 958.9387842077986,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.009884705998235,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 816.2752215222458,
+              "episode_return": 828.2752215222458,
+              "reference_target_squared_error_integral": 2.3566039645146186,
+              "tracking_squared_error_integral": 2.8463210535401533,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 835.1154278272982,
+              "episode_return": 847.1154278272982,
+              "reference_target_squared_error_integral": 3.5763938927762156,
+              "tracking_squared_error_integral": 2.881630937088243,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 792.1496859733481,
+              "episode_return": 804.1496859733481,
+              "reference_target_squared_error_integral": 4.58930163108905,
+              "tracking_squared_error_integral": 3.475471939814647,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 846.5391344207093,
+              "episode_return": 858.5391344207093,
+              "reference_target_squared_error_integral": 1.948127079590937,
+              "tracking_squared_error_integral": 2.5453956233428285,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 825.1885099238987,
+              "episode_return": 837.1885099238987,
+              "reference_target_squared_error_integral": 2.4349456758701677,
+              "tracking_squared_error_integral": 2.811337730598954,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 946.7151140911697,
+              "episode_return": 958.7151140911697,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.0116406715025157,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 815.6726245202176,
+              "episode_return": 827.6726245202176,
+              "reference_target_squared_error_integral": 2.3468764723052096,
+              "tracking_squared_error_integral": 2.8546696220288186,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 835.1927657317644,
+              "episode_return": 847.1927657317644,
+              "reference_target_squared_error_integral": 3.5763938927762156,
+              "tracking_squared_error_integral": 2.881325855523415,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 791.8080114893764,
+              "episode_return": 803.8080114893764,
+              "reference_target_squared_error_integral": 4.58930163108905,
+              "tracking_squared_error_integral": 3.4822585077582646,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 846.4409091298774,
+              "episode_return": 858.4409091298774,
+              "reference_target_squared_error_integral": 1.948127079590937,
+              "tracking_squared_error_integral": 2.548219325128354,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 824.8817315253871,
+              "episode_return": 836.8817315253871,
+              "reference_target_squared_error_integral": 2.434276457702314,
+              "tracking_squared_error_integral": 2.8156160029101267,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310089
+    },
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.733110563774446,
+          "target_curve": 0.733110563774446
+        },
+        "100": {
+          "reverse_curve": 0.7299673768620302,
+          "target_curve": 0.7299673768620302
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": -21.727944268547958,
+        "period100:target_curve_minus_reverse_curve": -25.682265877933787,
+        "period100:target_curve_minus_target_hold": -45.092479509418126,
+        "period100:target_hold_minus_waypoint": 21.962858226016124,
+        "period50:target_curve_minus_frozen": -42.89135108445055,
+        "period50:target_curve_minus_reverse_curve": 20.91877251151311,
+        "period50:target_curve_minus_target_hold": -0.6074225057989224,
+        "period50:target_hold_minus_waypoint": -23.3060468916741
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 911.4760876333155,
+              "episode_return": 935.4760876333155,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.2075428480424097,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 882.7254375634511,
+              "episode_return": 906.7254375634511,
+              "reference_target_squared_error_integral": 1.2354120943293456,
+              "tracking_squared_error_integral": 1.5213909569746775,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 818.9153139674875,
+              "episode_return": 842.9153139674875,
+              "reference_target_squared_error_integral": 1.6814617011072452,
+              "tracking_squared_error_integral": 2.7306200930260878,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 839.8340864790006,
+              "episode_return": 863.8340864790006,
+              "reference_target_squared_error_integral": 1.0875141015434084,
+              "tracking_squared_error_integral": 2.0712648436341405,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 840.4415089847995,
+              "episode_return": 864.4415089847995,
+              "reference_target_squared_error_integral": 0.7394965478406255,
+              "tracking_squared_error_integral": 2.209702997587124,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 863.7475558764736,
+              "episode_return": 887.7475558764736,
+              "reference_target_squared_error_integral": 1.0787181795736125,
+              "tracking_squared_error_integral": 1.7714085936764459,
+              "upper_inference_calls": 24
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 911.3086998936926,
+              "episode_return": 935.3086998936926,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.209136175060701,
+              "upper_inference_calls": 24
+            },
+            "frozen": {
+              "charged_utility": 882.9653774412116,
+              "episode_return": 906.9653774412116,
+              "reference_target_squared_error_integral": 1.213430362632825,
+              "tracking_squared_error_integral": 1.5185363208567404,
+              "upper_inference_calls": 24
+            },
+            "reverse_curve": {
+              "charged_utility": 818.8383012110346,
+              "episode_return": 842.8383012110346,
+              "reference_target_squared_error_integral": 1.6814617011072452,
+              "tracking_squared_error_integral": 2.730500679345359,
+              "upper_inference_calls": 24
+            },
+            "target_curve": {
+              "charged_utility": 839.6768960479053,
+              "episode_return": 863.6768960479053,
+              "reference_target_squared_error_integral": 1.0875141015434084,
+              "tracking_squared_error_integral": 2.073462251363641,
+              "upper_inference_calls": 24
+            },
+            "target_hold": {
+              "charged_utility": 840.331436757114,
+              "episode_return": 864.331436757114,
+              "reference_target_squared_error_integral": 0.7394965478406255,
+              "tracking_squared_error_integral": 2.2111302368921084,
+              "upper_inference_calls": 24
+            },
+            "waypoint": {
+              "charged_utility": 863.7899974346115,
+              "episode_return": 887.7899974346115,
+              "reference_target_squared_error_integral": 1.0796040542993197,
+              "tracking_squared_error_integral": 1.7717549620683264,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 923.4760876333155,
+              "episode_return": 935.4760876333155,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.2075428480424097,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 789.719537789838,
+              "episode_return": 801.719537789838,
+              "reference_target_squared_error_integral": 2.86908280841827,
+              "tracking_squared_error_integral": 3.39171023266936,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 793.6738593992238,
+              "episode_return": 805.6738593992238,
+              "reference_target_squared_error_integral": 4.216350558353449,
+              "tracking_squared_error_integral": 3.611586542188951,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 767.99159352129,
+              "episode_return": 779.99159352129,
+              "reference_target_squared_error_integral": 4.798019983208844,
+              "tracking_squared_error_integral": 3.9623710982652565,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 813.0840730307082,
+              "episode_return": 825.0840730307082,
+              "reference_target_squared_error_integral": 2.2355106950886627,
+              "tracking_squared_error_integral": 3.1065708040469047,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 791.121214804692,
+              "episode_return": 803.121214804692,
+              "reference_target_squared_error_integral": 2.847671705568904,
+              "tracking_squared_error_integral": 3.3785647021563197,
+              "upper_inference_calls": 12
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 923.3086998936926,
+              "episode_return": 935.3086998936926,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 1.209136175060701,
+              "upper_inference_calls": 12
+            },
+            "frozen": {
+              "charged_utility": 788.7157775419573,
+              "episode_return": 800.7157775419573,
+              "reference_target_squared_error_integral": 2.8734186452539987,
+              "tracking_squared_error_integral": 3.4089066630703093,
+              "upper_inference_calls": 12
+            },
+            "reverse_curve": {
+              "charged_utility": 793.6147602043336,
+              "episode_return": 805.6147602043336,
+              "reference_target_squared_error_integral": 4.216350558353449,
+              "tracking_squared_error_integral": 3.611356093718575,
+              "upper_inference_calls": 12
+            },
+            "target_curve": {
+              "charged_utility": 767.9701624828176,
+              "episode_return": 779.9701624828176,
+              "reference_target_squared_error_integral": 4.798019983208844,
+              "tracking_squared_error_integral": 3.962813403340225,
+              "upper_inference_calls": 12
+            },
+            "target_hold": {
+              "charged_utility": 812.9875463185308,
+              "episode_return": 824.9875463185308,
+              "reference_target_squared_error_integral": 2.2355106950886627,
+              "tracking_squared_error_integral": 3.106927302009133,
+              "upper_inference_calls": 12
+            },
+            "waypoint": {
+              "charged_utility": 791.1403622311136,
+              "episode_return": 803.1403622311136,
+              "reference_target_squared_error_integral": 2.848378146104279,
+              "tracking_squared_error_integral": 3.3809396735293022,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310101
+    }
+  ],
+  "run_name": "pointmaze_plan_alignment_stage52_full_20260930_r2",
+  "status": "complete",
+  "verification_primitive_steps": 0
+}
