@@ -1,0 +1,78 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "archive_episodes": 1536,
+    "diagnostic_distribution_passes": 640,
+    "diagnostic_gae_calls": 320,
+    "diagnostic_updates": 320,
+    "diagnostic_value_passes": 640,
+    "final_checkpoint_loads": 4,
+    "forecaster_loads": 1,
+    "native_steps": 0,
+    "new_evaluation_steps": 0,
+    "new_fits": 0,
+    "reconstructed_lower_calls": 1843200,
+    "reconstructed_upper_calls": 27648,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "decision": "diagnosis_only_no_performance_gate_no_stability_intervention_selected_before_diagnostics",
+    "diagnostics": "Gaussian_conditional_and_episode_KL_ratio_clipping_std_GAE_target_value_MSE_explained_variance",
+    "execution": "reconstruct_actual_proposed_upper_and_pre_squash_lower_actions_no_environment_calls",
+    "identity": "exact_archived_upper_and_executed_lower_actions_and_final_four_networks_four_optimizers",
+    "limits": "posthoc_development_diagnostics_not_causal_failure_attribution_or_new_performance_validation",
+    "periods": [
+      50,
+      100
+    ],
+    "sampling": "archived_observations_rewards_contexts_and_original_policy_noise_seeds",
+    "selection": "all_eight_roots_both_periods_both_learned_arms_all_warmup_and_training_iterations",
+    "source_protocol": "pointmaze_matched_upper_stage57_v1",
+    "source_runs": [
+      "pointmaze_matched_upper_stage57_preflight_20260930_r1",
+      "pointmaze_matched_upper_stage57_full_20260930_r1"
+    ],
+    "updates": "unchanged_Stage57_PPO_credit_shuffle_optimizers_and_iteration_roster"
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "critic_warmup_iterations": 16,
+    "evaluation_paths": 16,
+    "learning_iterations": 32,
+    "rollouts_per_iteration": 8,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_update_diagnostics_stage58_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "source_revision": "ca61b690bb6e761898fbce0b04a8da281c38a385",
+  "source_run": "pointmaze_matched_upper_stage57_full_20260930_r1"
+}
