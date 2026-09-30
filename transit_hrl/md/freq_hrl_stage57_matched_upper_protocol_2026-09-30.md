@@ -8,6 +8,12 @@ Retain eight source roots and deterministic/lower_sampled evaluation of all thre
 
 Full incremental budget: 16588800 native steps (4915200 critic calibration, 9830400 PPO training, 1843200 evaluation), 13824 audits, 248832 upper calls and 16588800 lower calls. Reuse 16 clone checkpoints/eight forecasters; zero new fits, supervised or extra verification steps. Count actual actor/value optimizer steps, parameter changes and execution/audit operations. Upstream Stage55 cost stays separately declared. Preflight: 16800 steps and 56 audits. Tests, native training/evaluation and qualification use scheduler's dynamic node001-node006 pool, nine CPU / 12 GB per full root and two CPU / 4 GB for preflight/qualification. Pull compact JSON only.
 
+## Execution
+
+Source implementation: `6a435ce0e6`; seed/protocol freeze: `e673634741`. Scheduler tests `t108805` passed all 39 tests. Native preflight `t108833` and qualification `t108836` completed successfully: 16800 steps, 56 audits; optimizer steps upper actor/value 16/48 and lower actor/value 32/64. Only the compact qualification JSON was pulled locally.
+
+Full run `pointmaze_matched_upper_stage57_full_20260930_r1`: tasks `t109115` through `t109122` correspond, in order, to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight entered running on the dynamic node001-node006 pool. Full qualification and the six preregistered return intervals remain pending; preflight is not performance evidence.
+
 ## Limitations
 
 Lower training/native budgets are matched; upper update cost and total FLOPs differ and are explicitly counted. This addresses deployment-only deletion's co-adaptation issue but remains conditional development on reused roots and teacher initialization. It does not establish frequency-separation, promotion, OOD or independent training-root confirmation, and does not retroactively change Stage55/56 decisions.
