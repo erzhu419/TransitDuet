@@ -12,7 +12,7 @@ Full incremental budget: 16588800 native steps (4915200 critic calibration, 9830
 
 Source implementation: `6a435ce0e6`; seed/protocol freeze: `e673634741`. Scheduler tests `t108805` passed all 39 tests. Native preflight `t108833` and qualification `t108836` completed successfully: 16800 steps, 56 audits; optimizer steps upper actor/value 16/48 and lower actor/value 32/64. Only the compact qualification JSON was pulled locally.
 
-Full run `pointmaze_matched_upper_stage57_full_20260930_r1`: tasks `t109115` through `t109122` correspond, in order, to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight entered running on the dynamic node001-node006 pool. Full qualification and the six preregistered return intervals remain pending; preflight is not performance evidence.
+Full run `pointmaze_matched_upper_stage57_full_20260930_r1`: tasks `t109115` through `t109122` correspond, in order, to roots 310011, 310023, 310037, 310049, 310061, 310073, 310089 and 310101. All eight completed on the dynamic node001-node006 pool. Full qualification `t109157` completed with exit 0 on node005. Matched-upper gate passed; training-gain gate failed. See [Stage57 Result](freq_hrl_stage57_matched_upper_result_2026-09-30.md) for all six preregistered intervals; preflight is not performance evidence.
 
 ## Limitations
 
