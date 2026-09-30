@@ -1,0 +1,15 @@
+# Stage54 Protocol
+
+Separate forecast from tracking, following Stage53's negative forecast/controller decomposition. Six arms: frozen, target_hold, linear_position, linear_velocity, ridge_position, ridge_velocity; periods 50/100 and deterministic/lower_sampled modes. Original Stage42 warmup16 checkpoints and eight optimizer roots remain fixed; preflight uses warmup2 and one root. Stage52 gains, action clamp, Gaussian std, 64-observation history and call schedule are unchanged.
+
+Ridge predicts all future displacements at lags 1-100 from 17 standardized observable features: current position, last velocity, 4/16-increment means, OLS64 velocity, recent constant-motion run age (velocity tolerance .001), age-times-velocity and position-outer-velocity. Run age is capped at 63 observable increments, not a latent regime label. Fit once per root on 32 fresh driver paths (two preflight), t=1 through horizon-100, lambda=1, unpenalized intercept; no validation, feature selection or native fitting steps. Future labels are confined to fitting paths. Evaluation has 16 fresh paired paths per root (two preflight), disjoint from fitting and Stage52.
+
+Plans are anchored at the renewal's visible target, clipped to existing goal bounds, flat initially, and never updated inside an option. Velocity tracking adds the forward difference of the clipped frozen plan to the explicit actor state; reward/value/cost inputs retain original semantics. Upper is called at every renewal in every arm, even when ignored by an analytic reference. No gate or RL optimizer updates. The original linear-position arm reproduces Stage52's candidate on new paths.
+
+Primary: native episode return in deterministic deployment, 12 simultaneous paired-root bootstrap intervals (65536 draws, Bonferroni12). At each period report forecast main effect, velocity main effect, factorial interaction, and combined ridge-velocity minus held/frozen/linear-position. Adopt only if all six combined-vs-control intervals are positive. Forecast MSE, sampled deployment and tracking error remain secondary; no period/mode/root selection or seed extension.
+
+Full budget: 3686400 native steps and 3072 trace audits; eight disjoint ridge fits and eight CARE solves, 281600 fitting rows/OLS fits from 256 generated driver paths. Count fitting observations/labels, plan and audit OLS/prediction operations, actor-context evaluations and inference calls separately. Fitting driver simulation is not free and is not MuJoCo control validation. Run tests, native preflight, full matrix and qualification via scheduler on the dynamic node001-node006 pool; no local heavy compute. Pull compact JSON only; raw traces and fitted weights stay remote.
+
+## Limitations
+
+This is conditional mechanism development with a learned forecaster and fixed feedback, not learned Freq-HRL confirmation. Equal policy calls do not imply equal FLOPs. Reused optimizer roots and simulator-generated fitting trajectories limit generalization; any positive result still requires a learned-policy test and independent confirmation.
