@@ -1,0 +1,283 @@
+{
+  "computation": {
+    "actor_optimizer_steps": 0,
+    "riccati_solves": 1,
+    "value_optimizer_steps": 0
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      52,
+      52052
+    ],
+    "bounds": "clip_evaluated_reference_to_same_environment_goal_bounds_no_maze_route_or_future_access",
+    "cost": "equal_upper_lower_calls_per_period_zero_gate_or_optimizer_steps_all_plan_and_audit_regressions_counted",
+    "current_target": "per_primitive_observed_target_diagnostic_not_low_frequency_plan",
+    "decision": "curve_vs_hold_reverse_and_frozen_positive_at_both_fixed_periods_for_plan_phase_utility",
+    "dt_seconds": 0.01,
+    "forecast": "numpy_lstsq_position_on_intercept_and_past_relative_time_at_renewals_only",
+    "frozen": "original_source_lower_MLP_reference_control_all_networks_critics_optimizers_unchanged",
+    "initialization": "valid_observations_only_initial_zero_velocity_no_padding_fit",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "analytic_plan_feedback_development_not_learned_FreqHRL_confirmation_extra_OLS_compute_not_free_same_call_budget_not_equal_FLOPs",
+    "lookback_steps": 64,
+    "lower": "Stage51_fixed_LQR_gain_action_clip_source_Gaussian_std_no_velocity_feedforward",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "frozen",
+      "waypoint",
+      "target_hold",
+      "target_curve",
+      "reverse_curve",
+      "current_target"
+    ],
+    "primary_endpoints": [
+      "period50:target_hold_minus_waypoint",
+      "period50:target_curve_minus_target_hold",
+      "period50:target_curve_minus_reverse_curve",
+      "period50:target_curve_minus_frozen",
+      "period100:target_hold_minus_waypoint",
+      "period100:target_curve_minus_target_hold",
+      "period100:target_curve_minus_reverse_curve",
+      "period100:target_curve_minus_frozen"
+    ],
+    "primary_mode": "deterministic",
+    "renewal": "fixed_exogenous_period_no_gate_no_future_reference_trajectory_schedule_replay",
+    "reverse_curve": "same_OLS_and_anchor_opposite_velocity_negative_control",
+    "sampling": "deterministic_upper_lower_deterministic_and_sampled_same_noise_seeds",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_gain_or_window_tuning_no_root_extension_no_period_or_deployment_mode_selection",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "state": "separate_upper_anchor_and_lower_phase_reference_unchanged_actor_dimensions",
+    "target_curve": "same_observed_anchor_plus_OLS_target_velocity_times_option_age_seconds",
+    "target_hold": "currently_observed_target_at_renewal_held_for_the_option",
+    "upper": "same_source_upper_actor_called_once_per_fixed_renewal_all_arms",
+    "waypoint": "original_decoded_upper_anchor_held_between_calls"
+  },
+  "method_cost": {
+    "audit_regression_fits": 56,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 14400,
+    "plan_regression_fits": 56,
+    "primitive_steps": 14400,
+    "reference_evaluations": 14400,
+    "upper_inference_calls": 216
+  },
+  "native_trace_audits": 48,
+  "protocol": "pointmaze_plan_alignment_stage52_v1",
+  "root_rows": [
+    {
+      "curve_velocity_norms": {
+        "50": {
+          "reverse_curve": 0.5908379059393287,
+          "target_curve": 0.5908379059393287
+        },
+        "100": {
+          "reverse_curve": 0.5638020782946391,
+          "target_curve": 0.5638020782946391
+        }
+      },
+      "endpoints": {
+        "period100:target_curve_minus_frozen": 109.17697335731097,
+        "period100:target_curve_minus_reverse_curve": 2.6913763888383357,
+        "period100:target_curve_minus_target_hold": -4.7959348845721195,
+        "period100:target_hold_minus_waypoint": 0.06709302667263728,
+        "period50:target_curve_minus_frozen": 119.98634329135119,
+        "period50:target_curve_minus_reverse_curve": 2.4793991477454824,
+        "period50:target_curve_minus_target_hold": -0.04515321594658417,
+        "period50:target_hold_minus_waypoint": 5.469856277659176
+      },
+      "means": {
+        "50": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 251.0909777188733,
+              "episode_return": 257.0909777188733,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 0.09918257885328344,
+              "upper_inference_calls": 6
+            },
+            "frozen": {
+              "charged_utility": 118.9104987300279,
+              "episode_return": 124.9104987300279,
+              "reference_target_squared_error_integral": 4.987099756536802,
+              "tracking_squared_error_integral": 5.954836824065111,
+              "upper_inference_calls": 6
+            },
+            "reverse_curve": {
+              "charged_utility": 236.4174428736336,
+              "episode_return": 242.4174428736336,
+              "reference_target_squared_error_integral": 0.12078723835117161,
+              "tracking_squared_error_integral": 0.20647115345390027,
+              "upper_inference_calls": 6
+            },
+            "target_curve": {
+              "charged_utility": 238.8968420213791,
+              "episode_return": 244.8968420213791,
+              "reference_target_squared_error_integral": 0.3095935362495151,
+              "tracking_squared_error_integral": 0.17367414159282626,
+              "upper_inference_calls": 6
+            },
+            "target_hold": {
+              "charged_utility": 238.94199523732567,
+              "episode_return": 244.94199523732567,
+              "reference_target_squared_error_integral": 0.13156492139689485,
+              "tracking_squared_error_integral": 0.17566076371852674,
+              "upper_inference_calls": 6
+            },
+            "waypoint": {
+              "charged_utility": 233.4721389596665,
+              "episode_return": 239.4721389596665,
+              "reference_target_squared_error_integral": 0.2169271326148109,
+              "tracking_squared_error_integral": 0.22814488226324064,
+              "upper_inference_calls": 6
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 250.79880757000257,
+              "episode_return": 256.79880757000257,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 0.09955017129556273,
+              "upper_inference_calls": 6
+            },
+            "frozen": {
+              "charged_utility": 130.50241884718952,
+              "episode_return": 136.50241884718952,
+              "reference_target_squared_error_integral": 4.57170237044952,
+              "tracking_squared_error_integral": 5.2916714071261834,
+              "upper_inference_calls": 6
+            },
+            "reverse_curve": {
+              "charged_utility": 236.43990410399735,
+              "episode_return": 242.43990410399735,
+              "reference_target_squared_error_integral": 0.12078723835117161,
+              "tracking_squared_error_integral": 0.20500988364275416,
+              "upper_inference_calls": 6
+            },
+            "target_curve": {
+              "charged_utility": 238.651528680917,
+              "episode_return": 244.651528680917,
+              "reference_target_squared_error_integral": 0.3095935362495151,
+              "tracking_squared_error_integral": 0.17378835542842602,
+              "upper_inference_calls": 6
+            },
+            "target_hold": {
+              "charged_utility": 238.74812322934426,
+              "episode_return": 244.74812322934426,
+              "reference_target_squared_error_integral": 0.13156492139689485,
+              "tracking_squared_error_integral": 0.17531414379936663,
+              "upper_inference_calls": 6
+            },
+            "waypoint": {
+              "charged_utility": 232.6924879183934,
+              "episode_return": 238.6924879183934,
+              "reference_target_squared_error_integral": 0.22040297960124766,
+              "tracking_squared_error_integral": 0.23384858229691075,
+              "upper_inference_calls": 6
+            }
+          }
+        },
+        "100": {
+          "deterministic": {
+            "current_target": {
+              "charged_utility": 254.0909777188733,
+              "episode_return": 257.0909777188733,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 0.09918257885328344,
+              "upper_inference_calls": 3
+            },
+            "frozen": {
+              "charged_utility": 121.91501053950856,
+              "episode_return": 124.91501053950856,
+              "reference_target_squared_error_integral": 4.513656101793153,
+              "tracking_squared_error_integral": 5.951802514759147,
+              "upper_inference_calls": 3
+            },
+            "reverse_curve": {
+              "charged_utility": 228.4006075079812,
+              "episode_return": 231.4006075079812,
+              "reference_target_squared_error_integral": 0.4343178528632913,
+              "tracking_squared_error_integral": 0.31033252435376335,
+              "upper_inference_calls": 3
+            },
+            "target_curve": {
+              "charged_utility": 231.09198389681953,
+              "episode_return": 234.09198389681953,
+              "reference_target_squared_error_integral": 0.49488591331841164,
+              "tracking_squared_error_integral": 0.27751524171178255,
+              "upper_inference_calls": 3
+            },
+            "target_hold": {
+              "charged_utility": 235.88791878139165,
+              "episode_return": 238.88791878139165,
+              "reference_target_squared_error_integral": 0.22105805376782836,
+              "tracking_squared_error_integral": 0.23923316625026703,
+              "upper_inference_calls": 3
+            },
+            "waypoint": {
+              "charged_utility": 235.820825754719,
+              "episode_return": 238.820825754719,
+              "reference_target_squared_error_integral": 0.2254653529595822,
+              "tracking_squared_error_integral": 0.2342742780677879,
+              "upper_inference_calls": 3
+            }
+          },
+          "lower_sampled": {
+            "current_target": {
+              "charged_utility": 253.79880757000257,
+              "episode_return": 256.79880757000257,
+              "reference_target_squared_error_integral": 0,
+              "tracking_squared_error_integral": 0.09955017129556273,
+              "upper_inference_calls": 3
+            },
+            "frozen": {
+              "charged_utility": 133.52032853613326,
+              "episode_return": 136.52032853613326,
+              "reference_target_squared_error_integral": 4.058575541000054,
+              "tracking_squared_error_integral": 5.290210841612684,
+              "upper_inference_calls": 3
+            },
+            "reverse_curve": {
+              "charged_utility": 228.41419616267643,
+              "episode_return": 231.41419616267643,
+              "reference_target_squared_error_integral": 0.4343178528632913,
+              "tracking_squared_error_integral": 0.30904670297470566,
+              "upper_inference_calls": 3
+            },
+            "target_curve": {
+              "charged_utility": 230.97602643172684,
+              "episode_return": 233.97602643172684,
+              "reference_target_squared_error_integral": 0.49488591331841164,
+              "tracking_squared_error_integral": 0.27653238833349203,
+              "upper_inference_calls": 3
+            },
+            "target_hold": {
+              "charged_utility": 235.88996440551557,
+              "episode_return": 238.88996440551557,
+              "reference_target_squared_error_integral": 0.22105805376782836,
+              "tracking_squared_error_integral": 0.23836256535296685,
+              "upper_inference_calls": 3
+            },
+            "waypoint": {
+              "charged_utility": 235.43891883131073,
+              "episode_return": 238.43891883131073,
+              "reference_target_squared_error_integral": 0.2270627736784607,
+              "tracking_squared_error_integral": 0.23747554504967605,
+              "upper_inference_calls": 3
+            }
+          }
+        }
+      },
+      "root": 310001
+    }
+  ],
+  "run_name": "pointmaze_plan_alignment_stage52_preflight_20260930_r1",
+  "status": "preflight_passed",
+  "verification_primitive_steps": 0
+}
