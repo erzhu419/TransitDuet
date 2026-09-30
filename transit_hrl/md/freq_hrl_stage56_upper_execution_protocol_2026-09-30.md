@@ -1,0 +1,13 @@
+# Stage56 Protocol
+
+Freeze every Stage55 fixed final joint_ppo checkpoint and its saved forecaster. Two execution conditions: normal learned residual versus zero residual on the same causal ridge base plan. In both, infer the actual learned upper at every fixed renewal and run the same learned lower MLP, standard deviation and planned-velocity context rule. Change no network weights, objective, forecast fit, period or training budget. Upper proposals may diverge after the physical trajectories diverge; the initial proposal must match within each paired path.
+
+Retain all eight roots, periods 50/100 and deterministic/lower_sampled deployment. Use 16 fresh paired evaluation paths per root; preflight uses two paths and one source-preflight root. These paths are disjoint from Stage54 fitting/evaluation and every Stage55 fitting/label/warmup/training/evaluation path. Common lower noise is indexed by primitive step. Record proposed actions separately from executed actions, audit causal plans/velocity and native reward from saved traces, and check all four networks remain exactly frozen. No extra verification episode.
+
+Primary endpoints: native deterministic return normal minus zero_residual at each period. Equal-root paired bootstrap, 65536 draws, simultaneous two-sided Bonferroni2 intervals. Upper execution gate passes only if both lower bounds exceed zero. Lower-sampled mode is descriptive, not a fallback endpoint. No seed extension, checkpoint/period/mode selection or post-outcome tuning.
+
+Full incremental budget: 1228800 native steps, 1024 trace audits, 18432 upper calls and 1228800 lower calls. Execution and reconstruction each require 17408 OLS fits and ridge predictions; Bernstein basis evaluations total 77824 on each side. Reuse 16 checkpoints and eight forecasters, with zero new fits/optimizer/gate/preview/verification steps. The upstream Stage55 training/evaluation cost remains separately declared, not treated as free training. Preflight: 4800 steps, 16 audits. All tests, native evaluation and qualification run through scheduler on dynamically eligible node001-node006; full tasks use nine CPU / 12 GB, preflight and qualification two CPU / 4 GB. Pull compact JSON only.
+
+## Limitations
+
+This estimates the value of upper residual execution conditional on its co-adapted lower policy; it does not retrain a lower controller for the counterfactual. Reused training roots yield conditional development evidence, not independent training-root confirmation. Fixed periods do not identify frequency-separation, promotion or OOD utility; identical inference calls are not identical FLOPs.
