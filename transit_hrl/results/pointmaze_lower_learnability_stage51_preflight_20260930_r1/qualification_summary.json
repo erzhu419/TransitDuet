@@ -1,0 +1,253 @@
+{
+  "computation": {
+    "original_actor_optimizer_steps": 0,
+    "original_value_optimizer_steps": 0,
+    "riccati_solves": 1,
+    "score_backward_calls": 5,
+    "supervised_optimizer_steps": 16,
+    "teacher_label_states": 1200
+  },
+  "contract": {
+    "Q_diagonal": [
+      25,
+      25,
+      1,
+      1
+    ],
+    "R_diagonal": [
+      1,
+      1
+    ],
+    "action": "clip_requested_normalized_torque_then_atanh_Gaussian_mean_source_std_unchanged",
+    "action_limit": 0.95,
+    "bc_lr": 0.0003,
+    "bc_minibatch": 1024,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      51,
+      51051
+    ],
+    "cloning": "original_lower_MLP_mean_raw_action_MSE_on_frozen_A_states_only",
+    "credit": "A_normalized_MC_or_original_GAE_plus_entropy_vs_B_reward_only_full_episode_LOO_MC_gradient",
+    "credit_scaling": "A_mean_logp_advantage_B_sum_logp_raw_LOO_RTG_per_episode",
+    "decision": "waypoint_teacher_positive_for_plan_headroom_clone_vs_frozen_and_sham_positive_for_same_network_learnability",
+    "endpoints": [
+      "teacher_waypoint_minus_frozen",
+      "teacher_task_minus_frozen",
+      "clone_waypoint_minus_frozen",
+      "clone_task_minus_frozen",
+      "clone_waypoint_minus_sham_waypoint",
+      "clone_task_minus_sham_task",
+      "mc_independent_cosine",
+      "gae_independent_cosine"
+    ],
+    "feedback": "continuous_LQR_unit_mass_double_integrator_scipy_CARE_no_native_model_fit",
+    "frozen": "all_other_networks_source_std_and_original_RL_optimizers_unchanged",
+    "independence": "disjoint_A_B_evaluation_paths_same_source_actor_critic",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "conditional_development_reused_roots_teacher_failure_not_ceiling_BC_failure_not_unlearnability_cosine_not_finite_return_proof",
+    "policies": [
+      "frozen",
+      "teacher_waypoint",
+      "teacher_task",
+      "clone_waypoint",
+      "sham_waypoint",
+      "clone_task",
+      "sham_task"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_credit": "A_negative_BC_loss_gradient_vs_B_reward_only_gradient",
+    "secondary_mode": "lower_sampled",
+    "selection": "fixed_final_no_early_stopping_eval_selection_gain_search_root_exclusion_or_seed_extension",
+    "sham": "fixed_A_label_permutation_same_optimizer_budget_shuffle",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "task_teacher": "bypasses_waypoint_diagnostic_not_hierarchical_policy_claim",
+    "teacher_inputs": "waypoint_error_or_visible_current_target_minus_position_velocity_current_force_only"
+  },
+  "method_cost": {
+    "gate_inference_calls": 303,
+    "lower_inference_calls": 9600,
+    "primitive_steps": 9600,
+    "upper_inference_calls": 154
+  },
+  "native_trace_audits": 32,
+  "protocol": "pointmaze_lower_learnability_stage51_v1",
+  "root_rows": [
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 7.935205878580554,
+          "B_reward_norm": 3199.530161846634,
+          "cosine": -0.5898936628367687,
+          "dot": -14976.769237046854,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 7.099838251011731,
+          "B_reward_norm": 3199.530161846634,
+          "cosine": -0.5083036135722968,
+          "dot": -11546.699417625648,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.6712809780067108,
+          "B_reward_norm": 3199.530161846634,
+          "cosine": -0.009642779656588716,
+          "dot": -20.71060531824297,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.7839946721065751,
+          "B_reward_norm": 3199.530161846634,
+          "cosine": -0.1662415893958542,
+          "dot": -417.0028299897179,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": -14.004686298853386,
+        "clone_task_minus_sham_task": -13.888383015647776,
+        "clone_waypoint_minus_frozen": -10.44748565678313,
+        "clone_waypoint_minus_sham_waypoint": -3.3086623407481,
+        "gae_independent_cosine": -0.009642779656588716,
+        "mc_independent_cosine": -0.1662415893958542,
+        "teacher_task_minus_frozen": 118.75276046438523,
+        "teacher_waypoint_minus_frozen": 73.40891542311084
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 110.59467041973656,
+            "episode_return": 115.59467041973656,
+            "tracking_squared_error_integral": 5.164524985073369,
+            "upper_inference_calls": 5
+          },
+          "clone_waypoint": {
+            "charged_utility": 114.15187106180682,
+            "episode_return": 119.15187106180682,
+            "tracking_squared_error_integral": 4.83379026072587,
+            "upper_inference_calls": 5
+          },
+          "frozen": {
+            "charged_utility": 125.09935671858993,
+            "episode_return": 129.59935671858995,
+            "tracking_squared_error_integral": 3.77176363225988,
+            "upper_inference_calls": 4.5
+          },
+          "sham_task": {
+            "charged_utility": 124.48305343538433,
+            "episode_return": 129.48305343538433,
+            "tracking_squared_error_integral": 4.569942229012132,
+            "upper_inference_calls": 5
+          },
+          "sham_waypoint": {
+            "charged_utility": 117.96053340255492,
+            "episode_return": 122.46053340255492,
+            "tracking_squared_error_integral": 4.733028612404403,
+            "upper_inference_calls": 4.5
+          },
+          "teacher_task": {
+            "charged_utility": 243.85211718297518,
+            "episode_return": 248.35211718297518,
+            "tracking_squared_error_integral": 0.14205343617202681,
+            "upper_inference_calls": 4.5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 198.0082721417008,
+            "episode_return": 203.0082721417008,
+            "tracking_squared_error_integral": 0.8243818542979787,
+            "upper_inference_calls": 5
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 112.75348920582003,
+            "episode_return": 118.25348920582003,
+            "tracking_squared_error_integral": 5.86454230806136,
+            "upper_inference_calls": 5.5
+          },
+          "clone_waypoint": {
+            "charged_utility": 115.39122502417113,
+            "episode_return": 120.39122502417113,
+            "tracking_squared_error_integral": 5.354127848362479,
+            "upper_inference_calls": 5
+          },
+          "frozen": {
+            "charged_utility": 142.19296993363275,
+            "episode_return": 146.69296993363275,
+            "tracking_squared_error_integral": 2.7489110717050624,
+            "upper_inference_calls": 4.5
+          },
+          "sham_task": {
+            "charged_utility": 118.83637534924793,
+            "episode_return": 124.33637534924793,
+            "tracking_squared_error_integral": 7.567291157496678,
+            "upper_inference_calls": 5.5
+          },
+          "sham_waypoint": {
+            "charged_utility": 120.55103890111695,
+            "episode_return": 125.55103890111695,
+            "tracking_squared_error_integral": 7.454807274075946,
+            "upper_inference_calls": 5
+          },
+          "teacher_task": {
+            "charged_utility": 243.4563870429755,
+            "episode_return": 248.4563870429755,
+            "tracking_squared_error_integral": 0.14004282373339905,
+            "upper_inference_calls": 5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 199.0482489800142,
+            "episode_return": 203.5482489800142,
+            "tracking_squared_error_integral": 0.8100939273557405,
+            "upper_inference_calls": 4.5
+          }
+        }
+      },
+      "root": 310001,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 2.9007277488708496,
+          "initial_label_mse": 3.062053680419922,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2467367580,
+          "supervised_optimizer_steps": 4,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 2.579442262649536,
+          "initial_label_mse": 2.719585657119751,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2692085800,
+          "supervised_optimizer_steps": 4,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.9397530555725098,
+          "initial_label_mse": 3.015268087387085,
+          "label_seed": 235333080,
+          "sham": true,
+          "shuffle_seed": 2467367580,
+          "supervised_optimizer_steps": 4,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.611302137374878,
+          "initial_label_mse": 2.650621175765991,
+          "label_seed": 3273825871,
+          "sham": true,
+          "shuffle_seed": 2692085800,
+          "supervised_optimizer_steps": 4,
+          "unchanged_other_state": "passed"
+        }
+      }
+    }
+  ],
+  "run_name": "pointmaze_lower_learnability_stage51_preflight_20260930_r1",
+  "status": "preflight_passed",
+  "verification_primitive_steps": 0
+}
