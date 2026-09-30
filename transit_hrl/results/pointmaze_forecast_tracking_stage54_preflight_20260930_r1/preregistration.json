@@ -1,0 +1,115 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "actor_context_evaluations": 4800,
+    "audit_ols_fits": 112,
+    "audit_ridge_predictions": 56,
+    "fitting_driver_paths": 2,
+    "fitting_native_steps": 0,
+    "fitting_observations": 602,
+    "fitting_rows": 400,
+    "native_trace_audits": 48,
+    "plan_ols_fits": 112,
+    "plan_ridge_predictions": 56,
+    "reference_evaluations": 14400,
+    "ridge_solves": 1,
+    "total_primitive_steps": 14400,
+    "upper_inference_calls": 216
+  },
+  "contract": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      54,
+      54054
+    ],
+    "calls": "same_upper_at_all_fixed_renewals_lower_every_step_no_gate_or_actor_value_optimizer_updates",
+    "decision": "combined_native_reward_positive_vs_hold_frozen_and_linear_position_at_both_periods",
+    "endpoints": [
+      "period50:forecast_main",
+      "period50:velocity_main",
+      "period50:interaction",
+      "period50:combined_minus_hold",
+      "period50:combined_minus_frozen",
+      "period50:combined_minus_linear_position",
+      "period100:forecast_main",
+      "period100:velocity_main",
+      "period100:interaction",
+      "period100:combined_minus_hold",
+      "period100:combined_minus_frozen",
+      "period100:combined_minus_linear_position"
+    ],
+    "features": "position_last_velocity_mean_velocity4_mean_velocity16_OLS64_observed_motion_run_age_age_times_velocity_position_outer_velocity",
+    "fit": "one_closed_form_numpy_solve_per_root_disjoint_fitting_driver_paths_no_MuJoCo_fit_steps_no_validation_selection",
+    "interval": "two_sided_percentile_Bonferroni12_equal_root_paired_means",
+    "labels": "future_targets_in_fitting_paths_only_t1_through_horizon_minus100",
+    "limits": "learned_forecaster_fixed_feedback_conditional_development_not_learned_HRL_confirmation_same_calls_not_equal_FLOPs",
+    "linear": "unchanged_Stage52_OLS64_anchor_plus_velocity_times_age_times_dt",
+    "motion_run": "consecutive_recent_velocity_difference_norm_leq_tolerance_capped_at63_not_latent_regime",
+    "motion_tolerance": 0.001,
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "frozen",
+      "target_hold",
+      "linear_position",
+      "linear_velocity",
+      "ridge_position",
+      "ridge_velocity"
+    ],
+    "primary_mode": "deterministic",
+    "reference": "predict_once_at_renewal_anchor_visible_target_clip_same_goal_bounds_initial_flat_no_padding",
+    "ridge": "standardized_17_observable_features_intercept_unpenalized_multioutput_future_displacements_lags1_to100",
+    "ridge_lambda": 1.0,
+    "secondary_mode": "lower_sampled",
+    "selection": "no_gain_window_lambda_feature_root_period_mode_or_checkpoint_selection_after_outcomes",
+    "source_iteration": "warmup16_full_warmup2_preflight",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "state": "planned_velocity_explicit_two_dim_actor_context_critic_and_cost_state_unchanged",
+    "tracking": "Stage51_same_LQR_gain_clip_source_Gaussian_std_position_only_or_position_plus_planned_velocity",
+    "velocity": "forward_difference_of_clipped_frozen_plan_lag_age_plus1_minus_age_over_dt"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_paths": 2,
+    "fitting_paths": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_forecast_tracking_stage54_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        13093001,
+        13093002
+      ],
+      "fitting": [
+        13090001,
+        13090002
+      ]
+    }
+  },
+  "source_revision": "f4d58cd6654b5352be3227677e25c794f60b929b",
+  "source_run": "pointmaze_critic_clock_stage42_v1_preflight_20260928_r1",
+  "total_method_steps": 14400
+}
