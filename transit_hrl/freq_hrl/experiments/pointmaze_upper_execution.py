@@ -10,6 +10,7 @@ import torch
 from freq_hrl.rl.smdp_actor_critic import FrequencySeparatedActorCriticPPO, SMDPPPOConfig
 from . import pointmaze_joint_renewal as joint
 from . import pointmaze_learned_plan as learned
+from .pointmaze_goal_validation import _json_ready
 from .pointmaze_root_response import raw_directory, write_json
 from scripts import pointmaze_upper_execution_stage56_spec as spec
 
@@ -96,7 +97,7 @@ def load_source(root, *, preflight):
             raise ValueError("Stage56 requires fixed final joint checkpoint")
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(**payload["state_dict"]["config"]))
         model.load_state_dict(payload["state_dict"])
-        if model.config.__dict__ != c["config"] or (model.config.lower_state_dim, model.config.lower_value_state_dim,
+        if _json_ready(model.config.__dict__) != c["config"] or (model.config.lower_state_dim, model.config.lower_value_state_dim,
                 model.config.upper_action_dim, model.config.promotion_state_dim) != (392, 394, 4, 0):
             raise ValueError("Stage56 source learned architecture changed")
         models[p], checkpoints[p] = model, checkpoint
