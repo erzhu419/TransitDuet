@@ -1,0 +1,1516 @@
+{
+  "computation": {
+    "original_actor_optimizer_steps": 0,
+    "original_value_optimizer_steps": 0,
+    "riccati_solves": 8,
+    "score_backward_calls": 40,
+    "supervised_optimizer_steps": 10240,
+    "teacher_label_states": 153600
+  },
+  "contract": {
+    "Q_diagonal": [
+      25,
+      25,
+      1,
+      1
+    ],
+    "R_diagonal": [
+      1,
+      1
+    ],
+    "action": "clip_requested_normalized_torque_then_atanh_Gaussian_mean_source_std_unchanged",
+    "action_limit": 0.95,
+    "bc_lr": 0.0003,
+    "bc_minibatch": 1024,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      51,
+      51051
+    ],
+    "cloning": "original_lower_MLP_mean_raw_action_MSE_on_frozen_A_states_only",
+    "credit": "A_normalized_MC_or_original_GAE_plus_entropy_vs_B_reward_only_full_episode_LOO_MC_gradient",
+    "credit_scaling": "A_mean_logp_advantage_B_sum_logp_raw_LOO_RTG_per_episode",
+    "decision": "waypoint_teacher_positive_for_plan_headroom_clone_vs_frozen_and_sham_positive_for_same_network_learnability",
+    "endpoints": [
+      "teacher_waypoint_minus_frozen",
+      "teacher_task_minus_frozen",
+      "clone_waypoint_minus_frozen",
+      "clone_task_minus_frozen",
+      "clone_waypoint_minus_sham_waypoint",
+      "clone_task_minus_sham_task",
+      "mc_independent_cosine",
+      "gae_independent_cosine"
+    ],
+    "feedback": "continuous_LQR_unit_mass_double_integrator_scipy_CARE_no_native_model_fit",
+    "frozen": "all_other_networks_source_std_and_original_RL_optimizers_unchanged",
+    "independence": "disjoint_A_B_evaluation_paths_same_source_actor_critic",
+    "interval": "two_sided_percentile_Bonferroni8_equal_root_paired_means",
+    "limits": "conditional_development_reused_roots_teacher_failure_not_ceiling_BC_failure_not_unlearnability_cosine_not_finite_return_proof",
+    "policies": [
+      "frozen",
+      "teacher_waypoint",
+      "teacher_task",
+      "clone_waypoint",
+      "sham_waypoint",
+      "clone_task",
+      "sham_task"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_credit": "A_negative_BC_loss_gradient_vs_B_reward_only_gradient",
+    "secondary_mode": "lower_sampled",
+    "selection": "fixed_final_no_early_stopping_eval_selection_gain_search_root_exclusion_or_seed_extension",
+    "sham": "fixed_A_label_permutation_same_optimizer_budget_shuffle",
+    "source_iteration": "warmup16_full_warmup2_preflight_not_post_actor_update",
+    "source_method": "task_clock",
+    "source_protocol": "pointmaze_critic_clock_stage42_v1",
+    "task_teacher": "bypasses_waypoint_diagnostic_not_hierarchical_policy_claim",
+    "teacher_inputs": "waypoint_error_or_visible_current_target_minus_position_velocity_current_force_only"
+  },
+  "method_cost": {
+    "gate_inference_calls": 81693,
+    "lower_inference_calls": 2304000,
+    "primitive_steps": 2304000,
+    "upper_inference_calls": 60668
+  },
+  "native_trace_audits": 1920,
+  "primary_endpoints": {
+    "clone_task_minus_frozen": {
+      "ci": [
+        -13.812932127506812,
+        47.62772875204223
+      ],
+      "effect": "inconclusive",
+      "mean": 16.383659611566586
+    },
+    "clone_task_minus_sham_task": {
+      "ci": [
+        365.13698281359285,
+        549.4003476500171
+      ],
+      "effect": "positive",
+      "mean": 460.00659199437655
+    },
+    "clone_waypoint_minus_frozen": {
+      "ci": [
+        -39.07645318872734,
+        -3.8646172890091037
+      ],
+      "effect": "negative",
+      "mean": -22.980303499822952
+    },
+    "clone_waypoint_minus_sham_waypoint": {
+      "ci": [
+        318.9599578353565,
+        458.5137684062509
+      ],
+      "effect": "positive",
+      "mean": 388.4509264782715
+    },
+    "gae_independent_cosine": {
+      "ci": [
+        0.08939728781867716,
+        0.41377378729694236
+      ],
+      "effect": "positive",
+      "mean": 0.25705856793573034
+    },
+    "mc_independent_cosine": {
+      "ci": [
+        -0.08999176757858512,
+        0.1685600826336844
+      ],
+      "effect": "inconclusive",
+      "mean": 0.014090760185942783
+    },
+    "teacher_task_minus_frozen": {
+      "ci": [
+        8.707806807028788,
+        65.65477615100339
+      ],
+      "effect": "positive",
+      "mean": 35.359886930999224
+    },
+    "teacher_waypoint_minus_frozen": {
+      "ci": [
+        -34.11579156792012,
+        -0.3550670061972738
+      ],
+      "effect": "negative",
+      "mean": -19.213289279176138
+    }
+  },
+  "protocol": "pointmaze_lower_learnability_stage51_v1",
+  "root_rows": [
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 3.8533079776255366,
+          "B_reward_norm": 61310.30467497961,
+          "cosine": -0.4551513400841898,
+          "dot": -107528.35989665001,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.586347750965439,
+          "B_reward_norm": 61310.30467497961,
+          "cosine": -0.27250524459708364,
+          "dot": -43211.093579991466,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.48476877368751525,
+          "B_reward_norm": 61310.30467497961,
+          "cosine": 0.0005478009074171964,
+          "dot": 16.28136672940602,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.581424337367345,
+          "B_reward_norm": 61310.30467497961,
+          "cosine": -0.03200475918827452,
+          "dot": -1140.8833568498198,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": 40.4446347774782,
+        "clone_task_minus_sham_task": 630.0350922244229,
+        "clone_waypoint_minus_frozen": -11.1495960827815,
+        "clone_waypoint_minus_sham_waypoint": 362.2280572387833,
+        "gae_independent_cosine": 0.0005478009074171964,
+        "mc_independent_cosine": -0.03200475918827452,
+        "teacher_task_minus_frozen": 47.2951629744548,
+        "teacher_waypoint_minus_frozen": -8.13049587656974
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 911.4858294555751,
+            "episode_return": 944.6108294555751,
+            "tracking_squared_error_integral": 1.1092714625540223,
+            "upper_inference_calls": 33.125
+          },
+          "clone_waypoint": {
+            "charged_utility": 859.9540985953154,
+            "episode_return": 893.0165985953154,
+            "tracking_squared_error_integral": 1.831658280260571,
+            "upper_inference_calls": 33.0625
+          },
+          "frozen": {
+            "charged_utility": 870.8536946780969,
+            "episode_return": 904.1661946780969,
+            "tracking_squared_error_integral": 1.6278219897094721,
+            "upper_inference_calls": 33.3125
+          },
+          "sham_task": {
+            "charged_utility": 284.3882372311522,
+            "episode_return": 314.5757372311522,
+            "tracking_squared_error_integral": 41.120038505798874,
+            "upper_inference_calls": 30.1875
+          },
+          "sham_waypoint": {
+            "charged_utility": 497.60104135653205,
+            "episode_return": 530.788541356532,
+            "tracking_squared_error_integral": 17.493906820373525,
+            "upper_inference_calls": 33.1875
+          },
+          "teacher_task": {
+            "charged_utility": 918.4613576525517,
+            "episode_return": 951.4613576525517,
+            "tracking_squared_error_integral": 1.0571102537314143,
+            "upper_inference_calls": 33
+          },
+          "teacher_waypoint": {
+            "charged_utility": 862.9731988015271,
+            "episode_return": 896.0356988015271,
+            "tracking_squared_error_integral": 1.8036608162655097,
+            "upper_inference_calls": 33.0625
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 911.1594810815308,
+            "episode_return": 944.2844810815308,
+            "tracking_squared_error_integral": 1.1115580965675211,
+            "upper_inference_calls": 33.125
+          },
+          "clone_waypoint": {
+            "charged_utility": 859.7274068061997,
+            "episode_return": 892.7899068061997,
+            "tracking_squared_error_integral": 1.8319288863306706,
+            "upper_inference_calls": 33.0625
+          },
+          "frozen": {
+            "charged_utility": 869.6898822485211,
+            "episode_return": 903.0023822485211,
+            "tracking_squared_error_integral": 1.6334259791779167,
+            "upper_inference_calls": 33.3125
+          },
+          "sham_task": {
+            "charged_utility": 295.4044746625898,
+            "episode_return": 325.4044746625898,
+            "tracking_squared_error_integral": 39.228582891505695,
+            "upper_inference_calls": 30
+          },
+          "sham_waypoint": {
+            "charged_utility": 523.2480820986899,
+            "episode_return": 556.4980820986899,
+            "tracking_squared_error_integral": 15.504822704182931,
+            "upper_inference_calls": 33.25
+          },
+          "teacher_task": {
+            "charged_utility": 918.2930060573315,
+            "episode_return": 951.2930060573315,
+            "tracking_squared_error_integral": 1.057696784322982,
+            "upper_inference_calls": 33
+          },
+          "teacher_waypoint": {
+            "charged_utility": 862.8105476053884,
+            "episode_return": 895.8730476053884,
+            "tracking_squared_error_integral": 1.803523286290392,
+            "upper_inference_calls": 33.0625
+          }
+        }
+      },
+      "root": 310011,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.34920835494995117,
+          "initial_label_mse": 2.583517551422119,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2116348230,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.16765515506267548,
+          "initial_label_mse": 1.7300679683685303,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3049950634,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.5416665077209473,
+          "initial_label_mse": 2.8481783866882324,
+          "label_seed": 3762130859,
+          "sham": true,
+          "shuffle_seed": 2116348230,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 1.9344028234481812,
+          "initial_label_mse": 2.2142112255096436,
+          "label_seed": 2605088339,
+          "sham": true,
+          "shuffle_seed": 3049950634,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 3.2879419269900714,
+          "B_reward_norm": 21601.339034048207,
+          "cosine": 0.11119154982466577,
+          "dot": 7897.26288494021,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.7169858775647318,
+          "B_reward_norm": 21601.339034048207,
+          "cosine": 0.20342917861832582,
+          "dot": 11939.366939576574,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.5048101498831784,
+          "B_reward_norm": 21601.339034048207,
+          "cosine": 0.13714835737819228,
+          "dot": 1495.5445759636643,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.5747297218323315,
+          "B_reward_norm": 21601.339034048207,
+          "cosine": 0.32760517577489906,
+          "dot": 4067.195840613684,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": -35.00681456275902,
+        "clone_task_minus_sham_task": 495.5660130769392,
+        "clone_waypoint_minus_frozen": -48.81795359984653,
+        "clone_waypoint_minus_sham_waypoint": 427.02063723774324,
+        "gae_independent_cosine": 0.13714835737819228,
+        "mc_independent_cosine": 0.32760517577489906,
+        "teacher_task_minus_frozen": -8.778994455013844,
+        "teacher_waypoint_minus_frozen": -39.32590309165198
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 880.5099993271344,
+            "episode_return": 920.0724993271344,
+            "tracking_squared_error_integral": 1.4394398608885728,
+            "upper_inference_calls": 39.5625
+          },
+          "clone_waypoint": {
+            "charged_utility": 866.6988602900469,
+            "episode_return": 906.2613602900469,
+            "tracking_squared_error_integral": 1.6290841277319996,
+            "upper_inference_calls": 39.5625
+          },
+          "frozen": {
+            "charged_utility": 916.0793138898935,
+            "episode_return": 955.0793138898935,
+            "tracking_squared_error_integral": 1.14924238220158,
+            "upper_inference_calls": 39
+          },
+          "sham_task": {
+            "charged_utility": 385.9439862501952,
+            "episode_return": 424.5064862501952,
+            "tracking_squared_error_integral": 25.506996212470767,
+            "upper_inference_calls": 38.5625
+          },
+          "sham_waypoint": {
+            "charged_utility": 440.7407230523037,
+            "episode_return": 479.2407230523037,
+            "tracking_squared_error_integral": 20.44370248163345,
+            "upper_inference_calls": 38.5
+          },
+          "teacher_task": {
+            "charged_utility": 906.8003194348796,
+            "episode_return": 946.3003194348796,
+            "tracking_squared_error_integral": 1.0827536781448717,
+            "upper_inference_calls": 39.5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 876.2534107982415,
+            "episode_return": 915.7534107982415,
+            "tracking_squared_error_integral": 1.5032044866086753,
+            "upper_inference_calls": 39.5
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 880.897926715608,
+            "episode_return": 920.460426715608,
+            "tracking_squared_error_integral": 1.432301381578715,
+            "upper_inference_calls": 39.5625
+          },
+          "clone_waypoint": {
+            "charged_utility": 869.0368930555985,
+            "episode_return": 908.5993930555985,
+            "tracking_squared_error_integral": 1.602109194131899,
+            "upper_inference_calls": 39.5625
+          },
+          "frozen": {
+            "charged_utility": 916.6849721471685,
+            "episode_return": 955.7474721471685,
+            "tracking_squared_error_integral": 1.1457070104033173,
+            "upper_inference_calls": 39.0625
+          },
+          "sham_task": {
+            "charged_utility": 387.1833636970008,
+            "episode_return": 425.8708636970008,
+            "tracking_squared_error_integral": 25.742732228644613,
+            "upper_inference_calls": 38.6875
+          },
+          "sham_waypoint": {
+            "charged_utility": 452.53976448782396,
+            "episode_return": 491.2272644878239,
+            "tracking_squared_error_integral": 19.41626443167209,
+            "upper_inference_calls": 38.6875
+          },
+          "teacher_task": {
+            "charged_utility": 907.0958999617529,
+            "episode_return": 946.5958999617529,
+            "tracking_squared_error_integral": 1.079462019157212,
+            "upper_inference_calls": 39.5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 876.7580990622683,
+            "episode_return": 916.2580990622683,
+            "tracking_squared_error_integral": 1.4980415785188277,
+            "upper_inference_calls": 39.5
+          }
+        }
+      },
+      "root": 310023,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.3127408027648926,
+          "initial_label_mse": 2.5049095153808594,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3927989445,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.1672525852918625,
+          "initial_label_mse": 1.9783515930175781,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 4065384582,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.5050694942474365,
+          "initial_label_mse": 2.6991429328918457,
+          "label_seed": 2471489686,
+          "sham": true,
+          "shuffle_seed": 3927989445,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.1477627754211426,
+          "initial_label_mse": 2.305095672607422,
+          "label_seed": 166835205,
+          "sham": true,
+          "shuffle_seed": 4065384582,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.515102130431623,
+          "B_reward_norm": 20465.872638923698,
+          "cosine": -0.05177640195953708,
+          "dot": -2665.1260816721856,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.3007712929097757,
+          "B_reward_norm": 20465.872638923698,
+          "cosine": 0.03424896025817808,
+          "dot": 1612.690801003392,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.43976618842747217,
+          "B_reward_norm": 20465.872638923698,
+          "cosine": 0.2605139673764762,
+          "dot": 2344.677497414684,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.7837645039315881,
+          "B_reward_norm": 20465.872638923698,
+          "cosine": -0.10595373935686642,
+          "dot": -1699.542958381285,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": 8.154860106624938,
+        "clone_task_minus_sham_task": 461.3157524773752,
+        "clone_waypoint_minus_frozen": -24.336400129020603,
+        "clone_waypoint_minus_sham_waypoint": 272.9201680042819,
+        "gae_independent_cosine": 0.2605139673764762,
+        "mc_independent_cosine": -0.10595373935686642,
+        "teacher_task_minus_frozen": 19.902588131489438,
+        "teacher_waypoint_minus_frozen": -21.888384913175514
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 903.3363137570605,
+            "episode_return": 938.3363137570605,
+            "tracking_squared_error_integral": 1.1406513878193825,
+            "upper_inference_calls": 35
+          },
+          "clone_waypoint": {
+            "charged_utility": 870.8450535214149,
+            "episode_return": 905.8450535214149,
+            "tracking_squared_error_integral": 1.7576727942362482,
+            "upper_inference_calls": 35
+          },
+          "frozen": {
+            "charged_utility": 895.5564536504355,
+            "episode_return": 930.1814536504355,
+            "tracking_squared_error_integral": 1.4463138128661917,
+            "upper_inference_calls": 34.625
+          },
+          "sham_task": {
+            "charged_utility": 441.89556127968524,
+            "episode_return": 477.02056127968524,
+            "tracking_squared_error_integral": 19.442816833134962,
+            "upper_inference_calls": 35.125
+          },
+          "sham_waypoint": {
+            "charged_utility": 597.862385517133,
+            "episode_return": 632.924885517133,
+            "tracking_squared_error_integral": 7.58092320652478,
+            "upper_inference_calls": 35.0625
+          },
+          "teacher_task": {
+            "charged_utility": 915.084041781925,
+            "episode_return": 950.084041781925,
+            "tracking_squared_error_integral": 1.064482616383239,
+            "upper_inference_calls": 35
+          },
+          "teacher_waypoint": {
+            "charged_utility": 873.35556873726,
+            "episode_return": 908.29306873726,
+            "tracking_squared_error_integral": 1.7346955629721301,
+            "upper_inference_calls": 34.9375
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 903.1444247621682,
+            "episode_return": 938.0819247621682,
+            "tracking_squared_error_integral": 1.1437200606514106,
+            "upper_inference_calls": 34.9375
+          },
+          "clone_waypoint": {
+            "charged_utility": 874.3670013846963,
+            "episode_return": 909.4295013846963,
+            "tracking_squared_error_integral": 1.706418372476285,
+            "upper_inference_calls": 35.0625
+          },
+          "frozen": {
+            "charged_utility": 894.037462514726,
+            "episode_return": 928.724962514726,
+            "tracking_squared_error_integral": 1.4552030992595215,
+            "upper_inference_calls": 34.6875
+          },
+          "sham_task": {
+            "charged_utility": 428.92192227437494,
+            "episode_return": 463.85942227437494,
+            "tracking_squared_error_integral": 21.03478154277517,
+            "upper_inference_calls": 34.9375
+          },
+          "sham_waypoint": {
+            "charged_utility": 600.8488909764119,
+            "episode_return": 635.7238909764119,
+            "tracking_squared_error_integral": 7.683030052100504,
+            "upper_inference_calls": 34.875
+          },
+          "teacher_task": {
+            "charged_utility": 914.739218353707,
+            "episode_return": 949.676718353707,
+            "tracking_squared_error_integral": 1.066850810953855,
+            "upper_inference_calls": 34.9375
+          },
+          "teacher_waypoint": {
+            "charged_utility": 877.7023673202873,
+            "episode_return": 912.7023673202873,
+            "tracking_squared_error_integral": 1.6677862452165888,
+            "upper_inference_calls": 35
+          }
+        }
+      },
+      "root": 310037,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.37497633695602417,
+          "initial_label_mse": 2.4832751750946045,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2794788067,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.18510177731513977,
+          "initial_label_mse": 1.7937400341033936,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2586158968,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.518232583999634,
+          "initial_label_mse": 2.7527618408203125,
+          "label_seed": 3882602282,
+          "sham": true,
+          "shuffle_seed": 2794788067,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.018573522567749,
+          "initial_label_mse": 2.237443208694458,
+          "label_seed": 3740327617,
+          "sham": true,
+          "shuffle_seed": 2586158968,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.5416366483660116,
+          "B_reward_norm": 30613.580112573174,
+          "cosine": 0.22117817159391695,
+          "dot": 17209.563252323856,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.360590408956675,
+          "B_reward_norm": 30613.580112573174,
+          "cosine": -0.0027806643958440598,
+          "dot": -200.9478369134209,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.5055539050786445,
+          "B_reward_norm": 30613.580112573174,
+          "cosine": 0.019926672906140162,
+          "dot": 308.4014296227105,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.8790828114250023,
+          "B_reward_norm": 30613.580112573174,
+          "cosine": -0.04087927655361696,
+          "dot": -1100.1378610536703,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": -7.842818047195351,
+        "clone_task_minus_sham_task": 390.09360695468933,
+        "clone_waypoint_minus_frozen": -38.025860010765314,
+        "clone_waypoint_minus_sham_waypoint": 415.7891501699134,
+        "gae_independent_cosine": 0.019926672906140162,
+        "mc_independent_cosine": -0.04087927655361696,
+        "teacher_task_minus_frozen": 13.877191122247723,
+        "teacher_waypoint_minus_frozen": -37.2773356878389
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 886.3043408811975,
+            "episode_return": 918.2418408811975,
+            "tracking_squared_error_integral": 1.4462878435788766,
+            "upper_inference_calls": 31.9375
+          },
+          "clone_waypoint": {
+            "charged_utility": 855.9337989176275,
+            "episode_return": 888.0587989176275,
+            "tracking_squared_error_integral": 1.9107223460658656,
+            "upper_inference_calls": 32.125
+          },
+          "frozen": {
+            "charged_utility": 894.1471589283927,
+            "episode_return": 926.0846589283929,
+            "tracking_squared_error_integral": 1.4862564220803272,
+            "upper_inference_calls": 31.9375
+          },
+          "sham_task": {
+            "charged_utility": 495.58573392650817,
+            "episode_return": 528.1482339265082,
+            "tracking_squared_error_integral": 18.719798251816044,
+            "upper_inference_calls": 32.5625
+          },
+          "sham_waypoint": {
+            "charged_utility": 440.08214874771414,
+            "episode_return": 472.26964874771414,
+            "tracking_squared_error_integral": 20.864571736441565,
+            "upper_inference_calls": 32.1875
+          },
+          "teacher_task": {
+            "charged_utility": 908.0868500506406,
+            "episode_return": 939.9618500506406,
+            "tracking_squared_error_integral": 1.1655277709403058,
+            "upper_inference_calls": 31.875
+          },
+          "teacher_waypoint": {
+            "charged_utility": 856.557323240554,
+            "episode_return": 888.807323240554,
+            "tracking_squared_error_integral": 1.8913117130361647,
+            "upper_inference_calls": 32.25
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 886.1319620432093,
+            "episode_return": 918.0694620432093,
+            "tracking_squared_error_integral": 1.4475719700076808,
+            "upper_inference_calls": 31.9375
+          },
+          "clone_waypoint": {
+            "charged_utility": 855.0201706068294,
+            "episode_return": 887.0826706068294,
+            "tracking_squared_error_integral": 1.930923552607828,
+            "upper_inference_calls": 32.0625
+          },
+          "frozen": {
+            "charged_utility": 896.732572424723,
+            "episode_return": 928.670072424723,
+            "tracking_squared_error_integral": 1.4668791300094826,
+            "upper_inference_calls": 31.9375
+          },
+          "sham_task": {
+            "charged_utility": 514.7945470094153,
+            "episode_return": 547.2320470094153,
+            "tracking_squared_error_integral": 16.96232319537608,
+            "upper_inference_calls": 32.4375
+          },
+          "sham_waypoint": {
+            "charged_utility": 452.53246538329194,
+            "episode_return": 484.78246538329194,
+            "tracking_squared_error_integral": 19.44579730147027,
+            "upper_inference_calls": 32.25
+          },
+          "teacher_task": {
+            "charged_utility": 907.9965011764302,
+            "episode_return": 939.9340011764302,
+            "tracking_squared_error_integral": 1.1653182394022892,
+            "upper_inference_calls": 31.9375
+          },
+          "teacher_waypoint": {
+            "charged_utility": 852.8584525449195,
+            "episode_return": 884.9209525449195,
+            "tracking_squared_error_integral": 1.961656823805838,
+            "upper_inference_calls": 32.0625
+          }
+        }
+      },
+      "root": 310049,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.3192342221736908,
+          "initial_label_mse": 2.4757323265075684,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 704286046,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.18640576303005219,
+          "initial_label_mse": 1.9322391748428345,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2233686302,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.4810445308685303,
+          "initial_label_mse": 2.6840872764587402,
+          "label_seed": 1809443398,
+          "sham": true,
+          "shuffle_seed": 704286046,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.1296370029449463,
+          "initial_label_mse": 2.3231425285339355,
+          "label_seed": 788420127,
+          "sham": true,
+          "shuffle_seed": 2233686302,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.744733896418112,
+          "B_reward_norm": 7779.981666809597,
+          "cosine": -0.1881288965632785,
+          "dot": -4017.3005807041695,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.2140717700889794,
+          "B_reward_norm": 7779.981666809597,
+          "cosine": -0.11132643875347915,
+          "dot": -1917.6466440496472,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.6176858345865229,
+          "B_reward_norm": 7779.981666809597,
+          "cosine": 0.37386204173354604,
+          "dot": 1796.6256212776125,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.5041783626673104,
+          "B_reward_norm": 7779.981666809597,
+          "cosine": -0.05546640226321277,
+          "dot": -217.56687514922524,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": 60.15624400650495,
+        "clone_task_minus_sham_task": 515.0789563479692,
+        "clone_waypoint_minus_frozen": -10.030948219746278,
+        "clone_waypoint_minus_sham_waypoint": 308.46821877764364,
+        "gae_independent_cosine": 0.37386204173354604,
+        "mc_independent_cosine": -0.05546640226321277,
+        "teacher_task_minus_frozen": 81.39730629448661,
+        "teacher_waypoint_minus_frozen": -5.49083994626244
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 894.2573963674176,
+            "episode_return": 919.0698963674176,
+            "tracking_squared_error_integral": 1.354930386736872,
+            "upper_inference_calls": 24.8125
+          },
+          "clone_waypoint": {
+            "charged_utility": 823.7577041411664,
+            "episode_return": 848.8827041411664,
+            "tracking_squared_error_integral": 2.534958826507034,
+            "upper_inference_calls": 25.125
+          },
+          "frozen": {
+            "charged_utility": 835.7261523609127,
+            "episode_return": 858.9136523609127,
+            "tracking_squared_error_integral": 2.32254678086289,
+            "upper_inference_calls": 23.1875
+          },
+          "sham_task": {
+            "charged_utility": 382.49094001944843,
+            "episode_return": 403.99094001944843,
+            "tracking_squared_error_integral": 26.399590607491866,
+            "upper_inference_calls": 21.5
+          },
+          "sham_waypoint": {
+            "charged_utility": 514.4144853635228,
+            "episode_return": 540.4144853635228,
+            "tracking_squared_error_integral": 13.853033332696116,
+            "upper_inference_calls": 26
+          },
+          "teacher_task": {
+            "charged_utility": 915.3734586553993,
+            "episode_return": 940.3109586553993,
+            "tracking_squared_error_integral": 1.1511777876132467,
+            "upper_inference_calls": 24.9375
+          },
+          "teacher_waypoint": {
+            "charged_utility": 828.1103124146503,
+            "episode_return": 853.4228124146503,
+            "tracking_squared_error_integral": 2.492520411341422,
+            "upper_inference_calls": 25.3125
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 894.1148859848934,
+            "episode_return": 918.8648859848934,
+            "tracking_squared_error_integral": 1.3537012260825674,
+            "upper_inference_calls": 24.75
+          },
+          "clone_waypoint": {
+            "charged_utility": 824.9161537549701,
+            "episode_return": 850.1036537549701,
+            "tracking_squared_error_integral": 2.5071842336621146,
+            "upper_inference_calls": 25.1875
+          },
+          "frozen": {
+            "charged_utility": 832.9744603541003,
+            "episode_return": 856.2244603541003,
+            "tracking_squared_error_integral": 2.4505667643752234,
+            "upper_inference_calls": 23.25
+          },
+          "sham_task": {
+            "charged_utility": 412.83985830266136,
+            "episode_return": 435.08985830266136,
+            "tracking_squared_error_integral": 23.508252614796053,
+            "upper_inference_calls": 22.25
+          },
+          "sham_waypoint": {
+            "charged_utility": 512.9181785172653,
+            "episode_return": 539.6681785172653,
+            "tracking_squared_error_integral": 13.742065309414347,
+            "upper_inference_calls": 26.75
+          },
+          "teacher_task": {
+            "charged_utility": 915.4021231067346,
+            "episode_return": 940.1521231067346,
+            "tracking_squared_error_integral": 1.1533961703551219,
+            "upper_inference_calls": 24.75
+          },
+          "teacher_waypoint": {
+            "charged_utility": 826.3209902538126,
+            "episode_return": 851.5084902538126,
+            "tracking_squared_error_integral": 2.5469153282273607,
+            "upper_inference_calls": 25.1875
+          }
+        }
+      },
+      "root": 310061,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.38930970430374146,
+          "initial_label_mse": 2.5485610961914062,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3035818251,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.2145153284072876,
+          "initial_label_mse": 1.8939200639724731,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 879045637,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.5282504558563232,
+          "initial_label_mse": 2.8346028327941895,
+          "label_seed": 3401630275,
+          "sham": true,
+          "shuffle_seed": 3035818251,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.144033670425415,
+          "initial_label_mse": 2.438929319381714,
+          "label_seed": 172866715,
+          "sham": true,
+          "shuffle_seed": 879045637,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.9731335302481803,
+          "B_reward_norm": 30141.520856881383,
+          "cosine": 0.36065023710562893,
+          "dot": 32319.586718685307,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.4658420647094283,
+          "B_reward_norm": 30141.520856881383,
+          "cosine": 0.12159620198398711,
+          "dot": 9037.544086207132,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.5580444297726189,
+          "B_reward_norm": 30141.520856881383,
+          "cosine": 0.47231555220620997,
+          "dot": 7944.49297583675,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.6053348780402831,
+          "B_reward_norm": 30141.520856881383,
+          "cosine": 0.14210347769295134,
+          "dot": 2592.7793913381893,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": -2.284636695577319,
+        "clone_task_minus_sham_task": 476.05872894032274,
+        "clone_waypoint_minus_frozen": -33.5056210834847,
+        "clone_waypoint_minus_sham_waypoint": 513.5322583309566,
+        "gae_independent_cosine": 0.47231555220620997,
+        "mc_independent_cosine": 0.14210347769295134,
+        "teacher_task_minus_frozen": 27.704403790589936,
+        "teacher_waypoint_minus_frozen": -29.914500886172277
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 878.2446655232743,
+            "episode_return": 910.9321655232743,
+            "tracking_squared_error_integral": 1.4469453054954053,
+            "upper_inference_calls": 32.6875
+          },
+          "clone_waypoint": {
+            "charged_utility": 847.2736811353669,
+            "episode_return": 879.7111811353669,
+            "tracking_squared_error_integral": 2.0878655092738065,
+            "upper_inference_calls": 32.4375
+          },
+          "frozen": {
+            "charged_utility": 880.8418022188516,
+            "episode_return": 913.2168022188516,
+            "tracking_squared_error_integral": 1.6509514853821867,
+            "upper_inference_calls": 32.375
+          },
+          "sham_task": {
+            "charged_utility": 402.31093658295157,
+            "episode_return": 434.87343658295157,
+            "tracking_squared_error_integral": 21.671849041789965,
+            "upper_inference_calls": 32.5625
+          },
+          "sham_waypoint": {
+            "charged_utility": 333.9914228044104,
+            "episode_return": 366.1789228044104,
+            "tracking_squared_error_integral": 32.2616526992294,
+            "upper_inference_calls": 32.1875
+          },
+          "teacher_task": {
+            "charged_utility": 908.4212060094416,
+            "episode_return": 940.9212060094416,
+            "tracking_squared_error_integral": 1.1585048809831862,
+            "upper_inference_calls": 32.5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 850.8023013326793,
+            "episode_return": 883.3023013326793,
+            "tracking_squared_error_integral": 2.051431678380977,
+            "upper_inference_calls": 32.5
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 877.9210268448458,
+            "episode_return": 910.6085268448458,
+            "tracking_squared_error_integral": 1.4513955478677967,
+            "upper_inference_calls": 32.6875
+          },
+          "clone_waypoint": {
+            "charged_utility": 847.3512927277654,
+            "episode_return": 879.7887927277654,
+            "tracking_squared_error_integral": 2.088779149992571,
+            "upper_inference_calls": 32.4375
+          },
+          "frozen": {
+            "charged_utility": 879.7974350711156,
+            "episode_return": 912.1724350711156,
+            "tracking_squared_error_integral": 1.6587679080933684,
+            "upper_inference_calls": 32.375
+          },
+          "sham_task": {
+            "charged_utility": 391.9954652493522,
+            "episode_return": 424.6829652493522,
+            "tracking_squared_error_integral": 21.88173401089354,
+            "upper_inference_calls": 32.6875
+          },
+          "sham_waypoint": {
+            "charged_utility": 331.39863667505233,
+            "episode_return": 363.64863667505233,
+            "tracking_squared_error_integral": 32.72705206873557,
+            "upper_inference_calls": 32.25
+          },
+          "teacher_task": {
+            "charged_utility": 908.1583891099128,
+            "episode_return": 940.6583891099128,
+            "tracking_squared_error_integral": 1.1605793892807224,
+            "upper_inference_calls": 32.5
+          },
+          "teacher_waypoint": {
+            "charged_utility": 850.8895488928836,
+            "episode_return": 883.3895488928836,
+            "tracking_squared_error_integral": 2.051468468364474,
+            "upper_inference_calls": 32.5
+          }
+        }
+      },
+      "root": 310073,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.3288508653640747,
+          "initial_label_mse": 2.518014669418335,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3651952569,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.18360581994056702,
+          "initial_label_mse": 1.9295027256011963,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2453244691,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.4935405254364014,
+          "initial_label_mse": 2.8017685413360596,
+          "label_seed": 3965795442,
+          "sham": true,
+          "shuffle_seed": 3651952569,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.2014076709747314,
+          "initial_label_mse": 2.5064287185668945,
+          "label_seed": 4098060749,
+          "sham": true,
+          "shuffle_seed": 2453244691,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.984802185280635,
+          "B_reward_norm": 24960.808958206,
+          "cosine": -0.13220773292712093,
+          "dot": -9849.88292276765,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.8723603203491397,
+          "B_reward_norm": 24960.808958206,
+          "cosine": 0.11322287860519176,
+          "dot": 8117.677007260166,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.4173426749354938,
+          "B_reward_norm": 24960.808958206,
+          "cosine": 0.32263963404024343,
+          "dot": 3361.0050735119808,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.6720597306574835,
+          "B_reward_norm": 24960.808958206,
+          "cosine": -0.12956767942169087,
+          "dot": -2173.5178463935154,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": 3.655533450531834,
+        "clone_task_minus_sham_task": 273.3229485628335,
+        "clone_waypoint_minus_frozen": -32.26402347624321,
+        "clone_waypoint_minus_sham_waypoint": 356.1773013937999,
+        "gae_independent_cosine": 0.32263963404024343,
+        "mc_independent_cosine": -0.12956767942169087,
+        "teacher_task_minus_frozen": 20.63806365469702,
+        "teacher_waypoint_minus_frozen": -29.165483925305352
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 890.3001139502787,
+            "episode_return": 921.9876139502787,
+            "tracking_squared_error_integral": 1.2884480107869316,
+            "upper_inference_calls": 31.6875
+          },
+          "clone_waypoint": {
+            "charged_utility": 854.8805570235037,
+            "episode_return": 886.0680570235037,
+            "tracking_squared_error_integral": 2.0401662976614006,
+            "upper_inference_calls": 31.1875
+          },
+          "frozen": {
+            "charged_utility": 888.0195804997469,
+            "episode_return": 918.3320804997469,
+            "tracking_squared_error_integral": 1.5646367377032242,
+            "upper_inference_calls": 30.3125
+          },
+          "sham_task": {
+            "charged_utility": 618.3521653874452,
+            "episode_return": 648.6646653874452,
+            "tracking_squared_error_integral": 7.698454545564921,
+            "upper_inference_calls": 30.3125
+          },
+          "sham_waypoint": {
+            "charged_utility": 499.7032556297038,
+            "episode_return": 529.8907556297038,
+            "tracking_squared_error_integral": 16.804836363873804,
+            "upper_inference_calls": 30.1875
+          },
+          "teacher_task": {
+            "charged_utility": 907.1576441544439,
+            "episode_return": 938.9701441544439,
+            "tracking_squared_error_integral": 1.1521332718045287,
+            "upper_inference_calls": 31.8125
+          },
+          "teacher_waypoint": {
+            "charged_utility": 857.7915965744415,
+            "episode_return": 889.1665965744415,
+            "tracking_squared_error_integral": 1.935803865900105,
+            "upper_inference_calls": 31.375
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 890.3798100142575,
+            "episode_return": 922.2548100142575,
+            "tracking_squared_error_integral": 1.2827133614936497,
+            "upper_inference_calls": 31.875
+          },
+          "clone_waypoint": {
+            "charged_utility": 852.6942757595101,
+            "episode_return": 884.1942757595101,
+            "tracking_squared_error_integral": 2.0671212384029376,
+            "upper_inference_calls": 31.5
+          },
+          "frozen": {
+            "charged_utility": 891.770597042234,
+            "episode_return": 922.895597042234,
+            "tracking_squared_error_integral": 1.5094577723320715,
+            "upper_inference_calls": 31.125
+          },
+          "sham_task": {
+            "charged_utility": 614.8669866854493,
+            "episode_return": 645.5544866854493,
+            "tracking_squared_error_integral": 8.507935133049777,
+            "upper_inference_calls": 30.6875
+          },
+          "sham_waypoint": {
+            "charged_utility": 486.9531863610865,
+            "episode_return": 517.0781863610865,
+            "tracking_squared_error_integral": 18.05485859756994,
+            "upper_inference_calls": 30.125
+          },
+          "teacher_task": {
+            "charged_utility": 907.0340710548355,
+            "episode_return": 938.7840710548355,
+            "tracking_squared_error_integral": 1.1540198594447137,
+            "upper_inference_calls": 31.75
+          },
+          "teacher_waypoint": {
+            "charged_utility": 855.0425369482797,
+            "episode_return": 886.4800369482797,
+            "tracking_squared_error_integral": 1.990509111909844,
+            "upper_inference_calls": 31.4375
+          }
+        }
+      },
+      "root": 310089,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.3467385470867157,
+          "initial_label_mse": 2.655313730239868,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3176369000,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.18152223527431488,
+          "initial_label_mse": 2.0124316215515137,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 2108442703,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.6573708057403564,
+          "initial_label_mse": 2.8797473907470703,
+          "label_seed": 1368953682,
+          "sham": true,
+          "shuffle_seed": 3176369000,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 2.1892123222351074,
+          "initial_label_mse": 2.4099490642547607,
+          "label_seed": 250112119,
+          "sham": true,
+          "shuffle_seed": 2108442703,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    },
+    {
+      "credit": {
+        "bc_task": {
+          "A_norm": 2.296563890087974,
+          "B_reward_norm": 30082.19667756114,
+          "cosine": 0.5077077388959004,
+          "dot": 35075.33774604908,
+          "zero_norm": false
+        },
+        "bc_waypoint": {
+          "A_norm": 2.1955280081951414,
+          "B_reward_norm": 30082.19667756114,
+          "cosine": 0.4263431754374692,
+          "dot": 28158.391550375203,
+          "zero_norm": false
+        },
+        "gae": {
+          "A_norm": 0.4242649622174661,
+          "B_reward_norm": 30082.19667756114,
+          "cosine": 0.46951451693761764,
+          "dot": 5992.330223380137,
+          "zero_norm": false
+        },
+        "mc": {
+          "A_norm": 0.3690014203943647,
+          "B_reward_norm": 30082.19667756114,
+          "cosine": 0.006889284803353359,
+          "dot": 76.47363310517011,
+          "zero_norm": false
+        }
+      },
+      "endpoints": {
+        "clone_task_minus_frozen": 63.79227385692445,
+        "clone_task_minus_sham_task": 438.58163737046,
+        "clone_waypoint_minus_frozen": 14.28797460330452,
+        "clone_waypoint_minus_sham_waypoint": 451.47162067305044,
+        "gae_independent_cosine": 0.46951451693761764,
+        "mc_independent_cosine": 0.006889284803353359,
+        "teacher_task_minus_frozen": 80.84337393504211,
+        "teacher_waypoint_minus_frozen": 17.4866300935671
+      },
+      "means": {
+        "deterministic": {
+          "clone_task": {
+            "charged_utility": 915.0881498815171,
+            "episode_return": 942.0881498815171,
+            "tracking_squared_error_integral": 1.106454691602319,
+            "upper_inference_calls": 27
+          },
+          "clone_waypoint": {
+            "charged_utility": 867.1463506278972,
+            "episode_return": 892.5838506278972,
+            "tracking_squared_error_integral": 2.099727125009532,
+            "upper_inference_calls": 25.4375
+          },
+          "frozen": {
+            "charged_utility": 854.1708760245926,
+            "episode_return": 878.2958760245926,
+            "tracking_squared_error_integral": 2.3136018204683455,
+            "upper_inference_calls": 24.125
+          },
+          "sham_task": {
+            "charged_utility": 471.88151251105717,
+            "episode_return": 503.5065125110571,
+            "tracking_squared_error_integral": 15.252352974208435,
+            "upper_inference_calls": 31.625
+          },
+          "sham_waypoint": {
+            "charged_utility": 412.8622299548467,
+            "episode_return": 441.1122299548467,
+            "tracking_squared_error_integral": 22.564947882707443,
+            "upper_inference_calls": 28.25
+          },
+          "teacher_task": {
+            "charged_utility": 933.2017499596348,
+            "episode_return": 959.1392499596348,
+            "tracking_squared_error_integral": 0.9855118486643092,
+            "upper_inference_calls": 25.9375
+          },
+          "teacher_waypoint": {
+            "charged_utility": 870.1575061181597,
+            "episode_return": 895.7825061181597,
+            "tracking_squared_error_integral": 2.0495847840677612,
+            "upper_inference_calls": 25.625
+          }
+        },
+        "lower_sampled": {
+          "clone_task": {
+            "charged_utility": 913.2501827564597,
+            "episode_return": 940.0626827564597,
+            "tracking_squared_error_integral": 1.1232995969600967,
+            "upper_inference_calls": 26.8125
+          },
+          "clone_waypoint": {
+            "charged_utility": 866.817898834191,
+            "episode_return": 892.255398834191,
+            "tracking_squared_error_integral": 2.104367429319071,
+            "upper_inference_calls": 25.4375
+          },
+          "frozen": {
+            "charged_utility": 856.4594455029136,
+            "episode_return": 880.7719455029136,
+            "tracking_squared_error_integral": 2.286019013641273,
+            "upper_inference_calls": 24.3125
+          },
+          "sham_task": {
+            "charged_utility": 485.6387134588932,
+            "episode_return": 516.7637134588933,
+            "tracking_squared_error_integral": 14.5465360335416,
+            "upper_inference_calls": 31.125
+          },
+          "sham_waypoint": {
+            "charged_utility": 422.66384470849346,
+            "episode_return": 449.97634470849346,
+            "tracking_squared_error_integral": 21.58870720154114,
+            "upper_inference_calls": 27.3125
+          },
+          "teacher_task": {
+            "charged_utility": 932.9320807134502,
+            "episode_return": 958.8695807134502,
+            "tracking_squared_error_integral": 0.9876706815839116,
+            "upper_inference_calls": 25.9375
+          },
+          "teacher_waypoint": {
+            "charged_utility": 869.9328546408824,
+            "episode_return": 895.5578546408824,
+            "tracking_squared_error_integral": 2.052669135580789,
+            "upper_inference_calls": 25.625
+          }
+        }
+      },
+      "root": 310101,
+      "training": {
+        "clone_task": {
+          "final_label_mse": 0.35861751437187195,
+          "initial_label_mse": 2.3569259643554688,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 4188257320,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "clone_waypoint": {
+          "final_label_mse": 0.16933466494083405,
+          "initial_label_mse": 1.634775996208191,
+          "label_seed": null,
+          "sham": false,
+          "shuffle_seed": 3757364577,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_task": {
+          "final_label_mse": 2.3658478260040283,
+          "initial_label_mse": 2.5611023902893066,
+          "label_seed": 3465997325,
+          "sham": true,
+          "shuffle_seed": 4188257320,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        },
+        "sham_waypoint": {
+          "final_label_mse": 1.8040212392807007,
+          "initial_label_mse": 1.976136326789856,
+          "label_seed": 782830309,
+          "sham": true,
+          "shuffle_seed": 3757364577,
+          "supervised_optimizer_steps": 320,
+          "unchanged_other_state": "passed"
+        }
+      }
+    }
+  ],
+  "run_name": "pointmaze_lower_learnability_stage51_full_20260930_r1",
+  "status": "complete",
+  "verification_primitive_steps": 0
+}
