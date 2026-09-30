@@ -117,6 +117,8 @@ class LearnedPlanTest(unittest.TestCase):
                 self.assertEqual(result["calibration"][p]["parameter_changes"]["lower_actor"], 0)
                 self.assertEqual(result["training"][p]["lower_ppo"]["parameter_changes"]["upper_actor"], 0)
                 self.assertGreater(result["training"][p]["joint_ppo"]["parameter_changes"]["upper_actor"], 0)
+                self.assertGreater(sum(r["executed_plan_delta_squared_sum"] for r in
+                    result["evaluation_rows"][p]["joint_ppo"]["deterministic"]), 0)
             mutations = (("optimizer", "PPO optimizer"), ("network", "network"), ("actor_type", "executed learned policy"), ("config", "hyperparameters"))
             for mutation, message in mutations:
                 bad = copy.deepcopy(result)

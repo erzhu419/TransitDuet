@@ -51,6 +51,7 @@ class ResidualPlan(forecast.PlanReference):
             basis_dim=spec.PLAN_BASIS, n_entities=2), coefficient_scale=scale, anchor_first_coefficient=True)
         self.basis = np.array([self.mapper.curve.basis(t * forecast.spec.DT_SECONDS) for t in range(period + 1)])
         self.actions, self.coefficients = [], []
+        self.executed_delta_squared_sum = 0.
 
     def decode(self, *, action, observation, history, step, world_low, world_high):
         self.bounds = np.asarray(world_low), np.asarray(world_high)
@@ -59,6 +60,7 @@ class ResidualPlan(forecast.PlanReference):
         coefficients = self.mapper.residual_coefficients(action)
         self.points = np.clip(base.astype(np.float64) + self.basis @ coefficients.reshape(2, spec.PLAN_BASIS).T,
                               *self.bounds).astype(np.float32)
+        self.executed_delta_squared_sum += float(np.square(self.points.astype(np.float64) - base).sum())
         self.actions.append(action.copy())
         self.coefficients.append(coefficients)
         self.ols_fits += int(step > 0)
@@ -141,11 +143,14 @@ def worker_rollout(job):
             reference_evaluations=reference.calls, actor_context_evaluations=reference.context_calls,
             upper_plan_decodes=len(reference.actions), bernstein_basis_evaluations=period + 1,
             audit_bernstein_basis_evaluations=period + 1,
+            upper_plan_action_rms=float(np.sqrt(np.square(raw["upper_plan_action"].astype(np.float64)).mean())),
+            executed_plan_delta_squared_sum=reference.executed_delta_squared_sum,
             **audit_plan(raw, row, predictor=predictor, period=period, scale=args.maximum_subgoal_delta,
                          bounds=reference.bounds, batch=batch))
     else:
         clocks.audit_context(None, row, raw["lower_value_context"], clock=True)
-        row.update(**dict.fromkeys(EXTRA_COUNTS, 0), reference_target_squared_error_integral=float(
+        row.update(**dict.fromkeys(EXTRA_COUNTS, 0), upper_plan_action_rms=0., executed_plan_delta_squared_sum=0.,
+            reference_target_squared_error_integral=float(
             np.square(raw["subgoal"].astype(np.float64) - raw["measurement"][:, :2]).sum() * .01))
     row.update(policy_seed=spec.policy_seed(args.optimizer_seed, seed), policy=policy, period=period, phase=phase,
                deployment_mode=mode, lower_actor_type=actor_type, upper_action_dim=model.config.upper_action_dim)
@@ -432,7 +437,14 @@ def aggregate(results, *, preflight):
                     raise ValueError("Stage55 deployment mode roster incomplete")
                 for mode, rows in stage[policy].items():
                     rows_check(rows, phase="eval", policy=policy, period=period, mode=mode, seeds=roles["evaluation"])
+                    if policy == "joint_ppo":
+                        if sum(r["executed_plan_delta_squared_sum"] for r in rows) <= 0:
+                            raise ValueError("Stage55 learned upper changed no executed plan")
+                    elif any(r["upper_plan_action_rms"] != 0 or r["executed_plan_delta_squared_sum"] != 0 for r in rows):
+                        raise ValueError("Stage55 frozen upper acquired a residual mean")
                     means[p][mode][policy] = {k: float(np.mean([r[k] for r in rows])) for k in spec.METRICS}
+                    means[p][mode][policy].update(upper_plan_action_rms=float(np.mean([r["upper_plan_action_rms"] for r in rows])),
+                        executed_plan_delta_squared_sum=float(np.mean([r["executed_plan_delta_squared_sum"] for r in rows])))
         if observed != c["inference_counts"]:
             raise ValueError("Stage55 total inference accounting changed")
         for phase in totals:
