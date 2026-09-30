@@ -1,0 +1,109 @@
+{
+  "checkpoint_loads": 2,
+  "contract": {
+    "audit": "actual_proposed_and_executed_actions_native_credit_plan_velocity_reconstruction_rollout_networks_frozen_parent_updates_nonnull",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      57,
+      57057
+    ],
+    "calibration": "each_arm_same_budget_critic_only_on_its_own_execution_distribution_both_actors_std_frozen",
+    "credit": "lower_native_task_option_reward_upper_discounted_native_reward_minus_equal_call_cost",
+    "decision": "matched_upper_gate_joint_vs_zero_positive_both_periods_training_gain_gate_joint_vs_clone_positive_both_periods",
+    "deployment": "fixed_final_same_execution_rule_as_training_no_analytic_feedback_no_checkpoint_selection",
+    "endpoints": [
+      "period50:joint_ppo_minus_zero_train",
+      "period50:joint_ppo_minus_clone",
+      "period50:zero_train_minus_clone",
+      "period100:joint_ppo_minus_zero_train",
+      "period100:joint_ppo_minus_clone",
+      "period100:zero_train_minus_clone"
+    ],
+    "forecaster": "same_saved_Stage55_forecaster_no_fitting_or_BC",
+    "initialization": "fixed_Stage55_clone_final_each_root_period_same_four_networks_and_optimizer_states",
+    "interval": "two_sided_percentile_Bonferroni6_equal_root_paired_means",
+    "joint_ppo": "normal_residual_execution_shared_native_SMDP_PPO_upper_and_lower_learned",
+    "limits": "reused_training_roots_teacher_initialized_fixed_forecast_development_not_frequency_promotion_OOD_or_equal_total_FLOPs",
+    "optimizer": "unchanged_inherited_PPO_hyperparameters_and_matched_lower_updates_upper_updates_only_for_joint",
+    "pairing": "fresh_shared_environment_and_stepwise_lower_noise_seeds_same_initial_upper_proposals_not_identical_lower_trajectories",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "clone",
+      "zero_train",
+      "joint_ppo"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_checkpoint_period_mode_root_seed_or_budget_selection_after_outcomes",
+    "source_protocol": "pointmaze_learned_plan_stage55_v1",
+    "source_runs": [
+      "pointmaze_learned_plan_stage55_preflight_20260930_r1",
+      "pointmaze_learned_plan_stage55_full_20260930_r1"
+    ],
+    "zero_train": "infer_upper_but_execute_zero_residual_from_first_warmup_and_training_rollout_upper_actor_fixed_lower_PPO_learned"
+  },
+  "forecaster_loads": 1,
+  "method_cost": {
+    "eval": {
+      "actor_context_evaluations": 7200,
+      "audit_bernstein_basis_evaluations": 1824,
+      "audit_ols_fits": 84,
+      "audit_ridge_predictions": 84,
+      "bernstein_basis_evaluations": 1824,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 7200,
+      "plan_ols_fits": 84,
+      "plan_ridge_predictions": 84,
+      "primitive_steps": 7200,
+      "reference_evaluations": 7200,
+      "upper_inference_calls": 108,
+      "upper_plan_decodes": 108
+    },
+    "train": {
+      "actor_context_evaluations": 4800,
+      "audit_bernstein_basis_evaluations": 1216,
+      "audit_ols_fits": 56,
+      "audit_ridge_predictions": 56,
+      "bernstein_basis_evaluations": 1216,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 4800,
+      "plan_ols_fits": 56,
+      "plan_ridge_predictions": 56,
+      "primitive_steps": 4800,
+      "reference_evaluations": 4800,
+      "upper_inference_calls": 72,
+      "upper_plan_decodes": 72
+    },
+    "warmup": {
+      "actor_context_evaluations": 4800,
+      "audit_bernstein_basis_evaluations": 1216,
+      "audit_ols_fits": 56,
+      "audit_ridge_predictions": 56,
+      "bernstein_basis_evaluations": 1216,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 4800,
+      "plan_ols_fits": 56,
+      "plan_ridge_predictions": 56,
+      "primitive_steps": 4800,
+      "reference_evaluations": 4800,
+      "upper_inference_calls": 72,
+      "upper_plan_decodes": 72
+    }
+  },
+  "native_trace_audits": 56,
+  "new_forecaster_fits": 0,
+  "optimizer_steps": {
+    "lower_actor": 32,
+    "lower_value": 64,
+    "upper_actor": 16,
+    "upper_value": 48
+  },
+  "protocol": "pointmaze_matched_upper_stage57_v1",
+  "run_name": "pointmaze_matched_upper_stage57_preflight_20260930_r1",
+  "status": "preflight_passed",
+  "supervised_steps": 0,
+  "verification_primitive_steps": 0
+}
