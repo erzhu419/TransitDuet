@@ -1,0 +1,260 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "actor_context_evaluations": 153600,
+    "audit_bernstein_basis_evaluations": 9728,
+    "audit_ols_fits": 2176,
+    "audit_ridge_predictions": 2176,
+    "bernstein_basis_evaluations": 9728,
+    "checkpoint_loads": 2,
+    "forecaster_loads": 1,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 153600,
+    "native_trace_audits": 128,
+    "new_forecaster_fits": 0,
+    "optimizer_steps": 0,
+    "plan_ols_fits": 2176,
+    "plan_ridge_predictions": 2176,
+    "reference_evaluations": 153600,
+    "total_primitive_steps": 153600,
+    "upper_inference_calls": 2304,
+    "upper_plan_decodes": 2304,
+    "verification_primitive_steps": 0
+  },
+  "contract": {
+    "audit": "proposed_and_executed_actions_separate_independent_plan_velocity_reconstruction_exact_frozen_networks_and_native_metrics",
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      56,
+      56056
+    ],
+    "checkpoint": "fixed_final_joint_ppo_each_root_period_no_selection",
+    "cost": "both_arms_charge_all_actual_upper_and_lower_calls_no_gate_or_preview",
+    "credit": "native_episode_return_no_shaping_or_new_objective",
+    "decision": "normal_minus_zero_residual_positive_at_both_periods",
+    "endpoints": [
+      "period50:normal_minus_zero_residual",
+      "period100:normal_minus_zero_residual"
+    ],
+    "forecaster": "same_saved_Stage55_forecaster_no_refitting",
+    "interval": "two_sided_percentile_Bonferroni2_equal_root_paired_means",
+    "limits": "execution_ablation_with_coadapted_lower_conditional_on_reused_training_roots_not_frequency_or_promotion_confirmation",
+    "lower": "same_saved_joint_MLP_weights_std_and_velocity_context_rule_no_analytic_feedback_or_retraining",
+    "normal": "unchanged_Stage55_executed_residual_plan",
+    "pairing": "fresh_shared_environment_and_stepwise_lower_noise_seeds",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "normal",
+      "zero_residual"
+    ],
+    "primary_mode": "deterministic",
+    "secondary_mode": "lower_sampled",
+    "selection": "no_checkpoint_period_mode_root_seed_or_training_budget_selection_after_outcomes",
+    "source_protocol": "pointmaze_learned_plan_stage55_v1",
+    "source_runs": [
+      "pointmaze_learned_plan_stage55_preflight_20260930_r1",
+      "pointmaze_learned_plan_stage55_full_20260930_r1"
+    ],
+    "zero_residual": "infer_same_upper_then_execute_zero_four_dim_action_on_same_causal_base_forecast"
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "evaluation_paths": 16,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_upper_execution_stage56_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "evaluation": [
+        15105001,
+        15105002,
+        15105003,
+        15105004,
+        15105005,
+        15105006,
+        15105007,
+        15105008,
+        15105009,
+        15105010,
+        15105011,
+        15105012,
+        15105013,
+        15105014,
+        15105015,
+        15105016
+      ]
+    },
+    "310023": {
+      "evaluation": [
+        15115001,
+        15115002,
+        15115003,
+        15115004,
+        15115005,
+        15115006,
+        15115007,
+        15115008,
+        15115009,
+        15115010,
+        15115011,
+        15115012,
+        15115013,
+        15115014,
+        15115015,
+        15115016
+      ]
+    },
+    "310037": {
+      "evaluation": [
+        15125001,
+        15125002,
+        15125003,
+        15125004,
+        15125005,
+        15125006,
+        15125007,
+        15125008,
+        15125009,
+        15125010,
+        15125011,
+        15125012,
+        15125013,
+        15125014,
+        15125015,
+        15125016
+      ]
+    },
+    "310049": {
+      "evaluation": [
+        15135001,
+        15135002,
+        15135003,
+        15135004,
+        15135005,
+        15135006,
+        15135007,
+        15135008,
+        15135009,
+        15135010,
+        15135011,
+        15135012,
+        15135013,
+        15135014,
+        15135015,
+        15135016
+      ]
+    },
+    "310061": {
+      "evaluation": [
+        15145001,
+        15145002,
+        15145003,
+        15145004,
+        15145005,
+        15145006,
+        15145007,
+        15145008,
+        15145009,
+        15145010,
+        15145011,
+        15145012,
+        15145013,
+        15145014,
+        15145015,
+        15145016
+      ]
+    },
+    "310073": {
+      "evaluation": [
+        15155001,
+        15155002,
+        15155003,
+        15155004,
+        15155005,
+        15155006,
+        15155007,
+        15155008,
+        15155009,
+        15155010,
+        15155011,
+        15155012,
+        15155013,
+        15155014,
+        15155015,
+        15155016
+      ]
+    },
+    "310089": {
+      "evaluation": [
+        15165001,
+        15165002,
+        15165003,
+        15165004,
+        15165005,
+        15165006,
+        15165007,
+        15165008,
+        15165009,
+        15165010,
+        15165011,
+        15165012,
+        15165013,
+        15165014,
+        15165015,
+        15165016
+      ]
+    },
+    "310101": {
+      "evaluation": [
+        15175001,
+        15175002,
+        15175003,
+        15175004,
+        15175005,
+        15175006,
+        15175007,
+        15175008,
+        15175009,
+        15175010,
+        15175011,
+        15175012,
+        15175013,
+        15175014,
+        15175015,
+        15175016
+      ]
+    }
+  },
+  "source_revision": "db3139c06e3cff47cb28ff74f268e8ce3ff3cfe9",
+  "source_run": "pointmaze_learned_plan_stage55_full_20260930_r1",
+  "total_method_steps": 1228800
+}
