@@ -1,0 +1,526 @@
+{
+  "artifacts": {
+    "native_traces_and_weights": "server_only",
+    "pull": "completion_markers_and_compact_json_only"
+  },
+  "budget_per_root": {
+    "actor_score_backward_batches": 1600,
+    "actor_score_forward_batches": 320,
+    "archive_episodes": 32,
+    "archive_network_checks": 32,
+    "critic_checkpoint_loads": 8,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 10,
+    "gae_calls": 40,
+    "mc_calls": 20,
+    "native_episodes": 128,
+    "native_network_checks": 128,
+    "native_trace_audits": 128,
+    "probe_value_rows": 384000,
+    "reconstructed_lower_calls": 38400,
+    "reconstructed_upper_calls": 576,
+    "source_clone_loads": 2,
+    "source_mc_reproduction_calls": 4,
+    "source_probe_checks": 8,
+    "td_identity_checks": 40
+  },
+  "contract": {
+    "MC_precision": "explicit_float64_recurrence_legacy_MC_only_for_exact_historical_probe_reproduction",
+    "TD": "true_episode_done_GAE_minus_MC_advantage_equals_filtered_future_value_error_no_lambda_sweep",
+    "common_baseline": "discounted_remaining_mass_times_Stage67_first_calibration_rate_location_time_only",
+    "decision": "diagnostic_only_Stage67_HOLD_unchanged_no_native_reward_adoption_trial",
+    "directions": "each_batch_own_PPO_center_scale_GAE_separate_entropy_adjusted_directions_vs_disjoint_MC_batches",
+    "frozen": "all_networks_and_Adam_unchanged_no_fits_optimizer_steps_or_checkpoint_writes",
+    "limits": "finite_MC_reference_reused_teacher_initialized_development_roots_not_true_gradient_or_frequency_proof",
+    "noise": "independent_raw_episode_gradient_sample_covariance_unbiased_signal_power_no_zero_clamp",
+    "pairing": "same_fresh_reset_action_seeds_across_cases_both_critics_on_identical_paths_within_case",
+    "reference": "raw_uncentered_unscaled_MC_minus_common_baseline_uniform_time_discounted_return_convention",
+    "roster": "same_eight_development_roots_period50_100_zero_train_joint_ppo_four_independent_batches_of_eight",
+    "sampling": "frozen_Stage55_clones_saved_forecaster_Stage57_training_noise_no_policy_updates",
+    "source": "pointmaze_horizon_value_stage67_v1",
+    "treatments": [
+      "mc_normalized",
+      "mc_factored"
+    ]
+  },
+  "native_budget_per_root": {
+    "actor_context_evaluations": 153600,
+    "audit_bernstein_basis_evaluations": 9728,
+    "audit_ols_fits": 2176,
+    "audit_ridge_predictions": 2176,
+    "bernstein_basis_evaluations": 9728,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 153600,
+    "plan_ols_fits": 2176,
+    "plan_ridge_predictions": 2176,
+    "primitive_steps": 153600,
+    "reference_evaluations": 153600,
+    "upper_inference_calls": 2304,
+    "upper_plan_decodes": 2304
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "batches": 4,
+    "episodes_per_batch": 8,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_independent_credit_stage69_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 6144,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "anchor": [
+        16103001,
+        16103002,
+        16103003,
+        16103004,
+        16103005,
+        16103006,
+        16103007,
+        16103008
+      ],
+      "fresh_batches": [
+        [
+          26700001,
+          26700002,
+          26700003,
+          26700004,
+          26700005,
+          26700006,
+          26700007,
+          26700008
+        ],
+        [
+          26700101,
+          26700102,
+          26700103,
+          26700104,
+          26700105,
+          26700106,
+          26700107,
+          26700108
+        ],
+        [
+          26700201,
+          26700202,
+          26700203,
+          26700204,
+          26700205,
+          26700206,
+          26700207,
+          26700208
+        ],
+        [
+          26700301,
+          26700302,
+          26700303,
+          26700304,
+          26700305,
+          26700306,
+          26700307,
+          26700308
+        ]
+      ]
+    },
+    "310023": {
+      "anchor": [
+        16113001,
+        16113002,
+        16113003,
+        16113004,
+        16113005,
+        16113006,
+        16113007,
+        16113008
+      ],
+      "fresh_batches": [
+        [
+          26710001,
+          26710002,
+          26710003,
+          26710004,
+          26710005,
+          26710006,
+          26710007,
+          26710008
+        ],
+        [
+          26710101,
+          26710102,
+          26710103,
+          26710104,
+          26710105,
+          26710106,
+          26710107,
+          26710108
+        ],
+        [
+          26710201,
+          26710202,
+          26710203,
+          26710204,
+          26710205,
+          26710206,
+          26710207,
+          26710208
+        ],
+        [
+          26710301,
+          26710302,
+          26710303,
+          26710304,
+          26710305,
+          26710306,
+          26710307,
+          26710308
+        ]
+      ]
+    },
+    "310037": {
+      "anchor": [
+        16123001,
+        16123002,
+        16123003,
+        16123004,
+        16123005,
+        16123006,
+        16123007,
+        16123008
+      ],
+      "fresh_batches": [
+        [
+          26720001,
+          26720002,
+          26720003,
+          26720004,
+          26720005,
+          26720006,
+          26720007,
+          26720008
+        ],
+        [
+          26720101,
+          26720102,
+          26720103,
+          26720104,
+          26720105,
+          26720106,
+          26720107,
+          26720108
+        ],
+        [
+          26720201,
+          26720202,
+          26720203,
+          26720204,
+          26720205,
+          26720206,
+          26720207,
+          26720208
+        ],
+        [
+          26720301,
+          26720302,
+          26720303,
+          26720304,
+          26720305,
+          26720306,
+          26720307,
+          26720308
+        ]
+      ]
+    },
+    "310049": {
+      "anchor": [
+        16133001,
+        16133002,
+        16133003,
+        16133004,
+        16133005,
+        16133006,
+        16133007,
+        16133008
+      ],
+      "fresh_batches": [
+        [
+          26730001,
+          26730002,
+          26730003,
+          26730004,
+          26730005,
+          26730006,
+          26730007,
+          26730008
+        ],
+        [
+          26730101,
+          26730102,
+          26730103,
+          26730104,
+          26730105,
+          26730106,
+          26730107,
+          26730108
+        ],
+        [
+          26730201,
+          26730202,
+          26730203,
+          26730204,
+          26730205,
+          26730206,
+          26730207,
+          26730208
+        ],
+        [
+          26730301,
+          26730302,
+          26730303,
+          26730304,
+          26730305,
+          26730306,
+          26730307,
+          26730308
+        ]
+      ]
+    },
+    "310061": {
+      "anchor": [
+        16143001,
+        16143002,
+        16143003,
+        16143004,
+        16143005,
+        16143006,
+        16143007,
+        16143008
+      ],
+      "fresh_batches": [
+        [
+          26740001,
+          26740002,
+          26740003,
+          26740004,
+          26740005,
+          26740006,
+          26740007,
+          26740008
+        ],
+        [
+          26740101,
+          26740102,
+          26740103,
+          26740104,
+          26740105,
+          26740106,
+          26740107,
+          26740108
+        ],
+        [
+          26740201,
+          26740202,
+          26740203,
+          26740204,
+          26740205,
+          26740206,
+          26740207,
+          26740208
+        ],
+        [
+          26740301,
+          26740302,
+          26740303,
+          26740304,
+          26740305,
+          26740306,
+          26740307,
+          26740308
+        ]
+      ]
+    },
+    "310073": {
+      "anchor": [
+        16153001,
+        16153002,
+        16153003,
+        16153004,
+        16153005,
+        16153006,
+        16153007,
+        16153008
+      ],
+      "fresh_batches": [
+        [
+          26750001,
+          26750002,
+          26750003,
+          26750004,
+          26750005,
+          26750006,
+          26750007,
+          26750008
+        ],
+        [
+          26750101,
+          26750102,
+          26750103,
+          26750104,
+          26750105,
+          26750106,
+          26750107,
+          26750108
+        ],
+        [
+          26750201,
+          26750202,
+          26750203,
+          26750204,
+          26750205,
+          26750206,
+          26750207,
+          26750208
+        ],
+        [
+          26750301,
+          26750302,
+          26750303,
+          26750304,
+          26750305,
+          26750306,
+          26750307,
+          26750308
+        ]
+      ]
+    },
+    "310089": {
+      "anchor": [
+        16163001,
+        16163002,
+        16163003,
+        16163004,
+        16163005,
+        16163006,
+        16163007,
+        16163008
+      ],
+      "fresh_batches": [
+        [
+          26760001,
+          26760002,
+          26760003,
+          26760004,
+          26760005,
+          26760006,
+          26760007,
+          26760008
+        ],
+        [
+          26760101,
+          26760102,
+          26760103,
+          26760104,
+          26760105,
+          26760106,
+          26760107,
+          26760108
+        ],
+        [
+          26760201,
+          26760202,
+          26760203,
+          26760204,
+          26760205,
+          26760206,
+          26760207,
+          26760208
+        ],
+        [
+          26760301,
+          26760302,
+          26760303,
+          26760304,
+          26760305,
+          26760306,
+          26760307,
+          26760308
+        ]
+      ]
+    },
+    "310101": {
+      "anchor": [
+        16173001,
+        16173002,
+        16173003,
+        16173004,
+        16173005,
+        16173006,
+        16173007,
+        16173008
+      ],
+      "fresh_batches": [
+        [
+          26770001,
+          26770002,
+          26770003,
+          26770004,
+          26770005,
+          26770006,
+          26770007,
+          26770008
+        ],
+        [
+          26770101,
+          26770102,
+          26770103,
+          26770104,
+          26770105,
+          26770106,
+          26770107,
+          26770108
+        ],
+        [
+          26770201,
+          26770202,
+          26770203,
+          26770204,
+          26770205,
+          26770206,
+          26770207,
+          26770208
+        ],
+        [
+          26770301,
+          26770302,
+          26770303,
+          26770304,
+          26770305,
+          26770306,
+          26770307,
+          26770308
+        ]
+      ]
+    }
+  },
+  "source_revision": "8deedf560d8e18fef84db67e5c391ac2132ded5a"
+}
