@@ -1,0 +1,25 @@
+{
+  "protocol": "pointmaze_crossed_direction_stage74_v1",
+  "run_name": "pointmaze_crossed_direction_stage74_preflight_20261001_r1",
+  "source_revision": "fccb59f843",
+  "preflight": true,
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t118661",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "role": "historical_reproduction_and_crossed_native_response",
+      "root": 310001
+    },
+    {
+      "id": "t118662",
+      "status": "done",
+      "node": "node005",
+      "exit_code": 0,
+      "role": "qualification"
+    }
+  ],
+  "qualification": "preflight_passed"
+}

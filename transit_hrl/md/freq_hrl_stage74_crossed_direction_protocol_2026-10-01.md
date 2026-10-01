@@ -10,6 +10,10 @@ Report 72 cell contrasts (plus-minus, plus-base, minus-base), 12 execution diffe
 
 Full budget: 4096 historical episodes / 4,915,200 reconstructed lower calls; 13,312 native episodes / 15,974,400 native steps; 192 cloned-actor perturbations; 96 Stage73 direction reproductions. Native plan solver costs are recorded separately. Dynamic scheduler placement uses node001-node006, 9CPU/8GiB per full root, separate preflight/full resource histories and a 1CPU/2GiB qualifier. Pull compact JSON/logs/markers only.
 
+## Execution
+
+Preflight t118661/t118662 passed: 208 native episodes / 62,400 steps, 12 exact Stage73 geometry/frame reproductions and eight cross-execution paired-seed checks. Root runtime was 53.8 seconds. Nineteen focused tests passed. No protocol or radius changes were made from preflight rewards.
+
 ## Limitations
 
 Execution comparisons hold parameters fixed, not target-state KL. Fitting effects compare the entire historical-data/critic/direction bundle. This is a finite-radius stochastic diagnosis on teacher-initialized development roots, not full training, OOD validation or frequency-superiority evidence. Eight-root percentile-bootstrap uncertainty is limited.
