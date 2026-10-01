@@ -14,4 +14,6 @@ Advantages use saved post-update values, not the original first-update sampling 
 
 ## Execution
 
-Implementation/protocol committed atcc150f5594. Task`t116561` passed all4 focused tests on node006 in7.642s, exit0: exact native feature/macro-return reconstruction, three boundary semantics, frozen state/no actor/environment/update calls, seed roster and cost accounting. No existing algorithm modules changed. Real archive preflight is next; no diagnostic conclusion yet.
+Implementation/protocol committed atcc150f5594. Task`t116561` passed all4 focused tests on node006 in7.642s, exit0: exact native feature/macro-return reconstruction, three boundary semantics, frozen state/no actor/environment/update calls, seed roster and cost accounting. No existing algorithm modules changed.
+
+Real archive preflight`t116563` on node005 and qualification`t116565` on node006 completed with exit0. Counts match:16 archives,4 checkpoint loads,4800 lower/72 upper value rows,16 lower/16 upper forward batches,64 GAE/48 MC calls; all new native/actor/optimizer/fit/write counts0. Four full state/Adam identity checks passed. Only35.6KB of [compact JSON](../results/pointmaze_credit_diagnostics_stage62_preflight_20261001_r1/compact_summary.json) pulled. Proceed to the frozen eight-root run without changing any setting; no full diagnostic conclusion yet.
