@@ -1,0 +1,85 @@
+{
+  "artifacts": {
+    "native_steps_or_new_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "bc_mse_reproductions": 2,
+    "bernstein_basis_evaluations": 912,
+    "checkpoint_writes": 0,
+    "counterfactual_upper_proposals": 18,
+    "forecaster_fits": 0,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "label_archive_loads": 4,
+    "label_plan_checks": 4,
+    "label_state_rows": 1200,
+    "layout_loads": 1,
+    "native_driver_paths": 8,
+    "native_plan_frame_checks": 8,
+    "native_steps": 0,
+    "native_trace_writes": 0,
+    "offline_actor_forward_batches": 12,
+    "offline_actor_rows": 3600,
+    "optimizer_steps": 0,
+    "plan_decodes": 54,
+    "plan_ols_fits": 42,
+    "plan_ridge_predictions": 42,
+    "replayed_velocity_rows": 7200,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "actor": "frozen_clone_batched_conditional_tanh_command_change_and_Gaussian_KL_no_optimization",
+    "artifacts": "compact_JSON_only_no_raw_trace_or_checkpoint_writes",
+    "calibration": "all_actual_Stage55_BC_label_states_only_no_warmup_train_evaluation_or_reward_selected_scale",
+    "counterfactual": "historical_label_states_hold_first390_columns_fixed_replace_only_velocity2_zero_or_sampled_residual",
+    "decision": "input_support_diagnosis_and_training_only_calibration_no_budget_application_no_policy_adoption_Stage67_HOLD_unchanged",
+    "labels": "pointmaze_learned_plan_stage55_v1",
+    "limits": "coordinate_and_speed_envelopes_not_joint_state_support_conditional_actor_response_not_native_reward_improvement",
+    "native_replay": "existing_Stage75_seeds_and_upper_proposals_causal_target_driver_prefix_original_world_clipping_exact_energy_frame",
+    "proposal_noise": "new_Stage76_RNG_zero_mean_frozen_upper_Gaussian_marginals_not_native_episode_rng_reconstruction",
+    "source": "pointmaze_upper_paths_stage75_v1",
+    "state_check": "zero_residual_plan_and_velocity_exact_BC_command_MSE_reproduces_saved_clone_MSE",
+    "statistics": "four_residual_minus_base_coverage_contrasts_equal_root_bootstrap_Bonferroni4_all_reported",
+    "support": "coordinate_min_max_and_speed_q99_of_label_velocity_position_error_q99_in_physical_units"
+  },
+  "endpoints": [
+    "50/outside_label_axis_range_rate/residual_minus_base",
+    "50/above_label_speed_q99_rate/residual_minus_base",
+    "100/outside_label_axis_range_rate/residual_minus_base",
+    "100/above_label_speed_q99_rate/residual_minus_base"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "preflight": true,
+  "protocol": "pointmaze_velocity_support_stage76_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 2048,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "calibration_labels": [
+        14091001,
+        14091002
+      ],
+      "native_plan_replay": [
+        75095001,
+        75095002,
+        75095003,
+        75095004
+      ]
+    }
+  },
+  "source_revision": "b32c0b9822533746db504bd9ab758d2d73c3b015"
+}

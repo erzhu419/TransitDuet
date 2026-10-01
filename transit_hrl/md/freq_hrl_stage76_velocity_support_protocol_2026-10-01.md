@@ -10,6 +10,10 @@ Stage75 attributes most sampled-residual execution loss to planned velocity. Sta
 - Full audit: 8 frozen roots,128 label archives /153,600 label states,512 existing native plan frames,1,536,000 replayed velocity rows,460,800 offline actor rows and768 actor forward batches. Optimization, forecaster fitting and native steps are zero.
 - Scheduler: dynamic node001..006, no pin; each root and qualifier1CPU/2048MiB. Preflight root310001 runs before the full eight-root matrix. Pull only completion markers and compact JSON.
 
+Preflight r1: t118825 failed before label audit because the layout probe closed the task instead of its owned environment; t118826 cancelled. Fixed in b32c0b9822 with an ownership/API test (7 tests passed). Retry r2 retains the same calibration inputs, four endpoints and statistical protocol; r1 provides no scientific result.
+
+Preflight r2: t118827/t118828 both done0 on node006;1,200 exact label states,2 saved BC MSE reproductions,8 Stage75 plan-energy frame matches,7,200 replayed velocity rows and3,600 conditional actor rows. Native steps, fitting and optimizer steps are zero. Mechanical gate passed; full eight-root audit released without performance selection.
+
 ## Limits
 
 Coordinate and speed envelopes are not joint-state support. Historical-state response is not an on-policy reward counterfactual. This audit calibrates inputs and tests a mechanism hypothesis; it does not repair the learned upper, adopt a budget, or establish frequency superiority. Stage67 HOLD remains unchanged.

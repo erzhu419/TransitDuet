@@ -1,0 +1,35 @@
+{
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "preflight": true,
+  "protocol": "pointmaze_velocity_support_stage76_v1",
+  "run_name": "pointmaze_velocity_support_stage76_preflight_20261001_r1",
+  "source_revision": "22eb8b8d50cab0b08922ab9f012dacd44ad02bdc",
+  "tasks": [
+    {
+      "cpu_cores": 1,
+      "exit_code": 1,
+      "id": "t118825",
+      "node": "node006",
+      "peak_ram_mb": 333,
+      "ram_mb": 2048,
+      "resource_family": "Freq-HRL/pointmaze_velocity_support_stage76_v1/velocity_support/preflight",
+      "role": "offline_velocity_support_audit",
+      "root": 310001,
+      "status": "failed"
+    },
+    {
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t118826",
+      "node": null,
+      "peak_ram_mb": 0,
+      "ram_mb": 2048,
+      "resource_family": "Freq-HRL/pointmaze_velocity_support_stage76_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null,
+      "status": "cancelled"
+    }
+  ],
+  "failure": "native_layout_cleanup_AttributeError_PointMazeRegimeTask_has_no_close_before_label_audit",
+  "valid_scientific_results": 0
+}

@@ -1,0 +1,310 @@
+{
+  "contract": {
+    "actor": "frozen_clone_batched_conditional_tanh_command_change_and_Gaussian_KL_no_optimization",
+    "artifacts": "compact_JSON_only_no_raw_trace_or_checkpoint_writes",
+    "calibration": "all_actual_Stage55_BC_label_states_only_no_warmup_train_evaluation_or_reward_selected_scale",
+    "counterfactual": "historical_label_states_hold_first390_columns_fixed_replace_only_velocity2_zero_or_sampled_residual",
+    "decision": "input_support_diagnosis_and_training_only_calibration_no_budget_application_no_policy_adoption_Stage67_HOLD_unchanged",
+    "labels": "pointmaze_learned_plan_stage55_v1",
+    "limits": "coordinate_and_speed_envelopes_not_joint_state_support_conditional_actor_response_not_native_reward_improvement",
+    "native_replay": "existing_Stage75_seeds_and_upper_proposals_causal_target_driver_prefix_original_world_clipping_exact_energy_frame",
+    "proposal_noise": "new_Stage76_RNG_zero_mean_frozen_upper_Gaussian_marginals_not_native_episode_rng_reconstruction",
+    "source": "pointmaze_upper_paths_stage75_v1",
+    "state_check": "zero_residual_plan_and_velocity_exact_BC_command_MSE_reproduces_saved_clone_MSE",
+    "statistics": "four_residual_minus_base_coverage_contrasts_equal_root_bootstrap_Bonferroni4_all_reported",
+    "support": "coordinate_min_max_and_speed_q99_of_label_velocity_position_error_q99_in_physical_units"
+  },
+  "cost": {
+    "bc_mse_reproductions": 2,
+    "bernstein_basis_evaluations": 912,
+    "checkpoint_writes": 0,
+    "counterfactual_upper_proposals": 18,
+    "forecaster_fits": 0,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "label_archive_loads": 4,
+    "label_plan_checks": 4,
+    "label_state_rows": 1200,
+    "layout_loads": 1,
+    "native_driver_paths": 8,
+    "native_plan_frame_checks": 8,
+    "native_steps": 0,
+    "native_trace_writes": 0,
+    "offline_actor_forward_batches": 12,
+    "offline_actor_rows": 3600,
+    "optimizer_steps": 0,
+    "plan_decodes": 54,
+    "plan_ols_fits": 42,
+    "plan_ridge_predictions": 42,
+    "replayed_velocity_rows": 7200,
+    "source_clone_loads": 2
+  },
+  "endpoints": {
+    "100/above_label_speed_q99_rate/residual_minus_base": {
+      "mean": 0.0008333333333333335
+    },
+    "100/outside_label_axis_range_rate/residual_minus_base": {
+      "mean": 0.003333333333333327
+    },
+    "50/above_label_speed_q99_rate/residual_minus_base": {
+      "mean": 0.019166666666666665
+    },
+    "50/outside_label_axis_range_rate/residual_minus_base": {
+      "mean": 0.008333333333333331
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "none_offline_input_support_and_calibration_only",
+  "protocol": "pointmaze_velocity_support_stage76_v1",
+  "root_rows": [
+    {
+      "root": 310001,
+      "preflight": true,
+      "seed_roles": {
+        "calibration_labels": [
+          14091001,
+          14091002
+        ],
+        "native_plan_replay": [
+          75095001,
+          75095002,
+          75095003,
+          75095004
+        ]
+      },
+      "cost": {
+        "bc_mse_reproductions": 2,
+        "bernstein_basis_evaluations": 912,
+        "checkpoint_writes": 0,
+        "counterfactual_upper_proposals": 18,
+        "forecaster_fits": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "label_archive_loads": 4,
+        "label_plan_checks": 4,
+        "label_state_rows": 1200,
+        "layout_loads": 1,
+        "native_driver_paths": 8,
+        "native_plan_frame_checks": 8,
+        "native_steps": 0,
+        "native_trace_writes": 0,
+        "offline_actor_forward_batches": 12,
+        "offline_actor_rows": 3600,
+        "optimizer_steps": 0,
+        "plan_decodes": 54,
+        "plan_ols_fits": 42,
+        "plan_ridge_predictions": 42,
+        "replayed_velocity_rows": 7200,
+        "source_clone_loads": 2
+      },
+      "groups": {
+        "50": {
+          "actor_responses": {
+            "as_label": {
+              "bc_command_mse": 0.2918226972950328,
+              "command_change_rms": 0,
+              "conditional_gaussian_kl_mean": 0
+            },
+            "sampled_velocity": {
+              "bc_command_mse": 0.29182257779704623,
+              "command_change_rms": 0.00014577338709488658,
+              "conditional_gaussian_kl_mean": 7.828076680501302e-8
+            },
+            "zero_velocity": {
+              "bc_command_mse": 0.2919417275059274,
+              "command_change_rms": 0.00027582232474919753,
+              "conditional_gaussian_kl_mean": 3.0587116877237957e-7
+            }
+          },
+          "bc_mse_reproduction": {
+            "observed": 0.2918226972950328,
+            "saved": 0.2918227016925812,
+            "status": "passed"
+          },
+          "calibration": {
+            "axis_max": [
+              3.632688522338867,
+              7.560145854949951
+            ],
+            "axis_mean": [
+              -0.8602707918795447,
+              0.3989571047822634
+            ],
+            "axis_min": [
+              -4.486238956451416,
+              -3.184998035430908
+            ],
+            "axis_std": [
+              1.5956976490273271,
+              1.721763816545944
+            ],
+            "data_role": "historical_BC_labels_only",
+            "position_error_q99": 1.9724560626807641,
+            "position_error_rms": 0.5903890260851479,
+            "rows": 600,
+            "velocity_speed_q99": 7.044092240333557,
+            "velocity_speed_rms": 2.531788741956068
+          },
+          "effects": {
+            "50/above_label_speed_q99_rate/residual_minus_base": 0.019166666666666665,
+            "50/outside_label_axis_range_rate/residual_minus_base": 0.008333333333333331
+          },
+          "label_plan_check": "passed",
+          "native_coverage": {
+            "base": {
+              "above_label_speed_q99_rate": 0.010833333333333334,
+              "axis_max": [
+                6.504167556762695,
+                8.45482349395752
+              ],
+              "axis_min": [
+                -4.814028739929199,
+                -4.454612731933594
+              ],
+              "outside_label_axis_range_rate": 0.19583333333333333,
+              "rows": 1200,
+              "speed_quantiles": [
+                1.0350925785443374,
+                6.051767578697787,
+                7.093684406280516,
+                8.45482349395752
+              ],
+              "speed_rms": 2.7913538555069417
+            },
+            "residual": {
+              "above_label_speed_q99_rate": 0.03,
+              "axis_max": [
+                7.65361213684082,
+                8.230340957641602
+              ],
+              "axis_min": [
+                -4.3199005126953125,
+                -4.320704936981201
+              ],
+              "outside_label_axis_range_rate": 0.20416666666666666,
+              "rows": 1200,
+              "speed_quantiles": [
+                1.9485722396677068,
+                6.625090794384353,
+                7.544776705681088,
+                8.230340957641602
+              ],
+              "speed_rms": 3.2229805419411153
+            }
+          },
+          "native_plan_frame_check": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "actor_responses": {
+            "as_label": {
+              "bc_command_mse": 0.1741895774833184,
+              "command_change_rms": 0,
+              "conditional_gaussian_kl_mean": 0
+            },
+            "sampled_velocity": {
+              "bc_command_mse": 0.17419496145993066,
+              "command_change_rms": 0.00006055902777693394,
+              "conditional_gaussian_kl_mean": 7.351239522298177e-9
+            },
+            "zero_velocity": {
+              "bc_command_mse": 0.17427173903618984,
+              "command_change_rms": 0.00017992960341927524,
+              "conditional_gaussian_kl_mean": 1.2725591659545897e-7
+            }
+          },
+          "bc_mse_reproduction": {
+            "observed": 0.1741895774833184,
+            "saved": 0.17418958246707916,
+            "status": "passed"
+          },
+          "calibration": {
+            "axis_max": [
+              3.632688522338867,
+              7.679259777069092
+            ],
+            "axis_mean": [
+              -0.4346381604671478,
+              0.15405728737513225
+            ],
+            "axis_min": [
+              -4.422274112701416,
+              -3.437650203704834
+            ],
+            "axis_std": [
+              1.2116376348202287,
+              1.7171507730839324
+            ],
+            "data_role": "historical_BC_labels_only",
+            "position_error_q99": 2.629995779346044,
+            "position_error_rms": 1.0273500850843296,
+            "rows": 600,
+            "velocity_speed_q99": 7.329675731658935,
+            "velocity_speed_rms": 2.151584651819027
+          },
+          "effects": {
+            "100/above_label_speed_q99_rate/residual_minus_base": 0.0008333333333333335,
+            "100/outside_label_axis_range_rate/residual_minus_base": 0.003333333333333327
+          },
+          "label_plan_check": "passed",
+          "native_coverage": {
+            "base": {
+              "above_label_speed_q99_rate": 0.009166666666666667,
+              "axis_max": [
+                4.911365985870361,
+                8.534253120422363
+              ],
+              "axis_min": [
+                -4.814028739929199,
+                -4.454612731933594
+              ],
+              "outside_label_axis_range_rate": 0.0825,
+              "rows": 1200,
+              "speed_quantiles": [
+                0.5204226791006112,
+                4.735570843404032,
+                7.203751921653747,
+                8.534253120422363
+              ],
+              "speed_rms": 2.1835783917146383
+            },
+            "residual": {
+              "above_label_speed_q99_rate": 0.01,
+              "axis_max": [
+                4.812192916870117,
+                8.62116813659668
+              ],
+              "axis_min": [
+                -4.359132289886475,
+                -4.571926593780518
+              ],
+              "outside_label_axis_range_rate": 0.08583333333333333,
+              "rows": 1200,
+              "speed_quantiles": [
+                1.0495772840180662,
+                4.535748456108753,
+                7.304425058364867,
+                8.62116813659668
+              ],
+              "speed_rms": 2.216228492379695
+            }
+          },
+          "native_plan_frame_check": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "wall_seconds": 0.5026564728468657,
+      "source_paths": {
+        "result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_learned_plan_stage55_preflight_20260930_r1/cells/replicate_310001/result.json",
+        "checkpoints": {
+          "50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_learned_plan_stage55_preflight_20260930_r1/cells/replicate_310001_raw/50/clone_final.pt",
+          "100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_learned_plan_stage55_preflight_20260930_r1/cells/replicate_310001_raw/100/clone_final.pt"
+        },
+        "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_learned_plan_stage55_preflight_20260930_r1/cells/replicate_310001_raw/forecaster.npz"
+      }
+    }
+  ],
+  "run_name": "pointmaze_velocity_support_stage76_preflight_20261001_r2",
+  "status": "preflight_passed"
+}
