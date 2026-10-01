@@ -14,4 +14,4 @@ This isolates credit plus its necessary lower critic recalibration, not credit a
 
 ## Execution
 
-Implementation/tests pending; no experiment registered yet.
+Implementation committed as eef5006ecf. Scheduler t116620/node004 passed five Stage63 tests plus the existing Stage46 regression (six tests,54.120s). Exact Stage60 control reproduction, shared upper checkpoint states, scalar old values, episode boundaries and actual GAE counts passed. Actual archive preflight is next; full native evaluation remains gated.
