@@ -1,0 +1,2277 @@
+{
+  "artifacts": {
+    "native_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_parameter_perturbations": 16,
+    "actor_score_backward_batches": 1152,
+    "actor_score_forward_batches": 384,
+    "credit_episodes": 128,
+    "decoder_loads": 2,
+    "evaluation_episodes": 896,
+    "exact_kl_forward_batches": 612,
+    "fisher_jvp_batches": 306,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "joint_composition_checks": 8,
+    "mc_calls": 256,
+    "native_episodes": 1024,
+    "native_lower_calls": 1228800,
+    "native_network_checks": 1024,
+    "native_pair_checks": 64,
+    "native_steps": 1228800,
+    "native_upper_calls": 18432,
+    "objective_checks": 128,
+    "pairing_upper_forward_calls": 18432,
+    "parameter_part_checks": 16,
+    "scenario_pair_checks": 64,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "allocation": "equal_half_budget_joint_plus_minus_and_cross_signs_same_half_step_actors_as_single_level_controls",
+    "artifacts": "server_memory_training_batches_compact_JSON_only_no_trace_or_candidate_checkpoint_writes",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "direction_validation_only_no_actor_adoption_Stage67_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "direction": "same_fresh_scenario_MC_mean_gradient_std_bit_exact_frozen",
+    "limits": "sum_of_per_level_source_state_conditional_KL_not_full_trajectory_KL_single_step_not_joint_training_not_frequency_superiority",
+    "noise_mapping": "Stage80_explicit_environment_and_action_noise_mapping_on_fresh_Stage82_seed_roles",
+    "noise_units": "average_gradients_within_scenario_then_measure_covariance_across_independent_scenario_groups",
+    "pairing": "same_environment_and_stepwise_lower_noise_same_standardized_upper_noise_not_same_proposals",
+    "parameter_freeze": "both_log_std_critics_forecaster_source_Adam_decoder_frozen_joint_composition_bit_exact",
+    "periods": [
+      50,
+      100
+    ],
+    "perturbation": "fixed_sum_of_level_mean_conditional_Gaussian_KL_.001_single_full_.001_joint_.0005_each_no_radius_sweep",
+    "sampling": "two_disjoint_batches_16_scenarios_each_two_independent_noise_replicates_exact_initial_physical_and_exogenous_history_match",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all60_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni60",
+    "variants": [
+      "base",
+      "zero",
+      "upper_full_plus",
+      "upper_full_minus",
+      "lower_full_plus",
+      "lower_full_minus",
+      "upper_half_plus",
+      "upper_half_minus",
+      "lower_half_plus",
+      "lower_half_minus",
+      "joint_plus",
+      "joint_minus",
+      "joint_upper_plus_lower_minus",
+      "joint_upper_minus_lower_plus"
+    ]
+  },
+  "endpoints": [
+    "50/base_minus_zero",
+    "50/upper_full_plus_minus_upper_full_minus",
+    "50/upper_full_plus_minus_base",
+    "50/upper_full_minus_minus_base",
+    "50/upper_full_plus_minus_zero",
+    "50/lower_full_plus_minus_lower_full_minus",
+    "50/lower_full_plus_minus_base",
+    "50/lower_full_minus_minus_base",
+    "50/lower_full_plus_minus_zero",
+    "50/upper_half_plus_minus_upper_half_minus",
+    "50/upper_half_plus_minus_base",
+    "50/upper_half_minus_minus_base",
+    "50/upper_half_plus_minus_zero",
+    "50/lower_half_plus_minus_lower_half_minus",
+    "50/lower_half_plus_minus_base",
+    "50/lower_half_minus_minus_base",
+    "50/lower_half_plus_minus_zero",
+    "50/joint_plus_minus_joint_minus",
+    "50/joint_plus_minus_base",
+    "50/joint_minus_minus_base",
+    "50/joint_plus_minus_zero",
+    "50/joint_plus_minus_upper_full_plus",
+    "50/joint_plus_minus_upper_half_plus",
+    "50/joint_plus_minus_lower_full_plus",
+    "50/joint_plus_minus_lower_half_plus",
+    "50/joint_upper_plus_lower_minus_minus_base",
+    "50/joint_upper_minus_lower_plus_minus_base",
+    "50/joint_plus_minus_joint_upper_plus_lower_minus",
+    "50/joint_plus_minus_joint_upper_minus_lower_plus",
+    "50/joint_plus_interaction",
+    "100/base_minus_zero",
+    "100/upper_full_plus_minus_upper_full_minus",
+    "100/upper_full_plus_minus_base",
+    "100/upper_full_minus_minus_base",
+    "100/upper_full_plus_minus_zero",
+    "100/lower_full_plus_minus_lower_full_minus",
+    "100/lower_full_plus_minus_base",
+    "100/lower_full_minus_minus_base",
+    "100/lower_full_plus_minus_zero",
+    "100/upper_half_plus_minus_upper_half_minus",
+    "100/upper_half_plus_minus_base",
+    "100/upper_half_minus_minus_base",
+    "100/upper_half_plus_minus_zero",
+    "100/lower_half_plus_minus_lower_half_minus",
+    "100/lower_half_plus_minus_base",
+    "100/lower_half_minus_minus_base",
+    "100/lower_half_plus_minus_zero",
+    "100/joint_plus_minus_joint_minus",
+    "100/joint_plus_minus_base",
+    "100/joint_minus_minus_base",
+    "100/joint_plus_minus_zero",
+    "100/joint_plus_minus_upper_full_plus",
+    "100/joint_plus_minus_upper_half_plus",
+    "100/joint_plus_minus_lower_full_plus",
+    "100/joint_plus_minus_lower_half_plus",
+    "100/joint_upper_plus_lower_minus_minus_base",
+    "100/joint_upper_minus_lower_plus_minus_base",
+    "100/joint_plus_minus_joint_upper_plus_lower_minus",
+    "100/joint_plus_minus_joint_upper_minus_lower_plus",
+    "100/joint_plus_interaction"
+  ],
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "credit_scenarios_per_batch": 16,
+    "evaluation_episodes": 32,
+    "rollouts_per_scenario": 2,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_joint_mean_stage82_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82102002,
+            82102003
+          ],
+          "scenario_seed": 82100001
+        },
+        {
+          "noise_seeds": [
+            82102004,
+            82102005
+          ],
+          "scenario_seed": 82100002
+        },
+        {
+          "noise_seeds": [
+            82102006,
+            82102007
+          ],
+          "scenario_seed": 82100003
+        },
+        {
+          "noise_seeds": [
+            82102008,
+            82102009
+          ],
+          "scenario_seed": 82100004
+        },
+        {
+          "noise_seeds": [
+            82102010,
+            82102011
+          ],
+          "scenario_seed": 82100005
+        },
+        {
+          "noise_seeds": [
+            82102012,
+            82102013
+          ],
+          "scenario_seed": 82100006
+        },
+        {
+          "noise_seeds": [
+            82102014,
+            82102015
+          ],
+          "scenario_seed": 82100007
+        },
+        {
+          "noise_seeds": [
+            82102016,
+            82102017
+          ],
+          "scenario_seed": 82100008
+        },
+        {
+          "noise_seeds": [
+            82102018,
+            82102019
+          ],
+          "scenario_seed": 82100009
+        },
+        {
+          "noise_seeds": [
+            82102020,
+            82102021
+          ],
+          "scenario_seed": 82100010
+        },
+        {
+          "noise_seeds": [
+            82102022,
+            82102023
+          ],
+          "scenario_seed": 82100011
+        },
+        {
+          "noise_seeds": [
+            82102024,
+            82102025
+          ],
+          "scenario_seed": 82100012
+        },
+        {
+          "noise_seeds": [
+            82102026,
+            82102027
+          ],
+          "scenario_seed": 82100013
+        },
+        {
+          "noise_seeds": [
+            82102028,
+            82102029
+          ],
+          "scenario_seed": 82100014
+        },
+        {
+          "noise_seeds": [
+            82102030,
+            82102031
+          ],
+          "scenario_seed": 82100015
+        },
+        {
+          "noise_seeds": [
+            82102032,
+            82102033
+          ],
+          "scenario_seed": 82100016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82103002,
+            82103003
+          ],
+          "scenario_seed": 82101001
+        },
+        {
+          "noise_seeds": [
+            82103004,
+            82103005
+          ],
+          "scenario_seed": 82101002
+        },
+        {
+          "noise_seeds": [
+            82103006,
+            82103007
+          ],
+          "scenario_seed": 82101003
+        },
+        {
+          "noise_seeds": [
+            82103008,
+            82103009
+          ],
+          "scenario_seed": 82101004
+        },
+        {
+          "noise_seeds": [
+            82103010,
+            82103011
+          ],
+          "scenario_seed": 82101005
+        },
+        {
+          "noise_seeds": [
+            82103012,
+            82103013
+          ],
+          "scenario_seed": 82101006
+        },
+        {
+          "noise_seeds": [
+            82103014,
+            82103015
+          ],
+          "scenario_seed": 82101007
+        },
+        {
+          "noise_seeds": [
+            82103016,
+            82103017
+          ],
+          "scenario_seed": 82101008
+        },
+        {
+          "noise_seeds": [
+            82103018,
+            82103019
+          ],
+          "scenario_seed": 82101009
+        },
+        {
+          "noise_seeds": [
+            82103020,
+            82103021
+          ],
+          "scenario_seed": 82101010
+        },
+        {
+          "noise_seeds": [
+            82103022,
+            82103023
+          ],
+          "scenario_seed": 82101011
+        },
+        {
+          "noise_seeds": [
+            82103024,
+            82103025
+          ],
+          "scenario_seed": 82101012
+        },
+        {
+          "noise_seeds": [
+            82103026,
+            82103027
+          ],
+          "scenario_seed": 82101013
+        },
+        {
+          "noise_seeds": [
+            82103028,
+            82103029
+          ],
+          "scenario_seed": 82101014
+        },
+        {
+          "noise_seeds": [
+            82103030,
+            82103031
+          ],
+          "scenario_seed": 82101015
+        },
+        {
+          "noise_seeds": [
+            82103032,
+            82103033
+          ],
+          "scenario_seed": 82101016
+        }
+      ],
+      "native_evaluation": [
+        82105001,
+        82105002,
+        82105003,
+        82105004,
+        82105005,
+        82105006,
+        82105007,
+        82105008,
+        82105009,
+        82105010,
+        82105011,
+        82105012,
+        82105013,
+        82105014,
+        82105015,
+        82105016,
+        82105017,
+        82105018,
+        82105019,
+        82105020,
+        82105021,
+        82105022,
+        82105023,
+        82105024,
+        82105025,
+        82105026,
+        82105027,
+        82105028,
+        82105029,
+        82105030,
+        82105031,
+        82105032
+      ]
+    },
+    "310023": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82112002,
+            82112003
+          ],
+          "scenario_seed": 82110001
+        },
+        {
+          "noise_seeds": [
+            82112004,
+            82112005
+          ],
+          "scenario_seed": 82110002
+        },
+        {
+          "noise_seeds": [
+            82112006,
+            82112007
+          ],
+          "scenario_seed": 82110003
+        },
+        {
+          "noise_seeds": [
+            82112008,
+            82112009
+          ],
+          "scenario_seed": 82110004
+        },
+        {
+          "noise_seeds": [
+            82112010,
+            82112011
+          ],
+          "scenario_seed": 82110005
+        },
+        {
+          "noise_seeds": [
+            82112012,
+            82112013
+          ],
+          "scenario_seed": 82110006
+        },
+        {
+          "noise_seeds": [
+            82112014,
+            82112015
+          ],
+          "scenario_seed": 82110007
+        },
+        {
+          "noise_seeds": [
+            82112016,
+            82112017
+          ],
+          "scenario_seed": 82110008
+        },
+        {
+          "noise_seeds": [
+            82112018,
+            82112019
+          ],
+          "scenario_seed": 82110009
+        },
+        {
+          "noise_seeds": [
+            82112020,
+            82112021
+          ],
+          "scenario_seed": 82110010
+        },
+        {
+          "noise_seeds": [
+            82112022,
+            82112023
+          ],
+          "scenario_seed": 82110011
+        },
+        {
+          "noise_seeds": [
+            82112024,
+            82112025
+          ],
+          "scenario_seed": 82110012
+        },
+        {
+          "noise_seeds": [
+            82112026,
+            82112027
+          ],
+          "scenario_seed": 82110013
+        },
+        {
+          "noise_seeds": [
+            82112028,
+            82112029
+          ],
+          "scenario_seed": 82110014
+        },
+        {
+          "noise_seeds": [
+            82112030,
+            82112031
+          ],
+          "scenario_seed": 82110015
+        },
+        {
+          "noise_seeds": [
+            82112032,
+            82112033
+          ],
+          "scenario_seed": 82110016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82113002,
+            82113003
+          ],
+          "scenario_seed": 82111001
+        },
+        {
+          "noise_seeds": [
+            82113004,
+            82113005
+          ],
+          "scenario_seed": 82111002
+        },
+        {
+          "noise_seeds": [
+            82113006,
+            82113007
+          ],
+          "scenario_seed": 82111003
+        },
+        {
+          "noise_seeds": [
+            82113008,
+            82113009
+          ],
+          "scenario_seed": 82111004
+        },
+        {
+          "noise_seeds": [
+            82113010,
+            82113011
+          ],
+          "scenario_seed": 82111005
+        },
+        {
+          "noise_seeds": [
+            82113012,
+            82113013
+          ],
+          "scenario_seed": 82111006
+        },
+        {
+          "noise_seeds": [
+            82113014,
+            82113015
+          ],
+          "scenario_seed": 82111007
+        },
+        {
+          "noise_seeds": [
+            82113016,
+            82113017
+          ],
+          "scenario_seed": 82111008
+        },
+        {
+          "noise_seeds": [
+            82113018,
+            82113019
+          ],
+          "scenario_seed": 82111009
+        },
+        {
+          "noise_seeds": [
+            82113020,
+            82113021
+          ],
+          "scenario_seed": 82111010
+        },
+        {
+          "noise_seeds": [
+            82113022,
+            82113023
+          ],
+          "scenario_seed": 82111011
+        },
+        {
+          "noise_seeds": [
+            82113024,
+            82113025
+          ],
+          "scenario_seed": 82111012
+        },
+        {
+          "noise_seeds": [
+            82113026,
+            82113027
+          ],
+          "scenario_seed": 82111013
+        },
+        {
+          "noise_seeds": [
+            82113028,
+            82113029
+          ],
+          "scenario_seed": 82111014
+        },
+        {
+          "noise_seeds": [
+            82113030,
+            82113031
+          ],
+          "scenario_seed": 82111015
+        },
+        {
+          "noise_seeds": [
+            82113032,
+            82113033
+          ],
+          "scenario_seed": 82111016
+        }
+      ],
+      "native_evaluation": [
+        82115001,
+        82115002,
+        82115003,
+        82115004,
+        82115005,
+        82115006,
+        82115007,
+        82115008,
+        82115009,
+        82115010,
+        82115011,
+        82115012,
+        82115013,
+        82115014,
+        82115015,
+        82115016,
+        82115017,
+        82115018,
+        82115019,
+        82115020,
+        82115021,
+        82115022,
+        82115023,
+        82115024,
+        82115025,
+        82115026,
+        82115027,
+        82115028,
+        82115029,
+        82115030,
+        82115031,
+        82115032
+      ]
+    },
+    "310037": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82122002,
+            82122003
+          ],
+          "scenario_seed": 82120001
+        },
+        {
+          "noise_seeds": [
+            82122004,
+            82122005
+          ],
+          "scenario_seed": 82120002
+        },
+        {
+          "noise_seeds": [
+            82122006,
+            82122007
+          ],
+          "scenario_seed": 82120003
+        },
+        {
+          "noise_seeds": [
+            82122008,
+            82122009
+          ],
+          "scenario_seed": 82120004
+        },
+        {
+          "noise_seeds": [
+            82122010,
+            82122011
+          ],
+          "scenario_seed": 82120005
+        },
+        {
+          "noise_seeds": [
+            82122012,
+            82122013
+          ],
+          "scenario_seed": 82120006
+        },
+        {
+          "noise_seeds": [
+            82122014,
+            82122015
+          ],
+          "scenario_seed": 82120007
+        },
+        {
+          "noise_seeds": [
+            82122016,
+            82122017
+          ],
+          "scenario_seed": 82120008
+        },
+        {
+          "noise_seeds": [
+            82122018,
+            82122019
+          ],
+          "scenario_seed": 82120009
+        },
+        {
+          "noise_seeds": [
+            82122020,
+            82122021
+          ],
+          "scenario_seed": 82120010
+        },
+        {
+          "noise_seeds": [
+            82122022,
+            82122023
+          ],
+          "scenario_seed": 82120011
+        },
+        {
+          "noise_seeds": [
+            82122024,
+            82122025
+          ],
+          "scenario_seed": 82120012
+        },
+        {
+          "noise_seeds": [
+            82122026,
+            82122027
+          ],
+          "scenario_seed": 82120013
+        },
+        {
+          "noise_seeds": [
+            82122028,
+            82122029
+          ],
+          "scenario_seed": 82120014
+        },
+        {
+          "noise_seeds": [
+            82122030,
+            82122031
+          ],
+          "scenario_seed": 82120015
+        },
+        {
+          "noise_seeds": [
+            82122032,
+            82122033
+          ],
+          "scenario_seed": 82120016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82123002,
+            82123003
+          ],
+          "scenario_seed": 82121001
+        },
+        {
+          "noise_seeds": [
+            82123004,
+            82123005
+          ],
+          "scenario_seed": 82121002
+        },
+        {
+          "noise_seeds": [
+            82123006,
+            82123007
+          ],
+          "scenario_seed": 82121003
+        },
+        {
+          "noise_seeds": [
+            82123008,
+            82123009
+          ],
+          "scenario_seed": 82121004
+        },
+        {
+          "noise_seeds": [
+            82123010,
+            82123011
+          ],
+          "scenario_seed": 82121005
+        },
+        {
+          "noise_seeds": [
+            82123012,
+            82123013
+          ],
+          "scenario_seed": 82121006
+        },
+        {
+          "noise_seeds": [
+            82123014,
+            82123015
+          ],
+          "scenario_seed": 82121007
+        },
+        {
+          "noise_seeds": [
+            82123016,
+            82123017
+          ],
+          "scenario_seed": 82121008
+        },
+        {
+          "noise_seeds": [
+            82123018,
+            82123019
+          ],
+          "scenario_seed": 82121009
+        },
+        {
+          "noise_seeds": [
+            82123020,
+            82123021
+          ],
+          "scenario_seed": 82121010
+        },
+        {
+          "noise_seeds": [
+            82123022,
+            82123023
+          ],
+          "scenario_seed": 82121011
+        },
+        {
+          "noise_seeds": [
+            82123024,
+            82123025
+          ],
+          "scenario_seed": 82121012
+        },
+        {
+          "noise_seeds": [
+            82123026,
+            82123027
+          ],
+          "scenario_seed": 82121013
+        },
+        {
+          "noise_seeds": [
+            82123028,
+            82123029
+          ],
+          "scenario_seed": 82121014
+        },
+        {
+          "noise_seeds": [
+            82123030,
+            82123031
+          ],
+          "scenario_seed": 82121015
+        },
+        {
+          "noise_seeds": [
+            82123032,
+            82123033
+          ],
+          "scenario_seed": 82121016
+        }
+      ],
+      "native_evaluation": [
+        82125001,
+        82125002,
+        82125003,
+        82125004,
+        82125005,
+        82125006,
+        82125007,
+        82125008,
+        82125009,
+        82125010,
+        82125011,
+        82125012,
+        82125013,
+        82125014,
+        82125015,
+        82125016,
+        82125017,
+        82125018,
+        82125019,
+        82125020,
+        82125021,
+        82125022,
+        82125023,
+        82125024,
+        82125025,
+        82125026,
+        82125027,
+        82125028,
+        82125029,
+        82125030,
+        82125031,
+        82125032
+      ]
+    },
+    "310049": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82132002,
+            82132003
+          ],
+          "scenario_seed": 82130001
+        },
+        {
+          "noise_seeds": [
+            82132004,
+            82132005
+          ],
+          "scenario_seed": 82130002
+        },
+        {
+          "noise_seeds": [
+            82132006,
+            82132007
+          ],
+          "scenario_seed": 82130003
+        },
+        {
+          "noise_seeds": [
+            82132008,
+            82132009
+          ],
+          "scenario_seed": 82130004
+        },
+        {
+          "noise_seeds": [
+            82132010,
+            82132011
+          ],
+          "scenario_seed": 82130005
+        },
+        {
+          "noise_seeds": [
+            82132012,
+            82132013
+          ],
+          "scenario_seed": 82130006
+        },
+        {
+          "noise_seeds": [
+            82132014,
+            82132015
+          ],
+          "scenario_seed": 82130007
+        },
+        {
+          "noise_seeds": [
+            82132016,
+            82132017
+          ],
+          "scenario_seed": 82130008
+        },
+        {
+          "noise_seeds": [
+            82132018,
+            82132019
+          ],
+          "scenario_seed": 82130009
+        },
+        {
+          "noise_seeds": [
+            82132020,
+            82132021
+          ],
+          "scenario_seed": 82130010
+        },
+        {
+          "noise_seeds": [
+            82132022,
+            82132023
+          ],
+          "scenario_seed": 82130011
+        },
+        {
+          "noise_seeds": [
+            82132024,
+            82132025
+          ],
+          "scenario_seed": 82130012
+        },
+        {
+          "noise_seeds": [
+            82132026,
+            82132027
+          ],
+          "scenario_seed": 82130013
+        },
+        {
+          "noise_seeds": [
+            82132028,
+            82132029
+          ],
+          "scenario_seed": 82130014
+        },
+        {
+          "noise_seeds": [
+            82132030,
+            82132031
+          ],
+          "scenario_seed": 82130015
+        },
+        {
+          "noise_seeds": [
+            82132032,
+            82132033
+          ],
+          "scenario_seed": 82130016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82133002,
+            82133003
+          ],
+          "scenario_seed": 82131001
+        },
+        {
+          "noise_seeds": [
+            82133004,
+            82133005
+          ],
+          "scenario_seed": 82131002
+        },
+        {
+          "noise_seeds": [
+            82133006,
+            82133007
+          ],
+          "scenario_seed": 82131003
+        },
+        {
+          "noise_seeds": [
+            82133008,
+            82133009
+          ],
+          "scenario_seed": 82131004
+        },
+        {
+          "noise_seeds": [
+            82133010,
+            82133011
+          ],
+          "scenario_seed": 82131005
+        },
+        {
+          "noise_seeds": [
+            82133012,
+            82133013
+          ],
+          "scenario_seed": 82131006
+        },
+        {
+          "noise_seeds": [
+            82133014,
+            82133015
+          ],
+          "scenario_seed": 82131007
+        },
+        {
+          "noise_seeds": [
+            82133016,
+            82133017
+          ],
+          "scenario_seed": 82131008
+        },
+        {
+          "noise_seeds": [
+            82133018,
+            82133019
+          ],
+          "scenario_seed": 82131009
+        },
+        {
+          "noise_seeds": [
+            82133020,
+            82133021
+          ],
+          "scenario_seed": 82131010
+        },
+        {
+          "noise_seeds": [
+            82133022,
+            82133023
+          ],
+          "scenario_seed": 82131011
+        },
+        {
+          "noise_seeds": [
+            82133024,
+            82133025
+          ],
+          "scenario_seed": 82131012
+        },
+        {
+          "noise_seeds": [
+            82133026,
+            82133027
+          ],
+          "scenario_seed": 82131013
+        },
+        {
+          "noise_seeds": [
+            82133028,
+            82133029
+          ],
+          "scenario_seed": 82131014
+        },
+        {
+          "noise_seeds": [
+            82133030,
+            82133031
+          ],
+          "scenario_seed": 82131015
+        },
+        {
+          "noise_seeds": [
+            82133032,
+            82133033
+          ],
+          "scenario_seed": 82131016
+        }
+      ],
+      "native_evaluation": [
+        82135001,
+        82135002,
+        82135003,
+        82135004,
+        82135005,
+        82135006,
+        82135007,
+        82135008,
+        82135009,
+        82135010,
+        82135011,
+        82135012,
+        82135013,
+        82135014,
+        82135015,
+        82135016,
+        82135017,
+        82135018,
+        82135019,
+        82135020,
+        82135021,
+        82135022,
+        82135023,
+        82135024,
+        82135025,
+        82135026,
+        82135027,
+        82135028,
+        82135029,
+        82135030,
+        82135031,
+        82135032
+      ]
+    },
+    "310061": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82142002,
+            82142003
+          ],
+          "scenario_seed": 82140001
+        },
+        {
+          "noise_seeds": [
+            82142004,
+            82142005
+          ],
+          "scenario_seed": 82140002
+        },
+        {
+          "noise_seeds": [
+            82142006,
+            82142007
+          ],
+          "scenario_seed": 82140003
+        },
+        {
+          "noise_seeds": [
+            82142008,
+            82142009
+          ],
+          "scenario_seed": 82140004
+        },
+        {
+          "noise_seeds": [
+            82142010,
+            82142011
+          ],
+          "scenario_seed": 82140005
+        },
+        {
+          "noise_seeds": [
+            82142012,
+            82142013
+          ],
+          "scenario_seed": 82140006
+        },
+        {
+          "noise_seeds": [
+            82142014,
+            82142015
+          ],
+          "scenario_seed": 82140007
+        },
+        {
+          "noise_seeds": [
+            82142016,
+            82142017
+          ],
+          "scenario_seed": 82140008
+        },
+        {
+          "noise_seeds": [
+            82142018,
+            82142019
+          ],
+          "scenario_seed": 82140009
+        },
+        {
+          "noise_seeds": [
+            82142020,
+            82142021
+          ],
+          "scenario_seed": 82140010
+        },
+        {
+          "noise_seeds": [
+            82142022,
+            82142023
+          ],
+          "scenario_seed": 82140011
+        },
+        {
+          "noise_seeds": [
+            82142024,
+            82142025
+          ],
+          "scenario_seed": 82140012
+        },
+        {
+          "noise_seeds": [
+            82142026,
+            82142027
+          ],
+          "scenario_seed": 82140013
+        },
+        {
+          "noise_seeds": [
+            82142028,
+            82142029
+          ],
+          "scenario_seed": 82140014
+        },
+        {
+          "noise_seeds": [
+            82142030,
+            82142031
+          ],
+          "scenario_seed": 82140015
+        },
+        {
+          "noise_seeds": [
+            82142032,
+            82142033
+          ],
+          "scenario_seed": 82140016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82143002,
+            82143003
+          ],
+          "scenario_seed": 82141001
+        },
+        {
+          "noise_seeds": [
+            82143004,
+            82143005
+          ],
+          "scenario_seed": 82141002
+        },
+        {
+          "noise_seeds": [
+            82143006,
+            82143007
+          ],
+          "scenario_seed": 82141003
+        },
+        {
+          "noise_seeds": [
+            82143008,
+            82143009
+          ],
+          "scenario_seed": 82141004
+        },
+        {
+          "noise_seeds": [
+            82143010,
+            82143011
+          ],
+          "scenario_seed": 82141005
+        },
+        {
+          "noise_seeds": [
+            82143012,
+            82143013
+          ],
+          "scenario_seed": 82141006
+        },
+        {
+          "noise_seeds": [
+            82143014,
+            82143015
+          ],
+          "scenario_seed": 82141007
+        },
+        {
+          "noise_seeds": [
+            82143016,
+            82143017
+          ],
+          "scenario_seed": 82141008
+        },
+        {
+          "noise_seeds": [
+            82143018,
+            82143019
+          ],
+          "scenario_seed": 82141009
+        },
+        {
+          "noise_seeds": [
+            82143020,
+            82143021
+          ],
+          "scenario_seed": 82141010
+        },
+        {
+          "noise_seeds": [
+            82143022,
+            82143023
+          ],
+          "scenario_seed": 82141011
+        },
+        {
+          "noise_seeds": [
+            82143024,
+            82143025
+          ],
+          "scenario_seed": 82141012
+        },
+        {
+          "noise_seeds": [
+            82143026,
+            82143027
+          ],
+          "scenario_seed": 82141013
+        },
+        {
+          "noise_seeds": [
+            82143028,
+            82143029
+          ],
+          "scenario_seed": 82141014
+        },
+        {
+          "noise_seeds": [
+            82143030,
+            82143031
+          ],
+          "scenario_seed": 82141015
+        },
+        {
+          "noise_seeds": [
+            82143032,
+            82143033
+          ],
+          "scenario_seed": 82141016
+        }
+      ],
+      "native_evaluation": [
+        82145001,
+        82145002,
+        82145003,
+        82145004,
+        82145005,
+        82145006,
+        82145007,
+        82145008,
+        82145009,
+        82145010,
+        82145011,
+        82145012,
+        82145013,
+        82145014,
+        82145015,
+        82145016,
+        82145017,
+        82145018,
+        82145019,
+        82145020,
+        82145021,
+        82145022,
+        82145023,
+        82145024,
+        82145025,
+        82145026,
+        82145027,
+        82145028,
+        82145029,
+        82145030,
+        82145031,
+        82145032
+      ]
+    },
+    "310073": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82152002,
+            82152003
+          ],
+          "scenario_seed": 82150001
+        },
+        {
+          "noise_seeds": [
+            82152004,
+            82152005
+          ],
+          "scenario_seed": 82150002
+        },
+        {
+          "noise_seeds": [
+            82152006,
+            82152007
+          ],
+          "scenario_seed": 82150003
+        },
+        {
+          "noise_seeds": [
+            82152008,
+            82152009
+          ],
+          "scenario_seed": 82150004
+        },
+        {
+          "noise_seeds": [
+            82152010,
+            82152011
+          ],
+          "scenario_seed": 82150005
+        },
+        {
+          "noise_seeds": [
+            82152012,
+            82152013
+          ],
+          "scenario_seed": 82150006
+        },
+        {
+          "noise_seeds": [
+            82152014,
+            82152015
+          ],
+          "scenario_seed": 82150007
+        },
+        {
+          "noise_seeds": [
+            82152016,
+            82152017
+          ],
+          "scenario_seed": 82150008
+        },
+        {
+          "noise_seeds": [
+            82152018,
+            82152019
+          ],
+          "scenario_seed": 82150009
+        },
+        {
+          "noise_seeds": [
+            82152020,
+            82152021
+          ],
+          "scenario_seed": 82150010
+        },
+        {
+          "noise_seeds": [
+            82152022,
+            82152023
+          ],
+          "scenario_seed": 82150011
+        },
+        {
+          "noise_seeds": [
+            82152024,
+            82152025
+          ],
+          "scenario_seed": 82150012
+        },
+        {
+          "noise_seeds": [
+            82152026,
+            82152027
+          ],
+          "scenario_seed": 82150013
+        },
+        {
+          "noise_seeds": [
+            82152028,
+            82152029
+          ],
+          "scenario_seed": 82150014
+        },
+        {
+          "noise_seeds": [
+            82152030,
+            82152031
+          ],
+          "scenario_seed": 82150015
+        },
+        {
+          "noise_seeds": [
+            82152032,
+            82152033
+          ],
+          "scenario_seed": 82150016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82153002,
+            82153003
+          ],
+          "scenario_seed": 82151001
+        },
+        {
+          "noise_seeds": [
+            82153004,
+            82153005
+          ],
+          "scenario_seed": 82151002
+        },
+        {
+          "noise_seeds": [
+            82153006,
+            82153007
+          ],
+          "scenario_seed": 82151003
+        },
+        {
+          "noise_seeds": [
+            82153008,
+            82153009
+          ],
+          "scenario_seed": 82151004
+        },
+        {
+          "noise_seeds": [
+            82153010,
+            82153011
+          ],
+          "scenario_seed": 82151005
+        },
+        {
+          "noise_seeds": [
+            82153012,
+            82153013
+          ],
+          "scenario_seed": 82151006
+        },
+        {
+          "noise_seeds": [
+            82153014,
+            82153015
+          ],
+          "scenario_seed": 82151007
+        },
+        {
+          "noise_seeds": [
+            82153016,
+            82153017
+          ],
+          "scenario_seed": 82151008
+        },
+        {
+          "noise_seeds": [
+            82153018,
+            82153019
+          ],
+          "scenario_seed": 82151009
+        },
+        {
+          "noise_seeds": [
+            82153020,
+            82153021
+          ],
+          "scenario_seed": 82151010
+        },
+        {
+          "noise_seeds": [
+            82153022,
+            82153023
+          ],
+          "scenario_seed": 82151011
+        },
+        {
+          "noise_seeds": [
+            82153024,
+            82153025
+          ],
+          "scenario_seed": 82151012
+        },
+        {
+          "noise_seeds": [
+            82153026,
+            82153027
+          ],
+          "scenario_seed": 82151013
+        },
+        {
+          "noise_seeds": [
+            82153028,
+            82153029
+          ],
+          "scenario_seed": 82151014
+        },
+        {
+          "noise_seeds": [
+            82153030,
+            82153031
+          ],
+          "scenario_seed": 82151015
+        },
+        {
+          "noise_seeds": [
+            82153032,
+            82153033
+          ],
+          "scenario_seed": 82151016
+        }
+      ],
+      "native_evaluation": [
+        82155001,
+        82155002,
+        82155003,
+        82155004,
+        82155005,
+        82155006,
+        82155007,
+        82155008,
+        82155009,
+        82155010,
+        82155011,
+        82155012,
+        82155013,
+        82155014,
+        82155015,
+        82155016,
+        82155017,
+        82155018,
+        82155019,
+        82155020,
+        82155021,
+        82155022,
+        82155023,
+        82155024,
+        82155025,
+        82155026,
+        82155027,
+        82155028,
+        82155029,
+        82155030,
+        82155031,
+        82155032
+      ]
+    },
+    "310089": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82162002,
+            82162003
+          ],
+          "scenario_seed": 82160001
+        },
+        {
+          "noise_seeds": [
+            82162004,
+            82162005
+          ],
+          "scenario_seed": 82160002
+        },
+        {
+          "noise_seeds": [
+            82162006,
+            82162007
+          ],
+          "scenario_seed": 82160003
+        },
+        {
+          "noise_seeds": [
+            82162008,
+            82162009
+          ],
+          "scenario_seed": 82160004
+        },
+        {
+          "noise_seeds": [
+            82162010,
+            82162011
+          ],
+          "scenario_seed": 82160005
+        },
+        {
+          "noise_seeds": [
+            82162012,
+            82162013
+          ],
+          "scenario_seed": 82160006
+        },
+        {
+          "noise_seeds": [
+            82162014,
+            82162015
+          ],
+          "scenario_seed": 82160007
+        },
+        {
+          "noise_seeds": [
+            82162016,
+            82162017
+          ],
+          "scenario_seed": 82160008
+        },
+        {
+          "noise_seeds": [
+            82162018,
+            82162019
+          ],
+          "scenario_seed": 82160009
+        },
+        {
+          "noise_seeds": [
+            82162020,
+            82162021
+          ],
+          "scenario_seed": 82160010
+        },
+        {
+          "noise_seeds": [
+            82162022,
+            82162023
+          ],
+          "scenario_seed": 82160011
+        },
+        {
+          "noise_seeds": [
+            82162024,
+            82162025
+          ],
+          "scenario_seed": 82160012
+        },
+        {
+          "noise_seeds": [
+            82162026,
+            82162027
+          ],
+          "scenario_seed": 82160013
+        },
+        {
+          "noise_seeds": [
+            82162028,
+            82162029
+          ],
+          "scenario_seed": 82160014
+        },
+        {
+          "noise_seeds": [
+            82162030,
+            82162031
+          ],
+          "scenario_seed": 82160015
+        },
+        {
+          "noise_seeds": [
+            82162032,
+            82162033
+          ],
+          "scenario_seed": 82160016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82163002,
+            82163003
+          ],
+          "scenario_seed": 82161001
+        },
+        {
+          "noise_seeds": [
+            82163004,
+            82163005
+          ],
+          "scenario_seed": 82161002
+        },
+        {
+          "noise_seeds": [
+            82163006,
+            82163007
+          ],
+          "scenario_seed": 82161003
+        },
+        {
+          "noise_seeds": [
+            82163008,
+            82163009
+          ],
+          "scenario_seed": 82161004
+        },
+        {
+          "noise_seeds": [
+            82163010,
+            82163011
+          ],
+          "scenario_seed": 82161005
+        },
+        {
+          "noise_seeds": [
+            82163012,
+            82163013
+          ],
+          "scenario_seed": 82161006
+        },
+        {
+          "noise_seeds": [
+            82163014,
+            82163015
+          ],
+          "scenario_seed": 82161007
+        },
+        {
+          "noise_seeds": [
+            82163016,
+            82163017
+          ],
+          "scenario_seed": 82161008
+        },
+        {
+          "noise_seeds": [
+            82163018,
+            82163019
+          ],
+          "scenario_seed": 82161009
+        },
+        {
+          "noise_seeds": [
+            82163020,
+            82163021
+          ],
+          "scenario_seed": 82161010
+        },
+        {
+          "noise_seeds": [
+            82163022,
+            82163023
+          ],
+          "scenario_seed": 82161011
+        },
+        {
+          "noise_seeds": [
+            82163024,
+            82163025
+          ],
+          "scenario_seed": 82161012
+        },
+        {
+          "noise_seeds": [
+            82163026,
+            82163027
+          ],
+          "scenario_seed": 82161013
+        },
+        {
+          "noise_seeds": [
+            82163028,
+            82163029
+          ],
+          "scenario_seed": 82161014
+        },
+        {
+          "noise_seeds": [
+            82163030,
+            82163031
+          ],
+          "scenario_seed": 82161015
+        },
+        {
+          "noise_seeds": [
+            82163032,
+            82163033
+          ],
+          "scenario_seed": 82161016
+        }
+      ],
+      "native_evaluation": [
+        82165001,
+        82165002,
+        82165003,
+        82165004,
+        82165005,
+        82165006,
+        82165007,
+        82165008,
+        82165009,
+        82165010,
+        82165011,
+        82165012,
+        82165013,
+        82165014,
+        82165015,
+        82165016,
+        82165017,
+        82165018,
+        82165019,
+        82165020,
+        82165021,
+        82165022,
+        82165023,
+        82165024,
+        82165025,
+        82165026,
+        82165027,
+        82165028,
+        82165029,
+        82165030,
+        82165031,
+        82165032
+      ]
+    },
+    "310101": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82172002,
+            82172003
+          ],
+          "scenario_seed": 82170001
+        },
+        {
+          "noise_seeds": [
+            82172004,
+            82172005
+          ],
+          "scenario_seed": 82170002
+        },
+        {
+          "noise_seeds": [
+            82172006,
+            82172007
+          ],
+          "scenario_seed": 82170003
+        },
+        {
+          "noise_seeds": [
+            82172008,
+            82172009
+          ],
+          "scenario_seed": 82170004
+        },
+        {
+          "noise_seeds": [
+            82172010,
+            82172011
+          ],
+          "scenario_seed": 82170005
+        },
+        {
+          "noise_seeds": [
+            82172012,
+            82172013
+          ],
+          "scenario_seed": 82170006
+        },
+        {
+          "noise_seeds": [
+            82172014,
+            82172015
+          ],
+          "scenario_seed": 82170007
+        },
+        {
+          "noise_seeds": [
+            82172016,
+            82172017
+          ],
+          "scenario_seed": 82170008
+        },
+        {
+          "noise_seeds": [
+            82172018,
+            82172019
+          ],
+          "scenario_seed": 82170009
+        },
+        {
+          "noise_seeds": [
+            82172020,
+            82172021
+          ],
+          "scenario_seed": 82170010
+        },
+        {
+          "noise_seeds": [
+            82172022,
+            82172023
+          ],
+          "scenario_seed": 82170011
+        },
+        {
+          "noise_seeds": [
+            82172024,
+            82172025
+          ],
+          "scenario_seed": 82170012
+        },
+        {
+          "noise_seeds": [
+            82172026,
+            82172027
+          ],
+          "scenario_seed": 82170013
+        },
+        {
+          "noise_seeds": [
+            82172028,
+            82172029
+          ],
+          "scenario_seed": 82170014
+        },
+        {
+          "noise_seeds": [
+            82172030,
+            82172031
+          ],
+          "scenario_seed": 82170015
+        },
+        {
+          "noise_seeds": [
+            82172032,
+            82172033
+          ],
+          "scenario_seed": 82170016
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82173002,
+            82173003
+          ],
+          "scenario_seed": 82171001
+        },
+        {
+          "noise_seeds": [
+            82173004,
+            82173005
+          ],
+          "scenario_seed": 82171002
+        },
+        {
+          "noise_seeds": [
+            82173006,
+            82173007
+          ],
+          "scenario_seed": 82171003
+        },
+        {
+          "noise_seeds": [
+            82173008,
+            82173009
+          ],
+          "scenario_seed": 82171004
+        },
+        {
+          "noise_seeds": [
+            82173010,
+            82173011
+          ],
+          "scenario_seed": 82171005
+        },
+        {
+          "noise_seeds": [
+            82173012,
+            82173013
+          ],
+          "scenario_seed": 82171006
+        },
+        {
+          "noise_seeds": [
+            82173014,
+            82173015
+          ],
+          "scenario_seed": 82171007
+        },
+        {
+          "noise_seeds": [
+            82173016,
+            82173017
+          ],
+          "scenario_seed": 82171008
+        },
+        {
+          "noise_seeds": [
+            82173018,
+            82173019
+          ],
+          "scenario_seed": 82171009
+        },
+        {
+          "noise_seeds": [
+            82173020,
+            82173021
+          ],
+          "scenario_seed": 82171010
+        },
+        {
+          "noise_seeds": [
+            82173022,
+            82173023
+          ],
+          "scenario_seed": 82171011
+        },
+        {
+          "noise_seeds": [
+            82173024,
+            82173025
+          ],
+          "scenario_seed": 82171012
+        },
+        {
+          "noise_seeds": [
+            82173026,
+            82173027
+          ],
+          "scenario_seed": 82171013
+        },
+        {
+          "noise_seeds": [
+            82173028,
+            82173029
+          ],
+          "scenario_seed": 82171014
+        },
+        {
+          "noise_seeds": [
+            82173030,
+            82173031
+          ],
+          "scenario_seed": 82171015
+        },
+        {
+          "noise_seeds": [
+            82173032,
+            82173033
+          ],
+          "scenario_seed": 82171016
+        }
+      ],
+      "native_evaluation": [
+        82175001,
+        82175002,
+        82175003,
+        82175004,
+        82175005,
+        82175006,
+        82175007,
+        82175008,
+        82175009,
+        82175010,
+        82175011,
+        82175012,
+        82175013,
+        82175014,
+        82175015,
+        82175016,
+        82175017,
+        82175018,
+        82175019,
+        82175020,
+        82175021,
+        82175022,
+        82175023,
+        82175024,
+        82175025,
+        82175026,
+        82175027,
+        82175028,
+        82175029,
+        82175030,
+        82175031,
+        82175032
+      ]
+    }
+  },
+  "source_revision": "4ac1f4aacf43e8544dcecc2ea2823be14957c71d"
+}

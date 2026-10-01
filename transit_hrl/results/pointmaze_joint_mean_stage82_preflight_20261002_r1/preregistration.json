@@ -1,0 +1,198 @@
+{
+  "artifacts": {
+    "native_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_parameter_perturbations": 16,
+    "actor_score_backward_batches": 96,
+    "actor_score_forward_batches": 32,
+    "credit_episodes": 16,
+    "decoder_loads": 2,
+    "evaluation_episodes": 112,
+    "exact_kl_forward_batches": 32,
+    "fisher_jvp_batches": 16,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "joint_composition_checks": 8,
+    "mc_calls": 32,
+    "native_episodes": 128,
+    "native_lower_calls": 38400,
+    "native_network_checks": 128,
+    "native_pair_checks": 8,
+    "native_steps": 38400,
+    "native_upper_calls": 576,
+    "objective_checks": 16,
+    "pairing_upper_forward_calls": 576,
+    "parameter_part_checks": 16,
+    "scenario_pair_checks": 8,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "allocation": "equal_half_budget_joint_plus_minus_and_cross_signs_same_half_step_actors_as_single_level_controls",
+    "artifacts": "server_memory_training_batches_compact_JSON_only_no_trace_or_candidate_checkpoint_writes",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "direction_validation_only_no_actor_adoption_Stage67_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "direction": "same_fresh_scenario_MC_mean_gradient_std_bit_exact_frozen",
+    "limits": "sum_of_per_level_source_state_conditional_KL_not_full_trajectory_KL_single_step_not_joint_training_not_frequency_superiority",
+    "noise_mapping": "Stage80_explicit_environment_and_action_noise_mapping_on_fresh_Stage82_seed_roles",
+    "noise_units": "average_gradients_within_scenario_then_measure_covariance_across_independent_scenario_groups",
+    "pairing": "same_environment_and_stepwise_lower_noise_same_standardized_upper_noise_not_same_proposals",
+    "parameter_freeze": "both_log_std_critics_forecaster_source_Adam_decoder_frozen_joint_composition_bit_exact",
+    "periods": [
+      50,
+      100
+    ],
+    "perturbation": "fixed_sum_of_level_mean_conditional_Gaussian_KL_.001_single_full_.001_joint_.0005_each_no_radius_sweep",
+    "sampling": "two_disjoint_batches_16_scenarios_each_two_independent_noise_replicates_exact_initial_physical_and_exogenous_history_match",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all60_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni60",
+    "variants": [
+      "base",
+      "zero",
+      "upper_full_plus",
+      "upper_full_minus",
+      "lower_full_plus",
+      "lower_full_minus",
+      "upper_half_plus",
+      "upper_half_minus",
+      "lower_half_plus",
+      "lower_half_minus",
+      "joint_plus",
+      "joint_minus",
+      "joint_upper_plus_lower_minus",
+      "joint_upper_minus_lower_plus"
+    ]
+  },
+  "endpoints": [
+    "50/base_minus_zero",
+    "50/upper_full_plus_minus_upper_full_minus",
+    "50/upper_full_plus_minus_base",
+    "50/upper_full_minus_minus_base",
+    "50/upper_full_plus_minus_zero",
+    "50/lower_full_plus_minus_lower_full_minus",
+    "50/lower_full_plus_minus_base",
+    "50/lower_full_minus_minus_base",
+    "50/lower_full_plus_minus_zero",
+    "50/upper_half_plus_minus_upper_half_minus",
+    "50/upper_half_plus_minus_base",
+    "50/upper_half_minus_minus_base",
+    "50/upper_half_plus_minus_zero",
+    "50/lower_half_plus_minus_lower_half_minus",
+    "50/lower_half_plus_minus_base",
+    "50/lower_half_minus_minus_base",
+    "50/lower_half_plus_minus_zero",
+    "50/joint_plus_minus_joint_minus",
+    "50/joint_plus_minus_base",
+    "50/joint_minus_minus_base",
+    "50/joint_plus_minus_zero",
+    "50/joint_plus_minus_upper_full_plus",
+    "50/joint_plus_minus_upper_half_plus",
+    "50/joint_plus_minus_lower_full_plus",
+    "50/joint_plus_minus_lower_half_plus",
+    "50/joint_upper_plus_lower_minus_minus_base",
+    "50/joint_upper_minus_lower_plus_minus_base",
+    "50/joint_plus_minus_joint_upper_plus_lower_minus",
+    "50/joint_plus_minus_joint_upper_minus_lower_plus",
+    "50/joint_plus_interaction",
+    "100/base_minus_zero",
+    "100/upper_full_plus_minus_upper_full_minus",
+    "100/upper_full_plus_minus_base",
+    "100/upper_full_minus_minus_base",
+    "100/upper_full_plus_minus_zero",
+    "100/lower_full_plus_minus_lower_full_minus",
+    "100/lower_full_plus_minus_base",
+    "100/lower_full_minus_minus_base",
+    "100/lower_full_plus_minus_zero",
+    "100/upper_half_plus_minus_upper_half_minus",
+    "100/upper_half_plus_minus_base",
+    "100/upper_half_minus_minus_base",
+    "100/upper_half_plus_minus_zero",
+    "100/lower_half_plus_minus_lower_half_minus",
+    "100/lower_half_plus_minus_base",
+    "100/lower_half_minus_minus_base",
+    "100/lower_half_plus_minus_zero",
+    "100/joint_plus_minus_joint_minus",
+    "100/joint_plus_minus_base",
+    "100/joint_minus_minus_base",
+    "100/joint_plus_minus_zero",
+    "100/joint_plus_minus_upper_full_plus",
+    "100/joint_plus_minus_upper_half_plus",
+    "100/joint_plus_minus_lower_full_plus",
+    "100/joint_plus_minus_lower_half_plus",
+    "100/joint_upper_plus_lower_minus_minus_base",
+    "100/joint_upper_minus_lower_plus_minus_base",
+    "100/joint_plus_minus_joint_upper_plus_lower_minus",
+    "100/joint_plus_minus_joint_upper_minus_lower_plus",
+    "100/joint_plus_interaction"
+  ],
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "credit_scenarios_per_batch": 2,
+    "evaluation_episodes": 4,
+    "rollouts_per_scenario": 2,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_joint_mean_stage82_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            82092002,
+            82092003
+          ],
+          "scenario_seed": 82090001
+        },
+        {
+          "noise_seeds": [
+            82092004,
+            82092005
+          ],
+          "scenario_seed": 82090002
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            82093002,
+            82093003
+          ],
+          "scenario_seed": 82091001
+        },
+        {
+          "noise_seeds": [
+            82093004,
+            82093005
+          ],
+          "scenario_seed": 82091002
+        }
+      ],
+      "native_evaluation": [
+        82095001,
+        82095002,
+        82095003,
+        82095004
+      ]
+    }
+  },
+  "source_revision": "4ac1f4aacf43e8544dcecc2ea2823be14957c71d"
+}
