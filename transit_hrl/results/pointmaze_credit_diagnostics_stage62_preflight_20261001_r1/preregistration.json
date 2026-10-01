@@ -1,0 +1,94 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "actor_inference_calls": 0,
+    "archive_episodes": 16,
+    "checkpoint_loads": 4,
+    "checkpoint_writes": 0,
+    "feature_lower_rows": 4800,
+    "feature_upper_rows": 72,
+    "forecaster_loads": 0,
+    "gae_calls": 64,
+    "lower_value_forward_batches": 16,
+    "lower_value_rows": 4800,
+    "mc_return_calls": 48,
+    "native_steps": 0,
+    "new_fits": 0,
+    "optimizer_steps": 0,
+    "upper_value_forward_batches": 16,
+    "upper_value_rows": 72
+  },
+  "contract": {
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "features": "same_causal_history_upper_state_lower_reference_and_value_context_no_actor_or_forecaster_inference",
+    "heldout": "Stage61_fresh_deterministic_native_paths_not_used_to_fit_critic",
+    "limits": "post_update_diagnostic_not_original_training_advantage_not_causal_credit_ablation_deterministic_policy_distribution_differs_from_stochastic_training_option_critic_not_consistent_continuing_value",
+    "lower_variants": [
+      "option_terminal",
+      "option_trace_continuing_bootstrap",
+      "episode_continuing"
+    ],
+    "periods": [
+      50,
+      100
+    ],
+    "selection": "all_roots_both_periods_both_arms_fixed_training_batch_and_all_heldout_paths_no_fit_or_tuning",
+    "source_protocol": "pointmaze_native_update_stage61_v1",
+    "source_runs": [
+      "pointmaze_native_update_stage61_preflight_20261001_r1",
+      "pointmaze_native_update_stage61_full_20261001_r1"
+    ],
+    "splits": [
+      "training_first_batch",
+      "heldout_deterministic"
+    ],
+    "summaries": "pooled_samples_within_root_arm_period_split_then_equal_root_descriptive_means_no_performance_gate",
+    "targets": "existing_SMDP_GAE_and_discounted_MC_option_or_episode_returns_upper_charged_discounted_native_returns",
+    "training": "Stage57_first_batch_used_by_the_shared_first_update_critic",
+    "treatment": "backtracking_kl",
+    "weights": "actual_Stage61_evaluated_post_first_update_backtracking_checkpoint_no_updates"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "boundary_window": 5,
+    "heldout_paths": 2,
+    "training_paths": 2,
+    "value_batch_size": 512
+  },
+  "preflight": true,
+  "protocol": "pointmaze_credit_diagnostics_stage62_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "heldout_deterministic": [
+        61095001,
+        61095002
+      ],
+      "training_first_batch": [
+        16093001,
+        16093002
+      ]
+    }
+  },
+  "source_revision": "2201a37085db0623700c39604b70df10c272febd"
+}
