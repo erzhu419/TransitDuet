@@ -1,0 +1,108 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_critic_weights": "server_only"
+  },
+  "budget_per_root": {
+    "actor_optimizer_steps": 0,
+    "archive_episodes": 24,
+    "archive_network_checks": 96,
+    "calibration_gae_calls": 16,
+    "calibration_updates": 32,
+    "critic_checkpoint_writes": 16,
+    "extra_critic_scalar_calls": 21600,
+    "forecaster_loads": 1,
+    "frozen_state_checks": 96,
+    "initialization_checks": 8,
+    "initialization_value_rows": 4800,
+    "mc_supervised_updates": 16,
+    "mc_target_calls": 12,
+    "native_steps": 0,
+    "new_evaluation_steps": 0,
+    "new_forecaster_fits": 0,
+    "normalization_frame_fits": 4,
+    "probe_gae_calls": 16,
+    "reconstructed_lower_calls": 7200,
+    "reconstructed_upper_calls": 108,
+    "representation_forward_batches": 32,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "architecture": "unchanged_two_Tanh_ValueNet_actor_upper_networks_and_their_Adam_all_frozen",
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "checkpoint": "critic_only_training_units_Adam_and_normalization_plus_public_value_weights_not_a_native_ready_full_policy",
+    "control": "gae_raw_pre_actor_episode_MC_probe_exactly_reproduces_Stage63_episode_critic",
+    "decision": {
+      "MSE_each_case": "below_gae_raw",
+      "candidate": "mc_normalized",
+      "minimum_EV_each_case": 0.1,
+      "next": "critic_only_pass_still_requires_guarded_actor_and_native_trial"
+    },
+    "initialization": "same_Stage55_clone_values_empty_value_Adam_no_reset_same_public_initial_prediction",
+    "limits": "archive_critic_fit_factorial_not_reward_frequency_OOD_or_full_training_confirmation",
+    "normalization": "fixed_mean_std_from_first_calibration_episode_MC_only_rebase_last_linear_head_train_in_normalized_units_export_public_values",
+    "pairing": "same_Stage57_calibration_and_first_training_probe_archives_causal_states_actions_rewards_logp_and_shuffle",
+    "periods": [
+      50,
+      100
+    ],
+    "probe": "first_training_paths_disjoint_from_all_calibration_no_probe_target_or_prediction_used_by_training_or_normalization",
+    "selection": "all_eight_roots_both_periods_both_arms_no_fit_LR_seed_sweep_no_best_arm_selection",
+    "source_protocol": "pointmaze_episode_credit_stage63_v1",
+    "source_runs": [
+      "pointmaze_episode_credit_stage63_preflight_20261001_r1",
+      "pointmaze_episode_credit_stage63_full_20261001_r1"
+    ],
+    "targets": "continuing_existing_PPO_GAE_vs_discounted_complete_episode_MC_same_gamma_true_episode_done",
+    "training": "same_nominal_value_steps_LR_epochs_minibatches_coef_gradient_clip_all_extra_MC_supervision_and_forward_calls_counted",
+    "treatments": [
+      "gae_raw",
+      "mc_raw",
+      "gae_normalized",
+      "mc_normalized"
+    ]
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "actor_updates": 0,
+    "critic_warmup_iterations": 2,
+    "rollouts_per_iteration": 2,
+    "value_batch_size": 512,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_value_targets_stage64_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "calibration": [
+        16092001,
+        16092002,
+        16092003,
+        16092004
+      ],
+      "first_training_probe": [
+        16093001,
+        16093002
+      ]
+    }
+  },
+  "source_revision": "822de12022d60c32c534ce533b47f721c2703ac2"
+}
