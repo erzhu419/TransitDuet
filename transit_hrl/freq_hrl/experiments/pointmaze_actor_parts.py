@@ -30,13 +30,13 @@ def std_summary(actor, changed):
     return {"source_log_std": log_std.tolist(), "source_std": std.tolist(), "candidates": candidates}
 
 
-def credit_directions(clone, batches, *, period, horizon, cost):
+def scenario_actor_scores(clone, batches, *, period, horizon, cost):
     returns = {}
     for name, groups in batches.items():
         returns[name] = [[native.task_returns(b, period, horizon, row["episode_return"]) for b, row in group] for group in groups]
         cost["objective_checks"] += sum(map(len, groups))
         cost["mc_calls"] += 2 * sum(map(len, groups))
-    candidates, actors = {}, {}
+    scored = {}
     for actor_name, length in (("upper", horizon // period), ("lower", horizon)):
         actor = getattr(clone, actor_name + "_actor")
         gradients, states, score_costs, signal_rms = {}, [], {}, {}
@@ -52,11 +52,22 @@ def credit_directions(clone, batches, *, period, horizon, cost):
             score_costs[name] = c
             signal_rms[name] = float(np.sqrt(np.square(signal).mean()))
             for key in ("actor_score_forward_batches", "actor_score_backward_batches"):cost[key] += c[key]
+        scored[actor_name] = {"gradients": gradients, "states": np.concatenate(states),
+            "sigma_mask": sigma_mask, "score_costs": score_costs, "signal_rms": signal_rms}
+    return scored
+
+
+def credit_directions(clone, batches, *, period, horizon, cost):
+    scored = scenario_actor_scores(clone, batches, period=period, horizon=horizon, cost=cost)
+    candidates, actors = {}, {}
+    for actor_name, score in scored.items():
+        actor = getattr(clone, actor_name + "_actor")
+        gradients, sigma_mask = score["gradients"], score["sigma_mask"]
         pooled = np.concatenate(list(gradients.values())).mean(0)
         rows = {}
         for part, mask in masks(sigma_mask).items():
             projected = np.where(mask, pooled, 0.)
-            changed, geometry, c = native.direction.matched_perturbations(actor, np.concatenate(states), projected,
+            changed, geometry, c = native.direction.matched_perturbations(actor, score["states"], projected,
                 delta=spec.FISHER_RADIUS, chunk_size=spec.CHUNK_SIZE)
             for key in c:cost[key] += c[key]
             cost["actor_parameter_perturbations"] += len(changed)
@@ -70,7 +81,7 @@ def credit_directions(clone, batches, *, period, horizon, cost):
                 "credit_batch_cosine": native.reliability.scores.cosine(gradients["A"].mean(0)[mask], gradients["B"].mean(0)[mask]),
                 "scenario_group_noise": {name: scenario.group_noise(g[:, mask], len(batches[name]), len(batches[name][0]))
                     for name, g in gradients.items()}}
-        actors[actor_name] = {"parts": rows, "score_costs": score_costs, "signal_rms": signal_rms,
+        actors[actor_name] = {"parts": rows, "score_costs": score["score_costs"], "signal_rms": score["signal_rms"],
             "raw_loss_gradient_norms": {part: float(np.linalg.norm(pooled[mask])) for part, mask in masks(sigma_mask).items()},
             "raw_log_std_loss_gradient": pooled[sigma_mask].tolist()}
     return candidates, {"actors": actors}

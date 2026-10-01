@@ -108,7 +108,7 @@ def credit_effects(period, credit):
 
 
 def run(root, *, preflight, output, protocol=spec, credit_builder=credit_directions,
-        credit_endpoints=credit_effects, qualifier=None):
+        credit_endpoints=credit_effects, qualifier=None, effects_builder=native.paired_effects):
     if qualifier is None:qualifier = qualify
     source = json.loads(protocol.source_result(root).read_text())
     if (source["status"], source["protocol"], source["root"], source["preflight"], source["contract"]) != (
@@ -156,7 +156,7 @@ def run(root, *, preflight, output, protocol=spec, credit_builder=credit_directi
             del batches
             candidates.update(base=weights, zero=weights)
             evaluation = {v: [r for _, r in episodes(candidates[v], [(s, s) for s in roles["native_evaluation"]], v)] for v in protocol.VARIANTS}
-            effects = native.paired_effects(period, evaluation, roles["native_evaluation"], protocol=protocol)
+            effects = effects_builder(period, evaluation, roles["native_evaluation"], protocol=protocol)
             effects.update(credit_endpoints(period, credit))
             cost["native_pair_checks"] += len(roles["native_evaluation"])
             native.curves.support.assert_frozen(clone, snapshot)
