@@ -1,0 +1,33 @@
+{
+  "protocol": "pointmaze_iterative_mc_stage83_v1",
+  "preflight": true,
+  "run_name": "pointmaze_iterative_mc_stage83_preflight_20261002_r1",
+  "source_revision": "3f0bac67029cec421715513138c393e433e69bbb",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120825",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/preflight",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310011
+    },
+    {
+      "id": "t120826",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/qualification",
+      "role": "all_root_final_evaluation_qualification",
+      "root": null
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "protocol": "pointmaze_iterative_mc_stage83_v1",
+  "preflight": false,
+  "run_name": "pointmaze_iterative_mc_stage83_full_20261002_r1",
+  "source_revision": "3f0bac67029cec421715513138c393e433e69bbb",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120827",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4641,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310011
+    },
+    {
+      "id": "t120828",
+      "status": "done",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4670,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310023
+    },
+    {
+      "id": "t120829",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4724,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310037
+    },
+    {
+      "id": "t120830",
+      "status": "done",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4532,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310049
+    },
+    {
+      "id": "t120831",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4748,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310061
+    },
+    {
+      "id": "t120832",
+      "status": "done",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4777,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310073
+    },
+    {
+      "id": "t120833",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4793,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310089
+    },
+    {
+      "id": "t120834",
+      "status": "done",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 4788,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/iterative_mc/full",
+      "role": "iterative_scenario_MC_mean_training",
+      "root": 310101
+    },
+    {
+      "id": "t120835",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_iterative_mc_stage83_v1/qualification",
+      "role": "all_root_final_evaluation_qualification",
+      "root": null
+    }
+  ]
+}
