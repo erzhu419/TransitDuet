@@ -1,0 +1,2723 @@
+{
+  "contract": {
+    "artifacts": "no_native_raw_trace_or_candidate_checkpoint_writes_compact_JSON_only",
+    "decision": "forward_response_audit_only_no_optimizer_critic_or_forecaster_fit_no_policy_adoption_Stage67_HOLD_unchanged",
+    "directions": [
+      "gae_control",
+      "gae_factored",
+      "native_mc"
+    ],
+    "execution": "same_Stage57_training_distribution_both_actors_sampled_fixed50_100_zero_normal_execution",
+    "fisher": "conditional_diagonal_Gaussian_Fisher_via_functional_JVP_including_native_std_clamp",
+    "fisher_radius": 0.001,
+    "fitting": "all_Stage57_historical_warmup_only_no_Stage69_or_fresh_native_labels",
+    "gae_directions": "mean_of_separately_PPO_normalized_warmup_batch_loss_gradients_plus_unchanged_entropy_coefficient",
+    "limits": "finite_radius_response_not_infinitesimal_gradient_teacher_initialized_development_roots_not_full_training_generalization_or_frequency_claim",
+    "native_direction": "raw_undiscounted_MC_episode_loss_gradient_first_historical_reward_rate_time_baseline_no_entropy",
+    "native_pairing": "fresh_environment_seeds_same_stepwise_lower_noise_initial_policy_rng_and_fixed_upper_proposals_all_seven_variants",
+    "perturbation": "negative_L2_normalized_loss_gradient_all_lower_actor_parameters_same_plus_minus_step_sqrt(2_delta/F)",
+    "radius_check": "historical_average_of_exact_plus_minus_old_to_new_KL_between_half_and_twice_nominal_delta_no_radius_sweep",
+    "source": "pointmaze_objective_audit_stage72_v1",
+    "statistics": "equal_root_paired_reward_means_percentile_root_bootstrap_two_sided_Bonferroni36_all_endpoints",
+    "variants": [
+      "base",
+      "gae_control_plus",
+      "gae_control_minus",
+      "gae_factored_plus",
+      "gae_factored_minus",
+      "native_mc_plus",
+      "native_mc_minus"
+    ]
+  },
+  "cost": {
+    "actor_parameter_perturbations": 192,
+    "actor_score_backward_batches": 40960,
+    "actor_score_forward_batches": 8192,
+    "archive_network_checks": 4096,
+    "calibration_archive_episodes": 4096,
+    "calibration_radius_checks": 96,
+    "calibration_value_rows": 9830400,
+    "critic_checkpoint_loads": 64,
+    "exact_kl_forward_batches": 28800,
+    "fisher_jvp_batches": 14400,
+    "forecaster_loads": 8,
+    "frozen_model_checks": 80,
+    "gae_calls": 1024,
+    "historical_direction_fits": 96,
+    "historical_reward_rate_fits": 32,
+    "mc_calls": 512,
+    "native_episodes": 7168,
+    "native_lower_calls": 8601600,
+    "native_network_checks": 7168,
+    "native_pair_checks": 1024,
+    "native_steps": 8601600,
+    "native_upper_calls": 129024,
+    "reconstructed_lower_calls": 4915200,
+    "reconstructed_upper_calls": 73728,
+    "source_clone_loads": 16
+  },
+  "endpoints": {
+    "100/joint_ppo/gae_control/minus_base": {
+      "ci": [
+        -0.4904277057372477,
+        0.2756635075321623
+      ],
+      "effect": "inconclusive",
+      "mean": -0.045191806834953496
+    },
+    "100/joint_ppo/gae_control/plus_base": {
+      "ci": [
+        -0.32328467954139883,
+        0.3777382864973165
+      ],
+      "effect": "inconclusive",
+      "mean": -0.011161006036778609
+    },
+    "100/joint_ppo/gae_control/plus_minus": {
+      "ci": [
+        -0.5985510878212565,
+        0.8654243347917038
+      ],
+      "effect": "inconclusive",
+      "mean": 0.03403080079817489
+    },
+    "100/joint_ppo/gae_factored/minus_base": {
+      "ci": [
+        -0.7221622126453529,
+        0.29187724170399143
+      ],
+      "effect": "inconclusive",
+      "mean": -0.1917089638952394
+    },
+    "100/joint_ppo/gae_factored/plus_base": {
+      "ci": [
+        -0.32484485519492035,
+        0.6849770305243679
+      ],
+      "effect": "inconclusive",
+      "mean": 0.15686637510955492
+    },
+    "100/joint_ppo/gae_factored/plus_minus": {
+      "ci": [
+        -0.6164773806492345,
+        1.4071392431697207
+      ],
+      "effect": "inconclusive",
+      "mean": 0.3485753390047943
+    },
+    "100/joint_ppo/native_mc/minus_base": {
+      "ci": [
+        -0.32378736134891195,
+        0.14218083672881532
+      ],
+      "effect": "inconclusive",
+      "mean": -0.10622192915199369
+    },
+    "100/joint_ppo/native_mc/plus_base": {
+      "ci": [
+        -0.17191600804702903,
+        0.2619374451793428
+      ],
+      "effect": "inconclusive",
+      "mean": 0.06731094322212838
+    },
+    "100/joint_ppo/native_mc/plus_minus": {
+      "ci": [
+        -0.3153666929576694,
+        0.5863122302447494
+      ],
+      "effect": "inconclusive",
+      "mean": 0.17353287237412207
+    },
+    "100/zero_train/gae_control/minus_base": {
+      "ci": [
+        -0.9265675969661652,
+        0.6574239741486544
+      ],
+      "effect": "inconclusive",
+      "mean": -0.13451550644081411
+    },
+    "100/zero_train/gae_control/plus_base": {
+      "ci": [
+        -0.731776208867512,
+        0.8462396643215375
+      ],
+      "effect": "inconclusive",
+      "mean": 0.05819254568803833
+    },
+    "100/zero_train/gae_control/plus_minus": {
+      "ci": [
+        -1.3864608387067832,
+        1.7723716938861136
+      ],
+      "effect": "inconclusive",
+      "mean": 0.19270805212885245
+    },
+    "100/zero_train/gae_factored/minus_base": {
+      "ci": [
+        -1.5347147855959171,
+        0.11853596236465534
+      ],
+      "effect": "inconclusive",
+      "mean": -0.7425517181387176
+    },
+    "100/zero_train/gae_factored/plus_base": {
+      "ci": [
+        -0.17321353465404155,
+        1.4418905031976008
+      ],
+      "effect": "inconclusive",
+      "mean": 0.6732765392017814
+    },
+    "100/zero_train/gae_factored/plus_minus": {
+      "ci": [
+        -0.2905429166512232,
+        2.983237816211703
+      ],
+      "effect": "inconclusive",
+      "mean": 1.415828257340499
+    },
+    "100/zero_train/native_mc/minus_base": {
+      "ci": [
+        -1.2788765049260997,
+        -0.202600276758103
+      ],
+      "effect": "negative",
+      "mean": -0.7092618711726915
+    },
+    "100/zero_train/native_mc/plus_base": {
+      "ci": [
+        0.16028736502523477,
+        1.0774834458920384
+      ],
+      "effect": "positive",
+      "mean": 0.6112298254400867
+    },
+    "100/zero_train/native_mc/plus_minus": {
+      "ci": [
+        0.36288764178333777,
+        2.3537663994709113
+      ],
+      "effect": "positive",
+      "mean": 1.3204916966127782
+    },
+    "50/joint_ppo/gae_control/minus_base": {
+      "ci": [
+        -0.14756003474393076,
+        0.13480676918782697
+      ],
+      "effect": "inconclusive",
+      "mean": -0.008873313165606245
+    },
+    "50/joint_ppo/gae_control/plus_base": {
+      "ci": [
+        -0.16813377183103725,
+        0.1102265577836001
+      ],
+      "effect": "inconclusive",
+      "mean": -0.029391032273493156
+    },
+    "50/joint_ppo/gae_control/plus_minus": {
+      "ci": [
+        -0.30106349139880173,
+        0.2578195155858645
+      ],
+      "effect": "inconclusive",
+      "mean": -0.02051771910788691
+    },
+    "50/joint_ppo/gae_factored/minus_base": {
+      "ci": [
+        -0.2292921396089635,
+        0.018854129445276764
+      ],
+      "effect": "inconclusive",
+      "mean": -0.10589183564454929
+    },
+    "50/joint_ppo/gae_factored/plus_base": {
+      "ci": [
+        -0.04335940732076292,
+        0.19932953805309062
+      ],
+      "effect": "inconclusive",
+      "mean": 0.07054921990050156
+    },
+    "50/joint_ppo/gae_factored/plus_minus": {
+      "ci": [
+        -0.06057677546692485,
+        0.43049402556087113
+      ],
+      "effect": "inconclusive",
+      "mean": 0.17644105554505085
+    },
+    "50/joint_ppo/native_mc/minus_base": {
+      "ci": [
+        -0.15878468889896785,
+        0.04190554124628054
+      ],
+      "effect": "inconclusive",
+      "mean": -0.05588734250709804
+    },
+    "50/joint_ppo/native_mc/plus_base": {
+      "ci": [
+        -0.0981396247622943,
+        0.1310072290003661
+      ],
+      "effect": "inconclusive",
+      "mean": 0.028909859903957003
+    },
+    "50/joint_ppo/native_mc/plus_minus": {
+      "ci": [
+        -0.13850042051305778,
+        0.2891255713247279
+      ],
+      "effect": "inconclusive",
+      "mean": 0.08479720241105504
+    },
+    "50/zero_train/gae_control/minus_base": {
+      "ci": [
+        -0.4380507571360183,
+        0.282850350414515
+      ],
+      "effect": "inconclusive",
+      "mean": -0.07700912483926103
+    },
+    "50/zero_train/gae_control/plus_base": {
+      "ci": [
+        -0.31363270404399346,
+        0.40035870539349583
+      ],
+      "effect": "inconclusive",
+      "mean": 0.04102611395730715
+    },
+    "50/zero_train/gae_control/plus_minus": {
+      "ci": [
+        -0.5954763162993344,
+        0.8377285913743484
+      ],
+      "effect": "inconclusive",
+      "mean": 0.11803523879656819
+    },
+    "50/zero_train/gae_factored/minus_base": {
+      "ci": [
+        -0.6864546871440194,
+        -0.10975041903469585
+      ],
+      "effect": "negative",
+      "mean": -0.41500877665746483
+    },
+    "50/zero_train/gae_factored/plus_base": {
+      "ci": [
+        0.08515718807224992,
+        0.6533416185898124
+      ],
+      "effect": "positive",
+      "mean": 0.3834305795642994
+    },
+    "50/zero_train/gae_factored/plus_minus": {
+      "ci": [
+        0.19395287414166118,
+        1.3388415727685472
+      ],
+      "effect": "positive",
+      "mean": 0.7984393562217642
+    },
+    "50/zero_train/native_mc/minus_base": {
+      "ci": [
+        -0.633123892260536,
+        0.5480556946320636
+      ],
+      "effect": "inconclusive",
+      "mean": -0.07981155441800958
+    },
+    "50/zero_train/native_mc/plus_base": {
+      "ci": [
+        -0.5867789074020142,
+        0.5782785585082366
+      ],
+      "effect": "inconclusive",
+      "mean": 0.03538199915612905
+    },
+    "50/zero_train/native_mc/plus_minus": {
+      "ci": [
+        -1.1331600039667906,
+        1.2090283390577694
+      ],
+      "effect": "inconclusive",
+      "mean": 0.11519355357413863
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_planning_cost": {
+    "actor_context_evaluations": 8601600,
+    "plan_ols_fits": 121856,
+    "plan_ridge_predictions": 121856,
+    "reference_evaluations": 8601600
+  },
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "none_forward_direction_response_only",
+  "protocol": "pointmaze_native_direction_stage73_v1",
+  "root_rows": [
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.0018992649254805372,
+                "plus_base": -0.027026307847943798,
+                "plus_minus": -0.02512704292246326
+              },
+              "gae_factored": {
+                "minus_base": -0.07331557320620519,
+                "plus_base": 0.04944792322370972,
+                "plus_minus": 0.12276349642991491
+              },
+              "native_mc": {
+                "minus_base": -0.05258934476837851,
+                "plus_base": 0.032920428059206586,
+                "plus_minus": 0.0855097728275851
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009989379088579308,
+                  "plus": 0.001001075066274062
+                },
+                "fisher_quadratic": 609.6153642718672,
+                "historical_loss_gradient_norm": 0.17174782420064655,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.00181128606445094
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010000154579643432,
+                  "plus": 0.0009999583326086652
+                },
+                "fisher_quadratic": 3595.9174696433092,
+                "historical_loss_gradient_norm": 0.5040443361026415,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0007457789826410396
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009995736469657582,
+                  "plus": 0.0010004104195116621
+                },
+                "fisher_quadratic": 2274.6136216917603,
+                "historical_loss_gradient_norm": 6.028867909547796,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0009376940926553695
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.670178686962463,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.4798509954055987,
+                "plus_base": -0.5114533373927657,
+                "plus_minus": -0.9913043327983644
+              },
+              "gae_factored": {
+                "minus_base": 0.05004716419550448,
+                "plus_base": -0.07084291121645592,
+                "plus_minus": -0.1208900754119604
+              },
+              "native_mc": {
+                "minus_base": -0.5001247317292652,
+                "plus_base": 0.41065982778122745,
+                "plus_minus": 0.9107845595104926
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009999014776166147,
+                  "plus": 0.0010000874908098006
+                },
+                "fisher_quadratic": 2972.1684832139913,
+                "historical_loss_gradient_norm": 0.23020918402084545,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0008203105282400894
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009999921417414832,
+                  "plus": 0.0010000037486986757
+                },
+                "fisher_quadratic": 3470.360441781582,
+                "historical_loss_gradient_norm": 0.22844401030659228,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.000759150191150687
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998313532413837,
+                  "plus": 0.0010001487207216026
+                },
+                "fisher_quadratic": 731.7309823366243,
+                "historical_loss_gradient_norm": 5.80774973567405,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0016532528340474867
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.8097022816073149,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.10344325738736515,
+                "plus_base": -0.14447054035133888,
+                "plus_minus": -0.24791379773870403
+              },
+              "gae_factored": {
+                "minus_base": 0.29962380259235744,
+                "plus_base": -0.3204348431899362,
+                "plus_minus": -0.6200586457822936
+              },
+              "native_mc": {
+                "minus_base": -0.2247467244412853,
+                "plus_base": 0.17005384192610506,
+                "plus_minus": 0.39480056636739036
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010006204714262156,
+                  "plus": 0.0009993563619233128
+                },
+                "fisher_quadratic": 755.7827762299491,
+                "historical_loss_gradient_norm": 0.1379384883208202,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0016267338455529955
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009996318161800538,
+                  "plus": 0.0010003413612700183
+                },
+                "fisher_quadratic": 1265.3272415898678,
+                "historical_loss_gradient_norm": 0.1898936713737459,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012572266220879642
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0010008647937062827,
+                  "plus": 0.0009991174009023071
+                },
+                "fisher_quadratic": 624.0107800921812,
+                "historical_loss_gradient_norm": 5.117204425364854,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017902717209873403
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6780899160526072,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.9515443952815339,
+                "plus_base": -1.034653887388444,
+                "plus_minus": -1.986198282669978
+              },
+              "gae_factored": {
+                "minus_base": 0.41583495009129123,
+                "plus_base": -0.4748709267605733,
+                "plus_minus": -0.8907058768518645
+              },
+              "native_mc": {
+                "minus_base": -0.2544747353884844,
+                "plus_base": 0.22449700947115403,
+                "plus_minus": 0.47897174485963845
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.001000417897259055,
+                  "plus": 0.0009995733559672898
+                },
+                "fisher_quadratic": 787.6083693695001,
+                "historical_loss_gradient_norm": 0.15427603123705677,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0015935285053101306
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.000999820762843179,
+                  "plus": 0.0010001659522607283
+                },
+                "fisher_quadratic": 1760.4852589328839,
+                "historical_loss_gradient_norm": 0.30206146537192696,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0010658566554095858
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.000999974006043366,
+                  "plus": 0.0010000012628912794
+                },
+                "fisher_quadratic": 961.0561183969862,
+                "historical_loss_gradient_norm": 7.127830276742587,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014425823818266289
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.731029940036436,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 445.47026646416634
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.20130167214994543,
+                "plus_base": 0.16704707975576483,
+                "plus_minus": 0.36834875190571026
+              },
+              "gae_factored": {
+                "minus_base": -0.30019026408558247,
+                "plus_base": 0.2689398963856213,
+                "plus_minus": 0.5691301604712038
+              },
+              "native_mc": {
+                "minus_base": -0.09958879846601931,
+                "plus_base": 0.07746142034910264,
+                "plus_minus": 0.17705021881512195
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009995861852440044,
+                  "plus": 0.001000411630689167
+                },
+                "fisher_quadratic": 1079.2066296439925,
+                "historical_loss_gradient_norm": 0.20548010026928226,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.00136132774390691
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000317969160922,
+                  "plus": 0.000999662741080096
+                },
+                "fisher_quadratic": 1203.935950328542,
+                "historical_loss_gradient_norm": 0.23383230773564606,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012888824386204306
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0010000268083099552,
+                  "plus": 0.0009999491192333372
+                },
+                "fisher_quadratic": 1476.3545852365412,
+                "historical_loss_gradient_norm": 6.768846191071194,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011639106959418634
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6825772952164213,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.5756016262780541,
+                "plus_base": 0.5491427943946725,
+                "plus_minus": 1.1247444206727266
+              },
+              "gae_factored": {
+                "minus_base": -0.45735014036115373,
+                "plus_base": 0.42876041415694743,
+                "plus_minus": 0.8861105545181012
+              },
+              "native_mc": {
+                "minus_base": 0.19554836891839855,
+                "plus_base": -0.21998444429186037,
+                "plus_minus": -0.4155328132102589
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009996315256856742,
+                  "plus": 0.00100033997787745
+                },
+                "fisher_quadratic": 710.4488800998512,
+                "historical_loss_gradient_norm": 0.187360683093641,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0016778324161844582
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.00099987110971995,
+                  "plus": 0.0010001178909335982
+                },
+                "fisher_quadratic": 2424.124148550737,
+                "historical_loss_gradient_norm": 0.31711268585304286,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0009083172643191381
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009997602652556956,
+                  "plus": 0.0010002298391234487
+                },
+                "fisher_quadratic": 1206.6289367561817,
+                "historical_loss_gradient_norm": 7.136556896660623,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012874433542391594
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.8094229120016098,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.033557416380670446,
+                "plus_base": -0.06577766966083232,
+                "plus_minus": -0.09933508604150276
+              },
+              "gae_factored": {
+                "minus_base": -0.5323616877436272,
+                "plus_base": 0.48829919369156727,
+                "plus_minus": 1.0206608814351945
+              },
+              "native_mc": {
+                "minus_base": -0.22197147466279787,
+                "plus_base": 0.20455330162019436,
+                "plus_minus": 0.42652477628299224
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010006059945107761,
+                  "plus": 0.000999387186397771
+                },
+                "fisher_quadratic": 713.1168067332529,
+                "historical_loss_gradient_norm": 0.20897098637622996,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0016746909053307311
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009997666161798082,
+                  "plus": 0.0010002115416813302
+                },
+                "fisher_quadratic": 715.552170098246,
+                "historical_loss_gradient_norm": 0.1650590613407065,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001671838592656486
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.001000380669233795,
+                  "plus": 0.0009995832850000397
+                },
+                "fisher_quadratic": 978.6708798415584,
+                "historical_loss_gradient_norm": 7.696107947103891,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014295411615508264
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6772111997334287,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.6891715000769096,
+                "plus_base": 0.6243863581669125,
+                "plus_minus": 1.313557858243822
+              },
+              "gae_factored": {
+                "minus_base": -0.626296074386147,
+                "plus_base": 0.5487992321074842,
+                "plus_minus": 1.1750953064936311
+              },
+              "native_mc": {
+                "minus_base": -0.1978702735225326,
+                "plus_base": 0.1387093664888006,
+                "plus_minus": 0.3365796400113332
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010003146548538018,
+                  "plus": 0.0009996612741264659
+                },
+                "fisher_quadratic": 235.4967253022832,
+                "historical_loss_gradient_norm": 0.12571254938951887,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0029142215247762804
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.000999873253210515,
+                  "plus": 0.0010001126433699778
+                },
+                "fisher_quadratic": 1101.5846645820927,
+                "historical_loss_gradient_norm": 0.24033385188896336,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013474295179336365
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009999447516098711,
+                  "plus": 0.0010000520134363729
+                },
+                "fisher_quadratic": 992.0585459579792,
+                "historical_loss_gradient_norm": 9.247910010634866,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014198626874348153
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7414048180387666,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310023,
+      "status": "complete",
+      "wall_seconds": 442.2331739868969
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.05360986319914929,
+                "plus_base": 0.014930992243904484,
+                "plus_minus": 0.06854085544305377
+              },
+              "gae_factored": {
+                "minus_base": -0.12321519418113525,
+                "plus_base": 0.13623479488657608,
+                "plus_minus": 0.25944998906771133
+              },
+              "native_mc": {
+                "minus_base": 0.00685827034393327,
+                "plus_base": -0.006202359297976301,
+                "plus_minus": -0.013060629641909571
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.001000534086035839,
+                  "plus": 0.0009994514567291384
+                },
+                "fisher_quadratic": 796.6826360924805,
+                "historical_loss_gradient_norm": 0.2077652353959346,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0015844273189751892
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009996661140706342,
+                  "plus": 0.0010003257050457102
+                },
+                "fisher_quadratic": 1441.6783066057856,
+                "historical_loss_gradient_norm": 0.22087750454499616,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011778251297346399
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998822044993598,
+                  "plus": 0.0010001012494885231
+                },
+                "fisher_quadratic": 1754.8801996843451,
+                "historical_loss_gradient_norm": 7.435966293629916,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0010675574629466478
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6718798535782844,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.07130858367557025,
+                "plus_base": 0.024048447464693368,
+                "plus_minus": 0.09535703114026362
+              },
+              "gae_factored": {
+                "minus_base": -0.8465427362984528,
+                "plus_base": 0.8069895684208284,
+                "plus_minus": 1.6535323047192811
+              },
+              "native_mc": {
+                "minus_base": -0.5790769185110705,
+                "plus_base": 0.5309959702114639,
+                "plus_minus": 1.1100728887225344
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010002053032483573,
+                  "plus": 0.0009997741033787129
+                },
+                "fisher_quadratic": 1096.0658449928617,
+                "historical_loss_gradient_norm": 0.1666531512363749,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001350817491103683
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000263800509395,
+                  "plus": 0.00099970502641326
+                },
+                "fisher_quadratic": 1856.167640305193,
+                "historical_loss_gradient_norm": 0.2877090825307189,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0010380216203883378
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.000999818907172592,
+                  "plus": 0.0010001734997763865
+                },
+                "fisher_quadratic": 2086.2351742172023,
+                "historical_loss_gradient_norm": 9.299916101438626,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.000979114238304115
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7717935843765735,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.8249151167685227,
+                "plus_base": 0.6637700256957721,
+                "plus_minus": 1.4886851424642948
+              },
+              "gae_factored": {
+                "minus_base": -1.0169471084170105,
+                "plus_base": 0.9806153568653357,
+                "plus_minus": 1.9975624652823463
+              },
+              "native_mc": {
+                "minus_base": -0.13509030642117992,
+                "plus_base": 0.10814067354662527,
+                "plus_minus": 0.24323097996780518
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010005163032021536,
+                  "plus": 0.0009994672428648781
+                },
+                "fisher_quadratic": 295.824975682626,
+                "historical_loss_gradient_norm": 0.09935000429562399,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.002600145068990991
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009999733486725218,
+                  "plus": 0.0009999971794817045
+                },
+                "fisher_quadratic": 683.8321075770832,
+                "historical_loss_gradient_norm": 0.18209996657739974,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017101738198843203
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009995211132708248,
+                  "plus": 0.0010004580889657409
+                },
+                "fisher_quadratic": 725.3320083299628,
+                "historical_loss_gradient_norm": 5.325964526525183,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0016605294270752424
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6401332338294015,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.9928984672184811,
+                "plus_base": 0.8445231547597665,
+                "plus_minus": 1.8374216219782475
+              },
+              "gae_factored": {
+                "minus_base": -1.8584845095804,
+                "plus_base": 1.7707236029675286,
+                "plus_minus": 3.6292081125479285
+              },
+              "native_mc": {
+                "minus_base": -1.5600876485695139,
+                "plus_base": 1.2568164255365453,
+                "plus_minus": 2.816904074106059
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010003137252526482,
+                  "plus": 0.0009996574921732016
+                },
+                "fisher_quadratic": 246.89153255646613,
+                "historical_loss_gradient_norm": 0.09541746513400336,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0028461769690365972
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009999155504452283,
+                  "plus": 0.0010000634330578342
+                },
+                "fisher_quadratic": 656.0375175022303,
+                "historical_loss_gradient_norm": 0.178033652888474,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017460258113822546
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.001000178541612215,
+                  "plus": 0.0009997930800745784
+                },
+                "fisher_quadratic": 408.7496932360062,
+                "historical_loss_gradient_norm": 6.376384375479199,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.002212005884484892
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6897909258368115,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310037,
+      "status": "complete",
+      "wall_seconds": 436.3812648029998
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.14195457085586227,
+                "plus_base": 0.09884113361982827,
+                "plus_minus": 0.24079570447569054
+              },
+              "gae_factored": {
+                "minus_base": -0.08810557332740387,
+                "plus_base": 0.025529375446247116,
+                "plus_minus": 0.11363494877365099
+              },
+              "native_mc": {
+                "minus_base": -0.17398951289851183,
+                "plus_base": 0.14027244004826755,
+                "plus_minus": 0.3142619529467794
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009996800457061574,
+                  "plus": 0.0010003277135139867
+                },
+                "fisher_quadratic": 1888.482249336712,
+                "historical_loss_gradient_norm": 0.23178662597950392,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001029102289265887
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000322027751281,
+                  "plus": 0.0009996488012506313
+                },
+                "fisher_quadratic": 1377.2437539364103,
+                "historical_loss_gradient_norm": 0.23448115295196,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012050625558757964
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009997754579619826,
+                  "plus": 0.0010002138252392942
+                },
+                "fisher_quadratic": 1334.9218663759875,
+                "historical_loss_gradient_norm": 9.264721213906848,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012240159422750687
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6872337208284686,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.06813323233894053,
+                "plus_base": -0.09416749241992761,
+                "plus_minus": -0.16230072475886814
+              },
+              "gae_factored": {
+                "minus_base": -0.40169119563200084,
+                "plus_base": 0.3765805213405855,
+                "plus_minus": 0.7782717169725863
+              },
+              "native_mc": {
+                "minus_base": 0.597837151675872,
+                "plus_base": -0.6151234482073917,
+                "plus_minus": -1.2129605998832638
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009998195670957236,
+                  "plus": 0.0010001667077349273
+                },
+                "fisher_quadratic": 2531.239492044953,
+                "historical_loss_gradient_norm": 0.24383884566930378,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0008888907339128034
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009994055346366896,
+                  "plus": 0.0010005883698472023
+                },
+                "fisher_quadratic": 1784.1142784648982,
+                "historical_loss_gradient_norm": 0.23096422653695314,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001058774964057641
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998486586113775,
+                  "plus": 0.0010001597220997264
+                },
+                "fisher_quadratic": 1535.5672165090334,
+                "historical_loss_gradient_norm": 6.034449129957065,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011412494520674486
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.8090742674407859,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.24118018561798493,
+                "plus_base": -0.2617288790213408,
+                "plus_minus": -0.5029090646393257
+              },
+              "gae_factored": {
+                "minus_base": -0.3194854980809616,
+                "plus_base": 0.3061927926592958,
+                "plus_minus": 0.6256782907402574
+              },
+              "native_mc": {
+                "minus_base": 0.28607186973914267,
+                "plus_base": -0.31462941016390644,
+                "plus_minus": -0.6007012799030491
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009984782021578715,
+                  "plus": 0.0010015188983971768
+                },
+                "fisher_quadratic": 434.91956791462997,
+                "historical_loss_gradient_norm": 0.16690341877492262,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.002144423332220682
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.000999706866294308,
+                  "plus": 0.001000288409475254
+                },
+                "fisher_quadratic": 1077.369369127447,
+                "historical_loss_gradient_norm": 0.24892622275245557,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013624879998012402
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009996765223147489,
+                  "plus": 0.0010003133531611666
+                },
+                "fisher_quadratic": 1020.1099935408,
+                "historical_loss_gradient_norm": 5.827061165661425,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014002045892688127
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6786387499701232,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.49491500650870535,
+                "plus_base": -0.557843694326646,
+                "plus_minus": -1.0527587008353514
+              },
+              "gae_factored": {
+                "minus_base": -0.48075965556328626,
+                "plus_base": 0.4474486704371614,
+                "plus_minus": 0.9282083260004477
+              },
+              "native_mc": {
+                "minus_base": -0.5729785618636072,
+                "plus_base": 0.5355624999194966,
+                "plus_minus": 1.1085410617831037
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009998600211920817,
+                  "plus": 0.0010001298000964958
+                },
+                "fisher_quadratic": 1008.5702909887535,
+                "historical_loss_gradient_norm": 0.1651899826751292,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001408192128057114
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009996433582794182,
+                  "plus": 0.0010003605451241737
+                },
+                "fisher_quadratic": 1071.3292571350144,
+                "historical_loss_gradient_norm": 0.24491688888711405,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013663234281369387
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998942347731888,
+                  "plus": 0.0010000826242879915
+                },
+                "fisher_quadratic": 750.6329988922965,
+                "historical_loss_gradient_norm": 5.57909969494652,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001632304475853892
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7296404650931557,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310049,
+      "status": "complete",
+      "wall_seconds": 441.27054094383493
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.12159301878102369,
+                "plus_base": -0.18452387439362283,
+                "plus_minus": -0.3061168931746465
+              },
+              "gae_factored": {
+                "minus_base": -0.14789413392797002,
+                "plus_base": 0.01892388592469274,
+                "plus_minus": 0.16681801985266276
+              },
+              "native_mc": {
+                "minus_base": -0.20318690577607867,
+                "plus_base": 0.17228622114993897,
+                "plus_minus": 0.37547312692601764
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009997030555475644,
+                  "plus": 0.001000265109461841
+                },
+                "fisher_quadratic": 1097.2970726819058,
+                "historical_loss_gradient_norm": 0.18632688956582574,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013500594326245413
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009991129772485945,
+                  "plus": 0.0010008557477543883
+                },
+                "fisher_quadratic": 591.3741052635119,
+                "historical_loss_gradient_norm": 0.22257764287970316,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0018390089626863176
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009990003036419786,
+                  "plus": 0.0010009670491114746
+                },
+                "fisher_quadratic": 572.2843977745729,
+                "historical_loss_gradient_norm": 3.3785139587069426,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0018694292986678731
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6528501340157042,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.5300188078588164,
+                "plus_base": 0.4723471196096085,
+                "plus_minus": 1.002365927468425
+              },
+              "gae_factored": {
+                "minus_base": -0.4820330840089291,
+                "plus_base": 0.4208356529135706,
+                "plus_minus": 0.9028687369224997
+              },
+              "native_mc": {
+                "minus_base": 0.7932924323872115,
+                "plus_base": -0.8523120513728273,
+                "plus_minus": -1.6456044837600388
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010001726745480384,
+                  "plus": 0.0009997978052847397
+                },
+                "fisher_quadratic": 1116.8768985202948,
+                "historical_loss_gradient_norm": 0.20623238095911048,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013381732490113187
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009999321389788664,
+                  "plus": 0.0010000366753400072
+                },
+                "fisher_quadratic": 930.013805234388,
+                "historical_loss_gradient_norm": 0.2833593916452131,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001466460265937962
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.000998645913164346,
+                  "plus": 0.0010013432637687076
+                },
+                "fisher_quadratic": 435.54180180280923,
+                "historical_loss_gradient_norm": 2.47145776002992,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0021428909766872395
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.8007798960991204,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.15339893744121724,
+                "plus_base": 0.11062183516730428,
+                "plus_minus": 0.2640207726085215
+              },
+              "gae_factored": {
+                "minus_base": -0.42883104083509593,
+                "plus_base": 0.3814314151913685,
+                "plus_minus": 0.8102624560264644
+              },
+              "native_mc": {
+                "minus_base": -0.110525709657189,
+                "plus_base": 0.07400223871224654,
+                "plus_minus": 0.18452794836943553
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.000999545761978856,
+                  "plus": 0.0010004238986677668
+                },
+                "fisher_quadratic": 497.04814296345353,
+                "historical_loss_gradient_norm": 0.15060247762259257,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0020059299837253135
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.000998858428837278,
+                  "plus": 0.0010011073461519307
+                },
+                "fisher_quadratic": 464.4825261688632,
+                "historical_loss_gradient_norm": 0.19914719860827018,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0020750583220270915
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009996460458200445,
+                  "plus": 0.0010003299792025347
+                },
+                "fisher_quadratic": 438.49769855665943,
+                "historical_loss_gradient_norm": 3.98509683477716,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0021356561893375926
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6476632574759423,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -1.160511926350658,
+                "plus_base": 1.0997397178540282,
+                "plus_minus": 2.2602516442046863
+              },
+              "gae_factored": {
+                "minus_base": -1.5035514439714106,
+                "plus_base": 1.367601272506814,
+                "plus_minus": 2.8711527164782247
+              },
+              "native_mc": {
+                "minus_base": -1.1449193749792457,
+                "plus_base": 0.9914378041162806,
+                "plus_minus": 2.1363571790955262
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009996844681240348,
+                  "plus": 0.0010002765343417003
+                },
+                "fisher_quadratic": 542.003645512186,
+                "historical_loss_gradient_norm": 0.13372778920749775,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0019209404158407194
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009996998314872098,
+                  "plus": 0.001000268020600886
+                },
+                "fisher_quadratic": 679.3415051023975,
+                "historical_loss_gradient_norm": 0.18837459470658346,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017158168295803864
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0010000580227982356,
+                  "plus": 0.0009999296364767967
+                },
+                "fisher_quadratic": 680.7098347094368,
+                "historical_loss_gradient_norm": 5.983797600408827,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017140914365454966
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7076561485758672,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310061,
+      "status": "complete",
+      "wall_seconds": 436.60680313408375
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.20568667080467762,
+                "plus_base": -0.22251727998850157,
+                "plus_minus": -0.4282039507931792
+              },
+              "gae_factored": {
+                "minus_base": 0.09932187091858324,
+                "plus_base": -0.10813696093243053,
+                "plus_minus": -0.20745883185101377
+              },
+              "native_mc": {
+                "minus_base": -0.0056060395502832705,
+                "plus_base": 0.02002353203018714,
+                "plus_minus": 0.02562957158047041
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010000876514543347,
+                  "plus": 0.0009998925380304998
+                },
+                "fisher_quadratic": 2039.304199429862,
+                "historical_loss_gradient_norm": 0.28802863265019696,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0009903164453084006
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010002037463194403,
+                  "plus": 0.0009998141092767317
+                },
+                "fisher_quadratic": 2214.4978466587177,
+                "historical_loss_gradient_norm": 0.2378167753161778,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0009503364057835756
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009987368638503206,
+                  "plus": 0.001001267838764487
+                },
+                "fisher_quadratic": 607.8845181687266,
+                "historical_loss_gradient_norm": 4.887488444622899,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0018138628934954379
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6661737581094106,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.23073612487171147,
+                "plus_base": -0.2611696866671487,
+                "plus_minus": -0.49190581153886015
+              },
+              "gae_factored": {
+                "minus_base": -0.09723386470932738,
+                "plus_base": 0.06644523655868184,
+                "plus_minus": 0.16367910126800922
+              },
+              "native_mc": {
+                "minus_base": 0.20894515345669618,
+                "plus_base": -0.22989071693369212,
+                "plus_minus": -0.4388358703903883
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009998758191911497,
+                  "plus": 0.001000143860392248
+                },
+                "fisher_quadratic": 3478.652278627937,
+                "historical_loss_gradient_norm": 0.38485648905039066,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0007582448829169499
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009998715591273699,
+                  "plus": 0.0010001196094348763
+                },
+                "fisher_quadratic": 3567.6323561529953,
+                "historical_loss_gradient_norm": 0.4328741410438428,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0007487295105310053
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.000999964332912365,
+                  "plus": 0.0010000188939998046
+                },
+                "fisher_quadratic": 3672.054477546957,
+                "historical_loss_gradient_norm": 11.819662357232058,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0007380069301262677
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7863963526828835,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.431156439932316,
+                "plus_base": -0.4967948644592397,
+                "plus_minus": -0.9279513043915557
+              },
+              "gae_factored": {
+                "minus_base": 0.41795692911407656,
+                "plus_base": -0.46410941020781493,
+                "plus_minus": -0.8820663393218915
+              },
+              "native_mc": {
+                "minus_base": 0.15380554423889237,
+                "plus_base": -0.17186790783455663,
+                "plus_minus": -0.325673452073449
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009999361441777642,
+                  "plus": 0.0010000533563527848
+                },
+                "fisher_quadratic": 992.649989201494,
+                "historical_loss_gradient_norm": 0.2627205684457705,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001419439631308374
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009993770917804126,
+                  "plus": 0.0010006196115187314
+                },
+                "fisher_quadratic": 534.7276625687036,
+                "historical_loss_gradient_norm": 0.1198834878091352,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0019339652754552213
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009995162784526342,
+                  "plus": 0.0010004652453947044
+                },
+                "fisher_quadratic": 1280.474869947135,
+                "historical_loss_gradient_norm": 6.551618222891952,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012497681944051732
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6516179655989011,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.6788094493514798,
+                "plus_base": -0.7408267947187994,
+                "plus_minus": -1.4196362440702792
+              },
+              "gae_factored": {
+                "minus_base": 0.30941852364986033,
+                "plus_base": -0.35805358156395783,
+                "plus_minus": -0.6674721052138182
+              },
+              "native_mc": {
+                "minus_base": -0.047711211459727565,
+                "plus_base": 0.006774556120824116,
+                "plus_minus": 0.05448576758055168
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010000544024244128,
+                  "plus": 0.0009999328768958054
+                },
+                "fisher_quadratic": 1130.2065538755858,
+                "historical_loss_gradient_norm": 0.32869045610624853,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013302586363508591
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010003002419570175,
+                  "plus": 0.0009996869446515172
+                },
+                "fisher_quadratic": 800.8997105257058,
+                "historical_loss_gradient_norm": 0.15671826364955346,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0015802504747926794
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009997154520058101,
+                  "plus": 0.0010002764145945365
+                },
+                "fisher_quadratic": 1609.4196606169792,
+                "historical_loss_gradient_norm": 10.498000742969111,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011147573555560194
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.709753420818597,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310073,
+      "status": "complete",
+      "wall_seconds": 444.82010030094534
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.09386215735101544,
+                "plus_base": -0.13519588779203673,
+                "plus_minus": -0.22905804514305217
+              },
+              "gae_factored": {
+                "minus_base": -0.1856514303057466,
+                "plus_base": 0.1717823418315696,
+                "plus_minus": 0.3574337721373162
+              },
+              "native_mc": {
+                "minus_base": 0.09181471592670576,
+                "plus_base": -0.1914705960686902,
+                "plus_minus": -0.28328531199539597
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.000999641298868504,
+                  "plus": 0.0010003610817764046
+                },
+                "fisher_quadratic": 906.4006737283239,
+                "historical_loss_gradient_norm": 0.20917494039756376,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014854392254913943
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000287884833256,
+                  "plus": 0.000999685875847224
+                },
+                "fisher_quadratic": 2417.042643192998,
+                "historical_loss_gradient_norm": 0.26619865876867727,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0009096468952094017
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.001000428248519308,
+                  "plus": 0.000999558773927342
+                },
+                "fisher_quadratic": 2081.728469125859,
+                "historical_loss_gradient_norm": 6.756180113794592,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.000980173500736013
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6807460485585034,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.023603767855867375,
+                "plus_base": -0.003797516304015147,
+                "plus_minus": 0.019806251551852228
+              },
+              "gae_factored": {
+                "minus_base": -0.4743952202866524,
+                "plus_base": 0.45515815498587386,
+                "plus_minus": 0.9295533752725262
+              },
+              "native_mc": {
+                "minus_base": -0.6881270192770437,
+                "plus_base": 0.6259198610214867,
+                "plus_minus": 1.3140468802985303
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010000819501735593,
+                  "plus": 0.0009999043828505777
+                },
+                "fisher_quadratic": 1852.2754567258137,
+                "historical_loss_gradient_norm": 0.29777705054535575,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0010391116446925254
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000353237370706,
+                  "plus": 0.0009996320107612873
+                },
+                "fisher_quadratic": 1359.8401103146437,
+                "historical_loss_gradient_norm": 0.2483805973207179,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012127494162927353
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0010000271747225731,
+                  "plus": 0.000999951008987927
+                },
+                "fisher_quadratic": 1968.1624699953575,
+                "historical_loss_gradient_norm": 9.651031854924536,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001008055688572399
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7984456985785315,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.11595413524175768,
+                "plus_base": 0.10794509597717905,
+                "plus_minus": 0.22389923121893673
+              },
+              "gae_factored": {
+                "minus_base": -0.3212023335361529,
+                "plus_base": 0.2674026276729258,
+                "plus_minus": 0.5886049612090787
+              },
+              "native_mc": {
+                "minus_base": -0.15496335374774262,
+                "plus_base": 0.10765058858131837,
+                "plus_minus": 0.262613942329061
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0009998145495605931,
+                  "plus": 0.0010001506718372636
+                },
+                "fisher_quadratic": 1063.584858586011,
+                "historical_loss_gradient_norm": 0.2548413350192322,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013712887870843578
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.000999876621799706,
+                  "plus": 0.0010001231402270256
+                },
+                "fisher_quadratic": 1402.012339447076,
+                "historical_loss_gradient_norm": 0.34616301877529193,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011943705322360815
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009995416970156384,
+                  "plus": 0.0010004477072316775
+                },
+                "fisher_quadratic": 932.6851428622015,
+                "historical_loss_gradient_norm": 5.87117865784496,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014643586888184415
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6682854016373555,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.5633805228738531,
+                "plus_base": 0.5328791351568576,
+                "plus_minus": 1.0962596580307107
+              },
+              "gae_factored": {
+                "minus_base": -0.850685764871578,
+                "plus_base": 0.8229281791105478,
+                "plus_minus": 1.6736139439821258
+              },
+              "native_mc": {
+                "minus_base": -1.1202897070974984,
+                "plus_base": 1.0609697722713989,
+                "plus_minus": 2.1812594793688973
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.001000220064901056,
+                  "plus": 0.0009997671991317566
+                },
+                "fisher_quadratic": 833.715920114243,
+                "historical_loss_gradient_norm": 0.1985686320940884,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001548837840350856
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0009997799702040745,
+                  "plus": 0.0010001979706026642
+                },
+                "fisher_quadratic": 1018.970513262487,
+                "historical_loss_gradient_norm": 0.2689914120897624,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0014009872712471287
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009996496187743469,
+                  "plus": 0.0010003288768153408
+                },
+                "fisher_quadratic": 1294.9660433950346,
+                "historical_loss_gradient_norm": 10.284789445488283,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012427558254561725
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7105937699135393,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310089,
+      "status": "complete",
+      "wall_seconds": 447.34339782362804
+    },
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 5120,
+        "actor_score_forward_batches": 1024,
+        "archive_network_checks": 512,
+        "calibration_archive_episodes": 512,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 1228800,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 3600,
+        "fisher_jvp_batches": 1800,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 128,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 64,
+        "native_episodes": 896,
+        "native_lower_calls": 1075200,
+        "native_network_checks": 896,
+        "native_pair_checks": 128,
+        "native_steps": 1075200,
+        "native_upper_calls": 16128,
+        "reconstructed_lower_calls": 614400,
+        "reconstructed_upper_calls": 9216,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.09336298113112917,
+                "plus_base": 0.0533158862146621,
+                "plus_minus": 0.14667886734579128
+              },
+              "gae_factored": {
+                "minus_base": -0.02808438704093419,
+                "plus_base": 0.001672502438026413,
+                "plus_minus": 0.029756889478960602
+              },
+              "native_mc": {
+                "minus_base": -0.010811124868151722,
+                "plus_base": -0.014012207038380353,
+                "plus_minus": -0.0032010821702286307
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010001250960094848,
+                  "plus": 0.0009998700782757274
+                },
+                "fisher_quadratic": 1218.7273533898601,
+                "historical_loss_gradient_norm": 0.18275602975639973,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012810371325056348
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010008689885908331,
+                  "plus": 0.0009991141811420059
+                },
+                "fisher_quadratic": 1567.6720178928465,
+                "historical_loss_gradient_norm": 0.18914767393247625,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0011295030151600384
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009999025095949283,
+                  "plus": 0.0010000785478086376
+                },
+                "fisher_quadratic": 1071.1237691330375,
+                "historical_loss_gradient_norm": 6.3529976144212785,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0013664544819026426
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6506672236478577,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.19426056566203087,
+                "plus_base": 0.15325858297333994,
+                "plus_minus": 0.3475191486353708
+              },
+              "gae_factored": {
+                "minus_base": -0.6108711361587069,
+                "plus_base": 0.5835179993543633,
+                "plus_minus": 1.1943891355130702
+              },
+              "native_mc": {
+                "minus_base": -0.6667868722648755,
+                "plus_base": 0.6327909950406259,
+                "plus_minus": 1.2995778673055014
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010002519333130045,
+                  "plus": 0.0009997517512905262
+                },
+                "fisher_quadratic": 1719.235379161679,
+                "historical_loss_gradient_norm": 0.2648992527339774,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001078567495655615
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000219043766412,
+                  "plus": 0.0009997892350318304
+                },
+                "fisher_quadratic": 1394.067627606119,
+                "historical_loss_gradient_norm": 0.15515256082435697,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.001197769021911568
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0010000661368953561,
+                  "plus": 0.0009999137313047718
+                },
+                "fisher_quadratic": 1337.2413584947903,
+                "historical_loss_gradient_norm": 5.454069114348311,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0012229539322236001
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.7823362226970494,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -0.07660356454646688,
+                "plus_base": -0.0028530516417326623,
+                "plus_minus": 0.07375051290473422
+              },
+              "gae_factored": {
+                "minus_base": 0.3675752257444991,
+                "plus_base": -0.3844661318063025,
+                "plus_minus": -0.7520413575508016
+              },
+              "native_mc": {
+                "minus_base": -0.44235527826378984,
+                "plus_base": 0.36058421938900054,
+                "plus_minus": 0.8029394976527904
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.001000360546308598,
+                  "plus": 0.000999632612736039
+                },
+                "fisher_quadratic": 356.72107244379947,
+                "historical_loss_gradient_norm": 0.1413162873085116,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.002367830526862186
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010000986369120013,
+                  "plus": 0.0009998834952574046
+                },
+                "fisher_quadratic": 635.4119866027239,
+                "historical_loss_gradient_norm": 0.16026880495301069,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0017741375838720565
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.000999401961214024,
+                  "plus": 0.0010005782265762966
+                },
+                "fisher_quadratic": 511.6599779158696,
+                "historical_loss_gradient_norm": 5.890641267570049,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0019770801416665092
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6425494347962861,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 0.20456951385166988,
+                "plus_base": -0.3026636239993685,
+                "plus_minus": -0.5072331378510384
+              },
+              "gae_factored": {
+                "minus_base": -1.3458897704780703,
+                "plus_base": 1.2616358648092465,
+                "plus_minus": 2.607525635287317
+              },
+              "native_mc": {
+                "minus_base": -0.7757634565009219,
+                "plus_base": 0.675071169596194,
+                "plus_minus": 1.4508346260971159
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010003588351540683,
+                  "plus": 0.000999626570442516
+                },
+                "fisher_quadratic": 579.4375221928296,
+                "historical_loss_gradient_norm": 0.18395513747517592,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0018578544639996574
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001000230681442686,
+                  "plus": 0.0009997486032837062
+                },
+                "fisher_quadratic": 356.7631548271706,
+                "historical_loss_gradient_norm": 0.11526584640948463,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0023676908727398123
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009990777289669874,
+                  "plus": 0.0010008941283263767
+                },
+                "fisher_quadratic": 437.3010806546582,
+                "historical_loss_gradient_norm": 5.354042225931995,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.002138576166770228
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.6947007525448377,
+              "sample_count": 9600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 1075200,
+        "plan_ols_fits": 15232,
+        "plan_ridge_predictions": 15232,
+        "reference_evaluations": 1075200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310101,
+      "status": "complete",
+      "wall_seconds": 440.15279864612967
+    }
+  ],
+  "run_name": "pointmaze_native_direction_stage73_full_20261001_r1",
+  "status": "complete"
+}

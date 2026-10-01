@@ -9,62 +9,80 @@
       "root": 310011,
       "role": "historical_directions_and_native_response",
       "node": "node005",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4656
     },
     {
       "id": "t118626",
       "root": 310023,
       "role": "historical_directions_and_native_response",
       "node": "node006",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4678
     },
     {
       "id": "t118627",
       "root": 310037,
       "role": "historical_directions_and_native_response",
       "node": "node004",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4599
     },
     {
       "id": "t118628",
       "root": 310049,
       "role": "historical_directions_and_native_response",
       "node": "node001",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4628
     },
     {
       "id": "t118629",
       "root": 310061,
       "role": "historical_directions_and_native_response",
       "node": "node005",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4663
     },
     {
       "id": "t118630",
       "root": 310073,
       "role": "historical_directions_and_native_response",
       "node": "node006",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4655
     },
     {
       "id": "t118631",
       "root": 310089,
       "role": "historical_directions_and_native_response",
       "node": "node004",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4642
     },
     {
       "id": "t118632",
       "root": 310101,
       "role": "historical_directions_and_native_response",
       "node": "node001",
-      "status": "running"
+      "status": "done",
+      "exit_code": 0,
+      "peak_ram_mb": 4658
     },
     {
       "id": "t118633",
       "role": "qualification",
-      "status": "queued",
-      "waiting_for": "eight_root_completion_markers"
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
+      "peak_ram_mb": 0
     }
   ],
   "placement": "scheduler_dynamic_node001_node006_no_pin",
@@ -74,5 +92,12 @@
     "resource_family": "Freq-HRL/pointmaze_native_direction_stage73_v1/native_direction/full"
   },
   "resource_correction": "separate_full_from_preflight_history_to_avoid_reusing_three_worker_RAM_estimate",
-  "startup_observation": "all_eight_roots_completed_first_case_seven_variant_native_pairing"
+  "startup_observation": "all_eight_roots_completed_first_case_seven_variant_native_pairing",
+  "completion": {
+    "qualification": "passed",
+    "native_episodes": 7168,
+    "native_steps": 8601600,
+    "performance_claim": "none_forward_direction_response_only",
+    "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged"
+  }
 }
