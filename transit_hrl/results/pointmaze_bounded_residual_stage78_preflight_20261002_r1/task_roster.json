@@ -1,0 +1,33 @@
+{
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "preflight": true,
+  "protocol": "pointmaze_bounded_residual_stage78_v1",
+  "run_name": "pointmaze_bounded_residual_stage78_preflight_20261002_r1",
+  "source_revision": "70dc1b5c43d3c82f08e7adcae23144b38e333045",
+  "tasks": [
+    {
+      "id": "t119795",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 1396,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_bounded_residual_stage78_v1/bounded_residual/preflight",
+      "role": "historical_constraint_and_native_probe",
+      "root": 310011
+    },
+    {
+      "id": "t119796",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_bounded_residual_stage78_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null
+    }
+  ]
+}
