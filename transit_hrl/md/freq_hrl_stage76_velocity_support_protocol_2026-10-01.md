@@ -14,6 +14,8 @@ Preflight r1: t118825 failed before label audit because the layout probe closed 
 
 Preflight r2: t118827/t118828 both done0 on node006;1,200 exact label states,2 saved BC MSE reproductions,8 Stage75 plan-energy frame matches,7,200 replayed velocity rows and3,600 conditional actor rows. Native steps, fitting and optimizer steps are zero. Mechanical gate passed; full eight-root audit released without performance selection.
 
+Full r1: t118830..t118837 dispatched dynamically on node001/004/005/006; all eight roots done0. t118838 qualifies the four frozen coverage endpoints after completion markers are synchronized.
+
 ## Limits
 
 Coordinate and speed envelopes are not joint-state support. Historical-state response is not an on-policy reward counterfactual. This audit calibrates inputs and tests a mechanism hypothesis; it does not repair the learned upper, adopt a budget, or establish frequency superiority. Stage67 HOLD remains unchanged.
