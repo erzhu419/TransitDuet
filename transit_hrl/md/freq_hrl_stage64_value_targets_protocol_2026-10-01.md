@@ -13,3 +13,7 @@ Full fixed costs:4352 archive episodes,5222400 lower/78336 upper reconstructions
 ## Limitations
 
 Fixed-policy retrospective critic calibration does not establish on-policy reward gains, frequency attribution, OOD generalization or full-training stability. Activation saturation is measured rather than assumed causal. Unit reparameterization changes value optimization, not just a printed loss scale.
+
+## Execution
+
+Implementation aa2f0103aa; scheduler t116702/node005 passed four focused tests in45.286s. Raw critic/Adam equivalence, normalized public predictions, frozen actor/upper and actual GAE/MC/optimizer accounting passed. Actual archive preflight is next; native evaluation remains HOLD.
