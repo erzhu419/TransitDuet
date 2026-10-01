@@ -49,6 +49,8 @@ class IndependentCreditTest(unittest.TestCase):
         lower = replace(lower, reward=np.arange(12, dtype=np.float32) / 4)
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(upper_state_dim=1, upper_action_dim=1,
             lower_state_dim=1, lower_action_dim=1, hidden_dim=4, gamma=.9, gae_lambda=.8))
+        frozen = copy.deepcopy(model.state_dict())
+        experiment.assert_frozen(model, frozen)
         mc = calibration.monte_carlo_returns(lower, .9)
         pred = np.array([4., 5., -1., 100., -20., 8., 6., 2., -2., 10., 1., 3.], dtype=np.float32)
         advantage, _ = model._gae(lower.reward, lower.done, lower.duration, pred)
@@ -74,6 +76,10 @@ class IndependentCreditTest(unittest.TestCase):
         self.assertEqual(comparisons["mean"]["raw_episode_noise"]["mc_common"]["episodes"], 4)
         torch.testing.assert_close(actor.state_dict(), before, atol=0, rtol=0)
         self.assertTrue(all(p.grad is None for p in actor.parameters()))
+        with torch.no_grad():
+            next(model.lower_actor.parameters()).add_(.1)
+        with self.assertRaises(AssertionError):
+            experiment.assert_frozen(model, frozen)
 
     def test_disjoint_seed_roles_counts_and_dynamic_scheduler_dependency(self):
         full = spec.budget(preflight=False)

@@ -108,6 +108,13 @@ def init_worker(config, args):
     native.init_worker(config, args)
 
 
+def assert_frozen(model, before):
+    after, expected = model.state_dict(), dict(before)
+    if expected.pop("config") != after.pop("config"):
+        raise ValueError("Stage69 model configuration changed")
+    torch.testing.assert_close(after, expected, atol=0, rtol=0)
+
+
 def replay(root, *, preflight, output):
     source = json.loads(spec.source_result(root, preflight=preflight).read_text())
     if ((source["status"], source["root"], source["preflight"], source["protocol"]) !=
@@ -220,13 +227,13 @@ def replay(root, *, preflight, output):
                         "frozen_episode_returns": [r["episode_return"] for r in rows]})
                     print(f"independent credit {root}/period{period}/{arm}: batch{i + 1}/{opt['batches']} complete", flush=True)
                 for t, fit in fits.items():
-                    torch.testing.assert_close(fit.model.state_dict(), snapshots[t], atol=0, rtol=0)
+                    assert_frozen(fit.model, snapshots[t])
                     cost["frozen_model_checks"] += 1
                 groups[p][arm] = {"common_rate_location": fits["mc_factored"].location,
                     "anchor": {"TD": anchor["TD"], "score_cost": anchor["score_cost"],
                         "historical_MC_rounding_max_abs": anchor["historical_MC_rounding_max_abs"]}, "batches": batch_rows,
                     "comparisons": compare_batches(anchor, batches, mask), "model_and_Adam_unchanged": "passed"}
-            torch.testing.assert_close(clone.state_dict(), frozen_clone, atol=0, rtol=0)
+            assert_frozen(clone, frozen_clone)
             cost["frozen_model_checks"] += 1
     result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
         "preflight": preflight, "cost": cost, "native_counts": counts, "groups": groups, "seed_roles": roles,
