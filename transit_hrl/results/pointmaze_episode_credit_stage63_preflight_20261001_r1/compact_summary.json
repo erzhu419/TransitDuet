@@ -1,0 +1,438 @@
+{
+  "contract": {
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "cost": "shared_archive_reconstruction_plus_every_extra_episode_critic_scalar_call_lower_calibration_update_guard_retry_and_checkpoint_write",
+    "decision": "full_native_prerequisite_all_active_actors_nonzero_and_all_episode_probe_EV_positive_MSE_below_option_critic_on_episode_MC",
+    "episode_credit": "only_lower_done_at_true_episode_end_lower_critic_recalibrated_with_same_PPO_GAE_and_nominal_value_steps",
+    "guard": "one_Adam_proposal_per_minibatch_first_feasible_parameter_displacement_scale_restore_actor_and_Adam_between_rejected_trials",
+    "initialization": "same_Stage55_clone_networks_and_Adam_no_reset",
+    "kl_budget": 0.02,
+    "limits": "archive_first_update_credit_plus_consistent_critic_package_not_new_native_reward_or_full_training_confirmation",
+    "option_credit": "exact_Stage60_backtracking_first_update_and_original_critic_calibration",
+    "pairing": "same_Stage57_calibration_and_first_training_archives_actions_states_rewards_logp_noise_and_shuffle",
+    "periods": [
+      50,
+      100
+    ],
+    "probe": "first_training_batch_unseen_by_calibration_pre_actor_MC_fit_and_actual_pre_update_advantage_alignment",
+    "selection": "all_roots_both_periods_both_arms_same_hyperparameters_and_calibration_budget_no_seed_KL_or_fit_sweep",
+    "source_protocol": "pointmaze_backtracking_stage60_v1",
+    "source_runs": [
+      "pointmaze_backtracking_stage60_preflight_20261001_r1",
+      "pointmaze_backtracking_stage60_full_20261001_r1"
+    ],
+    "treatments": [
+      "option_credit",
+      "episode_credit"
+    ],
+    "upper": "control_upper_calibration_and_first_update_executed_once_shared_final_four_upper_network_Adam_states"
+  },
+  "cost": {
+    "archive_episodes": 24,
+    "archive_network_checks": 48,
+    "candidate_checkpoint_writes": 8,
+    "diagnostic_distribution_passes": 20,
+    "diagnostic_gae_calls": 22,
+    "diagnostic_updates": 10,
+    "diagnostic_value_passes": 20,
+    "episode_critic_scalar_calls": 7200,
+    "forecaster_loads": 1,
+    "native_steps": 0,
+    "new_evaluation_steps": 0,
+    "new_forecaster_fits": 0,
+    "ppo_gae_calls": 34,
+    "probe_mc_calls": 8,
+    "reconstructed_lower_calls": 7200,
+    "reconstructed_upper_calls": 108,
+    "source_clone_loads": 2,
+    "supervised_steps": 0,
+    "upper_pair_state_checks": 16,
+    "upper_state_transfers": 16,
+    "warmup_actor_state_checks": 32,
+    "warmup_critic_updates": 24
+  },
+  "episode_critic_fit_failures": [],
+  "episode_critic_fit_gate": "passed",
+  "executed_optimizer_steps": {
+    "lower_actor": 32,
+    "lower_value": 96,
+    "upper_actor": 8,
+    "upper_value": 40
+  },
+  "frozen_actors": [],
+  "guard_cost": {
+    "candidate_evaluations": 40,
+    "guard_distribution_passes": 50,
+    "parameter_interpolation_trials": 0,
+    "rejected_actor_steps": 0,
+    "retained_actor_steps": 40,
+    "rollback_state_checks": 0,
+    "state_snapshot_calls": 80
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "not_applicable_preflight",
+  "performance_claim": "none_archive_only",
+  "protocol": "pointmaze_episode_credit_stage63_v1",
+  "root_rows": [
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "critic_probe": {
+              "episode_done_count": 2,
+              "episode_value_episode_mc": {
+                "bias": -30.887118516580667,
+                "explained_variance": 0.010406545161161906,
+                "mse": 1210.1637787234508,
+                "prediction_mean": 0.4040522479848005,
+                "prediction_std": 0.16649172435438298,
+                "target_mean": 31.291170764565468,
+                "target_std": 16.088609433824985
+              },
+              "option_done_count": 12,
+              "option_value_episode_mc": {
+                "bias": -30.89053247324036,
+                "explained_variance": 0.010406195075763236,
+                "mse": 1210.3747755637462,
+                "prediction_mean": 0.4006382913251097,
+                "prediction_std": 0.16497556674138744,
+                "target_mean": 31.291170764565468,
+                "target_std": 16.088609433824985
+              },
+              "option_value_option_mc": {
+                "bias": -8.617545212757152,
+                "explained_variance": -0.0013444593160354401,
+                "mse": 133.79395716818388,
+                "prediction_mean": 0.4006382913251097,
+                "prediction_std": 0.16497556674138744,
+                "target_mean": 9.018183504082263,
+                "target_std": 7.710508475995098
+              },
+              "recalibrated_advantage_alignment": {
+                "correlation": 0.8608929630553686,
+                "normalized_rms_difference": 0.5274600386619568,
+                "normalized_sign_disagreement": 0.15833333333333333
+              },
+              "same_value_boundary_alignment": {
+                "correlation": 0.8608757891620125,
+                "normalized_rms_difference": 0.5274925827980042,
+                "normalized_sign_disagreement": 0.15833333333333333
+              }
+            },
+            "updates": {
+              "episode_credit": [
+                {
+                  "clip_fraction": 0.15666666626930237,
+                  "kl_max": 0.012305753264856606,
+                  "kl_mean": 0.008210002188869222,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04499464416507028,
+                  "value_after": {
+                    "explained_variance": 0.004670482227679629,
+                    "mse": 50.03003920823417
+                  },
+                  "value_before": {
+                    "explained_variance": 0.006660400855145965,
+                    "mse": 51.4740015838289
+                  }
+                }
+              ],
+              "option_credit": [
+                {
+                  "clip_fraction": 0.5,
+                  "kl_max": 0.02455199683717655,
+                  "kl_mean": 0.017315106243925536,
+                  "level": "upper",
+                  "mean_action_change_rms": 0.04620408395405997,
+                  "value_after": {
+                    "explained_variance": 0.0022994410550446487,
+                    "mse": 381.91247333319075
+                  },
+                  "value_before": {
+                    "explained_variance": 0.002017790114661744,
+                    "mse": 385.79517417710963
+                  }
+                },
+                {
+                  "clip_fraction": 0.1433333307504654,
+                  "kl_max": 0.011779051689426296,
+                  "kl_mean": 0.007670778678046705,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.043495298131062524,
+                  "value_after": {
+                    "explained_variance": -0.006280383819819768,
+                    "mse": 32.42347581397956
+                  },
+                  "value_before": {
+                    "explained_variance": -0.00263976631777596,
+                    "mse": 33.445404345535806
+                  }
+                }
+              ]
+            }
+          },
+          "zero_train": {
+            "critic_probe": {
+              "episode_done_count": 2,
+              "episode_value_episode_mc": {
+                "bias": -29.731295771756365,
+                "explained_variance": 0.010459802797988527,
+                "mse": 1138.7724107870436,
+                "prediction_mean": 0.40493637630483137,
+                "prediction_std": 0.16607046860414124,
+                "target_mean": 30.136232148061197,
+                "target_std": 16.047305985874242
+              },
+              "option_done_count": 12,
+              "option_value_episode_mc": {
+                "bias": -29.734722459785797,
+                "explained_variance": 0.010459997935040377,
+                "mse": 1138.9761320289565,
+                "prediction_mean": 0.40150968827540057,
+                "prediction_std": 0.1646224793596871,
+                "target_mean": 30.136232148061197,
+                "target_std": 16.047305985874242
+              },
+              "option_value_option_mc": {
+                "bias": -8.398890232006863,
+                "explained_variance": -0.00003458454472426986,
+                "mse": 128.41112757149472,
+                "prediction_mean": 0.40150968827540057,
+                "prediction_std": 0.1646224793596871,
+                "target_mean": 8.800399920282265,
+                "target_std": 7.607086769042766
+              },
+              "recalibrated_advantage_alignment": {
+                "correlation": 0.8655584221131243,
+                "normalized_rms_difference": 0.5185394287109375,
+                "normalized_sign_disagreement": 0.145
+              },
+              "same_value_boundary_alignment": {
+                "correlation": 0.8655383469910548,
+                "normalized_rms_difference": 0.5185781717300415,
+                "normalized_sign_disagreement": 0.145
+              }
+            },
+            "updates": {
+              "episode_credit": [
+                {
+                  "clip_fraction": 0.15666666626930237,
+                  "kl_max": 0.012485142524181321,
+                  "kl_mean": 0.008312394106571183,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04527420144344086,
+                  "value_after": {
+                    "explained_variance": 0.009223421925101283,
+                    "mse": 48.21077556845383
+                  },
+                  "value_before": {
+                    "explained_variance": 0.0104565953732485,
+                    "mse": 49.63063708956843
+                  }
+                }
+              ],
+              "option_credit": [
+                {
+                  "clip_fraction": 0.1433333307504654,
+                  "kl_max": 0.0120360788945673,
+                  "kl_mean": 0.007685747155755659,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04353745802946354,
+                  "value_after": {
+                    "explained_variance": -0.0022207409208054862,
+                    "mse": 31.2114947470212
+                  },
+                  "value_before": {
+                    "explained_variance": 0.0008188012374253928,
+                    "mse": 32.2171789681472
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "critic_probe": {
+              "episode_done_count": 2,
+              "episode_value_episode_mc": {
+                "bias": -31.264005852579917,
+                "explained_variance": 0.010960096696960298,
+                "mse": 1259.4613749684083,
+                "prediction_mean": 0.40739558677887544,
+                "prediction_std": 0.16392397005862422,
+                "target_mean": 31.671401439358792,
+                "target_std": 16.8863426740805
+              },
+              "option_done_count": 6,
+              "option_value_episode_mc": {
+                "bias": -31.26489444443568,
+                "explained_variance": 0.011045635071259441,
+                "mse": 1259.4925464949442,
+                "prediction_mean": 0.40650699492311104,
+                "prediction_std": 0.16464048482864346,
+                "target_mean": 31.671401439358792,
+                "target_std": 16.8863426740805
+              },
+              "option_value_option_mc": {
+                "bias": -16.078680287415626,
+                "explained_variance": 0.002735661447841542,
+                "mse": 426.3098799968419,
+                "prediction_mean": 0.40650699492311104,
+                "prediction_std": 0.16464048482864346,
+                "target_mean": 16.48518728233874,
+                "target_std": 12.970974705605382
+              },
+              "recalibrated_advantage_alignment": {
+                "correlation": 0.9490453708864144,
+                "normalized_rms_difference": 0.3192322850227356,
+                "normalized_sign_disagreement": 0.05
+              },
+              "same_value_boundary_alignment": {
+                "correlation": 0.9490660871454735,
+                "normalized_rms_difference": 0.3191673755645752,
+                "normalized_sign_disagreement": 0.05
+              }
+            },
+            "updates": {
+              "episode_credit": [
+                {
+                  "clip_fraction": 0.17000000178813934,
+                  "kl_max": 0.012314039810786005,
+                  "kl_mean": 0.008513099339862674,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04581771245087315,
+                  "value_after": {
+                    "explained_variance": 0.017067675182468434,
+                    "mse": 52.613762428032445
+                  },
+                  "value_before": {
+                    "explained_variance": 0.016508819291134902,
+                    "mse": 54.157285091158606
+                  }
+                }
+              ],
+              "option_credit": [
+                {
+                  "clip_fraction": 0.5,
+                  "kl_max": 0.018198628185699485,
+                  "kl_mean": 0.012424985138891098,
+                  "level": "upper",
+                  "mean_action_change_rms": 0.039147390172266164,
+                  "value_after": {
+                    "explained_variance": -0.00033711278527159827,
+                    "mse": 1187.2177557588864
+                  },
+                  "value_before": {
+                    "explained_variance": -0.0009289351233687793,
+                    "mse": 1194.9881081106134
+                  }
+                },
+                {
+                  "clip_fraction": 0.1483333259820938,
+                  "kl_max": 0.011027833703060489,
+                  "kl_mean": 0.008080145279210287,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04464065202625532,
+                  "value_after": {
+                    "explained_variance": 0.005461730213419447,
+                    "mse": 46.65267506612589
+                  },
+                  "value_before": {
+                    "explained_variance": 0.0064811326663237745,
+                    "mse": 48.01985793433857
+                  }
+                }
+              ]
+            }
+          },
+          "zero_train": {
+            "critic_probe": {
+              "episode_done_count": 2,
+              "episode_value_episode_mc": {
+                "bias": -29.76923667232894,
+                "explained_variance": 0.010766525867295984,
+                "mse": 1175.9944070802587,
+                "prediction_mean": 0.4078332287996697,
+                "prediction_std": 0.16352820608233196,
+                "target_mean": 30.17706990112861,
+                "target_std": 17.115516671200936
+              },
+              "option_done_count": 6,
+              "option_value_episode_mc": {
+                "bias": -29.770383610894594,
+                "explained_variance": 0.010833256226257859,
+                "mse": 1176.0431473148055,
+                "prediction_mean": 0.40668629023401687,
+                "prediction_std": 0.16402998776276762,
+                "target_mean": 30.17706990112861,
+                "target_std": 17.115516671200936
+              },
+              "option_value_option_mc": {
+                "bias": -15.506160007263533,
+                "explained_variance": 0.0038480482287028828,
+                "mse": 406.13107051163206,
+                "prediction_mean": 0.40668629023401687,
+                "prediction_std": 0.16402998776276762,
+                "target_mean": 15.91284629749755,
+                "target_std": 12.896903452350868
+              },
+              "recalibrated_advantage_alignment": {
+                "correlation": 0.950831552739714,
+                "normalized_rms_difference": 0.31358712911605835,
+                "normalized_sign_disagreement": 0.04833333333333333
+              },
+              "same_value_boundary_alignment": {
+                "correlation": 0.95084644058534,
+                "normalized_rms_difference": 0.31353965401649475,
+                "normalized_sign_disagreement": 0.04833333333333333
+              }
+            },
+            "updates": {
+              "episode_credit": [
+                {
+                  "clip_fraction": 0.17666666209697723,
+                  "kl_max": 0.012641864836136735,
+                  "kl_mean": 0.00853659184923956,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04588036652357063,
+                  "value_after": {
+                    "explained_variance": 0.022505520107440558,
+                    "mse": 50.73504970960038
+                  },
+                  "value_before": {
+                    "explained_variance": 0.021111106596896412,
+                    "mse": 52.24617265739658
+                  }
+                }
+              ],
+              "option_credit": [
+                {
+                  "clip_fraction": 0.1550000011920929,
+                  "kl_max": 0.011400674886681013,
+                  "kl_mean": 0.008294464073227249,
+                  "level": "lower",
+                  "mean_action_change_rms": 0.04522859840908087,
+                  "value_after": {
+                    "explained_variance": 0.011126422838108385,
+                    "mse": 44.848019192969126
+                  },
+                  "value_before": {
+                    "explained_variance": 0.011316604158497556,
+                    "mse": 46.1856070502155
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "root": 310001
+    }
+  ],
+  "run_name": "pointmaze_episode_credit_stage63_preflight_20261001_r1",
+  "status": "preflight_passed"
+}

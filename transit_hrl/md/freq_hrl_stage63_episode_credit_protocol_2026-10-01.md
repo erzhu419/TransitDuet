@@ -14,4 +14,4 @@ This isolates credit plus its necessary lower critic recalibration, not credit a
 
 ## Execution
 
-Implementation committed as eef5006ecf. Scheduler t116620/node004 passed five Stage63 tests plus the existing Stage46 regression (six tests,54.120s). Exact Stage60 control reproduction, shared upper checkpoint states, scalar old values, episode boundaries and actual GAE counts passed. Actual archive preflight is next; full native evaluation remains gated.
+Implementation committed as eef5006ecf. Scheduler t116620/node004 passed five Stage63 tests plus the existing Stage46 regression (six tests,54.120s). Actual archive preflight t116623/node006 and qualification t116626/node001 passed exact Stage60 control reproduction, shared upper states, critic probe criteria and complete cost accounting. Full archive comparison is next; native evaluation remains gated.
