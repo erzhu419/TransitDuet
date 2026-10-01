@@ -13,6 +13,8 @@ Stage74's normal-execution base reward was descriptively below zero-residual by 
 
 Preflight `pointmaze_upper_paths_stage75_preflight_20261001_r1`: t118800/t118801 both done0 on node006; all16 original-production comparisons passed, 48 episodes /14,400 steps /216 upper calls, source and Adam unchanged. Root computation took16.85 seconds. Six new tests and three original-plan regression tests passed locally. This releases the frozen full matrix without a performance-based selection.
 
+Full `pointmaze_upper_paths_stage75_full_20261001_r1`: t118808..t118815 launched dynamically on node004/001/005/006 (two roots per selected node); t118816 waits for all completion markers. All eight roots completed their period50 factorial block at startup inspection; no native raw traces or checkpoints were pulled.
+
 ## Limits
 
 Mixed paths are interventions, not coherent deployment plans. These teacher-initialized development roots do not establish joint-HRL training, OOD generalization or frequency superiority. Stage67 HOLD remains unchanged; this experiment diagnoses the upper execution interface and does not adopt an actor or choose a winning path.

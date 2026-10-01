@@ -1,0 +1,121 @@
+{
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "preflight": false,
+  "preflight_tasks": [
+    "t118800",
+    "t118801"
+  ],
+  "protocol": "pointmaze_upper_paths_stage75_v1",
+  "run_name": "pointmaze_upper_paths_stage75_full_20261001_r1",
+  "source_revision": "1b847e3fa2cca5f6b7b0230bcda424c5776c409e",
+  "tasks": [
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118808",
+      "node": "node004",
+      "peak_ram_mb": 4198,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310011,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118809",
+      "node": "node001",
+      "peak_ram_mb": 4182,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310023,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118810",
+      "node": "node005",
+      "peak_ram_mb": 4169,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310037,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118811",
+      "node": "node006",
+      "peak_ram_mb": 4216,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310049,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118812",
+      "node": "node004",
+      "peak_ram_mb": 4171,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310061,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118813",
+      "node": "node001",
+      "peak_ram_mb": 4206,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310073,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118814",
+      "node": "node005",
+      "peak_ram_mb": 4202,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310089,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 9,
+      "exit_code": null,
+      "id": "t118815",
+      "node": "node006",
+      "peak_ram_mb": 4210,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/full",
+      "role": "native_factorial_path_diagnosis",
+      "root": 310101,
+      "status": "running"
+    },
+    {
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t118816",
+      "node": null,
+      "peak_ram_mb": 0,
+      "ram_mb": 2048,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null,
+      "status": "queued"
+    }
+  ]
+}
