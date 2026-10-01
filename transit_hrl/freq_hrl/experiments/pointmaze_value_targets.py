@@ -54,12 +54,12 @@ class ValueFit:
         state[head + ".bias"] = state[head + ".bias"] * self.scale + self.location
         return state
 
-    def update(self, lower, target, *, root, period, iteration):
+    def update(self, lower, target, *, root, period, iteration, phase="warmup"):
         model, cfg = self.model, self.model.config
         state = torch.as_tensor(lower.value_state, dtype=torch.float32, device=model.device)
         target_t = (torch.as_tensor(target, dtype=torch.float32, device=model.device) - self.location) / self.scale
         indices, count, losses, norms = np.arange(lower.size), 0, [], []
-        np.random.seed(spec.source.source.source.previous.shuffle_seed(root, period, iteration, phase="warmup", level="lower"))
+        np.random.seed(spec.source.source.source.previous.shuffle_seed(root, period, iteration, phase=phase, level="lower"))
         minibatch = min(cfg.minibatch_size, lower.size)
         for _ in range(max(1, cfg.epochs)):
             np.random.shuffle(indices)
