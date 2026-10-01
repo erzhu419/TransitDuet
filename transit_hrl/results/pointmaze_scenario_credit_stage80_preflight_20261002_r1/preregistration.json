@@ -1,0 +1,176 @@
+{
+  "artifacts": {
+    "native_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_parameter_perturbations": 16,
+    "actor_score_backward_batches": 128,
+    "actor_score_forward_batches": 32,
+    "credit_episodes": 16,
+    "decoder_loads": 2,
+    "evaluation_episodes": 80,
+    "exact_kl_forward_batches": 32,
+    "fisher_jvp_batches": 16,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 32,
+    "native_episodes": 96,
+    "native_lower_calls": 28800,
+    "native_network_checks": 96,
+    "native_pair_checks": 8,
+    "native_steps": 28800,
+    "native_upper_calls": 432,
+    "objective_checks": 16,
+    "pairing_upper_forward_calls": 432,
+    "scenario_pair_checks": 8,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "artifacts": "server_memory_training_batches_compact_JSON_only_no_trace_or_candidate_checkpoint_writes",
+    "baseline_candidate": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "baseline_control": "remaining_primitive_steps_times_opposite_disjoint_scenario_batch_mean_reward_rate",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "direction_validation_only_no_actor_adoption_Stage67_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "direction": "negative_raw_MC_loss_gradient_all_actor_parameters_no_entropy_or_advantage_normalization",
+    "limits": "offline_training_control_variate_uses_other_rollout_future_not_inference_input_not_a_state_value_fit_or_joint_HRL_proof",
+    "noise_units": "average_gradients_within_scenario_then_measure_covariance_across_independent_scenario_groups",
+    "pairing": "same_environment_and_stepwise_lower_noise_same_standardized_upper_noise_not_same_proposals",
+    "periods": [
+      50,
+      100
+    ],
+    "perturbation": "separate_upper_lower_symmetric_Fisher_radius_.001_exact_raw_Gaussian_KL_check_no_radius_sweep",
+    "sampling": "two_disjoint_batches_16_scenarios_each_two_independent_noise_replicates_exact_initial_physical_and_exogenous_history_match",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "38_reward_and8_credit_contrasts_equal_root_bootstrap65536_Bonferroni46_no_threshold_or_reward_selection",
+    "variants": [
+      "base",
+      "zero",
+      "upper_rate_plus",
+      "upper_rate_minus",
+      "upper_scenario_plus",
+      "upper_scenario_minus",
+      "lower_rate_plus",
+      "lower_rate_minus",
+      "lower_scenario_plus",
+      "lower_scenario_minus"
+    ]
+  },
+  "endpoints": [
+    "50/base_minus_zero",
+    "50/upper_rate_plus_minus_upper_rate_minus",
+    "50/upper_rate_plus_minus_base",
+    "50/upper_rate_minus_minus_base",
+    "50/upper_rate_plus_minus_zero",
+    "50/upper_scenario_plus_minus_upper_scenario_minus",
+    "50/upper_scenario_plus_minus_base",
+    "50/upper_scenario_minus_minus_base",
+    "50/upper_scenario_plus_minus_zero",
+    "50/lower_rate_plus_minus_lower_rate_minus",
+    "50/lower_rate_plus_minus_base",
+    "50/lower_rate_minus_minus_base",
+    "50/lower_rate_plus_minus_zero",
+    "50/lower_scenario_plus_minus_lower_scenario_minus",
+    "50/lower_scenario_plus_minus_base",
+    "50/lower_scenario_minus_minus_base",
+    "50/lower_scenario_plus_minus_zero",
+    "50/upper_scenario_plus_minus_upper_rate_plus",
+    "50/lower_scenario_plus_minus_lower_rate_plus",
+    "100/base_minus_zero",
+    "100/upper_rate_plus_minus_upper_rate_minus",
+    "100/upper_rate_plus_minus_base",
+    "100/upper_rate_minus_minus_base",
+    "100/upper_rate_plus_minus_zero",
+    "100/upper_scenario_plus_minus_upper_scenario_minus",
+    "100/upper_scenario_plus_minus_base",
+    "100/upper_scenario_minus_minus_base",
+    "100/upper_scenario_plus_minus_zero",
+    "100/lower_rate_plus_minus_lower_rate_minus",
+    "100/lower_rate_plus_minus_base",
+    "100/lower_rate_minus_minus_base",
+    "100/lower_rate_plus_minus_zero",
+    "100/lower_scenario_plus_minus_lower_scenario_minus",
+    "100/lower_scenario_plus_minus_base",
+    "100/lower_scenario_minus_minus_base",
+    "100/lower_scenario_plus_minus_zero",
+    "100/upper_scenario_plus_minus_upper_rate_plus",
+    "100/lower_scenario_plus_minus_lower_rate_plus",
+    "50/upper/scenario_minus_rate_cosine",
+    "50/upper/log_rate_over_scenario_gradient_variance",
+    "50/lower/scenario_minus_rate_cosine",
+    "50/lower/log_rate_over_scenario_gradient_variance",
+    "100/upper/scenario_minus_rate_cosine",
+    "100/upper/log_rate_over_scenario_gradient_variance",
+    "100/lower/scenario_minus_rate_cosine",
+    "100/lower/log_rate_over_scenario_gradient_variance"
+  ],
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "credit_scenarios_per_batch": 2,
+    "evaluation_episodes": 4,
+    "rollouts_per_scenario": 2,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_scenario_credit_stage80_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "credit_A": [
+        {
+          "noise_seeds": [
+            80092002,
+            80092003
+          ],
+          "scenario_seed": 80090001
+        },
+        {
+          "noise_seeds": [
+            80092004,
+            80092005
+          ],
+          "scenario_seed": 80090002
+        }
+      ],
+      "credit_B": [
+        {
+          "noise_seeds": [
+            80093002,
+            80093003
+          ],
+          "scenario_seed": 80091001
+        },
+        {
+          "noise_seeds": [
+            80093004,
+            80093005
+          ],
+          "scenario_seed": 80091002
+        }
+      ],
+      "native_evaluation": [
+        80095001,
+        80095002,
+        80095003,
+        80095004
+      ]
+    }
+  },
+  "source_revision": "d1dbcf686bd3f7a2ad4257e50ebe6584aed18510"
+}
