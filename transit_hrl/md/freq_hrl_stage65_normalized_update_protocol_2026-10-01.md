@@ -15,3 +15,7 @@ Dynamic scheduler node001-node006;9CPU/6GB full,2CPU/2GB tests/preflight/qualifi
 ## Limitations
 
 One update on reused teacher-initialized development roots does not establish full-training stability, frequency-specific superiority, OOD or equal-FLOPs gains. The common upper is controlled rather than newly optimized; deterministic native evaluation does not establish stochastic deployment gains.
+
+## Execution
+
+Scientific preregistration d5ab6f0fc2 precedes native evaluation; later resource/accounting amendments retain all roots, treatments, endpoints and budgets. Initial fixture comparison errors are retained in t116804/t116810. Four Stage64 regression tests passed in t116810; four new unit/integration tests passed in t116814/node006 (62.141s), including exact raw-core/Adam continuation, serialized normalized Adam recovery, public reward-unit GAE, shared upper and archive-to-native cost accounting. Actual MuJoCo preflight t116815 is registered; full native reward results remain pending.
