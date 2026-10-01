@@ -94,7 +94,7 @@ def init_worker(config, args):
 
 def train(root, *, preflight, output):
     source = json.loads(spec.source_result(root, preflight=preflight).read_text())
-    _, _, failures = values.qualify(source, preflight=preflight)
+    _, source_steps, failures = values.qualify(source, preflight=preflight)
     if source["root"] != root or (failures and not preflight):
         raise ValueError("Stage65 full candidate critic prerequisite failed")
     if not preflight:
@@ -205,6 +205,7 @@ def train(root, *, preflight, output):
     result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
         "preflight": preflight, "options": opt, "seed_roles": roles, "budget": budget, "archive_cost": cost,
         "source_initialization": initialization, "source_critic_budget": source["budget"], "source_critic_cost": source["cost"],
+        "source_critic_value_optimizer_steps": source_steps,
         "groups": groups, "evaluation_rows": evaluations, "new_forecaster_fits": 0, "new_training_native_steps": 0,
         "wall_seconds": time.monotonic() - started}
     _, counts, _, _ = qualify(result, preflight=preflight)
@@ -320,6 +321,8 @@ def aggregate(cells, *, preflight):
         "contract": spec.contract(), "root_rows": rows, "native_evaluation_counts": counts, "executed_optimizer_and_guard_cost": totals,
         "archive_cost": {k: sum(c["archive_cost"][k] for c in cells) for k in spec.budget(preflight=preflight)["archive"]},
         "native_trace_audits": sum(c["native_trace_audits"] for c in cells), "frozen_actors": frozen,
+        "upstream_Stage64_cost": {k: sum(c["source_critic_cost"][k] for c in cells) for k in spec.source.budget(preflight=preflight)},
+        "upstream_Stage64_value_optimizer_steps": {k: sum(c["source_critic_value_optimizer_steps"][k] for c in cells) for k in spec.source.TREATMENTS},
         "mechanical_gate": "failed" if frozen else "passed", "new_forecaster_fits": 0, "new_training_native_steps": 0}
     if not preflight:
         x = np.asarray([[r["endpoints"][key] for key in spec.ENDPOINTS] for r in rows])

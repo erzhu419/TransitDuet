@@ -15,7 +15,7 @@ from freq_hrl.experiments import pointmaze_matched_upper as previous
 from freq_hrl.experiments import pointmaze_joint_renewal as joint
 from scripts import pointmaze_normalized_update_stage65_spec as spec
 from scripts.submit_pointmaze_normalized_update_stage65_scheduleurm import task_specification
-from test_pointmaze_value_targets import ValueTargetsTest
+import test_pointmaze_value_targets as value_fixtures
 from test_pointmaze_joint_renewal import DenseTask
 from test_pointmaze_update_isolation import ImmediatePool
 
@@ -23,8 +23,8 @@ from test_pointmaze_update_isolation import ImmediatePool
 class NormalizedUpdateTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ValueTargetsTest.setUpClass()
-        cls.helper = ValueTargetsTest()
+        value_fixtures.ValueTargetsTest.setUpClass()
+        cls.helper = value_fixtures.ValueTargetsTest()
 
     def checkpoint(self, fit, *, period=50, arm="zero_train"):
         return {"protocol": spec.source.EXPERIMENT_PROTOCOL, "root": 310001, "period": period, "arm": arm,
@@ -37,7 +37,7 @@ class NormalizedUpdateTest(unittest.TestCase):
         # Start both Adam states before testing exact continuation, not just initialization.
         guarded.guarded_update(model, batch, level="lower", root=310001, period=50, episode_count=1,
             guard_type=guarded.BacktrackingKLGuard)
-        for phase in (1, 2):
+        for _ in range(2):
             core, fit = copy.deepcopy(model), values.ValueFit(copy.deepcopy(model), "gae_raw")
             expected = guarded.guarded_update(core, batch, level="lower", root=310001, period=50, episode_count=1,
                 guard_type=guarded.BacktrackingKLGuard)
@@ -47,7 +47,9 @@ class NormalizedUpdateTest(unittest.TestCase):
             self.assertEqual(actual["kl_mean"], expected["kl_mean"])
             self.assertEqual(actual["actor_optimizer_steps"], expected["optimizer_steps"]["lower_actor_optimizer_steps"])
             self.assertEqual(value["value_optimizer_steps"], expected["optimizer_steps"]["lower_value_optimizer_steps"])
-            torch.testing.assert_close(core.state_dict(), fit.model.state_dict(), atol=0, rtol=0)
+            expected_state, actual_state = core.state_dict(), fit.model.state_dict()
+            self.assertEqual(expected_state.pop("config"), actual_state.pop("config"))
+            torch.testing.assert_close(expected_state, actual_state, atol=0, rtol=0)
             model = core
 
     def test_normalized_checkpoint_resume_keeps_frame_adam_and_reward_unit_gae(self):
@@ -70,7 +72,9 @@ class NormalizedUpdateTest(unittest.TestCase):
             f.update(batch.lower, mc, root=310001, period=50, iteration=1, phase="train")
             self.assertEqual((f.location, f.scale), (payload["location"], payload["scale"]))
             self.assertGreater(actual["guard"]["retained_actor_steps"], 0)
-        torch.testing.assert_close(fit.model.state_dict(), resumed.model.state_dict(), atol=0, rtol=0)
+        expected_state, actual_state = fit.model.state_dict(), resumed.model.state_dict()
+        self.assertEqual(expected_state.pop("config"), actual_state.pop("config"))
+        torch.testing.assert_close(expected_state, actual_state, atol=0, rtol=0)
         bad = copy.deepcopy(payload)
         bad["value_training_state"] = bad["public_value_state"]
         with self.assertRaises(AssertionError):
