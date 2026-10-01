@@ -24,6 +24,11 @@ class NativeUpdateTest(unittest.TestCase):
     def setUpClass(cls):
         torch.set_num_threads(1)
 
+    def assert_model_state(self, actual, expected):
+        actual, expected = dict(actual), dict(expected)
+        self.assertEqual(actual.pop("config"), expected.pop("config"))
+        torch.testing.assert_close(actual, expected, atol=0, rtol=0)
+
     def test_fresh_paired_paths_frozen_budget_and_dynamic_pool(self):
         b = spec.budget(preflight=False)
         self.assertEqual(8 * b["native_trace_audits"], 1792)
@@ -87,7 +92,7 @@ class NativeUpdateTest(unittest.TestCase):
         def observed(pool, candidate, predictor, args, **kwargs):
             before = copy.deepcopy(candidate.state_dict())
             rows = evaluate(pool, candidate, predictor, args, **kwargs)
-            torch.testing.assert_close(candidate.state_dict(), before, atol=0, rtol=0)
+            self.assert_model_state(candidate.state_dict(), before)
             snapshots[str(kwargs["directory"])] = before
             return rows
         with tempfile.TemporaryDirectory() as directory:
@@ -122,7 +127,7 @@ class NativeUpdateTest(unittest.TestCase):
                             saved = torch.load(file, map_location="cpu", weights_only=False)
                             self.assertEqual((saved["protocol"], saved["root"], saved["period"], saved["arm"], saved["treatment"]),
                                 (spec.EXPERIMENT_PROTOCOL, 310001, int(p), arm, treatment))
-                            torch.testing.assert_close(saved["state_dict"], snapshots[str(Path(file).parent)], atol=0, rtol=0)
+                            self.assert_model_state(saved["state_dict"], snapshots[str(Path(file).parent)])
                 self.assertEqual(summary["status"], "preflight_passed")
                 self.assertEqual(summary["native_evaluation_counts"], spec.budget(preflight=True)["native_evaluation"])
                 self.assertEqual(summary["native_trace_audits"], 28)
