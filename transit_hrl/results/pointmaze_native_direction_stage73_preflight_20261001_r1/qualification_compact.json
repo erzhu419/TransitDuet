@@ -1,0 +1,478 @@
+{
+  "contract": {
+    "artifacts": "no_native_raw_trace_or_candidate_checkpoint_writes_compact_JSON_only",
+    "decision": "forward_response_audit_only_no_optimizer_critic_or_forecaster_fit_no_policy_adoption_Stage67_HOLD_unchanged",
+    "directions": [
+      "gae_control",
+      "gae_factored",
+      "native_mc"
+    ],
+    "execution": "same_Stage57_training_distribution_both_actors_sampled_fixed50_100_zero_normal_execution",
+    "fisher": "conditional_diagonal_Gaussian_Fisher_via_functional_JVP_including_native_std_clamp",
+    "fisher_radius": 0.001,
+    "fitting": "all_Stage57_historical_warmup_only_no_Stage69_or_fresh_native_labels",
+    "gae_directions": "mean_of_separately_PPO_normalized_warmup_batch_loss_gradients_plus_unchanged_entropy_coefficient",
+    "limits": "finite_radius_response_not_infinitesimal_gradient_teacher_initialized_development_roots_not_full_training_generalization_or_frequency_claim",
+    "native_direction": "raw_undiscounted_MC_episode_loss_gradient_first_historical_reward_rate_time_baseline_no_entropy",
+    "native_pairing": "fresh_environment_seeds_same_stepwise_lower_noise_initial_policy_rng_and_fixed_upper_proposals_all_seven_variants",
+    "perturbation": "negative_L2_normalized_loss_gradient_all_lower_actor_parameters_same_plus_minus_step_sqrt(2_delta/F)",
+    "radius_check": "historical_average_of_exact_plus_minus_old_to_new_KL_between_half_and_twice_nominal_delta_no_radius_sweep",
+    "source": "pointmaze_objective_audit_stage72_v1",
+    "statistics": "equal_root_paired_reward_means_percentile_root_bootstrap_two_sided_Bonferroni36_all_endpoints",
+    "variants": [
+      "base",
+      "gae_control_plus",
+      "gae_control_minus",
+      "gae_factored_plus",
+      "gae_factored_minus",
+      "native_mc_plus",
+      "native_mc_minus"
+    ]
+  },
+  "cost": {
+    "actor_parameter_perturbations": 24,
+    "actor_score_backward_batches": 80,
+    "actor_score_forward_batches": 16,
+    "archive_network_checks": 16,
+    "calibration_archive_episodes": 16,
+    "calibration_radius_checks": 12,
+    "calibration_value_rows": 9600,
+    "critic_checkpoint_loads": 8,
+    "exact_kl_forward_batches": 48,
+    "fisher_jvp_batches": 24,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 10,
+    "gae_calls": 16,
+    "historical_direction_fits": 12,
+    "historical_reward_rate_fits": 4,
+    "mc_calls": 8,
+    "native_episodes": 112,
+    "native_lower_calls": 33600,
+    "native_network_checks": 112,
+    "native_pair_checks": 16,
+    "native_steps": 33600,
+    "native_upper_calls": 504,
+    "reconstructed_lower_calls": 4800,
+    "reconstructed_upper_calls": 72,
+    "source_clone_loads": 2
+  },
+  "endpoints": {
+    "100/joint_ppo/gae_control/minus_base": {
+      "mean": -1.4207867512456076
+    },
+    "100/joint_ppo/gae_control/plus_base": {
+      "mean": -8.427604744640139
+    },
+    "100/joint_ppo/gae_control/plus_minus": {
+      "mean": -7.006817993394531
+    },
+    "100/joint_ppo/gae_factored/minus_base": {
+      "mean": 0.1584946297341574
+    },
+    "100/joint_ppo/gae_factored/plus_base": {
+      "mean": -4.701519619941905
+    },
+    "100/joint_ppo/gae_factored/plus_minus": {
+      "mean": -4.8600142496760625
+    },
+    "100/joint_ppo/native_mc/minus_base": {
+      "mean": 5.684588533278095
+    },
+    "100/joint_ppo/native_mc/plus_base": {
+      "mean": -13.612414775742955
+    },
+    "100/joint_ppo/native_mc/plus_minus": {
+      "mean": -19.29700330902105
+    },
+    "100/zero_train/gae_control/minus_base": {
+      "mean": 4.03656762864366
+    },
+    "100/zero_train/gae_control/plus_base": {
+      "mean": -2.514263487776823
+    },
+    "100/zero_train/gae_control/plus_minus": {
+      "mean": -6.550831116420483
+    },
+    "100/zero_train/gae_factored/minus_base": {
+      "mean": 1.3932207915788482
+    },
+    "100/zero_train/gae_factored/plus_base": {
+      "mean": -1.6825139320810294
+    },
+    "100/zero_train/gae_factored/plus_minus": {
+      "mean": -3.0757347236598775
+    },
+    "100/zero_train/native_mc/minus_base": {
+      "mean": 5.784366087216966
+    },
+    "100/zero_train/native_mc/plus_base": {
+      "mean": -13.55859554936843
+    },
+    "100/zero_train/native_mc/plus_minus": {
+      "mean": -19.342961636585397
+    },
+    "50/joint_ppo/gae_control/minus_base": {
+      "mean": 1.6084511537888808
+    },
+    "50/joint_ppo/gae_control/plus_base": {
+      "mean": 3.6457208734079565
+    },
+    "50/joint_ppo/gae_control/plus_minus": {
+      "mean": 2.0372697196190757
+    },
+    "50/joint_ppo/gae_factored/minus_base": {
+      "mean": 0.7466119197367291
+    },
+    "50/joint_ppo/gae_factored/plus_base": {
+      "mean": 5.792962845801682
+    },
+    "50/joint_ppo/gae_factored/plus_minus": {
+      "mean": 5.046350926064953
+    },
+    "50/joint_ppo/native_mc/minus_base": {
+      "mean": 11.924409357806049
+    },
+    "50/joint_ppo/native_mc/plus_base": {
+      "mean": -1.5005544277815943
+    },
+    "50/joint_ppo/native_mc/plus_minus": {
+      "mean": -13.424963785587643
+    },
+    "50/zero_train/gae_control/minus_base": {
+      "mean": 1.8487621136078936
+    },
+    "50/zero_train/gae_control/plus_base": {
+      "mean": 5.414358471814531
+    },
+    "50/zero_train/gae_control/plus_minus": {
+      "mean": 3.565596358206637
+    },
+    "50/zero_train/gae_factored/minus_base": {
+      "mean": 0.8415327669397321
+    },
+    "50/zero_train/gae_factored/plus_base": {
+      "mean": 6.875884039172689
+    },
+    "50/zero_train/gae_factored/plus_minus": {
+      "mean": 6.034351272232957
+    },
+    "50/zero_train/native_mc/minus_base": {
+      "mean": 12.510477340099623
+    },
+    "50/zero_train/native_mc/plus_base": {
+      "mean": 0.1396654684373253
+    },
+    "50/zero_train/native_mc/plus_minus": {
+      "mean": -12.370811871662298
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_planning_cost": {
+    "actor_context_evaluations": 33600,
+    "plan_ols_fits": 392,
+    "plan_ridge_predictions": 392,
+    "reference_evaluations": 33600
+  },
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "none_forward_direction_response_only",
+  "protocol": "pointmaze_native_direction_stage73_v1",
+  "root_rows": [
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "actor_parameter_perturbations": 24,
+        "actor_score_backward_batches": 80,
+        "actor_score_forward_batches": 16,
+        "archive_network_checks": 16,
+        "calibration_archive_episodes": 16,
+        "calibration_radius_checks": 12,
+        "calibration_value_rows": 9600,
+        "critic_checkpoint_loads": 8,
+        "exact_kl_forward_batches": 48,
+        "fisher_jvp_batches": 24,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 10,
+        "gae_calls": 16,
+        "historical_direction_fits": 12,
+        "historical_reward_rate_fits": 4,
+        "mc_calls": 8,
+        "native_episodes": 112,
+        "native_lower_calls": 33600,
+        "native_network_checks": 112,
+        "native_pair_checks": 16,
+        "native_steps": 33600,
+        "native_upper_calls": 504,
+        "reconstructed_lower_calls": 4800,
+        "reconstructed_upper_calls": 72,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 1.6084511537888808,
+                "plus_base": 3.6457208734079565,
+                "plus_minus": 2.0372697196190757
+              },
+              "gae_factored": {
+                "minus_base": 0.7466119197367291,
+                "plus_base": 5.792962845801682,
+                "plus_minus": 5.046350926064953
+              },
+              "native_mc": {
+                "minus_base": 11.924409357806049,
+                "plus_base": -1.5005544277815943,
+                "plus_minus": -13.424963785587643
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010010964037268704,
+                  "plus": 0.0009989048521874477
+                },
+                "fisher_quadratic": 53.383310314060104,
+                "historical_loss_gradient_norm": 0.5972597082714114,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006120857197586191
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010012091720055325,
+                  "plus": 0.0009987922381925396
+                },
+                "fisher_quadratic": 50.621573345536,
+                "historical_loss_gradient_norm": 0.5518388429314923,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006285606341070652
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009997198744874283,
+                  "plus": 0.0010002801493187068
+                },
+                "fisher_quadratic": 53.9965680096687,
+                "historical_loss_gradient_norm": 24.93354908625621,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0060859995965727165
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.5298848692824443,
+              "sample_count": 600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 1.8487621136078936,
+                "plus_base": 5.414358471814531,
+                "plus_minus": 3.565596358206637
+              },
+              "gae_factored": {
+                "minus_base": 0.8415327669397321,
+                "plus_base": 6.875884039172689,
+                "plus_minus": 6.034351272232957
+              },
+              "native_mc": {
+                "minus_base": 12.510477340099623,
+                "plus_base": 0.1396654684373253,
+                "plus_minus": -12.370811871662298
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010010939434440156,
+                  "plus": 0.0009989069606477913
+                },
+                "fisher_quadratic": 53.30764256680494,
+                "historical_loss_gradient_norm": 0.5954603391711044,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.00612519979476464
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.0010012067898984762,
+                  "plus": 0.0009987944855128963
+                },
+                "fisher_quadratic": 50.56932462983962,
+                "historical_loss_gradient_norm": 0.5494294407170152,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006288852677407354
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009997150523470813,
+                  "plus": 0.001000285194178086
+                },
+                "fisher_quadratic": 53.96483804101499,
+                "historical_loss_gradient_norm": 24.95490927388105,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006087788541059805
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.530153464525938,
+              "sample_count": 600
+            },
+            "pairing": "passed"
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "effects": {
+              "gae_control": {
+                "minus_base": -1.4207867512456076,
+                "plus_base": -8.427604744640139,
+                "plus_minus": -7.006817993394531
+              },
+              "gae_factored": {
+                "minus_base": 0.1584946297341574,
+                "plus_base": -4.701519619941905,
+                "plus_minus": -4.8600142496760625
+              },
+              "native_mc": {
+                "minus_base": 5.684588533278095,
+                "plus_base": -13.612414775742955,
+                "plus_minus": -19.29700330902105
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.0010011754285058115,
+                  "plus": 0.0009988258029552488
+                },
+                "fisher_quadratic": 52.469749502403566,
+                "historical_loss_gradient_norm": 0.5756718633606794,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006173912958961987
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001001339785630535,
+                  "plus": 0.0009986616308068482
+                },
+                "fisher_quadratic": 48.519261123904734,
+                "historical_loss_gradient_norm": 0.5227528384504766,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.0064203382416582
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998207941037535,
+                  "plus": 0.0010001793738574714
+                },
+                "fisher_quadratic": 61.60928331324109,
+                "historical_loss_gradient_norm": 24.853463267718375,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.005697599516095451
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.532601807564497,
+              "sample_count": 600
+            },
+            "pairing": "passed"
+          },
+          "zero_train": {
+            "effects": {
+              "gae_control": {
+                "minus_base": 4.03656762864366,
+                "plus_base": -2.514263487776823,
+                "plus_minus": -6.550831116420483
+              },
+              "gae_factored": {
+                "minus_base": 1.3932207915788482,
+                "plus_base": -1.6825139320810294,
+                "plus_minus": -3.0757347236598775
+              },
+              "native_mc": {
+                "minus_base": 5.784366087216966,
+                "plus_base": -13.55859554936843,
+                "plus_minus": -19.342961636585397
+              }
+            },
+            "geometry": {
+              "gae_control": {
+                "exact_kl": {
+                  "minus": 0.001001177014983918,
+                  "plus": 0.0009988242898801734
+                },
+                "fisher_quadratic": 52.508592795977115,
+                "historical_loss_gradient_norm": 0.5751562568783058,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006171628956781765
+              },
+              "gae_factored": {
+                "exact_kl": {
+                  "minus": 0.001001339959410093,
+                  "plus": 0.000998661985045916
+                },
+                "fisher_quadratic": 48.64768183083486,
+                "historical_loss_gradient_norm": 0.5223373222960395,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.006411858400501467
+              },
+              "native_mc": {
+                "exact_kl": {
+                  "minus": 0.0009998261323670952,
+                  "plus": 0.0010001738376299138
+                },
+                "fisher_quadratic": 61.41317546149145,
+                "historical_loss_gradient_norm": 24.76325326016142,
+                "nominal_fisher_kl": 0.001,
+                "radius_check": "passed",
+                "step": 0.005706689205917354
+              }
+            },
+            "model_and_Adam_unchanged": "passed",
+            "native_baseline_frame": {
+              "data_role": "first_historical_calibration_only",
+              "location": 0.5329620568454265,
+              "sample_count": 600
+            },
+            "pairing": "passed"
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 33600,
+        "plan_ols_fits": 392,
+        "plan_ridge_predictions": 392,
+        "reference_evaluations": 33600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "protocol": "pointmaze_native_direction_stage73_v1",
+      "root": 310001,
+      "status": "complete",
+      "wall_seconds": 41.09941349783912
+    }
+  ],
+  "run_name": "pointmaze_native_direction_stage73_preflight_20261001_r1",
+  "status": "preflight_passed"
+}
