@@ -2,7 +2,7 @@
   "protocol": "pointmaze_episode_credit_stage63_v1",
   "run_name": "pointmaze_episode_credit_stage63_full_20261001_r1",
   "preregistration_revision": "c215033712",
-  "snapshot": "after_launch_before_full_qualification",
+  "snapshot": "after_full_qualification",
   "allowed_nodes": [
     "node001",
     "node002",
@@ -18,82 +18,100 @@
       "log": "/tmp/sched_t116628.log",
       "node": "node005",
       "optimizer_root": 310011,
-      "status": "running",
+      "status": "done",
       "task_id": "t116628",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2560
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2560
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116629.log",
       "node": "node005",
       "optimizer_root": 310023,
-      "status": "running",
+      "status": "done",
       "task_id": "t116629",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2580
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2580
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116630.log",
       "node": "node004",
       "optimizer_root": 310037,
-      "status": "running",
+      "status": "done",
       "task_id": "t116630",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2774
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2774
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116631.log",
       "node": "node005",
       "optimizer_root": 310049,
-      "status": "running",
+      "status": "done",
       "task_id": "t116631",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2596
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2596
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116632.log",
       "node": "node005",
       "optimizer_root": 310061,
-      "status": "running",
+      "status": "done",
       "task_id": "t116632",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2595
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2595
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116633.log",
       "node": "node006",
       "optimizer_root": 310073,
-      "status": "running",
+      "status": "done",
       "task_id": "t116633",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2604
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2604
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116634.log",
       "node": "node006",
       "optimizer_root": 310089,
-      "status": "running",
+      "status": "done",
       "task_id": "t116634",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2623
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2623
     },
     {
       "cpu_cores": 9,
       "log": "/tmp/sched_t116635.log",
       "node": "node006",
       "optimizer_root": 310101,
-      "status": "running",
+      "status": "done",
       "task_id": "t116635",
       "submitted_ram_mb": 12288,
-      "observed_ram_mb": 2550
+      "exit_code": 0,
+      "observed_ram_mb_at_launch": 2550
     }
   ],
-  "qualification": "pending",
+  "qualification": {
+    "task_id": "t116638",
+    "node": "node004",
+    "status": "done",
+    "exit_code": 0,
+    "log": "/tmp/sched_t116638.log",
+    "result_status": "fixed_batch_valid",
+    "mechanical_gate": "passed",
+    "episode_critic_fit_gate": "failed",
+    "native_trial_prerequisite": "hold"
+  },
   "performance_claim": "none_archive_only"
 }
