@@ -1,9 +1,4 @@
 {
-  "protocol": "pointmaze_normalized_update_stage65_v1",
-  "run_name": "pointmaze_normalized_update_stage65_full_20261001_r1",
-  "preregistration_revision": "d5ab6f0fc2",
-  "implementation_revision": "317c4761f9",
-  "snapshot": "after_full_submission_before_full_qualification",
   "allowed_nodes": [
     "node001",
     "node002",
@@ -12,99 +7,128 @@
     "node005",
     "node006"
   ],
-  "require_node": null,
+  "completion_handoff": {
+    "integration_status": "passed",
+    "integration_task_id": "t116829",
+    "integration_tests": 2,
+    "synchronized_bytes": 792,
+    "traces_and_weights": "server_only"
+  },
+  "implementation_revision": "317c4761f9",
+  "performance_claim": "no_supported_native_reward_gain",
+  "placement_wait_at_snapshot": "no fit (prio=normal): node001=cpu: need 9, free 0/192 observed_free=25 slot_free=62 startup_hold=5 hold_release<=10s reserve=20 | node002=cpu: need 9, free 4/192 observed_free=29 slot_free=58 startup_hold=5 hold_release<=10s reserve=20 | node003=cpu: need 9, free 0/192 observed_free=21 slot_free=112 startup_hold=1 hold_release<=10s reserve=20 | node004=cpu: need 9, free 0/192 observed_free=19 slot_free=14 reserve=20 | node005=cpu: need 9, free 0/192 observed_free=35 slot_free=6 startup_hold=15 hold_release<=10s reserve=20 | node006=ram: need 6144MB, free 19926MB (headroom 19279MB) | node007=outside-allowed-nodes",
   "preflight": {
-    "task_id": "t116815",
-    "qualification_task_id": "t116816",
+    "exit_code": 0,
+    "frozen_actors": 0,
+    "mechanical_gate": "passed",
     "node": "node006",
+    "qualification_task_id": "t116816",
     "status": "done",
+    "task_id": "t116815"
+  },
+  "preregistration_revision": "d5ab6f0fc2",
+  "protocol": "pointmaze_normalized_update_stage65_v1",
+  "qualification": {
+    "corrected_reward_intervals": "12/12 inconclusive",
     "exit_code": 0,
     "mechanical_gate": "passed",
-    "frozen_actors": 0
+    "node": "node004",
+    "repair_gain_gate": "failed",
+    "status": "done",
+    "task_id": "t116843",
+    "training_gain_gate": "failed"
   },
+  "require_node": null,
+  "run_name": "pointmaze_normalized_update_stage65_full_20261001_r1",
+  "snapshot": "after_full_qualification",
   "tasks": [
     {
-      "task_id": "t116817",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116817.log",
+      "node": "node005",
       "optimizer_root": 310011,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4300,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116817.log"
+      "status": "done",
+      "task_id": "t116817"
     },
     {
-      "task_id": "t116818",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116818.log",
+      "node": "node004",
       "optimizer_root": 310023,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4305,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116818.log"
+      "status": "done",
+      "task_id": "t116818"
     },
     {
-      "task_id": "t116819",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116819.log",
+      "node": "node001",
       "optimizer_root": 310037,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4347,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116819.log"
+      "status": "done",
+      "task_id": "t116819"
     },
     {
-      "task_id": "t116820",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116820.log",
+      "node": "node003",
       "optimizer_root": 310049,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4320,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116820.log"
+      "status": "done",
+      "task_id": "t116820"
     },
     {
-      "task_id": "t116821",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116821.log",
+      "node": "node006",
       "optimizer_root": 310061,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4270,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116821.log"
+      "status": "done",
+      "task_id": "t116821"
     },
     {
-      "task_id": "t116822",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116822.log",
+      "node": "node002",
       "optimizer_root": 310073,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4342,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116822.log"
+      "status": "done",
+      "task_id": "t116822"
     },
     {
-      "task_id": "t116823",
+      "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116823.log",
+      "node": "node004",
       "optimizer_root": 310089,
-      "status": "queued",
-      "node": null,
-      "cpu_cores": 9,
+      "peak_ram_mb": 4323,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116823.log"
+      "status": "done",
+      "task_id": "t116823"
     },
     {
-      "task_id": "t116824",
-      "optimizer_root": 310101,
-      "status": "queued",
-      "node": null,
       "cpu_cores": 9,
+      "exit_code": 0,
+      "log": "/tmp/sched_t116824.log",
+      "node": "node005",
+      "optimizer_root": 310101,
+      "peak_ram_mb": 4256,
       "ram_mb": 6144,
-      "exit_code": null,
-      "log": "/tmp/sched_t116824.log"
+      "status": "done",
+      "task_id": "t116824"
     }
-  ],
-  "placement_wait_at_snapshot": "no fit (prio=normal): node001=cpu: need 9, free 0/192 observed_free=25 slot_free=62 startup_hold=5 hold_release<=10s reserve=20 | node002=cpu: need 9, free 4/192 observed_free=29 slot_free=58 startup_hold=5 hold_release<=10s reserve=20 | node003=cpu: need 9, free 0/192 observed_free=21 slot_free=112 startup_hold=1 hold_release<=10s reserve=20 | node004=cpu: need 9, free 0/192 observed_free=19 slot_free=14 reserve=20 | node005=cpu: need 9, free 0/192 observed_free=35 slot_free=6 startup_hold=15 hold_release<=10s reserve=20 | node006=ram: need 6144MB, free 19926MB (headroom 19279MB) | node007=outside-allowed-nodes",
-  "qualification": "pending",
-  "performance_claim": "none_pending_full_native_results"
+  ]
 }

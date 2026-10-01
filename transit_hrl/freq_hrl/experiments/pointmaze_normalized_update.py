@@ -213,6 +213,8 @@ def train(root, *, preflight, output):
     result["native_evaluation_counts"] = counts
     result["native_trace_audits"] = budget["native_trace_audits"]
     write_json(output, result)
+    write_json(output.parent / "completion" / "ready.json", {
+        "protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
     return result
 
 

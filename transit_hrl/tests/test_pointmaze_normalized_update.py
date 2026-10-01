@@ -15,7 +15,7 @@ from freq_hrl.experiments import pointmaze_first_update as guarded
 from freq_hrl.experiments import pointmaze_matched_upper as previous
 from freq_hrl.experiments import pointmaze_joint_renewal as joint
 from scripts import pointmaze_normalized_update_stage65_spec as spec
-from scripts.submit_pointmaze_normalized_update_stage65_scheduleurm import task_specification
+from scripts.submit_pointmaze_normalized_update_stage65_scheduleurm import task_specification, qualification_task
 import test_pointmaze_value_targets as value_fixtures
 from test_pointmaze_joint_renewal import DenseTask
 from test_pointmaze_update_isolation import ImmediatePool
@@ -124,6 +124,8 @@ class NormalizedUpdateTest(unittest.TestCase):
             self.assertEqual(result["native_evaluation_counts"], spec.budget(preflight=True)["native_evaluation"])
             self.assertEqual(summary["mechanical_gate"], "passed")
             self.assertEqual(summary["native_trace_audits"], 24)
+            self.assertEqual(json.loads((d / "stage65/completion/ready.json").read_text()), {
+                "protocol": spec.EXPERIMENT_PROTOCOL, "root": 310001, "preflight": True})
             for p, groups in result["groups"].items():
                 self.assertEqual(result["evaluation_rows"][p]["zero_train"]["frozen_lower"], result["evaluation_rows"][p]["clone"])
                 for arm, cell in groups.items():
@@ -160,6 +162,23 @@ class NormalizedUpdateTest(unittest.TestCase):
             roles = spec.seed_roles(root, preflight=False)
             self.assertFalse(set(roles["evaluation"]).intersection(spec.source.seed_roles(root, preflight=False)["calibration"]))
             self.assertEqual(roles["first_training"], spec.source.seed_roles(root, preflight=False)["first_training_probe"])
+
+
+class SubmissionDependencyTest(unittest.TestCase):
+    def test_qualification_waits_for_every_root_and_pulls_only_completion_markers(self):
+        for preflight in (False, True):
+            roots = spec.roots(preflight=preflight)
+            task = qualification_task("unit_stage65_dependency", preflight=preflight)
+            self.assertEqual(len(task["wait_for_files"]), len(roots))
+            self.assertIsNone(task["result_dir"])
+            self.assertIsNone(task["local_result_dir"])
+            self.assertEqual("--preflight" in task["cmd"], preflight)
+            for root, marker in zip(roots, task["wait_for_files"]):
+                native = task_specification("unit_stage65_dependency", root, preflight=preflight)
+                self.assertEqual(Path(marker).parent, Path(native["local_result_dir"]))
+                self.assertEqual(native["result_dir"], native["local_result_dir"])
+                self.assertEqual(Path(marker).parts[-3:], (f"replicate_{root}", "completion", "ready.json"))
+                self.assertFalse(native.get("require_node"))
 
 
 if __name__ == "__main__":

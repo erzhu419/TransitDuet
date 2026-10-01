@@ -26,9 +26,27 @@ def task_specification(run_name, root, *, preflight):
         description=f"Freq-HRL Stage65 normalized actor/native root{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/native_{'preflight' if preflight else 'full'}",
+        result_dir=str(output.parent / "completion"), local_result_dir=str(output.parent / "completion"),
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "
             + shlex.join(command) + " && printf '%s\\n' 'Training complete: result.json written'",
         cpu_training_justification="Reused critic checkpoints, one paired guarded actor/value update and fresh native paths; persistent workers plus learner.")
+    return task
+
+
+def qualification_task(run_name, *, preflight):
+    roots = spec.roots(preflight=preflight)
+    task = task_specification(run_name, roots[0], preflight=True)
+    command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/analyze_pointmaze_normalized_update_stage65.py", "--run-name", run_name]
+    if preflight:
+        command.append("--preflight")
+    task.update(description="Freq-HRL Stage65 complete-roster native reward qualification",
+        signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/qualification",
+        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/qualification",
+        result_dir=None, local_result_dir=None,
+        wait_for_files=[str(ROOT / "results" / run_name / "cells" / f"replicate_{r}" / "completion" / "ready.json") for r in roots],
+        cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "
+            + shlex.join(command),
+        cpu_training_justification="Aggregate all completed roots and calculate the frozen reward intervals on the server.")
     return task
 
 
@@ -41,6 +59,7 @@ def main():
     if inventory(args.run_name, protocol_spec=spec):
         raise SystemExit("Stage65 run already registered")
     tasks = [task_specification(args.run_name, r, preflight=args.preflight) for r in spec.roots(preflight=args.preflight)]
+    tasks.append(qualification_task(args.run_name, preflight=args.preflight))
     write_json(ROOT / "results" / args.run_name / "preregistration.json", {
         "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "preflight": args.preflight,
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
