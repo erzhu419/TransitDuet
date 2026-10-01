@@ -133,6 +133,75 @@ def paired_effects(evaluation, seeds):
     return result
 
 
+def historical_directions(clone, *, root, period, arm, history, archive, controls, factored,
+        roles, args, opt, pool, cost):
+    p = str(period)
+    legacy = spec.source.legacy
+    saved = torch.load(controls["groups"][p][arm]["treatments"]["mc_normalized"]["checkpoint"], map_location="cpu", weights_only=False)
+    fits = {"control": normalized.restore_fit(clone, saved, root=root, period=period, arm=arm, treatment="mc_normalized")}
+    saved = torch.load(factored["groups"][p][arm]["candidate_checkpoint"], map_location="cpu", weights_only=False)
+    if (saved["protocol"], saved["root"], saved["period"], saved["arm"], saved["horizon"]) != (
+            legacy.values_source.EXPERIMENT_PROTOCOL, root, period, arm, args.horizon):
+        raise ValueError("Stage73 fixed factored critic identity changed")
+    fits["factored"] = values.FactoredValueFit.restore(copy.deepcopy(clone), saved)
+    fit_snapshots = {t: copy.deepcopy(f.model.state_dict()) for t, f in fits.items()}
+    cost["critic_checkpoint_loads"] += len(fits)
+    items = history["calibration"][p][arm]["history"]
+    if len(items) != opt["calibration_batches"] or [r["seed"] for item in items for r in item["rows"]] != roles["calibration"]:
+        raise ValueError("Stage73 historical direction fitting roster changed")
+    states, gradients, frame = [], {}, None
+    for item in items:
+        seeds = [r["seed"] for r in item["rows"]]
+        path = archive / p / arm / "warmup" / str(item["iteration"]) / "training"
+        pairs = list(pool.map(diagnostics.worker_reconstruct, [(joint.inference_weights(clone),
+            str(path / f"episode_{seed}.npz"), seed, period) for seed in seeds]))
+        for (_, row), old in zip(pairs, item["rows"]):
+            if row["episode_return"] != old["episode_return"] or row["action_check"] != "passed":
+                raise ValueError("Stage73 historical actions or rewards changed")
+            cost["calibration_archive_episodes"] += 1
+            cost["archive_network_checks"] += 1
+            cost["reconstructed_lower_calls"] += row["lower_calls"]
+            cost["reconstructed_upper_calls"] += row["upper_calls"]
+        batch = concat_hierarchical_batches([b for b, _ in pairs])
+        lower = continuing.episode_batch(batch, batch.lower.old_value, args.horizon).lower
+        if frame is None:
+            frame = {"location": float(lower.reward.astype(np.float64).mean()), "sample_count": lower.size,
+                "data_role": "first_historical_calibration_only"}
+            cost["historical_reward_rate_fits"] += 1
+        remaining = args.horizon - np.arange(lower.size) % args.horizon
+        signals = {"native_mc": independent.exact_returns(lower, 1.) - remaining * frame["location"]}
+        cost["mc_calls"] += 1
+        for t, fit in fits.items():
+            pred = values.control_predictions(fit, lower, clone) if t == "control" else fit.predictions(lower)
+            b = replace(lower, old_value=pred)
+            signals["gae_" + t], _ = fit.model._gae(b.reward, b.done, b.duration, b.old_value, b.next_value, b.terminal)
+            cost["calibration_value_rows"] += lower.size
+            cost["gae_calls"] += 1
+        g, arrays, _, score_cost = reliability.episode_scores(clone.lower_actor, lower, signals,
+            horizon=args.horizon, clip_ratio=clone.config.clip_ratio)
+        fold = reliability.fold_gradients(g, arrays, range(len(seeds)))
+        for d in spec.DIRECTIONS:
+            direction = g[d].mean(0) if d == "native_mc" else fold[d] + clone.config.entropy_coef * fold["entropy"]
+            gradients[d] = gradients.get(d, np.zeros_like(direction)) + direction / len(items)
+        for key in ("actor_score_forward_batches", "actor_score_backward_batches"):cost[key] += score_cost[key]
+        states.append(lower.state)
+    states = np.concatenate(states)
+    geometry, weights = {}, {"base": joint.inference_weights(clone)}
+    for d, gradient in gradients.items():
+        actors, geometry[d], c = matched_perturbations(clone.lower_actor, states, gradient,
+            delta=spec.FISHER_RADIUS, chunk_size=spec.CHUNK_SIZE)
+        for key, v in c.items():cost[key] += v
+        cost["historical_direction_fits"] += 1
+        cost["calibration_radius_checks"] += 1
+        for sign, actor in actors.items():
+            weights[d + "_" + sign] = {**joint.inference_weights(clone), "lower_actor": copy.deepcopy(actor.state_dict())}
+            cost["actor_parameter_perturbations"] += 1
+    for t, fit in fits.items():
+        independent.assert_frozen(fit.model, fit_snapshots[t])
+        cost["frozen_model_checks"] += 1
+    return weights, {"geometry": geometry, "native_baseline_frame": frame, "model_and_Adam_unchanged": "passed"}
+
+
 def run(root, *, preflight, output):
     source = json.loads(spec.source_result(root, preflight=preflight).read_text())
     previous.qualify(source, preflight=preflight)
@@ -155,66 +224,9 @@ def run(root, *, preflight, output):
             snapshot = copy.deepcopy(clone.state_dict())
             groups[p] = {}
             for arm in spec.TRAIN_POLICIES:
-                saved = torch.load(controls["groups"][p][arm]["treatments"]["mc_normalized"]["checkpoint"], map_location="cpu", weights_only=False)
-                fits = {"control": normalized.restore_fit(clone, saved, root=root, period=period, arm=arm, treatment="mc_normalized")}
-                saved = torch.load(factored["groups"][p][arm]["candidate_checkpoint"], map_location="cpu", weights_only=False)
-                if (saved["protocol"], saved["root"], saved["period"], saved["arm"], saved["horizon"]) != (
-                        legacy.values_source.EXPERIMENT_PROTOCOL, root, period, arm, args.horizon):
-                    raise ValueError("Stage73 fixed factored critic identity changed")
-                fits["factored"] = values.FactoredValueFit.restore(copy.deepcopy(clone), saved)
-                fit_snapshots = {t: copy.deepcopy(f.model.state_dict()) for t, f in fits.items()}
-                cost["critic_checkpoint_loads"] += len(fits)
-                items = historical["calibration"][p][arm]["history"]
-                if len(items) != opt["calibration_batches"] or [r["seed"] for item in items for r in item["rows"]] != roles["calibration"]:
-                    raise ValueError("Stage73 historical direction fitting roster changed")
-                states, gradients, frame = [], {}, None
-                for item in items:
-                    seeds = [r["seed"] for r in item["rows"]]
-                    path = archive / p / arm / "warmup" / str(item["iteration"]) / "training"
-                    pairs = list(pool.map(diagnostics.worker_reconstruct, [(joint.inference_weights(clone),
-                        str(path / f"episode_{seed}.npz"), seed, period) for seed in seeds]))
-                    for (_, row), old in zip(pairs, item["rows"]):
-                        if row["episode_return"] != old["episode_return"] or row["action_check"] != "passed":
-                            raise ValueError("Stage73 historical actions or rewards changed")
-                        cost["calibration_archive_episodes"] += 1
-                        cost["archive_network_checks"] += 1
-                        cost["reconstructed_lower_calls"] += row["lower_calls"]
-                        cost["reconstructed_upper_calls"] += row["upper_calls"]
-                    batch = concat_hierarchical_batches([b for b, _ in pairs])
-                    lower = continuing.episode_batch(batch, batch.lower.old_value, args.horizon).lower
-                    if frame is None:
-                        frame = {"location": float(lower.reward.astype(np.float64).mean()), "sample_count": lower.size,
-                            "data_role": "first_historical_calibration_only"}
-                        cost["historical_reward_rate_fits"] += 1
-                    remaining = args.horizon - np.arange(lower.size) % args.horizon
-                    signals = {"native_mc": independent.exact_returns(lower, 1.) - remaining * frame["location"]}
-                    cost["mc_calls"] += 1
-                    for t, fit in fits.items():
-                        pred = values.control_predictions(fit, lower, clone) if t == "control" else fit.predictions(lower)
-                        b = replace(lower, old_value=pred)
-                        signals["gae_" + t], _ = fit.model._gae(b.reward, b.done, b.duration, b.old_value, b.next_value, b.terminal)
-                        cost["calibration_value_rows"] += lower.size
-                        cost["gae_calls"] += 1
-                    g, arrays, _, score_cost = reliability.episode_scores(clone.lower_actor, lower, signals,
-                        horizon=args.horizon, clip_ratio=clone.config.clip_ratio)
-                    fold = reliability.fold_gradients(g, arrays, range(len(seeds)))
-                    for d in spec.DIRECTIONS:
-                        direction = g[d].mean(0) if d == "native_mc" else fold[d] + clone.config.entropy_coef * fold["entropy"]
-                        gradients[d] = gradients.get(d, np.zeros_like(direction)) + direction / len(items)
-                    for key in ("actor_score_forward_batches", "actor_score_backward_batches"):cost[key] += score_cost[key]
-                    states.append(lower.state)
-                states = np.concatenate(states)
-                geometry, weights = {}, {"base": joint.inference_weights(clone)}
-                for d, gradient in gradients.items():
-                    actors, geometry[d], c = matched_perturbations(clone.lower_actor, states, gradient,
-                        delta=spec.FISHER_RADIUS, chunk_size=spec.CHUNK_SIZE)
-                    for key, v in c.items():cost[key] += v
-                    cost["historical_direction_fits"] += 1
-                    cost["calibration_radius_checks"] += 1
-                    for sign, actor in actors.items():
-                        weights[d + "_" + sign] = {**joint.inference_weights(clone), "lower_actor": copy.deepcopy(actor.state_dict())}
-                        cost["actor_parameter_perturbations"] += 1
-                del states
+                weights, fitted = historical_directions(clone, root=root, period=period, arm=arm,
+                    history=historical, archive=archive, controls=controls, factored=factored,
+                    roles=roles, args=args, opt=opt, pool=pool, cost=cost)
                 print(f"native direction {root}/{p}/{arm}: three historical directions and fixed radii frozen", flush=True)
                 evaluation = {}
                 for variant in spec.VARIANTS:
@@ -232,11 +244,7 @@ def run(root, *, preflight, output):
                     evaluation[variant] = rows
                 effects = paired_effects(evaluation, roles["native_evaluation"])
                 cost["native_pair_checks"] += len(roles["native_evaluation"])
-                for t, fit in fits.items():
-                    independent.assert_frozen(fit.model, fit_snapshots[t])
-                    cost["frozen_model_checks"] += 1
-                groups[p][arm] = {"geometry": geometry, "native_baseline_frame": frame, "effects": effects,
-                    "evaluation": evaluation, "model_and_Adam_unchanged": "passed", "pairing": "passed"}
+                groups[p][arm] = {**fitted, "effects": effects, "evaluation": evaluation, "pairing": "passed"}
                 print(f"native direction {root}/{p}/{arm}: all seven paired native probes completed", flush=True)
             independent.assert_frozen(clone, snapshot)
             cost["frozen_model_checks"] += 1
