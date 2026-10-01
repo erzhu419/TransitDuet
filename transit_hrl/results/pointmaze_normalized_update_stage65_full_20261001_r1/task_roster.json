@@ -1,0 +1,110 @@
+{
+  "protocol": "pointmaze_normalized_update_stage65_v1",
+  "run_name": "pointmaze_normalized_update_stage65_full_20261001_r1",
+  "preregistration_revision": "d5ab6f0fc2",
+  "implementation_revision": "317c4761f9",
+  "snapshot": "after_full_submission_before_full_qualification",
+  "allowed_nodes": [
+    "node001",
+    "node002",
+    "node003",
+    "node004",
+    "node005",
+    "node006"
+  ],
+  "require_node": null,
+  "preflight": {
+    "task_id": "t116815",
+    "qualification_task_id": "t116816",
+    "node": "node006",
+    "status": "done",
+    "exit_code": 0,
+    "mechanical_gate": "passed",
+    "frozen_actors": 0
+  },
+  "tasks": [
+    {
+      "task_id": "t116817",
+      "optimizer_root": 310011,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116817.log"
+    },
+    {
+      "task_id": "t116818",
+      "optimizer_root": 310023,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116818.log"
+    },
+    {
+      "task_id": "t116819",
+      "optimizer_root": 310037,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116819.log"
+    },
+    {
+      "task_id": "t116820",
+      "optimizer_root": 310049,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116820.log"
+    },
+    {
+      "task_id": "t116821",
+      "optimizer_root": 310061,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116821.log"
+    },
+    {
+      "task_id": "t116822",
+      "optimizer_root": 310073,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116822.log"
+    },
+    {
+      "task_id": "t116823",
+      "optimizer_root": 310089,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116823.log"
+    },
+    {
+      "task_id": "t116824",
+      "optimizer_root": 310101,
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 9,
+      "ram_mb": 6144,
+      "exit_code": null,
+      "log": "/tmp/sched_t116824.log"
+    }
+  ],
+  "placement_wait_at_snapshot": "no fit (prio=normal): node001=cpu: need 9, free 0/192 observed_free=25 slot_free=62 startup_hold=5 hold_release<=10s reserve=20 | node002=cpu: need 9, free 4/192 observed_free=29 slot_free=58 startup_hold=5 hold_release<=10s reserve=20 | node003=cpu: need 9, free 0/192 observed_free=21 slot_free=112 startup_hold=1 hold_release<=10s reserve=20 | node004=cpu: need 9, free 0/192 observed_free=19 slot_free=14 reserve=20 | node005=cpu: need 9, free 0/192 observed_free=35 slot_free=6 startup_hold=15 hold_release<=10s reserve=20 | node006=ram: need 6144MB, free 19926MB (headroom 19279MB) | node007=outside-allowed-nodes",
+  "qualification": "pending",
+  "performance_claim": "none_pending_full_native_results"
+}
