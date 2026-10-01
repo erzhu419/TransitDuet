@@ -1,0 +1,375 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "archive": {
+      "MC_continuation_updates": 4,
+      "actor_gae_calls": 8,
+      "actor_updates": 8,
+      "archive_episodes": 32,
+      "archive_network_checks": 64,
+      "candidate_checkpoint_writes": 8,
+      "critic_checkpoint_loads": 8,
+      "critic_continuation_updates": 8,
+      "critic_resume_checks": 8,
+      "extra_critic_scalar_calls": 38400,
+      "forecaster_loads": 1,
+      "post_update_public_value_passes": 8,
+      "probe_mc_calls": 4,
+      "reconstructed_lower_calls": 38400,
+      "reconstructed_upper_calls": 576,
+      "source_clone_loads": 2,
+      "source_probe_checks": 8,
+      "upper_checkpoint_loads": 4,
+      "upper_frozen_state_checks": 32
+    },
+    "native_evaluation": {
+      "actor_context_evaluations": 230400,
+      "audit_bernstein_basis_evaluations": 14592,
+      "audit_ols_fits": 3264,
+      "audit_ridge_predictions": 3264,
+      "bernstein_basis_evaluations": 14592,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 230400,
+      "plan_ols_fits": 3264,
+      "plan_ridge_predictions": 3264,
+      "primitive_steps": 230400,
+      "reference_evaluations": 230400,
+      "upper_inference_calls": 3456,
+      "upper_plan_decodes": 3456
+    },
+    "native_trace_audits": 192,
+    "new_forecaster_fits": 0,
+    "new_training_native_steps": 0
+  },
+  "contract": {
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      65,
+      65065
+    ],
+    "candidate": "mc_normalized",
+    "controls": "pure_clone_shared_per_period_zero_train_frozen_lower_reuses_clone_joint_frozen_lower_executes_common_upper",
+    "cost": "checkpoint_reuse_no_recalibration_all_archive_value_actor_guard_MC_and_native_work_counted",
+    "decision": "repair_gain_vs_gae_raw_and_training_gain_vs_frozen_lower_and_clone_require_positive_all_periods_arms",
+    "endpoints": [
+      "period50:zero_train:mc_normalized_minus_gae_raw",
+      "period50:zero_train:mc_normalized_minus_frozen_lower",
+      "period50:zero_train:mc_normalized_minus_clone",
+      "period50:joint_ppo:mc_normalized_minus_gae_raw",
+      "period50:joint_ppo:mc_normalized_minus_frozen_lower",
+      "period50:joint_ppo:mc_normalized_minus_clone",
+      "period100:zero_train:mc_normalized_minus_gae_raw",
+      "period100:zero_train:mc_normalized_minus_frozen_lower",
+      "period100:zero_train:mc_normalized_minus_clone",
+      "period100:joint_ppo:mc_normalized_minus_gae_raw",
+      "period100:joint_ppo:mc_normalized_minus_frozen_lower",
+      "period100:joint_ppo:mc_normalized_minus_clone"
+    ],
+    "evaluation": "fresh_shared_deterministic_native_paths_all_arms_treatments_periods_no_selection",
+    "guard": "unchanged_Stage60_backtracking_conditional_mean_KL",
+    "interval": "two_sided_percentile_Bonferroni12_equal_root_paired_path_means",
+    "kl_budget": 0.02,
+    "limits": "one_update_teacher_initialized_development_roots_not_full_training_frequency_specific_OOD_or_equal_FLOPs",
+    "lower": "same_Stage55_actor_Adam_same_Stage57_first_batch_episode_done_public_reward_unit_GAE",
+    "normalization": "restore_Stage64_training_weights_Adam_fixed_frame_exact_public_weights_no_refit_reset_or_unit_relabel",
+    "periods": [
+      50,
+      100
+    ],
+    "selection": "all_eight_roots_all_cases_no_seed_KL_target_scale_checkpoint_or_budget_sweep",
+    "source_gate": "full_Stage64_candidate_fit_pass_required_preflight_mechanics_only",
+    "source_protocol": "pointmaze_value_targets_stage64_v1",
+    "source_runs": [
+      "pointmaze_value_targets_stage64_preflight_20261001_r1",
+      "pointmaze_value_targets_stage64_full_20261001_r1"
+    ],
+    "treatments": [
+      "gae_raw",
+      "mc_normalized"
+    ],
+    "update": "one_guarded_lower_PPO_update_then_same_budget_critic_continuation_GAE_raw_or_MC_normalized",
+    "upper": "Stage63_common_upper_actor_value_Adam_loaded_once_per_case_and_frozen_for_both_treatments_and_frozen_lower_control"
+  },
+  "optimizer_roots": [
+    310011,
+    310023,
+    310037,
+    310049,
+    310061,
+    310073,
+    310089,
+    310101
+  ],
+  "options": {
+    "actor_iterations": 1,
+    "deployment_mode": "deterministic",
+    "evaluation_paths": 16,
+    "rollouts_per_iteration": 8,
+    "workers": 8
+  },
+  "preflight": false,
+  "protocol": "pointmaze_normalized_update_stage65_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "evaluation": [
+        65105001,
+        65105002,
+        65105003,
+        65105004,
+        65105005,
+        65105006,
+        65105007,
+        65105008,
+        65105009,
+        65105010,
+        65105011,
+        65105012,
+        65105013,
+        65105014,
+        65105015,
+        65105016
+      ],
+      "first_training": [
+        16103001,
+        16103002,
+        16103003,
+        16103004,
+        16103005,
+        16103006,
+        16103007,
+        16103008
+      ]
+    },
+    "310023": {
+      "evaluation": [
+        65115001,
+        65115002,
+        65115003,
+        65115004,
+        65115005,
+        65115006,
+        65115007,
+        65115008,
+        65115009,
+        65115010,
+        65115011,
+        65115012,
+        65115013,
+        65115014,
+        65115015,
+        65115016
+      ],
+      "first_training": [
+        16113001,
+        16113002,
+        16113003,
+        16113004,
+        16113005,
+        16113006,
+        16113007,
+        16113008
+      ]
+    },
+    "310037": {
+      "evaluation": [
+        65125001,
+        65125002,
+        65125003,
+        65125004,
+        65125005,
+        65125006,
+        65125007,
+        65125008,
+        65125009,
+        65125010,
+        65125011,
+        65125012,
+        65125013,
+        65125014,
+        65125015,
+        65125016
+      ],
+      "first_training": [
+        16123001,
+        16123002,
+        16123003,
+        16123004,
+        16123005,
+        16123006,
+        16123007,
+        16123008
+      ]
+    },
+    "310049": {
+      "evaluation": [
+        65135001,
+        65135002,
+        65135003,
+        65135004,
+        65135005,
+        65135006,
+        65135007,
+        65135008,
+        65135009,
+        65135010,
+        65135011,
+        65135012,
+        65135013,
+        65135014,
+        65135015,
+        65135016
+      ],
+      "first_training": [
+        16133001,
+        16133002,
+        16133003,
+        16133004,
+        16133005,
+        16133006,
+        16133007,
+        16133008
+      ]
+    },
+    "310061": {
+      "evaluation": [
+        65145001,
+        65145002,
+        65145003,
+        65145004,
+        65145005,
+        65145006,
+        65145007,
+        65145008,
+        65145009,
+        65145010,
+        65145011,
+        65145012,
+        65145013,
+        65145014,
+        65145015,
+        65145016
+      ],
+      "first_training": [
+        16143001,
+        16143002,
+        16143003,
+        16143004,
+        16143005,
+        16143006,
+        16143007,
+        16143008
+      ]
+    },
+    "310073": {
+      "evaluation": [
+        65155001,
+        65155002,
+        65155003,
+        65155004,
+        65155005,
+        65155006,
+        65155007,
+        65155008,
+        65155009,
+        65155010,
+        65155011,
+        65155012,
+        65155013,
+        65155014,
+        65155015,
+        65155016
+      ],
+      "first_training": [
+        16153001,
+        16153002,
+        16153003,
+        16153004,
+        16153005,
+        16153006,
+        16153007,
+        16153008
+      ]
+    },
+    "310089": {
+      "evaluation": [
+        65165001,
+        65165002,
+        65165003,
+        65165004,
+        65165005,
+        65165006,
+        65165007,
+        65165008,
+        65165009,
+        65165010,
+        65165011,
+        65165012,
+        65165013,
+        65165014,
+        65165015,
+        65165016
+      ],
+      "first_training": [
+        16163001,
+        16163002,
+        16163003,
+        16163004,
+        16163005,
+        16163006,
+        16163007,
+        16163008
+      ]
+    },
+    "310101": {
+      "evaluation": [
+        65175001,
+        65175002,
+        65175003,
+        65175004,
+        65175005,
+        65175006,
+        65175007,
+        65175008,
+        65175009,
+        65175010,
+        65175011,
+        65175012,
+        65175013,
+        65175014,
+        65175015,
+        65175016
+      ],
+      "first_training": [
+        16173001,
+        16173002,
+        16173003,
+        16173004,
+        16173005,
+        16173006,
+        16173007,
+        16173008
+      ]
+    }
+  },
+  "source_revision": "db4bf26ea4fb2e8459df069e80fcc8a091fb4cd9"
+}

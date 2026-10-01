@@ -1,0 +1,138 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "archive": {
+      "MC_continuation_updates": 4,
+      "actor_gae_calls": 8,
+      "actor_updates": 8,
+      "archive_episodes": 8,
+      "archive_network_checks": 16,
+      "candidate_checkpoint_writes": 8,
+      "critic_checkpoint_loads": 8,
+      "critic_continuation_updates": 8,
+      "critic_resume_checks": 8,
+      "extra_critic_scalar_calls": 2400,
+      "forecaster_loads": 1,
+      "post_update_public_value_passes": 8,
+      "probe_mc_calls": 4,
+      "reconstructed_lower_calls": 2400,
+      "reconstructed_upper_calls": 36,
+      "source_clone_loads": 2,
+      "source_probe_checks": 8,
+      "upper_checkpoint_loads": 4,
+      "upper_frozen_state_checks": 32
+    },
+    "native_evaluation": {
+      "actor_context_evaluations": 7200,
+      "audit_bernstein_basis_evaluations": 1824,
+      "audit_ols_fits": 84,
+      "audit_ridge_predictions": 84,
+      "bernstein_basis_evaluations": 1824,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 7200,
+      "plan_ols_fits": 84,
+      "plan_ridge_predictions": 84,
+      "primitive_steps": 7200,
+      "reference_evaluations": 7200,
+      "upper_inference_calls": 108,
+      "upper_plan_decodes": 108
+    },
+    "native_trace_audits": 24,
+    "new_forecaster_fits": 0,
+    "new_training_native_steps": 0
+  },
+  "contract": {
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      65,
+      65065
+    ],
+    "candidate": "mc_normalized",
+    "controls": "pure_clone_shared_per_period_zero_train_frozen_lower_reuses_clone_joint_frozen_lower_executes_common_upper",
+    "cost": "checkpoint_reuse_no_recalibration_all_archive_value_actor_guard_MC_and_native_work_counted",
+    "decision": "repair_gain_vs_gae_raw_and_training_gain_vs_frozen_lower_and_clone_require_positive_all_periods_arms",
+    "endpoints": [
+      "period50:zero_train:mc_normalized_minus_gae_raw",
+      "period50:zero_train:mc_normalized_minus_frozen_lower",
+      "period50:zero_train:mc_normalized_minus_clone",
+      "period50:joint_ppo:mc_normalized_minus_gae_raw",
+      "period50:joint_ppo:mc_normalized_minus_frozen_lower",
+      "period50:joint_ppo:mc_normalized_minus_clone",
+      "period100:zero_train:mc_normalized_minus_gae_raw",
+      "period100:zero_train:mc_normalized_minus_frozen_lower",
+      "period100:zero_train:mc_normalized_minus_clone",
+      "period100:joint_ppo:mc_normalized_minus_gae_raw",
+      "period100:joint_ppo:mc_normalized_minus_frozen_lower",
+      "period100:joint_ppo:mc_normalized_minus_clone"
+    ],
+    "evaluation": "fresh_shared_deterministic_native_paths_all_arms_treatments_periods_no_selection",
+    "guard": "unchanged_Stage60_backtracking_conditional_mean_KL",
+    "interval": "two_sided_percentile_Bonferroni12_equal_root_paired_path_means",
+    "kl_budget": 0.02,
+    "limits": "one_update_teacher_initialized_development_roots_not_full_training_frequency_specific_OOD_or_equal_FLOPs",
+    "lower": "same_Stage55_actor_Adam_same_Stage57_first_batch_episode_done_public_reward_unit_GAE",
+    "normalization": "restore_Stage64_training_weights_Adam_fixed_frame_exact_public_weights_no_refit_reset_or_unit_relabel",
+    "periods": [
+      50,
+      100
+    ],
+    "selection": "all_eight_roots_all_cases_no_seed_KL_target_scale_checkpoint_or_budget_sweep",
+    "source_gate": "full_Stage64_candidate_fit_pass_required_preflight_mechanics_only",
+    "source_protocol": "pointmaze_value_targets_stage64_v1",
+    "source_runs": [
+      "pointmaze_value_targets_stage64_preflight_20261001_r1",
+      "pointmaze_value_targets_stage64_full_20261001_r1"
+    ],
+    "treatments": [
+      "gae_raw",
+      "mc_normalized"
+    ],
+    "update": "one_guarded_lower_PPO_update_then_same_budget_critic_continuation_GAE_raw_or_MC_normalized",
+    "upper": "Stage63_common_upper_actor_value_Adam_loaded_once_per_case_and_frozen_for_both_treatments_and_frozen_lower_control"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "actor_iterations": 1,
+    "deployment_mode": "deterministic",
+    "evaluation_paths": 2,
+    "rollouts_per_iteration": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_normalized_update_stage65_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        65095001,
+        65095002
+      ],
+      "first_training": [
+        16093001,
+        16093002
+      ]
+    }
+  },
+  "source_revision": "db4bf26ea4fb2e8459df069e80fcc8a091fb4cd9"
+}
