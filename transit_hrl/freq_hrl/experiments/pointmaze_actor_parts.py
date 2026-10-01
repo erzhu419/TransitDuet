@@ -30,14 +30,15 @@ def std_summary(actor, changed):
     return {"source_log_std": log_std.tolist(), "source_std": std.tolist(), "candidates": candidates}
 
 
-def scenario_actor_scores(clone, batches, *, period, horizon, cost):
+def scenario_actor_scores(clone, batches, *, period, horizon, cost, actor_names=("upper", "lower")):
     returns = {}
     for name, groups in batches.items():
         returns[name] = [[native.task_returns(b, period, horizon, row["episode_return"]) for b, row in group] for group in groups]
         cost["objective_checks"] += sum(map(len, groups))
         cost["mc_calls"] += 2 * sum(map(len, groups))
     scored = {}
-    for actor_name, length in (("upper", horizon // period), ("lower", horizon)):
+    for actor_name in actor_names:
+        length = horizon // period if actor_name == "upper" else horizon
         actor = getattr(clone, actor_name + "_actor")
         gradients, states, score_costs, signal_rms = {}, [], {}, {}
         for name, groups in batches.items():
