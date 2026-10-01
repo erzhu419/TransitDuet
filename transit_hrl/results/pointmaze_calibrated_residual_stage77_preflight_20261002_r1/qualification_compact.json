@@ -1,0 +1,320 @@
+{
+  "contract": {
+    "alpha": "min(1,sqrt(BC_command_MSE)/original_joint_command_change_RMS)_once_per_root_period_no_reward_selection",
+    "artifacts": "compact_JSON_no_native_traces_or_checkpoints_no_optimizer_or_forecaster_fit",
+    "calibration": "all_Stage55_BC_states_joint_reference_error_and_velocity_change_Stage76_fixed_marginal_proposals",
+    "curve": "convex_blend_base_and_world_clipped_original_points_float32_same_curve_reference_and_dt_derivative",
+    "decision": "repair_validation_only_no_policy_adoption_Stage67_HOLD_unchanged",
+    "limits": "RMS_ratio_is_not_a_nonlinear_command_constraint_teacher_initialized_development_roots_not_joint_HRL_or_frequency_proof",
+    "modes": [
+      "zero",
+      "original",
+      "calibrated"
+    ],
+    "periods": [
+      50,
+      100
+    ],
+    "production_equivalence": "preflight_only_zero_original_exact_native_reward_noise_proposal_call_match",
+    "sampling": "both_actors_sampled_fixed50_100_fresh_paired_seeds_stepwise_lower_noise_identical_upper_proposals",
+    "source": "pointmaze_velocity_support_stage76_v1",
+    "statistics": "all12_reward_tracking_contrasts_equal_root_bootstrap_65536_Bonferroni12"
+  },
+  "cost": {
+    "bc_mse_reproductions": 2,
+    "calibration_curve_decodes": 18,
+    "calibration_upper_proposals": 18,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "label_archive_loads": 4,
+    "label_plan_checks": 4,
+    "label_state_rows": 1200,
+    "layout_loads": 1,
+    "native_episodes": 40,
+    "native_lower_calls": 12000,
+    "native_network_checks": 40,
+    "native_pair_checks": 8,
+    "native_steps": 12000,
+    "native_upper_calls": 180,
+    "offline_actor_forward_batches": 12,
+    "offline_actor_rows": 3600,
+    "production_equivalence_checks": 16,
+    "source_clone_loads": 2
+  },
+  "endpoints": {
+    "100/episode_return/calibrated_minus_original": {
+      "mean": 0
+    },
+    "100/episode_return/calibrated_minus_zero": {
+      "mean": -0.2120274087937375
+    },
+    "100/episode_return/original_minus_zero": {
+      "mean": -0.2120274087937375
+    },
+    "100/tracking_squared_error_integral/calibrated_minus_original": {
+      "mean": 0
+    },
+    "100/tracking_squared_error_integral/calibrated_minus_zero": {
+      "mean": -0.002952098853513385
+    },
+    "100/tracking_squared_error_integral/original_minus_zero": {
+      "mean": -0.002952098853513385
+    },
+    "50/episode_return/calibrated_minus_original": {
+      "mean": 0
+    },
+    "50/episode_return/calibrated_minus_zero": {
+      "mean": 0.35816019242114905
+    },
+    "50/episode_return/original_minus_zero": {
+      "mean": 0.35816019242114905
+    },
+    "50/tracking_squared_error_integral/calibrated_minus_original": {
+      "mean": 0
+    },
+    "50/tracking_squared_error_integral/calibrated_minus_zero": {
+      "mean": -0.01940552266041501
+    },
+    "50/tracking_squared_error_integral/original_minus_zero": {
+      "mean": -0.01940552266041501
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_planning_cost": {
+    "actor_context_evaluations": 12000,
+    "plan_ols_fits": 140,
+    "plan_ridge_predictions": 140,
+    "reference_evaluations": 12000
+  },
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "frozen_decoder_repair_validation_only",
+  "protocol": "pointmaze_calibrated_residual_stage77_v1",
+  "root_rows": [
+    {
+      "checkpoint_writes": 0,
+      "cost": {
+        "bc_mse_reproductions": 2,
+        "calibration_curve_decodes": 18,
+        "calibration_upper_proposals": 18,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "label_archive_loads": 4,
+        "label_plan_checks": 4,
+        "label_state_rows": 1200,
+        "layout_loads": 1,
+        "native_episodes": 40,
+        "native_lower_calls": 12000,
+        "native_network_checks": 40,
+        "native_pair_checks": 8,
+        "native_steps": 12000,
+        "native_upper_calls": 180,
+        "offline_actor_forward_batches": 12,
+        "offline_actor_rows": 3600,
+        "production_equivalence_checks": 16,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "calibration": {
+            "alpha": 1,
+            "bc_mse_reproduction": "passed",
+            "calibrated_to_bc_rmse_ratio": 0.0010132685820808786,
+            "data_role": "historical_BC_labels_only",
+            "envelope": {
+              "axis_max": [
+                3.632688522338867,
+                7.560145854949951
+              ],
+              "axis_mean": [
+                -0.8602707918795447,
+                0.3989571047822634
+              ],
+              "axis_min": [
+                -4.486238956451416,
+                -3.184998035430908
+              ],
+              "axis_std": [
+                1.5956976490273271,
+                1.721763816545944
+              ],
+              "data_role": "historical_BC_labels_only",
+              "position_error_q99": 1.9724560626807641,
+              "position_error_rms": 0.5903890260851479,
+              "rows": 600,
+              "velocity_speed_q99": 7.044092240333557,
+              "velocity_speed_rms": 2.531788741956068
+            },
+            "label_plan_checks": "passed",
+            "responses": {
+              "calibrated": {
+                "bc_command_mse": 0.29173104548213974,
+                "command_change_rms": 0.0005473739316437802
+              },
+              "original": {
+                "bc_command_mse": 0.29173104548213974,
+                "command_change_rms": 0.0005473739316437802
+              },
+              "zero": {
+                "bc_command_mse": 0.2918226972950328,
+                "command_change_rms": 0
+              }
+            },
+            "saved_bc_mse": 0.2918227016925812
+          },
+          "effects": {
+            "50/episode_return/calibrated_minus_original": 0,
+            "50/episode_return/calibrated_minus_zero": 0.35816019242114905,
+            "50/episode_return/original_minus_zero": 0.35816019242114905,
+            "50/tracking_squared_error_integral/calibrated_minus_original": 0,
+            "50/tracking_squared_error_integral/calibrated_minus_zero": -0.01940552266041501,
+            "50/tracking_squared_error_integral/original_minus_zero": -0.01940552266041501
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "mode_means": {
+            "calibrated": {
+              "episode_return": 124.65652896254669,
+              "tracking_squared_error_integral": 4.298757732013213,
+              "reference_residual_squared_integral": 0.18678116491891966,
+              "velocity_residual_squared_integral": 6.366222275098486,
+              "above_label_speed_q99_rate": 0.05,
+              "outside_label_axis_range_rate": 0.23
+            },
+            "original": {
+              "episode_return": 124.65652896254669,
+              "tracking_squared_error_integral": 4.298757732013213,
+              "reference_residual_squared_integral": 0.18678116491891966,
+              "velocity_residual_squared_integral": 6.366222275098486,
+              "above_label_speed_q99_rate": 0.05,
+              "outside_label_axis_range_rate": 0.23
+            },
+            "zero": {
+              "episode_return": 124.29836877012556,
+              "tracking_squared_error_integral": 4.318163254673628,
+              "reference_residual_squared_integral": 0,
+              "velocity_residual_squared_integral": 0,
+              "above_label_speed_q99_rate": 0.025833333333333333,
+              "outside_label_axis_range_rate": 0.2325
+            }
+          },
+          "production_replay_count": 8
+        },
+        "100": {
+          "calibration": {
+            "alpha": 1,
+            "bc_mse_reproduction": "passed",
+            "calibrated_to_bc_rmse_ratio": 0.0009018484998373758,
+            "data_role": "historical_BC_labels_only",
+            "envelope": {
+              "axis_max": [
+                3.632688522338867,
+                7.679259777069092
+              ],
+              "axis_mean": [
+                -0.4346381604671478,
+                0.15405728737513225
+              ],
+              "axis_min": [
+                -4.422274112701416,
+                -3.437650203704834
+              ],
+              "axis_std": [
+                1.2116376348202287,
+                1.7171507730839324
+              ],
+              "data_role": "historical_BC_labels_only",
+              "position_error_q99": 2.629995779346044,
+              "position_error_rms": 1.0273500850843296,
+              "rows": 600,
+              "velocity_speed_q99": 7.329675731658935,
+              "velocity_speed_rms": 2.151584651819027
+            },
+            "label_plan_checks": "passed",
+            "responses": {
+              "calibrated": {
+                "bc_command_mse": 0.17421679777427745,
+                "command_change_rms": 0.00037639571449343416
+              },
+              "original": {
+                "bc_command_mse": 0.17421679777427745,
+                "command_change_rms": 0.00037639571449343416
+              },
+              "zero": {
+                "bc_command_mse": 0.17418957748331845,
+                "command_change_rms": 0
+              }
+            },
+            "saved_bc_mse": 0.17418958246707916
+          },
+          "effects": {
+            "100/episode_return/calibrated_minus_original": 0,
+            "100/episode_return/calibrated_minus_zero": -0.2120274087937375,
+            "100/episode_return/original_minus_zero": -0.2120274087937375,
+            "100/tracking_squared_error_integral/calibrated_minus_original": 0,
+            "100/tracking_squared_error_integral/calibrated_minus_zero": -0.002952098853513385,
+            "100/tracking_squared_error_integral/original_minus_zero": -0.002952098853513385
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "mode_means": {
+            "calibrated": {
+              "episode_return": 152.8172891155961,
+              "tracking_squared_error_integral": 2.6548590234123823,
+              "reference_residual_squared_integral": 0.18603511128840855,
+              "velocity_residual_squared_integral": 1.6807127833453932,
+              "above_label_speed_q99_rate": 0.013333333333333334,
+              "outside_label_axis_range_rate": 0.09416666666666668
+            },
+            "original": {
+              "episode_return": 152.8172891155961,
+              "tracking_squared_error_integral": 2.6548590234123823,
+              "reference_residual_squared_integral": 0.18603511128840855,
+              "velocity_residual_squared_integral": 1.6807127833453932,
+              "above_label_speed_q99_rate": 0.013333333333333334,
+              "outside_label_axis_range_rate": 0.09416666666666668
+            },
+            "zero": {
+              "episode_return": 153.02931652438986,
+              "tracking_squared_error_integral": 2.6578111222658953,
+              "reference_residual_squared_integral": 0,
+              "velocity_residual_squared_integral": 0,
+              "above_label_speed_q99_rate": 0.015,
+              "outside_label_axis_range_rate": 0.09999999999999999
+            }
+          },
+          "production_replay_count": 8
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 12000,
+        "plan_ols_fits": 140,
+        "plan_ridge_predictions": 140,
+        "reference_evaluations": 12000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "protocol": "pointmaze_calibrated_residual_stage77_v1",
+      "root": 310001,
+      "seed_roles": {
+        "calibration_labels": [
+          14091001,
+          14091002
+        ],
+        "native_evaluation": [
+          77095001,
+          77095002,
+          77095003,
+          77095004
+        ]
+      },
+      "status": "complete",
+      "wall_seconds": 13.73877319227904
+    }
+  ],
+  "run_name": "pointmaze_calibrated_residual_stage77_preflight_20261002_r1",
+  "status": "preflight_passed",
+  "artifact_scope": "compact_qualification_root_effects_and_mode_means_no_episode_rows"
+}
