@@ -44,10 +44,18 @@ def task_returns(batch, period, horizon, native_return):
 
 def worker_native(job):
     weights, seed, variant, period, predictor, alpha, envelope, collect = job
+    _, args = _WORKER
+    native = curves.paths.native.native
+    policy_seed = native.spec.policy_seed(args.optimizer_seed, seed)
+    lower_seed = native.spec.rollout_arguments(args.optimizer_seed, seed, phase="train", mode="training")["lower_seed"]
+    return native_episode(weights, seed=seed, variant=variant, period=period, predictor=predictor,
+        alpha=alpha, envelope=envelope, collect=collect, policy_seed=policy_seed, lower_seed=lower_seed)
+
+
+def native_episode(weights, *, seed, variant, period, predictor, alpha, envelope, collect, policy_seed, lower_seed):
     model, args = _WORKER
     model.load_state_dict(weights)
     native = curves.paths.native.native
-    policy_seed = native.spec.policy_seed(args.optimizer_seed, seed)
     torch.manual_seed(policy_seed)
     plan = curves.CalibratedPlan(predictor, period, args.maximum_subgoal_delta, alpha, envelope)
     noise = []
@@ -60,7 +68,7 @@ def worker_native(job):
         return plan.decode(**kw)
 
     kw = native.spec.rollout_arguments(args.optimizer_seed, seed, phase="train", mode="training")
-    kw["sample"] = collect
+    kw.update(sample=collect, lower_seed=lower_seed)
     batch, row, raw = joint.rollout(model, args, f"fixed{period}", seed=seed, capture=False,
         lower_credit="task_episode", upper_plan_decoder=decode, lower_reference_builder=plan,
         lower_actor_context_builder=plan.actor_context, lower_value_context_builder=plan.value_context, **kw)
@@ -115,8 +123,8 @@ def credit_directions(clone, batches, *, period, horizon, cost):
     return candidates, {"baseline_reward_rates": rates, "actors": summaries}
 
 
-def paired_effects(period, evaluation, seeds):
-    if set(evaluation) != set(spec.VARIANTS) or any([r["seed"] for r in rows] != seeds for rows in evaluation.values()):
+def paired_effects(period, evaluation, seeds, *, protocol=spec):
+    if set(evaluation) != set(protocol.VARIANTS) or any([r["seed"] for r in rows] != seeds for rows in evaluation.values()):
         raise ValueError("Stage79 native variant or evaluation roster changed")
     for rows in evaluation.values():
         for row, base in zip(rows, evaluation["base"]):
@@ -124,7 +132,7 @@ def paired_effects(period, evaluation, seeds):
                 raise ValueError("Stage79 native seeds or decision schedule changed")
             np.testing.assert_allclose(row["upper_standard_noise"], base["upper_standard_noise"], atol=2e-6, rtol=0)
     return {f"{period}/{a}_minus_{b}": float(np.mean([x["episode_return"] - y["episode_return"]
-        for x, y in zip(evaluation[a], evaluation[b])])) for a, b in spec.CONTRAST_PAIRS}
+        for x, y in zip(evaluation[a], evaluation[b])])) for a, b in protocol.CONTRAST_PAIRS}
 
 
 def run(root, *, preflight, output):
@@ -208,20 +216,21 @@ def qualify(cell, *, preflight):
     return cell
 
 
-def aggregate(cells, *, preflight):
-    if len(cells) != len(spec.roots(preflight=preflight)) or {c["root"] for c in cells} != set(spec.roots(preflight=preflight)):
+def aggregate(cells, *, preflight, protocol=spec, qualifier=None):
+    if qualifier is None:qualifier = qualify
+    if len(cells) != len(protocol.roots(preflight=preflight)) or {c["root"] for c in cells} != set(protocol.roots(preflight=preflight)):
         raise ValueError("Stage79 requires all frozen roots")
-    rows = [qualify(c, preflight=preflight) for c in sorted(cells, key=lambda c: c["root"])]
+    rows = [qualifier(c, preflight=preflight) for c in sorted(cells, key=lambda c: c["root"])]
     effects = [{k: v for g in c["groups"].values() for k, v in g["effects"].items()} for c in rows]
-    x = np.asarray([[e[k] for k in spec.ENDPOINTS] for e in effects])
-    endpoints = {k: {"mean": float(x[:, i].mean())} for i, k in enumerate(spec.ENDPOINTS)}
+    x = np.asarray([[e[k] for k in protocol.ENDPOINTS] for e in effects])
+    endpoints = {k: {"mean": float(x[:, i].mean())} for i, k in enumerate(protocol.ENDPOINTS)}
     if not preflight:
-        idx = np.random.default_rng(np.random.SeedSequence(spec.BOOTSTRAP_SEED)).integers(0, len(rows), (spec.BOOTSTRAP_DRAWS, len(rows)))
-        tail = .05 / (2 * len(spec.ENDPOINTS))
+        idx = np.random.default_rng(np.random.SeedSequence(protocol.BOOTSTRAP_SEED)).integers(0, len(rows), (protocol.BOOTSTRAP_DRAWS, len(rows)))
+        tail = .05 / (2 * len(protocol.ENDPOINTS))
         ci = np.quantile(x[idx].mean(1), [tail, 1 - tail], axis=0)
-        for i, k in enumerate(spec.ENDPOINTS):
+        for i, k in enumerate(protocol.ENDPOINTS):
             endpoints[k].update(ci=ci[:, i].tolist(), effect="positive" if ci[0, i] > 0 else "negative" if ci[1, i] < 0 else "inconclusive")
-    return {"status": "preflight_passed" if preflight else "complete", "protocol": spec.EXPERIMENT_PROTOCOL,
-        "contract": spec.contract(), "mechanical_gate": "passed", "root_rows": rows, "endpoints": endpoints,
-        "cost": {k: sum(c["cost"][k] for c in rows) for k in spec.budget(preflight=preflight)},
+    return {"status": "preflight_passed" if preflight else "complete", "protocol": protocol.EXPERIMENT_PROTOCOL,
+        "contract": protocol.contract(), "mechanical_gate": "passed", "root_rows": rows, "endpoints": endpoints,
+        "cost": {k: sum(c["cost"][k] for c in rows) for k in protocol.budget(preflight=preflight)},
         "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged", "performance_claim": "frozen_decoder_fresh_MC_direction_only"}
