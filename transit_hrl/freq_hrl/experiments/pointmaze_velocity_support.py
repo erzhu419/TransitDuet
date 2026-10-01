@@ -115,6 +115,12 @@ def effects(period, coverage):
     return {f"{period}/{k}/residual_minus_base": coverage["residual"][k] - coverage["base"][k] for k in spec.COVERAGE_METRICS}
 
 
+def layout_bounds(args, seed):
+    task = native.joint._make_task(env_id=args.env_id, seed=seed, horizon=args.horizon, **native.joint._task_options(args))
+    try:return native.joint.pointmaze_goal_bounds(task.environment)
+    finally:task.environment.close()
+
+
 def run(root, *, preflight, output):
     old = json.loads(spec.source_result(root, preflight=preflight).read_text())
     if (old["status"], old["protocol"], old["root"], old["preflight"], old["contract"]) != (
@@ -126,9 +132,7 @@ def run(root, *, preflight, output):
     roles, args = spec.seed_roles(root, preflight=preflight), spec.arguments(root, preflight=preflight)
     cost, groups, started = dict.fromkeys(spec.budget(preflight=preflight), 0), {}, time.monotonic()
     cost.update(source_clone_loads=len(clones), forecaster_loads=1)
-    task = native.joint._make_task(env_id=args.env_id, seed=roles["calibration_labels"][0], horizon=args.horizon, **native.joint._task_options(args))
-    try:bounds = native.joint.pointmaze_goal_bounds(task.environment)
-    finally:task.close()
+    bounds = layout_bounds(args, roles["calibration_labels"][0])
     cost["layout_loads"] += 1
     for period in spec.PERIODS:
         p, model = str(period), clones[str(period)]

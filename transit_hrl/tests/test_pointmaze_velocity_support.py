@@ -1,6 +1,7 @@
 import copy
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import torch
@@ -35,6 +36,16 @@ class VelocitySupportTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):torch.set_num_threads(1)
 
+    def test_layout_probe_closes_owned_environment_without_task_close_or_steps(self):
+        env = SimpleNamespace(close=Mock(), step=Mock(), reset=Mock())
+        task = SimpleNamespace(environment=env)
+        bounds = (-2 * np.ones(2), 2 * np.ones(2))
+        with patch.object(experiment.native.joint, "_make_task", return_value=task), patch.object(
+                experiment.native.joint, "pointmaze_goal_bounds", return_value=bounds):
+            self.assertIs(experiment.layout_bounds(spec.arguments(310001, preflight=True), 1), bounds)
+        env.close.assert_called_once_with()
+        env.step.assert_not_called();env.reset.assert_not_called()
+
     def test_curve_replay_matches_production_and_freezes_each_observed_prefix(self):
         m = np.zeros((300, 6), dtype=np.float32)
         m[:, :2] = np.arange(300)[:, None] * [.001, .002]
@@ -44,7 +55,6 @@ class VelocitySupportTest(unittest.TestCase):
             br, r, bv, v, cost = experiment.replay_plan(m, actions, predictor=predictor(), period=p, scale=.5, bounds=bounds)
             actual = paths.PathFactorPlan(predictor(), p, .5, "R1V1")
             for i, start in enumerate(range(0, 300, p)):
-                from types import SimpleNamespace
                 actual.decode(action=actions[i], observation=None, history=SimpleNamespace(history=m[max(0, start-63):start+1].reshape(-1)),
                     step=start, world_low=bounds[0], world_high=bounds[1])
                 for age in range(p):
