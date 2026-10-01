@@ -16,4 +16,4 @@ Fixed-policy retrospective critic calibration does not establish on-policy rewar
 
 ## Execution
 
-Implementation aa2f0103aa; scheduler t116702/node005 passed four focused tests in45.286s. Raw critic/Adam equivalence, normalized public predictions, frozen actor/upper and actual GAE/MC/optimizer accounting passed. Actual archive preflight is next; native evaluation remains HOLD.
+Implementation aa2f0103aa; scheduler t116702/node005 passed four focused tests in45.286s. Actual archive preflight t116706 and qualification t116709 passed exact raw GAE reproduction, normalization initialization, frozen actor/upper and complete accounting. Preflight candidate EV0.06329-0.07342 remains below0.10. Full eight-root comparison is next with unchanged candidate/threshold; native evaluation remains HOLD.
