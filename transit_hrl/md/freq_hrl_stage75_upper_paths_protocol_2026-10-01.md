@@ -11,6 +11,8 @@ Stage74's normal-execution base reward was descriptively below zero-residual by 
 - Reference-target error, reference/velocity residual energy and proposal RMS are descriptive mechanism telemetry, not additional significance claims.
 - Scheduler: node001..006, dynamic placement, no node pinning; each full root has eight workers plus coordinator (9CPU/8192MiB), preflight two workers plus coordinator (3CPU/3072MiB). Qualification waits for completion markers. Pull only compact JSON and small markers.
 
+Preflight `pointmaze_upper_paths_stage75_preflight_20261001_r1`: t118800/t118801 both done0 on node006; all16 original-production comparisons passed, 48 episodes /14,400 steps /216 upper calls, source and Adam unchanged. Root computation took16.85 seconds. Six new tests and three original-plan regression tests passed locally. This releases the frozen full matrix without a performance-based selection.
+
 ## Limits
 
 Mixed paths are interventions, not coherent deployment plans. These teacher-initialized development roots do not establish joint-HRL training, OOD generalization or frequency superiority. Stage67 HOLD remains unchanged; this experiment diagnoses the upper execution interface and does not adopt an actor or choose a winning path.

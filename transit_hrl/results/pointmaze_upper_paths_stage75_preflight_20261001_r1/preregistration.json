@@ -1,0 +1,100 @@
+{
+  "artifacts": {
+    "native_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "native_episodes": 48,
+    "native_lower_calls": 14400,
+    "native_network_checks": 48,
+    "native_pair_checks": 8,
+    "native_steps": 14400,
+    "native_upper_calls": 216,
+    "production_equivalence_checks": 16,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "artifacts": "compact_JSON_no_new_native_traces_or_checkpoints",
+    "decision": "mechanism_diagnosis_only_no_path_selection_or_policy_adoption_Stage67_HOLD_unchanged",
+    "intervention": "R_selects_reference_position_V_selects_actor_and_value_planned_velocity_0_base_forecast_1_residual_curve",
+    "limits": "mixed_paths_are_diagnostic_not_coherent_deployment_plans_teacher_initialized_development_roots_not_joint_training_or_frequency_proof",
+    "modes": [
+      "R0V0",
+      "R1V0",
+      "R0V1",
+      "R1V1"
+    ],
+    "native_pairing": "fresh_common_environment_seeds_stepwise_lower_noise_initial_policy_rng_upper_proposals_all_four_modes",
+    "parameters": "Stage55_teacher_clones_frozen_no_historical_direction_fitting_or_perturbation",
+    "periods": [
+      50,
+      100
+    ],
+    "planning": "one_causal_ridge_forecast_per_option_anchored_Bernstein_residual_same_fixed_scale_and_world_clipping",
+    "production_equivalence": "preflight_only_16_extra_native_episodes_exact_reward_proposal_noise_call_match_R0V0_zero_R1V1_normal",
+    "sampling": "both_actors_sampled_fixed50_100_no_batch_or_raw_trace",
+    "source": "pointmaze_crossed_direction_stage74_v1",
+    "statistics": "all24_reward_and_tracking_error_factorial_contrasts_equal_root_percentile_bootstrap_Bonferroni24"
+  },
+  "endpoints": [
+    "50/episode_return/reference_at_base_velocity",
+    "50/episode_return/reference_at_residual_velocity",
+    "50/episode_return/velocity_at_base_reference",
+    "50/episode_return/velocity_at_residual_reference",
+    "50/episode_return/normal_minus_zero",
+    "50/episode_return/interaction",
+    "50/tracking_squared_error_integral/reference_at_base_velocity",
+    "50/tracking_squared_error_integral/reference_at_residual_velocity",
+    "50/tracking_squared_error_integral/velocity_at_base_reference",
+    "50/tracking_squared_error_integral/velocity_at_residual_reference",
+    "50/tracking_squared_error_integral/normal_minus_zero",
+    "50/tracking_squared_error_integral/interaction",
+    "100/episode_return/reference_at_base_velocity",
+    "100/episode_return/reference_at_residual_velocity",
+    "100/episode_return/velocity_at_base_reference",
+    "100/episode_return/velocity_at_residual_reference",
+    "100/episode_return/normal_minus_zero",
+    "100/episode_return/interaction",
+    "100/tracking_squared_error_integral/reference_at_base_velocity",
+    "100/tracking_squared_error_integral/reference_at_residual_velocity",
+    "100/tracking_squared_error_integral/velocity_at_base_reference",
+    "100/tracking_squared_error_integral/velocity_at_residual_reference",
+    "100/tracking_squared_error_integral/normal_minus_zero",
+    "100/tracking_squared_error_integral/interaction"
+  ],
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "evaluation_episodes": 4,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_upper_paths_stage75_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "native_evaluation": [
+        75095001,
+        75095002,
+        75095003,
+        75095004
+      ]
+    }
+  },
+  "source_revision": "30e68d1f36b00cdd547b53397cf85fe3c7dbc621"
+}

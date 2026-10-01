@@ -1,0 +1,33 @@
+{
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "preflight": true,
+  "protocol": "pointmaze_upper_paths_stage75_v1",
+  "run_name": "pointmaze_upper_paths_stage75_preflight_20261001_r1",
+  "source_revision": "30e68d1f36",
+  "tasks": [
+    {
+      "cpu_cores": 3,
+      "exit_code": 0,
+      "id": "t118800",
+      "node": "node006",
+      "peak_ram_mb": 0,
+      "ram_mb": 3072,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/upper_paths/preflight",
+      "role": "native_factorial_and_production_equivalence",
+      "root": 310001,
+      "status": "done"
+    },
+    {
+      "cpu_cores": 1,
+      "exit_code": 0,
+      "id": "t118801",
+      "node": "node006",
+      "peak_ram_mb": 0,
+      "ram_mb": 2048,
+      "resource_family": "Freq-HRL/pointmaze_upper_paths_stage75_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null,
+      "status": "done"
+    }
+  ]
+}
