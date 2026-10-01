@@ -1,0 +1,66 @@
+{
+  "artifacts": {
+    "pull": "completion_markers_and_compact_json_only",
+    "traces_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "actor_score_backward_batches": 64,
+    "actor_score_forward_batches": 16,
+    "archive_episodes": 8,
+    "archive_network_checks": 8,
+    "balanced_partitions": 4,
+    "critic_checkpoint_loads": 8,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 8,
+    "gae_calls": 8,
+    "mc_calls": 4,
+    "probe_value_rows": 4800,
+    "reconstructed_lower_calls": 2400,
+    "reconstructed_upper_calls": 36,
+    "source_clone_loads": 2,
+    "source_gradient_checks": 8,
+    "source_probe_checks": 8
+  },
+  "contract": {
+    "batch": "same_disjoint_Stage57_first_training_archive_reproduces_Stage67_values_and_full_credit_gradients",
+    "comparisons": "within_GAE_within_MC_disjoint_half_GAE_MC_and_both_critics_against_each_same_MC_reference",
+    "decision": "diagnosis_only_Stage67_native_HOLD_not_replaced_or_released_by_reliability",
+    "entropy": "unchanged_recorded_separately",
+    "frozen": "all_networks_and_Adam_bitexact_no_sampling_fitting_or_optimizer_steps",
+    "gradients": "per_episode_raw_GAE_MC_and_constant_score_then_exact_fold_center_and_scale",
+    "limits": "finite_archive_gradient_stability_not_true_policy_gradient_or_reward_improvement",
+    "linearity": "preupdate_ratios_inside_PPO_clip_interval_required_for_fold_reconstruction",
+    "partitions": "all_unordered_balanced_episode_halves_35_full_1_preflight_no_chosen_split",
+    "parts": [
+      "all",
+      "mean",
+      "log_std"
+    ],
+    "selection": "same_eight_roots_both_periods_both_arms_no_lambda_LR_seed_or_gate_sweep",
+    "source": "pointmaze_horizon_value_stage67_v1",
+    "statistics": "descriptive_cosines_and_positive_fractions_partitions_dependent_not_independent_CI_samples",
+    "treatments": [
+      "mc_normalized",
+      "mc_factored"
+    ]
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "preflight": true,
+  "protocol": "pointmaze_credit_reliability_stage68_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "b49f3d49b8bdc3cd62bad768b8867e45c8327328"
+}
