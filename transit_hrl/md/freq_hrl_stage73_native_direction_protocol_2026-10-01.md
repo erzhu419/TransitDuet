@@ -12,6 +12,12 @@ Report all 36 reward endpoints: plus-minus, plus-base, minus-base for three dire
 
 Full budget: 4096 archived calibration episodes, 4,915,200 reconstructed lower calls; 7168 native episodes, 8,601,600 native steps; 8192 score forwards/40,960 backwards; 14,400 Fisher JVP chunks/28,800 exact-KL forwards; 192 explicit cloned-actor perturbations. Plan solver calls are recorded separately from native inference calls. Nine CPU/8-GiB root jobs use dynamic node001-node006 placement. Pull compact JSON/markers only; do not write native raw traces or candidate checkpoints.
 
+## Execution
+
+Preflight t118615/t118616 passed: 112 native episodes, all 12 radius checks and all 16 paired-seed checks; source networks and Adam states unchanged. Preflight response signs differ between periods, so the full protocol and radius remain unchanged.
+
+Full run `pointmaze_native_direction_stage73_full_20261001_r1`: t118625-t118632 launched; t118633 waits for all eight completion markers. Preflight/full resource histories are separated because the scheduler had applied the three-worker preflight RAM estimate to nine-worker full tasks; full declarations restored to 8 GiB.
+
 ## Limitations
 
 Finite-radius stochastic policy responses are not infinitesimal derivatives or full learning curves. Teacher-initialized development roots and historical fits are reused; new evaluation paths are independent of direction fitting. Eight-root bootstrap uncertainty is limited, and this is not OOD or frequency-superiority evidence.

@@ -1,0 +1,78 @@
+{
+  "protocol": "pointmaze_native_direction_stage73_v1",
+  "run_name": "pointmaze_native_direction_stage73_full_20261001_r1",
+  "source_revision": "569c5ce55b",
+  "preflight": false,
+  "tasks": [
+    {
+      "id": "t118625",
+      "root": 310011,
+      "role": "historical_directions_and_native_response",
+      "node": "node005",
+      "status": "running"
+    },
+    {
+      "id": "t118626",
+      "root": 310023,
+      "role": "historical_directions_and_native_response",
+      "node": "node006",
+      "status": "running"
+    },
+    {
+      "id": "t118627",
+      "root": 310037,
+      "role": "historical_directions_and_native_response",
+      "node": "node004",
+      "status": "running"
+    },
+    {
+      "id": "t118628",
+      "root": 310049,
+      "role": "historical_directions_and_native_response",
+      "node": "node001",
+      "status": "running"
+    },
+    {
+      "id": "t118629",
+      "root": 310061,
+      "role": "historical_directions_and_native_response",
+      "node": "node005",
+      "status": "running"
+    },
+    {
+      "id": "t118630",
+      "root": 310073,
+      "role": "historical_directions_and_native_response",
+      "node": "node006",
+      "status": "running"
+    },
+    {
+      "id": "t118631",
+      "root": 310089,
+      "role": "historical_directions_and_native_response",
+      "node": "node004",
+      "status": "running"
+    },
+    {
+      "id": "t118632",
+      "root": 310101,
+      "role": "historical_directions_and_native_response",
+      "node": "node001",
+      "status": "running"
+    },
+    {
+      "id": "t118633",
+      "role": "qualification",
+      "status": "queued",
+      "waiting_for": "eight_root_completion_markers"
+    }
+  ],
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "root_resources": {
+    "cpu_cores": 9,
+    "ram_mb": 8192,
+    "resource_family": "Freq-HRL/pointmaze_native_direction_stage73_v1/native_direction/full"
+  },
+  "resource_correction": "separate_full_from_preflight_history_to_avoid_reusing_three_worker_RAM_estimate",
+  "startup_observation": "all_eight_roots_completed_first_case_seven_variant_native_pairing"
+}
