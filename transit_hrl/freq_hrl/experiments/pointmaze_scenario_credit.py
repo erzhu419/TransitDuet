@@ -107,19 +107,21 @@ def credit_effects(period, credit):
     return result
 
 
-def run(root, *, preflight, output):
-    source = json.loads(spec.source_result(root).read_text())
+def run(root, *, preflight, output, protocol=spec, credit_builder=credit_directions,
+        credit_endpoints=credit_effects, qualifier=None):
+    if qualifier is None:qualifier = qualify
+    source = json.loads(protocol.source_result(root).read_text())
     if (source["status"], source["protocol"], source["root"], source["preflight"], source["contract"]) != (
             "complete", spec.source.source.EXPERIMENT_PROTOCOL, root, False, spec.source.source.contract()):
         raise ValueError("Stage80 needs the completed full Stage78 decoder")
     clones, predictor, initialization = native.curves.support.native.load_source(root, preflight=False)
-    args, roles = spec.arguments(root, preflight=preflight), spec.seed_roles(root, preflight=preflight)
-    cost, groups, started = dict.fromkeys(spec.budget(preflight=preflight), 0), {}, time.monotonic()
+    args, roles = protocol.arguments(root, preflight=preflight), protocol.seed_roles(root, preflight=preflight)
+    cost, groups, started = dict.fromkeys(protocol.budget(preflight=preflight), 0), {}, time.monotonic()
     cost.update(source_clone_loads=len(clones), forecaster_loads=1, decoder_loads=len(clones))
     planning = dict.fromkeys(native.curves.paths.PLANNING_KEYS, 0)
-    with ProcessPoolExecutor(max_workers=spec.options(preflight=preflight)["workers"], mp_context=mp.get_context("spawn"),
-            initializer=native.init_worker, initargs=(clones[str(spec.PERIODS[0])].config, args)) as pool:
-        for period in spec.PERIODS:
+    with ProcessPoolExecutor(max_workers=protocol.options(preflight=preflight)["workers"], mp_context=mp.get_context("spawn"),
+            initializer=native.init_worker, initargs=(clones[str(protocol.PERIODS[0])].config, args)) as pool:
+        for period in protocol.PERIODS:
             clone = clones[str(period)]
             snapshot, weights = copy.deepcopy(clone.state_dict()), native.joint.inference_weights(clone)
             calibration = source["groups"][str(period)]["calibration"]
@@ -145,30 +147,30 @@ def run(root, *, preflight, output):
             for name in ("A", "B"):
                 roster = roles["credit_" + name]
                 pairs = episodes(weights, [(s["scenario_seed"], n) for s in roster for n in s["noise_seeds"]], "base", True)
-                replicas = spec.options(preflight=preflight)["rollouts_per_scenario"]
+                replicas = protocol.options(preflight=preflight)["rollouts_per_scenario"]
                 batches[name] = [pairs[i:i+replicas] for i in range(0, len(pairs), replicas)]
                 for group, scenario in zip(batches[name], roster):
                     check_scenario_pair(group, scenario)
                     cost["scenario_pair_checks"] += 1
-            candidates, credit = credit_directions(clone, batches, period=period, horizon=args.horizon, cost=cost)
+            candidates, credit = credit_builder(clone, batches, period=period, horizon=args.horizon, cost=cost)
             del batches
             candidates.update(base=weights, zero=weights)
-            evaluation = {v: [r for _, r in episodes(candidates[v], [(s, s) for s in roles["native_evaluation"]], v)] for v in spec.VARIANTS}
-            effects = native.paired_effects(period, evaluation, roles["native_evaluation"], protocol=spec)
-            effects.update(credit_effects(period, credit))
+            evaluation = {v: [r for _, r in episodes(candidates[v], [(s, s) for s in roles["native_evaluation"]], v)] for v in protocol.VARIANTS}
+            effects = native.paired_effects(period, evaluation, roles["native_evaluation"], protocol=protocol)
+            effects.update(credit_endpoints(period, credit))
             cost["native_pair_checks"] += len(roles["native_evaluation"])
             native.curves.support.assert_frozen(clone, snapshot)
             cost["frozen_model_checks"] += 1
             groups[str(period)] = {"alpha": alpha, "credit": credit, "evaluation": evaluation, "effects": effects,
                 "scenario_pairing": "passed", "pairing": "passed", "source_and_Adam_unchanged": "passed"}
-            print(f"scenario credit {root}/{period}: same-data rate/scenario directions evaluated, alpha={alpha:.8f} frozen", flush=True)
-    cell = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
+            print(f"{protocol.EXPERIMENT_PROTOCOL} {root}/{period}: registered directions evaluated, alpha={alpha:.8f} frozen", flush=True)
+    cell = {"status": "complete", "protocol": protocol.EXPERIMENT_PROTOCOL, "contract": protocol.contract(), "root": root,
         "preflight": preflight, "seed_roles": roles, "cost": cost, "native_planning_cost": planning, "groups": groups,
         "source_initialization": initialization, "optimizer_steps": 0, "critic_fits": 0, "forecaster_fits": 0,
         "checkpoint_writes": 0, "native_trace_writes": 0, "wall_seconds": time.monotonic() - started}
-    qualify(cell, preflight=preflight)
+    qualifier(cell, preflight=preflight)
     write_json(output, cell)
-    write_json(output.parent / "completion" / "ready.json", {"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
+    write_json(output.parent / "completion" / "ready.json", {"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
     return cell
 
 
