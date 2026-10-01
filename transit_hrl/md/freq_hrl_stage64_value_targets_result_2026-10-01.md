@@ -9,3 +9,5 @@ Cost:24 archived episodes,7200 lower/108 upper reconstructions plus21600 extra c
 ## Next
 
 Run the frozen eight roots,16 calibration iterations/eight paths. Preserve every period/arm, including root310037. Keep mc_normalized as the preregistered candidate and require every full case EV>=0.10 with MSE below gae_raw. A pass is critic-only and still needs a separate guarded actor/native trial; Stage63 native evaluation remains HOLD.
+
+Full preregistration committed as662c7b4032 before outcomes. All eight tasks t116713-t116720 have started dynamically on node004/005/006, with9CPU each and no node pin. Early measured RAM is approximately3.9GB/task; submitted RAM is12GB. Full qualification is pending. No raw archives or critic weights are pulled locally.
