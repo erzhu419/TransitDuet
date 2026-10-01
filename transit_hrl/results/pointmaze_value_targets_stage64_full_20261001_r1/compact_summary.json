@@ -1,0 +1,4729 @@
+{
+  "candidate_fit_failures": [],
+  "candidate_fit_gate": "passed",
+  "contract": {
+    "architecture": "unchanged_two_Tanh_ValueNet_actor_upper_networks_and_their_Adam_all_frozen",
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "checkpoint": "critic_only_training_units_Adam_and_normalization_plus_public_value_weights_not_a_native_ready_full_policy",
+    "control": "gae_raw_pre_actor_episode_MC_probe_exactly_reproduces_Stage63_episode_critic",
+    "decision": {
+      "MSE_each_case": "below_gae_raw",
+      "candidate": "mc_normalized",
+      "minimum_EV_each_case": 0.1,
+      "next": "critic_only_pass_still_requires_guarded_actor_and_native_trial"
+    },
+    "initialization": "same_Stage55_clone_values_empty_value_Adam_no_reset_same_public_initial_prediction",
+    "limits": "archive_critic_fit_factorial_not_reward_frequency_OOD_or_full_training_confirmation",
+    "normalization": "fixed_mean_std_from_first_calibration_episode_MC_only_rebase_last_linear_head_train_in_normalized_units_export_public_values",
+    "pairing": "same_Stage57_calibration_and_first_training_probe_archives_causal_states_actions_rewards_logp_and_shuffle",
+    "periods": [
+      50,
+      100
+    ],
+    "probe": "first_training_paths_disjoint_from_all_calibration_no_probe_target_or_prediction_used_by_training_or_normalization",
+    "selection": "all_eight_roots_both_periods_both_arms_no_fit_LR_seed_sweep_no_best_arm_selection",
+    "source_protocol": "pointmaze_episode_credit_stage63_v1",
+    "source_runs": [
+      "pointmaze_episode_credit_stage63_preflight_20261001_r1",
+      "pointmaze_episode_credit_stage63_full_20261001_r1"
+    ],
+    "targets": "continuing_existing_PPO_GAE_vs_discounted_complete_episode_MC_same_gamma_true_episode_done",
+    "training": "same_nominal_value_steps_LR_epochs_minibatches_coef_gradient_clip_all_extra_MC_supervision_and_forward_calls_counted",
+    "treatments": [
+      "gae_raw",
+      "mc_raw",
+      "gae_normalized",
+      "mc_normalized"
+    ]
+  },
+  "cost": {
+    "actor_optimizer_steps": 0,
+    "archive_episodes": 4352,
+    "archive_network_checks": 17408,
+    "calibration_gae_calls": 1024,
+    "calibration_updates": 2048,
+    "critic_checkpoint_writes": 128,
+    "extra_critic_scalar_calls": 15667200,
+    "forecaster_loads": 8,
+    "frozen_state_checks": 768,
+    "initialization_checks": 64,
+    "initialization_value_rows": 614400,
+    "mc_supervised_updates": 1024,
+    "mc_target_calls": 544,
+    "native_steps": 0,
+    "new_evaluation_steps": 0,
+    "new_forecaster_fits": 0,
+    "normalization_frame_fits": 32,
+    "probe_gae_calls": 128,
+    "reconstructed_lower_calls": 5222400,
+    "reconstructed_upper_calls": 78336,
+    "representation_forward_batches": 2432,
+    "source_clone_loads": 16
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "passed_critic_only_actor_test_still_required",
+  "performance_claim": "none_critic_archive_only",
+  "protocol": "pointmaze_value_targets_stage64_v1",
+  "root_rows": [
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 111.64529664206628,
+              "sample_count": 9600,
+              "scale": 31.717489337864478,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0875,
+                "loss_training_units": 0.044859655917389316,
+                "preclip_gradient_norm_mean": 0.4146295978134731
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 72.24959192276,
+                "preclip_gradient_norm_mean": 79.98451489210129
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3484375,
+                "loss_training_units": 0.959479483566247,
+                "preclip_gradient_norm_mean": 2.5574588996125387
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6655.379003143311,
+                "preclip_gradient_norm_mean": 840.8031365394593
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8917599911995335,
+                  "normalized_rms_difference": 0.4652741551399231,
+                  "normalized_sign_disagreement": 0.238125
+                },
+                "episode_mc": {
+                  "bias": -14.933939227157582,
+                  "explained_variance": 0.2760592180246719,
+                  "mse": 1035.0770536030739,
+                  "prediction_mean": 99.098274974823,
+                  "prediction_std": 8.65676530653836,
+                  "target_mean": 114.03221420198058,
+                  "target_std": 33.49199909507054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4715018805801662,
+                    0.20156467368107206
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12064778645833334,
+                    0.49961995442708335
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -62.08959431955591,
+                  "explained_variance": 0.0010409979902007427,
+                  "mse": 4975.664024128131,
+                  "prediction_mean": 51.94261988242467,
+                  "prediction_std": 0.0405156520054707,
+                  "target_mean": 114.03221420198058,
+                  "target_std": 33.49199909507054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.33667821782542356,
+                    0.0012515624000220273
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06799560546875,
+                    0.9963045247395833
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7842252759557891,
+                  "normalized_rms_difference": 0.6569242477416992,
+                  "normalized_sign_disagreement": 0.28802083333333334
+                },
+                "episode_mc": {
+                  "bias": 2.161328881687174,
+                  "explained_variance": 0.6742177453929292,
+                  "mse": 370.10585958164495,
+                  "prediction_mean": 116.19354308366775,
+                  "prediction_std": 23.55413462814357,
+                  "target_mean": 114.03221420198058,
+                  "target_std": 33.49199909507054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4721047751641123,
+                    0.3609412128706347
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.19060628255208334,
+                    0.3423291015625
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.99999893814336,
+                  "normalized_rms_difference": 0.0014572965446859598,
+                  "normalized_sign_disagreement": 0.0004166666666666667
+                },
+                "episode_mc": {
+                  "bias": -62.0422848005034,
+                  "explained_variance": 0.0009342461398066382,
+                  "mse": 4969.911149673352,
+                  "prediction_mean": 51.98992940147718,
+                  "prediction_std": 0.03475116840144517,
+                  "target_mean": 114.03221420198058,
+                  "target_std": 33.49199909507054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3253524394067424,
+                    0.0010797767429821911
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06146565755208333,
+                    0.9967203776041667
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 136.37959955596054,
+              "sample_count": 9600,
+              "scale": 38.643683917033684,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0953125,
+                "loss_training_units": 0.04030749796220334,
+                "preclip_gradient_norm_mean": 0.4147086753946496
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 109.05705324411392,
+                "preclip_gradient_norm_mean": 105.2247727751732
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.365625,
+                "loss_training_units": 0.959687216160819,
+                "preclip_gradient_norm_mean": 2.6884644515812397
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10688.39674835205,
+                "preclip_gradient_norm_mean": 1084.0237865447998
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9084059322952107,
+                  "normalized_rms_difference": 0.42800483107566833,
+                  "normalized_sign_disagreement": 0.2604166666666667
+                },
+                "episode_mc": {
+                  "bias": -15.423433570706596,
+                  "explained_variance": 0.2716689589215131,
+                  "mse": 1334.6216169701875,
+                  "prediction_mean": 116.45054066896438,
+                  "prediction_std": 9.284335613720835,
+                  "target_mean": 131.87397423967099,
+                  "target_std": 38.80496498457176
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.43619133586078906,
+                    0.17822620603581754
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10972412109375,
+                    0.5727726236979167
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -79.96352404817318,
+                  "explained_variance": 0.0005606446895392025,
+                  "mse": 7899.146252694612,
+                  "prediction_mean": 51.9104501914978,
+                  "prediction_std": 0.01785146798154371,
+                  "target_mean": 131.87397423967099,
+                  "target_std": 38.80496498457176
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.28559595417419037,
+                    0.0005159904515950218
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.05077880859375,
+                    0.9987809244791667
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7657657440259088,
+                  "normalized_rms_difference": 0.6844475865364075,
+                  "normalized_sign_disagreement": 0.3360416666666667
+                },
+                "episode_mc": {
+                  "bias": 9.512589263673872,
+                  "explained_variance": 0.7356858405863851,
+                  "mse": 488.5003048627734,
+                  "prediction_mean": 141.38656350334486,
+                  "prediction_std": 28.859350294327093,
+                  "target_mean": 131.87397423967099,
+                  "target_std": 38.80496498457176
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4549093193210789,
+                    0.3481404932829607
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12132405598958333,
+                    0.39794921875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999998452545754,
+                  "normalized_rms_difference": 0.0005563190206885338,
+                  "normalized_sign_disagreement": 0.0003125
+                },
+                "episode_mc": {
+                  "bias": -79.989761067871,
+                  "explained_variance": 0.0005361911066755765,
+                  "mse": 7903.379773010867,
+                  "prediction_mean": 51.88421317179998,
+                  "prediction_std": 0.019527501370155496,
+                  "target_mean": 131.87397423967099,
+                  "target_std": 38.80496498457176
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.27975087221938577,
+                    0.000536970763038065
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.04498372395833333,
+                    0.9986027018229167
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 113.37100168505684,
+              "sample_count": 9600,
+              "scale": 32.37403844487199,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.07968750000000001,
+                "loss_training_units": 0.04032729525206378,
+                "preclip_gradient_norm_mean": 0.38059323997294997
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 71.19163696169852,
+                "preclip_gradient_norm_mean": 77.75794983506202
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3671875,
+                "loss_training_units": 0.9585453633684664,
+                "preclip_gradient_norm_mean": 2.5634630498476323
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6509.603950500488,
+                "preclip_gradient_norm_mean": 830.1359064102173
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8217551710175345,
+                  "normalized_rms_difference": 0.5970675349235535,
+                  "normalized_sign_disagreement": 0.19739583333333333
+                },
+                "episode_mc": {
+                  "bias": -12.342770855200166,
+                  "explained_variance": 0.3097463465793666,
+                  "mse": 916.82405444012,
+                  "prediction_mean": 96.84990008950234,
+                  "prediction_std": 9.66471285265516,
+                  "target_mean": 109.1926709447025,
+                  "target_std": 33.27964804417627
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4495449231423264,
+                    0.19795662317034682
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09814453125,
+                    0.47359293619791665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -57.225439365875594,
+                  "explained_variance": 0.0008899446769685682,
+                  "mse": 4381.300239707132,
+                  "prediction_mean": 51.967231578826905,
+                  "prediction_std": 0.04139888257816934,
+                  "target_mean": 109.1926709447025,
+                  "target_std": 33.27964804417627
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3244799485695571,
+                    0.0013720129388632588
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06933349609375,
+                    0.9967350260416666
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7832748572480059,
+                  "normalized_rms_difference": 0.6583693623542786,
+                  "normalized_sign_disagreement": 0.2646875
+                },
+                "episode_mc": {
+                  "bias": 11.952767911978686,
+                  "explained_variance": 0.623296388676857,
+                  "mse": 560.0810851091078,
+                  "prediction_mean": 121.14543885668118,
+                  "prediction_std": 23.360057849873613,
+                  "target_mean": 109.1926709447025,
+                  "target_std": 33.27964804417627
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.46711757235170276,
+                    0.3424792412057603
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14810953776041666,
+                    0.3718741861979167
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999975372800871,
+                  "normalized_rms_difference": 0.00221933308057487,
+                  "normalized_sign_disagreement": 0.00010416666666666667
+                },
+                "episode_mc": {
+                  "bias": -57.185885313125326,
+                  "explained_variance": 0.0009273154946520812,
+                  "mse": 4376.733418647961,
+                  "prediction_mean": 52.00678563157717,
+                  "prediction_std": 0.047214630195741965,
+                  "target_mean": 109.1926709447025,
+                  "target_std": 33.27964804417627
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3179424005967136,
+                    0.0014697183452868738
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06528238932291666,
+                    0.9963924153645833
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 123.02015954428663,
+              "sample_count": 9600,
+              "scale": 35.649133889194154,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.078125,
+                "loss_training_units": 0.03821898870664882,
+                "preclip_gradient_norm_mean": 0.3758903600886697
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 87.67520748972892,
+                "preclip_gradient_norm_mean": 89.37842699885368
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3734375,
+                "loss_training_units": 0.922855158895254,
+                "preclip_gradient_norm_mean": 2.587215729919262
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 8278.726225280761,
+                "preclip_gradient_norm_mean": 944.272445487976
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8422858616452743,
+                  "normalized_rms_difference": 0.5616300106048584,
+                  "normalized_sign_disagreement": 0.22802083333333334
+                },
+                "episode_mc": {
+                  "bias": -11.513893337634702,
+                  "explained_variance": 0.33079596835543,
+                  "mse": 1039.8932530534623,
+                  "prediction_mean": 106.50328463991482,
+                  "prediction_std": 10.554774593183792,
+                  "target_mean": 118.01717797754954,
+                  "target_std": 36.821528157207545
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4338729229229264,
+                    0.1931639180584339
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09534423828125,
+                    0.46630452473958334
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -66.08365965524068,
+                  "explained_variance": 0.0006192841900288792,
+                  "mse": 5722.035368314505,
+                  "prediction_mean": 51.933518322308856,
+                  "prediction_std": 0.02534999678515634,
+                  "target_mean": 118.01717797754954,
+                  "target_std": 36.821528157207545
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.30300981517773584,
+                    0.0008378820296806356
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06688720703125,
+                    0.99830810546875
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7454856497918535,
+                  "normalized_rms_difference": 0.7134624719619751,
+                  "normalized_sign_disagreement": 0.28583333333333333
+                },
+                "episode_mc": {
+                  "bias": 12.232261999857922,
+                  "explained_variance": 0.6297133972828592,
+                  "mse": 651.6720430015951,
+                  "prediction_mean": 130.24943997740746,
+                  "prediction_std": 25.982878837962506,
+                  "target_mean": 118.01717797754954,
+                  "target_std": 36.821528157207545
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.450671430203487,
+                    0.3432260681671411
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14079833984375,
+                    0.39398600260416666
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999996693455051,
+                  "normalized_rms_difference": 0.0008132091024890542,
+                  "normalized_sign_disagreement": 0.0004166666666666667
+                },
+                "episode_mc": {
+                  "bias": -66.04489995915442,
+                  "explained_variance": 0.0005343385659438704,
+                  "mse": 5717.029276894861,
+                  "prediction_mean": 51.97227801839511,
+                  "prediction_std": 0.02473762647292112,
+                  "target_mean": 118.01717797754954,
+                  "target_std": 36.821528157207545
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3024664028637519,
+                    0.0007816062944301636
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.058351236979166665,
+                    0.99829345703125
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310011
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 114.42374577042337,
+              "sample_count": 9600,
+              "scale": 31.72249576242885,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0828125,
+                "loss_training_units": 0.04509330676519312,
+                "preclip_gradient_norm_mean": 0.3939992860890925
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 70.60893879532813,
+                "preclip_gradient_norm_mean": 78.34249846935273
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3140625,
+                "loss_training_units": 0.9619568231282756,
+                "preclip_gradient_norm_mean": 2.526285076676868
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6641.408410644532,
+                "preclip_gradient_norm_mean": 835.2851851463317
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9090350973993561,
+                  "normalized_rms_difference": 0.4265322983264923,
+                  "normalized_sign_disagreement": 0.2271875
+                },
+                "episode_mc": {
+                  "bias": -10.58257773381658,
+                  "explained_variance": 0.20831102094764464,
+                  "mse": 971.0206802296105,
+                  "prediction_mean": 100.0307342672348,
+                  "prediction_std": 8.78672845545793,
+                  "target_mean": 110.61331200105138,
+                  "target_std": 32.94024289947829
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5556530059111657,
+                    0.2338877242210392
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13760335286458333,
+                    0.3779573567708333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -58.77242840073692,
+                  "explained_variance": 0.006391076383723604,
+                  "mse": 4532.323243597335,
+                  "prediction_mean": 51.840883600314456,
+                  "prediction_std": 0.48437097035203985,
+                  "target_mean": 110.61331200105138,
+                  "target_std": 32.94024289947829
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4202520485356654,
+                    0.01190258950728363
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08306722005208333,
+                    0.94185791015625
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7184654707779541,
+                  "normalized_rms_difference": 0.7503792643547058,
+                  "normalized_sign_disagreement": 0.3403125
+                },
+                "episode_mc": {
+                  "bias": 2.7850718154292555,
+                  "explained_variance": 0.6112053230913348,
+                  "mse": 429.62202251088553,
+                  "prediction_mean": 113.39838381648063,
+                  "prediction_std": 25.297513847244105,
+                  "target_mean": 110.61331200105138,
+                  "target_std": 32.94024289947829
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5850739663261771,
+                    0.43501207593957836
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.18485514322916666,
+                    0.36753173828125
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9994333658903922,
+                  "normalized_rms_difference": 0.033664047718048096,
+                  "normalized_sign_disagreement": 0.013645833333333333
+                },
+                "episode_mc": {
+                  "bias": -58.64118456663874,
+                  "explained_variance": 0.002767294077045346,
+                  "mse": 4520.845450644599,
+                  "prediction_mean": 51.97212743441264,
+                  "prediction_std": 0.1613341652882206,
+                  "target_mean": 110.61331200105138,
+                  "target_std": 32.94024289947829
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4104708064995848,
+                    0.008428776153120415
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08649658203125,
+                    0.9830517578125
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 135.79905022509706,
+              "sample_count": 9600,
+              "scale": 39.185903202830225,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000011444091796875,
+              "mc_normalized": 0.000011444091796875
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0828125,
+                "loss_training_units": 0.039449650514870885,
+                "preclip_gradient_norm_mean": 0.39386624884791677
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 109.12849169969559,
+                "preclip_gradient_norm_mean": 104.85258212089539
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3046875,
+                "loss_training_units": 0.8919457691954449,
+                "preclip_gradient_norm_mean": 2.537765938369557
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10843.900598144532,
+                "preclip_gradient_norm_mean": 1089.0710974693297
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9024407076813923,
+                  "normalized_rms_difference": 0.4417223036289215,
+                  "normalized_sign_disagreement": 0.2303125
+                },
+                "episode_mc": {
+                  "bias": -17.734824139842143,
+                  "explained_variance": 0.19768552728891486,
+                  "mse": 1603.281256249471,
+                  "prediction_mean": 117.09268633405368,
+                  "prediction_std": 10.342401375083023,
+                  "target_mean": 134.8275104738958,
+                  "target_std": 40.07866534726017
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5333400874208216,
+                    0.21659775121931127
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12110677083333334,
+                    0.4130631510416667
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -82.8435873140581,
+                  "explained_variance": 0.0012853851703379382,
+                  "mse": 8467.294661631167,
+                  "prediction_mean": 51.98392315983772,
+                  "prediction_std": 0.06746629391938694,
+                  "target_mean": 134.8275104738958,
+                  "target_std": 40.07866534726017
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.36881392965893517,
+                    0.0018317101854596557
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06977783203125,
+                    0.9887736002604167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7376491244647158,
+                  "normalized_rms_difference": 0.7243629693984985,
+                  "normalized_sign_disagreement": 0.3544791666666667
+                },
+                "episode_mc": {
+                  "bias": 0.35210151337708034,
+                  "explained_variance": 0.6611368229194283,
+                  "mse": 544.4396989301382,
+                  "prediction_mean": 135.1796119872729,
+                  "prediction_std": 29.037944589067482,
+                  "target_mean": 134.8275104738958,
+                  "target_std": 40.07866534726017
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5444221659927286,
+                    0.4109637008004565
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14083414713541667,
+                    0.37530924479166666
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999937490756767,
+                  "normalized_rms_difference": 0.003535795258358121,
+                  "normalized_sign_disagreement": 0.00125
+                },
+                "episode_mc": {
+                  "bias": -82.82384239491697,
+                  "explained_variance": 0.001836457035614858,
+                  "mse": 8463.138385211867,
+                  "prediction_mean": 52.003668078978855,
+                  "prediction_std": 0.12129018436122078,
+                  "target_mean": 134.8275104738958,
+                  "target_std": 40.07866534726017
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3673759046882764,
+                    0.005713572310640023
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.0696240234375,
+                    0.9847208658854166
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 113.23479051584688,
+              "sample_count": 9600,
+              "scale": 32.22393169608889,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.078125,
+                "loss_training_units": 0.041663769210572354,
+                "preclip_gradient_norm_mean": 0.37968150537344625
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 69.99184986352921,
+                "preclip_gradient_norm_mean": 76.84665560722351
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3046875,
+                "loss_training_units": 0.9380017298972234,
+                "preclip_gradient_norm_mean": 2.4074377496959642
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6590.040421295165,
+                "preclip_gradient_norm_mean": 833.8780040740967
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8541508241047114,
+                  "normalized_rms_difference": 0.5400910973548889,
+                  "normalized_sign_disagreement": 0.19197916666666667
+                },
+                "episode_mc": {
+                  "bias": -14.952817470561714,
+                  "explained_variance": 0.1922672640796752,
+                  "mse": 1231.0944615393632,
+                  "prediction_mean": 98.57604382038116,
+                  "prediction_std": 9.755521031649742,
+                  "target_mean": 113.52886129094287,
+                  "target_std": 35.3175319900061
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5450435468076379,
+                    0.22185903144296273
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.1241064453125,
+                    0.3717822265625
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -62.01463831755643,
+                  "explained_variance": 0.01230938740934917,
+                  "mse": 5077.789587133155,
+                  "prediction_mean": 51.514222973386445,
+                  "prediction_std": 1.9977334796888022,
+                  "target_mean": 113.52886129094287,
+                  "target_std": 35.3175319900061
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.436569988596555,
+                    0.043344924673877835
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08697265625,
+                    0.87194580078125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.6942747939936121,
+                  "normalized_rms_difference": 0.781952977180481,
+                  "normalized_sign_disagreement": 0.3017708333333333
+                },
+                "episode_mc": {
+                  "bias": -0.26270634684090816,
+                  "explained_variance": 0.5006965143503919,
+                  "mse": 622.8642656597011,
+                  "prediction_mean": 113.26615494410197,
+                  "prediction_std": 24.281067580697616,
+                  "target_mean": 113.52886129094287,
+                  "target_std": 35.3175319900061
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.556762086927408,
+                    0.4161904261003113
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15666666666666668,
+                    0.3605810546875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9839877651837518,
+                  "normalized_rms_difference": 0.17895382642745972,
+                  "normalized_sign_disagreement": 0.017083333333333332
+                },
+                "episode_mc": {
+                  "bias": -61.49834911776706,
+                  "explained_variance": 0.002646043240127516,
+                  "mse": 5026.074526078961,
+                  "prediction_mean": 52.030512173175815,
+                  "prediction_std": 0.18705772046664218,
+                  "target_mean": 113.52886129094287,
+                  "target_std": 35.3175319900061
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4046009773683872,
+                    0.009000353059177839
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08258219401041667,
+                    0.9793123372395833
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 124.51891946025813,
+              "sample_count": 9600,
+              "scale": 36.30305099450404,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0703125,
+                "loss_training_units": 0.037963210101588624,
+                "preclip_gradient_norm_mean": 0.3700437325634993
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 87.2987955391407,
+                "preclip_gradient_norm_mean": 89.44416881203651
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3046875,
+                "loss_training_units": 0.8891321199946106,
+                "preclip_gradient_norm_mean": 2.423995249997825
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 8478.733162689208,
+                "preclip_gradient_norm_mean": 955.1746215820312
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8504371733314584,
+                  "normalized_rms_difference": 0.546923816204071,
+                  "normalized_sign_disagreement": 0.18947916666666667
+                },
+                "episode_mc": {
+                  "bias": -18.046920711087683,
+                  "explained_variance": 0.2115750897251657,
+                  "mse": 1487.1410677645738,
+                  "prediction_mean": 106.56657259384791,
+                  "prediction_std": 10.347313029383233,
+                  "target_mean": 124.61349330493559,
+                  "target_std": 38.38133161735943
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5327837238418731,
+                    0.22204240348161683
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12502604166666667,
+                    0.4034220377604167
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -72.6736471997574,
+                  "explained_variance": 0.0029612446514426516,
+                  "mse": 6750.223325721855,
+                  "prediction_mean": 51.9398461051782,
+                  "prediction_std": 0.3133254797224931,
+                  "target_mean": 124.61349330493559,
+                  "target_std": 38.38133161735943
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3871166676020367,
+                    0.007123388780158516
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.07236165364583333,
+                    0.9760579427083333
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7318199808454902,
+                  "normalized_rms_difference": 0.7323660850524902,
+                  "normalized_sign_disagreement": 0.3148958333333333
+                },
+                "episode_mc": {
+                  "bias": 0.8049169060712059,
+                  "explained_variance": 0.5956954384910533,
+                  "mse": 596.2397020465102,
+                  "prediction_mean": 125.4184102110068,
+                  "prediction_std": 25.663433824669493,
+                  "target_mean": 124.61349330493559,
+                  "target_std": 38.38133161735943
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5431265266799925,
+                    0.40174987688025354
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15257975260416667,
+                    0.38544921875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.999885804550055,
+                  "normalized_rms_difference": 0.01511260773986578,
+                  "normalized_sign_disagreement": 0.002916666666666667
+                },
+                "episode_mc": {
+                  "bias": -72.56485106099397,
+                  "explained_variance": 0.0022614450755163995,
+                  "mse": 6735.452831292955,
+                  "prediction_mean": 52.04864224394162,
+                  "prediction_std": 0.16763928633984188,
+                  "target_mean": 124.61349330493559,
+                  "target_std": 38.38133161735943
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.38543833825078405,
+                    0.008145659900103375
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.07283772786458333,
+                    0.9818660481770833
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310023
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 112.19379225738346,
+              "sample_count": 9600,
+              "scale": 34.314654808445084,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.06562499999999999,
+                "loss_training_units": 0.036795086778874976,
+                "preclip_gradient_norm_mean": 0.34167431608220794
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 68.90398422479629,
+                "preclip_gradient_norm_mean": 78.43609681725502
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.25937499999999997,
+                "loss_training_units": 0.748483233852312,
+                "preclip_gradient_norm_mean": 2.149465017579496
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6388.1201171875,
+                "preclip_gradient_norm_mean": 832.900262928009
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9031449119193914,
+                  "normalized_rms_difference": 0.4401251971721649,
+                  "normalized_sign_disagreement": 0.21979166666666666
+                },
+                "episode_mc": {
+                  "bias": -13.24706373971887,
+                  "explained_variance": 0.1494445285058258,
+                  "mse": 1090.9766511642506,
+                  "prediction_mean": 97.38357036709786,
+                  "prediction_std": 9.307951172983195,
+                  "target_mean": 110.63063410681673,
+                  "target_std": 32.80771204056683
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5435352822555686,
+                    0.20788249976976053
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11364013671875,
+                    0.3921256510416667
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -59.32487178923873,
+                  "explained_variance": -0.008462826379096233,
+                  "mse": 4604.895311208704,
+                  "prediction_mean": 51.305762317578,
+                  "prediction_std": 1.2881588964644375,
+                  "target_mean": 110.63063410681673,
+                  "target_std": 32.80771204056683
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4041596449226843,
+                    0.027791502019391918
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06762125651041667,
+                    0.9093359375
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7815795430812481,
+                  "normalized_rms_difference": 0.6609393954277039,
+                  "normalized_sign_disagreement": 0.3207291666666667
+                },
+                "episode_mc": {
+                  "bias": 2.240996772426491,
+                  "explained_variance": 0.6086172256164002,
+                  "mse": 426.2853382096497,
+                  "prediction_mean": 112.87163087924321,
+                  "prediction_std": 23.083147035936246,
+                  "target_mean": 110.63063410681673,
+                  "target_std": 32.80771204056683
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5457484665778316,
+                    0.39023874529983255
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14449137369791668,
+                    0.43672607421875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9935171890889538,
+                  "normalized_rms_difference": 0.11386668682098389,
+                  "normalized_sign_disagreement": 0.026979166666666665
+                },
+                "episode_mc": {
+                  "bias": -59.01958411814955,
+                  "explained_variance": 0.00017964120386437799,
+                  "mse": 4559.463922730379,
+                  "prediction_mean": 51.61104998866717,
+                  "prediction_std": 0.04133082824061307,
+                  "target_mean": 110.63063410681673,
+                  "target_std": 32.80771204056683
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3840740405110128,
+                    0.0011220714171332768
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.072900390625,
+                    0.99287841796875
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 130.15750756407158,
+              "sample_count": 9600,
+              "scale": 37.94001988549312,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.084375,
+                "loss_training_units": 0.04038418425261625,
+                "preclip_gradient_norm_mean": 0.41611815663054585
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 107.59789311289788,
+                "preclip_gradient_norm_mean": 105.23276259303094
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.29375,
+                "loss_training_units": 0.8834168560802937,
+                "preclip_gradient_norm_mean": 2.566669179708697
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10623.251763916016,
+                "preclip_gradient_norm_mean": 1091.0302401542663
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8795896340107465,
+                  "normalized_rms_difference": 0.49073490500450134,
+                  "normalized_sign_disagreement": 0.2346875
+                },
+                "episode_mc": {
+                  "bias": -17.025908151535937,
+                  "explained_variance": 0.18045932723217395,
+                  "mse": 1453.1632922606748,
+                  "prediction_mean": 115.99473455588023,
+                  "prediction_std": 10.123157237357647,
+                  "target_mean": 133.02064270741616,
+                  "target_std": 37.675341734750624
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.504028031158217,
+                    0.19628416658515768
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11701497395833334,
+                    0.42352132161458333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -81.57445403503255,
+                  "explained_variance": -0.0005319725126005093,
+                  "mse": 8074.57802441881,
+                  "prediction_mean": 51.44618867238363,
+                  "prediction_std": 0.3137672141197129,
+                  "target_mean": 133.02064270741616,
+                  "target_std": 37.675341734750624
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.33633066382734833,
+                    0.006805535689727975
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.0506005859375,
+                    0.95512939453125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7718689567655633,
+                  "normalized_rms_difference": 0.6754717826843262,
+                  "normalized_sign_disagreement": 0.30864583333333334
+                },
+                "episode_mc": {
+                  "bias": 0.25601301504299045,
+                  "explained_variance": 0.6255017692574144,
+                  "mse": 531.6400811983129,
+                  "prediction_mean": 133.27665572245917,
+                  "prediction_std": 28.203381529585595,
+                  "target_mean": 133.02064270741616,
+                  "target_std": 37.675341734750624
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5142442720386626,
+                    0.3642803614869261
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13275553385416666,
+                    0.41020263671875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9996404542129691,
+                  "normalized_rms_difference": 0.026815883815288544,
+                  "normalized_sign_disagreement": 0.005729166666666666
+                },
+                "episode_mc": {
+                  "bias": -81.49087832179542,
+                  "explained_variance": 0.0002680960223570006,
+                  "mse": 8059.814080582308,
+                  "prediction_mean": 51.52976438562075,
+                  "prediction_std": 0.04152778737215374,
+                  "target_mean": 133.02064270741616,
+                  "target_std": 37.675341734750624
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3290659916071026,
+                    0.0009269638318593201
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.054340006510416664,
+                    0.9938802083333333
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 107.8143994976425,
+              "sample_count": 9600,
+              "scale": 34.62461106779868,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.06093749999999999,
+                "loss_training_units": 0.03402992495975923,
+                "preclip_gradient_norm_mean": 0.3332958225189941
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 67.06208983659744,
+                "preclip_gradient_norm_mean": 76.53037023842336
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.27031249999999996,
+                "loss_training_units": 0.7420039150165394,
+                "preclip_gradient_norm_mean": 2.087064088252373
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6231.551805877685,
+                "preclip_gradient_norm_mean": 825.6104671478271
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8508647195930187,
+                  "normalized_rms_difference": 0.546141505241394,
+                  "normalized_sign_disagreement": 0.23614583333333333
+                },
+                "episode_mc": {
+                  "bias": -11.049934022215506,
+                  "explained_variance": 0.2071203389583155,
+                  "mse": 930.2783705435099,
+                  "prediction_mean": 96.82640794595082,
+                  "prediction_std": 8.808946482428547,
+                  "target_mean": 107.87634196816633,
+                  "target_std": 31.926381059717027
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5043234429219768,
+                    0.18563812057455942
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09922119140625,
+                    0.38460123697916665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -56.353764326560004,
+                  "explained_variance": -0.004474532059112191,
+                  "mse": 4199.601424163353,
+                  "prediction_mean": 51.52257764160633,
+                  "prediction_std": 1.2615661945304575,
+                  "target_mean": 107.87634196816633,
+                  "target_std": 31.926381059717027
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.39347599368644154,
+                    0.028731090810568027
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.062437337239583335,
+                    0.90423095703125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7754400079633296,
+                  "normalized_rms_difference": 0.670164167881012,
+                  "normalized_sign_disagreement": 0.28802083333333334
+                },
+                "episode_mc": {
+                  "bias": 4.986052120340367,
+                  "explained_variance": 0.5400677486752297,
+                  "mse": 493.66681142393674,
+                  "prediction_mean": 112.8623940885067,
+                  "prediction_std": 20.996834677107255,
+                  "target_mean": 107.87634196816633,
+                  "target_std": 31.926381059717027
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5283309294679401,
+                    0.35144350870928937
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13705647786458333,
+                    0.43352783203125
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9914622830350417,
+                  "normalized_rms_difference": 0.13067299127578735,
+                  "normalized_sign_disagreement": 0.019583333333333335
+                },
+                "episode_mc": {
+                  "bias": -56.16678899545222,
+                  "explained_variance": 0.0002812096426147992,
+                  "mse": 4173.715358382565,
+                  "prediction_mean": 51.70955297271411,
+                  "prediction_std": 0.0558573741912411,
+                  "target_mean": 107.87634196816633,
+                  "target_std": 31.926381059717027
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.37223979883448216,
+                    0.0013716615863495337
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06949951171875,
+                    0.99235595703125
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 116.85621570851964,
+              "sample_count": 9600,
+              "scale": 34.91027945107779,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.071875,
+                "loss_training_units": 0.03807623539032647,
+                "preclip_gradient_norm_mean": 0.36386747178330553
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 82.2743761897087,
+                "preclip_gradient_norm_mean": 88.07906360626221
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.31875,
+                "loss_training_units": 0.908031365647912,
+                "preclip_gradient_norm_mean": 2.468702053138986
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 7941.182751464843,
+                "preclip_gradient_norm_mean": 939.1362125396729
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8453930101134153,
+                  "normalized_rms_difference": 0.55607008934021,
+                  "normalized_sign_disagreement": 0.22833333333333333
+                },
+                "episode_mc": {
+                  "bias": -11.236099514088904,
+                  "explained_variance": 0.21910202018752567,
+                  "mse": 1026.640080171201,
+                  "prediction_mean": 105.69720301389694,
+                  "prediction_std": 8.930115156442653,
+                  "target_mean": 116.93330252798584,
+                  "target_std": 33.956132336993406
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.49479973489754137,
+                    0.18362479762854148
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10173583984375,
+                    0.4055916341145833
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -65.56338574282515,
+                  "explained_variance": -0.009650702503242847,
+                  "mse": 5462.703915959152,
+                  "prediction_mean": 51.3699167851607,
+                  "prediction_std": 2.0139848250849264,
+                  "target_mean": 116.93330252798584,
+                  "target_std": 33.956132336993406
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.37574179177705935,
+                    0.042228703449301075
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.0540673828125,
+                    0.8981396484375
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7351991767661787,
+                  "normalized_rms_difference": 0.7277373671531677,
+                  "normalized_sign_disagreement": 0.2946875
+                },
+                "episode_mc": {
+                  "bias": 4.318347916680699,
+                  "explained_variance": 0.6163752474552151,
+                  "mse": 460.9747278550873,
+                  "prediction_mean": 121.25165044466654,
+                  "prediction_std": 24.47725694204096,
+                  "target_mean": 116.93330252798584,
+                  "target_std": 33.956132336993406
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5188040259084641,
+                    0.35378179658424913
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.1343896484375,
+                    0.4220361328125
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9905012773777181,
+                  "normalized_rms_difference": 0.13783122599124908,
+                  "normalized_sign_disagreement": 0.02375
+                },
+                "episode_mc": {
+                  "bias": -65.26173603844829,
+                  "explained_variance": 0.00020265414407238946,
+                  "mse": 5411.879449976511,
+                  "prediction_mean": 51.671566489537554,
+                  "prediction_std": 0.05520072472709576,
+                  "target_mean": 116.93330252798584,
+                  "target_std": 33.956132336993406
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3525231706976736,
+                    0.001361126180066846
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.05946044921875,
+                    0.9929541015625
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310037
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 113.99197292823655,
+              "sample_count": 9600,
+              "scale": 36.250472839323855,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.06562499999999999,
+                "loss_training_units": 0.035077068037207934,
+                "preclip_gradient_norm_mean": 0.3516195912787225
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 71.21752527952194,
+                "preclip_gradient_norm_mean": 79.28043698072433
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.240625,
+                "loss_training_units": 0.7139632716076448,
+                "preclip_gradient_norm_mean": 2.024737333250232
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6634.077867126465,
+                "preclip_gradient_norm_mean": 843.2695043563842
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9274028052751714,
+                  "normalized_rms_difference": 0.38104382157325745,
+                  "normalized_sign_disagreement": 0.23270833333333332
+                },
+                "episode_mc": {
+                  "bias": -14.497055364480863,
+                  "explained_variance": 0.24271557120463527,
+                  "mse": 984.5671561138264,
+                  "prediction_mean": 98.54536223252614,
+                  "prediction_std": 6.831550624291477,
+                  "target_mean": 113.042417597007,
+                  "target_std": 31.978189472707147
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4817178452202066,
+                    0.17513329395329422
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09515543619791667,
+                    0.4350691731770833
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -61.02041611316924,
+                  "explained_variance": 0.002805098381216342,
+                  "mse": 4743.227278063122,
+                  "prediction_mean": 52.02200148383776,
+                  "prediction_std": 0.08847220411742589,
+                  "target_mean": 113.042417597007,
+                  "target_std": 31.978189472707147
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.36725333869042853,
+                    0.008909536574109575
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09949625651041667,
+                    0.9837882486979167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7287339924930366,
+                  "normalized_rms_difference": 0.7365677356719971,
+                  "normalized_sign_disagreement": 0.3478125
+                },
+                "episode_mc": {
+                  "bias": -2.130110232066363,
+                  "explained_variance": 0.6814912007729144,
+                  "mse": 330.24593345269136,
+                  "prediction_mean": 110.91230736494065,
+                  "prediction_std": 27.516876918215726,
+                  "target_mean": 113.042417597007,
+                  "target_std": 31.978189472707147
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4922392035023866,
+                    0.42334504004505213
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15371907552083333,
+                    0.3628898111979167
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999934129603869,
+                  "normalized_rms_difference": 0.00362961133942008,
+                  "normalized_sign_disagreement": 0.0010416666666666667
+                },
+                "episode_mc": {
+                  "bias": -61.00118911666796,
+                  "explained_variance": 0.0021897001623149004,
+                  "mse": 4741.510478136968,
+                  "prediction_mean": 52.04122848033905,
+                  "prediction_std": 0.09223010012519142,
+                  "target_mean": 113.042417597007,
+                  "target_std": 31.978189472707147
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.37296478172828396,
+                    0.00831039594188765
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09802652994791666,
+                    0.9824112955729166
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 135.59953012124944,
+              "sample_count": 9600,
+              "scale": 39.98765255216458,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.08437499999999999,
+                "loss_training_units": 0.038538274479651594,
+                "preclip_gradient_norm_mean": 0.3955646977425204
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 109.470889544487,
+                "preclip_gradient_norm_mean": 105.69511369466781
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.2515625,
+                "loss_training_units": 0.8759769360069186,
+                "preclip_gradient_norm_mean": 2.4045792166143656
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10797.151970672607,
+                "preclip_gradient_norm_mean": 1096.118148136139
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9523159723325155,
+                  "normalized_rms_difference": 0.30881720781326294,
+                  "normalized_sign_disagreement": 0.15479166666666666
+                },
+                "episode_mc": {
+                  "bias": -18.8412794172888,
+                  "explained_variance": 0.19342054011594756,
+                  "mse": 1556.819425240544,
+                  "prediction_mean": 117.55638133923213,
+                  "prediction_std": 6.6354933707210115,
+                  "target_mean": 136.39766075652093,
+                  "target_std": 38.60087496870528
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.45839432195610785,
+                    0.15127837859630217
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.095498046875,
+                    0.5222444661458333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -84.3671857460464,
+                  "explained_variance": 0.001160894988433192,
+                  "mse": 8606.119813544006,
+                  "prediction_mean": 52.030475010474525,
+                  "prediction_std": 0.05636163264230941,
+                  "target_mean": 136.39766075652093,
+                  "target_std": 38.60087496870528
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3126637562958373,
+                    0.007843351565951376
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08076171875,
+                    0.9906298828125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7731323690608104,
+                  "normalized_rms_difference": 0.6735987663269043,
+                  "normalized_sign_disagreement": 0.36864583333333334
+                },
+                "episode_mc": {
+                  "bias": 0.13165142733603716,
+                  "explained_variance": 0.6687233723836976,
+                  "mse": 493.628633370968,
+                  "prediction_mean": 136.52931218385697,
+                  "prediction_std": 30.000421945721055,
+                  "target_mean": 136.39766075652093,
+                  "target_std": 38.60087496870528
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4998997339025817,
+                    0.41319955257597635
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15123779296875,
+                    0.3713484700520833
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999984396782476,
+                  "normalized_rms_difference": 0.0017665342893451452,
+                  "normalized_sign_disagreement": 0.0008333333333333334
+                },
+                "episode_mc": {
+                  "bias": -84.37900556009262,
+                  "explained_variance": 0.0010306279894347625,
+                  "mse": 8608.308463563402,
+                  "prediction_mean": 52.0186551964283,
+                  "prediction_std": 0.07143929987620508,
+                  "target_mean": 136.39766075652093,
+                  "target_std": 38.60087496870528
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.32248160913712953,
+                    0.007073491186637047
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.076416015625,
+                    0.9875520833333333
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 113.35405308684334,
+              "sample_count": 9600,
+              "scale": 34.81497101240123,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.065625,
+                "loss_training_units": 0.03540276501225889,
+                "preclip_gradient_norm_mean": 0.35036425257276277
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 70.058115619421,
+                "preclip_gradient_norm_mean": 77.04783522486687
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.2734375,
+                "loss_training_units": 0.8264932760503143,
+                "preclip_gradient_norm_mean": 2.1213649313431233
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6478.017637634277,
+                "preclip_gradient_norm_mean": 834.0075766563416
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8394006093212011,
+                  "normalized_rms_difference": 0.5667439699172974,
+                  "normalized_sign_disagreement": 0.2246875
+                },
+                "episode_mc": {
+                  "bias": -18.333014858911437,
+                  "explained_variance": 0.27231806066473985,
+                  "mse": 1166.867623862537,
+                  "prediction_mean": 96.66447755535444,
+                  "prediction_std": 9.563817255307903,
+                  "target_mean": 114.99749241426588,
+                  "target_std": 33.788517061154074
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.46321385891343414,
+                    0.20128491890365158
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09355794270833333,
+                    0.3788916015625
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -62.90604565575719,
+                  "explained_variance": 0.002092208539671736,
+                  "mse": 5096.445866306073,
+                  "prediction_mean": 52.09144675850868,
+                  "prediction_std": 0.07330574577744603,
+                  "target_mean": 114.99749241426588,
+                  "target_std": 33.788517061154074
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3476451311095702,
+                    0.00854657122686195
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09523274739583333,
+                    0.9863639322916666
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.6793988781357895,
+                  "normalized_rms_difference": 0.8007510304450989,
+                  "normalized_sign_disagreement": 0.3382291666666667
+                },
+                "episode_mc": {
+                  "bias": -7.824419695089261,
+                  "explained_variance": 0.5831328423506861,
+                  "mse": 537.1437223757207,
+                  "prediction_mean": 107.17307271917662,
+                  "prediction_std": 26.333817739066564,
+                  "target_mean": 114.99749241426588,
+                  "target_std": 33.788517061154074
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5071014416683937,
+                    0.4306104208924671
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12992024739583333,
+                    0.32855061848958333
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999953970305625,
+                  "normalized_rms_difference": 0.0030341290403157473,
+                  "normalized_sign_disagreement": 0.0015625
+                },
+                "episode_mc": {
+                  "bias": -62.91919071788589,
+                  "explained_variance": 0.0024327163133506247,
+                  "mse": 5097.711101427728,
+                  "prediction_mean": 52.07830169637998,
+                  "prediction_std": 0.09666881557685775,
+                  "target_mean": 114.99749241426588,
+                  "target_std": 33.788517061154074
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.35885374265360126,
+                    0.008596809381078407
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.1,
+                    0.9803466796875
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 122.33274930720528,
+              "sample_count": 9600,
+              "scale": 37.452804222612706,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0703125,
+                "loss_training_units": 0.03596386905119289,
+                "preclip_gradient_norm_mean": 0.3581279684469336
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 87.13644184470176,
+                "preclip_gradient_norm_mean": 89.65796354413033
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3203125,
+                "loss_training_units": 0.8691370474407449,
+                "preclip_gradient_norm_mean": 2.240129052801058
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 8355.743974304198,
+                "preclip_gradient_norm_mean": 956.244580745697
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8551655373560114,
+                  "normalized_rms_difference": 0.5382090210914612,
+                  "normalized_sign_disagreement": 0.19989583333333333
+                },
+                "episode_mc": {
+                  "bias": -17.82281035521999,
+                  "explained_variance": 0.25475050344971206,
+                  "mse": 1364.6555064790166,
+                  "prediction_mean": 105.91619146347045,
+                  "prediction_std": 9.36292604805166,
+                  "target_mean": 123.73900181869045,
+                  "target_std": 37.482030042053054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4513932939816652,
+                    0.18137831037804553
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10224365234375,
+                    0.41756510416666665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -71.66117922722673,
+                  "explained_variance": 0.0013214243704383621,
+                  "mse": 6538.370711807963,
+                  "prediction_mean": 52.07782259146372,
+                  "prediction_std": 0.06218902211678428,
+                  "target_mean": 123.73900181869045,
+                  "target_std": 37.482030042053054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.32886736014202633,
+                    0.008236592090310248
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09078369140625,
+                    0.99181884765625
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7051972395231311,
+                  "normalized_rms_difference": 0.7678577303886414,
+                  "normalized_sign_disagreement": 0.3232291666666667
+                },
+                "episode_mc": {
+                  "bias": 0.7156765832565725,
+                  "explained_variance": 0.636509760070066,
+                  "mse": 511.1805674269126,
+                  "prediction_mean": 124.45467840194702,
+                  "prediction_std": 29.37545490754852,
+                  "target_mean": 123.73900181869045,
+                  "target_std": 37.482030042053054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.49769527959962134,
+                    0.4147615983936812
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13361328125,
+                    0.3500634765625
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999978328392803,
+                  "normalized_rms_difference": 0.0020819033961743116,
+                  "normalized_sign_disagreement": 0.000625
+                },
+                "episode_mc": {
+                  "bias": -71.66889555751656,
+                  "explained_variance": 0.0014864333446631406,
+                  "mse": 6539.244872472506,
+                  "prediction_mean": 52.07010626117388,
+                  "prediction_std": 0.0865365904759703,
+                  "target_mean": 123.73900181869045,
+                  "target_std": 37.482030042053054
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.33994410324732205,
+                    0.008398842765258801
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08844970703125,
+                    0.98428466796875
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310049
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 109.15594787031412,
+              "sample_count": 9600,
+              "scale": 31.745533476368326,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0703125,
+                "loss_training_units": 0.04007488939678296,
+                "preclip_gradient_norm_mean": 0.3677700692322105
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 65.79830968379974,
+                "preclip_gradient_norm_mean": 78.89990364313125
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.303125,
+                "loss_training_units": 0.7806490149348974,
+                "preclip_gradient_norm_mean": 2.2127331647556274
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6119.74192276001,
+                "preclip_gradient_norm_mean": 837.4884975433349
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8786021043506123,
+                  "normalized_rms_difference": 0.4927431344985962,
+                  "normalized_sign_disagreement": 0.24479166666666666
+                },
+                "episode_mc": {
+                  "bias": -12.148480578561625,
+                  "explained_variance": 0.3670141680614025,
+                  "mse": 761.9077731434193,
+                  "prediction_mean": 98.48450984756151,
+                  "prediction_std": 10.444907727591227,
+                  "target_mean": 110.63299042612314,
+                  "target_std": 31.15308841824123
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5076385572526089,
+                    0.2279124135279615
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12315836588541666,
+                    0.40857096354166667
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -57.77680415898561,
+                  "explained_variance": 0.002162101595289956,
+                  "mse": 4306.575664968084,
+                  "prediction_mean": 52.85618626713753,
+                  "prediction_std": 0.0934553363868074,
+                  "target_mean": 110.63299042612314,
+                  "target_std": 31.15308841824123
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.33187725034614773,
+                    0.0023337891782277184
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.05603271484375,
+                    0.9912687174479167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7186469826490862,
+                  "normalized_rms_difference": 0.7501373291015625,
+                  "normalized_sign_disagreement": 0.3310416666666667
+                },
+                "episode_mc": {
+                  "bias": 2.1482934285203616,
+                  "explained_variance": 0.6026635678159395,
+                  "mse": 390.236099552466,
+                  "prediction_mean": 112.7812838546435,
+                  "prediction_std": 26.060200484819138,
+                  "target_mean": 110.63299042612314,
+                  "target_std": 31.15308841824123
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5111600682879016,
+                    0.38638179347816815
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16126790364583332,
+                    0.40600748697916667
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999797854976692,
+                  "normalized_rms_difference": 0.006358380429446697,
+                  "normalized_sign_disagreement": 0.003958333333333334
+                },
+                "episode_mc": {
+                  "bias": -57.839510016342004,
+                  "explained_variance": 0.001855207170269213,
+                  "mse": 4314.123330690566,
+                  "prediction_mean": 52.79348040978114,
+                  "prediction_std": 0.08752856996626739,
+                  "target_mean": 110.63299042612314,
+                  "target_std": 31.15308841824123
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.32667090214681005,
+                    0.002068369762162078
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.05406656901041667,
+                    0.9908186848958334
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 135.13223111075038,
+              "sample_count": 9600,
+              "scale": 38.205741190136266,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.07968750000000001,
+                "loss_training_units": 0.0381316833125311,
+                "preclip_gradient_norm_mean": 0.3902516859729076
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 105.66827719211578,
+                "preclip_gradient_norm_mean": 107.81319445371628
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.321875,
+                "loss_training_units": 0.82635687419679,
+                "preclip_gradient_norm_mean": 2.57898618739564
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10519.574533843996,
+                "preclip_gradient_norm_mean": 1114.3838551521303
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8793475889349609,
+                  "normalized_rms_difference": 0.4912278652191162,
+                  "normalized_sign_disagreement": 0.24552083333333333
+                },
+                "episode_mc": {
+                  "bias": -19.239803145546468,
+                  "explained_variance": 0.39373686377163675,
+                  "mse": 1243.418310305102,
+                  "prediction_mean": 116.7337711262703,
+                  "prediction_std": 12.451359046856163,
+                  "target_mean": 135.97357427181677,
+                  "target_std": 37.952316563217416
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4739592089383354,
+                    0.21928665888551566
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11604899088541666,
+                    0.4438330078125
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -83.13032466314112,
+                  "explained_variance": 0.001238558840210957,
+                  "mse": 8349.245217796932,
+                  "prediction_mean": 52.84324960867564,
+                  "prediction_std": 0.061404572380516026,
+                  "target_mean": 135.97357427181677,
+                  "target_std": 37.952316563217416
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.27357328900484973,
+                    0.001333002118747362
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.028768717447916668,
+                    0.9933870442708334
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7521639329741794,
+                  "normalized_rms_difference": 0.7040398716926575,
+                  "normalized_sign_disagreement": 0.3177083333333333
+                },
+                "episode_mc": {
+                  "bias": -6.205140386639783,
+                  "explained_variance": 0.726404806114743,
+                  "mse": 432.5843563703817,
+                  "prediction_mean": 129.768433885177,
+                  "prediction_std": 29.310252129338053,
+                  "target_mean": 135.97357427181677,
+                  "target_std": 37.952316563217416
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4824183019064827,
+                    0.371840455085492
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13513753255208333,
+                    0.41813720703125
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999963227153849,
+                  "normalized_rms_difference": 0.002711930777877569,
+                  "normalized_sign_disagreement": 0.0015625
+                },
+                "episode_mc": {
+                  "bias": -83.17969912709668,
+                  "explained_variance": 0.0014290186341473499,
+                  "mse": 8357.18235191161,
+                  "prediction_mean": 52.793875144720076,
+                  "prediction_std": 0.07900453099176237,
+                  "target_mean": 135.97357427181677,
+                  "target_std": 37.952316563217416
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.2744452726320077,
+                    0.0015726964437422493
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.03232584635416667,
+                    0.9902848307291666
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 109.48563794425068,
+              "sample_count": 9600,
+              "scale": 32.14360336283618,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0640625,
+                "loss_training_units": 0.03754643868160201,
+                "preclip_gradient_norm_mean": 0.35780172006925565
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 64.91250637173653,
+                "preclip_gradient_norm_mean": 77.84573639035224
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.309375,
+                "loss_training_units": 0.8013614928117022,
+                "preclip_gradient_norm_mean": 2.1784901411505415
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 5990.149262619019,
+                "preclip_gradient_norm_mean": 836.0623968124389
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8758240582011942,
+                  "normalized_rms_difference": 0.4983491897583008,
+                  "normalized_sign_disagreement": 0.15177083333333333
+                },
+                "episode_mc": {
+                  "bias": -10.083875662991778,
+                  "explained_variance": 0.22642122340950843,
+                  "mse": 792.7436801833215,
+                  "prediction_mean": 98.13413139422734,
+                  "prediction_std": 7.826362926331566,
+                  "target_mean": 108.21800705721913,
+                  "target_std": 29.88858342053184
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.44968850553751494,
+                    0.16376673199936503
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12357421875,
+                    0.4499332682291667
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -55.30052336703675,
+                  "explained_variance": 0.0017015603796778356,
+                  "mse": 3949.9552530122123,
+                  "prediction_mean": 52.917483690182365,
+                  "prediction_std": 0.1256448282982598,
+                  "target_mean": 108.21800705721913,
+                  "target_std": 29.88858342053184
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3070732733929672,
+                    0.0027508217628710676
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.04658528645833333,
+                    0.98749267578125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.695742887658994,
+                  "normalized_rms_difference": 0.7800731658935547,
+                  "normalized_sign_disagreement": 0.2721875
+                },
+                "episode_mc": {
+                  "bias": 0.5338783346520116,
+                  "explained_variance": 0.5621860852199341,
+                  "mse": 391.3962005191021,
+                  "prediction_mean": 108.75188539187114,
+                  "prediction_std": 23.936095388623652,
+                  "target_mean": 108.21800705721913,
+                  "target_std": 29.88858342053184
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5200959452518283,
+                    0.3749177810400789
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14138997395833333,
+                    0.393837890625
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999824758275376,
+                  "normalized_rms_difference": 0.0059201642870903015,
+                  "normalized_sign_disagreement": 0.0007291666666666667
+                },
+                "episode_mc": {
+                  "bias": -55.34611803701458,
+                  "explained_variance": 0.0014685842420423256,
+                  "mse": 3955.2082740828814,
+                  "prediction_mean": 52.87188902020454,
+                  "prediction_std": 0.1293451680871497,
+                  "target_mean": 108.21800705721913,
+                  "target_std": 29.88858342053184
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3105680398644014,
+                    0.0026087887015781856
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.05117024739583333,
+                    0.9886433919270833
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 119.5966202326864,
+              "sample_count": 9600,
+              "scale": 34.4038488815247,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0734375,
+                "loss_training_units": 0.03765785128780408,
+                "preclip_gradient_norm_mean": 0.37286864609341136
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 81.48792523741722,
+                "preclip_gradient_norm_mean": 89.8637710571289
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.34062499999999996,
+                "loss_training_units": 0.8667841976042837,
+                "preclip_gradient_norm_mean": 2.408864539442584
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 7862.866869354249,
+                "preclip_gradient_norm_mean": 965.4662425994873
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8487109949072387,
+                  "normalized_rms_difference": 0.5500709414482117,
+                  "normalized_sign_disagreement": 0.18583333333333332
+                },
+                "episode_mc": {
+                  "bias": -16.11419942324981,
+                  "explained_variance": 0.2883983778372504,
+                  "mse": 1085.0473845564445,
+                  "prediction_mean": 105.66379954179128,
+                  "prediction_std": 9.727271382223554,
+                  "target_mean": 121.77799896504109,
+                  "target_std": 34.05716518213367
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.440907452960952,
+                    0.17411105471543328
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10142822265625,
+                    0.45222330729166665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -68.86208182837193,
+                  "explained_variance": 0.0017592511673792943,
+                  "mse": 5899.836275263944,
+                  "prediction_mean": 52.91591713666916,
+                  "prediction_std": 0.10602945919083692,
+                  "target_mean": 121.77799896504109,
+                  "target_std": 34.05716518213367
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.28312227484816,
+                    0.00228491984218686
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.032978515625,
+                    0.9874658203125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.74772752866462,
+                  "normalized_rms_difference": 0.7103133201599121,
+                  "normalized_sign_disagreement": 0.2632291666666667
+                },
+                "episode_mc": {
+                  "bias": -3.2485752763909597,
+                  "explained_variance": 0.6009677060530989,
+                  "mse": 473.3870083656167,
+                  "prediction_mean": 118.52942368865013,
+                  "prediction_std": 25.724873798010005,
+                  "target_mean": 121.77799896504109,
+                  "target_std": 34.05716518213367
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.489292743642031,
+                    0.3616818835574049
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.1279443359375,
+                    0.39197916666666666
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999883750149987,
+                  "normalized_rms_difference": 0.004821822512894869,
+                  "normalized_sign_disagreement": 0.0011458333333333333
+                },
+                "episode_mc": {
+                  "bias": -68.90156458840396,
+                  "explained_variance": 0.001644463622453407,
+                  "mse": 5905.408705239461,
+                  "prediction_mean": 52.87643437663714,
+                  "prediction_std": 0.10398012927233084,
+                  "target_mean": 121.77799896504109,
+                  "target_std": 34.05716518213367
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.28542003611068634,
+                    0.0020937640888417843
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.04157958984375,
+                    0.9880908203125
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310061
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 111.2376737144962,
+              "sample_count": 9600,
+              "scale": 31.877465258391876,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.07968750000000001,
+                "loss_training_units": 0.04086627404903993,
+                "preclip_gradient_norm_mean": 0.3915908146911533
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 72.73822150230407,
+                "preclip_gradient_norm_mean": 79.98177410364151
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.328125,
+                "loss_training_units": 0.9093360339524225,
+                "preclip_gradient_norm_mean": 2.462543410854414
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6686.179402160645,
+                "preclip_gradient_norm_mean": 837.3155099868774
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9095371291712677,
+                  "normalized_rms_difference": 0.42535367608070374,
+                  "normalized_sign_disagreement": 0.17864583333333334
+                },
+                "episode_mc": {
+                  "bias": -14.53142682907482,
+                  "explained_variance": 0.2728668335870169,
+                  "mse": 979.2521693328756,
+                  "prediction_mean": 98.5280156548818,
+                  "prediction_std": 8.72029431560446,
+                  "target_mean": 113.05944248395662,
+                  "target_std": 32.50117205536848
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5770278150690926,
+                    0.23418530161801943
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16584228515625,
+                    0.53041259765625
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -61.234787544781966,
+                  "explained_variance": 0.0011566950222762218,
+                  "mse": 4804.803543387192,
+                  "prediction_mean": 51.82465493917465,
+                  "prediction_std": 0.03703562197814576,
+                  "target_mean": 113.05944248395662,
+                  "target_std": 32.50117205536848
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.39728662447636365,
+                    0.0010975890535386812
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08864420572916666,
+                    0.9949064127604167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8266502485537317,
+                  "normalized_rms_difference": 0.588811993598938,
+                  "normalized_sign_disagreement": 0.28479166666666667
+                },
+                "episode_mc": {
+                  "bias": 5.507075151825944,
+                  "explained_variance": 0.6584752297243454,
+                  "mse": 391.0894343868068,
+                  "prediction_mean": 118.56651763578256,
+                  "prediction_std": 23.223362351584765,
+                  "target_mean": 113.05944248395662,
+                  "target_std": 32.50117205536848
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5876430220763396,
+                    0.3510025917141541
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.17573486328125,
+                    0.5139249674479167
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.999997086946018,
+                  "normalized_rms_difference": 0.0024137331638485193,
+                  "normalized_sign_disagreement": 0.0005208333333333333
+                },
+                "episode_mc": {
+                  "bias": -61.19021838583052,
+                  "explained_variance": 0.001521404794364134,
+                  "mse": 4798.9619113560675,
+                  "prediction_mean": 51.8692240981261,
+                  "prediction_std": 0.04365419325955326,
+                  "target_mean": 113.05944248395662,
+                  "target_std": 32.50117205536848
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.39693385583263785,
+                    0.0012920346208650868
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.08145345052083333,
+                    0.99271240234375
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 131.81324029360587,
+              "sample_count": 9600,
+              "scale": 36.84596427651212,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0875,
+                "loss_training_units": 0.04164449288218748,
+                "preclip_gradient_norm_mean": 0.4294115787546616
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 111.03362692594528,
+                "preclip_gradient_norm_mean": 105.94027726650238
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.446875,
+                "loss_training_units": 0.9497017354005947,
+                "preclip_gradient_norm_mean": 2.8584768735803667
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10758.167025756837,
+                "preclip_gradient_norm_mean": 1081.543529510498
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9055646192106258,
+                  "normalized_rms_difference": 0.43459266424179077,
+                  "normalized_sign_disagreement": 0.159375
+                },
+                "episode_mc": {
+                  "bias": -16.559152400943763,
+                  "explained_variance": 0.26012895860830176,
+                  "mse": 1362.7762629525223,
+                  "prediction_mean": 117.16953486680984,
+                  "prediction_std": 10.405669768022722,
+                  "target_mean": 133.7286872677536,
+                  "target_std": 38.357501666819104
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5282048237969766,
+                    0.20672533695840467
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15014485677083333,
+                    0.5792757161458333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -81.92716179535104,
+                  "explained_variance": 0.0009596038864118084,
+                  "mse": 8181.945910746005,
+                  "prediction_mean": 51.801525472402574,
+                  "prediction_std": 0.03043002306837414,
+                  "target_mean": 133.7286872677536,
+                  "target_std": 38.357501666819104
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3479000514529527,
+                    0.0007334361104345307
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06507242838541667,
+                    0.9970939127604167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7736779734688614,
+                  "normalized_rms_difference": 0.6727882623672485,
+                  "normalized_sign_disagreement": 0.29583333333333334
+                },
+                "episode_mc": {
+                  "bias": 4.670864159412061,
+                  "explained_variance": 0.6596670661041414,
+                  "mse": 522.5481145496659,
+                  "prediction_mean": 138.39955142716568,
+                  "prediction_std": 28.418331772038233,
+                  "target_mean": 133.7286872677536,
+                  "target_std": 38.357501666819104
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.530002858452316,
+                    0.3471036735430344
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14525960286458334,
+                    0.564716796875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999990511681315,
+                  "normalized_rms_difference": 0.0013775571715086699,
+                  "normalized_sign_disagreement": 0.0003125
+                },
+                "episode_mc": {
+                  "bias": -81.88998824601683,
+                  "explained_variance": 0.0010265739243672245,
+                  "mse": 8175.75771295866,
+                  "prediction_mean": 51.83869902173678,
+                  "prediction_std": 0.03052169003490698,
+                  "target_mean": 133.7286872677536,
+                  "target_std": 38.357501666819104
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3536380586554818,
+                    0.000792706676552592
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.06484537760416667,
+                    0.9961100260416667
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 108.87857993292312,
+              "sample_count": 9600,
+              "scale": 31.74367624916855,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0765625,
+                "loss_training_units": 0.03973702178191161,
+                "preclip_gradient_norm_mean": 0.38150995699106716
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 70.61537350416182,
+                "preclip_gradient_norm_mean": 76.80963308811188
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.3640625,
+                "loss_training_units": 0.9439799323212356,
+                "preclip_gradient_norm_mean": 2.4584944588830693
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6377.501921081543,
+                "preclip_gradient_norm_mean": 813.8257813453674
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8996015498293101,
+                  "normalized_rms_difference": 0.448103666305542,
+                  "normalized_sign_disagreement": 0.19760416666666666
+                },
+                "episode_mc": {
+                  "bias": -10.897331687603145,
+                  "explained_variance": 0.2642867364573339,
+                  "mse": 845.831870753314,
+                  "prediction_mean": 98.69579119523367,
+                  "prediction_std": 7.614401224725991,
+                  "target_mean": 109.59312288283681,
+                  "target_std": 31.43669027375223
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5319055256137206,
+                    0.21485387502770398
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.12999593098958334,
+                    0.5455509440104167
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -57.751859444770965,
+                  "explained_variance": 0.0011772274585303277,
+                  "mse": 4322.379351418945,
+                  "prediction_mean": 51.841263438065845,
+                  "prediction_std": 0.04936194005132633,
+                  "target_mean": 109.59312288283681,
+                  "target_std": 31.43669027375223
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3848400483033942,
+                    0.0012955865455176827
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.09080973307291666,
+                    0.9946891276041666
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7656447210672821,
+                  "normalized_rms_difference": 0.6846243739128113,
+                  "normalized_sign_disagreement": 0.2939583333333333
+                },
+                "episode_mc": {
+                  "bias": 3.0810506540598968,
+                  "explained_variance": 0.5472888860508973,
+                  "mse": 456.89164641831417,
+                  "prediction_mean": 112.6741735368967,
+                  "prediction_std": 22.47517741598033,
+                  "target_mean": 109.59312288283681,
+                  "target_std": 31.43669027375223
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5650412886647749,
+                    0.3373993664729328
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.17211669921875,
+                    0.5784407552083334
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999929371113686,
+                  "normalized_rms_difference": 0.00375842722132802,
+                  "normalized_sign_disagreement": 0.0010416666666666667
+                },
+                "episode_mc": {
+                  "bias": -57.69272153972958,
+                  "explained_variance": 0.0013977228597186198,
+                  "mse": 4315.33429275426,
+                  "prediction_mean": 51.90040134310723,
+                  "prediction_std": 0.042216951088011,
+                  "target_mean": 109.59312288283681,
+                  "target_std": 31.43669027375223
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.38857500210934637,
+                    0.001206871027943532
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.0842919921875,
+                    0.9933878580729166
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 119.14872802029674,
+              "sample_count": 9600,
+              "scale": 35.25449281345159,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0796875,
+                "loss_training_units": 0.037447834546037485,
+                "preclip_gradient_norm_mean": 0.3792130211368203
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 87.73552147746085,
+                "preclip_gradient_norm_mean": 89.31677730679512
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.35781250000000003,
+                "loss_training_units": 0.8923585267504677,
+                "preclip_gradient_norm_mean": 2.4786436867667367
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 8259.288055419922,
+                "preclip_gradient_norm_mean": 935.6938070297241
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8914460733238632,
+                  "normalized_rms_difference": 0.46594828367233276,
+                  "normalized_sign_disagreement": 0.168125
+                },
+                "episode_mc": {
+                  "bias": -12.741108324869225,
+                  "explained_variance": 0.22338505664154829,
+                  "mse": 1142.404318938833,
+                  "prediction_mean": 106.8500778011481,
+                  "prediction_std": 8.57281578447986,
+                  "target_mean": 119.59118612601732,
+                  "target_std": 35.52428446610461
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5186079611661292,
+                    0.2095920784831861
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11890462239583334,
+                    0.5610205078125
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -67.7510752772726,
+                  "explained_variance": 0.0009634602622103916,
+                  "mse": 5850.96712549636,
+                  "prediction_mean": 51.84011084874471,
+                  "prediction_std": 0.0453623934782267,
+                  "target_mean": 119.59118612601732,
+                  "target_std": 35.52428446610461
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3628054546031538,
+                    0.0013251517436946069
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.07959147135416667,
+                    0.9953776041666667
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7830429275986696,
+                  "normalized_rms_difference": 0.6587215662002563,
+                  "normalized_sign_disagreement": 0.25916666666666666
+                },
+                "episode_mc": {
+                  "bias": 3.339194366987795,
+                  "explained_variance": 0.5640330252165722,
+                  "mse": 561.3295490872018,
+                  "prediction_mean": 122.93038049300512,
+                  "prediction_std": 24.92874594046609,
+                  "target_mean": 119.59118612601732,
+                  "target_std": 35.52428446610461
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5470940723406859,
+                    0.3419537267371348
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16355794270833332,
+                    0.5523665364583333
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.999995147492749,
+                  "normalized_rms_difference": 0.003115287283435464,
+                  "normalized_sign_disagreement": 0.000625
+                },
+                "episode_mc": {
+                  "bias": -67.72446852519488,
+                  "explained_variance": 0.0011130640410319526,
+                  "mse": 5847.173765092924,
+                  "prediction_mean": 51.86671760082245,
+                  "prediction_std": 0.03550011988891524,
+                  "target_mean": 119.59118612601732,
+                  "target_std": 35.52428446610461
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.367590456933012,
+                    0.001060781392503758
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.07395263671875,
+                    0.99589111328125
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310073
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 113.29661038438789,
+              "sample_count": 9600,
+              "scale": 32.58585441547205,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000011444091796875,
+              "mc_normalized": 0.000011444091796875
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0765625,
+                "loss_training_units": 0.039974625965987796,
+                "preclip_gradient_norm_mean": 0.3739058045117417
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 70.92765390872955,
+                "preclip_gradient_norm_mean": 78.25608615279198
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.246875,
+                "loss_training_units": 0.8209343657130375,
+                "preclip_gradient_norm_mean": 2.234483480709605
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6542.842599487305,
+                "preclip_gradient_norm_mean": 825.5184318542481
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9175201682832059,
+                  "normalized_rms_difference": 0.40615227818489075,
+                  "normalized_sign_disagreement": 0.1846875
+                },
+                "episode_mc": {
+                  "bias": -11.423284499049187,
+                  "explained_variance": 0.214694360406805,
+                  "mse": 999.2525707239649,
+                  "prediction_mean": 100.82484849890074,
+                  "prediction_std": 7.482124916160918,
+                  "target_mean": 112.24813299794992,
+                  "target_std": 33.26065791827266
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.6027534152467269,
+                    0.22809746115911914
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16249348958333334,
+                    0.41644287109375
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -60.56782490432263,
+                  "explained_variance": 0.0012268957950770654,
+                  "mse": 4773.375499110914,
+                  "prediction_mean": 51.680308093627296,
+                  "prediction_std": 0.058193628671329885,
+                  "target_mean": 112.24813299794992,
+                  "target_std": 33.26065791827266
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.46986899839192237,
+                    0.0015960098550911416
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.17101318359375,
+                    0.9920206705729167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7169980852391521,
+                  "normalized_rms_difference": 0.7523322105407715,
+                  "normalized_sign_disagreement": 0.33625
+                },
+                "episode_mc": {
+                  "bias": 2.5513690545161567,
+                  "explained_variance": 0.5383792597860844,
+                  "mse": 517.1872905132777,
+                  "prediction_mean": 114.79950205246608,
+                  "prediction_std": 24.139580216042614,
+                  "target_mean": 112.24813299794992,
+                  "target_std": 33.26065791827266
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.6029291592806281,
+                    0.39532484585672584
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.24058024088541666,
+                    0.39011962890625
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999904393009006,
+                  "normalized_rms_difference": 0.004372802563011646,
+                  "normalized_sign_disagreement": 0.0013541666666666667
+                },
+                "episode_mc": {
+                  "bias": -60.63451144794623,
+                  "explained_variance": 0.0013522317656181615,
+                  "mse": 4781.319408406119,
+                  "prediction_mean": 51.613621550003685,
+                  "prediction_std": 0.049582100070425926,
+                  "target_mean": 112.24813299794992,
+                  "target_std": 33.26065791827266
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4719868323754136,
+                    0.0013195269604289292
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16863118489583334,
+                    0.9930094401041667
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 134.02721716144433,
+              "sample_count": 9600,
+              "scale": 38.26148964379744,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000095367431640625,
+              "mc_normalized": 0.0000095367431640625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0890625,
+                "loss_training_units": 0.038795923102588864,
+                "preclip_gradient_norm_mean": 0.4041204579378246
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 110.56991243362427,
+                "preclip_gradient_norm_mean": 105.60619144439698
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.240625,
+                "loss_training_units": 0.8580533751752226,
+                "preclip_gradient_norm_mean": 2.4785119004547598
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10901.612523651122,
+                "preclip_gradient_norm_mean": 1086.1759783744812
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8884864267434635,
+                  "normalized_rms_difference": 0.47225749492645264,
+                  "normalized_sign_disagreement": 0.2165625
+                },
+                "episode_mc": {
+                  "bias": -13.808034654315561,
+                  "explained_variance": 0.23736221533685142,
+                  "mse": 1294.2632356709419,
+                  "prediction_mean": 119.66001993179322,
+                  "prediction_std": 10.685905674812842,
+                  "target_mean": 133.46805458610876,
+                  "target_std": 38.04056555384852
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5711390298414708,
+                    0.22204855462769357
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14453369140625,
+                    0.4494807942708333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -81.87149904157346,
+                  "explained_variance": 0.0009952186417148123,
+                  "mse": 8148.586817373427,
+                  "prediction_mean": 51.59655554453532,
+                  "prediction_std": 0.05454462417713344,
+                  "target_mean": 133.46805458610876,
+                  "target_std": 38.04056555384852
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.43152646576896414,
+                    0.0013144576769460075
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13757731119791666,
+                    0.9928971354166667
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7183561400203815,
+                  "normalized_rms_difference": 0.7505249977111816,
+                  "normalized_sign_disagreement": 0.31447916666666664
+                },
+                "episode_mc": {
+                  "bias": 7.987044228458156,
+                  "explained_variance": 0.6144998018125267,
+                  "mse": 621.6442862630302,
+                  "prediction_mean": 141.45509881456692,
+                  "prediction_std": 30.704595744714805,
+                  "target_mean": 133.46805458610876,
+                  "target_std": 38.04056555384852
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5705093933779248,
+                    0.3693986862138723
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.22092936197916666,
+                    0.41669352213541666
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999959775597673,
+                  "normalized_rms_difference": 0.0028363498859107494,
+                  "normalized_sign_disagreement": 0.0011458333333333333
+                },
+                "episode_mc": {
+                  "bias": -81.91724149649963,
+                  "explained_variance": 0.0012938400446315113,
+                  "mse": 8155.646786013253,
+                  "prediction_mean": 51.55081308960914,
+                  "prediction_std": 0.06273971939083156,
+                  "target_mean": 133.46805458610876,
+                  "target_std": 38.04056555384852
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.431008488261219,
+                    0.001460074880777366
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13773030598958333,
+                    0.9913761393229167
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 111.15771061036736,
+              "sample_count": 9600,
+              "scale": 34.58296356122133,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000057220458984375,
+              "mc_normalized": 0.0000057220458984375
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.06562499999999999,
+                "loss_training_units": 0.03327412797225407,
+                "preclip_gradient_norm_mean": 0.33986685054260307
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 69.06316614151001,
+                "preclip_gradient_norm_mean": 75.79685215353966
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.2453125,
+                "loss_training_units": 0.741139780706726,
+                "preclip_gradient_norm_mean": 2.0200250888010487
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6314.475051116943,
+                "preclip_gradient_norm_mean": 806.2519410133361
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8670369624892087,
+                  "normalized_rms_difference": 0.515680193901062,
+                  "normalized_sign_disagreement": 0.1890625
+                },
+                "episode_mc": {
+                  "bias": -14.638215372621392,
+                  "explained_variance": 0.2653223385730701,
+                  "mse": 1018.8211053873325,
+                  "prediction_mean": 98.14767153938611,
+                  "prediction_std": 8.44035691571068,
+                  "target_mean": 112.78588691200751,
+                  "target_std": 33.092259166279455
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5679405956564293,
+                    0.22191655074077485
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15166097005208334,
+                    0.42127848307291665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -61.094957494397335,
+                  "explained_variance": 0.0014807249166577385,
+                  "mse": 4826.069909643163,
+                  "prediction_mean": 51.69092941761017,
+                  "prediction_std": 0.06232017393938965,
+                  "target_mean": 112.78588691200751,
+                  "target_std": 33.092259166279455
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.46047437246349876,
+                    0.0017074677250554578
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16308268229166667,
+                    0.99207275390625
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.6837438195751807,
+                  "normalized_rms_difference": 0.7953065037727356,
+                  "normalized_sign_disagreement": 0.33760416666666665
+                },
+                "episode_mc": {
+                  "bias": 2.525652394235755,
+                  "explained_variance": 0.5421887048032388,
+                  "mse": 507.7269782977356,
+                  "prediction_mean": 115.31153930624326,
+                  "prediction_std": 24.977194768601258,
+                  "target_mean": 112.78588691200751,
+                  "target_std": 33.092259166279455
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5927200567532385,
+                    0.39907440306280667
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.22761311848958332,
+                    0.3852205403645833
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999909711318685,
+                  "normalized_rms_difference": 0.00424943957477808,
+                  "normalized_sign_disagreement": 0.0016666666666666668
+                },
+                "episode_mc": {
+                  "bias": -61.13217788940606,
+                  "explained_variance": 0.0018344390902040875,
+                  "mse": 4830.231900354478,
+                  "prediction_mean": 51.65370902260145,
+                  "prediction_std": 0.058884824135763195,
+                  "target_mean": 112.78588691200751,
+                  "target_std": 33.092259166279455
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4684756540753122,
+                    0.0015608821670133953
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.16992838541666666,
+                    0.9912288411458333
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 119.2886451053371,
+              "sample_count": 9600,
+              "scale": 36.06169644864045,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000095367431640625,
+              "mc_normalized": 0.0000095367431640625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.071875,
+                "loss_training_units": 0.03549681975127896,
+                "preclip_gradient_norm_mean": 0.36168584151018873
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 85.49353221654893,
+                "preclip_gradient_norm_mean": 87.76239020228385
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.32499999999999996,
+                "loss_training_units": 0.8299164899624885,
+                "preclip_gradient_norm_mean": 2.31905898663681
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 8135.112347412109,
+                "preclip_gradient_norm_mean": 924.6576188087463
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8280054896410497,
+                  "normalized_rms_difference": 0.5865058302879333,
+                  "normalized_sign_disagreement": 0.19041666666666668
+                },
+                "episode_mc": {
+                  "bias": -15.008985840672006,
+                  "explained_variance": 0.2679549621969666,
+                  "mse": 1077.976594166213,
+                  "prediction_mean": 105.94729546288649,
+                  "prediction_std": 10.290211474274745,
+                  "target_mean": 120.9562813035585,
+                  "target_std": 34.1295842390779
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5598717938859857,
+                    0.23112369620671047
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.159375,
+                    0.42627685546875
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -69.2836465326883,
+                  "explained_variance": 0.0015030047516755296,
+                  "mse": 5963.301454397858,
+                  "prediction_mean": 51.67263477087021,
+                  "prediction_std": 0.09527209011304887,
+                  "target_mean": 120.9562813035585,
+                  "target_std": 34.1295842390779
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4444281554757512,
+                    0.002163632174196442
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14883544921875,
+                    0.99109375
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7394486063201395,
+                  "normalized_rms_difference": 0.7218745350837708,
+                  "normalized_sign_disagreement": 0.28541666666666665
+                },
+                "episode_mc": {
+                  "bias": 7.608061921205372,
+                  "explained_variance": 0.5556279001031015,
+                  "mse": 575.4999017967629,
+                  "prediction_mean": 128.56434322476386,
+                  "prediction_std": 25.63666236367907,
+                  "target_mean": 120.9562813035585,
+                  "target_std": 34.1295842390779
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5956167346569518,
+                    0.3806856637416083
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.21514567057291667,
+                    0.3921207682291667
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999953266503134,
+                  "normalized_rms_difference": 0.00305723724886775,
+                  "normalized_sign_disagreement": 0.0005208333333333333
+                },
+                "episode_mc": {
+                  "bias": -69.33044508536035,
+                  "explained_variance": 0.0016923527849717068,
+                  "mse": 5969.567835276083,
+                  "prediction_mean": 51.62583621819814,
+                  "prediction_std": 0.09022700978801532,
+                  "target_mean": 120.9562813035585,
+                  "target_std": 34.1295842390779
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4495417460060625,
+                    0.002034710388354407
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15172037760416668,
+                    0.9900960286458333
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310089
+    },
+    {
+      "groups": {
+        "50": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 107.83170150510345,
+              "sample_count": 9600,
+              "scale": 32.74948287436352,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.0000019073486328125,
+              "mc_normalized": 0.0000019073486328125
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.078125,
+                "loss_training_units": 0.04163209438702324,
+                "preclip_gradient_norm_mean": 0.3820835348597029
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 69.28518577516078,
+                "preclip_gradient_norm_mean": 76.03271102607249
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.25312500000000004,
+                "loss_training_units": 0.8046612172620371,
+                "preclip_gradient_norm_mean": 2.141979805100709
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6294.0414367675785,
+                "preclip_gradient_norm_mean": 814.6954028129578
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9073256110940524,
+                  "normalized_rms_difference": 0.43052154779434204,
+                  "normalized_sign_disagreement": 0.189375
+                },
+                "episode_mc": {
+                  "bias": -13.852077889138211,
+                  "explained_variance": 0.2068979155620958,
+                  "mse": 1059.2611592444184,
+                  "prediction_mean": 101.17901808261871,
+                  "prediction_std": 7.418723869829219,
+                  "target_mean": 115.03109597175693,
+                  "target_std": 33.07047486548657
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5409464863198103,
+                    0.17601130984734012
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.13628987630208333,
+                    0.48878336588541665
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -61.4607880398569,
+                  "explained_variance": 0.0013624879850714366,
+                  "mse": 4869.5946807297805,
+                  "prediction_mean": 53.570307931900025,
+                  "prediction_std": 0.2860154323724874,
+                  "target_mean": 115.03109597175693,
+                  "target_std": 33.07047486548657
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.40670348169571113,
+                    0.005485326819268217
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.109072265625,
+                    0.9835636393229167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.7368589916742508,
+                  "normalized_rms_difference": 0.7254530191421509,
+                  "normalized_sign_disagreement": 0.32885416666666667
+                },
+                "episode_mc": {
+                  "bias": -2.412185474727303,
+                  "explained_variance": 0.6019856937276076,
+                  "mse": 441.1094954253828,
+                  "prediction_mean": 112.61891049702962,
+                  "prediction_std": 23.773700455563997,
+                  "target_mean": 115.03109597175693,
+                  "target_std": 33.07047486548657
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5601491777107006,
+                    0.3906968268671394
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.17880289713541667,
+                    0.42942138671875
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9995842154376927,
+                  "normalized_rms_difference": 0.028836939483880997,
+                  "normalized_sign_disagreement": 0.005833333333333334
+                },
+                "episode_mc": {
+                  "bias": -61.30614624867216,
+                  "explained_variance": 0.0007405056939275845,
+                  "mse": 4851.29001696921,
+                  "prediction_mean": 53.72494972308477,
+                  "prediction_std": 0.06187052883328401,
+                  "target_mean": 115.03109597175693,
+                  "target_std": 33.07047486548657
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.40730135181556043,
+                    0.0015294919191100964
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11993570963541667,
+                    0.9944034830729167
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 131.44062183637172,
+              "sample_count": 9600,
+              "scale": 39.045068574320844,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.08281250000000001,
+                "loss_training_units": 0.039049493602215074,
+                "preclip_gradient_norm_mean": 0.3962903178238775
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 105.63763262629509,
+                "preclip_gradient_norm_mean": 101.90444189310074
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.2234375,
+                "loss_training_units": 0.7708158305147662,
+                "preclip_gradient_norm_mean": 2.24749173365999
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 10282.755904388428,
+                "preclip_gradient_norm_mean": 1064.586509513855
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9056264258758078,
+                  "normalized_rms_difference": 0.4344503879547119,
+                  "normalized_sign_disagreement": 0.18260416666666668
+                },
+                "episode_mc": {
+                  "bias": -16.315071016121657,
+                  "explained_variance": 0.24533685078654932,
+                  "mse": 1323.3395867601932,
+                  "prediction_mean": 118.08218853195508,
+                  "prediction_std": 9.030121383684355,
+                  "target_mean": 134.39725954807673,
+                  "target_std": 37.4277213663966
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5418120638094851,
+                    0.17703045731714406
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15347981770833333,
+                    0.4960026041666667
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -80.8382664664276,
+                  "explained_variance": 0.00044973980584639417,
+                  "mse": 7935.029641019668,
+                  "prediction_mean": 53.55899308164914,
+                  "prediction_std": 0.02672420628301435,
+                  "target_mean": 134.39725954807673,
+                  "target_std": 37.4277213663966
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.37326742656198914,
+                    0.0005821143355907401
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.1029248046875,
+                    0.998203125
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.6992941294413355,
+                  "normalized_rms_difference": 0.7755074501037598,
+                  "normalized_sign_disagreement": 0.30541666666666667
+                },
+                "episode_mc": {
+                  "bias": 0.2546325554760794,
+                  "explained_variance": 0.675643323520114,
+                  "mse": 454.4348042393731,
+                  "prediction_mean": 134.65189210355283,
+                  "prediction_std": 29.357482863772205,
+                  "target_mean": 134.39725954807673,
+                  "target_std": 37.4277213663966
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5453323345087207,
+                    0.3734385272904728
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.18844075520833334,
+                    0.4534033203125
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999993196468117,
+                  "normalized_rms_difference": 0.0011664931662380695,
+                  "normalized_sign_disagreement": 0.0003125
+                },
+                "episode_mc": {
+                  "bias": -80.68822340405856,
+                  "explained_variance": 0.0004981629876644744,
+                  "mse": 7910.725878970483,
+                  "prediction_mean": 53.70903614401817,
+                  "prediction_std": 0.02909696858021993,
+                  "target_mean": 134.39725954807673,
+                  "target_std": 37.4277213663966
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.3840303776298459,
+                    0.0006507645227923553
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11220296223958333,
+                    0.9974861653645833
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 107.66454087379388,
+              "sample_count": 9600,
+              "scale": 32.39957256428288,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.0703125,
+                "loss_training_units": 0.03952066476049367,
+                "preclip_gradient_norm_mean": 0.35827449212083595
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 67.98220442831516,
+                "preclip_gradient_norm_mean": 73.27763449251651
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.24375000000000002,
+                "loss_training_units": 0.8185021195793525,
+                "preclip_gradient_norm_mean": 2.116263915924355
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 6040.601940917968,
+                "preclip_gradient_norm_mean": 794.6865471839906
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8562785795376927,
+                  "normalized_rms_difference": 0.5361369848251343,
+                  "normalized_sign_disagreement": 0.20875
+                },
+                "episode_mc": {
+                  "bias": -14.989912922891477,
+                  "explained_variance": 0.23983132408697205,
+                  "mse": 1020.1499202693664,
+                  "prediction_mean": 97.45397777001062,
+                  "prediction_std": 9.06838562326267,
+                  "target_mean": 112.4438906929021,
+                  "target_std": 32.34834913446712
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5314552643538479,
+                    0.20309462938616593
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.14505045572916667,
+                    0.44082438151041664
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999999999999998,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -58.853762107801934,
+                  "explained_variance": 0.000974946643848118,
+                  "mse": 4509.160806500405,
+                  "prediction_mean": 53.590128585100175,
+                  "prediction_std": 0.08176603203826681,
+                  "target_mean": 112.4438906929021,
+                  "target_std": 32.34834913446712
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.39564223746196225,
+                    0.00198025892293467
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10348063151041667,
+                    0.9955216471354167
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.695468604542062,
+                  "normalized_rms_difference": 0.7804247140884399,
+                  "normalized_sign_disagreement": 0.25145833333333334
+                },
+                "episode_mc": {
+                  "bias": 0.2331753586605191,
+                  "explained_variance": 0.49102161201060823,
+                  "mse": 532.6573426890748,
+                  "prediction_mean": 112.67706605156263,
+                  "prediction_std": 24.893787333152297,
+                  "target_mean": 112.4438906929021,
+                  "target_std": 32.34834913446712
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5495323937449452,
+                    0.3833733285924676
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.18944010416666668,
+                    0.41119710286458333
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.999992705685567,
+                  "normalized_rms_difference": 0.003819506149739027,
+                  "normalized_sign_disagreement": 0.0005208333333333333
+                },
+                "episode_mc": {
+                  "bias": -58.745497693729895,
+                  "explained_variance": 0.0008754617062025627,
+                  "mse": 4496.533094142529,
+                  "prediction_mean": 53.69839299917221,
+                  "prediction_std": 0.0733572378837127,
+                  "target_mean": 112.4438906929021,
+                  "target_std": 32.34834913446712
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.4000709899983177,
+                    0.0018271681450616173
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11466878255208333,
+                    0.9946541341145834
+                  ]
+                }
+              }
+            }
+          },
+          "zero_train": {
+            "control_reproduction": "passed",
+            "frame": {
+              "iteration": 1,
+              "location": 116.85620905776197,
+              "sample_count": 9600,
+              "scale": 35.784607155284185,
+              "source": "first_calibration_episode_MC_only"
+            },
+            "frozen_actor_upper_and_Adam": "passed",
+            "initialization_public_error": {
+              "gae_normalized": 0.000003814697265625,
+              "mc_normalized": 0.000003814697265625
+            },
+            "training_summary": {
+              "gae_normalized": {
+                "gradient_clip_fraction": 0.07187500000000001,
+                "loss_training_units": 0.038023098843405025,
+                "preclip_gradient_norm_mean": 0.3660890410305001
+              },
+              "gae_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 83.78395343422889,
+                "preclip_gradient_norm_mean": 85.42784268260002
+              },
+              "mc_normalized": {
+                "gradient_clip_fraction": 0.2359375,
+                "loss_training_units": 0.8047429249389096,
+                "preclip_gradient_norm_mean": 2.1362472037319096
+              },
+              "mc_raw": {
+                "gradient_clip_fraction": 1,
+                "loss_training_units": 7793.001662445068,
+                "preclip_gradient_norm_mean": 915.1052193641663
+              }
+            },
+            "treatments": {
+              "gae_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.8379951051220638,
+                  "normalized_rms_difference": 0.5692185163497925,
+                  "normalized_sign_disagreement": 0.2046875
+                },
+                "episode_mc": {
+                  "bias": -16.842050896659494,
+                  "explained_variance": 0.261956625704433,
+                  "mse": 1213.1295382332453,
+                  "prediction_mean": 104.53040596604347,
+                  "prediction_std": 10.290630757865674,
+                  "target_mean": 121.37245686270296,
+                  "target_std": 35.487702271575664
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5272906282769394,
+                    0.21081599774617618
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.15148193359375,
+                    0.4414143880208333
+                  ]
+                }
+              },
+              "gae_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 1,
+                  "normalized_rms_difference": 0,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -67.79363108175497,
+                  "explained_variance": 0.0008313699823193632,
+                  "mse": 5854.306419520461,
+                  "prediction_mean": 53.578825780948,
+                  "prediction_std": 0.0777186518345781,
+                  "target_mean": 121.37245686270296,
+                  "target_std": 35.487702271575664
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.38024596643398045,
+                    0.0018318945751371108
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.10247721354166667,
+                    0.9963509114583333
+                  ]
+                }
+              },
+              "mc_normalized": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.6741604099184619,
+                  "normalized_rms_difference": 0.8072664737701416,
+                  "normalized_sign_disagreement": 0.2869791666666667
+                },
+                "episode_mc": {
+                  "bias": 0.04951093855003516,
+                  "explained_variance": 0.5809674525412594,
+                  "mse": 527.7224090985924,
+                  "prediction_mean": 121.421967801253,
+                  "prediction_std": 26.455014864664868,
+                  "target_mean": 121.37245686270296,
+                  "target_std": 35.487702271575664
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.5631254621354094,
+                    0.39583969759072096
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.196171875,
+                    0.4448982747395833
+                  ]
+                }
+              },
+              "mc_raw": {
+                "advantage_vs_gae_raw": {
+                  "correlation": 0.9999972089005783,
+                  "normalized_rms_difference": 0.0023626675829291344,
+                  "normalized_sign_disagreement": 0
+                },
+                "episode_mc": {
+                  "bias": -67.66829947171112,
+                  "explained_variance": 0.0008210411840773313,
+                  "mse": 5837.34176551562,
+                  "prediction_mean": 53.704157390991845,
+                  "prediction_std": 0.06894557276159016,
+                  "target_mean": 121.37245686270296,
+                  "target_std": 35.487702271575664
+                },
+                "representation": {
+                  "hidden_unit_std_mean": [
+                    0.39133770366100806,
+                    0.0016383406910090393
+                  ],
+                  "tanh_saturation_fraction": [
+                    0.11222574869791667,
+                    0.99568603515625
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "root": 310101
+    }
+  ],
+  "run_name": "pointmaze_value_targets_stage64_full_20261001_r1",
+  "status": "fixed_archive_valid",
+  "supervised_MC_optimizer_steps": 40960,
+  "value_optimizer_steps": {
+    "gae_normalized": 20480,
+    "gae_raw": 20480,
+    "mc_normalized": 20480,
+    "mc_raw": 20480
+  }
+}

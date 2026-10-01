@@ -2,7 +2,7 @@
   "protocol": "pointmaze_value_targets_stage64_v1",
   "run_name": "pointmaze_value_targets_stage64_full_20261001_r1",
   "preregistration_revision": "662c7b4032",
-  "snapshot": "after_launch_before_full_qualification",
+  "snapshot": "after_full_qualification",
   "allowed_nodes": [
     "node001",
     "node002",
@@ -15,101 +15,120 @@
   "tasks": [
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116713.log",
       "node": "node004",
       "observed_ram_mb_at_launch": 3858,
       "optimizer_root": 310011,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116713"
+      "task_id": "t116713",
+      "finished_at": 1790827433.3502126
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116714.log",
       "node": "node006",
       "observed_ram_mb_at_launch": 3933,
       "optimizer_root": 310023,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116714"
+      "task_id": "t116714",
+      "finished_at": 1790827433.3509154
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116715.log",
       "node": "node004",
       "observed_ram_mb_at_launch": 3885,
       "optimizer_root": 310037,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116715"
+      "task_id": "t116715",
+      "finished_at": 1790827433.3517702
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116716.log",
       "node": "node005",
       "observed_ram_mb_at_launch": 3868,
       "optimizer_root": 310049,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116716"
+      "task_id": "t116716",
+      "finished_at": 1790827433.3535686
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116717.log",
       "node": "node006",
       "observed_ram_mb_at_launch": null,
       "optimizer_root": 310061,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116717"
+      "task_id": "t116717",
+      "finished_at": 1790827570.851741
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116718.log",
       "node": "node004",
       "observed_ram_mb_at_launch": null,
       "optimizer_root": 310073,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116718"
+      "task_id": "t116718",
+      "finished_at": 1790827570.8520331
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116719.log",
       "node": "node005",
       "observed_ram_mb_at_launch": null,
       "optimizer_root": 310089,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116719"
+      "task_id": "t116719",
+      "finished_at": 1790827570.852322
     },
     {
       "cpu_cores": 9,
-      "exit_code": null,
+      "exit_code": 0,
       "last_block_reason": null,
       "log": "/tmp/sched_t116720.log",
       "node": "node006",
       "observed_ram_mb_at_launch": null,
       "optimizer_root": 310101,
-      "status": "running",
+      "status": "done",
       "submitted_ram_mb": 12288,
-      "task_id": "t116720"
+      "task_id": "t116720",
+      "finished_at": 1790827570.852602
     }
   ],
-  "qualification": "pending",
+  "qualification": {
+    "task_id": "t116775",
+    "node": "node006",
+    "status": "done",
+    "exit_code": 0,
+    "log": "/tmp/sched_t116775.log",
+    "cpu_cores": 2,
+    "submitted_ram_mb": 4096,
+    "mechanical_gate": "passed",
+    "candidate_fit_gate": "passed",
+    "native_trial_prerequisite": "passed_critic_only_actor_test_still_required"
+  },
   "performance_claim": "none_critic_archive_only"
 }
