@@ -1,0 +1,84 @@
+{
+  "artifacts": {
+    "native_traces_and_weights": "server_only",
+    "pull": "completion_markers_and_compact_json_only"
+  },
+  "budget_per_root": {
+    "actor_score_backward_batches": 112,
+    "actor_score_forward_batches": 16,
+    "archive_episodes": 16,
+    "archive_network_checks": 16,
+    "control_variate_identity_checks": 24,
+    "critic_checkpoint_loads": 8,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 10,
+    "gae_calls": 16,
+    "mc_calls": 8,
+    "probe_value_rows": 9600,
+    "reconstructed_lower_calls": 4800,
+    "reconstructed_upper_calls": 72,
+    "source_clone_loads": 2,
+    "source_gradient_checks": 4,
+    "source_value_checks": 16
+  },
+  "contract": {
+    "baseline": "Stage64_control_Stage67_factored_critics_frozen_first_calibration_before_independent_archives",
+    "causality": "critic_value_state_physical_history_executed_upper_plan_velocity_and_clock_before_current_lower_action",
+    "checks": "Stage69_values_common_MC_and_GAE_noise_and_repeatability_reproduced_models_Adam_frozen",
+    "data": "all_Stage69_fresh_batches_same_eight_roots_periods_execution_and_episode_order_no_resampling",
+    "decision": "diagnosis_only_no_actor_adoption_Stage67_HOLD_unchanged_no_fitted_CV_coefficient_or_baseline_selection",
+    "decomposition": "g_state=g_common-h_var_state=var_common+var_h-2_trace_cov_common_h",
+    "estimators": [
+      "mc_common",
+      "mc_control",
+      "mc_factored",
+      "gae_control",
+      "gae_factored"
+    ],
+    "limits": "reused_teacher_initialized_development_roots_uniform_time_discounted_surrogate_not_native_reward_gradient_or_frequency_proof",
+    "primary": "raw_uncentered_unscaled_MC_minus_fixed_state_baseline_episode_loss_gradients",
+    "reference": "unchanged_Stage69_time_only_rate_location_baseline_double_MC_recursion",
+    "secondary": "separately_PPO_centered_scaled_each_batch_GAE_MC_directions_not_unbiased_raw_noise_estimates",
+    "source": "pointmaze_independent_credit_stage69_v1",
+    "statistics": "raw_mean_snr_unbiased_signal_power_negative_estimates_retained_dependent_batch_pairs_descriptive_only",
+    "variance": "sample_covariance_trace_of_independent_episode_gradients_n32_full_n4_preflight"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "batches": 2,
+    "episodes_per_batch": 2,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_mc_control_variate_stage70_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "archive_batches": [
+        [
+          26690001,
+          26690002
+        ],
+        [
+          26690101,
+          26690102
+        ]
+      ]
+    }
+  },
+  "source_revision": "45ca93d558c6222915540b7a8c935dd6f5f46aed"
+}
