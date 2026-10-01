@@ -1,4 +1,5 @@
 import copy
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -58,7 +59,11 @@ class NormalizedUpdateTest(unittest.TestCase):
         mc = values.monte_carlo_returns(batch.lower, model.config.gamma)
         fit.initialize_frame(float(mc.mean()), float(mc.std()), batch.lower)
         fit.update(batch.lower, mc, root=310001, period=50, iteration=1)
-        payload = self.checkpoint(fit)
+        # A serialized checkpoint isolates live Adam tensors, as the native runner does.
+        buffer = io.BytesIO()
+        torch.save(self.checkpoint(fit), buffer)
+        buffer.seek(0)
+        payload = torch.load(buffer, map_location="cpu", weights_only=False)
         resumed = experiment.restore_fit(model, payload, root=310001, period=50, arm="zero_train", treatment="mc_normalized")
         self.assertTrue(resumed.model.lower_value_optimizer.state)
         for f in (fit, resumed):
