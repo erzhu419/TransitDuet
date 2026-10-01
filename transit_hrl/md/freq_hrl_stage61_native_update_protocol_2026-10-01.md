@@ -16,4 +16,4 @@ This is one-update development validation on reused teacher-initialized training
 
 ## Execution
 
-Implementation/tests pending; no native task registered yet.
+Code/protocol committed at15339d6843; test-only assertion correction at07917c7756. Task`t116482` passed16 existing regressions and3 new tests; the pipeline test failed because its state comparison included string configuration. Task`t116486` reran the stale remote test because tests were absent from its staging inputs. With corrected assertions and explicit tests staging, task`t116493` passed all4 new tests in54.018s on node006, exit0. No algorithm changes were needed; both failed tasks remain recorded. Native preflight is next; no performance outcome yet.
