@@ -1,0 +1,115 @@
+{
+  "artifacts": {
+    "native_trace_or_checkpoint_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_parameter_perturbations": 8,
+    "actor_score_backward_batches": 48,
+    "actor_score_forward_batches": 16,
+    "credit_episodes": 8,
+    "decoder_loads": 2,
+    "evaluation_episodes": 48,
+    "exact_kl_forward_batches": 12,
+    "fisher_jvp_batches": 6,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 16,
+    "native_episodes": 56,
+    "native_lower_calls": 16800,
+    "native_network_checks": 56,
+    "native_pair_checks": 8,
+    "native_steps": 16800,
+    "native_upper_calls": 252,
+    "objective_checks": 8,
+    "pairing_upper_forward_calls": 252,
+    "source_clone_loads": 2
+  },
+  "contract": {
+    "artifacts": "server_memory_training_batches_compact_JSON_only_no_trace_or_candidate_checkpoint_writes",
+    "baseline": "remaining_primitive_steps_times_opposite_independent_credit_batch_mean_reward_rate",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "direction_validation_only_no_actor_adoption_Stage67_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "direction": "negative_raw_MC_loss_gradient_all_actor_parameters_no_entropy_or_advantage_normalization",
+    "limits": "teacher_initialized_fixed_period_diagnostic_not_joint_training_or_frequency_superiority_candidate_command_bound_not_certified",
+    "pairing": "same_environment_and_stepwise_lower_noise_same_standardized_upper_noise_not_same_proposals",
+    "periods": [
+      50,
+      100
+    ],
+    "perturbation": "separate_upper_lower_symmetric_Fisher_radius_.001_exact_raw_Gaussian_KL_check_no_radius_sweep",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all18_reward_contrasts_equal_root_bootstrap_65536_Bonferroni18_tracking_and_credit_descriptive",
+    "variants": [
+      "base",
+      "zero",
+      "upper_plus",
+      "upper_minus",
+      "lower_plus",
+      "lower_minus"
+    ]
+  },
+  "endpoints": [
+    "50/base_minus_zero",
+    "50/upper_plus_minus_upper_minus",
+    "50/upper_plus_minus_base",
+    "50/upper_minus_minus_base",
+    "50/upper_plus_minus_zero",
+    "50/lower_plus_minus_lower_minus",
+    "50/lower_plus_minus_base",
+    "50/lower_minus_minus_base",
+    "50/lower_plus_minus_zero",
+    "100/base_minus_zero",
+    "100/upper_plus_minus_upper_minus",
+    "100/upper_plus_minus_base",
+    "100/upper_minus_minus_base",
+    "100/upper_plus_minus_zero",
+    "100/lower_plus_minus_lower_minus",
+    "100/lower_plus_minus_base",
+    "100/lower_minus_minus_base",
+    "100/lower_plus_minus_zero"
+  ],
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "credit_episodes_per_batch": 2,
+    "evaluation_episodes": 4,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_feasible_credit_stage79_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "credit_A": [
+        79090001,
+        79090002
+      ],
+      "credit_B": [
+        79091001,
+        79091002
+      ],
+      "native_evaluation": [
+        79095001,
+        79095002,
+        79095003,
+        79095004
+      ]
+    }
+  },
+  "source_revision": "bc4bf17c0d51052f66480562bafcec5292c6d7b9"
+}
