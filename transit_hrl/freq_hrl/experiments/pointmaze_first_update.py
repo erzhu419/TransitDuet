@@ -131,7 +131,8 @@ def guarded_update(model, batch, *, level, root, period, episode_count, budget=s
     return row
 
 
-def replay(root, *, preflight, output, specification=spec):
+def replay(root, *, preflight, output, specification=spec, model_observer=None,
+           worker_initializer=diagnostics.init_worker):
     spec = specification
     file = spec.source.source_result(root, preflight=preflight)
     c = json.loads(file.read_text())
@@ -144,7 +145,7 @@ def replay(root, *, preflight, output, specification=spec):
             or reference["protocol"] != spec.source.EXPERIMENT_PROTOCOL or reference["contract"] != spec.source.contract()
             or any((x["status"], x["root"], x["preflight"]) != ("complete", root, preflight) for x in (c, reference))):
         raise ValueError("Stage59 requires the frozen Stage57/58 sources")
-    clones, _, source = previous.load_source(root, preflight=preflight)
+    clones, predictor, source = previous.load_source(root, preflight=preflight)
     args, opt, budget = spec.source.previous.arguments(root, preflight=preflight), spec.options(preflight=preflight), spec.budget(preflight=preflight)
     raw, started = file.parent.with_name(file.parent.name + "_raw"), time.monotonic()
     costs = dict.fromkeys(budget, 0)
@@ -152,7 +153,7 @@ def replay(root, *, preflight, output, specification=spec):
     warmup_steps = dict.fromkeys(("upper_actor", "upper_value", "lower_actor", "lower_value"), 0)
     config, comparisons = clones[str(spec.PERIODS[0])].config, {}
     with ProcessPoolExecutor(max_workers=opt["workers"], mp_context=mp.get_context("spawn"),
-            initializer=diagnostics.init_worker, initargs=(config, args)) as pool:
+            initializer=worker_initializer, initargs=(config, args)) as pool:
         def archive_batch(model, period, arm, phase, item):
             directory = raw / str(period) / arm / phase / str(item["iteration"]) / "training"
             weights = joint.inference_weights(model)
@@ -219,6 +220,8 @@ def replay(root, *, preflight, output, specification=spec):
                     "critic_networks_and_Adam_pair": "passed", "treatments": rows}
                 if rejection_reference is not None:
                     comparisons[p][arm]["rejection_only_reproduction"] = "passed"
+                if model_observer is not None:
+                    model_observer(pool, period, arm, clone, treatments, predictor)
                 print(f"paired first update {root}/period{period}/{arm}: source and critics exact", flush=True)
     result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(),
         "root": root, "preflight": preflight, "options": opt, "budget": budget, "cost": costs,
