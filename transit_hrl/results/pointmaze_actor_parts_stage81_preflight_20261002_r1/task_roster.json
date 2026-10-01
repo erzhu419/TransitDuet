@@ -1,0 +1,33 @@
+{
+  "protocol": "pointmaze_actor_parts_stage81_v1",
+  "preflight": true,
+  "run_name": "pointmaze_actor_parts_stage81_preflight_20261002_r1",
+  "source_revision": "47e54192a4da86763cd66408c9e88f6075561986",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120491",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_actor_parts_stage81_v1/actor_parts/preflight",
+      "role": "scenario_MC_actor_parameter_attribution",
+      "root": 310011
+    },
+    {
+      "id": "t120492",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_actor_parts_stage81_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null
+    }
+  ]
+}
