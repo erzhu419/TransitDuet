@@ -1,0 +1,33 @@
+{
+  "protocol": "pointmaze_joint_mean_stage82_v1",
+  "preflight": true,
+  "run_name": "pointmaze_joint_mean_stage82_preflight_20261002_r1",
+  "source_revision": "4ac1f4aacf43e8544dcecc2ea2823be14957c71d",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120791",
+      "status": "done",
+      "node": "node005",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_joint_mean_stage82_v1/joint_mean/preflight",
+      "role": "scenario_MC_joint_mean_direction",
+      "root": 310011
+    },
+    {
+      "id": "t120792",
+      "status": "done",
+      "node": "node001",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_joint_mean_stage82_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null
+    }
+  ]
+}
