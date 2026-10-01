@@ -54,6 +54,7 @@ def budget(*, preflight):
         "archive_network_checks": cases * old, "native_episodes": cases * fresh,
         "native_trace_audits": cases * fresh, "native_network_checks": cases * fresh,
         "probe_value_rows": 2 * cases * (old + fresh) * h, "mc_calls": cases * (opt["batches"] + 1),
+        "source_mc_reproduction_calls": cases,
         "gae_calls": 2 * cases * (opt["batches"] + 1), "td_identity_checks": 2 * cases * (opt["batches"] + 1),
         "source_probe_checks": 2 * cases, "actor_score_forward_batches": forwards,
         "actor_score_backward_batches": 5 * forwards, "frozen_model_checks": len(PERIODS) + 2 * cases}
@@ -66,6 +67,7 @@ def contract():
         "pairing": "same_fresh_reset_action_seeds_across_cases_both_critics_on_identical_paths_within_case",
         "common_baseline": "discounted_remaining_mass_times_Stage67_first_calibration_rate_location_time_only",
         "reference": "raw_uncentered_unscaled_MC_minus_common_baseline_uniform_time_discounted_return_convention",
+        "MC_precision": "explicit_float64_recurrence_legacy_MC_only_for_exact_historical_probe_reproduction",
         "directions": "each_batch_own_PPO_center_scale_GAE_separate_entropy_adjusted_directions_vs_disjoint_MC_batches",
         "noise": "independent_raw_episode_gradient_sample_covariance_unbiased_signal_power_no_zero_clamp",
         "TD": "true_episode_done_GAE_minus_MC_advantage_equals_filtered_future_value_error_no_lambda_sweep",

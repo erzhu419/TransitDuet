@@ -32,6 +32,15 @@ def common_baseline(lower, *, horizon, gamma, rate_location):
     return values.discounted_mass(remaining, gamma).astype(np.float64) * rate_location
 
 
+def exact_returns(lower, gamma):
+    target, successor = np.empty(lower.size, dtype=np.float64), 0.
+    for i in range(lower.size - 1, -1, -1):
+        # Native float32 done must not downcast the Python/double recurrence.
+        successor = float(lower.reward[i]) + gamma ** int(lower.duration[i]) * (1. - float(lower.done[i])) * successor
+        target[i] = successor
+    return target
+
+
 def gradient_noise(episodes):
     g = np.asarray(episodes, dtype=np.float64)
     n, mean = len(g), g.mean(0)
@@ -154,7 +163,10 @@ def replay(root, *, preflight, output):
                 def probe(outputs, anchor=False):
                     batch = concat_hierarchical_batches([b for b, _ in outputs])
                     lower = continuing.episode_batch(batch, batch.lower.old_value, args.horizon).lower
-                    mc = values.values.monte_carlo_returns(lower, clone.config.gamma)
+                    mc = exact_returns(lower, clone.config.gamma)
+                    historical_mc = values.values.monte_carlo_returns(lower, clone.config.gamma) if anchor else None
+                    if anchor:
+                        cost["source_mc_reproduction_calls"] += 1
                     baseline = common_baseline(lower, horizon=args.horizon, gamma=clone.config.gamma,
                         rate_location=fits["mc_factored"].location)
                     signals, rows = {"mc_common": mc - baseline}, {}
@@ -167,7 +179,7 @@ def replay(root, *, preflight, output):
                             lam=clone.config.gae_lambda, horizon=args.horizon, period=period)
                         if anchor:
                             expected = source["groups"][p][arm]["treatments"][t]
-                            if rows[t]["value_mc"] != expected["value_mc"] or float(np.std(advantage)) != expected["gae_advantage_std"]:
+                            if credit.value_metrics(pred, historical_mc) != expected["value_mc"] or float(np.std(advantage)) != expected["gae_advantage_std"]:
                                 raise ValueError("Stage69 anchor value/GAE differs from Stage67")
                             cost["source_probe_checks"] += 1
                         signals[t] = advantage
@@ -181,7 +193,8 @@ def replay(root, *, preflight, output):
                     direction = reliability.fold_gradients(g, arrays, range(lower.size // args.horizon))
                     for t in spec.TREATMENTS:
                         direction[t + "_entropy"] = direction[t] + clone.config.entropy_coef * direction["entropy"]
-                    return {"gradients": g, "directions": direction, "TD": rows, "score_cost": score_cost}, mask
+                    return {"gradients": g, "directions": direction, "TD": rows, "score_cost": score_cost,
+                        "historical_MC_rounding_max_abs": None if not anchor else float(np.max(np.abs(mc - historical_mc)))}, mask
 
                 anchor, mask = probe(pairs, anchor=True)
                 batches, batch_rows = [], []
@@ -210,7 +223,8 @@ def replay(root, *, preflight, output):
                     torch.testing.assert_close(fit.model.state_dict(), snapshots[t], atol=0, rtol=0)
                     cost["frozen_model_checks"] += 1
                 groups[p][arm] = {"common_rate_location": fits["mc_factored"].location,
-                    "anchor": {"TD": anchor["TD"], "score_cost": anchor["score_cost"]}, "batches": batch_rows,
+                    "anchor": {"TD": anchor["TD"], "score_cost": anchor["score_cost"],
+                        "historical_MC_rounding_max_abs": anchor["historical_MC_rounding_max_abs"]}, "batches": batch_rows,
                     "comparisons": compare_batches(anchor, batches, mask), "model_and_Adam_unchanged": "passed"}
             torch.testing.assert_close(clone.state_dict(), frozen_clone, atol=0, rtol=0)
             cost["frozen_model_checks"] += 1

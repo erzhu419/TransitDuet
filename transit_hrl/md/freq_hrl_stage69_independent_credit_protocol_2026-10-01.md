@@ -7,6 +7,7 @@ Stage67 improved critic fit but failed its credit gate; Stage68 showed poor cros
 - Use one time-only baseline for both critics: discounted remaining mass times the Stage67 first-calibration mean reward rate. Reference gradients are raw, uncentered MC-minus-common-baseline gradients. Compare independently normalized PPO GAE directions, with entropy reported separately, against disjoint MC batches and compare the old probe against new MC batches.
 - Report raw independent episode-gradient covariance, unbiased squared-signal estimate and debiased mean SNR without truncating negative estimates. Batch-pair comparisons are dependent descriptive observations, not extra roots or CI samples.
 - Attribute TD residual and GAE-minus-MC advantage to the exact filtered future value-error identity, masking true episode terminals. Report global, renewal and tail diagnostics. No lambda, learning-rate, seed or gate search.
+- MC reference recursion explicitly casts native float32 rewards/done to double. The historical MC helper is retained only for exact Stage67 reproduction; its rounding difference is recorded rather than changing archived claims.
 - Full budget: 1,024 fresh episodes / 1,228,800 primitive steps; 256 reconstructed anchor episodes. No actor/value optimizer steps, critic fits or checkpoint writes. Scheduler uses node001-node006 dynamically, 9 CPU / 6 GiB per full root, 3 CPU / 3 GiB preflight. Pull completion markers and compact JSON only.
 
 ## Limitations

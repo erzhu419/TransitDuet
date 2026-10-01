@@ -35,6 +35,15 @@ class IndependentCreditTest(unittest.TestCase):
         self.assertEqual(exact["unbiased_signal_power"], 25.)
         self.assertIsNone(exact["debiased_mean_snr"])
 
+    def test_exact_MC_recurrence_with_native_float32_done(self):
+        _, lower, _ = fixtures.CreditReliabilityTest().data()
+        lower = replace(lower, reward=np.full(12, .7, dtype=np.float32), done=lower.done.astype(np.float32))
+        mc = experiment.exact_returns(lower, .99)
+        reward = float(lower.reward[0])
+        np.testing.assert_allclose(mc, np.tile([reward * (1. + .99 + .99 ** 2), reward * 1.99, reward], 4), atol=1e-15)
+        residual = lower.reward.astype(np.float64) + .99 * (1. - lower.done.astype(np.float64)) * np.r_[mc[1:], 0.] - mc
+        np.testing.assert_allclose(residual, 0., atol=1e-15, rtol=0)
+
     def test_TD_identity_true_terminals_and_shared_score_pass_leave_actor_frozen(self):
         actor, lower, old_signal = fixtures.CreditReliabilityTest().data()
         lower = replace(lower, reward=np.arange(12, dtype=np.float32) / 4)
