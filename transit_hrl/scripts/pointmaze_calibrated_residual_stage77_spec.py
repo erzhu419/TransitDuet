@@ -11,13 +11,26 @@ PERIODS, roots, arguments = source.PERIODS, source.roots, source.arguments
 CHUNK_SIZE = source.CHUNK_SIZE
 MODES = ("zero", "original", "calibrated")
 METRICS = ("episode_return", "tracking_squared_error_integral")
-CONTRASTS = ("original_minus_zero", "calibrated_minus_original", "calibrated_minus_zero")
+CONTRAST_PAIRS = (("original", "zero"), ("calibrated", "original"), ("calibrated", "zero"))
+CONTRASTS = tuple(f"{a}_minus_{b}" for a, b in CONTRAST_PAIRS)
 ENDPOINTS = tuple(f"{p}/{m}/{c}" for p in PERIODS for m in METRICS for c in CONTRASTS)
 BOOTSTRAP_DRAWS, BOOTSTRAP_SEED = 65536, (77, 77077)
 
 
 def options(*, preflight):
     return {"evaluation_episodes": 4 if preflight else 32, "workers": 2 if preflight else 8}
+
+
+def source_preflight(preflight):
+    return preflight
+
+
+def production_replay_count(preflight):
+    return 2 if preflight else 0
+
+
+def mode_alphas(calibration):
+    return {"zero": 0., "original": 1., "calibrated": calibration["alpha"]}
 
 
 def source_result(root, *, preflight):
@@ -63,3 +76,7 @@ def contract():
         "decision": "repair_validation_only_no_policy_adoption_Stage67_HOLD_unchanged",
         "artifacts": "compact_JSON_no_native_traces_or_checkpoints_no_optimizer_or_forecaster_fit",
         "limits": "RMS_ratio_is_not_a_nonlinear_command_constraint_teacher_initialized_development_roots_not_joint_HRL_or_frequency_proof"}
+
+
+def realized_budget(cell, *, preflight):
+    return budget(preflight=preflight)

@@ -81,7 +81,7 @@ def response(command, base_command, target):
         "command_change_rms": float(np.sqrt(np.square(command.astype(np.float64) - base_command).mean()))}
 
 
-def calibrate(root, period, *, model, predictor, args, roles, bounds, old, cost, preflight):
+def prepare_calibration(root, period, *, model, predictor, args, roles, bounds, saved_bc_mse, cost, preflight):
     cache = []
     for seed in roles["calibration_labels"]:
         with np.load(spec.source.label_archive(root, period, seed, preflight=preflight)) as a:
@@ -100,15 +100,28 @@ def calibrate(root, period, *, model, predictor, args, roles, bounds, old, cost,
     base_command, original_command = [np.concatenate([c[i] for c in cache]) for i in (5, 6)]
     responses = {"zero": response(base_command, base_command, target),
         "original": response(original_command, base_command, target)}
-    saved = old["bc_mse_reproduction"]["saved"]
-    np.testing.assert_allclose(responses["zero"]["bc_command_mse"], saved, atol=1e-7, rtol=1e-5)
+    np.testing.assert_allclose(responses["zero"]["bc_command_mse"], saved_bc_mse, atol=1e-7, rtol=1e-5)
     cost["bc_mse_reproductions"] += 1
-    alpha = calibration_alpha(responses["zero"]["bc_command_mse"], responses["original"]["command_change_rms"])
-    calibrated_command = np.concatenate([commands(model.lower_actor, curve_states(s, a, blend(b, o, alpha)))
+    cost["offline_actor_rows"] += 2 * len(target)
+    cost["offline_actor_forward_batches"] += 2 * len(cache) * int(np.ceil(args.horizon / spec.CHUNK_SIZE))
+    return cache, target, base_command, responses
+
+
+def evaluate_curve(actor, cache, alpha, cost):
+    command = np.concatenate([commands(actor, curve_states(s, a, blend(b, o, alpha)))
         for s, a, _, b, o, _, _ in cache])
+    cost["offline_actor_rows"] += len(command)
+    cost["offline_actor_forward_batches"] += sum(int(np.ceil(len(c[0]) / spec.CHUNK_SIZE)) for c in cache)
+    return command
+
+
+def calibrate(root, period, *, model, predictor, args, roles, bounds, old, cost, preflight):
+    saved = old["bc_mse_reproduction"]["saved"]
+    cache, target, base_command, responses = prepare_calibration(root, period, model=model, predictor=predictor,
+        args=args, roles=roles, bounds=bounds, saved_bc_mse=saved, cost=cost, preflight=preflight)
+    alpha = calibration_alpha(responses["zero"]["bc_command_mse"], responses["original"]["command_change_rms"])
+    calibrated_command = evaluate_curve(model.lower_actor, cache, alpha, cost)
     responses["calibrated"] = response(calibrated_command, base_command, target)
-    cost["offline_actor_rows"] += 3 * len(target)
-    cost["offline_actor_forward_batches"] += 3 * len(cache) * int(np.ceil(args.horizon / spec.CHUNK_SIZE))
     return {"alpha": alpha, "saved_bc_mse": saved, "responses": responses,
         "calibrated_to_bc_rmse_ratio": responses["calibrated"]["command_change_rms"] / np.sqrt(responses["zero"]["bc_command_mse"]),
         "data_role": "historical_BC_labels_only", "bc_mse_reproduction": "passed",
@@ -116,13 +129,12 @@ def calibrate(root, period, *, model, predictor, args, roles, bounds, old, cost,
 
 
 def worker_native(job):
-    weights, seed, mode, period, predictor, calibration = job
+    weights, seed, mode, period, predictor, alpha, envelope = job
     model, args = paths._WORKER
     model.load_state_dict(weights)
     policy_seed = paths.native.native.spec.policy_seed(args.optimizer_seed, seed)
     torch.manual_seed(policy_seed)
-    alpha = {"zero": 0., "original": 1., "calibrated": calibration["alpha"]}[mode]
-    plan = CalibratedPlan(predictor, period, args.maximum_subgoal_delta, alpha, calibration["envelope"])
+    plan = CalibratedPlan(predictor, period, args.maximum_subgoal_delta, alpha, envelope)
     kwargs = paths.native.native.spec.rollout_arguments(args.optimizer_seed, seed, phase="train", mode="training")
     kwargs["sample"] = False
     batch, row, raw = paths.native.joint.rollout(model, args, f"fixed{period}", seed=seed, capture=False,
@@ -143,16 +155,17 @@ def worker_native(job):
         "outside_label_axis_range_rate": plan.axis_outside_rows / row["episode_length"]}
 
 
-def paired_endpoints(period, evaluation, seeds):
-    if set(evaluation) != set(spec.MODES) or any([r["seed"] for r in rows] != seeds for rows in evaluation.values()):
+def paired_endpoints(period, evaluation, seeds, *, protocol=spec):
+    if set(evaluation) != set(protocol.MODES) or any([r["seed"] for r in rows] != seeds for rows in evaluation.values()):
         raise ValueError("Stage77 native mode or seed roster changed")
     for rows in evaluation.values():
         for row, base in zip(rows, evaluation["zero"]):
             if any(row[k] != base[k] for k in paths.PAIR_KEYS):raise ValueError("Stage77 native common-noise pairing changed")
     effects = {}
-    for metric in spec.METRICS:
-        z, o, c = [np.asarray([r[metric] for r in evaluation[m]], dtype=np.float64) for m in spec.MODES]
-        for name, values in zip(spec.CONTRASTS, (o-z, c-o, c-z)):
+    for metric in protocol.METRICS:
+        values_by_mode = {m: np.asarray([r[metric] for r in evaluation[m]], dtype=np.float64) for m in protocol.MODES}
+        for a, b in protocol.CONTRAST_PAIRS:
+            name, values = f"{a}_minus_{b}", values_by_mode[a] - values_by_mode[b]
             if not np.isfinite(values).all():raise ValueError("Stage77 native endpoint is nonfinite")
             effects[f"{period}/{metric}/{name}"] = float(values.mean())
     return effects
@@ -162,28 +175,36 @@ def production_check(evaluation, replays, seeds):
     paths.check_production({"R0V0": evaluation["zero"], "R1V1": evaluation["original"]}, replays, seeds)
 
 
-def run(root, *, preflight, output):
-    prerequisite = json.loads(spec.source_result(root, preflight=preflight).read_text())
-    support.qualify(prerequisite, preflight=preflight)
+def check_calibration(c):
+    if c["alpha"] != calibration_alpha(c["responses"]["zero"]["bc_command_mse"], c["responses"]["original"]["command_change_rms"]):
+        raise ValueError("Stage77 historical calibration changed")
+
+
+def run(root, *, preflight, output, protocol=spec, calibrator=calibrate,
+        qualify_source=support.qualify, calibration_check=check_calibration):
+    prerequisite = json.loads(protocol.source_result(root, preflight=preflight).read_text())
+    source_preflight = protocol.source_preflight(preflight)
+    qualify_source(prerequisite, preflight=source_preflight)
     if prerequisite["root"] != root:raise ValueError("Stage77 prerequisite root changed")
-    clones, predictor, initialization = support.native.load_source(root, preflight=preflight)
-    args, roles = spec.arguments(root, preflight=preflight), spec.seed_roles(root, preflight=preflight)
-    cost, groups, started = dict.fromkeys(spec.budget(preflight=preflight), 0), {}, time.monotonic()
+    clones, predictor, initialization = support.native.load_source(root, preflight=source_preflight)
+    args, roles = protocol.arguments(root, preflight=preflight), protocol.seed_roles(root, preflight=preflight)
+    cost, groups, started = dict.fromkeys(protocol.budget(preflight=preflight), 0), {}, time.monotonic()
     cost.update(source_clone_loads=len(clones), forecaster_loads=1, layout_loads=1)
     bounds = support.layout_bounds(args, roles["calibration_labels"][0])
     planning = dict.fromkeys(paths.PLANNING_KEYS, 0)
-    with ProcessPoolExecutor(max_workers=spec.options(preflight=preflight)["workers"], mp_context=mp.get_context("spawn"),
-            initializer=init_worker, initargs=(clones[str(spec.PERIODS[0])].config, args)) as pool:
-        for period in spec.PERIODS:
+    with ProcessPoolExecutor(max_workers=protocol.options(preflight=preflight)["workers"], mp_context=mp.get_context("spawn"),
+            initializer=init_worker, initargs=(clones[str(protocol.PERIODS[0])].config, args)) as pool:
+        for period in protocol.PERIODS:
             clone = clones[str(period)]
             snapshot, weights = copy.deepcopy(clone.state_dict()), paths.native.joint.inference_weights(clone)
-            calibration = calibrate(root, period, model=clone, predictor=predictor, args=args, roles=roles,
+            calibration = calibrator(root, period, model=clone, predictor=predictor, args=args, roles=roles,
                 bounds=bounds, old=prerequisite["groups"][str(period)], cost=cost, preflight=preflight)
             print(f"calibration {root}/{period}: alpha={calibration['alpha']:.8f} frozen before native probes", flush=True)
-            evaluation = {m: list(pool.map(worker_native, [(weights, s, m, period, predictor, calibration)
-                for s in roles["native_evaluation"]])) for m in spec.MODES}
+            alphas = protocol.mode_alphas(calibration)
+            evaluation = {m: list(pool.map(worker_native, [(weights, s, m, period, predictor, alphas[m], calibration["envelope"])
+                for s in roles["native_evaluation"]])) for m in protocol.MODES}
             replays = {}
-            if preflight:
+            if protocol.production_replay_count(preflight):
                 replays = {m: list(pool.map(paths.native.worker_native, [(weights, s, arm, period, predictor)
                     for s in roles["native_evaluation"]])) for m, arm in (("R0V0", "zero_train"), ("R1V1", "joint_ppo"))}
                 production_check(evaluation, replays, roles["native_evaluation"])
@@ -197,44 +218,44 @@ def run(root, *, preflight, output):
                     cost["native_upper_calls"] += row["upper_calls"]
                     cost["native_network_checks"] += 1
                     for k in planning:planning[k] += row[k]
-            effects = paired_endpoints(period, evaluation, roles["native_evaluation"])
+            effects = paired_endpoints(period, evaluation, roles["native_evaluation"], protocol=protocol)
             cost["native_pair_checks"] += len(roles["native_evaluation"])
             support.assert_frozen(clone, snapshot)
             cost["frozen_model_checks"] += 1
             groups[str(period)] = {"calibration": calibration, "evaluation": evaluation, "production_replays": replays,
                 "effects": effects, "pairing": "passed", "source_and_Adam_unchanged": "passed"}
-    cell = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
+    cell = {"status": "complete", "protocol": protocol.EXPERIMENT_PROTOCOL, "contract": protocol.contract(), "root": root,
         "preflight": preflight, "seed_roles": roles, "cost": cost, "native_planning_cost": planning, "groups": groups,
         "source_initialization": initialization, "optimizer_steps": 0, "critic_fits": 0, "forecaster_fits": 0,
         "checkpoint_writes": 0, "native_trace_writes": 0, "wall_seconds": time.monotonic() - started}
-    qualify(cell, preflight=preflight)
+    qualify(cell, preflight=preflight, protocol=protocol, calibration_check=calibration_check)
     write_json(output, cell)
-    write_json(output.parent / "completion" / "ready.json", {"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
+    write_json(output.parent / "completion" / "ready.json", {"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
     return cell
 
 
-def qualify(cell, *, preflight):
-    if (cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract()
-            or cell["root"] not in spec.roots(preflight=preflight) or cell["preflight"] != preflight
-            or cell["cost"] != spec.budget(preflight=preflight) or cell["seed_roles"] != spec.seed_roles(cell["root"], preflight=preflight)
+def qualify(cell, *, preflight, protocol=spec, calibration_check=check_calibration):
+    if (cell["status"] != "complete" or cell["protocol"] != protocol.EXPERIMENT_PROTOCOL or cell["contract"] != protocol.contract()
+            or cell["root"] not in protocol.roots(preflight=preflight) or cell["preflight"] != preflight
+            or cell["cost"] != protocol.realized_budget(cell, preflight=preflight) or cell["seed_roles"] != protocol.seed_roles(cell["root"], preflight=preflight)
             or any(cell[k] for k in ("optimizer_steps", "critic_fits", "forecaster_fits", "checkpoint_writes", "native_trace_writes"))
-            or set(cell["groups"]) != {str(p) for p in spec.PERIODS}):
+            or set(cell["groups"]) != {str(p) for p in protocol.PERIODS}):
         raise ValueError("Stage77 frozen protocol or budget changed")
-    h = spec.arguments(cell["root"], preflight=preflight).horizon
+    h = protocol.arguments(cell["root"], preflight=preflight).horizon
     planning = dict.fromkeys(paths.PLANNING_KEYS, 0)
     for p, g in cell["groups"].items():
         c = g["calibration"]
         if (c["data_role"] != "historical_BC_labels_only" or c["bc_mse_reproduction"] != "passed"
-                or c["label_plan_checks"] != "passed" or g["source_and_Adam_unchanged"] != "passed" or g["pairing"] != "passed"
-                or c["alpha"] != calibration_alpha(c["responses"]["zero"]["bc_command_mse"], c["responses"]["original"]["command_change_rms"])):
+                or c["label_plan_checks"] != "passed" or g["source_and_Adam_unchanged"] != "passed" or g["pairing"] != "passed"):
             raise ValueError("Stage77 historical calibration or source model changed")
         np.testing.assert_allclose(c["responses"]["zero"]["bc_command_mse"], c["saved_bc_mse"], atol=1e-7, rtol=1e-5)
-        if g["effects"] != paired_endpoints(p, g["evaluation"], cell["seed_roles"]["native_evaluation"]):
+        calibration_check(c)
+        if g["effects"] != paired_endpoints(p, g["evaluation"], cell["seed_roles"]["native_evaluation"], protocol=protocol):
             raise ValueError("Stage77 paired native accounting changed")
-        if preflight:production_check(g["evaluation"], g["production_replays"], cell["seed_roles"]["native_evaluation"])
+        if protocol.production_replay_count(preflight):production_check(g["evaluation"], g["production_replays"], cell["seed_roles"]["native_evaluation"])
         elif g["production_replays"]:raise ValueError("Stage77 full run repeats settled production checks")
         for mode, rows in g["evaluation"].items():
-            alpha = {"zero": 0., "original": 1., "calibrated": c["alpha"]}[mode]
+            alpha = protocol.mode_alphas(c)[mode]
             if any(r["mode"] != mode or r["alpha"] != alpha for r in rows):raise ValueError("Stage77 execution scaling changed")
         for rows in [*g["evaluation"].values(), *g["production_replays"].values()]:
             for row in rows:
@@ -244,21 +265,21 @@ def qualify(cell, *, preflight):
     return cell
 
 
-def aggregate(cells, *, preflight):
-    if len({c["root"] for c in cells}) != len(cells) or {c["root"] for c in cells} != set(spec.roots(preflight=preflight)):
+def aggregate(cells, *, preflight, protocol=spec, calibration_check=check_calibration):
+    if len({c["root"] for c in cells}) != len(cells) or {c["root"] for c in cells} != set(protocol.roots(preflight=preflight)):
         raise ValueError("Stage77 requires every frozen root")
-    rows = [qualify(c, preflight=preflight) for c in sorted(cells, key=lambda c: c["root"])]
+    rows = [qualify(c, preflight=preflight, protocol=protocol, calibration_check=calibration_check) for c in sorted(cells, key=lambda c: c["root"])]
     effects = [{k: v for g in c["groups"].values() for k, v in g["effects"].items()} for c in rows]
-    x = np.asarray([[e[k] for k in spec.ENDPOINTS] for e in effects])
-    endpoints = {k: {"mean": float(x[:, i].mean())} for i, k in enumerate(spec.ENDPOINTS)}
+    x = np.asarray([[e[k] for k in protocol.ENDPOINTS] for e in effects])
+    endpoints = {k: {"mean": float(x[:, i].mean())} for i, k in enumerate(protocol.ENDPOINTS)}
     if not preflight:
-        idx = np.random.default_rng(np.random.SeedSequence(spec.BOOTSTRAP_SEED)).integers(0, len(rows), (spec.BOOTSTRAP_DRAWS, len(rows)))
-        tail = .05 / (2 * len(spec.ENDPOINTS))
+        idx = np.random.default_rng(np.random.SeedSequence(protocol.BOOTSTRAP_SEED)).integers(0, len(rows), (protocol.BOOTSTRAP_DRAWS, len(rows)))
+        tail = .05 / (2 * len(protocol.ENDPOINTS))
         bounds = np.quantile(x[idx].mean(1), [tail, 1-tail], axis=0)
-        for i, k in enumerate(spec.ENDPOINTS):
+        for i, k in enumerate(protocol.ENDPOINTS):
             endpoints[k].update(ci=bounds[:, i].tolist(), effect="positive" if bounds[0, i] > 0 else "negative" if bounds[1, i] < 0 else "inconclusive")
-    return {"status": "preflight_passed" if preflight else "complete", "protocol": spec.EXPERIMENT_PROTOCOL,
-        "contract": spec.contract(), "mechanical_gate": "passed", "root_rows": rows, "endpoints": endpoints,
-        "cost": {k: sum(c["cost"][k] for c in rows) for k in spec.budget(preflight=preflight)},
+    return {"status": "preflight_passed" if preflight else "complete", "protocol": protocol.EXPERIMENT_PROTOCOL,
+        "contract": protocol.contract(), "mechanical_gate": "passed", "root_rows": rows, "endpoints": endpoints,
+        "cost": {k: sum(c["cost"][k] for c in rows) for k in protocol.budget(preflight=preflight)},
         "native_planning_cost": {k: sum(c["native_planning_cost"][k] for c in rows) for k in paths.PLANNING_KEYS},
         "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged", "performance_claim": "frozen_decoder_repair_validation_only"}

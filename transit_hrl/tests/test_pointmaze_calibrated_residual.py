@@ -122,7 +122,7 @@ class CalibratedResidualTest(unittest.TestCase):
             with patch.object(experiment.paths.native.joint, "_make_task", side_effect=lambda **kw: DenseTask()), patch.object(
                     experiment.paths.native.joint, "pointmaze_goal_bounds", return_value=(-2*np.ones(2), 2*np.ones(2))), patch.object(
                     experiment.paths.native.joint, "rollout", wraps=experiment.paths.native.joint.rollout) as rollout:
-                ev = {m: [experiment.worker_native((weights, 77095001, m, p, predictor(), calibration))] for m in spec.MODES}
+                ev = {m: [experiment.worker_native((weights, 77095001, m, p, predictor(), spec.mode_alphas(calibration)[m], calibration["envelope"]))] for m in spec.MODES}
                 replay = {m: [experiment.paths.native.worker_native((weights, 77095001, arm, p, predictor()))]
                     for m, arm in (("R0V0", "zero_train"), ("R1V1", "joint_ppo"))}
             experiment.production_check(ev, replay, [77095001])
