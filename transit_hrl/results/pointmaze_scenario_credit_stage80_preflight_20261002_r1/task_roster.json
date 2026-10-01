@@ -1,0 +1,33 @@
+{
+  "protocol": "pointmaze_scenario_credit_stage80_v1",
+  "preflight": true,
+  "run_name": "pointmaze_scenario_credit_stage80_preflight_20261002_r1",
+  "source_revision": "d1dbcf686bd3f7a2ad4257e50ebe6584aed18510",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120425",
+      "status": "done",
+      "node": "node004",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 1411,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_scenario_credit_stage80_v1/scenario_credit/preflight",
+      "role": "scenario_credit_and_native_direction",
+      "root": 310011
+    },
+    {
+      "id": "t120426",
+      "status": "done",
+      "node": "node005",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_scenario_credit_stage80_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null
+    }
+  ]
+}
