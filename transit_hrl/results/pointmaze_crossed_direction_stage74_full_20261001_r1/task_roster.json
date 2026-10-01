@@ -1,0 +1,108 @@
+{
+  "protocol": "pointmaze_crossed_direction_stage74_v1",
+  "run_name": "pointmaze_crossed_direction_stage74_full_20261001_r1",
+  "source_revision": "a5de19aa3e",
+  "preflight": false,
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t118693",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310011,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118694",
+      "status": "running",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310023,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118695",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310037,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118696",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310049,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118697",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310061,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118698",
+      "status": "running",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310073,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118699",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310089,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118700",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/crossed_direction/full",
+      "root": 310101,
+      "role": "historical_reproduction_and_crossed_native_response"
+    },
+    {
+      "id": "t118701",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "resource_family": "Freq-HRL/pointmaze_crossed_direction_stage74_v1/qualification",
+      "role": "qualification",
+      "waiting_for": "eight_root_completion_markers"
+    }
+  ],
+  "budget_total": {
+    "historical_episodes": 4096,
+    "native_episodes": 13312,
+    "native_steps": 15974400,
+    "actor_parameter_perturbations": 192,
+    "stage73_direction_reproductions": 96
+  },
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "none_crossed_response_diagnosis_only"
+}

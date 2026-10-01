@@ -14,6 +14,8 @@ Full budget: 4096 historical episodes / 4,915,200 reconstructed lower calls; 13,
 
 Preflight t118661/t118662 passed: 208 native episodes / 62,400 steps, 12 exact Stage73 geometry/frame reproductions and eight cross-execution paired-seed checks. Root runtime was 53.8 seconds. Nineteen focused tests passed. No protocol or radius changes were made from preflight rewards.
 
+Full run `pointmaze_crossed_direction_stage74_full_20261001_r1`: t118693-t118700 launched through dynamic placement; t118701 waits for the eight root completion markers. Source revision and all 102 endpoints are retained in the preregistration, with actual launch nodes in the task roster.
+
 ## Limitations
 
 Execution comparisons hold parameters fixed, not target-state KL. Fitting effects compare the entire historical-data/critic/direction bundle. This is a finite-radius stochastic diagnosis on teacher-initialized development roots, not full training, OOD validation or frequency-superiority evidence. Eight-root percentile-bootstrap uncertainty is limited.
