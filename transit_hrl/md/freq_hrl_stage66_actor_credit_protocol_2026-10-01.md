@@ -8,6 +8,10 @@ Incremental full cost:256 archived episodes,307200 lower/4608 upper reconstructi
 
 Next intervention follows the complete diagnostic results, not a favorable root/period. No seed expansion, LR/KL tuning or MC-credit adoption is authorized by this diagnostic alone.
 
+## Execution
+
+Implementation frozen at e09969d065. Two analytic/dependency tests passed (0.117s). Actual preflight t116883/node005 and qualification t116884/node004 exited0: all8 Stage65 pre-update critic/GAE probes exact, all model/Adam states frozen;8 score forward/24 backward batches, no new sampling or optimization. Full roots t116888-t116895 and qualification t116896/node006 completed with exit0; all64 source probes and frozen model/Adam checks passed. See the result note for the descriptive diagnosis; no reward improvement is established by this stage.
+
 ## Limitations
 
 MC residuals and their finite-sample surrogate gradients are not ground-truth reward gradients. These reused stochastic training archives do not establish deterministic or stochastic deployment improvement, generalization or frequency-specific superiority.
