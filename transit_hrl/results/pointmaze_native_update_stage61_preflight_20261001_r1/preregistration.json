@@ -1,0 +1,128 @@
+{
+  "artifacts": {
+    "pull": "compact_json_only",
+    "raw_and_weights": "server_only"
+  },
+  "budget_per_root": {
+    "archive": {
+      "archive_episodes": 24,
+      "diagnostic_distribution_passes": 36,
+      "diagnostic_gae_calls": 18,
+      "diagnostic_updates": 18,
+      "diagnostic_value_passes": 36,
+      "forecaster_loads": 1,
+      "native_steps": 0,
+      "new_evaluation_steps": 0,
+      "new_fits": 0,
+      "reconstructed_lower_calls": 7200,
+      "reconstructed_upper_calls": 108,
+      "source_clone_loads": 2,
+      "warmup_critic_updates": 16
+    },
+    "candidate_checkpoint_writes": 12,
+    "native_evaluation": {
+      "actor_context_evaluations": 8400,
+      "audit_bernstein_basis_evaluations": 2128,
+      "audit_ols_fits": 98,
+      "audit_ridge_predictions": 98,
+      "bernstein_basis_evaluations": 2128,
+      "gate_inference_calls": 0,
+      "lower_inference_calls": 8400,
+      "plan_ols_fits": 98,
+      "plan_ridge_predictions": 98,
+      "primitive_steps": 8400,
+      "reference_evaluations": 8400,
+      "upper_inference_calls": 126,
+      "upper_plan_decodes": 126
+    },
+    "native_trace_audits": 28,
+    "new_forecaster_fits": 0,
+    "supervised_steps": 0
+  },
+  "contract": {
+    "archive": "exact_Stage60_first_update_comparisons_and_costs_same_Stage57_warmup_and_batch",
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      61,
+      61061
+    ],
+    "clone": "one_unmodified_Stage55_clone_evaluation_per_period_shared_across_arms",
+    "cost": "count_Stage60_reconstruction_and_all_new_native_calls_audits_and_candidate_checkpoint_writes_separately",
+    "decision": "repair_gain_backtracking_vs_plain_and_training_gain_vs_clone_each_require_positive_all_arms_and_periods",
+    "deployment": "fixed_one_update_models_deterministic_native_execution_rule_of_each_training_arm",
+    "endpoints": [
+      "period50:zero_train:backtracking_kl_minus_plain",
+      "period50:zero_train:backtracking_kl_minus_conditional_kl",
+      "period50:zero_train:backtracking_kl_minus_clone",
+      "period50:joint_ppo:backtracking_kl_minus_plain",
+      "period50:joint_ppo:backtracking_kl_minus_conditional_kl",
+      "period50:joint_ppo:backtracking_kl_minus_clone",
+      "period100:zero_train:backtracking_kl_minus_plain",
+      "period100:zero_train:backtracking_kl_minus_conditional_kl",
+      "period100:zero_train:backtracking_kl_minus_clone",
+      "period100:joint_ppo:backtracking_kl_minus_plain",
+      "period100:joint_ppo:backtracking_kl_minus_conditional_kl",
+      "period100:joint_ppo:backtracking_kl_minus_clone"
+    ],
+    "interval": "two_sided_percentile_Bonferroni12_equal_root_paired_path_means",
+    "limits": "single_update_reused_teacher_initialized_training_roots_new_eval_paths_not_full_training_frequency_specific_or_equal_FLOPs_confirmation",
+    "pairing": "fresh_shared_environment_paths_all_treatments_arms_periods_no_new_training_rollouts",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "clone",
+      "plain",
+      "conditional_kl",
+      "backtracking_kl"
+    ],
+    "policy_seed": "unchanged_Stage57_policy_seed_with_new_environment_seed",
+    "selection": "no_checkpoint_root_period_path_LR_credit_or_budget_selection_after_results",
+    "source_protocol": "pointmaze_backtracking_stage60_v1",
+    "source_runs": [
+      "pointmaze_backtracking_stage60_preflight_20261001_r1",
+      "pointmaze_backtracking_stage60_full_20261001_r1"
+    ],
+    "unchanged": "credit_critics_forecaster_KL_budget_backtracking_roots_periods_and_PPO_initialization"
+  },
+  "optimizer_roots": [
+    310001
+  ],
+  "options": {
+    "critic_warmup_iterations": 2,
+    "deployment_mode": "deterministic",
+    "evaluation_paths": 2,
+    "learning_iterations": 1,
+    "rollouts_per_iteration": 2,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_native_update_stage61_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310001": {
+      "evaluation": [
+        61095001,
+        61095002
+      ]
+    }
+  },
+  "source_revision": "cd2ea6c4476e96c5f018417a269e5a03faa3236f"
+}
