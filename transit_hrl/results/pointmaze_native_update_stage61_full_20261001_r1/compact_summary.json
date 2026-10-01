@@ -1,0 +1,1778 @@
+{
+  "archive_mechanics": {
+    "contract": {
+      "Adam_semantics": "accepted_scaled_proposal_keeps_single_gradient_moment_update_and_original_LR_all_rejected_restores_original_actor_and_Adam",
+      "arms": [
+        "zero_train",
+        "joint_ppo"
+      ],
+      "backtrack_factor": 0.5,
+      "decision": "nonzero_backtracking_actor_prerequisite_only_no_automatic_native_launch",
+      "guard_cost": "count_all_candidate_distributions_interpolation_trials_snapshots_and_rollback_checks_not_as_extra_optimizer_steps",
+      "identity": "plain_exact_Stage58_rejection_only_exact_Stage59_all_three_final_critics_and_Adam_exact",
+      "intervention": "one_Adam_proposal_per_minibatch_first_feasible_parameter_displacement_scale_restore_actor_and_Adam_between_rejected_trials",
+      "kl_budget": 0.02,
+      "limits": "archive_only_mechanics_not_reward_gain_causal_attribution_trajectory_KL_or_heldout_confirmation",
+      "max_backtracks": 12,
+      "pairing": "same_reconstructed_first_training_batch_same_four_networks_and_Adam_states_after_exact_archived_critic_warmup",
+      "periods": [
+        50,
+        100
+      ],
+      "reference": "fixed_sampling_policy_full_batch_mean_exact_conditional_Gaussian_KL_old_to_new_per_decision",
+      "selection": "all_roots_both_periods_both_arms_no_KL_LR_credit_seed_or_reward_tuning",
+      "source_protocol": "pointmaze_update_diagnostics_stage58_v1",
+      "source_runs": [
+        "pointmaze_update_diagnostics_stage58_preflight_20260930_r1",
+        "pointmaze_update_diagnostics_stage58_full_20260930_r1"
+      ],
+      "treatments": [
+        "plain",
+        "conditional_kl",
+        "backtracking_kl"
+      ],
+      "unchanged": "original_credit_targets_critic_updates_LR_entropy_shuffle_and_nominal_actor_step_attempts"
+    },
+    "cost": {
+      "archive_episodes": 4352,
+      "diagnostic_distribution_passes": 288,
+      "diagnostic_gae_calls": 144,
+      "diagnostic_updates": 144,
+      "diagnostic_value_passes": 288,
+      "forecaster_loads": 8,
+      "native_steps": 0,
+      "new_evaluation_steps": 0,
+      "new_fits": 0,
+      "reconstructed_lower_calls": 5222400,
+      "reconstructed_upper_calls": 78336,
+      "source_clone_loads": 16,
+      "warmup_critic_updates": 1024
+    },
+    "executed_optimizer_steps": {
+      "lower_actor": 3840,
+      "lower_value": 24320,
+      "upper_actor": 192,
+      "upper_value": 2240
+    },
+    "frozen_actors": [],
+    "guard_cost_and_retained_steps": {
+      "backtracked_actor_steps": 789,
+      "candidate_evaluations": 2496,
+      "guard_distribution_passes": 3936,
+      "parameter_interpolation_trials": 1152,
+      "proposal_rejections": 1152,
+      "rejected_actor_steps": 1280,
+      "retained_actor_steps": 1408,
+      "rollback_state_checks": 4864,
+      "state_snapshot_calls": 6954
+    },
+    "native_trial_prerequisite": "nonzero_step_passed_not_performance_evidence",
+    "performance_claim": "none_archive_only_zero_new_native_and_evaluation_steps",
+    "protocol": "pointmaze_backtracking_stage60_v1",
+    "status": "fixed_batch_valid"
+  },
+  "candidate_checkpoint_writes": 96,
+  "contract": {
+    "archive": "exact_Stage60_first_update_comparisons_and_costs_same_Stage57_warmup_and_batch",
+    "arms": [
+      "zero_train",
+      "joint_ppo"
+    ],
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      61,
+      61061
+    ],
+    "clone": "one_unmodified_Stage55_clone_evaluation_per_period_shared_across_arms",
+    "cost": "count_Stage60_reconstruction_and_all_new_native_calls_audits_and_candidate_checkpoint_writes_separately",
+    "decision": "repair_gain_backtracking_vs_plain_and_training_gain_vs_clone_each_require_positive_all_arms_and_periods",
+    "deployment": "fixed_one_update_models_deterministic_native_execution_rule_of_each_training_arm",
+    "endpoints": [
+      "period50:zero_train:backtracking_kl_minus_plain",
+      "period50:zero_train:backtracking_kl_minus_conditional_kl",
+      "period50:zero_train:backtracking_kl_minus_clone",
+      "period50:joint_ppo:backtracking_kl_minus_plain",
+      "period50:joint_ppo:backtracking_kl_minus_conditional_kl",
+      "period50:joint_ppo:backtracking_kl_minus_clone",
+      "period100:zero_train:backtracking_kl_minus_plain",
+      "period100:zero_train:backtracking_kl_minus_conditional_kl",
+      "period100:zero_train:backtracking_kl_minus_clone",
+      "period100:joint_ppo:backtracking_kl_minus_plain",
+      "period100:joint_ppo:backtracking_kl_minus_conditional_kl",
+      "period100:joint_ppo:backtracking_kl_minus_clone"
+    ],
+    "interval": "two_sided_percentile_Bonferroni12_equal_root_paired_path_means",
+    "limits": "single_update_reused_teacher_initialized_training_roots_new_eval_paths_not_full_training_frequency_specific_or_equal_FLOPs_confirmation",
+    "pairing": "fresh_shared_environment_paths_all_treatments_arms_periods_no_new_training_rollouts",
+    "periods": [
+      50,
+      100
+    ],
+    "policies": [
+      "clone",
+      "plain",
+      "conditional_kl",
+      "backtracking_kl"
+    ],
+    "policy_seed": "unchanged_Stage57_policy_seed_with_new_environment_seed",
+    "selection": "no_checkpoint_root_period_path_LR_credit_or_budget_selection_after_results",
+    "source_protocol": "pointmaze_backtracking_stage60_v1",
+    "source_runs": [
+      "pointmaze_backtracking_stage60_preflight_20261001_r1",
+      "pointmaze_backtracking_stage60_full_20261001_r1"
+    ],
+    "unchanged": "credit_critics_forecaster_KL_budget_backtracking_roots_periods_and_PPO_initialization"
+  },
+  "evaluation_forecaster_loads": 0,
+  "native_evaluation_counts": {
+    "actor_context_evaluations": 2150400,
+    "audit_bernstein_basis_evaluations": 136192,
+    "audit_ols_fits": 30464,
+    "audit_ridge_predictions": 30464,
+    "bernstein_basis_evaluations": 136192,
+    "gate_inference_calls": 0,
+    "lower_inference_calls": 2150400,
+    "plan_ols_fits": 30464,
+    "plan_ridge_predictions": 30464,
+    "primitive_steps": 2150400,
+    "reference_evaluations": 2150400,
+    "upper_inference_calls": 32256,
+    "upper_plan_decodes": 32256
+  },
+  "native_trace_audits": 1792,
+  "new_forecaster_fits": 0,
+  "primary_endpoints": {
+    "period100:joint_ppo:backtracking_kl_minus_clone": {
+      "ci": [
+        -3.1529129869803683,
+        3.4373825321892184
+      ],
+      "effect": "inconclusive",
+      "mean": 0.311875543778271
+    },
+    "period100:joint_ppo:backtracking_kl_minus_conditional_kl": {
+      "ci": [
+        -2.5619832588134677,
+        1.8943566317697673
+      ],
+      "effect": "inconclusive",
+      "mean": -0.04484008854016963
+    },
+    "period100:joint_ppo:backtracking_kl_minus_plain": {
+      "ci": [
+        -1.003659211409527,
+        4.117148232714115
+      ],
+      "effect": "inconclusive",
+      "mean": 1.3520976576704555
+    },
+    "period100:zero_train:backtracking_kl_minus_clone": {
+      "ci": [
+        -3.236308229284475,
+        1.0896959515890217
+      ],
+      "effect": "inconclusive",
+      "mean": -1.086480461469563
+    },
+    "period100:zero_train:backtracking_kl_minus_conditional_kl": {
+      "ci": [
+        -3.236308229284475,
+        1.0896959515890217
+      ],
+      "effect": "inconclusive",
+      "mean": -1.086480461469563
+    },
+    "period100:zero_train:backtracking_kl_minus_plain": {
+      "ci": [
+        -2.22530728074961,
+        2.75606748404536
+      ],
+      "effect": "inconclusive",
+      "mean": 0.14956920797571627
+    },
+    "period50:joint_ppo:backtracking_kl_minus_clone": {
+      "ci": [
+        -3.155730059829447,
+        7.529296553486759
+      ],
+      "effect": "inconclusive",
+      "mean": 2.548986922660987
+    },
+    "period50:joint_ppo:backtracking_kl_minus_conditional_kl": {
+      "ci": [
+        -2.364784383178769,
+        0.7097507279306967
+      ],
+      "effect": "inconclusive",
+      "mean": -0.7997231634296327
+    },
+    "period50:joint_ppo:backtracking_kl_minus_plain": {
+      "ci": [
+        -4.339111305948549,
+        156.04801679663336
+      ],
+      "effect": "inconclusive",
+      "mean": 37.573687908852264
+    },
+    "period50:zero_train:backtracking_kl_minus_clone": {
+      "ci": [
+        -2.287781012956789,
+        0.47353335565492216
+      ],
+      "effect": "inconclusive",
+      "mean": -1.117600828195208
+    },
+    "period50:zero_train:backtracking_kl_minus_conditional_kl": {
+      "ci": [
+        -2.287781012956789,
+        0.47353335565492216
+      ],
+      "effect": "inconclusive",
+      "mean": -1.117600828195208
+    },
+    "period50:zero_train:backtracking_kl_minus_plain": {
+      "ci": [
+        -2.248422646988118,
+        86.71171601385119
+      ],
+      "effect": "inconclusive",
+      "mean": 26.426177431650657
+    }
+  },
+  "protocol": "pointmaze_native_update_stage61_v1",
+  "repair_gain_gate": "failed",
+  "root_rows": [
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": -0.736380336860293,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": 1.842447002691415,
+        "period100:joint_ppo:backtracking_kl_minus_plain": 2.947555162166964,
+        "period100:zero_train:backtracking_kl_minus_clone": 2.7320660151237917,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": 2.7320660151237917,
+        "period100:zero_train:backtracking_kl_minus_plain": 2.7350433670287657,
+        "period50:joint_ppo:backtracking_kl_minus_clone": 6.699650075931572,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": -2.2067800285815338,
+        "period50:joint_ppo:backtracking_kl_minus_plain": -1.0783983732293336,
+        "period50:zero_train:backtracking_kl_minus_clone": -2.5858183012709333,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -2.5858183012709333,
+        "period50:zero_train:backtracking_kl_minus_plain": 2.3232158170437742
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 946.7965970547158,
+              "episode_return": 970.7965970547158,
+              "executed_action_rms": 0.023136718298242265,
+              "executed_plan_delta_squared_sum": 0.26064279094183096,
+              "proposed_action_rms": 0.023136718298242265,
+              "reference_target_squared_error_integral": 0.29628800409575823,
+              "tracking_squared_error_integral": 0.8892164272966119,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 940.0969469787842,
+              "episode_return": 964.0969469787842,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29307562227677864,
+              "tracking_squared_error_integral": 0.9399095243210809,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 949.0033770832973,
+              "episode_return": 973.0033770832973,
+              "executed_action_rms": 0.02281739961154088,
+              "executed_plan_delta_squared_sum": 0.25360430649062937,
+              "proposed_action_rms": 0.02281739961154088,
+              "reference_target_squared_error_integral": 0.29634834996127574,
+              "tracking_squared_error_integral": 0.879770699930698,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 947.8749954279451,
+              "episode_return": 971.8749954279451,
+              "executed_action_rms": 0.023075932853337228,
+              "executed_plan_delta_squared_sum": 0.25917004438198343,
+              "proposed_action_rms": 0.023075932853337228,
+              "reference_target_squared_error_integral": 0.29634596811095915,
+              "tracking_squared_error_integral": 0.8862648048546246,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 937.5111286775133,
+              "episode_return": 961.5111286775133,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29307562227677864,
+              "tracking_squared_error_integral": 0.9455418332503839,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 940.0969469787842,
+              "episode_return": 964.0969469787842,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29307562227677864,
+              "tracking_squared_error_integral": 0.9399095243210809,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 940.0969469787842,
+              "episode_return": 964.0969469787842,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29307562227677864,
+              "tracking_squared_error_integral": 0.9399095243210809,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 935.1879128604695,
+              "episode_return": 959.1879128604695,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29307562227677864,
+              "tracking_squared_error_integral": 0.9597131024380978,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 865.7234287427577,
+              "episode_return": 877.7234287427577,
+              "executed_action_rms": 0.029760057293190208,
+              "executed_plan_delta_squared_sum": 0.3263286799871238,
+              "proposed_action_rms": 0.029760057293190208,
+              "reference_target_squared_error_integral": 1.245597045906563,
+              "tracking_squared_error_integral": 2.1008680035145355,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 866.459809079618,
+              "episode_return": 878.459809079618,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2313835582457657,
+              "tracking_squared_error_integral": 2.0839102884597827,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 863.8809817400663,
+              "episode_return": 875.8809817400663,
+              "executed_action_rms": 0.029607162562714805,
+              "executed_plan_delta_squared_sum": 0.32517870382504577,
+              "proposed_action_rms": 0.029607162562714805,
+              "reference_target_squared_error_integral": 1.2454345679935104,
+              "tracking_squared_error_integral": 2.1186735451977023,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 862.7758735805908,
+              "episode_return": 874.7758735805908,
+              "executed_action_rms": 0.02956307185023005,
+              "executed_plan_delta_squared_sum": 0.3252241440170068,
+              "proposed_action_rms": 0.02956307185023005,
+              "reference_target_squared_error_integral": 1.245412030047126,
+              "tracking_squared_error_integral": 2.12591942029549,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 869.1918750947418,
+              "episode_return": 881.1918750947418,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2313835582457657,
+              "tracking_squared_error_integral": 2.06784998169969,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 866.459809079618,
+              "episode_return": 878.459809079618,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2313835582457657,
+              "tracking_squared_error_integral": 2.0839102884597827,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 866.459809079618,
+              "episode_return": 878.459809079618,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2313835582457657,
+              "tracking_squared_error_integral": 2.0839102884597827,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 866.456831727713,
+              "episode_return": 878.456831727713,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2313835582457657,
+              "tracking_squared_error_integral": 2.076555219028007,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310011
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": 0.9002456048008298,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": 1.5543194529705033,
+        "period100:joint_ppo:backtracking_kl_minus_plain": 1.8030258060125561,
+        "period100:zero_train:backtracking_kl_minus_clone": -0.6636214525112791,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -0.6636214525112791,
+        "period100:zero_train:backtracking_kl_minus_plain": -0.6787681401707459,
+        "period50:joint_ppo:backtracking_kl_minus_clone": 3.549723299730317,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": 0.6919709086193961,
+        "period50:joint_ppo:backtracking_kl_minus_plain": 3.8225796358220805,
+        "period50:zero_train:backtracking_kl_minus_clone": -1.393463126935444,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -1.393463126935444,
+        "period50:zero_train:backtracking_kl_minus_plain": 10.80051199553077
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 929.4367101529373,
+              "episode_return": 953.4367101529373,
+              "executed_action_rms": 0.024552323335506297,
+              "executed_plan_delta_squared_sum": 0.27059421901047354,
+              "proposed_action_rms": 0.024552323335506297,
+              "reference_target_squared_error_integral": 0.30072201241220725,
+              "tracking_squared_error_integral": 0.9916148342457243,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 925.886986853207,
+              "episode_return": 949.886986853207,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29904804797850615,
+              "tracking_squared_error_integral": 1.0222199318188554,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 928.7447392443179,
+              "episode_return": 952.7447392443179,
+              "executed_action_rms": 0.024537795632863856,
+              "executed_plan_delta_squared_sum": 0.26968372547322994,
+              "proposed_action_rms": 0.024537795632863856,
+              "reference_target_squared_error_integral": 0.3007016883028321,
+              "tracking_squared_error_integral": 0.9940691274396922,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 925.6141305171152,
+              "episode_return": 949.6141305171152,
+              "executed_action_rms": 0.02458045217627424,
+              "executed_plan_delta_squared_sum": 0.26368739746314757,
+              "proposed_action_rms": 0.02458045217627424,
+              "reference_target_squared_error_integral": 0.30068288442314917,
+              "tracking_squared_error_integral": 1.0056078192929325,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 924.4935237262715,
+              "episode_return": 948.4935237262715,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29904804797850615,
+              "tracking_squared_error_integral": 1.0305839033549522,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 925.886986853207,
+              "episode_return": 949.886986853207,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29904804797850615,
+              "tracking_squared_error_integral": 1.0222199318188554,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 925.886986853207,
+              "episode_return": 949.886986853207,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29904804797850615,
+              "tracking_squared_error_integral": 1.0222199318188554,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 913.6930117307407,
+              "episode_return": 937.6930117307407,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29904804797850615,
+              "tracking_squared_error_integral": 1.0825034396248223,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 854.8889015910852,
+              "episode_return": 866.8889015910852,
+              "executed_action_rms": 0.035296495387672246,
+              "executed_plan_delta_squared_sum": 0.3703874758363829,
+              "proposed_action_rms": 0.035296495387672246,
+              "reference_target_squared_error_integral": 1.2387093672719816,
+              "tracking_squared_error_integral": 2.1122649991552134,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 853.9886559862844,
+              "episode_return": 865.9886559862844,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.23952029036795,
+              "tracking_squared_error_integral": 2.147131567214478,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 853.3345821381147,
+              "episode_return": 865.3345821381147,
+              "executed_action_rms": 0.0352345697948402,
+              "executed_plan_delta_squared_sum": 0.36658926154025645,
+              "proposed_action_rms": 0.0352345697948402,
+              "reference_target_squared_error_integral": 1.2384190471288945,
+              "tracking_squared_error_integral": 2.123122237476462,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 853.0858757850726,
+              "episode_return": 865.0858757850726,
+              "executed_action_rms": 0.03529735866110941,
+              "executed_plan_delta_squared_sum": 0.36692775639969333,
+              "proposed_action_rms": 0.03529735866110941,
+              "reference_target_squared_error_integral": 1.238358524701354,
+              "tracking_squared_error_integral": 2.122298874364515,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 853.3250345337731,
+              "episode_return": 865.3250345337731,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.23952029036795,
+              "tracking_squared_error_integral": 2.166443170072868,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 853.9886559862844,
+              "episode_return": 865.9886559862844,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.23952029036795,
+              "tracking_squared_error_integral": 2.147131567214478,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 853.9886559862844,
+              "episode_return": 865.9886559862844,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.23952029036795,
+              "tracking_squared_error_integral": 2.147131567214478,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 854.0038026739438,
+              "episode_return": 866.0038026739438,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.23952029036795,
+              "tracking_squared_error_integral": 2.1408210443246247,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310023
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": -3.4845551953540053,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": -3.5211852771944905,
+        "period100:joint_ppo:backtracking_kl_minus_plain": -0.9759395553289778,
+        "period100:zero_train:backtracking_kl_minus_clone": -4.773173768325705,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -4.773173768325705,
+        "period100:zero_train:backtracking_kl_minus_plain": -3.9541210220590983,
+        "period50:joint_ppo:backtracking_kl_minus_clone": 6.924453503855034,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": 0.2920987022622512,
+        "period50:joint_ppo:backtracking_kl_minus_plain": -3.26127971485289,
+        "period50:zero_train:backtracking_kl_minus_clone": 0.34561552964601105,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": 0.34561552964601105,
+        "period50:zero_train:backtracking_kl_minus_plain": -3.26217328758446
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 953.3733649448734,
+              "episode_return": 977.3733649448734,
+              "executed_action_rms": 0.024410154780286818,
+              "executed_plan_delta_squared_sum": 0.3587735888150534,
+              "proposed_action_rms": 0.024410154780286818,
+              "reference_target_squared_error_integral": 0.2785019912452458,
+              "tracking_squared_error_integral": 0.837913031794359,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 946.4489114410184,
+              "episode_return": 970.4489114410184,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.27196884701090207,
+              "tracking_squared_error_integral": 0.88034216620874,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 953.0812662426112,
+              "episode_return": 977.0812662426112,
+              "executed_action_rms": 0.024343320555474057,
+              "executed_plan_delta_squared_sum": 0.3562053356125778,
+              "proposed_action_rms": 0.024343320555474057,
+              "reference_target_squared_error_integral": 0.2784716696835625,
+              "tracking_squared_error_integral": 0.8380066594462201,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 956.6346446597263,
+              "episode_return": 980.6346446597263,
+              "executed_action_rms": 0.02462682743341573,
+              "executed_plan_delta_squared_sum": 0.36646614531156096,
+              "proposed_action_rms": 0.02462682743341573,
+              "reference_target_squared_error_integral": 0.2788028066575302,
+              "tracking_squared_error_integral": 0.8195830694312423,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 946.7945269706644,
+              "episode_return": 970.7945269706644,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.27196884701090207,
+              "tracking_squared_error_integral": 0.8767453143741917,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 946.4489114410184,
+              "episode_return": 970.4489114410184,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.27196884701090207,
+              "tracking_squared_error_integral": 0.88034216620874,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 946.4489114410184,
+              "episode_return": 970.4489114410184,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.27196884701090207,
+              "tracking_squared_error_integral": 0.88034216620874,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 950.0567002582488,
+              "episode_return": 974.0567002582488,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.27196884701090207,
+              "tracking_squared_error_integral": 0.869629244434942,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 845.819298330242,
+              "episode_return": 857.819298330242,
+              "executed_action_rms": 0.03415923915576617,
+              "executed_plan_delta_squared_sum": 0.36737344452412,
+              "proposed_action_rms": 0.03415923915576617,
+              "reference_target_squared_error_integral": 1.2763773186274254,
+              "tracking_squared_error_integral": 2.226451019808419,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 849.303853525596,
+              "episode_return": 861.303853525596,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2744447024908694,
+              "tracking_squared_error_integral": 2.1864790936304788,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 849.3404836074365,
+              "episode_return": 861.3404836074365,
+              "executed_action_rms": 0.034330826354929116,
+              "executed_plan_delta_squared_sum": 0.3685465098116477,
+              "proposed_action_rms": 0.034330826354929116,
+              "reference_target_squared_error_integral": 1.2764734522576395,
+              "tracking_squared_error_integral": 2.179125900902571,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 846.7952378855709,
+              "episode_return": 858.7952378855709,
+              "executed_action_rms": 0.033850532340031686,
+              "executed_plan_delta_squared_sum": 0.3639161789869653,
+              "proposed_action_rms": 0.033850532340031686,
+              "reference_target_squared_error_integral": 1.2765164311069714,
+              "tracking_squared_error_integral": 2.2045397027360485,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 844.5306797572703,
+              "episode_return": 856.5306797572703,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2744447024908694,
+              "tracking_squared_error_integral": 2.239897467800395,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 849.303853525596,
+              "episode_return": 861.303853525596,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2744447024908694,
+              "tracking_squared_error_integral": 2.1864790936304788,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 849.303853525596,
+              "episode_return": 861.303853525596,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2744447024908694,
+              "tracking_squared_error_integral": 2.1864790936304788,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 848.4848007793294,
+              "episode_return": 860.4848007793294,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2744447024908694,
+              "tracking_squared_error_integral": 2.2161950040291627,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310037
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": 4.620705973277495,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": 0.45024683671965704,
+        "period100:joint_ppo:backtracking_kl_minus_plain": -0.3126259493701582,
+        "period100:zero_train:backtracking_kl_minus_clone": 1.04533666787961,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": 1.04533666787961,
+        "period100:zero_train:backtracking_kl_minus_plain": -0.4662063157131797,
+        "period50:joint_ppo:backtracking_kl_minus_clone": -2.303245112608465,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": -1.1140808694598263,
+        "period50:joint_ppo:backtracking_kl_minus_plain": -3.154187854471502,
+        "period50:zero_train:backtracking_kl_minus_clone": 1.8226488022859257,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": 1.8226488022859257,
+        "period50:zero_train:backtracking_kl_minus_plain": 142.82965511440602
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 942.3839674607041,
+              "episode_return": 966.3839674607041,
+              "executed_action_rms": 0.024534373039223942,
+              "executed_plan_delta_squared_sum": 0.3814681551678103,
+              "proposed_action_rms": 0.024534373039223942,
+              "reference_target_squared_error_integral": 0.29432847645264315,
+              "tracking_squared_error_integral": 0.8492990438138724,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 944.6872125733125,
+              "episode_return": 968.6872125733125,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29106384194044815,
+              "tracking_squared_error_integral": 0.8518774871370499,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 943.4980483301639,
+              "episode_return": 967.4980483301639,
+              "executed_action_rms": 0.024663638263573942,
+              "executed_plan_delta_squared_sum": 0.3860746755116928,
+              "proposed_action_rms": 0.024663638263573942,
+              "reference_target_squared_error_integral": 0.2943835968459917,
+              "tracking_squared_error_integral": 0.8451924371789246,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 945.5381553151756,
+              "episode_return": 969.5381553151756,
+              "executed_action_rms": 0.024450693113893987,
+              "executed_plan_delta_squared_sum": 0.37630427839885855,
+              "proposed_action_rms": 0.024450693113893987,
+              "reference_target_squared_error_integral": 0.2943299020815822,
+              "tracking_squared_error_integral": 0.8383624514671841,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 946.5098613755985,
+              "episode_return": 970.5098613755985,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29106384194044815,
+              "tracking_squared_error_integral": 0.8452618976789914,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 944.6872125733125,
+              "episode_return": 968.6872125733125,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29106384194044815,
+              "tracking_squared_error_integral": 0.8518774871370499,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 944.6872125733125,
+              "episode_return": 968.6872125733125,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29106384194044815,
+              "tracking_squared_error_integral": 0.8518774871370499,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 803.6802062611924,
+              "episode_return": 827.6802062611924,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.29106384194044815,
+              "tracking_squared_error_integral": 2.383653517899382,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 866.5929890796125,
+              "episode_return": 878.5929890796125,
+              "executed_action_rms": 0.03306061756954273,
+              "executed_plan_delta_squared_sum": 0.477195573021576,
+              "proposed_action_rms": 0.03306061756954273,
+              "reference_target_squared_error_integral": 1.2482636832610368,
+              "tracking_squared_error_integral": 2.0192886125617897,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 861.972283106335,
+              "episode_return": 873.972283106335,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2289607550933752,
+              "tracking_squared_error_integral": 2.028074731854382,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 866.1427422428928,
+              "episode_return": 878.1427422428928,
+              "executed_action_rms": 0.033203946334607895,
+              "executed_plan_delta_squared_sum": 0.48496866490135954,
+              "proposed_action_rms": 0.033203946334607895,
+              "reference_target_squared_error_integral": 1.2481651103566125,
+              "tracking_squared_error_integral": 2.0164902358489267,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 866.9056150289827,
+              "episode_return": 878.9056150289827,
+              "executed_action_rms": 0.03302492803976272,
+              "executed_plan_delta_squared_sum": 0.4780119558465745,
+              "proposed_action_rms": 0.03302492803976272,
+              "reference_target_squared_error_integral": 1.2483793333122106,
+              "tracking_squared_error_integral": 2.010990993727199,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 863.0176197742146,
+              "episode_return": 875.0176197742146,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2289607550933752,
+              "tracking_squared_error_integral": 2.0170679479337954,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 861.972283106335,
+              "episode_return": 873.972283106335,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2289607550933752,
+              "tracking_squared_error_integral": 2.028074731854382,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 861.972283106335,
+              "episode_return": 873.972283106335,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2289607550933752,
+              "tracking_squared_error_integral": 2.028074731854382,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 863.4838260899278,
+              "episode_return": 875.4838260899278,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.2289607550933752,
+              "tracking_squared_error_integral": 2.0180669382243934,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310049
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": 1.622424823268375,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": 1.027989741670126,
+        "period100:joint_ppo:backtracking_kl_minus_plain": 2.7090152779277332,
+        "period100:zero_train:backtracking_kl_minus_clone": -0.013858134764745955,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -0.013858134764745955,
+        "period100:zero_train:backtracking_kl_minus_plain": -0.5628647812598047,
+        "period50:joint_ppo:backtracking_kl_minus_clone": 10.111982702454043,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": -0.24246941939134103,
+        "period50:joint_ppo:backtracking_kl_minus_plain": -1.3401095550324271,
+        "period50:zero_train:backtracking_kl_minus_clone": -0.9889053241111014,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -0.9889053241111014,
+        "period50:zero_train:backtracking_kl_minus_plain": 0.1389968845913927
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 951.0895550600034,
+              "episode_return": 975.0895550600034,
+              "executed_action_rms": 0.027468592641323807,
+              "executed_plan_delta_squared_sum": 0.4007549252709851,
+              "proposed_action_rms": 0.027468592641323807,
+              "reference_target_squared_error_integral": 0.309846839918175,
+              "tracking_squared_error_integral": 0.8774226400761581,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 940.9775723575493,
+              "episode_return": 964.9775723575493,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.30297514787029695,
+              "tracking_squared_error_integral": 0.9368127636233001,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 951.3320244793947,
+              "episode_return": 975.3320244793947,
+              "executed_action_rms": 0.027264328788480636,
+              "executed_plan_delta_squared_sum": 0.395040778852065,
+              "proposed_action_rms": 0.027264328788480636,
+              "reference_target_squared_error_integral": 0.309799109677137,
+              "tracking_squared_error_integral": 0.8795547274316087,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 952.4296646150358,
+              "episode_return": 976.4296646150358,
+              "executed_action_rms": 0.02694863547172994,
+              "executed_plan_delta_squared_sum": 0.3830557036862178,
+              "proposed_action_rms": 0.02694863547172994,
+              "reference_target_squared_error_integral": 0.3097958523017409,
+              "tracking_squared_error_integral": 0.8723906229415633,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 939.9886670334382,
+              "episode_return": 963.9886670334382,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.30297514787029695,
+              "tracking_squared_error_integral": 0.9445727487948418,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 940.9775723575493,
+              "episode_return": 964.9775723575493,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.30297514787029695,
+              "tracking_squared_error_integral": 0.9368127636233001,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 940.9775723575493,
+              "episode_return": 964.9775723575493,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.30297514787029695,
+              "tracking_squared_error_integral": 0.9368127636233001,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 939.8496701488468,
+              "episode_return": 963.8496701488468,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.30297514787029695,
+              "tracking_squared_error_integral": 0.9526637806151681,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 851.1328174178483,
+              "episode_return": 863.1328174178483,
+              "executed_action_rms": 0.03015596994106607,
+              "executed_plan_delta_squared_sum": 0.4411407650562083,
+              "proposed_action_rms": 0.03015596994106607,
+              "reference_target_squared_error_integral": 1.3924491589711836,
+              "tracking_squared_error_integral": 2.2486006531305764,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 849.5103925945799,
+              "episode_return": 861.5103925945799,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3781215675771255,
+              "tracking_squared_error_integral": 2.291055771929255,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 850.1048276761782,
+              "episode_return": 862.1048276761782,
+              "executed_action_rms": 0.030153055804173073,
+              "executed_plan_delta_squared_sum": 0.44071449002491636,
+              "proposed_action_rms": 0.030153055804173073,
+              "reference_target_squared_error_integral": 1.3926134644267616,
+              "tracking_squared_error_integral": 2.2620856337156585,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 848.4238021399206,
+              "episode_return": 860.4238021399206,
+              "executed_action_rms": 0.030014360389082506,
+              "executed_plan_delta_squared_sum": 0.43746582801781264,
+              "proposed_action_rms": 0.030014360389082506,
+              "reference_target_squared_error_integral": 1.392316789308239,
+              "tracking_squared_error_integral": 2.2684098380443753,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 849.4965344598152,
+              "episode_return": 861.4965344598152,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3781215675771255,
+              "tracking_squared_error_integral": 2.283625345163667,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 849.5103925945799,
+              "episode_return": 861.5103925945799,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3781215675771255,
+              "tracking_squared_error_integral": 2.291055771929255,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 849.5103925945799,
+              "episode_return": 861.5103925945799,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3781215675771255,
+              "tracking_squared_error_integral": 2.291055771929255,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 850.059399241075,
+              "episode_return": 862.059399241075,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3781215675771255,
+              "tracking_squared_error_integral": 2.2825487605399175,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310061
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": -5.537376169999675,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": -4.12960873085126,
+        "period100:joint_ppo:backtracking_kl_minus_plain": -2.3130750439775056,
+        "period100:zero_train:backtracking_kl_minus_clone": -1.9510189837867529,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -1.9510189837867529,
+        "period100:zero_train:backtracking_kl_minus_plain": 4.859969607648395,
+        "period50:joint_ppo:backtracking_kl_minus_clone": -3.327566432083472,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": 1.5628345985788883,
+        "period50:joint_ppo:backtracking_kl_minus_plain": 310.8547985528719,
+        "period50:zero_train:backtracking_kl_minus_clone": -1.4295192847196176,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -1.4295192847196176,
+        "period50:zero_train:backtracking_kl_minus_plain": 63.79589472396765
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 940.5989946575895,
+              "episode_return": 964.5989946575895,
+              "executed_action_rms": 0.03615093032811244,
+              "executed_plan_delta_squared_sum": 0.3943959746903767,
+              "proposed_action_rms": 0.03615093032811244,
+              "reference_target_squared_error_integral": 0.30146013061705657,
+              "tracking_squared_error_integral": 0.9780790001475086,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 943.926561089673,
+              "episode_return": 967.926561089673,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.2971495776150578,
+              "tracking_squared_error_integral": 0.9581921433667553,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 939.0361600590106,
+              "episode_return": 963.0361600590106,
+              "executed_action_rms": 0.036270689900815264,
+              "executed_plan_delta_squared_sum": 0.39621741618703105,
+              "proposed_action_rms": 0.036270689900815264,
+              "reference_target_squared_error_integral": 0.3014590629864563,
+              "tracking_squared_error_integral": 0.9896069014074431,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 629.7441961047176,
+              "episode_return": 653.7441961047176,
+              "executed_action_rms": 0.030296716282030657,
+              "executed_plan_delta_squared_sum": 0.3812729160138091,
+              "proposed_action_rms": 0.030296716282030657,
+              "reference_target_squared_error_integral": 0.30128759722343224,
+              "tracking_squared_error_integral": 5.916753441015119,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 942.4970418049534,
+              "episode_return": 966.4970418049534,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.2971495776150578,
+              "tracking_squared_error_integral": 0.9632080789742663,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 943.926561089673,
+              "episode_return": 967.926561089673,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.2971495776150578,
+              "tracking_squared_error_integral": 0.9581921433667553,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 943.926561089673,
+              "episode_return": 967.926561089673,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.2971495776150578,
+              "tracking_squared_error_integral": 0.9581921433667553,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 878.7011470809857,
+              "episode_return": 902.7011470809857,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.2971495776150578,
+              "tracking_squared_error_integral": 1.4460900151387484,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 841.4361365307818,
+              "episode_return": 853.4361365307818,
+              "executed_action_rms": 0.0326719378193397,
+              "executed_plan_delta_squared_sum": 0.6249503575312524,
+              "proposed_action_rms": 0.0326719378193397,
+              "reference_target_squared_error_integral": 1.3638314487798398,
+              "tracking_squared_error_integral": 2.4056830356272716,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 846.9735127007815,
+              "episode_return": 858.9735127007815,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3639044265776858,
+              "tracking_squared_error_integral": 2.377981184227015,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 845.5657452616331,
+              "episode_return": 857.5657452616331,
+              "executed_action_rms": 0.032648164597726,
+              "executed_plan_delta_squared_sum": 0.6250466535494199,
+              "proposed_action_rms": 0.032648164597726,
+              "reference_target_squared_error_integral": 1.3639000547551001,
+              "tracking_squared_error_integral": 2.3719805861966945,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 843.7492115747593,
+              "episode_return": 855.7492115747593,
+              "executed_action_rms": 0.03262059060741648,
+              "executed_plan_delta_squared_sum": 0.6292239671061772,
+              "proposed_action_rms": 0.03262059060741648,
+              "reference_target_squared_error_integral": 1.363977373259422,
+              "tracking_squared_error_integral": 2.3577004882084114,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 845.0224937169947,
+              "episode_return": 857.0224937169947,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3639044265776858,
+              "tracking_squared_error_integral": 2.379670660461802,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 846.9735127007815,
+              "episode_return": 858.9735127007815,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3639044265776858,
+              "tracking_squared_error_integral": 2.377981184227015,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 846.9735127007815,
+              "episode_return": 858.9735127007815,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3639044265776858,
+              "tracking_squared_error_integral": 2.377981184227015,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 840.1625241093464,
+              "episode_return": 852.1625241093464,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.3639044265776858,
+              "tracking_squared_error_integral": 2.394339709635242,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310073
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": 0.47824813936938426,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": 2.7143982312642265,
+        "period100:joint_ppo:backtracking_kl_minus_plain": 6.447553891243956,
+        "period100:zero_train:backtracking_kl_minus_clone": -2.4662415090176637,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -2.4662415090176637,
+        "period100:zero_train:backtracking_kl_minus_plain": -1.346529551960657,
+        "period50:joint_ppo:backtracking_kl_minus_clone": -6.541156608291885,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": -3.414199530233873,
+        "period50:joint_ppo:backtracking_kl_minus_plain": -6.923248312360329,
+        "period50:zero_train:backtracking_kl_minus_clone": -2.4313701752690804,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -2.4313701752690804,
+        "period50:zero_train:backtracking_kl_minus_plain": -1.920895784500317
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 939.9238046283353,
+              "episode_return": 963.9238046283353,
+              "executed_action_rms": 0.030265811459044313,
+              "executed_plan_delta_squared_sum": 0.445783233766796,
+              "proposed_action_rms": 0.030265811459044313,
+              "reference_target_squared_error_integral": 0.3174944387907275,
+              "tracking_squared_error_integral": 0.9073039784050003,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 946.4649612366272,
+              "episode_return": 970.4649612366272,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3062412711501211,
+              "tracking_squared_error_integral": 0.8879128090806876,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 943.3380041585692,
+              "episode_return": 967.3380041585692,
+              "executed_action_rms": 0.0302308890935037,
+              "executed_plan_delta_squared_sum": 0.4464250458844096,
+              "proposed_action_rms": 0.0302308890935037,
+              "reference_target_squared_error_integral": 0.3175843772470418,
+              "tracking_squared_error_integral": 0.8953632674574047,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 946.8470529406957,
+              "episode_return": 970.8470529406957,
+              "executed_action_rms": 0.030285479576993173,
+              "executed_plan_delta_squared_sum": 0.45416011770864173,
+              "proposed_action_rms": 0.030285479576993173,
+              "reference_target_squared_error_integral": 0.31772898265192395,
+              "tracking_squared_error_integral": 0.8782096149532759,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 944.0335910613582,
+              "episode_return": 968.0335910613582,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3062412711501211,
+              "tracking_squared_error_integral": 0.8970070080333563,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 946.4649612366272,
+              "episode_return": 970.4649612366272,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3062412711501211,
+              "tracking_squared_error_integral": 0.8879128090806876,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 946.4649612366272,
+              "episode_return": 970.4649612366272,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3062412711501211,
+              "tracking_squared_error_integral": 0.8879128090806876,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 945.9544868458585,
+              "episode_return": 969.9544868458585,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3062412711501211,
+              "tracking_squared_error_integral": 0.8916889185762644,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 879.2841445104096,
+              "episode_return": 891.2841445104096,
+              "executed_action_rms": 0.03403677093291501,
+              "executed_plan_delta_squared_sum": 0.36076799692194583,
+              "proposed_action_rms": 0.03403677093291501,
+              "reference_target_squared_error_integral": 1.1775346508781084,
+              "tracking_squared_error_integral": 1.8932487227092047,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 878.8058963710403,
+              "episode_return": 890.8058963710403,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.1650086967876967,
+              "tracking_squared_error_integral": 1.893581247582323,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 876.5697462791454,
+              "episode_return": 888.5697462791454,
+              "executed_action_rms": 0.03405744462009169,
+              "executed_plan_delta_squared_sum": 0.3598831253514453,
+              "proposed_action_rms": 0.03405744462009169,
+              "reference_target_squared_error_integral": 1.1774770357894306,
+              "tracking_squared_error_integral": 1.9069366392167941,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 872.8365906191657,
+              "episode_return": 884.8365906191657,
+              "executed_action_rms": 0.03428518237862969,
+              "executed_plan_delta_squared_sum": 0.3617569752020703,
+              "proposed_action_rms": 0.03428518237862969,
+              "reference_target_squared_error_integral": 1.17740168512175,
+              "tracking_squared_error_integral": 1.9457595030289845,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 876.3396548620226,
+              "episode_return": 888.3396548620226,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.1650086967876967,
+              "tracking_squared_error_integral": 1.9043037751789236,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 878.8058963710403,
+              "episode_return": 890.8058963710403,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.1650086967876967,
+              "tracking_squared_error_integral": 1.893581247582323,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 878.8058963710403,
+              "episode_return": 890.8058963710403,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.1650086967876967,
+              "tracking_squared_error_integral": 1.893581247582323,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 877.6861844139833,
+              "episode_return": 889.6861844139833,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.1650086967876967,
+              "tracking_squared_error_integral": 1.8924616604193256,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310089
+    },
+    {
+      "endpoints": {
+        "period100:joint_ppo:backtracking_kl_minus_clone": 4.631691511724057,
+        "period100:joint_ppo:backtracking_kl_minus_conditional_kl": -0.29732796559153485,
+        "period100:joint_ppo:backtracking_kl_minus_plain": 0.5112716726890767,
+        "period100:zero_train:backtracking_kl_minus_clone": -2.601332526353758,
+        "period100:zero_train:backtracking_kl_minus_conditional_kl": -2.601332526353758,
+        "period100:zero_train:backtracking_kl_minus_plain": 0.610030500292055,
+        "period50:joint_ppo:backtracking_kl_minus_clone": 5.278053952300752,
+        "period50:joint_ppo:backtracking_kl_minus_conditional_kl": -1.9671596692310231,
+        "period50:joint_ppo:backtracking_kl_minus_plain": 1.6693488920706159,
+        "period50:zero_train:backtracking_kl_minus_clone": -2.279994745187423,
+        "period50:zero_train:backtracking_kl_minus_conditional_kl": -2.279994745187423,
+        "period50:zero_train:backtracking_kl_minus_plain": -3.2957860102495715
+      },
+      "means": {
+        "50": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 932.3330020023536,
+              "episode_return": 956.3330020023536,
+              "executed_action_rms": 0.027446391402480404,
+              "executed_plan_delta_squared_sum": 0.3525829173764018,
+              "proposed_action_rms": 0.027446391402480404,
+              "reference_target_squared_error_integral": 0.31986718658863944,
+              "tracking_squared_error_integral": 1.0271940578092034,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 927.0549480500529,
+              "episode_return": 951.0549480500529,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3162337950263252,
+              "tracking_squared_error_integral": 1.0760940514915762,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 934.3001616715846,
+              "episode_return": 958.3001616715846,
+              "executed_action_rms": 0.027433824052963122,
+              "executed_plan_delta_squared_sum": 0.35257323737946694,
+              "proposed_action_rms": 0.027433824052963122,
+              "reference_target_squared_error_integral": 0.31986376167026054,
+              "tracking_squared_error_integral": 1.0232688702872772,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 930.663653110283,
+              "episode_return": 954.663653110283,
+              "executed_action_rms": 0.027492321537351185,
+              "executed_plan_delta_squared_sum": 0.3544581296010958,
+              "proposed_action_rms": 0.027492321537351185,
+              "reference_target_squared_error_integral": 0.3198658899865062,
+              "tracking_squared_error_integral": 1.0369056558666019,
+              "upper_inference_calls": 24
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 924.7749533048654,
+              "episode_return": 948.7749533048654,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3162337950263252,
+              "tracking_squared_error_integral": 1.079015859371037,
+              "upper_inference_calls": 24
+            },
+            "clone": {
+              "charged_utility": 927.0549480500529,
+              "episode_return": 951.0549480500529,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3162337950263252,
+              "tracking_squared_error_integral": 1.0760940514915762,
+              "upper_inference_calls": 24
+            },
+            "conditional_kl": {
+              "charged_utility": 927.0549480500529,
+              "episode_return": 951.0549480500529,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3162337950263252,
+              "tracking_squared_error_integral": 1.0760940514915762,
+              "upper_inference_calls": 24
+            },
+            "plain": {
+              "charged_utility": 928.070739315115,
+              "episode_return": 952.070739315115,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 0.3162337950263252,
+              "tracking_squared_error_integral": 1.0776836529162543,
+              "upper_inference_calls": 24
+            }
+          }
+        },
+        "100": {
+          "joint_ppo": {
+            "backtracking_kl": {
+              "charged_utility": 839.3300066997938,
+              "episode_return": 851.3300066997938,
+              "executed_action_rms": 0.03256130675893222,
+              "executed_plan_delta_squared_sum": 0.5832085586923959,
+              "proposed_action_rms": 0.03256130675893222,
+              "reference_target_squared_error_integral": 1.4053543097466563,
+              "tracking_squared_error_integral": 2.4308232488854298,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 834.6983151880697,
+              "episode_return": 846.6983151880697,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.391615768377302,
+              "tracking_squared_error_integral": 2.4813378260528838,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 839.6273346653853,
+              "episode_return": 851.6273346653853,
+              "executed_action_rms": 0.032673904226476855,
+              "executed_plan_delta_squared_sum": 0.5855253178603339,
+              "proposed_action_rms": 0.032673904226476855,
+              "reference_target_squared_error_integral": 1.4059724204382833,
+              "tracking_squared_error_integral": 2.411389502815468,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 838.8187350271047,
+              "episode_return": 850.8187350271047,
+              "executed_action_rms": 0.0323514882762305,
+              "executed_plan_delta_squared_sum": 0.5773826046235269,
+              "proposed_action_rms": 0.0323514882762305,
+              "reference_target_squared_error_integral": 1.404846000328369,
+              "tracking_squared_error_integral": 2.428710288220609,
+              "upper_inference_calls": 12
+            }
+          },
+          "zero_train": {
+            "backtracking_kl": {
+              "charged_utility": 832.096982661716,
+              "episode_return": 844.096982661716,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.391615768377302,
+              "tracking_squared_error_integral": 2.5017388998703582,
+              "upper_inference_calls": 12
+            },
+            "clone": {
+              "charged_utility": 834.6983151880697,
+              "episode_return": 846.6983151880697,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.391615768377302,
+              "tracking_squared_error_integral": 2.4813378260528838,
+              "upper_inference_calls": 12
+            },
+            "conditional_kl": {
+              "charged_utility": 834.6983151880697,
+              "episode_return": 846.6983151880697,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.391615768377302,
+              "tracking_squared_error_integral": 2.4813378260528838,
+              "upper_inference_calls": 12
+            },
+            "plain": {
+              "charged_utility": 831.4869521614239,
+              "episode_return": 843.4869521614239,
+              "executed_action_rms": 0,
+              "executed_plan_delta_squared_sum": 0,
+              "proposed_action_rms": 0,
+              "reference_target_squared_error_integral": 1.391615768377302,
+              "tracking_squared_error_integral": 2.505011300496677,
+              "upper_inference_calls": 12
+            }
+          }
+        }
+      },
+      "root": 310101
+    }
+  ],
+  "run_name": "pointmaze_native_update_stage61_full_20261001_r1",
+  "status": "complete",
+  "supervised_steps": 0,
+  "training_gain_gate": "failed"
+}
