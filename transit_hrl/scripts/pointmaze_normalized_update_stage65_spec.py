@@ -63,6 +63,7 @@ def budget(*, preflight):
         "source_clone_loads": len(PERIODS), "forecaster_loads": 1, "critic_checkpoint_loads": 2 * cases,
         "upper_checkpoint_loads": cases, "critic_resume_checks": 2 * cases, "probe_mc_calls": cases,
         "source_probe_checks": 2 * cases, "actor_updates": 2 * cases, "actor_gae_calls": 2 * cases,
+        "actor_diagnostic_distribution_passes": 4 * cases,
         "critic_continuation_updates": 2 * cases, "MC_continuation_updates": cases,
         "post_update_public_value_passes": 2 * cases, "upper_frozen_state_checks": 8 * cases,
         "candidate_checkpoint_writes": 2 * cases},

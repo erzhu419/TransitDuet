@@ -179,6 +179,7 @@ def train(root, *, preflight, output):
                     update, gae_target = actor_update(fit, lower[t], root=root, period=period)
                     cost["actor_updates"] += 1
                     cost["actor_gae_calls"] += 1
+                    cost["actor_diagnostic_distribution_passes"] += 2
                     value = fit.update(lower[t], mc if t == spec.CANDIDATE else gae_target, root=root, period=period, iteration=1, phase="train")
                     cost["critic_continuation_updates"] += 1
                     cost["MC_continuation_updates"] += int(t == spec.CANDIDATE)
@@ -323,6 +324,7 @@ def aggregate(cells, *, preflight):
         "native_trace_audits": sum(c["native_trace_audits"] for c in cells), "frozen_actors": frozen,
         "upstream_Stage64_cost": {k: sum(c["source_critic_cost"][k] for c in cells) for k in spec.source.budget(preflight=preflight)},
         "upstream_Stage64_value_optimizer_steps": {k: sum(c["source_critic_value_optimizer_steps"][k] for c in cells) for k in spec.source.TREATMENTS},
+        "upstream_Stage63_reuse_budget_per_root": spec.source.source.budget(preflight=preflight),
         "mechanical_gate": "failed" if frozen else "passed", "new_forecaster_fits": 0, "new_training_native_steps": 0}
     if not preflight:
         x = np.asarray([[r["endpoints"][key] for key in spec.ENDPOINTS] for r in rows])
