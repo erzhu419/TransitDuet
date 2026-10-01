@@ -14,4 +14,4 @@ Advantages use saved post-update values, not the original first-update sampling 
 
 ## Execution
 
-Implementation/tests pending; no diagnostic task registered yet.
+Implementation/protocol committed atcc150f5594. Task`t116561` passed all4 focused tests on node006 in7.642s, exit0: exact native feature/macro-return reconstruction, three boundary semantics, frozen state/no actor/environment/update calls, seed roster and cost accounting. No existing algorithm modules changed. Real archive preflight is next; no diagnostic conclusion yet.
