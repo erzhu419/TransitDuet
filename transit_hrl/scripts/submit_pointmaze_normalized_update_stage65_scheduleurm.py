@@ -25,7 +25,7 @@ def task_specification(run_name, root, *, preflight):
     task.update(project=spec.EXPERIMENT_PROTOCOL, ram_mb=2048 if preflight else 6144,
         description=f"Freq-HRL Stage65 normalized actor/native root{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}",
-        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/native_evaluation",
+        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/native_{'preflight' if preflight else 'full'}",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "
             + shlex.join(command) + " && printf '%s\\n' 'Training complete: result.json written'",
         cpu_training_justification="Reused critic checkpoints, one paired guarded actor/value update and fresh native paths; persistent workers plus learner.")

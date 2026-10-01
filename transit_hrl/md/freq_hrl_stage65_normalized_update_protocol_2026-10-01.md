@@ -10,7 +10,7 @@ Evaluate16 fresh shared deterministic native paths per full root; root310001 pre
 
 Full cost:256 first-batch archive episodes,307200 lower/4608 upper reconstructions plus307200 extra critic scalar calls;64 critic checkpoint loads,32 common upper loads,64 paired actor/value updates,32 MC continuations and64 candidate checkpoints. Native evaluation1536 episodes/1843200 primitive steps,27648 upper calls,26112 plan OLS/ridge plus matching audits. Reuse zero_train clone rather than charging duplicate execution. Optimizer/forward/guard retries are counted from the frozen source config and actual guard records. Upstream Stage64 MC calibration remains separately recorded in the source cell.
 
-Dynamic scheduler node001-node006;9CPU/6GB full,2CPU/2GB tests/preflight/qualification. Resource-only amendment before native outcomes: preceding full Stage64 tasks used approximately3.9GB; Stage65 uses fewer worker networks, and the single-process DenseTask tests measured423MB. Scientific roster, budgets and endpoints remain unchanged. Only logs and compact JSON pulled. Full launch follows unit/integration tests and mechanical preflight.
+Dynamic scheduler node001-node006;9CPU/6GB full,2CPU/2GB tests/preflight/qualification. Resource-only amendment before native outcomes: preceding full Stage64 tasks used approximately3.9GB; Stage65 uses fewer worker networks, and the single-process DenseTask tests measured423MB. Separate test/qualification/preflight/full resource histories prevent small fixtures from reducing eight-worker RAM estimates. Scientific roster, budgets and endpoints remain unchanged. Only logs and compact JSON pulled. Full launch follows unit/integration tests and mechanical preflight.
 
 ## Limitations
 
