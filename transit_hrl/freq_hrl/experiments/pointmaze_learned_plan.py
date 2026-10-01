@@ -57,6 +57,7 @@ class ResidualPlan(forecast.PlanReference):
         self.bounds = np.asarray(world_low), np.asarray(world_high)
         targets = history.history.reshape(-1, 6)[-min(64, step + 1):, :2]
         base = forecast.plan_points(targets, "ridge_velocity", self.predictor, self.period, self.bounds)
+        self.base_points = base
         coefficients = self.mapper.residual_coefficients(action)
         self.points = np.clip(base.astype(np.float64) + self.basis @ coefficients.reshape(2, spec.PLAN_BASIS).T,
                               *self.bounds).astype(np.float32)
