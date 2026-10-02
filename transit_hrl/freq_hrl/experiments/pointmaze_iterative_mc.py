@@ -25,8 +25,8 @@ def check_training_freeze(model, before, active):
     native.curves.support.assert_frozen(model, expected)
 
 
-def update_mean(model, batches, *, method, period, horizon, cost):
-    allocation = spec.METHODS[method]
+def update_mean(model, batches, *, method, period, horizon, cost, allocation=None):
+    allocation = spec.METHODS[method] if allocation is None else allocation
     before = copy.deepcopy(model.state_dict())
     scored = parts.scenario_actor_scores(model, batches, period=period, horizon=horizon, cost=cost, actor_names=tuple(allocation))
     changed, actors = {}, {}
@@ -47,8 +47,9 @@ def update_mean(model, batches, *, method, period, horizon, cost):
             "scenario_covariance_trace": {b: parts.scenario.group_noise(g[:,mask],len(batches[b]),len(batches[b][0]))["covariance_trace"]
                 for b,g in gradients.items()}}
     exact = sum(r["geometry"]["exact_kl"]["plus"] for r in actors.values())
-    if not .5*spec.FISHER_RADIUS <= exact <= 2*spec.FISHER_RADIUS:
-        raise ValueError("Stage83 fixed per-round sum-of-level KL failed")
+    nominal = spec.FISHER_RADIUS*sum(allocation.values())
+    if not .5*nominal <= exact <= 2*nominal:
+        raise ValueError("Registered update sum-of-level KL failed")
     for name, weights in changed.items():
         getattr(model,name+"_actor").load_state_dict(weights)
         cost["actor_mean_parameter_updates"] += 1
