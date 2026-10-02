@@ -8,6 +8,7 @@ FISHER_RADIUS = source.FISHER_RADIUS
 EXPERIMENT_PROTOCOL = "pointmaze_call_weighted_stage87_v1"
 POLICY = "call_weighted_mc"
 RUNNER_SCRIPT = "scripts/run_pointmaze_call_weighted_stage87.py"
+ANALYZER_SCRIPT = "scripts/analyze_pointmaze_call_weighted_stage87.py"
 METHODS = {"joint_call": ("upper", "lower"), "joint_level": ("upper", "lower"), "lower_trained": ("lower",)}
 VARIANTS = ("base", "zero", *METHODS)
 CONTRAST_PAIRS = (("joint_call", "lower_trained"), ("joint_call", "joint_level"), ("joint_level", "lower_trained"),

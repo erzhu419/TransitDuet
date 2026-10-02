@@ -11,14 +11,15 @@ from freq_hrl.experiments import pointmaze_call_weighted as experiment
 from scripts import pointmaze_call_weighted_stage87_spec as spec
 
 
-def main():
+def main(*, protocol_spec=spec):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--optimizer-seed",type=int,required=True)
     p.add_argument("--output",type=Path,required=True)
     p.add_argument("--preflight",action="store_true")
     a = p.parse_args()
     torch.set_num_threads(1)
-    experiment.learning.run(a.optimizer_seed,preflight=a.preflight,output=a.output,protocol=spec,qualifier=experiment.qualify)
+    experiment.learning.run(a.optimizer_seed,preflight=a.preflight,output=a.output,protocol=protocol_spec,
+        qualifier=lambda c,**kw:experiment.qualify(c,protocol=protocol_spec,**kw))
     print("Training complete: result.json written",flush=True)
     return 0
 
