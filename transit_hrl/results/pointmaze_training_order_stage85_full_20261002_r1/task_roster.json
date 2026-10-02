@@ -1,0 +1,118 @@
+{
+  "protocol": "pointmaze_training_order_stage85_v1",
+  "preflight": false,
+  "run_name": "pointmaze_training_order_stage85_full_20261002_r1",
+  "source_revision": "5de47c869847528d618094dffc35a746d8ea6b80",
+  "status_snapshot_at": "2026-10-02T01:00:47.741176+00:00",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120865",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902755.1513257,
+      "role": "matched_MC_training_order",
+      "root": 310011
+    },
+    {
+      "id": "t120866",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902754.3587036,
+      "role": "matched_MC_training_order",
+      "root": 310023
+    },
+    {
+      "id": "t120867",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902755.151139,
+      "role": "matched_MC_training_order",
+      "root": 310037
+    },
+    {
+      "id": "t120868",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902754.3170872,
+      "role": "matched_MC_training_order",
+      "root": 310049
+    },
+    {
+      "id": "t120869",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902754.3334231,
+      "role": "matched_MC_training_order",
+      "root": 310061
+    },
+    {
+      "id": "t120870",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902754.3217854,
+      "role": "matched_MC_training_order",
+      "root": 310073
+    },
+    {
+      "id": "t120871",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902755.193467,
+      "role": "matched_MC_training_order",
+      "root": 310089
+    },
+    {
+      "id": "t120872",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/training_order/full",
+      "started_at": 1790902754.3493836,
+      "role": "matched_MC_training_order",
+      "root": 310101
+    },
+    {
+      "id": "t120873",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_training_order_stage85_v1/qualification",
+      "started_at": null,
+      "role": "all_root_training_order_qualification",
+      "root": null
+    }
+  ]
+}
