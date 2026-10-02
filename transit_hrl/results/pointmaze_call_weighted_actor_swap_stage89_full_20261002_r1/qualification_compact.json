@@ -1,0 +1,1462 @@
+{
+  "contract": {
+    "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+    "checkpoint_methods": [
+      "joint_call",
+      "lower_trained"
+    ],
+    "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+    "checkpoint_update": 8,
+    "compositions_upper_lower": {
+      "base": [
+        "source",
+        "source"
+      ],
+      "joint_call": [
+        "joint_call",
+        "joint_call"
+      ],
+      "joint_upper_lower_only_lower": [
+        "joint_call",
+        "lower_trained"
+      ],
+      "joint_upper_source_lower": [
+        "joint_call",
+        "source"
+      ],
+      "lower_trained": [
+        "source",
+        "lower_trained"
+      ],
+      "source_upper_joint_lower": [
+        "source",
+        "joint_call"
+      ],
+      "zero": [
+        "source",
+        "source"
+      ]
+    },
+    "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+    "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+    "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+    "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+    "periods": [
+      50,
+      100
+    ],
+    "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+    "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+    "variants": [
+      "base",
+      "zero",
+      "joint_call",
+      "source_upper_joint_lower",
+      "lower_trained",
+      "joint_upper_lower_only_lower",
+      "joint_upper_source_lower"
+    ]
+  },
+  "cost": {
+    "actor_composition_checks": 112,
+    "checkpoint_freeze_checks": 32,
+    "checkpoint_loads": 32,
+    "checkpoint_writes": 0,
+    "credit_episodes": 0,
+    "decoder_loads": 16,
+    "evaluation_episodes": 3584,
+    "forecaster_loads": 8,
+    "frozen_model_checks": 16,
+    "native_episodes": 3584,
+    "native_lower_calls": 4300800,
+    "native_network_checks": 3584,
+    "native_pair_checks": 512,
+    "native_steps": 4300800,
+    "native_upper_calls": 64512,
+    "pairing_upper_forward_calls": 64512,
+    "policy_updates": 0,
+    "source_clone_loads": 16
+  },
+  "endpoints": {
+    "100/base_minus_zero": {
+      "ci": [
+        -1.123610961349156,
+        0.5351581203932042
+      ],
+      "effect": "inconclusive",
+      "mean": -0.393306156142494
+    },
+    "100/joint_call_minus_joint_upper_lower_only_lower": {
+      "ci": [
+        -0.04236065082341049,
+        -0.01194431253874706
+      ],
+      "effect": "negative",
+      "mean": -0.025780256651998457
+    },
+    "100/joint_call_minus_lower_trained": {
+      "ci": [
+        0.32241493423148215,
+        0.5849045283576642
+      ],
+      "effect": "positive",
+      "mean": 0.4398826765975272
+    },
+    "100/joint_call_minus_source_upper_joint_lower": {
+      "ci": [
+        0.3471585743331578,
+        0.6215439822295709
+      ],
+      "effect": "positive",
+      "mean": 0.4682932113412428
+    },
+    "100/joint_call_minus_zero": {
+      "ci": [
+        4.0907419204326265,
+        9.414679814776484
+      ],
+      "effect": "positive",
+      "mean": 6.397125643681045
+    },
+    "100/joint_upper_lower_only_lower_minus_lower_trained": {
+      "ci": [
+        0.3454976213546441,
+        0.6191967658237338
+      ],
+      "effect": "positive",
+      "mean": 0.4656629332495257
+    },
+    "100/joint_upper_lower_only_lower_minus_zero": {
+      "ci": [
+        4.118447071970657,
+        9.44696412681619
+      ],
+      "effect": "positive",
+      "mean": 6.422905900333044
+    },
+    "100/joint_upper_source_lower_minus_base": {
+      "ci": [
+        0.46480132875863406,
+        0.7515982920275733
+      ],
+      "effect": "positive",
+      "mean": 0.6084794632263941
+    },
+    "100/lower_trained_minus_zero": {
+      "ci": [
+        3.5641143011886425,
+        9.04724025184449
+      ],
+      "effect": "positive",
+      "mean": 5.957242967083518
+    },
+    "100/source_upper_joint_lower_minus_lower_trained": {
+      "ci": [
+        -0.04374120241275703,
+        -0.014402030678668964
+      ],
+      "effect": "negative",
+      "mean": -0.028410534743715576
+    },
+    "100/upper_by_lower_interaction": {
+      "ci": [
+        0.0008054506477708223,
+        0.004840042464022067
+      ],
+      "effect": "positive",
+      "mean": 0.00263027809171712
+    },
+    "50/base_minus_zero": {
+      "ci": [
+        -0.1530477716430565,
+        0.1520271743898669
+      ],
+      "effect": "inconclusive",
+      "mean": -0.03238988841183543
+    },
+    "50/joint_call_minus_joint_upper_lower_only_lower": {
+      "ci": [
+        -0.03430584278910051,
+        -0.01803207537332696
+      ],
+      "effect": "negative",
+      "mean": -0.026728359176952043
+    },
+    "50/joint_call_minus_lower_trained": {
+      "ci": [
+        0.1463917750083033,
+        0.27033487525855504
+      ],
+      "effect": "positive",
+      "mean": 0.21549588375057294
+    },
+    "50/joint_call_minus_source_upper_joint_lower": {
+      "ci": [
+        0.1663462890746672,
+        0.29965955847578457
+      ],
+      "effect": "positive",
+      "mean": 0.24284484369279102
+    },
+    "50/joint_call_minus_zero": {
+      "ci": [
+        3.4689291114994116,
+        6.824622938619988
+      ],
+      "effect": "positive",
+      "mean": 4.857186517259057
+    },
+    "50/joint_upper_lower_only_lower_minus_lower_trained": {
+      "ci": [
+        0.16602960669421218,
+        0.2989787498967206
+      ],
+      "effect": "positive",
+      "mean": 0.24222424292752498
+    },
+    "50/joint_upper_lower_only_lower_minus_zero": {
+      "ci": [
+        3.4979903098397713,
+        6.855579359466484
+      ],
+      "effect": "positive",
+      "mean": 4.883914876436009
+    },
+    "50/joint_upper_source_lower_minus_base": {
+      "ci": [
+        0.19815664385300646,
+        0.36593361689643167
+      ],
+      "effect": "positive",
+      "mean": 0.29431817688689943
+    },
+    "50/lower_trained_minus_zero": {
+      "ci": [
+        3.232319149707112,
+        6.616924257963807
+      ],
+      "effect": "positive",
+      "mean": 4.6416906335084835
+    },
+    "50/source_upper_joint_lower_minus_lower_trained": {
+      "ci": [
+        -0.03525027021918165,
+        -0.018389364648152107
+      ],
+      "effect": "negative",
+      "mean": -0.027348959942218087
+    },
+    "50/upper_by_lower_interaction": {
+      "ci": [
+        0.00024644068575208067,
+        0.001064546095064678
+      ],
+      "effect": "positive",
+      "mean": 0.0006206007652660439
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_checkpoint_interventions",
+  "performance_claim": "fixed_final_checkpoint_causal_upper_lower_swap_not_retraining_or_frequency_superiority",
+  "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+  "root_rows": [
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.125536896062318,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.012445061719905226,
+            "50/joint_call_minus_lower_trained": 0.09585059327921996,
+            "50/joint_call_minus_source_upper_joint_lower": 0.10843209539680032,
+            "50/joint_call_minus_zero": 4.44848820195995,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.10829565499912519,
+            "50/joint_upper_lower_only_lower_minus_zero": 4.4609332636798555,
+            "50/joint_upper_source_lower_minus_base": 0.12710167562113028,
+            "50/lower_trained_minus_zero": 4.35263760868073,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.012581502117580357,
+            "50/upper_by_lower_interaction": 0.0001364403976751305
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.42587996104549575,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.013524524457690035,
+            "100/joint_call_minus_lower_trained": 0.3755207114746,
+            "100/joint_call_minus_source_upper_joint_lower": 0.3900110023950383,
+            "100/joint_call_minus_zero": 5.3587872503937035,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.38904523593229,
+            "100/joint_upper_lower_only_lower_minus_zero": 5.3723117748513936,
+            "100/joint_upper_source_lower_minus_base": 0.44315543464950125,
+            "100/lower_trained_minus_zero": 4.9832665389191035,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.014490290920438298,
+            "100/upper_by_lower_interaction": 0.0009657664627482632
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 102.4410300781019
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019697945784676246,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.01972783616237095,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.018671309770347477,
+            "50/joint_call_minus_lower_trained": 0.19655870716196944,
+            "50/joint_call_minus_source_upper_joint_lower": 0.2155625172232476,
+            "50/joint_call_minus_zero": 4.64981925703017,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.21523001693231691,
+            "50/joint_upper_lower_only_lower_minus_zero": 4.668490566800518,
+            "50/joint_upper_source_lower_minus_base": 0.2566626361862845,
+            "50/lower_trained_minus_zero": 4.453260549868201,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.01900381006127816,
+            "50/upper_by_lower_interaction": 0.0003325002909306818
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.0782795618110407,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -1.1951932533918423,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.008085359783461143,
+            "100/joint_call_minus_lower_trained": 0.3229822214297009,
+            "100/joint_call_minus_source_upper_joint_lower": 0.33260265238064335,
+            "100/joint_call_minus_zero": 4.42625690547408,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.33106758121316204,
+            "100/joint_upper_lower_only_lower_minus_zero": 4.434342265257541,
+            "100/joint_upper_source_lower_minus_base": 0.48639994204829406,
+            "100/lower_trained_minus_zero": 4.103274684044379,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.009620430950942449,
+            "100/upper_by_lower_interaction": 0.0015350711674813056
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310023,
+      "status": "complete",
+      "wall_seconds": 102.1282417406328
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019892258119766967,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.16420490561525725,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.03210823772169391,
+            "50/joint_call_minus_lower_trained": 0.266171812475811,
+            "50/joint_call_minus_source_upper_joint_lower": 0.29873843776537967,
+            "50/joint_call_minus_zero": 2.8614502125633408,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.2982800501975049,
+            "50/joint_upper_lower_only_lower_minus_zero": 2.8935584502850347,
+            "50/joint_upper_source_lower_minus_base": 0.3166890966371412,
+            "50/lower_trained_minus_zero": 2.5952784000875297,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.03256662528956866,
+            "50/upper_by_lower_interaction": 0.00045838756787475177
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.09857353856972718,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -1.3144610949124065,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.03769499422470801,
+            "100/joint_call_minus_lower_trained": 0.6481567111745292,
+            "100/joint_call_minus_source_upper_joint_lower": 0.6878482156856265,
+            "100/joint_call_minus_zero": 5.113897593279063,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.6858517053992372,
+            "100/joint_upper_lower_only_lower_minus_zero": 5.151592587503771,
+            "100/joint_upper_source_lower_minus_base": 0.7732533263961265,
+            "100/lower_trained_minus_zero": 4.465740882104534,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.039691504511097264,
+            "100/upper_by_lower_interaction": 0.0019965102863892525
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310037,
+      "status": "complete",
+      "wall_seconds": 98.47343987971544
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021338943540272614,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": 0.1317861121269317,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.023984706708322534,
+            "50/joint_call_minus_lower_trained": 0.2450471268372958,
+            "50/joint_call_minus_source_upper_joint_lower": 0.27014084119507586,
+            "50/joint_call_minus_zero": 5.767760640409179,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.2690318335456183,
+            "50/joint_upper_lower_only_lower_minus_zero": 5.7917453471175016,
+            "50/joint_upper_source_lower_minus_base": 0.3859536046505667,
+            "50/lower_trained_minus_zero": 5.522713513571883,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.025093714357780073,
+            "50/upper_by_lower_interaction": 0.0011090076494575385
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.07375870162021787,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": 0.008190994219628323,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.017200323128832906,
+            "100/joint_call_minus_lower_trained": 0.5019615140087836,
+            "100/joint_call_minus_source_upper_joint_lower": 0.5229469012758194,
+            "100/joint_call_minus_zero": 7.275110743266001,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.5191618371376165,
+            "100/joint_upper_lower_only_lower_minus_zero": 7.292311066394834,
+            "100/joint_upper_source_lower_minus_base": 0.7706994797111015,
+            "100/lower_trained_minus_zero": 6.773149229257218,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.020985387267035804,
+            "100/upper_by_lower_interaction": 0.0037850641382028982
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310049,
+      "status": "complete",
+      "wall_seconds": 103.9232580177486
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.018931567661582147,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.17757838405586313,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.032583904247154294,
+            "50/joint_call_minus_lower_trained": 0.1916188951057478,
+            "50/joint_call_minus_source_upper_joint_lower": 0.22440776182244093,
+            "50/joint_call_minus_zero": 8.453435722020778,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.2242027993529021,
+            "50/joint_upper_lower_only_lower_minus_zero": 8.486019626267932,
+            "50/joint_upper_source_lower_minus_base": 0.2529135582652309,
+            "50/lower_trained_minus_zero": 8.26181682691503,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.03278886671669312,
+            "50/upper_by_lower_interaction": 0.00020496246953882746
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.056687008052382776,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.22635249733854224,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.05070769289971366,
+            "100/joint_call_minus_lower_trained": 0.29789024541743103,
+            "100/joint_call_minus_source_upper_joint_lower": 0.3485382487310744,
+            "100/joint_call_minus_zero": 10.414588304668758,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.3485979383171447,
+            "100/joint_upper_lower_only_lower_minus_zero": 10.465295997568472,
+            "100/joint_upper_source_lower_minus_base": 0.43125170666239754,
+            "100/lower_trained_minus_zero": 10.116698059251327,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.050648003313643386,
+            "100/upper_by_lower_interaction": -0.0000596895860702773
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310061,
+      "status": "complete",
+      "wall_seconds": 103.63228650111705
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02252462422146412,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": 0.2855007894636259,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.027006489745218687,
+            "50/joint_call_minus_lower_trained": 0.29809956162575446,
+            "50/joint_call_minus_source_upper_joint_lower": 0.32578939003628093,
+            "50/joint_call_minus_zero": 3.827720989988034,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.32510605137097315,
+            "50/joint_upper_lower_only_lower_minus_zero": 3.8547274797332527,
+            "50/joint_upper_source_lower_minus_base": 0.3739086060013541,
+            "50/lower_trained_minus_zero": 3.5296214283622795,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.027689828410526474,
+            "50/upper_by_lower_interaction": 0.0006833386653077866
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.08440512728986628,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.013854045954346361,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.024966617209848607,
+            "100/joint_call_minus_lower_trained": 0.41378377748690554,
+            "100/joint_call_minus_source_upper_joint_lower": 0.44495898286174196,
+            "100/joint_call_minus_zero": 4.738711944862807,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.43875039469675414,
+            "100/joint_upper_lower_only_lower_minus_zero": 4.763678562072656,
+            "100/joint_upper_source_lower_minus_base": 0.5645607799266976,
+            "100/lower_trained_minus_zero": 4.3249281673759015,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.031175205374836423,
+            "100/upper_by_lower_interaction": 0.006208588164987816
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310073,
+      "status": "complete",
+      "wall_seconds": 98.40655892295763
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021416177466422083,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.06466566738886925,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.028564736707021865,
+            "50/joint_call_minus_lower_trained": 0.19924597192896698,
+            "50/joint_call_minus_source_upper_joint_lower": 0.22853582598222388,
+            "50/joint_call_minus_zero": 3.48044400682981,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.22781070863598885,
+            "50/joint_upper_lower_only_lower_minus_zero": 3.509008743536832,
+            "50/joint_upper_source_lower_minus_base": 0.2855096659045344,
+            "50/lower_trained_minus_zero": 3.281198034900843,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.029289854053256903,
+            "50/upper_by_lower_interaction": 0.000725117346235038
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.06630452565293349,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -1.1742528898737064,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.04181817527635445,
+            "100/joint_call_minus_lower_trained": 0.6375072192600939,
+            "100/joint_call_minus_source_upper_joint_lower": 0.6812209167421415,
+            "100/joint_call_minus_zero": 3.2146139260080524,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.6793253945364484,
+            "100/joint_upper_lower_only_lower_minus_zero": 3.256432101284407,
+            "100/joint_upper_source_lower_minus_base": 0.7657064071427584,
+            "100/lower_trained_minus_zero": 2.5771067067479585,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.043713697482047564,
+            "100/upper_by_lower_interaction": 0.001895522205693112
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310089,
+      "status": "complete",
+      "wall_seconds": 102.09953321423382
+    },
+    {
+      "contract": {
+        "artifacts": "read_final_weights_server_only_no_trace_or_checkpoint_writes_local_compact_JSON_and_completion_only",
+        "checkpoint_methods": [
+          "joint_call",
+          "lower_trained"
+        ],
+        "checkpoint_protocol": "pointmaze_call_weighted_replication_stage88_v1",
+        "checkpoint_update": 8,
+        "compositions_upper_lower": {
+          "base": [
+            "source",
+            "source"
+          ],
+          "joint_call": [
+            "joint_call",
+            "joint_call"
+          ],
+          "joint_upper_lower_only_lower": [
+            "joint_call",
+            "lower_trained"
+          ],
+          "joint_upper_source_lower": [
+            "joint_call",
+            "source"
+          ],
+          "lower_trained": [
+            "source",
+            "lower_trained"
+          ],
+          "source_upper_joint_lower": [
+            "source",
+            "joint_call"
+          ],
+          "zero": [
+            "source",
+            "source"
+          ]
+        },
+        "decision": "direct_upper_requires_positive_joint_call_minus_source_upper_joint_lower_CI_in_both_periods_transfer_and_interaction_reported_separately_no_tuning_Stage67_HOLD_unchanged",
+        "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+        "freeze": "bit_exact_actor_composition_both_std_and_values_source_Adam_forecaster_decoder_unchanged",
+        "intervention": "2x2_source_or_joint_upper_cross_joint_or_lower_only_lower_plus_source_lower_and_zero_controls",
+        "limits": "fixed_Stage88_checkpoint_actor_attribution_not_retraining_counterfactual_or_equal_training_budget_claim_for_composed_policies_not_frequency_superiority_no_cross_stage_teacher_pooling",
+        "noise_mapping": "Stage80_explicit_mapping_on_fresh_disjoint_Stage89_environment_noise_roles",
+        "periods": [
+          50,
+          100
+        ],
+        "sampling": "32_fresh_paired_evaluation_seeds_per_root_period_preflight_four_no_training_or_checkpoint_selection",
+        "source": "pointmaze_bounded_residual_stage78_v1",
+        "statistics": "all22_reward_and_interaction_contrasts_equal_root_bootstrap65536_Bonferroni22",
+        "training_run": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+        "variants": [
+          "base",
+          "zero",
+          "joint_call",
+          "source_upper_joint_lower",
+          "lower_trained",
+          "joint_upper_lower_only_lower",
+          "joint_upper_source_lower"
+        ]
+      },
+      "cost": {
+        "actor_composition_checks": 14,
+        "checkpoint_freeze_checks": 4,
+        "checkpoint_loads": 4,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "native_episodes": 448,
+        "native_lower_calls": 537600,
+        "native_network_checks": 448,
+        "native_pair_checks": 64,
+        "native_steps": 537600,
+        "native_upper_calls": 8064,
+        "pairing_upper_forward_calls": 8064,
+        "policy_updates": 0,
+        "source_clone_loads": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021178736844352213,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_50_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_50_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.12469231960056248,
+            "50/joint_call_minus_joint_upper_lower_only_lower": -0.038462426795952354,
+            "50/joint_call_minus_lower_trained": 0.23137440158981804,
+            "50/joint_call_minus_source_upper_joint_lower": 0.271151880120879,
+            "50/joint_call_minus_zero": 5.368373107271193,
+            "50/joint_upper_lower_only_lower_minus_lower_trained": 0.2698368283857704,
+            "50/joint_upper_lower_only_lower_minus_zero": 5.406835534067145,
+            "50/joint_upper_source_lower_minus_base": 0.35580657182895337,
+            "50/lower_trained_minus_zero": 5.136998705681375,
+            "50/source_upper_joint_lower_minus_lower_trained": -0.03977747853106095,
+            "50/upper_by_lower_interaction": 0.0013150517351085966
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.09301359568092121,
+          "checkpoint_freeze": "passed",
+          "checkpoints": {
+            "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_100_joint_call.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_100_lower_trained.pt"
+          },
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": 1.1953534991567594,
+            "100/joint_call_minus_joint_upper_lower_only_lower": -0.012244366235378834,
+            "100/joint_call_minus_lower_trained": 0.32125901252817357,
+            "100/joint_call_minus_source_upper_joint_lower": 0.338218770657857,
+            "100/joint_call_minus_zero": 10.635038481495894,
+            "100/joint_upper_lower_only_lower_minus_lower_trained": 0.3335033787635524,
+            "100/joint_upper_lower_only_lower_minus_zero": 10.647282847731272,
+            "100/joint_upper_source_lower_minus_base": 0.6328086292742761,
+            "100/lower_trained_minus_zero": 10.31377946896772,
+            "100/source_upper_joint_lower_minus_lower_trained": -0.016959758129683422,
+            "100/upper_by_lower_interaction": 0.004715391894304588
+          },
+          "pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 537600,
+        "plan_ols_fits": 7616,
+        "plan_ridge_predictions": 7616,
+        "reference_evaluations": 537600
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_actor_swap_stage89_v1",
+      "root": 310101,
+      "status": "complete",
+      "wall_seconds": 103.18527671694756
+    }
+  ],
+  "run_name": "pointmaze_call_weighted_actor_swap_stage89_full_20261002_r1",
+  "status": "complete"
+}
