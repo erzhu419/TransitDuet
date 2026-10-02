@@ -1,0 +1,37 @@
+{
+  "protocol": "pointmaze_staged_upper_stage94_v1",
+  "preflight": true,
+  "run_name": "pointmaze_staged_upper_stage94_preflight_20261002_r1",
+  "source_revision": "afb562c91a10906064cb7623f920f6784b926083",
+  "status_snapshot_utc": "2026-10-02T13:59:40.779645+00:00",
+  "placement": "dynamic_node001_006_no_pin",
+  "full_run_submission": "pending_successful_native_preflight",
+  "tasks": [
+    {
+      "id": "t126835",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_staged_upper_stage94_v1/call_weighted/preflight",
+      "waiting_reason": null,
+      "role": "native_upper_training",
+      "root": 310011
+    },
+    {
+      "id": "t126836",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_staged_upper_stage94_v1/qualification",
+      "waiting_reason": null,
+      "role": "all_root_qualification",
+      "root": null
+    }
+  ]
+}
