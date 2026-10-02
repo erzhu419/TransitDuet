@@ -1,0 +1,37 @@
+{
+  "protocol": "pointmaze_upper_noise_replication_stage93_v1",
+  "preflight": true,
+  "run_name": "pointmaze_upper_noise_replication_stage93_preflight_20261002_r1",
+  "source_revision": "cd8ea6bb3445ab36e31d6f49e58f0636ce749c41",
+  "status_snapshot_utc": "2026-10-02T10:44:00.993128+00:00",
+  "placement": "dynamic_node001_006_no_pin",
+  "full_run_submission": "pending_successful_native_preflight",
+  "tasks": [
+    {
+      "id": "t125030",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_upper_noise_replication_stage93_v1/call_weighted/preflight",
+      "role": "native_lower_training",
+      "root": 310011,
+      "waiting_reason": "launch staging: cwd not yet staged to node004; will retry next dispatch cycle"
+    },
+    {
+      "id": "t125031",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_upper_noise_replication_stage93_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null,
+      "waiting_reason": "waiting for prerequisite file(s): /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_upper_noise_replication_stage93_preflight_20261002_r1/cells/replicate_310011/completion/ready.json"
+    }
+  ]
+}
