@@ -1,0 +1,34 @@
+{
+  "protocol": "pointmaze_call_weighted_stage87_v1",
+  "preflight": true,
+  "run_name": "pointmaze_call_weighted_stage87_preflight_20261002_r1",
+  "source_revision": "5f0a041369ba411c9ee4c0d5a857da2200e72b84",
+  "status_snapshot_utc": "2026-10-02T02:25:12.110Z",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120930",
+      "status": "done",
+      "node": "node004",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 1403,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_stage87_v1/call_weighted/preflight",
+      "role": "native_shared_sample_MC_training",
+      "root": 310011
+    },
+    {
+      "id": "t120931",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_stage87_v1/qualification",
+      "role": "all_root_MC_qualification",
+      "root": null
+    }
+  ]
+}
