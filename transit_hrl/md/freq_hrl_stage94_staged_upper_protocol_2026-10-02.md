@@ -15,4 +15,5 @@ The lower-then-upper nominal call-weighted proxy is 0.008/branch; inherited lowe
 Dispatch preflight first through scheduler, dynamically across node001-node006; formal 8-root submission requires preflight pass. Pull only compact JSON/logs/markers; checkpoints remain server-only.
 
 Preflight t126835/t126836 completed with exit 0: mechanical gate passed, 152 episodes / 45,600 steps, 8 upper updates, 6 donor loads, 22 compositions, zero checkpoint writes and replay forwards; wall time 44.48 s. No performance claim.
-Formal frozen run submitted as t126885-t126892 (eight roots) and t126893 (all-root qualification), dynamic node001-node006 with no pin. Next: analyze all four primary CIs and all 28 registered contrasts after completion; no root/period selection or cross-stage pooling.
+Formal frozen run t126885-t126892 (eight roots) and t126893 (all-root qualification) completed with exit 0, dynamic node001-node006 with no pin. All 28 corrected CIs were independently reproduced and all four primary endpoints are positive supported. Result: freq_hrl_stage94_staged_upper_result_2026-10-02.md.
+Next: independent fresh upper-training/evaluation confirmation, followed by unseen-teacher validation. Roots, periods, radius, endpoints and stage separation remain fixed for confirmation.
