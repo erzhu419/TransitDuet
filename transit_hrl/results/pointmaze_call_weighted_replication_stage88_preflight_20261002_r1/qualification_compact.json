@@ -1,0 +1,560 @@
+{
+  "contract": {
+    "allocation": "upper_.0005_fixed_joint_call_lower_.001_minus_.0005_over_period_no_radius_or_allocation_search",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "budget": "per_native_step_nominal_K_lower_plus_K_upper_over_period_.001_joint_call_and_lower_only_joint_level_.0005_plus_.0005_over_period",
+    "confirmation": "all_four_primary_CI_lower_bounds_strictly_positive_in_unchanged_Bonferroni20_family_no_cross_stage_pooling",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "independent_MC_learning_route_Stage67_critic_credit_HOLD_unchanged_no_source_policy_adoption",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "diagnostics": "nominal_and_empirical_call_weighted_old_history_conditional_KL_per_round_actor_episode_and_decision_counts",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "freeze": "both_std_values_source_Adam_forecaster_decoder_unchanged_lower_only_upper_actor_bit_exact_frozen",
+    "limits": "teacher_initialized_fixed_std_decoder_MC_mean_training_empirical_old_history_KL_not_final_trajectory_KL_or_frequency_superiority",
+    "methods": {
+      "50": {
+        "joint_call": {
+          "lower": 0.99,
+          "upper": 0.5
+        },
+        "joint_level": {
+          "lower": 0.5,
+          "upper": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      },
+      "100": {
+        "joint_call": {
+          "lower": 0.995,
+          "upper": 0.5
+        },
+        "joint_level": {
+          "lower": 0.5,
+          "upper": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      }
+    },
+    "noise_mapping": "Stage80_explicit_mapping_fresh_disjoint_Stage88_round_and_evaluation_roles",
+    "periods": [
+      50,
+      100
+    ],
+    "reference_run": "pointmaze_call_weighted_stage87_full_20261002_r1",
+    "replication": "same_eight_frozen_Stage78_teachers_fresh_training_and_evaluation_samples_no_Stage87_weight_reuse",
+    "sampling": "each_method_same_exogenous_roster_8_fresh_rounds_64_episodes_all_episodes_used_by_every_active_actor_preflight2x8",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all20_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni20",
+    "training": "eight_fresh_on_policy_MC_mean_updates_no_PPO_Adam_entropy_or_reward_normalization_preflight_two",
+    "variants": [
+      "base",
+      "zero",
+      "joint_call",
+      "joint_level",
+      "lower_trained"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 20,
+    "actor_parameter_perturbations": 40,
+    "actor_score_backward_batches": 480,
+    "actor_score_forward_batches": 160,
+    "checkpoint_writes": 0,
+    "credit_episodes": 96,
+    "decoder_loads": 2,
+    "evaluation_episodes": 40,
+    "exact_kl_forward_batches": 88,
+    "fisher_jvp_batches": 44,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 192,
+    "native_episodes": 136,
+    "native_lower_calls": 40800,
+    "native_network_checks": 136,
+    "native_pair_checks": 8,
+    "native_steps": 40800,
+    "native_upper_calls": 612,
+    "objective_checks": 96,
+    "pairing_upper_forward_calls": 612,
+    "parameter_part_checks": 20,
+    "policy_updates": 12,
+    "scenario_pair_checks": 48,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 12,
+    "training_models_initialized": 6
+  },
+  "endpoints": {
+    "100/base_minus_zero": {
+      "mean": 0.36144640843515674
+    },
+    "100/joint_call_minus_base": {
+      "mean": 0.023520598951542127
+    },
+    "100/joint_call_minus_joint_level": {
+      "mean": 0.004235418278447867
+    },
+    "100/joint_call_minus_lower_trained": {
+      "mean": 0.0035224754577782846
+    },
+    "100/joint_call_minus_zero": {
+      "mean": 0.38496700738669887
+    },
+    "100/joint_level_minus_base": {
+      "mean": 0.01928518067309426
+    },
+    "100/joint_level_minus_lower_trained": {
+      "mean": -0.000712942820669582
+    },
+    "100/joint_level_minus_zero": {
+      "mean": 0.380731589108251
+    },
+    "100/lower_trained_minus_base": {
+      "mean": 0.019998123493763842
+    },
+    "100/lower_trained_minus_zero": {
+      "mean": 0.3814445319289206
+    },
+    "50/base_minus_zero": {
+      "mean": 0.06503498930061369
+    },
+    "50/joint_call_minus_base": {
+      "mean": -0.10587287582880833
+    },
+    "50/joint_call_minus_joint_level": {
+      "mean": -0.028491707259213683
+    },
+    "50/joint_call_minus_lower_trained": {
+      "mean": -0.009962050028683223
+    },
+    "50/joint_call_minus_zero": {
+      "mean": -0.040837886528194645
+    },
+    "50/joint_level_minus_base": {
+      "mean": -0.07738116856959465
+    },
+    "50/joint_level_minus_lower_trained": {
+      "mean": 0.01852965723053046
+    },
+    "50/joint_level_minus_zero": {
+      "mean": -0.012346179268980961
+    },
+    "50/lower_trained_minus_base": {
+      "mean": -0.09591082580012511
+    },
+    "50/lower_trained_minus_zero": {
+      "mean": -0.030875836499511422
+    }
+  },
+  "independent_confirmation": {
+    "population": "same_eight_frozen_teachers_fresh_sample_replication",
+    "primary_endpoints": [
+      "50/joint_call_minus_lower_trained",
+      "50/joint_call_minus_joint_level",
+      "100/joint_call_minus_lower_trained",
+      "100/joint_call_minus_joint_level"
+    ],
+    "reference_run": "pointmaze_call_weighted_stage87_full_20261002_r1",
+    "status": "mechanical_only"
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+  "performance_claim": "shared_full_MC_mean_learning_call_weighted_nominal_KL_not_full_actor_critic_or_frequency_superiority",
+  "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+  "root_rows": [
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 20,
+        "actor_parameter_perturbations": 40,
+        "actor_score_backward_batches": 480,
+        "actor_score_forward_batches": 160,
+        "checkpoint_writes": 0,
+        "credit_episodes": 96,
+        "decoder_loads": 2,
+        "evaluation_episodes": 40,
+        "exact_kl_forward_batches": 88,
+        "fisher_jvp_batches": 44,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 192,
+        "native_episodes": 136,
+        "native_lower_calls": 40800,
+        "native_network_checks": 136,
+        "native_pair_checks": 8,
+        "native_steps": 40800,
+        "native_upper_calls": 612,
+        "objective_checks": 96,
+        "pairing_upper_forward_calls": 612,
+        "parameter_part_checks": 20,
+        "policy_updates": 12,
+        "scenario_pair_checks": 48,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 12,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "effects": {
+            "50/base_minus_zero": 0.06503498930061369,
+            "50/joint_call_minus_base": -0.10587287582880833,
+            "50/joint_call_minus_joint_level": -0.028491707259213683,
+            "50/joint_call_minus_lower_trained": -0.009962050028683223,
+            "50/joint_call_minus_zero": -0.040837886528194645,
+            "50/joint_level_minus_base": -0.07738116856959465,
+            "50/joint_level_minus_lower_trained": 0.01852965723053046,
+            "50/joint_level_minus_zero": -0.012346179268980961,
+            "50/lower_trained_minus_base": -0.09591082580012511,
+            "50/lower_trained_minus_zero": -0.030875836499511422
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.00198,
+                  "upper": 0.001
+                },
+                "exact_by_level": {
+                  "lower": 0.0019798979907174343,
+                  "upper": 0.0010000102794325122
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.000999907871010874,
+                  0.0009999903252952106
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ],
+                  "upper": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ],
+                  "upper": [
+                    6
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                },
+                "exact_by_level": {
+                  "lower": 0.000999953843251356,
+                  "upper": 0.001000010327253338
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.000509959734929817,
+                  0.0005099943148666056
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ],
+                  "upper": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ],
+                  "upper": [
+                    6
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.002
+                },
+                "exact_by_level": {
+                  "lower": 0.0019999658395011277
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999360896979766,
+                  0.0010000297498031514
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 237.65535330906238,
+              "episode_length": 300,
+              "upper_calls": 6
+            },
+            "joint_call": {
+              "episode_return": 237.54948043323358,
+              "episode_length": 300,
+              "upper_calls": 6
+            },
+            "joint_level": {
+              "episode_return": 237.5779721404928,
+              "episode_length": 300,
+              "upper_calls": 6
+            },
+            "lower_trained": {
+              "episode_return": 237.55944248326225,
+              "episode_length": 300,
+              "upper_calls": 6
+            },
+            "zero": {
+              "episode_return": 237.59031831976176,
+              "episode_length": 300,
+              "upper_calls": 6
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "effects": {
+            "100/base_minus_zero": 0.36144640843515674,
+            "100/joint_call_minus_base": 0.023520598951542127,
+            "100/joint_call_minus_joint_level": 0.004235418278447867,
+            "100/joint_call_minus_lower_trained": 0.0035224754577782846,
+            "100/joint_call_minus_zero": 0.38496700738669887,
+            "100/joint_level_minus_base": 0.01928518067309426,
+            "100/joint_level_minus_lower_trained": -0.000712942820669582,
+            "100/joint_level_minus_zero": 0.380731589108251,
+            "100/lower_trained_minus_base": 0.019998123493763842,
+            "100/lower_trained_minus_zero": 0.3814445319289206
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.00199,
+                  "upper": 0.001
+                },
+                "exact_by_level": {
+                  "lower": 0.0019895961239314417,
+                  "upper": 0.0009999995179123904
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009997426733423219,
+                  0.0009998534457682437
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ],
+                  "upper": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ],
+                  "upper": [
+                    3
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000006794929504394531,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                },
+                "exact_by_level": {
+                  "lower": 0.0009998686072841092,
+                  "upper": 0.0009999993538297308
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005049179040641998,
+                  0.0005049506967582067
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ],
+                  "upper": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ],
+                  "upper": [
+                    3
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000006794929504394531,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 2,
+                "nominal_by_level": {
+                  "lower": 0.002
+                },
+                "exact_by_level": {
+                  "lower": 0.0019995658133741927
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009997258928976286,
+                  0.0009998399204765639
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    8,
+                    8
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    300
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000006794929504394531,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 220.46874495339574,
+              "episode_length": 300,
+              "upper_calls": 3
+            },
+            "joint_call": {
+              "episode_return": 220.4922655523473,
+              "episode_length": 300,
+              "upper_calls": 3
+            },
+            "joint_level": {
+              "episode_return": 220.48803013406882,
+              "episode_length": 300,
+              "upper_calls": 3
+            },
+            "lower_trained": {
+              "episode_return": 220.4887430768895,
+              "episode_length": 300,
+              "upper_calls": 3
+            },
+            "zero": {
+              "episode_return": 220.1072985449606,
+              "episode_length": 300,
+              "upper_calls": 3
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 40800,
+        "plan_ols_fits": 476,
+        "plan_ridge_predictions": 476,
+        "reference_evaluations": 40800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 38.948192187119275
+    }
+  ],
+  "run_name": "pointmaze_call_weighted_replication_stage88_preflight_20261002_r1",
+  "status": "preflight_passed"
+}
