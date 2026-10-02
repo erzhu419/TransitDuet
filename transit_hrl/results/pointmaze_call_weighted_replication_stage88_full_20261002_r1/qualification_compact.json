@@ -1,0 +1,4432 @@
+{
+  "contract": {
+    "allocation": "upper_.0005_fixed_joint_call_lower_.001_minus_.0005_over_period_no_radius_or_allocation_search",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "budget": "per_native_step_nominal_K_lower_plus_K_upper_over_period_.001_joint_call_and_lower_only_joint_level_.0005_plus_.0005_over_period",
+    "confirmation": "all_four_primary_CI_lower_bounds_strictly_positive_in_unchanged_Bonferroni20_family_no_cross_stage_pooling",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "independent_MC_learning_route_Stage67_critic_credit_HOLD_unchanged_no_source_policy_adoption",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "diagnostics": "nominal_and_empirical_call_weighted_old_history_conditional_KL_per_round_actor_episode_and_decision_counts",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "freeze": "both_std_values_source_Adam_forecaster_decoder_unchanged_lower_only_upper_actor_bit_exact_frozen",
+    "limits": "teacher_initialized_fixed_std_decoder_MC_mean_training_empirical_old_history_KL_not_final_trajectory_KL_or_frequency_superiority",
+    "methods": {
+      "50": {
+        "joint_call": {
+          "lower": 0.99,
+          "upper": 0.5
+        },
+        "joint_level": {
+          "lower": 0.5,
+          "upper": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      },
+      "100": {
+        "joint_call": {
+          "lower": 0.995,
+          "upper": 0.5
+        },
+        "joint_level": {
+          "lower": 0.5,
+          "upper": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      }
+    },
+    "noise_mapping": "Stage80_explicit_mapping_fresh_disjoint_Stage88_round_and_evaluation_roles",
+    "periods": [
+      50,
+      100
+    ],
+    "reference_run": "pointmaze_call_weighted_stage87_full_20261002_r1",
+    "replication": "same_eight_frozen_Stage78_teachers_fresh_training_and_evaluation_samples_no_Stage87_weight_reuse",
+    "sampling": "each_method_same_exogenous_roster_8_fresh_rounds_64_episodes_all_episodes_used_by_every_active_actor_preflight2x8",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all20_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni20",
+    "training": "eight_fresh_on_policy_MC_mean_updates_no_PPO_Adam_entropy_or_reward_normalization_preflight_two",
+    "variants": [
+      "base",
+      "zero",
+      "joint_call",
+      "joint_level",
+      "lower_trained"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 640,
+    "actor_parameter_perturbations": 1280,
+    "actor_score_backward_batches": 196608,
+    "actor_score_forward_batches": 65536,
+    "checkpoint_writes": 48,
+    "credit_episodes": 24576,
+    "decoder_loads": 16,
+    "evaluation_episodes": 2560,
+    "exact_kl_forward_batches": 58368,
+    "fisher_jvp_batches": 29184,
+    "forecaster_loads": 8,
+    "frozen_model_checks": 16,
+    "mc_calls": 49152,
+    "native_episodes": 27136,
+    "native_lower_calls": 32563200,
+    "native_network_checks": 27136,
+    "native_pair_checks": 512,
+    "native_steps": 32563200,
+    "native_upper_calls": 488448,
+    "objective_checks": 24576,
+    "pairing_upper_forward_calls": 488448,
+    "parameter_part_checks": 640,
+    "policy_updates": 384,
+    "scenario_pair_checks": 12288,
+    "source_clone_loads": 16,
+    "training_freeze_checks": 384,
+    "training_models_initialized": 48
+  },
+  "endpoints": {
+    "100/base_minus_zero": {
+      "ci": [
+        -1.2302681441456018,
+        0.055159672810425775
+      ],
+      "effect": "inconclusive",
+      "mean": -0.5033602761764358
+    },
+    "100/joint_call_minus_base": {
+      "ci": [
+        4.707633239827544,
+        7.446677813903206
+      ],
+      "effect": "positive",
+      "mean": 5.986018776331404
+    },
+    "100/joint_call_minus_joint_level": {
+      "ci": [
+        0.9260412747933474,
+        1.6241842589890294
+      ],
+      "effect": "positive",
+      "mean": 1.250292590473859
+    },
+    "100/joint_call_minus_lower_trained": {
+      "ci": [
+        0.3189873124027942,
+        0.708705887569504
+      ],
+      "effect": "positive",
+      "mean": 0.4801139216758945
+    },
+    "100/joint_call_minus_zero": {
+      "ci": [
+        4.340921351658392,
+        6.714286432153379
+      ],
+      "effect": "positive",
+      "mean": 5.482658500154968
+    },
+    "100/joint_level_minus_base": {
+      "ci": [
+        3.7275733930765362,
+        5.845023088248159
+      ],
+      "effect": "positive",
+      "mean": 4.735726185857544
+    },
+    "100/joint_level_minus_lower_trained": {
+      "ci": [
+        -1.2812871692017693,
+        -0.24216753170192684
+      ],
+      "effect": "negative",
+      "mean": -0.7701786687979646
+    },
+    "100/joint_level_minus_zero": {
+      "ci": [
+        3.3787656536106763,
+        5.130889326561958
+      ],
+      "effect": "positive",
+      "mean": 4.232365909681109
+    },
+    "100/lower_trained_minus_base": {
+      "ci": [
+        4.113941692676045,
+        7.08940916585446
+      ],
+      "effect": "positive",
+      "mean": 5.505904854655509
+    },
+    "100/lower_trained_minus_zero": {
+      "ci": [
+        3.6947391320131344,
+        6.370942450294741
+      ],
+      "effect": "positive",
+      "mean": 5.002544578479073
+    },
+    "50/base_minus_zero": {
+      "ci": [
+        -0.2651683940494949,
+        0.14535478414816838
+      ],
+      "effect": "inconclusive",
+      "mean": -0.06664627437057913
+    },
+    "50/joint_call_minus_base": {
+      "ci": [
+        3.6977561759109747,
+        5.740607729759237
+      ],
+      "effect": "positive",
+      "mean": 4.613383755686289
+    },
+    "50/joint_call_minus_joint_level": {
+      "ci": [
+        0.8050393074089963,
+        1.251258489881125
+      ],
+      "effect": "positive",
+      "mean": 1.0200691241003215
+    },
+    "50/joint_call_minus_lower_trained": {
+      "ci": [
+        0.14059759211250977,
+        0.28339056989140693
+      ],
+      "effect": "positive",
+      "mean": 0.22154878212839302
+    },
+    "50/joint_call_minus_zero": {
+      "ci": [
+        3.60078379483658,
+        5.66059223934725
+      ],
+      "effect": "positive",
+      "mean": 4.54673748131571
+    },
+    "50/joint_level_minus_base": {
+      "ci": [
+        2.8878342704541167,
+        4.506759669429303
+      ],
+      "effect": "positive",
+      "mean": 3.593314631585968
+    },
+    "50/joint_level_minus_lower_trained": {
+      "ci": [
+        -1.062615737725352,
+        -0.5489604347070607
+      ],
+      "effect": "negative",
+      "mean": -0.7985203419719284
+    },
+    "50/joint_level_minus_zero": {
+      "ci": [
+        2.7950505008970707,
+        4.436368492454177
+      ],
+      "effect": "positive",
+      "mean": 3.5266683572153887
+    },
+    "50/lower_trained_minus_base": {
+      "ci": [
+        3.439027897479906,
+        5.5574173636420445
+      ],
+      "effect": "positive",
+      "mean": 4.391834973557897
+    },
+    "50/lower_trained_minus_zero": {
+      "ci": [
+        3.358886050149162,
+        5.475977252251637
+      ],
+      "effect": "positive",
+      "mean": 4.325188699187317
+    }
+  },
+  "independent_confirmation": {
+    "population": "same_eight_frozen_teachers_fresh_sample_replication",
+    "primary_endpoints": [
+      "50/joint_call_minus_lower_trained",
+      "50/joint_call_minus_joint_level",
+      "100/joint_call_minus_lower_trained",
+      "100/joint_call_minus_joint_level"
+    ],
+    "reference_run": "pointmaze_call_weighted_stage87_full_20261002_r1",
+    "status": "confirmed"
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+  "performance_claim": "shared_full_MC_mean_learning_call_weighted_nominal_KL_not_full_actor_critic_or_frequency_superiority",
+  "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+  "root_rows": [
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "effects": {
+            "50/base_minus_zero": -0.3707316543179644,
+            "50/joint_call_minus_base": 3.911813516974,
+            "50/joint_call_minus_joint_level": 0.814251241156569,
+            "50/joint_call_minus_lower_trained": 0.08336131994084894,
+            "50/joint_call_minus_zero": 3.5410818626560356,
+            "50/joint_level_minus_base": 3.097562275817431,
+            "50/joint_level_minus_lower_trained": -0.73088992121572,
+            "50/joint_level_minus_zero": 2.7268306214994666,
+            "50/lower_trained_minus_base": 3.828452197033151,
+            "50/lower_trained_minus_zero": 3.4577205427151867
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007919364583371214,
+                  "upper": 0.004000097700081671
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001398736370444,
+                  0.0009997983878460416,
+                  0.0009998895785326503,
+                  0.0009998691494195594,
+                  0.0010000663273555899,
+                  0.0010000074661980505,
+                  0.0009999265413036462,
+                  0.000999669213080265
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000018596649169921875,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999857383796861,
+                  "upper": 0.004000098997985463
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100538690989179,
+                  0.000509937284625124,
+                  0.0005099577174330156,
+                  0.0005099654922848223,
+                  0.0005100400284754546,
+                  0.00051000424982446,
+                  0.0005099904272544547,
+                  0.000509910294760322
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000020503997802734375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.007999401596523029
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001481663636758,
+                  0.0009997968751479004,
+                  0.0009998931205955804,
+                  0.000999892955309502,
+                  0.0010000615566316733,
+                  0.001000015599286515,
+                  0.0009999246483248419,
+                  0.0009996686748633408
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000019788742065429688,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 959.7625504903223,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 963.674364007296,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 962.8601127661395,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 963.5910026873554,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 960.13328214464,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "effects": {
+            "100/base_minus_zero": -0.23935527583793714,
+            "100/joint_call_minus_base": 4.907964353960793,
+            "100/joint_call_minus_joint_level": 1.0899073809414226,
+            "100/joint_call_minus_lower_trained": 0.31253260722303366,
+            "100/joint_call_minus_zero": 4.668609078122856,
+            "100/joint_level_minus_base": 3.8180569730193703,
+            "100/joint_level_minus_lower_trained": -0.7773747737183889,
+            "100/joint_level_minus_zero": 3.578701697181433,
+            "100/lower_trained_minus_base": 4.595431746737759,
+            "100/lower_trained_minus_zero": 4.356076470899822
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007959740237767467,
+                  "upper": 0.0040002631164046615
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.001000050991572123,
+                  0.0009996264145476271,
+                  0.0010002172236167747,
+                  0.0010000255484451514,
+                  0.0009999903799822849,
+                  0.00100024585673279,
+                  0.0010000335677200667,
+                  0.0009995528863146967
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012636184692382812,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999960541361996,
+                  "upper": 0.0040002911150152105
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005050155546776742,
+                  0.0005048716382063815,
+                  0.0005050750794007543,
+                  0.0005050106866257571,
+                  0.0005049958473432407,
+                  0.0005050801872015127,
+                  0.0005050211383734681,
+                  0.0005048933206833601
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000014543533325195312,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310011/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.007999669974758357
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010000581569687523,
+                  0.000999616866828662,
+                  0.0010002109501800142,
+                  0.0010000330092170277,
+                  0.0009999835493243524,
+                  0.0010002139931103704,
+                  0.0010000392549694107,
+                  0.0009995141941597663
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 871.1956888525872,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 876.1036532065481,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 875.0137458256066,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 875.7911205993248,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 871.4350441284254,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 859.6251300610602
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019697945784676246,
+          "effects": {
+            "50/base_minus_zero": -0.03486032735977673,
+            "50/joint_call_minus_base": 5.0897570305221365,
+            "50/joint_call_minus_joint_level": 1.2345391759851019,
+            "50/joint_call_minus_lower_trained": 0.2357720140062085,
+            "50/joint_call_minus_zero": 5.05489670316236,
+            "50/joint_level_minus_base": 3.8552178545370346,
+            "50/joint_level_minus_lower_trained": -0.9987671619788934,
+            "50/joint_level_minus_zero": 3.820357527177258,
+            "50/lower_trained_minus_base": 4.853985016515928,
+            "50/lower_trained_minus_zero": 4.819124689156151
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007921836928900855,
+                  "upper": 0.004000228477232666
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010003272624071508,
+                  0.0010000234219317281,
+                  0.0010004420072302353,
+                  0.0010001004136424977,
+                  0.001000268002032096,
+                  0.0010003675833668354,
+                  0.0010001942431724592,
+                  0.0010001185646625057
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000024318695068359375,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.0040006350576375525,
+                  "upper": 0.004000218097854066
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005101070739161609,
+                  0.0005100222996850888,
+                  0.0005101417945888154,
+                  0.0005100373799093713,
+                  0.0005101051422408578,
+                  0.0005101244820020373,
+                  0.0005100623307104717,
+                  0.0005100389165418305
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000024318695068359375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008001901642660732
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.001000338414067902,
+                  0.0010000317268539158,
+                  0.001000451211747765,
+                  0.0010001108220536387,
+                  0.001000270832490208,
+                  0.0010003695212668536,
+                  0.001000205269744755,
+                  0.0010001238444356949
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000024318695068359375,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 961.2957805975922,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 966.385537628114,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 965.1509984521291,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 966.1497656141074,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 961.3306409249516,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.0782795618110407,
+          "effects": {
+            "100/base_minus_zero": -0.1429848322795273,
+            "100/joint_call_minus_base": 6.435816588459385,
+            "100/joint_call_minus_joint_level": 1.4412233776967582,
+            "100/joint_call_minus_lower_trained": 0.4136321900396709,
+            "100/joint_call_minus_zero": 6.292831756179858,
+            "100/joint_level_minus_base": 4.994593210762627,
+            "100/joint_level_minus_lower_trained": -1.0275911876570873,
+            "100/joint_level_minus_zero": 4.8516083784831,
+            "100/lower_trained_minus_base": 6.022184398419714,
+            "100/lower_trained_minus_zero": 5.879199566140187
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007960600438778213,
+                  "upper": 0.004000255668810283
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009998402239344872,
+                  0.0009999434003434302,
+                  0.0010003746580549682,
+                  0.0010000414261111782,
+                  0.001000124192342291,
+                  0.001000269292452108,
+                  0.000999870455807444,
+                  0.0010001393464204086
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000209183942745,
+                  "upper": 0.004000276023989811
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005049413484831162,
+                  0.0005049811419462419,
+                  0.0005051431201915529,
+                  0.0005050121918578719,
+                  0.0005050464879300884,
+                  0.0005050872970550932,
+                  0.0005049536676890069,
+                  0.0005050466890296718
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310023/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008000611259250758
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009998424370518924,
+                  0.000999931881716304,
+                  0.0010003831061812583,
+                  0.0010000373454854244,
+                  0.0010001156437835325,
+                  0.0010002721503785663,
+                  0.0009998820667253812,
+                  0.0010001466279283971
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000011444091796875,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 862.2391114047094,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 868.6749279931687,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 867.233704615472,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 868.2612958031291,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 862.3820962369888,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310023,
+      "status": "complete",
+      "wall_seconds": 854.0505989789963
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019892258119766967,
+          "effects": {
+            "50/base_minus_zero": -0.11013380134738071,
+            "50/joint_call_minus_base": 3.3096653490562957,
+            "50/joint_call_minus_joint_level": 0.69718933055821,
+            "50/joint_call_minus_lower_trained": 0.3037045161641245,
+            "50/joint_call_minus_zero": 3.199531547708915,
+            "50/joint_level_minus_base": 2.6124760184980858,
+            "50/joint_level_minus_lower_trained": -0.39348481439408545,
+            "50/joint_level_minus_zero": 2.502342217150705,
+            "50/lower_trained_minus_base": 3.005960832892171,
+            "50/lower_trained_minus_zero": 2.8958270315447905
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007920097504486714,
+                  "upper": 0.004000325781619313
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001164613506184,
+                  0.0010002077218578917,
+                  0.0009997400375642133,
+                  0.0009998478216771765,
+                  0.000999979811992381,
+                  0.001000283954651959,
+                  0.0010001637069975199,
+                  0.0009997645040273394
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000017642974853515625,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.00400002036163445,
+                  "upper": 0.004000308670199749
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100366091520281,
+                  0.0005100895755547774,
+                  0.0005099029174737415,
+                  0.0005099396217339255,
+                  0.0005099803809452407,
+                  0.0005100946353277508,
+                  0.0005100606316726738,
+                  0.000509922163178307
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.0000171661376953125,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008000101716723601
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001175289496395,
+                  0.0010002171185868262,
+                  0.0009997339105170088,
+                  0.000999836249694399,
+                  0.0009999763434823876,
+                  0.0010002945088518967,
+                  0.0010001611930043686,
+                  0.000999764863637074
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000016450881958007812,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 957.434593245187,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 960.7442585942434,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 960.047069263685,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 960.4405540780791,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 957.5447270465344,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.09857353856972718,
+          "effects": {
+            "100/base_minus_zero": -0.9111483248707763,
+            "100/joint_call_minus_base": 5.26738726231358,
+            "100/joint_call_minus_joint_level": 0.7897739699158812,
+            "100/joint_call_minus_lower_trained": 0.8602695180961035,
+            "100/joint_call_minus_zero": 4.356238937442804,
+            "100/joint_level_minus_base": 4.477613292397699,
+            "100/joint_level_minus_lower_trained": 0.0704955481802223,
+            "100/joint_level_minus_zero": 3.5664649675269224,
+            "100/lower_trained_minus_base": 4.4071177442174765,
+            "100/lower_trained_minus_zero": 3.4959694193467
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007962166619165453,
+                  "upper": 0.0040006438506996235
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010003465366052494,
+                  0.0010004687860895281,
+                  0.0010008751545895855,
+                  0.00100036278390994,
+                  0.0009991718043444282,
+                  0.0010005212191962843,
+                  0.0010000042744969903,
+                  0.0010004224984404434
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.0000133514404296875,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000761143484814,
+                  "upper": 0.004000628644066248
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005051235049258538,
+                  0.0005051895620492311,
+                  0.0005053219098469744,
+                  0.0005051257551167607,
+                  0.0005047121182493372,
+                  0.0005051463684537541,
+                  0.0005049961544309321,
+                  0.000505152056852633
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000009298324584960938,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310037/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008002197047746311
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010003515231795633,
+                  0.0010004807687239577,
+                  0.0010008880122769465,
+                  0.0010003657034345127,
+                  0.0009991841224073058,
+                  0.0010005001694241586,
+                  0.0009999890184152372,
+                  0.0010004377298846296
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000010013580322265625,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 861.5549337512243,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 866.8223210135378,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 866.0325470436221,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 865.9620514954419,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 862.4660820760952,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310037,
+      "status": "complete",
+      "wall_seconds": 862.5489966287278
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021338943540272614,
+          "effects": {
+            "50/base_minus_zero": 0.2580751485059807,
+            "50/joint_call_minus_base": 4.824474847021172,
+            "50/joint_call_minus_joint_level": 1.0494302643360456,
+            "50/joint_call_minus_lower_trained": 0.20544261147890452,
+            "50/joint_call_minus_zero": 5.0825499955271525,
+            "50/joint_level_minus_base": 3.775044582685126,
+            "50/joint_level_minus_lower_trained": -0.8439876528571411,
+            "50/joint_level_minus_zero": 4.033119731191107,
+            "50/lower_trained_minus_base": 4.619032235542267,
+            "50/lower_trained_minus_zero": 4.877107384048248
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007920454340301097,
+                  "upper": 0.0040001052216364075
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.001000100813710097,
+                  0.0009999545378181576,
+                  0.001000090878483237,
+                  0.0010001332711806021,
+                  0.0009999282328387207,
+                  0.0010000810977155892,
+                  0.001000137628893646,
+                  0.0010000299840937752
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00001811981201171875,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000140717634189,
+                  "upper": 0.004000099513627753
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100479620134603,
+                  0.000509968281796932,
+                  0.0005100365186112276,
+                  0.0005100362094738189,
+                  0.0005099791822982767,
+                  0.0005100258060881105,
+                  0.000510034611963371,
+                  0.0005100141356615482
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000019311904907226562,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008000467820289313
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001085419982765,
+                  0.000999924118394855,
+                  0.001000120173964487,
+                  0.001000115515061969,
+                  0.0009999326770793718,
+                  0.001000084683140303,
+                  0.0010001090553262172,
+                  0.0010000730553238327
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000025272369384765625,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 964.9973944589912,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 969.8218693060124,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 968.7724390416763,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 969.6164266945335,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 964.7393193104854,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07375870162021787,
+          "effects": {
+            "100/base_minus_zero": 0.32638949923342153,
+            "100/joint_call_minus_base": 6.205318477116705,
+            "100/joint_call_minus_joint_level": 1.292693807498253,
+            "100/joint_call_minus_lower_trained": 0.34638720961010705,
+            "100/joint_call_minus_zero": 6.531707976350127,
+            "100/joint_level_minus_base": 4.912624669618452,
+            "100/joint_level_minus_lower_trained": -0.946306597888146,
+            "100/joint_level_minus_zero": 5.239014168851874,
+            "100/lower_trained_minus_base": 5.858931267506598,
+            "100/lower_trained_minus_zero": 6.18532076674002
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007961039646466144,
+                  "upper": 0.0040001258961741976
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010000578717906476,
+                  0.0010002610857027883,
+                  0.001000158294251157,
+                  0.0010001869122907479,
+                  0.0009998995238711037,
+                  0.001000141957405071,
+                  0.0010001422308221505,
+                  0.0010001930292942195
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000014543533325195312,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000375159900239,
+                  "upper": 0.004000137559531128
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005050248901949638,
+                  0.0005050905841387098,
+                  0.0005050519715485275,
+                  0.0005050796286433265,
+                  0.0005049692634053431,
+                  0.0005050444380197519,
+                  0.0005050583480710128,
+                  0.0005050574114739155
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000016689300537109375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310049/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008001078818541531
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010000600436176632,
+                  0.0010002698817364911,
+                  0.0010001449138757575,
+                  0.001000214558742262,
+                  0.0009999065102329582,
+                  0.0010001384310172742,
+                  0.0010001709374888494,
+                  0.0010001735418302764
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00002002716064453125,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 869.3272666431038,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 875.5325851202209,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 874.2398913127223,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 875.1861979106105,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 869.0008771438704,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310049,
+      "status": "complete",
+      "wall_seconds": 879.038830792997
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.018931567661582147,
+          "effects": {
+            "50/base_minus_zero": -0.1051014598531701,
+            "50/joint_call_minus_base": 6.634719197283754,
+            "50/joint_call_minus_joint_level": 1.3978873555814033,
+            "50/joint_call_minus_lower_trained": 0.13939281156135763,
+            "50/joint_call_minus_zero": 6.529617737430584,
+            "50/joint_level_minus_base": 5.236831841702351,
+            "50/joint_level_minus_lower_trained": -1.2584945440200457,
+            "50/joint_level_minus_zero": 5.131730381849181,
+            "50/lower_trained_minus_base": 6.495326385722397,
+            "50/lower_trained_minus_zero": 6.3902249258692265
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.00792049872630127,
+                  "upper": 0.004001694679219595
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001576564503726,
+                  0.0009999943813297617,
+                  0.0009998788017522302,
+                  0.0010001167096371489,
+                  0.001000136094937227,
+                  0.0010001559860934903,
+                  0.000999931890417562,
+                  0.0010001610992678696
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000011920928955078125,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000181178403879,
+                  "upper": 0.004001815570624905
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100491025423555,
+                  0.000510000852054882,
+                  0.0005099671279884735,
+                  0.0005100414084872262,
+                  0.0005100524524657818,
+                  0.0005100551917105066,
+                  0.0005099831939003416,
+                  0.0005100681606668096
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.008000495238784001
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001533620374922,
+                  0.0009999791702955112,
+                  0.0009998935670723506,
+                  0.0010001062564286,
+                  0.0010001289438677308,
+                  0.001000160242950761,
+                  0.000999915146263983,
+                  0.001000158549867572
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.0000133514404296875,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 978.108498451461,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 984.7432176487446,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 983.345330293163,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 984.6038248371834,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 978.2135999113141,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.056687008052382776,
+          "effects": {
+            "100/base_minus_zero": -0.7398966020943334,
+            "100/joint_call_minus_base": 8.133511812394918,
+            "100/joint_call_minus_joint_level": 1.8558619781051107,
+            "100/joint_call_minus_lower_trained": 0.2706422231679291,
+            "100/joint_call_minus_zero": 7.3936152103005846,
+            "100/joint_level_minus_base": 6.277649834289807,
+            "100/joint_level_minus_lower_trained": -1.5852197549371816,
+            "100/joint_level_minus_zero": 5.537753232195474,
+            "100/lower_trained_minus_base": 7.862869589226989,
+            "100/lower_trained_minus_zero": 7.1229729871326555
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007960638413013357,
+                  "upper": 0.004001312451734909
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010000323658214275,
+                  0.000999783854567236,
+                  0.000999503213729201,
+                  0.0010007640415043793,
+                  0.0010001345294549117,
+                  0.0010003787445295592,
+                  0.0009998653049726677,
+                  0.0010001894829513242
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000010967254638671875,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000260269975498,
+                  "upper": 0.004001348068208068
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005050136890814946,
+                  0.0005049276743163329,
+                  0.0005048278451460863,
+                  0.0005052746597002505,
+                  0.0005050519864869765,
+                  0.0005051608564256521,
+                  0.0005049560994126556,
+                  0.000505060940088131
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000009059906005859375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310061/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.00800065224377302
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.001000027744128271,
+                  0.0009997794648271222,
+                  0.0009994936715502498,
+                  0.0010007706188237273,
+                  0.0010001377417173977,
+                  0.001000392234759726,
+                  0.0009998632366692397,
+                  0.0010001875312972846
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000009059906005859375,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 879.5480647875305,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 887.6815765999256,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 885.8257146218203,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 887.4109343767575,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 880.287961389625,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310061,
+      "status": "complete",
+      "wall_seconds": 872.1284807561897
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02252462422146412,
+          "effects": {
+            "50/base_minus_zero": 0.1869347528285381,
+            "50/joint_call_minus_base": 3.764187652295739,
+            "50/joint_call_minus_joint_level": 0.8741060367267224,
+            "50/joint_call_minus_lower_trained": 0.28659994859311055,
+            "50/joint_call_minus_zero": 3.951122405124277,
+            "50/joint_level_minus_base": 2.8900816155690165,
+            "50/joint_level_minus_lower_trained": -0.5875060881336118,
+            "50/joint_level_minus_zero": 3.0770163683975547,
+            "50/lower_trained_minus_base": 3.4775877037026284,
+            "50/lower_trained_minus_zero": 3.6645224565311665
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007920120806159189,
+                  "upper": 0.004000202005258644
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999274680144992,
+                  0.000999984083701107,
+                  0.0010000546664727526,
+                  0.0009998285309411323,
+                  0.0010001902972700232,
+                  0.001000098400965199,
+                  0.0009999018596087608,
+                  0.0010001395392908873
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00002384185791015625,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.004000038128640802,
+                  "upper": 0.004000197689821461
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005099691434601384,
+                  0.0005100051179870228,
+                  0.0005100088985444853,
+                  0.0005099558187144665,
+                  0.0005100517388437139,
+                  0.0005100324794262398,
+                  0.0005099599953891866,
+                  0.0005100588900719777
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000026702880859375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.00800011880698511
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.000999931116960665,
+                  0.000999974407693321,
+                  0.0010000440717822133,
+                  0.0009998295600715946,
+                  0.0010001745703947613,
+                  0.0010001090226427892,
+                  0.000999900217455844,
+                  0.001000155839983921
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00002574920654296875,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 958.4964701548959,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 962.2606578071916,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 961.3865517704646,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 961.9740578585986,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 958.3095354020674,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.08440512728986628,
+          "effects": {
+            "100/base_minus_zero": -0.00628308740993333,
+            "100/joint_call_minus_base": 4.428235738552356,
+            "100/joint_call_minus_joint_level": 0.9536480508345591,
+            "100/joint_call_minus_lower_trained": 0.4802815415981492,
+            "100/joint_call_minus_zero": 4.421952651142423,
+            "100/joint_level_minus_base": 3.474587687717797,
+            "100/joint_level_minus_lower_trained": -0.4733665092364099,
+            "100/joint_level_minus_zero": 3.4683046003078637,
+            "100/lower_trained_minus_base": 3.947954196954207,
+            "100/lower_trained_minus_zero": 3.9416711095442736
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007959390654031746,
+                  "upper": 0.004000028292371942
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009998051772031344,
+                  0.0010000597754646488,
+                  0.0009998937662897495,
+                  0.001000162902188079,
+                  0.0009997841307016878,
+                  0.0010000450505730752,
+                  0.000999510085207486,
+                  0.001000130049327605
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000013113021850585938,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999795445865391,
+                  "upper": 0.004000028757667471
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005049321616236025,
+                  0.0005050168032315203,
+                  0.0005049610315689987,
+                  0.0005050690777212563,
+                  0.0005049271350697467,
+                  0.000505017780942931,
+                  0.0005048193616549869,
+                  0.0005050523816290235
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310073/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.007999439742125046
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009998019869655228,
+                  0.0010000468632222108,
+                  0.0009998993442716347,
+                  0.0010001741144929968,
+                  0.0009998025276825324,
+                  0.0010000678405296935,
+                  0.0009995044471694716,
+                  0.0010001426177909817
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000011920928955078125,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 863.0149972145822,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 867.4432329531346,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 866.4895849023001,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 866.9629514115366,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 863.021280301992,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310073,
+      "status": "complete",
+      "wall_seconds": 862.6507828771137
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021416177466422083,
+          "effects": {
+            "50/base_minus_zero": -0.06619070778099001,
+            "50/joint_call_minus_base": 4.106432269276716,
+            "50/joint_call_minus_joint_level": 0.9442009704592493,
+            "50/joint_call_minus_lower_trained": 0.25107573091455393,
+            "50/joint_call_minus_zero": 4.040241561495726,
+            "50/joint_level_minus_base": 3.162231298817467,
+            "50/joint_level_minus_lower_trained": -0.6931252395446954,
+            "50/joint_level_minus_zero": 3.096040591036477,
+            "50/lower_trained_minus_base": 3.8553565383621624,
+            "50/lower_trained_minus_zero": 3.7891658305811724
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007919525368320246,
+                  "upper": 0.004000057221916274
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001106870790339,
+                  0.00099979073455286,
+                  0.0009998548046265914,
+                  0.0009999201409629113,
+                  0.0010000321637500165,
+                  0.0009999433295022624,
+                  0.0009999470854509958,
+                  0.0009999275668339002
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000021696090698242188,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999838822266804,
+                  "upper": 0.004000061023231368
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100424692425975,
+                  0.0005099210639209761,
+                  0.0005099568713445135,
+                  0.0005099658917157993,
+                  0.0005100142586108824,
+                  0.0005099873261835276,
+                  0.0005099805742646327,
+                  0.0005099715874485016
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.0000209808349609375,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.007999494109921346
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001040834795064,
+                  0.0009997877463450854,
+                  0.0009998487627846642,
+                  0.0009999197631742442,
+                  0.0010000116623826287,
+                  0.0009999446639332426,
+                  0.0009999461557332922,
+                  0.0009999312720886818
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00002574920654296875,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 970.2793260389925,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 974.3857583082694,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 973.4415573378103,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 974.1346825773549,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 970.3455167467736,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.06630452565293349,
+          "effects": {
+            "100/base_minus_zero": -0.4943851689566081,
+            "100/joint_call_minus_base": 4.56745497922212,
+            "100/joint_call_minus_joint_level": 0.9815601356420345,
+            "100/joint_call_minus_lower_trained": 0.7384531215356063,
+            "100/joint_call_minus_zero": 4.073069810265512,
+            "100/joint_level_minus_base": 3.5858948435800855,
+            "100/joint_level_minus_lower_trained": -0.2431070141064282,
+            "100/joint_level_minus_zero": 3.0915096746234774,
+            "100/lower_trained_minus_base": 3.8290018576865137,
+            "100/lower_trained_minus_zero": 3.3346166887299056
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007959470452692394,
+                  "upper": 0.004000213302633212
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999731516971142,
+                  0.000999984183599212,
+                  0.0009997180971637856,
+                  0.0010000891435402593,
+                  0.0009995933665862137,
+                  0.0009999451205205685,
+                  0.0010001185306009446,
+                  0.0010000509920106283
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000014543533325195312,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999821608367649,
+                  "upper": 0.00400021400840199
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005049907164714695,
+                  0.0005049973173321862,
+                  0.0005049079020235111,
+                  0.0005050268701093831,
+                  0.0005048652536329464,
+                  0.000504976648967156,
+                  0.0005050459333861583,
+                  0.0005050131065288586
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000015497207641601562,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310089/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.007999505352407085
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999839413369679,
+                  0.0009999837621658928,
+                  0.0009997308903710793,
+                  0.0010000989974263646,
+                  0.000999594981720105,
+                  0.000999939792069439,
+                  0.0010001178511889434,
+                  0.0010000551361282937
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00001430511474609375,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 864.3164813313975,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 868.8839363106194,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 867.9023761749778,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 868.145483189084,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 864.810866500354,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310089,
+      "status": "complete",
+      "wall_seconds": 863.5511196311563
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 80,
+        "actor_parameter_perturbations": 160,
+        "actor_score_backward_batches": 24576,
+        "actor_score_forward_batches": 8192,
+        "checkpoint_writes": 6,
+        "credit_episodes": 3072,
+        "decoder_loads": 2,
+        "evaluation_episodes": 320,
+        "exact_kl_forward_batches": 7296,
+        "fisher_jvp_batches": 3648,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 6144,
+        "native_episodes": 3392,
+        "native_lower_calls": 4070400,
+        "native_network_checks": 3392,
+        "native_pair_checks": 64,
+        "native_steps": 4070400,
+        "native_upper_calls": 61056,
+        "objective_checks": 3072,
+        "pairing_upper_forward_calls": 61056,
+        "parameter_part_checks": 80,
+        "policy_updates": 48,
+        "scenario_pair_checks": 1536,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 48,
+        "training_models_initialized": 6
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021178736844352213,
+          "effects": {
+            "50/base_minus_zero": -0.29116214563986986,
+            "50/joint_call_minus_base": 5.266020183060501,
+            "50/joint_call_minus_joint_level": 1.1489486179992703,
+            "50/joint_call_minus_lower_trained": 0.2670413043680355,
+            "50/joint_call_minus_zero": 4.974858037420631,
+            "50/joint_level_minus_base": 4.117071565061231,
+            "50/joint_level_minus_lower_trained": -0.8819073136312348,
+            "50/joint_level_minus_zero": 3.825909419421361,
+            "50/lower_trained_minus_base": 4.998978878692466,
+            "50/lower_trained_minus_zero": 4.707816733052596
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_50_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.007919999999999998,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007920230372117091,
+                  "upper": 0.004000230705054169
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001452767101982,
+                  0.001000090702518315,
+                  0.0010001696639661683,
+                  0.000999892032378472,
+                  0.00100012743111829,
+                  0.000999869164849239,
+                  0.0010000908320066675,
+                  0.0009998498826708252
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.00002288818359375,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_50_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.0040000551937444066,
+                  "upper": 0.0040002406210603155
+                },
+                "nominal_call_weighted_per_update": [
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051,
+                  0.00051
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005100470950463055,
+                  0.0005100222887511566,
+                  0.000510058793175663,
+                  0.0005099545617659498,
+                  0.0005100451520622245,
+                  0.0005099492236084959,
+                  0.000510039164409456,
+                  0.0005099437273463609
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    24
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000019073486328125,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_50_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.00800021517232519
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0010001391642745945,
+                  0.001000109682410215,
+                  0.0010001607019281583,
+                  0.0009999037432494352,
+                  0.0010001240600040033,
+                  0.000999849386906468,
+                  0.0010000925439140895,
+                  0.0009998358896382254
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000017881393432617188,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 961.5028852754243,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_call": {
+              "episode_return": 966.7689054584846,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "joint_level": {
+              "episode_return": 965.6199568404853,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "lower_trained": {
+              "episode_return": 966.5018641541167,
+              "episode_length": 1200,
+              "upper_calls": 24
+            },
+            "zero": {
+              "episode_return": 961.7940474210641,
+              "episode_length": 1200,
+              "upper_calls": 24
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.09301359568092121,
+          "effects": {
+            "100/base_minus_zero": -1.819218417195792,
+            "100/joint_call_minus_base": 7.942460998631372,
+            "100/joint_call_minus_joint_level": 1.5976720231568535,
+            "100/joint_call_minus_lower_trained": 0.4187129621365564,
+            "100/joint_call_minus_zero": 6.12324258143558,
+            "100/joint_level_minus_base": 6.344788975474518,
+            "100/joint_level_minus_lower_trained": -1.1789590610202971,
+            "100/joint_level_minus_zero": 4.5255705582787265,
+            "100/lower_trained_minus_base": 7.5237480364948155,
+            "100/lower_trained_minus_zero": 5.704529619299024
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_call": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_100_joint_call.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.00796,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.007959453613005258,
+                  "upper": 0.00400041707881633
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999923151514981,
+                  0.0009998250072632813,
+                  0.0010000835671090443,
+                  0.0009995007819215312,
+                  0.0010004854304024409,
+                  0.0009998049296013982,
+                  0.0009996987222286834,
+                  0.0010000670301155445
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000010967254638671875,
+                "freeze_check": "passed"
+              }
+            },
+            "joint_level": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_100_joint_level.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                },
+                "exact_by_level": {
+                  "lower": 0.003999815938269445,
+                  "upper": 0.004000396813213876
+                },
+                "nominal_call_weighted_per_update": [
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505,
+                  0.000505
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0005049995034412191,
+                  0.0005049396910776574,
+                  0.0005050282579087926,
+                  0.0005048331459060144,
+                  0.000505181018208062,
+                  0.0005049113279662942,
+                  0.0005049020234777669,
+                  0.0005050249384157765
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ],
+                  "upper": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ],
+                  "upper": [
+                    12
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000010609626770019531,
+                "freeze_check": "passed"
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_call_weighted_replication_stage88_full_20261002_r1/cells/replicate_310101/final_weights/period_100_lower_trained.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "updates": 8,
+                "nominal_by_level": {
+                  "lower": 0.008
+                },
+                "exact_by_level": {
+                  "lower": 0.00799942760180396
+                },
+                "nominal_call_weighted_per_update": [
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001,
+                  0.001
+                ],
+                "exact_call_weighted_per_update": [
+                  0.0009999987859678693,
+                  0.0009998210437262638,
+                  0.0010000848585780583,
+                  0.0009995040774348962,
+                  0.0010004819807554884,
+                  0.0009997780515068504,
+                  0.0009996977001690264,
+                  0.0010000611036655087
+                ],
+                "gradient_episodes_per_update": {
+                  "lower": [
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64,
+                    64
+                  ]
+                },
+                "decision_calls_per_episode": {
+                  "lower": [
+                    1200
+                  ]
+                },
+                "max_abs_old_logp_difference": 0.000014543533325195312,
+                "freeze_check": "passed"
+              }
+            }
+          },
+          "evaluation_means": {
+            "base": {
+              "episode_return": 869.7683112361718,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_call": {
+              "episode_return": 877.7107722348032,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "joint_level": {
+              "episode_return": 876.1131002116462,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "lower_trained": {
+              "episode_return": 877.2920592726666,
+              "episode_length": 1200,
+              "upper_calls": 12
+            },
+            "zero": {
+              "episode_return": 871.5875296533675,
+              "episode_length": 1200,
+              "upper_calls": 12
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 4070400,
+        "plan_ols_fits": 57664,
+        "plan_ridge_predictions": 57664,
+        "reference_evaluations": 4070400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+      "root": 310101,
+      "status": "complete",
+      "wall_seconds": 879.7587854140438
+    }
+  ],
+  "run_name": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+  "status": "complete"
+}
