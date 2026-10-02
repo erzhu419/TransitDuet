@@ -1,0 +1,14 @@
+# Stage91: lower learning under a fixed final upper
+
+Stage90 attributed part of the lower deficit to budget; a matched-budget residual remained negative at period50 and inconclusive at100. Train LC from source L0 with Stage88 update8 UJ frozen from the first update. Compare with Stage90 LM trained under frozen source U0 and Stage88 jointly trained LJ; no new upper training, allocation search or checkpoint adoption.
+Eight rounds,64 episodes per round, periods50/100, horizon1200. Lower nominal KL is .00099/.000995 per update, matching LM/LJ. Reuse their exact Stage88 full scenario/action-noise training rosters. Std, values, source Adam, forecaster and decoder remain frozen; the original source teacher remains untouched.
+Evaluate eight compositions on32 fresh Stage91 paired seeds per root/period: U0/L0, zero, U0/LM, U0/LJ, U0/LC, UJ/LJ, UJ/LM, UJ/LC. Only LC is newly trained. Preflight: one root, horizon300, two rounds using the first two full Stage88 scenarios per batch, four new evaluation seeds; mechanical qualification only, no performance gate or preflight-weight adoption.
+
+## Frozen Analysis
+All26 final reward endpoints use one equal-root bootstrap65536 / Bonferroni26 family, seed(91,91091), same eight teachers. Primary endpoints are UJ/LC minus UJ/LJ at both periods. Report signed CI for both separately, not a selected period.
+Also compare LC with LM at both fixed evaluation uppers, and LJ with LM as the matched-budget residual reference. The identity LC-LM = (LC-LJ) + (LJ-LM) is checked at each upper. Report upper gains with each lower and zero controls. CI crossing zero is inconclusive, not equality or no-harm; no CI-driven retuning or cross-stage pooling.
+Full additional cost: 12,288 native episodes /14,745,600 steps,128 lower-mean updates,16 new final checkpoints,32 donor loads,16 hybrid-initialization checks,128 exact compositions. Only registered final donors are read once per period; no critic/forecaster fits, Adam steps, intermediate selection or raw traces.
+Scheduler dynamically uses node001-006, no pin;9CPU/8192MiB with8 workers per full root, preflight3CPU/3072MiB with2 workers. Checkpoints remain server-only; pull only completion markers and compact JSON.
+
+## Limitations
+Conditional diagnostic on the same teachers and intentionally paired training rosters. Final UJ already used joint-training samples: this is not an equal-total-compute algorithm comparison. Freezing final UJ changes both its temporal path and level relative to joint training, so a positive LC-LJ alone cannot isolate upper nonstationarity as the cause. Nominal conditional-KL matching is not trajectory-distribution equality. This remains fixed-std MC mean learning, not full actor-critic; Stage67 critic-credit HOLD, earlier negative evidence and the closed frequency-superiority claim remain unchanged.

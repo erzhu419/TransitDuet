@@ -72,7 +72,7 @@ def final_checkpoint(model, output, *, root, period, method, updates, protocol=s
     return str(path)
 
 
-def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None):
+def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None):
     spec = protocol
     qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
     source = json.loads(spec.source_result(root).read_text())
@@ -111,6 +111,8 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
 
             models = {m:copy.deepcopy(original) for m in spec.METHODS}
             cost["training_models_initialized"] += len(models)
+            initialization_metadata = {} if initialize_models is None else initialize_models(period,models,cost)
+            training_snapshots = {m:copy.deepcopy(model.state_dict()) for m,model in models.items()}
             history = {m:[] for m in spec.METHODS}
             for iteration,round_roles in enumerate(roles["training_rounds"],1):
                 for method,model in models.items():
@@ -143,12 +145,13 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
                 checkpoint = None if preflight else final_checkpoint(model,output,root=root,period=period,method=method,
                     updates=o["updates"],protocol=spec)
                 cost["checkpoint_writes"] += int(checkpoint is not None)
-                check_training_freeze(model,snapshot,spec.METHODS[method])
+                check_training_freeze(model,training_snapshots[method],spec.METHODS[method])
                 trained[method] = {"history":history[method],"evaluation_update":o["updates"],"checkpoint":checkpoint,"final_freeze_check":"passed"}
             native.curves.support.assert_frozen(original,snapshot)
             cost["frozen_model_checks"] += 1
             groups[str(period)] = {"alpha":alpha,"trained":trained,"evaluation":evaluation,"effects":effects,
-                "scenario_pairing":"passed","pairing":"passed","source_and_Adam_unchanged":"passed",**evaluation_metadata}
+                "scenario_pairing":"passed","pairing":"passed","source_and_Adam_unchanged":"passed",
+                **initialization_metadata,**evaluation_metadata}
     cell = {"status":"complete","protocol":spec.EXPERIMENT_PROTOCOL,"contract":spec.contract(),"root":root,"preflight":preflight,
         "seed_roles":roles,"cost":cost,"native_planning_cost":planning,"groups":groups,"source_initialization":initialization,
         "optimizer_steps":0,"critic_fits":0,"forecaster_fits":0,"native_trace_writes":0,"wall_seconds":time.monotonic()-started}
