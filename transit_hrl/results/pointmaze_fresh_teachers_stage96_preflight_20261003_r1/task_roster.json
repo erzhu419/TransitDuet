@@ -1,0 +1,87 @@
+{
+  "run_name": "pointmaze_fresh_teachers_stage96_preflight_20261003_r1",
+  "protocol": "pointmaze_fresh_teachers_stage96_v1",
+  "source_revision": "b4a9750a4b1f42931db0b92e69a23348eeef0ec3",
+  "preregistration_revision": "14d7c33348",
+  "verified_at_utc": "2026-10-02 16:33:49 UTC",
+  "preflight": true,
+  "local_fixture_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=transit_hrl:transit_hrl/tests OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 python3 -m unittest test_pointmaze_fresh_teachers -v",
+    "passed": 3
+  },
+  "tasks": [
+    {
+      "actual_ram_mb": null,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "assigned_node": null,
+      "cpu_cores": 3,
+      "description": "Freq-HRL pointmaze_fresh_teachers_stage96_v1 root410001",
+      "exit_code": null,
+      "finished_at": null,
+      "id": "t127012",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001/completion",
+      "log_path": null,
+      "node": null,
+      "project": "pointmaze_fresh_teachers_stage96_v1",
+      "ram_mb": 3072,
+      "require_node": null,
+      "resource_family": "Freq-HRL/pointmaze_fresh_teachers_stage96_v1/preflight",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001/completion",
+      "signature": "Freq-HRL/pointmaze_fresh_teachers_stage96_v1/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/fresh_teachers/410001",
+      "started_at": null,
+      "status": "queued",
+      "submitted_at": 1790958709.4121485,
+      "wait_for_files": []
+    },
+    {
+      "actual_ram_mb": null,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "assigned_node": null,
+      "cpu_cores": 1,
+      "description": "Freq-HRL pointmaze_fresh_teachers_stage96_v1 all-root qualification",
+      "exit_code": null,
+      "finished_at": null,
+      "id": "t127013",
+      "local_result_dir": null,
+      "log_path": null,
+      "node": null,
+      "project": "pointmaze_fresh_teachers_stage96_v1",
+      "ram_mb": 2048,
+      "require_node": null,
+      "resource_family": "Freq-HRL/pointmaze_fresh_teachers_stage96_v1/qualification",
+      "result_dir": null,
+      "signature": "Freq-HRL/pointmaze_fresh_teachers_stage96_v1/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/qualification",
+      "started_at": null,
+      "status": "queued",
+      "submitted_at": 1790958709.4486213,
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001/completion/ready.json"
+      ]
+    }
+  ],
+  "full_run": {
+    "run_name": "pointmaze_fresh_teachers_stage96_full_20261003_r1",
+    "status": "frozen_not_submitted",
+    "launch_gate": "separate_native_preflight_passed"
+  },
+  "performance_confirmation": "not_tested",
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoints": "server_only",
+    "label_archives": "server_only"
+  }
+}
