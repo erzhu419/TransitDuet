@@ -1,0 +1,33 @@
+{
+  "protocol": "pointmaze_aligned_order_stage86_v1",
+  "preflight": true,
+  "run_name": "pointmaze_aligned_order_stage86_preflight_20261002_r1",
+  "source_revision": "5cb2dc52cc6b855ba00ac2f9aaec099647fbb6a7",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t120885",
+      "status": "done",
+      "node": "node006",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 1421,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_aligned_order_stage86_v1/aligned_order/preflight",
+      "role": "aligned_staged_MC_training",
+      "root": 310011
+    },
+    {
+      "id": "t120886",
+      "status": "done",
+      "node": "node005",
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": 0,
+      "resource_family": "Freq-HRL/pointmaze_aligned_order_stage86_v1/qualification",
+      "role": "all_root_aligned_order_qualification",
+      "root": null
+    }
+  ]
+}

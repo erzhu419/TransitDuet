@@ -1,0 +1,275 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "reuse_Stage85_baselines_save_only_aligned_staged_final_weights_server_only",
+    "native_trace_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_mean_parameter_updates": 8,
+    "actor_parameter_perturbations": 16,
+    "actor_score_backward_batches": 192,
+    "actor_score_forward_batches": 64,
+    "baseline_checkpoint_loads": 8,
+    "baseline_freeze_checks": 8,
+    "checkpoint_writes": 0,
+    "collection_freeze_checks": 8,
+    "credit_episodes": 64,
+    "decoder_loads": 2,
+    "evaluation_episodes": 56,
+    "exact_kl_forward_batches": 32,
+    "fisher_jvp_batches": 16,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 128,
+    "native_episodes": 120,
+    "native_lower_calls": 36000,
+    "native_network_checks": 120,
+    "native_pair_checks": 8,
+    "native_steps": 36000,
+    "native_upper_calls": 540,
+    "objective_checks": 64,
+    "pairing_upper_forward_calls": 540,
+    "parameter_part_checks": 8,
+    "policy_updates": 8,
+    "scenario_pair_checks": 32,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 8,
+    "training_models_initialized": 2
+  },
+  "contract": {
+    "artifacts": "read_baseline_weights_server_only_save_only_staged_aligned_final_weights_no_intermediate_checkpoints_or_traces",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "baseline_methods": {
+      "alternating": "alternating",
+      "lower_trained": "lower_trained",
+      "paired_joint": "paired_joint",
+      "staged_original": "staged"
+    },
+    "baseline_training_run": "pointmaze_training_order_stage85_full_20261002_r1",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "correct_real_staged_dataset_confound_keep_Stage85_negative_evidence_Stage67_critic_credit_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "evaluation": "seven_variants_on_32_fresh_paired_Stage86_seeds_per_root_period_preflight_four_no_intermediate_selection",
+    "freeze": "Stage85_final_baselines_bit_exact_reloaded_both_std_values_source_Adam_forecaster_decoder_frozen",
+    "limits": "post_Stage85_design_repair_same_fixed_training_rosters_fresh_evaluation_not_new_independent_training_replication_or_frequency_superiority",
+    "matching": "dual_methods_eight_updates_per_level_32_episodes_per_gradient_.0005_KL_each_lower_only_eight_64_episode_lower_updates_.001_each_total512_episodes_.008_nominal_KL_per_method_period",
+    "noise_mapping": "Stage80_explicit_mapping_original_Stage85_training_roles_fresh_disjoint_Stage86_evaluation_roles",
+    "periods": [
+      50,
+      100
+    ],
+    "repair": "staged_lower_uses_even_Stage85_chunks_upper_uses_odd_identical_level_rosters_to_paired_joint_and_alternating",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all18_reward_contrasts_equal_root_bootstrap65536_Bonferroni18",
+    "training": "only_staged_aligned_retrained_from_same_source_reuse_fixed_Stage85_training_scenarios_and_noise_no_new_selection_or_radius",
+    "variants": [
+      "base",
+      "zero",
+      "paired_joint",
+      "alternating",
+      "staged_original",
+      "lower_trained",
+      "staged_aligned"
+    ]
+  },
+  "endpoints": [
+    "50/staged_aligned_minus_paired_joint",
+    "50/staged_aligned_minus_alternating",
+    "50/staged_aligned_minus_staged_original",
+    "50/staged_aligned_minus_lower_trained",
+    "50/paired_joint_minus_lower_trained",
+    "50/alternating_minus_paired_joint",
+    "50/staged_aligned_minus_zero",
+    "50/lower_trained_minus_zero",
+    "50/base_minus_zero",
+    "100/staged_aligned_minus_paired_joint",
+    "100/staged_aligned_minus_alternating",
+    "100/staged_aligned_minus_staged_original",
+    "100/staged_aligned_minus_lower_trained",
+    "100/paired_joint_minus_lower_trained",
+    "100/alternating_minus_paired_joint",
+    "100/staged_aligned_minus_zero",
+    "100/lower_trained_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "credit_chunks": 4,
+    "credit_scenarios_per_batch": 2,
+    "evaluation_episodes": 4,
+    "rollouts_per_scenario": 2,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_aligned_order_stage86_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "native_evaluation": [
+        86090001,
+        86090002,
+        86090003,
+        86090004
+      ],
+      "source_chunk_order": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "training_chunks": [
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85102002,
+                85102003
+              ],
+              "scenario_seed": 85100001
+            },
+            {
+              "noise_seeds": [
+                85102004,
+                85102005
+              ],
+              "scenario_seed": 85100002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85103002,
+                85103003
+              ],
+              "scenario_seed": 85101001
+            },
+            {
+              "noise_seeds": [
+                85103004,
+                85103005
+              ],
+              "scenario_seed": 85101002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85112002,
+                85112003
+              ],
+              "scenario_seed": 85110001
+            },
+            {
+              "noise_seeds": [
+                85112004,
+                85112005
+              ],
+              "scenario_seed": 85110002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85113002,
+                85113003
+              ],
+              "scenario_seed": 85111001
+            },
+            {
+              "noise_seeds": [
+                85113004,
+                85113005
+              ],
+              "scenario_seed": 85111002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85107002,
+                85107003
+              ],
+              "scenario_seed": 85105001
+            },
+            {
+              "noise_seeds": [
+                85107004,
+                85107005
+              ],
+              "scenario_seed": 85105002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85108002,
+                85108003
+              ],
+              "scenario_seed": 85106001
+            },
+            {
+              "noise_seeds": [
+                85108004,
+                85108005
+              ],
+              "scenario_seed": 85106002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85117002,
+                85117003
+              ],
+              "scenario_seed": 85115001
+            },
+            {
+              "noise_seeds": [
+                85117004,
+                85117005
+              ],
+              "scenario_seed": 85115002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85118002,
+                85118003
+              ],
+              "scenario_seed": 85116001
+            },
+            {
+              "noise_seeds": [
+                85118004,
+                85118005
+              ],
+              "scenario_seed": 85116002
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "source_revision": "5cb2dc52cc6b855ba00ac2f9aaec099647fbb6a7"
+}

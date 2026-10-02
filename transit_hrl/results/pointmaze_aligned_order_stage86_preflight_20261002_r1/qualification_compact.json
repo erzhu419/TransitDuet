@@ -1,0 +1,381 @@
+{
+  "contract": {
+    "artifacts": "read_baseline_weights_server_only_save_only_staged_aligned_final_weights_no_intermediate_checkpoints_or_traces",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "baseline_methods": {
+      "alternating": "alternating",
+      "lower_trained": "lower_trained",
+      "paired_joint": "paired_joint",
+      "staged_original": "staged"
+    },
+    "baseline_training_run": "pointmaze_training_order_stage85_full_20261002_r1",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "correct_real_staged_dataset_confound_keep_Stage85_negative_evidence_Stage67_critic_credit_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "evaluation": "seven_variants_on_32_fresh_paired_Stage86_seeds_per_root_period_preflight_four_no_intermediate_selection",
+    "freeze": "Stage85_final_baselines_bit_exact_reloaded_both_std_values_source_Adam_forecaster_decoder_frozen",
+    "limits": "post_Stage85_design_repair_same_fixed_training_rosters_fresh_evaluation_not_new_independent_training_replication_or_frequency_superiority",
+    "matching": "dual_methods_eight_updates_per_level_32_episodes_per_gradient_.0005_KL_each_lower_only_eight_64_episode_lower_updates_.001_each_total512_episodes_.008_nominal_KL_per_method_period",
+    "noise_mapping": "Stage80_explicit_mapping_original_Stage85_training_roles_fresh_disjoint_Stage86_evaluation_roles",
+    "periods": [
+      50,
+      100
+    ],
+    "repair": "staged_lower_uses_even_Stage85_chunks_upper_uses_odd_identical_level_rosters_to_paired_joint_and_alternating",
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all18_reward_contrasts_equal_root_bootstrap65536_Bonferroni18",
+    "training": "only_staged_aligned_retrained_from_same_source_reuse_fixed_Stage85_training_scenarios_and_noise_no_new_selection_or_radius",
+    "variants": [
+      "base",
+      "zero",
+      "paired_joint",
+      "alternating",
+      "staged_original",
+      "lower_trained",
+      "staged_aligned"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 8,
+    "actor_parameter_perturbations": 16,
+    "actor_score_backward_batches": 192,
+    "actor_score_forward_batches": 64,
+    "baseline_checkpoint_loads": 8,
+    "baseline_freeze_checks": 8,
+    "checkpoint_writes": 0,
+    "collection_freeze_checks": 8,
+    "credit_episodes": 64,
+    "decoder_loads": 2,
+    "evaluation_episodes": 56,
+    "exact_kl_forward_batches": 32,
+    "fisher_jvp_batches": 16,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 128,
+    "native_episodes": 120,
+    "native_lower_calls": 36000,
+    "native_network_checks": 120,
+    "native_pair_checks": 8,
+    "native_steps": 36000,
+    "native_upper_calls": 540,
+    "objective_checks": 64,
+    "pairing_upper_forward_calls": 540,
+    "parameter_part_checks": 8,
+    "policy_updates": 8,
+    "scenario_pair_checks": 32,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 8,
+    "training_models_initialized": 2
+  },
+  "endpoints": {
+    "100/alternating_minus_paired_joint": {
+      "mean": 0.0005267660807248831
+    },
+    "100/base_minus_zero": {
+      "mean": 0.10439469829017867
+    },
+    "100/lower_trained_minus_zero": {
+      "mean": 1.486748061579057
+    },
+    "100/paired_joint_minus_lower_trained": {
+      "mean": -0.6677477531431961
+    },
+    "100/staged_aligned_minus_alternating": {
+      "mean": -0.7116594846840414
+    },
+    "100/staged_aligned_minus_lower_trained": {
+      "mean": -1.3788804717465126
+    },
+    "100/staged_aligned_minus_paired_joint": {
+      "mean": -0.7111327186033165
+    },
+    "100/staged_aligned_minus_staged_original": {
+      "mean": -0.042684659550218385
+    },
+    "100/staged_aligned_minus_zero": {
+      "mean": 0.1078675898325443
+    },
+    "50/alternating_minus_paired_joint": {
+      "mean": 0.0008322763982562265
+    },
+    "50/base_minus_zero": {
+      "mean": 0.11835708787643284
+    },
+    "50/lower_trained_minus_zero": {
+      "mean": 0.7567334356189122
+    },
+    "50/paired_joint_minus_lower_trained": {
+      "mean": -0.4715753734216648
+    },
+    "50/staged_aligned_minus_alternating": {
+      "mean": -0.289054834713518
+    },
+    "50/staged_aligned_minus_lower_trained": {
+      "mean": -0.7597979317369266
+    },
+    "50/staged_aligned_minus_paired_joint": {
+      "mean": -0.2882225583152618
+    },
+    "50/staged_aligned_minus_staged_original": {
+      "mean": -0.6382164650455593
+    },
+    "50/staged_aligned_minus_zero": {
+      "mean": -0.0030644961180144037
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_order_repair",
+  "performance_claim": "corrected_per_actor_scenario_aligned_training_order_not_new_independent_training_replication",
+  "protocol": "pointmaze_aligned_order_stage86_v1",
+  "root_rows": [
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 8,
+        "actor_parameter_perturbations": 16,
+        "actor_score_backward_batches": 192,
+        "actor_score_forward_batches": 64,
+        "baseline_checkpoint_loads": 8,
+        "baseline_freeze_checks": 8,
+        "checkpoint_writes": 0,
+        "collection_freeze_checks": 8,
+        "credit_episodes": 64,
+        "decoder_loads": 2,
+        "evaluation_episodes": 56,
+        "exact_kl_forward_batches": 32,
+        "fisher_jvp_batches": 16,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 128,
+        "native_episodes": 120,
+        "native_lower_calls": 36000,
+        "native_network_checks": 120,
+        "native_pair_checks": 8,
+        "native_steps": 36000,
+        "native_upper_calls": 540,
+        "objective_checks": 64,
+        "pairing_upper_forward_calls": 540,
+        "parameter_part_checks": 8,
+        "policy_updates": 8,
+        "scenario_pair_checks": 32,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 8,
+        "training_models_initialized": 2
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "baseline_checkpoints": {
+            "alternating": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_alternating.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_lower_trained.pt",
+            "paired_joint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_paired_joint.pt",
+            "staged_original": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_staged.pt"
+          },
+          "baseline_freeze": "passed",
+          "effects": {
+            "50/alternating_minus_paired_joint": 0.0008322763982562265,
+            "50/base_minus_zero": 0.11835708787643284,
+            "50/lower_trained_minus_zero": 0.7567334356189122,
+            "50/paired_joint_minus_lower_trained": -0.4715753734216648,
+            "50/staged_aligned_minus_alternating": -0.289054834713518,
+            "50/staged_aligned_minus_lower_trained": -0.7597979317369266,
+            "50/staged_aligned_minus_paired_joint": -0.2882225583152618,
+            "50/staged_aligned_minus_staged_original": -0.6382164650455593,
+            "50/staged_aligned_minus_zero": -0.0030644961180144037
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 231.74992082297888,
+              "tracking_squared_error_integral": 0.27105056389768606
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 231.5822875722598,
+              "tracking_squared_error_integral": 0.2697382318476083
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 232.22066392000227,
+              "tracking_squared_error_integral": 0.2684220195992994
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 231.7490885465806,
+              "tracking_squared_error_integral": 0.2710613045402949
+            },
+            "staged_aligned": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 231.46086598826537,
+              "tracking_squared_error_integral": 0.2708586555473723
+            },
+            "staged_original": {
+              "above_label_speed_q99_rate": 0.004166666666666667,
+              "episode_return": 232.09908245331087,
+              "tracking_squared_error_integral": 0.26786550347447896
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 231.46393048438335,
+              "tracking_squared_error_integral": 0.27426841802504065
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "checkpoint": null,
+            "cumulative_KL": {
+              "exact_by_level": {
+                "lower": 0.0010001113428919168,
+                "upper": 0.0010000142399389116
+              },
+              "matching": "passed",
+              "nominal_by_level": {
+                "lower": 0.001,
+                "upper": 0.001
+              }
+            },
+            "evaluation_update": 4,
+            "final_freeze_check": "passed",
+            "history_summary": {
+              "gradient_episodes_by_actor": {
+                "lower": 16,
+                "upper": 16
+              },
+              "max_abs_old_logp_difference": 0.000019073486328125,
+              "source_chunks_by_actor": {
+                "lower": [
+                  0,
+                  2
+                ],
+                "upper": [
+                  1,
+                  3
+                ]
+              },
+              "updates_by_actor": {
+                "lower": 2,
+                "upper": 2
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "baseline_checkpoints": {
+            "alternating": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_alternating.pt",
+            "lower_trained": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_lower_trained.pt",
+            "paired_joint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_paired_joint.pt",
+            "staged_original": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_staged.pt"
+          },
+          "baseline_freeze": "passed",
+          "effects": {
+            "100/alternating_minus_paired_joint": 0.0005267660807248831,
+            "100/base_minus_zero": 0.10439469829017867,
+            "100/lower_trained_minus_zero": 1.486748061579057,
+            "100/paired_joint_minus_lower_trained": -0.6677477531431961,
+            "100/staged_aligned_minus_alternating": -0.7116594846840414,
+            "100/staged_aligned_minus_lower_trained": -1.3788804717465126,
+            "100/staged_aligned_minus_paired_joint": -0.7111327186033165,
+            "100/staged_aligned_minus_staged_original": -0.042684659550218385,
+            "100/staged_aligned_minus_zero": 0.1078675898325443
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 205.55153457225197,
+              "tracking_squared_error_integral": 0.6454790792278503
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 204.83640219602557,
+              "tracking_squared_error_integral": 0.6519106831660294
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 206.21875555931445,
+              "tracking_squared_error_integral": 0.6390730174241391
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 205.55100780617124,
+              "tracking_squared_error_integral": 0.645492206345291
+            },
+            "staged_aligned": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 204.83987508756795,
+              "tracking_squared_error_integral": 0.6528761859197847
+            },
+            "staged_original": {
+              "above_label_speed_q99_rate": 0.005833333333333334,
+              "episode_return": 204.88255974711817,
+              "tracking_squared_error_integral": 0.6567858230579393
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.0016666666666666668,
+              "episode_return": 204.7320074977354,
+              "tracking_squared_error_integral": 0.676465581585364
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "checkpoint": null,
+            "cumulative_KL": {
+              "exact_by_level": {
+                "lower": 0.0009999134268164791,
+                "upper": 0.000999999258635175
+              },
+              "matching": "passed",
+              "nominal_by_level": {
+                "lower": 0.001,
+                "upper": 0.001
+              }
+            },
+            "evaluation_update": 4,
+            "final_freeze_check": "passed",
+            "history_summary": {
+              "gradient_episodes_by_actor": {
+                "lower": 16,
+                "upper": 16
+              },
+              "max_abs_old_logp_difference": 0.00000667572021484375,
+              "source_chunks_by_actor": {
+                "lower": [
+                  0,
+                  2
+                ],
+                "upper": [
+                  1,
+                  3
+                ]
+              },
+              "updates_by_actor": {
+                "lower": 2,
+                "upper": 2
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 36000,
+        "plan_ols_fits": 420,
+        "plan_ridge_predictions": 420,
+        "reference_evaluations": 36000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "protocol": "pointmaze_aligned_order_stage86_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 36.43936520488933
+    }
+  ],
+  "run_name": "pointmaze_aligned_order_stage86_preflight_20261002_r1",
+  "status": "preflight_passed"
+}
