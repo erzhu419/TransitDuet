@@ -1,0 +1,3221 @@
+{
+  "contract": {
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_traces_local_compact_JSON_and_completion_only",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "test_order_contrasts_and_fair_budget_lower_only_comparator_Stage67_critic_credit_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "evaluation": "registered_last_update_only_32_fresh_paired_seeds_per_root_period_no_intermediate_selection_preflight_four",
+    "freeze": "std_values_source_Adam_forecaster_decoder_bit_exact_frozen_lower_only_upper_frozen",
+    "limits": "teacher_initialized_fixed_std_decoder_MC_route_nominal_sum_of_update_state_conditional_KL_not_trajectory_KL_path_length_or_flat_RL_frequency_superiority",
+    "matching": "dual_methods_eight_updates_per_level_32_episodes_per_gradient_.0005_KL_each_lower_only_eight_64_episode_lower_updates_.001_each_total512_episodes_.008_nominal_KL_per_method_period",
+    "methods": [
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ],
+    "noise_mapping": "Stage80_explicit_mapping_fresh_disjoint_Stage85_chunk_and_evaluation_roles_same_rosters_across_methods",
+    "order": "paired_joint_collect_two_chunks_before_both_updates_alternating_lower_upper_staged_lower_first_half_then_upper_lower_only_pool_two_chunks",
+    "paired_joint": "independent_half_batch_per_level_same_pre_update_joint_policy_not_Stage83_shared_full_gradient_batch",
+    "periods": [
+      50,
+      100
+    ],
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all22_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni22",
+    "training": "16_fresh_credit_chunks_32_episodes_each_no_replay_PPO_Adam_entropy_or_reward_normalization_preflight_four_chunks_eight_episodes",
+    "variants": [
+      "base",
+      "zero",
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 896,
+    "actor_parameter_perturbations": 1792,
+    "actor_score_backward_batches": 159744,
+    "actor_score_forward_batches": 53248,
+    "checkpoint_writes": 64,
+    "collection_freeze_checks": 768,
+    "credit_episodes": 32768,
+    "decoder_loads": 16,
+    "evaluation_episodes": 3072,
+    "exact_kl_forward_batches": 49152,
+    "fisher_jvp_batches": 24576,
+    "forecaster_loads": 8,
+    "frozen_model_checks": 16,
+    "mc_calls": 65536,
+    "native_episodes": 35840,
+    "native_lower_calls": 43008000,
+    "native_network_checks": 35840,
+    "native_pair_checks": 512,
+    "native_steps": 43008000,
+    "native_upper_calls": 645120,
+    "objective_checks": 32768,
+    "pairing_upper_forward_calls": 645120,
+    "parameter_part_checks": 896,
+    "policy_updates": 896,
+    "scenario_pair_checks": 16384,
+    "source_clone_loads": 16,
+    "training_freeze_checks": 896,
+    "training_models_initialized": 64
+  },
+  "endpoints": {
+    "100/alternating_minus_lower_trained": {
+      "ci": [
+        -2.697769102270717,
+        -0.7659046687489447
+      ],
+      "effect": "negative",
+      "mean": -1.6816597825245494
+    },
+    "100/alternating_minus_paired_joint": {
+      "ci": [
+        -0.011952015497857182,
+        0.0017725158004076372
+      ],
+      "effect": "inconclusive",
+      "mean": -0.004472464800501896
+    },
+    "100/alternating_minus_zero": {
+      "ci": [
+        2.1333354836884966,
+        4.739751113294551
+      ],
+      "effect": "positive",
+      "mean": 3.2946799660700914
+    },
+    "100/base_minus_zero": {
+      "ci": [
+        -1.5431543154468077,
+        -0.21642428905398708
+      ],
+      "effect": "negative",
+      "mean": -0.8967834877104939
+    },
+    "100/lower_trained_minus_zero": {
+      "ci": [
+        3.661642528251547,
+        7.199812461895841
+      ],
+      "effect": "positive",
+      "mean": 4.976339748594641
+    },
+    "100/paired_joint_minus_lower_trained": {
+      "ci": [
+        -2.691334954571455,
+        -0.7573649049589681
+      ],
+      "effect": "negative",
+      "mean": -1.6771873177240475
+    },
+    "100/paired_joint_minus_zero": {
+      "ci": [
+        2.1314550911241583,
+        4.7486893074444705
+      ],
+      "effect": "positive",
+      "mean": 3.2991524308705933
+    },
+    "100/staged_minus_alternating": {
+      "ci": [
+        -1.0637056392380755,
+        0.9889042317913646
+      ],
+      "effect": "inconclusive",
+      "mean": 0.05771461723153726
+    },
+    "100/staged_minus_lower_trained": {
+      "ci": [
+        -2.666087302468155,
+        -0.9263173681763007
+      ],
+      "effect": "negative",
+      "mean": -1.6239451652930121
+    },
+    "100/staged_minus_paired_joint": {
+      "ci": [
+        -1.0753919513175212,
+        0.9891411545479114
+      ],
+      "effect": "inconclusive",
+      "mean": 0.05324215243103536
+    },
+    "100/staged_minus_zero": {
+      "ci": [
+        2.2605600412448985,
+        4.7147286246891555
+      ],
+      "effect": "positive",
+      "mean": 3.3523945833016286
+    },
+    "50/alternating_minus_lower_trained": {
+      "ci": [
+        -1.7996332741808936,
+        -1.173439806541208
+      ],
+      "effect": "negative",
+      "mean": -1.4935687320432356
+    },
+    "50/alternating_minus_paired_joint": {
+      "ci": [
+        -0.003228969475049137,
+        -0.0006970413494022942
+      ],
+      "effect": "negative",
+      "mean": -0.002026112966069249
+    },
+    "50/alternating_minus_zero": {
+      "ci": [
+        1.9582806078093604,
+        3.424616909687667
+      ],
+      "effect": "positive",
+      "mean": 2.6149671136420434
+    },
+    "50/base_minus_zero": {
+      "ci": [
+        -0.31970349874897286,
+        0.205543303107369
+      ],
+      "effect": "inconclusive",
+      "mean": -0.10498247496597246
+    },
+    "50/lower_trained_minus_zero": {
+      "ci": [
+        3.461009619188885,
+        4.867765035543982
+      ],
+      "effect": "positive",
+      "mean": 4.108535845685279
+    },
+    "50/paired_joint_minus_lower_trained": {
+      "ci": [
+        -1.7972181310919737,
+        -1.1709472429446222
+      ],
+      "effect": "negative",
+      "mean": -1.4915426190771663
+    },
+    "50/paired_joint_minus_zero": {
+      "ci": [
+        1.9601171078509037,
+        3.4270566761016106
+      ],
+      "effect": "positive",
+      "mean": 2.6169932266081126
+    },
+    "50/staged_minus_alternating": {
+      "ci": [
+        -0.24526779668150978,
+        0.28914140326248283
+      ],
+      "effect": "inconclusive",
+      "mean": 0.0607022534827677
+    },
+    "50/staged_minus_lower_trained": {
+      "ci": [
+        -1.7597463310599624,
+        -1.1507224349324998
+      ],
+      "effect": "negative",
+      "mean": -1.432866478560468
+    },
+    "50/staged_minus_paired_joint": {
+      "ci": [
+        -0.2484967661565589,
+        0.2878677266547145
+      ],
+      "effect": "inconclusive",
+      "mean": 0.05867614051669845
+    },
+    "50/staged_minus_zero": {
+      "ci": [
+        2.119718649515422,
+        3.230391478264554
+      ],
+      "effect": "positive",
+      "mean": 2.675669367124811
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+  "performance_claim": "matched_sample_cumulative_nominal_KL_MC_training_order_not_full_actor_critic_or_frequency_superiority",
+  "protocol": "pointmaze_training_order_stage85_v1",
+  "root_rows": [
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.5630902290814817,
+            "50/alternating_minus_paired_joint": -0.000009022596135110916,
+            "50/alternating_minus_zero": 2.441594416157372,
+            "50/base_minus_zero": 0.44560250534196655,
+            "50/lower_trained_minus_zero": 4.004684645238854,
+            "50/paired_joint_minus_lower_trained": -1.5630812064853465,
+            "50/paired_joint_minus_zero": 2.441603438753507,
+            "50/staged_minus_alternating": 0.20119423096994993,
+            "50/staged_minus_lower_trained": -1.3618959981115317,
+            "50/staged_minus_paired_joint": 0.20118520837381482,
+            "50/staged_minus_zero": 2.642788647127322
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.01744791666666667,
+              "episode_return": 964.7834590054777,
+              "tracking_squared_error_integral": 0.9326020979341361
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.01736979166666667,
+              "episode_return": 962.7874670946618,
+              "tracking_squared_error_integral": 0.9378441657671279
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.01736979166666667,
+              "episode_return": 966.3465492345589,
+              "tracking_squared_error_integral": 0.9277585355626203
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.01744791666666667,
+              "episode_return": 964.783468028074,
+              "tracking_squared_error_integral": 0.9326164267085069
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.01760416666666667,
+              "episode_return": 964.9846532364477,
+              "tracking_squared_error_integral": 0.9312094456879864
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.012291666666666666,
+              "episode_return": 962.34186458932,
+              "tracking_squared_error_integral": 0.9401981434059773
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0040000819046193525,
+                  "upper": 0.004000015111345618
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000020503997802734375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000467695117199,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.00002086162567138672,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000102796581729,
+                  "upper": 0.004000005541655454
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000021457672119140625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000036973069694,
+                  "upper": 0.004000159449765882
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000023365020751953125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "effects": {
+            "100/alternating_minus_lower_trained": -1.9306186786729533,
+            "100/alternating_minus_paired_joint": 0.0009603169916161391,
+            "100/alternating_minus_zero": 2.1208113769678683,
+            "100/base_minus_zero": 0.09901161713218798,
+            "100/lower_trained_minus_zero": 4.051430055640822,
+            "100/paired_joint_minus_lower_trained": -1.9315789956645695,
+            "100/paired_joint_minus_zero": 2.119851059976252,
+            "100/staged_minus_alternating": 0.6456771720122596,
+            "100/staged_minus_lower_trained": -1.2849415066606937,
+            "100/staged_minus_paired_joint": 0.6466374890038757,
+            "100/staged_minus_zero": 2.766488548980128
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.010703125000000003,
+              "episode_return": 875.4438464949885,
+              "tracking_squared_error_integral": 2.1229978915538736
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.010807291666666668,
+              "episode_return": 873.4220467351527,
+              "tracking_squared_error_integral": 2.1289838854407175
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.010807291666666668,
+              "episode_return": 877.3744651736614,
+              "tracking_squared_error_integral": 2.1155054388158834
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.010703125000000003,
+              "episode_return": 875.4428861779973,
+              "tracking_squared_error_integral": 2.1230212508533004
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.01078125,
+              "episode_return": 876.089523667001,
+              "tracking_squared_error_integral": 2.1236932445712973
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.005651041666666667,
+              "episode_return": 873.3230351180209,
+              "tracking_squared_error_integral": 2.1398987298921517
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0039997562206194725,
+                  "upper": 0.004000098698056844
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000322538318647,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.0000152587890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999768608455708,
+                  "upper": 0.004000099077412203
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310011/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999981596981327,
+                  "upper": 0.004000032520255962
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 1125.9223288241774
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019697945784676246,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.7911890019273393,
+            "50/alternating_minus_paired_joint": -0.001836326080759676,
+            "50/alternating_minus_zero": 2.0193730882743353,
+            "50/base_minus_zero": -0.07936959922674092,
+            "50/lower_trained_minus_zero": 3.8105620902016746,
+            "50/paired_joint_minus_lower_trained": -1.7893526758465796,
+            "50/paired_joint_minus_zero": 2.021209414355095,
+            "50/staged_minus_alternating": 0.3901689414422016,
+            "50/staged_minus_lower_trained": -1.4010200604851377,
+            "50/staged_minus_paired_joint": 0.3883326153614419,
+            "50/staged_minus_zero": 2.409542029716537
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.013541666666666665,
+              "episode_return": 970.5178425024296,
+              "tracking_squared_error_integral": 0.8868404887207042
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.013541666666666665,
+              "episode_return": 968.4190998149286,
+              "tracking_squared_error_integral": 0.893502411252561
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.013541666666666665,
+              "episode_return": 972.3090315043569,
+              "tracking_squared_error_integral": 0.8822547757075438
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.013541666666666665,
+              "episode_return": 970.5196788285107,
+              "tracking_squared_error_integral": 0.8868351678515516
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.013463541666666665,
+              "episode_return": 970.9080114438718,
+              "tracking_squared_error_integral": 0.8869017673247614
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.012473958333333337,
+              "episode_return": 968.4984694141552,
+              "tracking_squared_error_integral": 0.8935366091135687
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.00400014442592852,
+                  "upper": 0.004000214396564847
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000209808349609375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.00800122296413528,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000022411346435546875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0040001597132713895,
+                  "upper": 0.00400022319388306
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000018596649169921875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0040001381888348925,
+                  "upper": 0.004000137777067932
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000022411346435546875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.0782795618110407,
+          "effects": {
+            "100/alternating_minus_lower_trained": -2.185796532787883,
+            "100/alternating_minus_paired_joint": -0.00614613829308297,
+            "100/alternating_minus_zero": 3.436901161265908,
+            "100/base_minus_zero": -1.1093309106983789,
+            "100/lower_trained_minus_zero": 5.622697694053791,
+            "100/paired_joint_minus_lower_trained": -2.1796503944948,
+            "100/paired_joint_minus_zero": 3.443047299558991,
+            "100/staged_minus_alternating": 1.3491885624087772,
+            "100/staged_minus_lower_trained": -0.8366079703791058,
+            "100/staged_minus_paired_joint": 1.3430424241156942,
+            "100/staged_minus_zero": 4.786089723674685
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.0175,
+              "episode_return": 877.7158792681034,
+              "tracking_squared_error_integral": 2.102124760296054
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.017656250000000002,
+              "episode_return": 873.1696471961392,
+              "tracking_squared_error_integral": 2.125265538247662
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.017656250000000002,
+              "episode_return": 879.9016758008911,
+              "tracking_squared_error_integral": 2.0914775868845146
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.0175,
+              "episode_return": 877.7220254063967,
+              "tracking_squared_error_integral": 2.102096676486093
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.017552083333333336,
+              "episode_return": 879.0650678305121,
+              "tracking_squared_error_integral": 2.0952351711562454
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.01567708333333333,
+              "episode_return": 874.2789781068375,
+              "tracking_squared_error_integral": 2.120073402497364
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000070441388857,
+                  "upper": 0.004000193687676923
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000095367431640625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.007999992702064375,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.00001049041748046875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000079136035724,
+                  "upper": 0.004000201724844734
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000010013580322265625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310023/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.00399967514833176,
+                  "upper": 0.0040003349355141205
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001811981201171875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310023,
+      "status": "complete",
+      "wall_seconds": 1138.6447950140573
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.019892258119766967,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.944204127198482,
+            "50/alternating_minus_paired_joint": -0.0018581732334048695,
+            "50/alternating_minus_zero": 3.3408192584425223,
+            "50/base_minus_zero": -0.08833818684750128,
+            "50/lower_trained_minus_zero": 5.285023385641004,
+            "50/paired_joint_minus_lower_trained": -1.9423459539650771,
+            "50/paired_joint_minus_zero": 3.342677431675927,
+            "50/staged_minus_alternating": -0.03261316733483355,
+            "50/staged_minus_lower_trained": -1.9768172945333156,
+            "50/staged_minus_paired_joint": -0.03447134056823842,
+            "50/staged_minus_zero": 3.3082060911076887
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.020885416666666667,
+              "episode_return": 977.7354787199071,
+              "tracking_squared_error_integral": 0.8240954121987284
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.021119791666666665,
+              "episode_return": 974.3063212746171,
+              "tracking_squared_error_integral": 0.8370460321597474
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.021119791666666665,
+              "episode_return": 979.6796828471056,
+              "tracking_squared_error_integral": 0.8170826422325129
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.020885416666666667,
+              "episode_return": 977.7373368931403,
+              "tracking_squared_error_integral": 0.824090960678518
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.020989583333333336,
+              "episode_return": 977.7028655525721,
+              "tracking_squared_error_integral": 0.8242799823056174
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.01846354166666667,
+              "episode_return": 974.3946594614646,
+              "tracking_squared_error_integral": 0.8374256923376459
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000369161086585,
+                  "upper": 0.004000853803363779
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000014781951904296875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000511665356752,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.00001621246337890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0040003765792371694,
+                  "upper": 0.004000879050446099
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000152587890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000111919235822,
+                  "upper": 0.004000603997842246
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001430511474609375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.09857353856972718,
+          "effects": {
+            "100/alternating_minus_lower_trained": -3.3357346287225127,
+            "100/alternating_minus_paired_joint": -0.009723634620510069,
+            "100/alternating_minus_zero": 5.692279411873876,
+            "100/base_minus_zero": -1.031224991668065,
+            "100/lower_trained_minus_zero": 9.02801404059639,
+            "100/paired_joint_minus_lower_trained": -3.3260109941020026,
+            "100/paired_joint_minus_zero": 5.7020030464943865,
+            "100/staged_minus_alternating": -0.12659250859466553,
+            "100/staged_minus_lower_trained": -3.4623271373171782,
+            "100/staged_minus_paired_joint": -0.1363161432151756,
+            "100/staged_minus_zero": 5.565686903279211
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.015807291666666667,
+              "episode_return": 883.7443332159021,
+              "tracking_squared_error_integral": 1.8795833869235248
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.016041666666666666,
+              "episode_return": 877.0208288123599,
+              "tracking_squared_error_integral": 1.9136847310489336
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.016041666666666666,
+              "episode_return": 887.0800678446246,
+              "tracking_squared_error_integral": 1.8555803129507542
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.015859375,
+              "episode_return": 883.7540568505226,
+              "tracking_squared_error_integral": 1.8795751817341335
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.015859375000000002,
+              "episode_return": 883.6177407073075,
+              "tracking_squared_error_integral": 1.8754669348514017
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.012734375000000001,
+              "episode_return": 878.0520538040281,
+              "tracking_squared_error_integral": 1.908550803995086
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000838995591413,
+                  "upper": 0.004000646342976579
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000008106231689453125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008001433994234749,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000011444091796875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000851926309445,
+                  "upper": 0.004000676089050825
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00000858306884765625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310037/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000453422763262,
+                  "upper": 0.0040001728135945925
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000009059906005859375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310037,
+      "status": "complete",
+      "wall_seconds": 1103.5286143273115
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021338943540272614,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.2056465925026139,
+            "50/alternating_minus_paired_joint": -0.0026716026228861267,
+            "50/alternating_minus_zero": 3.0431628902891887,
+            "50/base_minus_zero": -0.3383461094346423,
+            "50/lower_trained_minus_zero": 4.248809482791803,
+            "50/paired_joint_minus_lower_trained": -1.2029749898797277,
+            "50/paired_joint_minus_zero": 3.045834492912075,
+            "50/staged_minus_alternating": 0.053529097238872225,
+            "50/staged_minus_lower_trained": -1.1521174952637416,
+            "50/staged_minus_paired_joint": 0.0508574946159861,
+            "50/staged_minus_zero": 3.096691987528061
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.008072916666666666,
+              "episode_return": 955.1442177903516,
+              "tracking_squared_error_integral": 1.0221592441853211
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.008359374999999999,
+              "episode_return": 951.762708790628,
+              "tracking_squared_error_integral": 1.0360791213745582
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.008359374999999999,
+              "episode_return": 956.3498643828545,
+              "tracking_squared_error_integral": 1.0165090809529886
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.008072916666666666,
+              "episode_return": 955.1468893929747,
+              "tracking_squared_error_integral": 1.0221560506876022
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.007994791666666667,
+              "episode_return": 955.1977468875908,
+              "tracking_squared_error_integral": 1.0212778346474474
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.005859374999999999,
+              "episode_return": 952.1010549000626,
+              "tracking_squared_error_integral": 1.0328852121928969
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000016843861811,
+                  "upper": 0.004000099069596708
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000019073486328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000486434355181,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000027179718017578125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000009987180085,
+                  "upper": 0.004000101847679748
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00002014636993408203,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000029141806582,
+                  "upper": 0.004000097096239176
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000019073486328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07375870162021787,
+          "effects": {
+            "100/alternating_minus_lower_trained": -0.4746995068404054,
+            "100/alternating_minus_paired_joint": -0.007208432074953919,
+            "100/alternating_minus_zero": 3.194054512112629,
+            "100/base_minus_zero": -1.0842928165774914,
+            "100/lower_trained_minus_zero": 3.6687540189530345,
+            "100/paired_joint_minus_lower_trained": -0.4674910747654515,
+            "100/paired_joint_minus_zero": 3.201262944187583,
+            "100/staged_minus_alternating": -0.23507154433561084,
+            "100/staged_minus_lower_trained": -0.7097710511760162,
+            "100/staged_minus_paired_joint": -0.24227997641056476,
+            "100/staged_minus_zero": 2.9589829677770183
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.013046875000000003,
+              "episode_return": 857.2829300893405,
+              "tracking_squared_error_integral": 2.3305866821565755
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.013125000000000003,
+              "episode_return": 853.0045827606504,
+              "tracking_squared_error_integral": 2.3620721918273553
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.013125000000000003,
+              "episode_return": 857.7576295961807,
+              "tracking_squared_error_integral": 2.3244434721190133
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.013046875000000003,
+              "episode_return": 857.2901385214152,
+              "tracking_squared_error_integral": 2.3305706852050996
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.01296875,
+              "episode_return": 857.0478585450045,
+              "tracking_squared_error_integral": 2.3337473602172585
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.011848958333333336,
+              "episode_return": 854.0888755772277,
+              "tracking_squared_error_integral": 2.3408744343883945
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000103684276133,
+                  "upper": 0.004000196853341994
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000010848045349121094,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000059151561212,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000016450881958007812,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000104532474293,
+                  "upper": 0.004000200211745606
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000012278556823730469,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310049/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000079799025535,
+                  "upper": 0.004000230093854034
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000152587890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310049,
+      "status": "complete",
+      "wall_seconds": 1124.6578385238536
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.018931567661582147,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.2865361312825918,
+            "50/alternating_minus_paired_joint": -0.000488456354784006,
+            "50/alternating_minus_zero": 2.110594607255372,
+            "50/base_minus_zero": -0.3051768752157962,
+            "50/lower_trained_minus_zero": 3.397130738537964,
+            "50/paired_joint_minus_lower_trained": -1.2860476749278078,
+            "50/paired_joint_minus_zero": 2.111083063610156,
+            "50/staged_minus_alternating": 0.29193719834796994,
+            "50/staged_minus_lower_trained": -0.9945989329346219,
+            "50/staged_minus_paired_joint": 0.29144874199318593,
+            "50/staged_minus_zero": 2.402531805603342
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.009218750000000001,
+              "episode_return": 965.7473247192751,
+              "tracking_squared_error_integral": 0.9197161010708401
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.009244791666666667,
+              "episode_return": 963.3315532368039,
+              "tracking_squared_error_integral": 0.92668406524268
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.009244791666666667,
+              "episode_return": 967.0338608505581,
+              "tracking_squared_error_integral": 0.9178114500954734
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.009218750000000001,
+              "episode_return": 965.7478131756299,
+              "tracking_squared_error_integral": 0.9197270445111526
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.009166666666666667,
+              "episode_return": 966.0392619176229,
+              "tracking_squared_error_integral": 0.9179793392818738
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.006979166666666668,
+              "episode_return": 963.6367301120197,
+              "tracking_squared_error_integral": 0.926129722938723
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000145035227439,
+                  "upper": 0.004000947324790555
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000171661376953125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000965948487536,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.00001621246337890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000145190648754,
+                  "upper": 0.004001015326513693
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000010967254638671875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000176845523348,
+                  "upper": 0.004000258361991931
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000012159347534179688,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.056687008052382776,
+          "effects": {
+            "100/alternating_minus_lower_trained": -2.373975023026251,
+            "100/alternating_minus_paired_joint": 0.002334314626537548,
+            "100/alternating_minus_zero": 2.607127448686178,
+            "100/base_minus_zero": -1.4169599519750555,
+            "100/lower_trained_minus_zero": 4.981102471712429,
+            "100/paired_joint_minus_lower_trained": -2.3763093376527884,
+            "100/paired_joint_minus_zero": 2.6047931340596406,
+            "100/staged_minus_alternating": 1.0963887001883563,
+            "100/staged_minus_lower_trained": -1.2775863228378945,
+            "100/staged_minus_paired_joint": 1.0987230148148939,
+            "100/staged_minus_zero": 3.7035161488745345
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.006145833333333333,
+              "episode_return": 876.3437600736584,
+              "tracking_squared_error_integral": 2.0884802343162194
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.006276041666666666,
+              "episode_return": 872.3196726729972,
+              "tracking_squared_error_integral": 2.1083218292876915
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.006276041666666666,
+              "episode_return": 878.7177350966849,
+              "tracking_squared_error_integral": 2.0763018847419734
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.006145833333333333,
+              "episode_return": 876.3414257590322,
+              "tracking_squared_error_integral": 2.0885126483501772
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.006171874999999999,
+              "episode_return": 877.4401487738469,
+              "tracking_squared_error_integral": 2.0823736039873646
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.003776041666666667,
+              "episode_return": 873.7366326249722,
+              "tracking_squared_error_integral": 2.096944407712326
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0040001735577252905,
+                  "upper": 0.0040004612614415545
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001430511474609375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.00800094092120742,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000014781951904296875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000175374943038,
+                  "upper": 0.004000444742671883
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000095367431640625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310061/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999995925910002,
+                  "upper": 0.004000141982897136
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000008821487426757812,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310061,
+      "status": "complete",
+      "wall_seconds": 1136.1398990922607
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02252462422146412,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.7116969777560556,
+            "50/alternating_minus_paired_joint": -0.003365273334090091,
+            "50/alternating_minus_zero": 2.298274139504997,
+            "50/base_minus_zero": -0.34764371506410185,
+            "50/lower_trained_minus_zero": 4.009971117261053,
+            "50/paired_joint_minus_lower_trained": -1.7083317044219655,
+            "50/paired_joint_minus_zero": 2.301639412839087,
+            "50/staged_minus_alternating": -0.011757759305631055,
+            "50/staged_minus_lower_trained": -1.7234547370616866,
+            "50/staged_minus_paired_joint": -0.015123032639721146,
+            "50/staged_minus_zero": 2.286516380199366
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.00484375,
+              "episode_return": 955.6292591324316,
+              "tracking_squared_error_integral": 0.9681045975715484
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.004895833333333333,
+              "episode_return": 952.9833412778623,
+              "tracking_squared_error_integral": 0.9801000959313725
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.004895833333333333,
+              "episode_return": 957.3409561101874,
+              "tracking_squared_error_integral": 0.9591862648997588
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.00484375,
+              "episode_return": 955.6326244057656,
+              "tracking_squared_error_integral": 0.9680958083848961
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.004869791666666666,
+              "episode_return": 955.6175013731258,
+              "tracking_squared_error_integral": 0.9670749637889614
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.00515625,
+              "episode_return": 953.3309849929263,
+              "tracking_squared_error_integral": 0.9749760944883671
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999997842394363,
+                  "upper": 0.004000126690800765
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000022530555725097656,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000384899041675,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000022530555725097656,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999985988495549,
+                  "upper": 0.004000125441357033
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000022530555725097656,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000148530629048,
+                  "upper": 0.004000052176055006
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000022530555725097656,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.08440512728986628,
+          "effects": {
+            "100/alternating_minus_lower_trained": -1.6875221465183046,
+            "100/alternating_minus_paired_joint": 0.0038900831407744363,
+            "100/alternating_minus_zero": 1.57367910847546,
+            "100/base_minus_zero": -0.7336956653978,
+            "100/lower_trained_minus_zero": 3.2612012549937646,
+            "100/paired_joint_minus_lower_trained": -1.691412229659079,
+            "100/paired_joint_minus_zero": 1.5697890253346856,
+            "100/staged_minus_alternating": 0.1816247567476772,
+            "100/staged_minus_lower_trained": -1.5058973897706274,
+            "100/staged_minus_paired_joint": 0.18551483988845163,
+            "100/staged_minus_zero": 1.7553038652231372
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.014270833333333335,
+              "episode_return": 857.6689332179141,
+              "tracking_squared_error_integral": 2.360545555809391
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.01432291666666667,
+              "episode_return": 855.3615584440408,
+              "tracking_squared_error_integral": 2.3724641881129727
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.01432291666666667,
+              "episode_return": 859.3564553644321,
+              "tracking_squared_error_integral": 2.3482921944237125
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.014270833333333335,
+              "episode_return": 857.6650431347734,
+              "tracking_squared_error_integral": 2.3606017880195536
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.01416666666666667,
+              "episode_return": 857.8505579746618,
+              "tracking_squared_error_integral": 2.358026308467586
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.01098958333333333,
+              "episode_return": 856.0952541094388,
+              "tracking_squared_error_integral": 2.359673488321837
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999870846659091,
+                  "upper": 0.004000074808848171
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000012993812561035156,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000402575910337,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000014185905456542969,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0039998671779881605,
+                  "upper": 0.004000075703847306
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000012993812561035156,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310073/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000375372376778,
+                  "upper": 0.004000084549555229
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000133514404296875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310073,
+      "status": "complete",
+      "wall_seconds": 1105.1562092653476
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021416177466422083,
+          "effects": {
+            "50/alternating_minus_lower_trained": -1.460535152857851,
+            "50/alternating_minus_paired_joint": -0.0022257207090561337,
+            "50/alternating_minus_zero": 1.7026784439701572,
+            "50/base_minus_zero": 0.1232414389668115,
+            "50/lower_trained_minus_zero": 3.163213596828008,
+            "50/paired_joint_minus_lower_trained": -1.4583094321487948,
+            "50/paired_joint_minus_zero": 1.7049041646792134,
+            "50/staged_minus_alternating": 0.09288387784014418,
+            "50/staged_minus_lower_trained": -1.3676512750177068,
+            "50/staged_minus_paired_joint": 0.09065815713108805,
+            "50/staged_minus_zero": 1.7955623218103014
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.01385416666666667,
+              "episode_return": 950.2909236103444,
+              "tracking_squared_error_integral": 1.0484881601178773
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.013984375000000002,
+              "episode_return": 948.711486605341,
+              "tracking_squared_error_integral": 1.0555592962725973
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.013984375000000002,
+              "episode_return": 951.7514587632022,
+              "tracking_squared_error_integral": 1.0436011248784736
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.01385416666666667,
+              "episode_return": 950.2931493310538,
+              "tracking_squared_error_integral": 1.0484836098609776
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.013671875000000003,
+              "episode_return": 950.3838074881849,
+              "tracking_squared_error_integral": 1.0482919415704466
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.012317708333333337,
+              "episode_return": 948.5882451663743,
+              "tracking_squared_error_integral": 1.0577753605440654
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000224523236061,
+                  "upper": 0.004000100004444479
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000031948089599609375,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.007999624273015066,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000018596649169921875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000254925986811,
+                  "upper": 0.004000100238574071
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001811981201171875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000221721614705,
+                  "upper": 0.004000082815945218
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000021219253540039062,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.06630452565293349,
+          "effects": {
+            "100/alternating_minus_lower_trained": -0.8834762472872875,
+            "100/alternating_minus_paired_joint": -0.0026897624950485977,
+            "100/alternating_minus_zero": 3.05409653255845,
+            "100/base_minus_zero": 0.02182175713429757,
+            "100/lower_trained_minus_zero": 3.9375727798457376,
+            "100/paired_joint_minus_lower_trained": -0.8807864847922389,
+            "100/paired_joint_minus_zero": 3.0567862950534987,
+            "100/staged_minus_alternating": -0.5922014166394405,
+            "100/staged_minus_lower_trained": -1.475677663926728,
+            "100/staged_minus_paired_joint": -0.5948911791344891,
+            "100/staged_minus_zero": 2.4618951159190097
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.02065104166666666,
+              "episode_return": 858.9870004469165,
+              "tracking_squared_error_integral": 2.303334838129004
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.02075520833333333,
+              "episode_return": 855.9547256714923,
+              "tracking_squared_error_integral": 2.322157352180841
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.02075520833333333,
+              "episode_return": 859.8704766942042,
+              "tracking_squared_error_integral": 2.2958028405752238
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.02065104166666666,
+              "episode_return": 858.9896902094118,
+              "tracking_squared_error_integral": 2.30335737831187
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.020468749999999997,
+              "episode_return": 858.3947990302771,
+              "tracking_squared_error_integral": 2.302926405700669
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.020312499999999997,
+              "episode_return": 855.9329039143582,
+              "tracking_squared_error_integral": 2.3289640098907154
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000291245990693,
+                  "upper": 0.00400011713661201
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000014543533325195312,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000211074967492,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000013589859008789062,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000289903702563,
+                  "upper": 0.00400011051063507
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001239776611328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310089/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000160559367047,
+                  "upper": 0.0040001666578437746
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000015497207641601562,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310089,
+      "status": "complete",
+      "wall_seconds": 1120.1479895338416
+    },
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 112,
+        "actor_parameter_perturbations": 224,
+        "actor_score_backward_batches": 19968,
+        "actor_score_forward_batches": 6656,
+        "checkpoint_writes": 8,
+        "collection_freeze_checks": 96,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 6144,
+        "fisher_jvp_batches": 3072,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 8192,
+        "native_episodes": 4480,
+        "native_lower_calls": 5376000,
+        "native_network_checks": 4480,
+        "native_pair_checks": 64,
+        "native_steps": 5376000,
+        "native_upper_calls": 80640,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 80640,
+        "parameter_part_checks": 112,
+        "policy_updates": 112,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 112,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021178736844352213,
+          "effects": {
+            "50/alternating_minus_lower_trained": -0.9856516437394696,
+            "50/alternating_minus_paired_joint": -0.003754328797437978,
+            "50/alternating_minus_zero": 3.9632400652424025,
+            "50/base_minus_zero": -0.24982925824777524,
+            "50/lower_trained_minus_zero": 4.948891708981872,
+            "50/paired_joint_minus_lower_trained": -0.9818973149420316,
+            "50/paired_joint_minus_zero": 3.9669943940398404,
+            "50/staged_minus_alternating": -0.4997243913365317,
+            "50/staged_minus_lower_trained": -1.4853760350760012,
+            "50/staged_minus_paired_joint": -0.5034787201339697,
+            "50/staged_minus_zero": 3.463515673905871
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.018802083333333334,
+              "episode_return": 951.4187000420022,
+              "tracking_squared_error_integral": 1.0695666323105173
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.018958333333333327,
+              "episode_return": 947.2056307185122,
+              "tracking_squared_error_integral": 1.0880629331649907
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.018958333333333327,
+              "episode_return": 952.404351685742,
+              "tracking_squared_error_integral": 1.064679640795067
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.018776041666666667,
+              "episode_return": 951.4224543707999,
+              "tracking_squared_error_integral": 1.0695546270424763
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.018828125,
+              "episode_return": 950.918975650666,
+              "tracking_squared_error_integral": 1.071220398977243
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.016171875,
+              "episode_return": 947.4554599767602,
+              "tracking_squared_error_integral": 1.0863278377725345
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_50_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000017002487641,
+                  "upper": 0.004000128949202177
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001728534698486328,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_50_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.008000649175308138,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000019073486328125,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_50_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000021003798812,
+                  "upper": 0.004000122621980232
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.0000133514404296875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_50_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.004000032979644428,
+                  "upper": 0.0040003364391696175
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001621246337890625,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.09301359568092121,
+          "effects": {
+            "100/alternating_minus_lower_trained": -0.5814554963407979,
+            "100/alternating_minus_paired_joint": -0.01719646567934774,
+            "100/alternating_minus_zero": 4.678490176620361,
+            "100/base_minus_zero": -1.9195969396336459,
+            "100/lower_trained_minus_zero": 5.259945672961159,
+            "100/paired_joint_minus_lower_trained": -0.5642590306614501,
+            "100/paired_joint_minus_zero": 4.695686642299709,
+            "100/staged_minus_alternating": -1.8572967839350554,
+            "100/staged_minus_lower_trained": -2.4387522802758532,
+            "100/staged_minus_paired_joint": -1.8744932496144031,
+            "100/staged_minus_zero": 2.8211933926853057
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.013489583333333336,
+              "episode_return": 859.8647221905153,
+              "tracking_squared_error_integral": 2.2541125280775236
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.013489583333333333,
+              "episode_return": 853.266635074261,
+              "tracking_squared_error_integral": 2.2998711128691416
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.013489583333333333,
+              "episode_return": 860.4461776868561,
+              "tracking_squared_error_integral": 2.2511768912822365
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.013489583333333336,
+              "episode_return": 859.8819186561947,
+              "tracking_squared_error_integral": 2.2540377810231247
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.013515625,
+              "episode_return": 858.0074254065801,
+              "tracking_squared_error_integral": 2.26525393029627
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0.012187500000000002,
+              "episode_return": 855.1862320138947,
+              "tracking_squared_error_integral": 2.274748759556792
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_100_alternating.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999398750535253,
+                  "upper": 0.004000167000391087
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.00001049041748046875,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_100_lower_trained.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.007999808174890547,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.008,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 512,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000011563301086425781,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_100_paired_joint.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0039993986076984145,
+                  "upper": 0.0040001630189525446
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000009298324584960938,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_training_order_stage85_full_20261002_r1/cells/replicate_310101/final_weights/period_100_staged.pt",
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.003999625163839539,
+                  "upper": 0.004000071844514839
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.004,
+                  "upper": 0.004
+                }
+              },
+              "evaluation_update": 16,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 256,
+                  "upper": 256
+                },
+                "max_abs_old_logp_difference": 0.000010132789611816406,
+                "updates_by_actor": {
+                  "lower": 8,
+                  "upper": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5376000,
+        "plan_ols_fits": 76160,
+        "plan_ridge_predictions": 76160,
+        "reference_evaluations": 5376000
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": false,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310101,
+      "status": "complete",
+      "wall_seconds": 1133.519110206049
+    }
+  ],
+  "run_name": "pointmaze_training_order_stage85_full_20261002_r1",
+  "status": "complete"
+}
