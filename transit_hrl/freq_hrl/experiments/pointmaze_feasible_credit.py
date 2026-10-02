@@ -52,7 +52,8 @@ def worker_native(job):
         alpha=alpha, envelope=envelope, collect=collect, policy_seed=policy_seed, lower_seed=lower_seed)
 
 
-def native_episode(weights, *, seed, variant, period, predictor, alpha, envelope, collect, policy_seed, lower_seed):
+def native_episode(weights, *, seed, variant, period, predictor, alpha, envelope, collect, policy_seed, lower_seed,
+        upper_standard_noise=None):
     model, args = _WORKER
     model.load_state_dict(weights)
     native = curves.paths.native.native
@@ -71,13 +72,15 @@ def native_episode(weights, *, seed, variant, period, predictor, alpha, envelope
     kw.update(sample=collect, lower_seed=lower_seed)
     batch, row, raw = joint.rollout(model, args, f"fixed{period}", seed=seed, capture=False,
         lower_credit="task_episode", upper_plan_decoder=decode, lower_reference_builder=plan,
-        lower_actor_context_builder=plan.actor_context, lower_value_context_builder=plan.value_context, **kw)
+        lower_actor_context_builder=plan.actor_context, lower_value_context_builder=plan.value_context,
+        upper_standard_noise=upper_standard_noise, **kw)
     if raw is not None or (batch is not None) != collect or not (row["upper_sample"] and row["lower_sample"]):
         raise ValueError("Stage79 changed stochastic sampling or materialized a native trace")
     torch.testing.assert_close(joint.inference_weights(model), weights, atol=0, rtol=0)
     result = {"seed": seed, "variant": variant, "alpha": alpha, "policy_seed": policy_seed,
         **{k: row[k] for k in ("episode_return", "tracking_squared_error_integral", "episode_length", "decision_steps", "lower_seed")},
         "upper_calls": row["upper_inference_calls"], "lower_calls": row["lower_inference_calls"],
+        "upper_replay_forward_calls":0 if upper_standard_noise is None else len(noise),
         "upper_standard_noise": noise, "network_check": "passed",
         **{k: getattr(plan, attr) for k, attr in (("plan_ols_fits", "ols_fits"), ("plan_ridge_predictions", "ridge_predictions"),
             ("reference_evaluations", "calls"), ("actor_context_evaluations", "context_calls"))},

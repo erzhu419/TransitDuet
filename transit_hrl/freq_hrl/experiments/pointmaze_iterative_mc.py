@@ -72,9 +72,11 @@ def final_checkpoint(model, output, *, root, period, method, updates, protocol=s
     return str(path)
 
 
-def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None):
+def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None,
+        training_pair_worker=None, scenario_pair_check=None):
     spec = protocol
     qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
+    scenario_pair_check = scenario_pair_check or parts.scenario.check_scenario_pair
     source = json.loads(spec.source_result(root).read_text())
     decoder_spec = parts.scenario.spec.source.source
     if (source["status"],source["protocol"],source["root"],source["preflight"],source["contract"]) != (
@@ -95,8 +97,14 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
             alpha,envelope = calibration["alpha"],calibration["envelope"]
 
             def episodes(weights,roster,variant,collect=False):
-                pairs = list(pool.map(parts.scenario.worker_native,[(weights,s,n,variant,period,predictor,
-                    0. if variant == "zero" else alpha,envelope,collect) for s,n in roster]))
+                jobs = [(weights,s,n,variant,period,predictor,
+                    0. if variant == "zero" else alpha,envelope,collect) for s,n in roster]
+                if collect and training_pair_worker is not None:
+                    replicas = o["rollouts_per_scenario"]
+                    pairs = [pair for group in pool.map(training_pair_worker,
+                        [jobs[i:i+replicas] for i in range(0,len(jobs),replicas)]) for pair in group]
+                else:
+                    pairs = list(pool.map(parts.scenario.worker_native,jobs))
                 for _,r in pairs:
                     native.curves.paths.check_row(r,period,args.horizon)
                     cost["native_episodes"] += 1
@@ -105,6 +113,8 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
                     cost["native_upper_calls"] += r["upper_calls"]
                     cost["pairing_upper_forward_calls"] += r["upper_calls"]
                     cost["native_network_checks"] += 1
+                    if "upper_replay_forward_calls" in cost:
+                        cost["upper_replay_forward_calls"] += r["upper_replay_forward_calls"]
                     cost["credit_episodes" if collect else "evaluation_episodes"] += 1
                     for key in planning:planning[key] += r[key]
                 return pairs
@@ -123,7 +133,7 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
                         replicas = o["rollouts_per_scenario"]
                         batches[b] = [pairs[i:i+replicas] for i in range(0,len(pairs),replicas)]
                         for group,s in zip(batches[b],roster):
-                            parts.scenario.check_scenario_pair(group,s)
+                            scenario_pair_check(group,s)
                             cost["scenario_pair_checks"] += 1
                     mean_reward = float(np.mean([r["episode_return"] for g in batches.values() for pairs in g for _,r in pairs]))
                     row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost,

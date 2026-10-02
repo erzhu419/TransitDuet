@@ -53,7 +53,7 @@ def make_model(controller, method, *, root):
 def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=None, gate_seed=None,
             lower_credit="intrinsic_option", lower_sample=None, upper_sample=None, lower_seed=None,
             lower_value_context_builder=None, lower_reference_builder=None, lower_actor_context_builder=None,
-            upper_plan_decoder=None):
+            upper_plan_decoder=None, upper_standard_noise=None):
     if lower_credit not in ("intrinsic_option", "intrinsic_episode", "task_option", "task_episode"):
         raise ValueError("unregistered lower credit")
     scale = scale_for(args)
@@ -111,6 +111,12 @@ def rollout(model, args, method, *, seed, sample, capture=False, gate_sample=Non
                 state = history.upper_state(observation, oracle_context=None)
                 clock = time.perf_counter()
                 output = model.act_upper(state, sample=sample if upper_sample is None else upper_sample)
+                if upper_standard_noise is not None:
+                    with torch.no_grad():
+                        dist = model.upper_actor.distribution(torch.as_tensor(state,dtype=torch.float32,device=model.device).view(1,-1))
+                        innovation = torch.as_tensor(upper_standard_noise[len(decisions)],dtype=dist.mean.dtype,device=model.device).view_as(dist.mean)
+                        action = dist.mean + dist.stddev * innovation
+                        output.update(action=action.cpu().numpy().reshape(-1),logp=float(dist.log_prob(action).sum(-1).item()))
                 upper_time += time.perf_counter() - clock
                 if upper_plan_decoder is None:
                     subgoal = adapter.decode(np.asarray(output["action"], dtype=np.float32), observation.achieved_goal)
