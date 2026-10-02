@@ -1,0 +1,468 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "final_inference_weights_server_only",
+    "native_trace_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_mean_parameter_updates": 28,
+    "actor_parameter_perturbations": 56,
+    "actor_score_backward_batches": 768,
+    "actor_score_forward_batches": 256,
+    "checkpoint_writes": 0,
+    "collection_freeze_checks": 24,
+    "credit_episodes": 256,
+    "decoder_loads": 2,
+    "evaluation_episodes": 48,
+    "exact_kl_forward_batches": 136,
+    "fisher_jvp_batches": 68,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 512,
+    "native_episodes": 304,
+    "native_lower_calls": 91200,
+    "native_network_checks": 304,
+    "native_pair_checks": 8,
+    "native_steps": 91200,
+    "native_upper_calls": 1368,
+    "objective_checks": 256,
+    "pairing_upper_forward_calls": 1368,
+    "parameter_part_checks": 28,
+    "policy_updates": 28,
+    "scenario_pair_checks": 128,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 28,
+    "training_models_initialized": 8
+  },
+  "contract": {
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_traces_local_compact_JSON_and_completion_only",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "test_order_contrasts_and_fair_budget_lower_only_comparator_Stage67_critic_credit_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "evaluation": "registered_last_update_only_32_fresh_paired_seeds_per_root_period_no_intermediate_selection_preflight_four",
+    "freeze": "std_values_source_Adam_forecaster_decoder_bit_exact_frozen_lower_only_upper_frozen",
+    "limits": "teacher_initialized_fixed_std_decoder_MC_route_nominal_sum_of_update_state_conditional_KL_not_trajectory_KL_path_length_or_flat_RL_frequency_superiority",
+    "matching": "dual_methods_eight_updates_per_level_32_episodes_per_gradient_.0005_KL_each_lower_only_eight_64_episode_lower_updates_.001_each_total512_episodes_.008_nominal_KL_per_method_period",
+    "methods": [
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ],
+    "noise_mapping": "Stage80_explicit_mapping_fresh_disjoint_Stage85_chunk_and_evaluation_roles_same_rosters_across_methods",
+    "order": "paired_joint_collect_two_chunks_before_both_updates_alternating_lower_upper_staged_lower_first_half_then_upper_lower_only_pool_two_chunks",
+    "paired_joint": "independent_half_batch_per_level_same_pre_update_joint_policy_not_Stage83_shared_full_gradient_batch",
+    "periods": [
+      50,
+      100
+    ],
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all22_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni22",
+    "training": "16_fresh_credit_chunks_32_episodes_each_no_replay_PPO_Adam_entropy_or_reward_normalization_preflight_four_chunks_eight_episodes",
+    "variants": [
+      "base",
+      "zero",
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ]
+  },
+  "endpoints": [
+    "50/alternating_minus_paired_joint",
+    "50/staged_minus_paired_joint",
+    "50/staged_minus_alternating",
+    "50/paired_joint_minus_lower_trained",
+    "50/alternating_minus_lower_trained",
+    "50/staged_minus_lower_trained",
+    "50/paired_joint_minus_zero",
+    "50/alternating_minus_zero",
+    "50/staged_minus_zero",
+    "50/lower_trained_minus_zero",
+    "50/base_minus_zero",
+    "100/alternating_minus_paired_joint",
+    "100/staged_minus_paired_joint",
+    "100/staged_minus_alternating",
+    "100/paired_joint_minus_lower_trained",
+    "100/alternating_minus_lower_trained",
+    "100/staged_minus_lower_trained",
+    "100/paired_joint_minus_zero",
+    "100/alternating_minus_zero",
+    "100/staged_minus_zero",
+    "100/lower_trained_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "credit_chunks": 4,
+    "credit_scenarios_per_batch": 2,
+    "evaluation_episodes": 4,
+    "rollouts_per_scenario": 2,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_training_order_stage85_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_roles": {
+    "310011": {
+      "native_evaluation": [
+        85095001,
+        85095002,
+        85095003,
+        85095004
+      ],
+      "training_chunks": [
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85002002,
+                85002003
+              ],
+              "scenario_seed": 85000001
+            },
+            {
+              "noise_seeds": [
+                85002004,
+                85002005
+              ],
+              "scenario_seed": 85000002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85003002,
+                85003003
+              ],
+              "scenario_seed": 85001001
+            },
+            {
+              "noise_seeds": [
+                85003004,
+                85003005
+              ],
+              "scenario_seed": 85001002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85007002,
+                85007003
+              ],
+              "scenario_seed": 85005001
+            },
+            {
+              "noise_seeds": [
+                85007004,
+                85007005
+              ],
+              "scenario_seed": 85005002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85008002,
+                85008003
+              ],
+              "scenario_seed": 85006001
+            },
+            {
+              "noise_seeds": [
+                85008004,
+                85008005
+              ],
+              "scenario_seed": 85006002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85012002,
+                85012003
+              ],
+              "scenario_seed": 85010001
+            },
+            {
+              "noise_seeds": [
+                85012004,
+                85012005
+              ],
+              "scenario_seed": 85010002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85013002,
+                85013003
+              ],
+              "scenario_seed": 85011001
+            },
+            {
+              "noise_seeds": [
+                85013004,
+                85013005
+              ],
+              "scenario_seed": 85011002
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "noise_seeds": [
+                85017002,
+                85017003
+              ],
+              "scenario_seed": 85015001
+            },
+            {
+              "noise_seeds": [
+                85017004,
+                85017005
+              ],
+              "scenario_seed": 85015002
+            }
+          ],
+          "credit_B": [
+            {
+              "noise_seeds": [
+                85018002,
+                85018003
+              ],
+              "scenario_seed": 85016001
+            },
+            {
+              "noise_seeds": [
+                85018004,
+                85018005
+              ],
+              "scenario_seed": 85016002
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "source_revision": "8f9e517cde630273bf9524ad47ce9a95a379db4e",
+  "training_groups": {
+    "alternating": [
+      {
+        "chunks": [
+          0
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              0
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          1
+        ],
+        "updates": [
+          {
+            "actor": "upper",
+            "chunks": [
+              1
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          2
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              2
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          3
+        ],
+        "updates": [
+          {
+            "actor": "upper",
+            "chunks": [
+              3
+            ],
+            "fraction": 0.5
+          }
+        ]
+      }
+    ],
+    "lower_trained": [
+      {
+        "chunks": [
+          0,
+          1
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              0,
+              1
+            ],
+            "fraction": 1.0
+          }
+        ]
+      },
+      {
+        "chunks": [
+          2,
+          3
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              2,
+              3
+            ],
+            "fraction": 1.0
+          }
+        ]
+      }
+    ],
+    "paired_joint": [
+      {
+        "chunks": [
+          0,
+          1
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              0
+            ],
+            "fraction": 0.5
+          },
+          {
+            "actor": "upper",
+            "chunks": [
+              1
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          2,
+          3
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              2
+            ],
+            "fraction": 0.5
+          },
+          {
+            "actor": "upper",
+            "chunks": [
+              3
+            ],
+            "fraction": 0.5
+          }
+        ]
+      }
+    ],
+    "staged": [
+      {
+        "chunks": [
+          0
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              0
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          1
+        ],
+        "updates": [
+          {
+            "actor": "lower",
+            "chunks": [
+              1
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          2
+        ],
+        "updates": [
+          {
+            "actor": "upper",
+            "chunks": [
+              2
+            ],
+            "fraction": 0.5
+          }
+        ]
+      },
+      {
+        "chunks": [
+          3
+        ],
+        "updates": [
+          {
+            "actor": "upper",
+            "chunks": [
+              3
+            ],
+            "fraction": 0.5
+          }
+        ]
+      }
+    ]
+  }
+}

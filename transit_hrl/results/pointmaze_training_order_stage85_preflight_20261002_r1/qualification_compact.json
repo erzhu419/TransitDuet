@@ -1,0 +1,514 @@
+{
+  "contract": {
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_traces_local_compact_JSON_and_completion_only",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "decision": "test_order_contrasts_and_fair_budget_lower_only_comparator_Stage67_critic_credit_HOLD_unchanged",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "evaluation": "registered_last_update_only_32_fresh_paired_seeds_per_root_period_no_intermediate_selection_preflight_four",
+    "freeze": "std_values_source_Adam_forecaster_decoder_bit_exact_frozen_lower_only_upper_frozen",
+    "limits": "teacher_initialized_fixed_std_decoder_MC_route_nominal_sum_of_update_state_conditional_KL_not_trajectory_KL_path_length_or_flat_RL_frequency_superiority",
+    "matching": "dual_methods_eight_updates_per_level_32_episodes_per_gradient_.0005_KL_each_lower_only_eight_64_episode_lower_updates_.001_each_total512_episodes_.008_nominal_KL_per_method_period",
+    "methods": [
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ],
+    "noise_mapping": "Stage80_explicit_mapping_fresh_disjoint_Stage85_chunk_and_evaluation_roles_same_rosters_across_methods",
+    "order": "paired_joint_collect_two_chunks_before_both_updates_alternating_lower_upper_staged_lower_first_half_then_upper_lower_only_pool_two_chunks",
+    "paired_joint": "independent_half_batch_per_level_same_pre_update_joint_policy_not_Stage83_shared_full_gradient_batch",
+    "periods": [
+      50,
+      100
+    ],
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "statistics": "all22_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni22",
+    "training": "16_fresh_credit_chunks_32_episodes_each_no_replay_PPO_Adam_entropy_or_reward_normalization_preflight_four_chunks_eight_episodes",
+    "variants": [
+      "base",
+      "zero",
+      "paired_joint",
+      "alternating",
+      "staged",
+      "lower_trained"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 28,
+    "actor_parameter_perturbations": 56,
+    "actor_score_backward_batches": 768,
+    "actor_score_forward_batches": 256,
+    "checkpoint_writes": 0,
+    "collection_freeze_checks": 24,
+    "credit_episodes": 256,
+    "decoder_loads": 2,
+    "evaluation_episodes": 48,
+    "exact_kl_forward_batches": 136,
+    "fisher_jvp_batches": 68,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 512,
+    "native_episodes": 304,
+    "native_lower_calls": 91200,
+    "native_network_checks": 304,
+    "native_pair_checks": 8,
+    "native_steps": 91200,
+    "native_upper_calls": 1368,
+    "objective_checks": 256,
+    "pairing_upper_forward_calls": 1368,
+    "parameter_part_checks": 28,
+    "policy_updates": 28,
+    "scenario_pair_checks": 128,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 28,
+    "training_models_initialized": 8
+  },
+  "endpoints": {
+    "100/alternating_minus_lower_trained": {
+      "mean": -0.038842140995107854
+    },
+    "100/alternating_minus_paired_joint": {
+      "mean": -0.0006465790936616145
+    },
+    "100/alternating_minus_zero": {
+      "mean": -0.61488631955946
+    },
+    "100/base_minus_zero": {
+      "mean": -0.9633475929483026
+    },
+    "100/lower_trained_minus_zero": {
+      "mean": -0.5760441785643522
+    },
+    "100/paired_joint_minus_lower_trained": {
+      "mean": -0.03819556190144624
+    },
+    "100/paired_joint_minus_zero": {
+      "mean": -0.6142397404657984
+    },
+    "100/staged_minus_alternating": {
+      "mean": -0.1432693263803415
+    },
+    "100/staged_minus_lower_trained": {
+      "mean": -0.18211146737544937
+    },
+    "100/staged_minus_paired_joint": {
+      "mean": -0.14391590547400313
+    },
+    "100/staged_minus_zero": {
+      "mean": -0.7581556459398016
+    },
+    "50/alternating_minus_lower_trained": {
+      "mean": -0.08038274306247217
+    },
+    "50/alternating_minus_paired_joint": {
+      "mean": -0.000039790451921817294
+    },
+    "50/alternating_minus_zero": {
+      "mean": 0.11852846985723176
+    },
+    "50/base_minus_zero": {
+      "mean": -0.07095333815612292
+    },
+    "50/lower_trained_minus_zero": {
+      "mean": 0.19891121291970393
+    },
+    "50/paired_joint_minus_lower_trained": {
+      "mean": -0.08034295261055036
+    },
+    "50/paired_joint_minus_zero": {
+      "mean": 0.11856826030915357
+    },
+    "50/staged_minus_alternating": {
+      "mean": -0.021762909032851496
+    },
+    "50/staged_minus_lower_trained": {
+      "mean": -0.10214565209532367
+    },
+    "50/staged_minus_paired_joint": {
+      "mean": -0.021802699484773314
+    },
+    "50/staged_minus_zero": {
+      "mean": 0.09676556082438026
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+  "performance_claim": "matched_sample_cumulative_nominal_KL_MC_training_order_not_full_actor_critic_or_frequency_superiority",
+  "protocol": "pointmaze_training_order_stage85_v1",
+  "root_rows": [
+    {
+      "cost": {
+        "actor_mean_parameter_updates": 28,
+        "actor_parameter_perturbations": 56,
+        "actor_score_backward_batches": 768,
+        "actor_score_forward_batches": 256,
+        "checkpoint_writes": 0,
+        "collection_freeze_checks": 24,
+        "credit_episodes": 256,
+        "decoder_loads": 2,
+        "evaluation_episodes": 48,
+        "exact_kl_forward_batches": 136,
+        "fisher_jvp_batches": 68,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "mc_calls": 512,
+        "native_episodes": 304,
+        "native_lower_calls": 91200,
+        "native_network_checks": 304,
+        "native_pair_checks": 8,
+        "native_steps": 91200,
+        "native_upper_calls": 1368,
+        "objective_checks": 256,
+        "pairing_upper_forward_calls": 1368,
+        "parameter_part_checks": 28,
+        "policy_updates": 28,
+        "scenario_pair_checks": 128,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 28,
+        "training_models_initialized": 8
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.023574009880115925,
+          "effects": {
+            "50/alternating_minus_lower_trained": -0.08038274306247217,
+            "50/alternating_minus_paired_joint": -0.000039790451921817294,
+            "50/alternating_minus_zero": 0.11852846985723176,
+            "50/base_minus_zero": -0.07095333815612292,
+            "50/lower_trained_minus_zero": 0.19891121291970393,
+            "50/paired_joint_minus_lower_trained": -0.08034295261055036,
+            "50/paired_joint_minus_zero": 0.11856826030915357,
+            "50/staged_minus_alternating": -0.021762909032851496,
+            "50/staged_minus_lower_trained": -0.10214565209532367,
+            "50/staged_minus_paired_joint": -0.021802699484773314,
+            "50/staged_minus_zero": 0.09676556082438026
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.26446319537445,
+              "tracking_squared_error_integral": 0.2814517669668744
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.0749813873611,
+              "tracking_squared_error_integral": 0.28246401136212174
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.34484593843695,
+              "tracking_squared_error_integral": 0.2802777015733758
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.26450298582637,
+              "tracking_squared_error_integral": 0.28145327981161183
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.2427002863416,
+              "tracking_squared_error_integral": 0.28117419078743905
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 234.1459347255172,
+              "tracking_squared_error_integral": 0.2825276101514087
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0010001923049589852,
+                  "upper": 0.0009999933264629051
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.00001049041748046875,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.002000451376152443,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.002,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 32,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.000012874603271484375,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0010001925824054342,
+                  "upper": 0.0009999946187995898
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.00001049041748046875,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0010001588188817325,
+                  "upper": 0.001000004360041757
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.000010848045349121094,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            }
+          }
+        },
+        "100": {
+          "alpha": 0.07930826474641986,
+          "effects": {
+            "100/alternating_minus_lower_trained": -0.038842140995107854,
+            "100/alternating_minus_paired_joint": -0.0006465790936616145,
+            "100/alternating_minus_zero": -0.61488631955946,
+            "100/base_minus_zero": -0.9633475929483026,
+            "100/lower_trained_minus_zero": -0.5760441785643522,
+            "100/paired_joint_minus_lower_trained": -0.03819556190144624,
+            "100/paired_joint_minus_zero": -0.6142397404657984,
+            "100/staged_minus_alternating": -0.1432693263803415,
+            "100/staged_minus_lower_trained": -0.18211146737544937,
+            "100/staged_minus_paired_joint": -0.14391590547400313,
+            "100/staged_minus_zero": -0.7581556459398016
+          },
+          "evaluation_means": {
+            "alternating": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 214.05819491105368,
+              "tracking_squared_error_integral": 0.5733026350049161
+            },
+            "base": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 213.70973363766484,
+              "tracking_squared_error_integral": 0.5775970609207698
+            },
+            "lower_trained": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 214.0970370520488,
+              "tracking_squared_error_integral": 0.5717753795461793
+            },
+            "paired_joint": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 214.05884149014733,
+              "tracking_squared_error_integral": 0.5733044126262951
+            },
+            "staged": {
+              "above_label_speed_q99_rate": 0.0008333333333333334,
+              "episode_return": 213.91492558467334,
+              "tracking_squared_error_integral": 0.574681294534837
+            },
+            "zero": {
+              "above_label_speed_q99_rate": 0,
+              "episode_return": 214.67308123061312,
+              "tracking_squared_error_integral": 0.5715235259616385
+            }
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "alternating": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0009999350185376289,
+                  "upper": 0.0010000031077818615
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.000008344650268554688,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            },
+            "lower_trained": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0019999223470666973,
+                  "upper": 0
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.002,
+                  "upper": 0
+                }
+              },
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 32,
+                  "upper": 0
+                },
+                "max_abs_old_logp_difference": 0.0000095367431640625,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 0
+                }
+              }
+            },
+            "paired_joint": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0009999370545261297,
+                  "upper": 0.0010000022380209916
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.000008344650268554688,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            },
+            "staged": {
+              "checkpoint": null,
+              "cumulative_KL": {
+                "exact_by_level": {
+                  "lower": 0.0009999493281906487,
+                  "upper": 0.0010000039283065236
+                },
+                "matching": "passed",
+                "nominal_by_level": {
+                  "lower": 0.001,
+                  "upper": 0.001
+                }
+              },
+              "evaluation_update": 4,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "gradient_episodes_by_actor": {
+                  "lower": 16,
+                  "upper": 16
+                },
+                "max_abs_old_logp_difference": 0.000008344650268554688,
+                "updates_by_actor": {
+                  "lower": 2,
+                  "upper": 2
+                }
+              }
+            }
+          }
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 91200,
+        "plan_ols_fits": 1064,
+        "plan_ridge_predictions": 1064,
+        "reference_evaluations": 91200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "protocol": "pointmaze_training_order_stage85_v1",
+      "root": 310011,
+      "status": "complete",
+      "wall_seconds": 81.68791925301775
+    }
+  ],
+  "run_name": "pointmaze_training_order_stage85_preflight_20261002_r1",
+  "status": "preflight_passed"
+}
