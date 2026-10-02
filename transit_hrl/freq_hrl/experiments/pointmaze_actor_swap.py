@@ -16,10 +16,11 @@ from scripts import pointmaze_actor_swap_stage84_spec as spec
 native = parts.native
 
 
-def check_checkpoint(payload, source_weights, *, root, period, method):
+def check_checkpoint(payload, source_weights, *, root, period, method, protocol=spec):
+    spec = protocol
     expected = {"protocol":spec.source.EXPERIMENT_PROTOCOL,"root":root,"period":period,"method":method,"updates":8}
     if {k:v for k,v in payload.items() if k != "weights"} != expected:
-        raise ValueError("Stage84 requires the registered Stage83 final checkpoint")
+        raise ValueError(f"{spec.EXPERIMENT_PROTOCOL} requires the registered final checkpoint")
     weights = payload["weights"]
     if set(weights) != set(source_weights):raise ValueError("Stage84 checkpoint networks changed")
     for name, original in source_weights.items():
@@ -36,7 +37,8 @@ def check_checkpoint(payload, source_weights, *, root, period, method):
     return weights
 
 
-def compose_weights(source_weights, trained):
+def compose_weights(source_weights, trained, *, protocol=spec):
+    spec = protocol
     donors = {"source":source_weights,**trained}
     composed = {}
     for variant,(upper,lower) in spec.COMPOSITIONS.items():
@@ -49,16 +51,18 @@ def compose_weights(source_weights, trained):
     return composed
 
 
-def paired_effects(period, evaluation, seeds):
+def paired_effects(period, evaluation, seeds, *, protocol=spec):
+    spec = protocol
     result = native.paired_effects(period,evaluation,seeds,protocol=spec)
+    variants = (*spec.CONTRAST_PAIRS[0],*spec.CONTRAST_PAIRS[1])
     result[f"{period}/upper_by_lower_interaction"] = float(np.mean([
         a["episode_return"]-b["episode_return"]-c["episode_return"]+d["episode_return"]
-        for a,b,c,d in zip(*(evaluation[v] for v in (
-            "joint_trained","source_upper_joint_lower","joint_upper_lower_only_lower","lower_trained")))]))
+        for a,b,c,d in zip(*(evaluation[v] for v in variants))]))
     return result
 
 
-def run(root, *, preflight, output):
+def run(root, *, preflight, output, protocol=spec):
+    spec = protocol
     decoder = json.loads(spec.source_result(root).read_text())
     decoder_spec = parts.scenario.spec.source.source
     if (decoder["status"],decoder["protocol"],decoder["root"],decoder["preflight"],decoder["contract"]) != (
@@ -67,7 +71,7 @@ def run(root, *, preflight, output):
     training = json.loads(spec.training_result(root).read_text())
     if (training["status"],training["protocol"],training["root"],training["preflight"],training["contract"]) != (
             "complete",spec.source.EXPERIMENT_PROTOCOL,root,False,spec.source.contract()):
-        raise ValueError("Stage84 requires completed full Stage83 training")
+        raise ValueError(f"{spec.EXPERIMENT_PROTOCOL} requires completed full {spec.source.EXPERIMENT_PROTOCOL} training")
     clones,predictor,initialization = native.curves.support.native.load_source(root,preflight=False)
     args,roles,o = spec.arguments(root,preflight=preflight),spec.seed_roles(root,preflight=preflight),spec.options(preflight=preflight)
     cost,groups,started = dict.fromkeys(spec.budget(preflight=preflight),0),{},time.monotonic()
@@ -80,17 +84,17 @@ def run(root, *, preflight, output):
             snapshot = copy.deepcopy(original.state_dict())
             source_weights = native.joint.inference_weights(original)
             trained,checkpoints = {},{}
-            for method in spec.source.METHODS:
+            for method in spec.CHECKPOINT_METHODS:
                 path = spec.training_result(root).parent/"final_weights"/f"period_{period}_{method}.pt"
                 record = training["groups"][str(period)]["trained"][method]
                 if record["evaluation_update"] != 8 or record["final_freeze_check"] != "passed" or record["checkpoint"] != str(path):
                     raise ValueError("Stage84 final checkpoint record changed")
                 trained[method] = check_checkpoint(torch.load(path,map_location="cpu",weights_only=False),
-                    source_weights,root=root,period=period,method=method)
+                    source_weights,root=root,period=period,method=method,protocol=spec)
                 cost["checkpoint_loads"] += 1
                 cost["checkpoint_freeze_checks"] += 1
                 checkpoints[method] = str(path)
-            weights = compose_weights(source_weights,trained)
+            weights = compose_weights(source_weights,trained,protocol=spec)
             cost["actor_composition_checks"] += len(weights)
             calibration = decoder["groups"][str(period)]["calibration"]
             native.bounded.check_calibration(calibration)
@@ -111,8 +115,8 @@ def run(root, *, preflight, output):
                     cost["pairing_upper_forward_calls"] += r["upper_calls"]
                     cost["native_network_checks"] += 1
                     for key in planning:planning[key] += r[key]
-                print(f"Stage84 {root}/{period}: {variant} evaluated, no training",flush=True)
-            effects = paired_effects(period,evaluation,roles["native_evaluation"])
+                print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: {variant} evaluated, no training",flush=True)
+            effects = paired_effects(period,evaluation,roles["native_evaluation"],protocol=spec)
             cost["native_pair_checks"] += len(roles["native_evaluation"])
             native.curves.support.assert_frozen(original,snapshot)
             cost["frozen_model_checks"] += 1
@@ -121,13 +125,14 @@ def run(root, *, preflight, output):
     cell = {"status":"complete","protocol":spec.EXPERIMENT_PROTOCOL,"contract":spec.contract(),"root":root,"preflight":preflight,
         "seed_roles":roles,"cost":cost,"native_planning_cost":planning,"groups":groups,"source_initialization":initialization,
         "optimizer_steps":0,"critic_fits":0,"forecaster_fits":0,"native_trace_writes":0,"wall_seconds":time.monotonic()-started}
-    qualify(cell,preflight=preflight)
+    qualify(cell,preflight=preflight,protocol=spec)
     write_json(output,cell)
     write_json(output.parent/"completion"/"ready.json",{"protocol":spec.EXPERIMENT_PROTOCOL,"root":root,"preflight":preflight})
     return cell
 
 
-def qualify(cell, *, preflight):
+def qualify(cell, *, preflight, protocol=spec):
+    spec = protocol
     if (cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract()
             or cell["root"] not in spec.roots(preflight=preflight) or cell["preflight"] != preflight
             or cell["cost"] != spec.budget(preflight=preflight) or cell["seed_roles"] != spec.seed_roles(cell["root"],preflight=preflight)
@@ -139,8 +144,8 @@ def qualify(cell, *, preflight):
     for p,g in cell["groups"].items():
         if any(g[k] != "passed" for k in ("checkpoint_freeze","composition","pairing","source_and_Adam_unchanged")):
             raise ValueError("Stage84 checkpoint composition or source freeze failed")
-        if set(g["checkpoints"]) != set(spec.source.METHODS):raise ValueError("Stage84 checkpoint donors changed")
-        effects = paired_effects(p,g["evaluation"],cell["seed_roles"]["native_evaluation"])
+        if set(g["checkpoints"]) != set(spec.CHECKPOINT_METHODS):raise ValueError("Registered checkpoint donors changed")
+        effects = paired_effects(p,g["evaluation"],cell["seed_roles"]["native_evaluation"],protocol=spec)
         if g["effects"] != effects or not np.isfinite(list(effects.values())).all():raise ValueError("Stage84 paired effects changed")
         for variant,rows in g["evaluation"].items():
             for row in rows:
@@ -152,8 +157,9 @@ def qualify(cell, *, preflight):
     return cell
 
 
-def aggregate(cells, *, preflight):
-    result = native.aggregate(cells,preflight=preflight,protocol=spec,qualifier=qualify)
+def aggregate(cells, *, preflight, protocol=spec):
+    result = native.aggregate(cells,preflight=preflight,protocol=protocol,
+        qualifier=lambda c, **kw: qualify(c,protocol=protocol,**kw))
     result["performance_claim"] = "fixed_final_checkpoint_causal_upper_lower_swap_not_retraining_or_frequency_superiority"
     result["native_trial_prerequisite"] = "Stage67_critic_route_HOLD_unchanged_independent_MC_checkpoint_interventions"
     return result

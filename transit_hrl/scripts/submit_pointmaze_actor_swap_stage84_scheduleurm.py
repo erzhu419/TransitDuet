@@ -16,24 +16,26 @@ from scripts.submit_pointmaze_timing_pair_stage11_scheduleurm import inventory
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
-def task_specification(run_name,root,*,preflight):
+def task_specification(run_name,root,*,preflight,protocol_spec=spec):
+    spec = protocol_spec
     task = previous_task(run_name,root,preflight=preflight)
     output = ROOT/"results"/run_name/"cells"/f"replicate_{root}"/"result.json"
     command = [DEFAULT_LINUX_PYTHON,"-u",spec.RUNNER_SCRIPT,"--optimizer-seed",str(root),"--output",str(output)]
     if preflight:command.append("--preflight")
-    task.update(project=spec.EXPERIMENT_PROTOCOL,description=f"Freq-HRL Stage84 final actor swaps root{root}",
+    task.update(project=spec.EXPERIMENT_PROTOCOL,description=f"Freq-HRL {spec.EXPERIMENT_PROTOCOL} final actor swaps root{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/actor_swap/{'preflight' if preflight else 'full'}",
-        cpu_training_justification="Native evaluation workers only; read Stage83 final weights server-side, no training.",
+        cpu_training_justification="Native evaluation workers only; read registered final weights server-side, no training.",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command))
     return task
 
 
-def qualification_task(run_name,*,preflight):
-    task = task_specification(run_name,spec.roots(preflight=preflight)[0],preflight=preflight)
-    command = [DEFAULT_LINUX_PYTHON,"-u","scripts/analyze_pointmaze_actor_swap_stage84.py","--run-name",run_name]
+def qualification_task(run_name,*,preflight,protocol_spec=spec):
+    spec = protocol_spec
+    task = task_specification(run_name,spec.roots(preflight=preflight)[0],preflight=preflight,protocol_spec=spec)
+    command = [DEFAULT_LINUX_PYTHON,"-u",spec.ANALYZER_SCRIPT,"--run-name",run_name]
     if preflight:command.append("--preflight")
-    task.update(description="Freq-HRL Stage84 all-root actor-swap qualification",
+    task.update(description=f"Freq-HRL {spec.EXPERIMENT_PROTOCOL} all-root actor-swap qualification",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/qualification",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/qualification",cpu=1,ram_mb=2048,
         result_dir=None,local_result_dir=None,
@@ -42,15 +44,16 @@ def qualification_task(run_name,*,preflight):
     return task
 
 
-def main():
+def main(*, protocol_spec=spec):
+    spec = protocol_spec
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name",required=True)
     p.add_argument("--preflight",action="store_true")
     p.add_argument("--dry-run",action="store_true")
     a = p.parse_args()
-    if inventory(a.run_name,protocol_spec=spec):raise SystemExit("Stage84 run already registered")
-    tasks = [task_specification(a.run_name,r,preflight=a.preflight) for r in spec.roots(preflight=a.preflight)]
-    tasks.append(qualification_task(a.run_name,preflight=a.preflight))
+    if inventory(a.run_name,protocol_spec=spec):raise SystemExit("Run already registered")
+    tasks = [task_specification(a.run_name,r,preflight=a.preflight,protocol_spec=spec) for r in spec.roots(preflight=a.preflight)]
+    tasks.append(qualification_task(a.run_name,preflight=a.preflight,protocol_spec=spec))
     write_json(ROOT/"results"/a.run_name/"preregistration.json",{
         "protocol":spec.EXPERIMENT_PROTOCOL,"contract":spec.contract(),"preflight":a.preflight,
         "source_revision":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
@@ -58,7 +61,7 @@ def main():
         "seed_roles":{str(r):spec.seed_roles(r,preflight=a.preflight) for r in spec.roots(preflight=a.preflight)},
         "budget_per_root":spec.budget(preflight=a.preflight),"endpoints":list(spec.ENDPOINTS),
         "scheduler":{"allowed_nodes":tasks[0]["allowed_nodes"],"require_node":None,"cpu_per_task":tasks[0]["cpu"],"ram_mb_per_task":tasks[0]["ram_mb"]},
-        "artifacts":{"pull":"completion_markers_and_compact_JSON_only","checkpoint_policy":"read_registered_Stage83_final_weights_server_only","checkpoint_writes":0,"native_trace_writes":0}})
+        "artifacts":{"pull":"completion_markers_and_compact_JSON_only","checkpoint_policy":"read_registered_final_weights_server_only","checkpoint_writes":0,"native_trace_writes":0}})
     execute_bulk(tasks,dry_run=a.dry_run,intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{a.run_name}")
     return 0
 

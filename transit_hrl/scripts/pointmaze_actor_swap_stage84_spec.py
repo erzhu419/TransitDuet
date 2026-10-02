@@ -7,7 +7,9 @@ roots, arguments, source_result = source.roots, source.arguments, source.source_
 EXPERIMENT_PROTOCOL = "pointmaze_actor_swap_stage84_v1"
 POLICY = "final_actor_swap"
 RUNNER_SCRIPT = "scripts/run_pointmaze_actor_swap_stage84.py"
+ANALYZER_SCRIPT = "scripts/analyze_pointmaze_actor_swap_stage84.py"
 TRAINING_RUN = "pointmaze_iterative_mc_stage83_full_20261002_r1"
+CHECKPOINT_METHODS = tuple(source.METHODS)
 COMPOSITIONS = {
     "base": ("source", "source"), "zero": ("source", "source"),
     "joint_trained": ("joint_trained", "joint_trained"),

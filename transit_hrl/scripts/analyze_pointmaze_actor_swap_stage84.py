@@ -12,14 +12,15 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 from scripts import pointmaze_actor_swap_stage84_spec as spec
 
 
-def main():
+def main(*, protocol_spec=spec):
+    spec = protocol_spec
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name",required=True)
     p.add_argument("--preflight",action="store_true")
     a = p.parse_args()
     directory = spec.ROOT/"results"/a.run_name
     cells = [json.loads((directory/"cells"/f"replicate_{r}"/"result.json").read_text()) for r in spec.roots(preflight=a.preflight)]
-    summary = experiment.aggregate(cells,preflight=a.preflight)
+    summary = experiment.aggregate(cells,preflight=a.preflight,protocol=spec)
     summary["run_name"] = a.run_name
     write_json(directory/"qualification_summary.json",summary)
     print(json.dumps({k:v for k,v in summary.items() if k != "root_rows"},sort_keys=True),flush=True)
