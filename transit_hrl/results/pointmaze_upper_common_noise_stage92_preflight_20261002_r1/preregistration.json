@@ -1,0 +1,300 @@
+{
+  "protocol": "pointmaze_upper_common_noise_stage92_v1",
+  "contract": {
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "base",
+      "zero",
+      "source_matched",
+      "source_fixed",
+      "source_common",
+      "source_joint_common",
+      "source_joint",
+      "joint_matched",
+      "joint_fixed",
+      "joint_source_common",
+      "joint_common",
+      "joint"
+    ],
+    "methods": {
+      "50": {
+        "source_upper_common": {
+          "lower": 0.99
+        },
+        "joint_upper_common": {
+          "lower": 0.99
+        }
+      },
+      "100": {
+        "source_upper_common": {
+          "lower": 0.995
+        },
+        "joint_upper_common": {
+          "lower": 0.995
+        }
+      }
+    },
+    "training_runs": {
+      "joint_call": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+      "lower_matched": "pointmaze_lower_budget_stage90_full_20261002_r1",
+      "lower_fixed_upper": "pointmaze_fixed_upper_lower_stage91_full_20261002_r1"
+    },
+    "checkpoint_protocols": {
+      "joint_call": "pointmaze_call_weighted_replication_stage88_v1",
+      "lower_matched": "pointmaze_lower_budget_stage90_v1",
+      "lower_fixed_upper": "pointmaze_fixed_upper_lower_stage91_v1"
+    },
+    "checkpoint_update": 8,
+    "checkpoint_methods": [
+      "joint_call",
+      "lower_matched",
+      "lower_fixed_upper"
+    ],
+    "compositions_upper_lower": {
+      "base": [
+        "source",
+        "source"
+      ],
+      "zero": [
+        "source",
+        "source"
+      ],
+      "source_matched": [
+        "source",
+        "lower_matched"
+      ],
+      "source_fixed": [
+        "source",
+        "lower_fixed_upper"
+      ],
+      "source_common": [
+        "source",
+        "source_upper_common"
+      ],
+      "source_joint_common": [
+        "source",
+        "joint_upper_common"
+      ],
+      "source_joint": [
+        "source",
+        "joint_call"
+      ],
+      "joint_matched": [
+        "joint_call",
+        "lower_matched"
+      ],
+      "joint_fixed": [
+        "joint_call",
+        "lower_fixed_upper"
+      ],
+      "joint_source_common": [
+        "joint_call",
+        "source_upper_common"
+      ],
+      "joint_common": [
+        "joint_call",
+        "joint_upper_common"
+      ],
+      "joint": [
+        "joint_call",
+        "joint_call"
+      ]
+    },
+    "training": "two_new_lower_mean_learners_U0_or_final_UJ_frozen_from_update1_source_L0_init_eight_updates_preflight_two",
+    "sampling": "exact_Stage88_scenario_and_lower_noise_rosters_first_replica_unchanged_all_its_upper_gaussian_innovations_replayed_to_second_64_episodes_per_update",
+    "noise_mapping": "Stage80_lower_streams_unchanged_upper_replay_only_during_pair_collection_fresh_Stage92_eval_uses_unmodified_legacy_RNG_path",
+    "conditional_baseline": "other_rollout_lower_actions_independent_given_shared_upper_innovations_and_scenario_upper_is_not_trained",
+    "budget": "lower_.00099_at50_.000995_at100_matches_Stage90_LM_and_Stage91_LC_no_search",
+    "freeze": "U0_or_Stage88_update8_UJ_bit_exact_std_values_source_Adam_forecaster_decoder_original_teacher_unchanged",
+    "statistics": "all26_reward_contrasts_equal_root_bootstrap65536_Bonferroni26_seed92_92092_initial_credit_covariance_descriptive_only",
+    "primary_endpoints": [
+      "50/source_common_minus_source_matched",
+      "50/joint_common_minus_joint_fixed",
+      "100/source_common_minus_source_matched",
+      "100/joint_common_minus_joint_fixed"
+    ],
+    "decision": "report_each_primary_CI_global_conditioning_benefit_requires_all_four_lower_bounds_positive_preflight_mechanical_only_no_adoption_or_seed_rescue",
+    "limits": "fixed_upper_conditional_lower_intervention_not_joint_upper_learning_sharing_innovations_does_not_fix_upper_actions_and_reduces_independent_upper_draws_same_teachers_not_equal_total_compute_frequency_superiority_closed_Stage67_HOLD"
+  },
+  "preflight": true,
+  "source_revision": "095718b6a9e5c15bdf9c30cc8c380af9de926af7",
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "workers": 2,
+    "credit_scenarios_per_batch": 2,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 4,
+    "updates": 2
+  },
+  "seed_roles": {
+    "310011": {
+      "training_rounds": [
+        {
+          "credit_A": [
+            {
+              "scenario_seed": 88100001,
+              "noise_seeds": [
+                88102002,
+                88102003
+              ]
+            },
+            {
+              "scenario_seed": 88100002,
+              "noise_seeds": [
+                88102004,
+                88102005
+              ]
+            }
+          ],
+          "credit_B": [
+            {
+              "scenario_seed": 88101001,
+              "noise_seeds": [
+                88103002,
+                88103003
+              ]
+            },
+            {
+              "scenario_seed": 88101002,
+              "noise_seeds": [
+                88103004,
+                88103005
+              ]
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "scenario_seed": 88110001,
+              "noise_seeds": [
+                88112002,
+                88112003
+              ]
+            },
+            {
+              "scenario_seed": 88110002,
+              "noise_seeds": [
+                88112004,
+                88112005
+              ]
+            }
+          ],
+          "credit_B": [
+            {
+              "scenario_seed": 88111001,
+              "noise_seeds": [
+                88113002,
+                88113003
+              ]
+            },
+            {
+              "scenario_seed": 88111002,
+              "noise_seeds": [
+                88113004,
+                88113005
+              ]
+            }
+          ]
+        }
+      ],
+      "native_evaluation": [
+        92090001,
+        92090002,
+        92090003,
+        92090004
+      ]
+    }
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 4,
+    "credit_episodes": 64,
+    "evaluation_episodes": 96,
+    "native_episodes": 160,
+    "native_steps": 48000,
+    "native_lower_calls": 48000,
+    "native_upper_calls": 720,
+    "pairing_upper_forward_calls": 720,
+    "native_network_checks": 160,
+    "native_pair_checks": 8,
+    "scenario_pair_checks": 32,
+    "objective_checks": 64,
+    "mc_calls": 128,
+    "actor_score_forward_batches": 64,
+    "actor_score_backward_batches": 192,
+    "fisher_jvp_batches": 24,
+    "exact_kl_forward_batches": 48,
+    "actor_parameter_perturbations": 16,
+    "parameter_part_checks": 8,
+    "actor_mean_parameter_updates": 8,
+    "policy_updates": 8,
+    "training_freeze_checks": 8,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 0,
+    "checkpoint_loads": 6,
+    "checkpoint_freeze_checks": 6,
+    "training_initialization_checks": 4,
+    "actor_composition_checks": 24,
+    "upper_replay_forward_calls": 144
+  },
+  "endpoints": [
+    "50/source_common_minus_source_matched",
+    "50/joint_common_minus_joint_fixed",
+    "50/joint_source_common_minus_joint_matched",
+    "50/source_joint_common_minus_source_fixed",
+    "50/joint_common_minus_joint_source_common",
+    "50/source_joint_common_minus_source_common",
+    "50/joint_common_minus_joint",
+    "50/source_joint_common_minus_source_joint",
+    "50/joint_source_common_minus_source_common",
+    "50/joint_common_minus_source_joint_common",
+    "50/joint_common_minus_zero",
+    "50/source_common_minus_zero",
+    "50/base_minus_zero",
+    "100/source_common_minus_source_matched",
+    "100/joint_common_minus_joint_fixed",
+    "100/joint_source_common_minus_joint_matched",
+    "100/source_joint_common_minus_source_fixed",
+    "100/joint_common_minus_joint_source_common",
+    "100/source_joint_common_minus_source_common",
+    "100/joint_common_minus_joint",
+    "100/source_joint_common_minus_source_joint",
+    "100/joint_source_common_minus_source_common",
+    "100/joint_common_minus_source_joint_common",
+    "100/joint_common_minus_zero",
+    "100/source_common_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoint_policy": "final_inference_weights_server_only",
+    "native_trace_writes": 0
+  }
+}
