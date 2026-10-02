@@ -72,7 +72,7 @@ def final_checkpoint(model, output, *, root, period, method, updates, protocol=s
     return str(path)
 
 
-def run(root, *, preflight, output, protocol=spec, qualifier=None):
+def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None):
     spec = protocol
     qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
     source = json.loads(spec.source_result(root).read_text())
@@ -132,6 +132,9 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None):
                 print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
             weights = {m:native.joint.inference_weights(model) for m,model in models.items()}
             weights.update(base=native.joint.inference_weights(original),zero=native.joint.inference_weights(original))
+            evaluation_metadata = {}
+            if evaluation_weights is not None:
+                weights,evaluation_metadata = evaluation_weights(period,weights,cost)
             evaluation = {v:[r for _,r in episodes(weights[v],[(s,s) for s in roles["native_evaluation"]],v)] for v in spec.VARIANTS}
             effects = native.paired_effects(period,evaluation,roles["native_evaluation"],protocol=spec)
             cost["native_pair_checks"] += len(roles["native_evaluation"])
@@ -145,7 +148,7 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None):
             native.curves.support.assert_frozen(original,snapshot)
             cost["frozen_model_checks"] += 1
             groups[str(period)] = {"alpha":alpha,"trained":trained,"evaluation":evaluation,"effects":effects,
-                "scenario_pairing":"passed","pairing":"passed","source_and_Adam_unchanged":"passed"}
+                "scenario_pairing":"passed","pairing":"passed","source_and_Adam_unchanged":"passed",**evaluation_metadata}
     cell = {"status":"complete","protocol":spec.EXPERIMENT_PROTOCOL,"contract":spec.contract(),"root":root,"preflight":preflight,
         "seed_roles":roles,"cost":cost,"native_planning_cost":planning,"groups":groups,"source_initialization":initialization,
         "optimizer_steps":0,"critic_fits":0,"forecaster_fits":0,"native_trace_writes":0,"wall_seconds":time.monotonic()-started}

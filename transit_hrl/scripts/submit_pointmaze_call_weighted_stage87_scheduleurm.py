@@ -25,7 +25,7 @@ def task_specification(run_name,root,*,preflight,protocol_spec=spec):
     task.update(project=spec.EXPERIMENT_PROTOCOL,description=f"Freq-HRL {spec.EXPERIMENT_PROTOCOL} root{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{spec.POLICY}/{root}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/call_weighted/{'preflight' if preflight else 'full'}",
-        cpu_training_justification="Fresh native workers; three matched-sample MC learners; final weights stay server-only.",
+        cpu_training_justification=f"Native workers; {len(spec.METHODS)} registered MC learners; final weights stay server-only.",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command))
     return task
 
