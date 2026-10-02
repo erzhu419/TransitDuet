@@ -1,0 +1,180 @@
+{
+  "arguments": {
+    "branch_window_seconds": 0.5,
+    "check_stride_steps": 5,
+    "checkpoint_evaluation_interval": 1,
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "env_id": "PointMaze_UMaze-v3",
+    "fast_period_seconds": 0.04,
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "history_seconds": 0.64,
+    "horizon": 300,
+    "iterations": 2,
+    "learning_rate": 0.0003,
+    "max_events_per_class": 1,
+    "max_offset_steps": 25,
+    "maximum_subgoal_delta": 0.75,
+    "optimizer_seed": 410001,
+    "preflight": true,
+    "reference_hidden_dim": 128,
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "threshold_quantile": 0.75,
+    "upper_period_seconds": 0.5
+  },
+  "artifacts": {
+    "historical_artifact_loads": 0,
+    "pull": "completion_markers_and_compact_JSON_only",
+    "server_only": [
+      "four_final_checkpoints_per_root",
+      "forecaster",
+      "teacher_label_npz_archives"
+    ]
+  },
+  "budget_per_root": {
+    "bc_optimizer_steps": 8,
+    "checkpoint_writes": 4,
+    "controller_diagnostic_episodes": 4,
+    "controller_lower_actor_steps": 8,
+    "controller_lower_value_steps": 8,
+    "controller_training_episodes": 2,
+    "controller_upper_actor_steps": 8,
+    "controller_upper_value_steps": 8,
+    "critic_warmup_episodes": 2,
+    "forecaster_driver_paths": 2,
+    "forecaster_observations": 602,
+    "forecaster_rows": 400,
+    "historical_artifact_loads": 0,
+    "label_archive_writes": 4,
+    "label_episodes": 4,
+    "native_episodes": 12,
+    "native_steps": 3600,
+    "riccati_solves": 1,
+    "ridge_solves": 1,
+    "warmup_actor_steps": 0,
+    "warmup_lower_value_steps": 8
+  },
+  "contract": {
+    "clone": "Stage55_tanh_command_MSE_BC64_final_lower_mean_only_std_and_upper_frozen",
+    "cohort": "eight_predeclared_new_optimizer_roots_all_retained",
+    "controller_checkpoint": "fixed_final_iteration384_one_based_no_best_checkpoint_or_reward_admission",
+    "controller_diagnostics": "same_disjoint_paths_at_initial_and_final_no_gate_no_CI",
+    "controller_training": "384_iterations_eight_fresh_paths_each_shared_PPO_update_no_selection_rollouts",
+    "critic_warmup": "Stage42_task_clock_sixteen_lower_critic_only_iterations_all_actors_and_other_values_frozen",
+    "downstream": "fresh_decoder_then_fresh_joint_and_lower_donors_then_Stage94_staged_upper_rules",
+    "downstream_controls": [
+      "zero_plan",
+      "U0",
+      "fixed_UJ",
+      "matched_independent_lower"
+    ],
+    "downstream_gate": "unchanged_four_corrected_primary_reward_endpoints_at_both_periods",
+    "historical_artifacts": "none_no_old_teacher_forecaster_decoder_or_lower_checkpoint",
+    "limits": "teacher_provisioning_only_not_unseen_teacher_performance_confirmation_not_frequency_superiority",
+    "native_initializer": "same_Stage33_history_MLP_PPO_and_balanced_jitter50_native_task",
+    "native_trace_writes": "teacher_label_archives_only_for_later_decoder_calibration",
+    "periods": [
+      50,
+      100
+    ],
+    "preflight": "separate_root410001_not_a_confirmation_teacher",
+    "teacher": "Stage55_LQR_velocity_teacher_causal_ridge_forecaster_fresh_label_states"
+  },
+  "endpoints": [],
+  "full_launch_gate": "native_separate_root_preflight_passed",
+  "optimizer_roots": [
+    410001
+  ],
+  "options": {
+    "bc_epochs": 4,
+    "controller_diagnostic_paths": 2,
+    "controller_iterations": 2,
+    "controller_paths_per_iteration": 1,
+    "critic_warmup_iterations": 2,
+    "fitting_paths": 2,
+    "label_paths": 2,
+    "warmup_paths_per_iteration": 1,
+    "workers": 2
+  },
+  "preflight": true,
+  "protocol": "pointmaze_fresh_teachers_stage96_v1",
+  "run_name": "pointmaze_fresh_teachers_stage96_preflight_20261003_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seed_encoding": "range(start,stop_exclusive,step); exact same integer rosters as spec.seed_roles",
+  "seed_roles_ranges": {
+    "410001": {
+      "controller_diagnostic": {
+        "count": 2,
+        "start": 96095001,
+        "step": 1,
+        "stop_exclusive": 96095003
+      },
+      "controller_training": {
+        "count": 2,
+        "start": 96090001,
+        "step": 1,
+        "stop_exclusive": 96090003
+      },
+      "critic_warmup": {
+        "count": 2,
+        "start": 96093501,
+        "step": 1,
+        "stop_exclusive": 96093503
+      },
+      "fitting": {
+        "count": 2,
+        "start": 96093701,
+        "step": 1,
+        "stop_exclusive": 96093703
+      },
+      "labels": {
+        "count": 2,
+        "start": 96094001,
+        "step": 1,
+        "stop_exclusive": 96094003
+      }
+    }
+  },
+  "source_revision": "b4a9750a4b1f42931db0b92e69a23348eeef0ec3"
+}
