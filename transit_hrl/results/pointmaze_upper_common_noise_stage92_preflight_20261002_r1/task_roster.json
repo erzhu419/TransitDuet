@@ -1,0 +1,37 @@
+{
+  "protocol": "pointmaze_upper_common_noise_stage92_v1",
+  "preflight": true,
+  "run_name": "pointmaze_upper_common_noise_stage92_preflight_20261002_r1",
+  "source_revision": "095718b6a9e5c15bdf9c30cc8c380af9de926af7",
+  "status_snapshot_utc": "2026-10-02T06:46:25.213140+00:00",
+  "placement": "dynamic_node001_006_no_pin",
+  "full_run_submission": "pending_successful_native_preflight",
+  "tasks": [
+    {
+      "id": "t124938",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_upper_common_noise_stage92_v1/call_weighted/preflight",
+      "role": "native_lower_training",
+      "root": 310011,
+      "waiting_reason": "no fit (prio=normal): node001=cpu: need 3, free 0/96 observed_free=0 slot_free=0 reserve=1 | node002=cpu: need 3, free 0/96 observed_free=3 slot_free=51 startup_hold=2 hold_release<=10s reserve=1 | node003=cpu: need 3, free 0/96 observed_free=0 slot_free=96 reserve=1 | node004=cpu: need 3, free 0/96 observed_free=0 slot_free=0 reserve=1 | node005=cpu: need 3, free 0/96 observed_free=0 slot_free=0 reserve=1 | node006=cpu: need 3, free 0/96 observed_free=0 slot_free=0 reserve=1 | node007=outside-allowed-nodes"
+    },
+    {
+      "id": "t124939",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_upper_common_noise_stage92_v1/qualification",
+      "role": "all_root_qualification",
+      "root": null,
+      "waiting_reason": "waiting for prerequisite file(s): /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_upper_common_noise_stage92_preflight_20261002_r1/cells/replicate_310011/completion/ready.json"
+    }
+  ]
+}
