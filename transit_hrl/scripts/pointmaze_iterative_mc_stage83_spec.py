@@ -21,6 +21,10 @@ def options(*, preflight):
     return {**source.options(preflight=preflight), "updates": 2 if preflight else 8}
 
 
+def allocation(method, period):
+    return METHODS[method]
+
+
 def seed_roles(root, *, preflight):
     base = 83_000_000 if preflight else 83_100_000 + roots(preflight=False).index(root) * 100000
     o = options(preflight=preflight)
@@ -34,31 +38,36 @@ def seed_roles(root, *, preflight):
 def budget(*, preflight):
     o = options(preflight=preflight)
     h = arguments(roots(preflight=preflight)[0], preflight=preflight).horizon
+    return training_budget(o, METHODS, VARIANTS, horizon=h, preflight=preflight)
+
+
+def training_budget(o, methods, variants, *, horizon, preflight):
+    h = horizon
     k, n, e = o["updates"], 2*o["credit_scenarios_per_batch"]*o["rollouts_per_scenario"], o["evaluation_episodes"]
-    credit = len(PERIODS)*len(METHODS)*k*n
-    evaluation = len(PERIODS)*len(VARIANTS)*e
+    credit = len(PERIODS)*len(methods)*k*n
+    evaluation = len(PERIODS)*len(variants)*e
     count = credit + evaluation
     forward = fisher = 0
     for p in PERIODS:
-        for allocation in METHODS.values():
+        for allocation in methods.values():
             for actor in allocation:
                 t = h//p if actor == "upper" else h
                 forward += k*n*math.ceil(t/CHUNK_SIZE)
                 fisher += k*math.ceil(n*t/CHUNK_SIZE)
-    actor_updates = len(PERIODS)*k*sum(map(len,METHODS.values()))
+    actor_updates = len(PERIODS)*k*sum(map(len,methods.values()))
     return {"source_clone_loads": len(PERIODS), "forecaster_loads": 1, "decoder_loads": len(PERIODS),
-        "training_models_initialized": len(PERIODS)*len(METHODS), "credit_episodes": credit, "evaluation_episodes": evaluation,
+        "training_models_initialized": len(PERIODS)*len(methods), "credit_episodes": credit, "evaluation_episodes": evaluation,
         "native_episodes": count, "native_steps": count*h, "native_lower_calls": count*h,
-        "native_upper_calls": (len(METHODS)*k*n+len(VARIANTS)*e)*sum(h//p for p in PERIODS),
-        "pairing_upper_forward_calls": (len(METHODS)*k*n+len(VARIANTS)*e)*sum(h//p for p in PERIODS),
+        "native_upper_calls": (len(methods)*k*n+len(variants)*e)*sum(h//p for p in PERIODS),
+        "pairing_upper_forward_calls": (len(methods)*k*n+len(variants)*e)*sum(h//p for p in PERIODS),
         "native_network_checks": count, "native_pair_checks": len(PERIODS)*e,
         "scenario_pair_checks": credit//o["rollouts_per_scenario"], "objective_checks": credit, "mc_calls": 2*credit,
         "actor_score_forward_batches": forward, "actor_score_backward_batches": 3*forward,
         "fisher_jvp_batches": fisher, "exact_kl_forward_batches": 2*fisher,
         "actor_parameter_perturbations": 2*actor_updates, "parameter_part_checks": actor_updates,
-        "actor_mean_parameter_updates": actor_updates, "policy_updates": len(PERIODS)*k*len(METHODS),
-        "training_freeze_checks": len(PERIODS)*k*len(METHODS), "frozen_model_checks": len(PERIODS),
-        "checkpoint_writes": 0 if preflight else len(PERIODS)*len(METHODS)}
+        "actor_mean_parameter_updates": actor_updates, "policy_updates": len(PERIODS)*k*len(methods),
+        "training_freeze_checks": len(PERIODS)*k*len(methods), "frozen_model_checks": len(PERIODS),
+        "checkpoint_writes": 0 if preflight else len(PERIODS)*len(methods)}
 
 
 def contract():

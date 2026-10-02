@@ -42,6 +42,8 @@ def update_mean(model, batches, *, method, period, horizon, cost, allocation=Non
         changed[name] = candidates["plus"].state_dict()
         mask, gradients = ~score["sigma_mask"], score["gradients"]
         actors[name] = {"geometry": geometry, "std_check": "passed",
+            "decision_calls_per_episode": horizon//period if name == "upper" else horizon,
+            "gradient_episodes": len(score["states"])//(horizon//period if name == "upper" else horizon),
             "max_abs_old_logp_difference": max(r["max_abs_old_logp_difference"] for r in score["score_costs"].values()),
             "credit_batch_cosine": native.reliability.scores.cosine(gradients["A"].mean(0)[mask], gradients["B"].mean(0)[mask]),
             "scenario_covariance_trace": {b: parts.scenario.group_noise(g[:,mask],len(batches[b]),len(batches[b][0]))["covariance_trace"]
@@ -50,29 +52,34 @@ def update_mean(model, batches, *, method, period, horizon, cost, allocation=Non
     nominal = spec.FISHER_RADIUS*sum(allocation.values())
     if not .5*nominal <= exact <= 2*nominal:
         raise ValueError("Registered update sum-of-level KL failed")
+    nominal_call = spec.FISHER_RADIUS*sum(v/(period if a == "upper" else 1) for a,v in allocation.items())
+    exact_call = sum(r["geometry"]["exact_kl"]["plus"]/(period if a == "upper" else 1) for a,r in actors.items())
     for name, weights in changed.items():
         getattr(model,name+"_actor").load_state_dict(weights)
         cost["actor_mean_parameter_updates"] += 1
     check_training_freeze(model,before,allocation)
     cost["training_freeze_checks"] += 1
     cost["policy_updates"] += 1
-    return {"actors": actors, "exact_sum_kl": exact, "freeze_check": "passed"}
+    return {"actors": actors, "exact_sum_kl": exact, "nominal_call_weighted_kl": nominal_call,
+        "exact_call_weighted_kl": exact_call, "freeze_check": "passed"}
 
 
-def final_checkpoint(model, output, *, root, period, method, updates):
+def final_checkpoint(model, output, *, root, period, method, updates, protocol=spec):
     path = output.parent / "final_weights" / f"period_{period}_{method}.pt"
     path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "period": period, "method": method,
+    torch.save({"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "period": period, "method": method,
         "updates": updates, "weights": native.joint.inference_weights(model)},path)
     return str(path)
 
 
-def run(root, *, preflight, output):
+def run(root, *, preflight, output, protocol=spec, qualifier=None):
+    spec = protocol
+    qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
     source = json.loads(spec.source_result(root).read_text())
     decoder_spec = parts.scenario.spec.source.source
     if (source["status"],source["protocol"],source["root"],source["preflight"],source["contract"]) != (
             "complete",decoder_spec.EXPERIMENT_PROTOCOL,root,False,decoder_spec.contract()):
-        raise ValueError("Stage83 requires the frozen full Stage78 decoder")
+        raise ValueError("MC training requires the frozen full Stage78 decoder")
     clones,predictor,initialization = native.curves.support.native.load_source(root,preflight=False)
     args,roles,o = spec.arguments(root,preflight=preflight),spec.seed_roles(root,preflight=preflight),spec.options(preflight=preflight)
     cost,groups,started = dict.fromkeys(spec.budget(preflight=preflight),0),{},time.monotonic()
@@ -117,11 +124,12 @@ def run(root, *, preflight, output):
                             parts.scenario.check_scenario_pair(group,s)
                             cost["scenario_pair_checks"] += 1
                     mean_reward = float(np.mean([r["episode_return"] for g in batches.values() for pairs in g for _,r in pairs]))
-                    row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost)
+                    row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost,
+                        allocation=spec.allocation(method,period))
                     del batches
                     row.update(iteration=iteration,credit_mean_reward_before_update=mean_reward)
                     history[method].append(row)
-                print(f"Stage83 {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
+                print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
             weights = {m:native.joint.inference_weights(model) for m,model in models.items()}
             weights.update(base=native.joint.inference_weights(original),zero=native.joint.inference_weights(original))
             evaluation = {v:[r for _,r in episodes(weights[v],[(s,s) for s in roles["native_evaluation"]],v)] for v in spec.VARIANTS}
@@ -129,7 +137,8 @@ def run(root, *, preflight, output):
             cost["native_pair_checks"] += len(roles["native_evaluation"])
             trained = {}
             for method,model in models.items():
-                checkpoint = None if preflight else final_checkpoint(model,output,root=root,period=period,method=method,updates=o["updates"])
+                checkpoint = None if preflight else final_checkpoint(model,output,root=root,period=period,method=method,
+                    updates=o["updates"],protocol=spec)
                 cost["checkpoint_writes"] += int(checkpoint is not None)
                 check_training_freeze(model,snapshot,spec.METHODS[method])
                 trained[method] = {"history":history[method],"evaluation_update":o["updates"],"checkpoint":checkpoint,"final_freeze_check":"passed"}
@@ -140,55 +149,59 @@ def run(root, *, preflight, output):
     cell = {"status":"complete","protocol":spec.EXPERIMENT_PROTOCOL,"contract":spec.contract(),"root":root,"preflight":preflight,
         "seed_roles":roles,"cost":cost,"native_planning_cost":planning,"groups":groups,"source_initialization":initialization,
         "optimizer_steps":0,"critic_fits":0,"forecaster_fits":0,"native_trace_writes":0,"wall_seconds":time.monotonic()-started}
-    qualify(cell,preflight=preflight)
+    qualifier(cell,preflight=preflight)
     write_json(output,cell)
     write_json(output.parent/"completion"/"ready.json",{"protocol":spec.EXPERIMENT_PROTOCOL,"root":root,"preflight":preflight})
     return cell
 
 
-def qualify(cell, *, preflight):
+def qualify(cell, *, preflight, protocol=spec):
+    spec = protocol
     if (cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract()
             or cell["root"] not in spec.roots(preflight=preflight) or cell["preflight"] != preflight
             or cell["cost"] != spec.budget(preflight=preflight) or cell["seed_roles"] != spec.seed_roles(cell["root"],preflight=preflight)
             or set(cell["groups"]) != {str(p) for p in spec.PERIODS}
             or any(cell[k] for k in ("optimizer_steps","critic_fits","forecaster_fits","native_trace_writes"))):
-        raise ValueError("Stage83 protocol, seeds or registered training budget changed")
+        raise ValueError("MC protocol, seeds or registered training budget changed")
     o,h = spec.options(preflight=preflight),spec.arguments(cell["root"],preflight=preflight).horizon
     planning = dict.fromkeys(native.curves.paths.PLANNING_KEYS,0)
     for p,g in cell["groups"].items():
         if any(g[k] != "passed" for k in ("scenario_pairing","pairing","source_and_Adam_unchanged")):
-            raise ValueError("Stage83 on-policy independence or source freeze failed")
+            raise ValueError("MC on-policy independence or source freeze failed")
         expected = native.paired_effects(p,g["evaluation"],cell["seed_roles"]["native_evaluation"],protocol=spec)
-        if g["effects"] != expected or not np.isfinite(list(expected.values())).all():raise ValueError("Stage83 final reward contrasts changed")
-        if set(g["trained"]) != set(spec.METHODS):raise ValueError("Stage83 training methods changed")
+        if g["effects"] != expected or not np.isfinite(list(expected.values())).all():raise ValueError("MC final reward contrasts changed")
+        if set(g["trained"]) != set(spec.METHODS):raise ValueError("MC training methods changed")
         for method,t in g["trained"].items():
+            allocation = spec.allocation(method,int(p))
             if (t["evaluation_update"] != o["updates"] or t["final_freeze_check"] != "passed"
                     or bool(t["checkpoint"]) == preflight or [r["iteration"] for r in t["history"]] != list(range(1,o["updates"]+1))):
-                raise ValueError("Stage83 intermediate selection or final model changed")
+                raise ValueError("MC intermediate selection or final model changed")
             for r in t["history"]:
-                if r["freeze_check"] != "passed" or set(r["actors"]) != set(spec.METHODS[method]):raise ValueError("Stage83 actor or frozen parameters changed")
+                if r["freeze_check"] != "passed" or set(r["actors"]) != set(allocation):raise ValueError("Registered actor or frozen parameters changed")
                 exact = 0.
                 for a,row in r["actors"].items():
                     geometry = row["geometry"]
                     if (row["std_check"] != "passed" or geometry["radius_check"] != "passed"
-                            or geometry["nominal_fisher_kl"] != spec.FISHER_RADIUS*spec.METHODS[method][a]):
-                        raise ValueError("Stage83 fixed allocation/radius or std changed")
+                            or geometry["nominal_fisher_kl"] != spec.FISHER_RADIUS*allocation[a]):
+                        raise ValueError("MC fixed allocation/radius or std changed")
                     exact += geometry["exact_kl"]["plus"]
-                if exact != r["exact_sum_kl"] or not .5*spec.FISHER_RADIUS <= exact <= 2*spec.FISHER_RADIUS:
-                    raise ValueError("Stage83 total per-round conditional KL changed")
+                nominal = spec.FISHER_RADIUS*sum(allocation.values())
+                if exact != r["exact_sum_kl"] or not .5*nominal <= exact <= 2*nominal:
+                    raise ValueError("MC total per-round conditional KL changed")
         for v,rows in g["evaluation"].items():
             for r in rows:
                 native.curves.paths.check_row(r,int(p),h)
-                if r["variant"] != v or r["alpha"] != (0. if v == "zero" else g["alpha"]):raise ValueError("Stage83 frozen decoder changed")
+                if r["variant"] != v or r["alpha"] != (0. if v == "zero" else g["alpha"]):raise ValueError("MC frozen decoder changed")
                 for key in planning:planning[key] += r[key]
         n = o["updates"]*len(spec.METHODS)*2*o["credit_scenarios_per_batch"]*o["rollouts_per_scenario"]
         for key in planning:planning[key] += n*(h if key in ("reference_evaluations","actor_context_evaluations") else h//int(p)-1)
-    if planning != cell["native_planning_cost"]:raise ValueError("Stage83 native planning budget changed")
+    if planning != cell["native_planning_cost"]:raise ValueError("MC native planning budget changed")
     return cell
 
 
-def aggregate(cells, *, preflight):
-    result = native.aggregate(cells,preflight=preflight,protocol=spec,qualifier=qualify)
+def aggregate(cells, *, preflight, protocol=spec, qualifier=None):
+    qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
+    result = native.aggregate(cells,preflight=preflight,protocol=protocol,qualifier=qualifier)
     result["performance_claim"] = "teacher_initialized_fixed_std_decoder_iterative_MC_mean_learning_not_full_actor_critic"
     result["native_trial_prerequisite"] = "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol"
     return result
