@@ -1,0 +1,267 @@
+{
+  "protocol": "pointmaze_fixed_upper_lower_stage91_v1",
+  "contract": {
+    "source": "pointmaze_bounded_residual_stage78_v1",
+    "decoder": "exact_saved_full_Stage78_alpha_and_envelope_no_new_scale_search",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "base",
+      "zero",
+      "lower_matched",
+      "source_upper_joint_lower",
+      "source_upper_fixed_lower",
+      "joint_call",
+      "joint_upper_lower_matched",
+      "joint_upper_fixed_lower"
+    ],
+    "methods": {
+      "50": {
+        "lower_fixed_upper": {
+          "lower": 0.99
+        }
+      },
+      "100": {
+        "lower_fixed_upper": {
+          "lower": 0.995
+        }
+      }
+    },
+    "training_runs": {
+      "joint_call": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+      "lower_matched": "pointmaze_lower_budget_stage90_full_20261002_r1"
+    },
+    "checkpoint_protocols": {
+      "joint_call": "pointmaze_call_weighted_replication_stage88_v1",
+      "lower_matched": "pointmaze_lower_budget_stage90_v1"
+    },
+    "checkpoint_update": 8,
+    "checkpoint_methods": [
+      "joint_call",
+      "lower_matched"
+    ],
+    "compositions_upper_lower": {
+      "base": [
+        "source",
+        "source"
+      ],
+      "zero": [
+        "source",
+        "source"
+      ],
+      "lower_matched": [
+        "source",
+        "lower_matched"
+      ],
+      "source_upper_joint_lower": [
+        "source",
+        "joint_call"
+      ],
+      "source_upper_fixed_lower": [
+        "source",
+        "lower_fixed_upper"
+      ],
+      "joint_call": [
+        "joint_call",
+        "joint_call"
+      ],
+      "joint_upper_lower_matched": [
+        "joint_call",
+        "lower_matched"
+      ],
+      "joint_upper_fixed_lower": [
+        "joint_call",
+        "lower_fixed_upper"
+      ]
+    },
+    "training": "one_new_lower_mean_learner_source_lower_init_final_Stage88_upper_frozen_from_update1_eight_updates_preflight_two",
+    "sampling": "exact_Stage88_full_training_scenario_noise_rosters_all64_episodes_per_update_preflight_first_two_rounds_two_scenarios_per_batch",
+    "noise_mapping": "intentional_Stage88_training_reuse_fresh_disjoint_Stage91_paired_evaluation_roles",
+    "budget": "lower_.00099_at50_.000995_at100_matches_Stage88_joint_call_and_Stage90_LM_no_search",
+    "freeze": "training_upper_bit_exact_Stage88_update8_std_values_source_Adam_forecaster_decoder_unchanged_original_source_teacher_untouched",
+    "statistics": "all26_final_reward_contrasts_equal_root_bootstrap65536_Bonferroni26_seed91_91091",
+    "primary_endpoints": [
+      "50/joint_upper_fixed_lower_minus_joint_call",
+      "100/joint_upper_fixed_lower_minus_joint_call"
+    ],
+    "decision": "report_fixed_final_upper_LC_minus_joint_LJ_and_LC_minus_source_upper_LM_at_both_evaluation_uppers_signed_CI_no_adoption_or_retuning_Stage67_HOLD_unchanged",
+    "limits": "same_teachers_paired_training_conditional_diagnostic_final_upper_uses_prior_joint_training_not_equal_total_compute_or_isolated_temporal_movement_effect_CI_crossing_zero_not_equivalence_frequency_superiority_closed"
+  },
+  "preflight": true,
+  "source_revision": "df58d3325f2a83f1ac66d4c495877e2d01ec1c37",
+  "optimizer_roots": [
+    310011
+  ],
+  "options": {
+    "workers": 2,
+    "credit_scenarios_per_batch": 2,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 4,
+    "updates": 2
+  },
+  "seed_roles": {
+    "310011": {
+      "training_rounds": [
+        {
+          "credit_A": [
+            {
+              "scenario_seed": 88100001,
+              "noise_seeds": [
+                88102002,
+                88102003
+              ]
+            },
+            {
+              "scenario_seed": 88100002,
+              "noise_seeds": [
+                88102004,
+                88102005
+              ]
+            }
+          ],
+          "credit_B": [
+            {
+              "scenario_seed": 88101001,
+              "noise_seeds": [
+                88103002,
+                88103003
+              ]
+            },
+            {
+              "scenario_seed": 88101002,
+              "noise_seeds": [
+                88103004,
+                88103005
+              ]
+            }
+          ]
+        },
+        {
+          "credit_A": [
+            {
+              "scenario_seed": 88110001,
+              "noise_seeds": [
+                88112002,
+                88112003
+              ]
+            },
+            {
+              "scenario_seed": 88110002,
+              "noise_seeds": [
+                88112004,
+                88112005
+              ]
+            }
+          ],
+          "credit_B": [
+            {
+              "scenario_seed": 88111001,
+              "noise_seeds": [
+                88113002,
+                88113003
+              ]
+            },
+            {
+              "scenario_seed": 88111002,
+              "noise_seeds": [
+                88113004,
+                88113005
+              ]
+            }
+          ]
+        }
+      ],
+      "native_evaluation": [
+        91090001,
+        91090002,
+        91090003,
+        91090004
+      ]
+    }
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 2,
+    "credit_episodes": 32,
+    "evaluation_episodes": 64,
+    "native_episodes": 96,
+    "native_steps": 28800,
+    "native_lower_calls": 28800,
+    "native_upper_calls": 432,
+    "pairing_upper_forward_calls": 432,
+    "native_network_checks": 96,
+    "native_pair_checks": 8,
+    "scenario_pair_checks": 16,
+    "objective_checks": 32,
+    "mc_calls": 64,
+    "actor_score_forward_batches": 32,
+    "actor_score_backward_batches": 96,
+    "fisher_jvp_batches": 12,
+    "exact_kl_forward_batches": 24,
+    "actor_parameter_perturbations": 8,
+    "parameter_part_checks": 4,
+    "actor_mean_parameter_updates": 4,
+    "policy_updates": 4,
+    "training_freeze_checks": 4,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 0,
+    "checkpoint_loads": 4,
+    "checkpoint_freeze_checks": 4,
+    "training_initialization_checks": 2,
+    "actor_composition_checks": 16
+  },
+  "endpoints": [
+    "50/joint_upper_fixed_lower_minus_joint_call",
+    "50/source_upper_fixed_lower_minus_source_upper_joint_lower",
+    "50/joint_upper_fixed_lower_minus_joint_upper_lower_matched",
+    "50/source_upper_fixed_lower_minus_lower_matched",
+    "50/joint_call_minus_joint_upper_lower_matched",
+    "50/source_upper_joint_lower_minus_lower_matched",
+    "50/joint_upper_fixed_lower_minus_source_upper_fixed_lower",
+    "50/joint_upper_lower_matched_minus_lower_matched",
+    "50/joint_call_minus_source_upper_joint_lower",
+    "50/joint_upper_fixed_lower_minus_zero",
+    "50/lower_matched_minus_zero",
+    "50/joint_call_minus_zero",
+    "50/base_minus_zero",
+    "100/joint_upper_fixed_lower_minus_joint_call",
+    "100/source_upper_fixed_lower_minus_source_upper_joint_lower",
+    "100/joint_upper_fixed_lower_minus_joint_upper_lower_matched",
+    "100/source_upper_fixed_lower_minus_lower_matched",
+    "100/joint_call_minus_joint_upper_lower_matched",
+    "100/source_upper_joint_lower_minus_lower_matched",
+    "100/joint_upper_fixed_lower_minus_source_upper_fixed_lower",
+    "100/joint_upper_lower_matched_minus_lower_matched",
+    "100/joint_call_minus_source_upper_joint_lower",
+    "100/joint_upper_fixed_lower_minus_zero",
+    "100/lower_matched_minus_zero",
+    "100/joint_call_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoint_policy": "final_inference_weights_server_only",
+    "native_trace_writes": 0
+  }
+}
