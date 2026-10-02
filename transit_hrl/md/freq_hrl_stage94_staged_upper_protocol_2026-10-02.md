@@ -13,3 +13,6 @@ Preflight is mechanical only: root 310011, horizon 300, 2 updates, 8 episodes/up
 Full additional cost: 22,016 episodes / 26,419,200 steps, 256 upper mean updates, 32 final checkpoints, 48 donor loads; no upper-replay forwards.
 The lower-then-upper nominal call-weighted proxy is 0.008/branch; inherited lower compute is separate, not equal total compute or trajectory KL. Same teachers, mean-only learning, no new frequency-superiority or full actor-critic claim.
 Dispatch preflight first through scheduler, dynamically across node001-node006; formal 8-root submission requires preflight pass. Pull only compact JSON/logs/markers; checkpoints remain server-only.
+
+Preflight t126835/t126836 completed with exit 0: mechanical gate passed, 152 episodes / 45,600 steps, 8 upper updates, 6 donor loads, 22 compositions, zero checkpoint writes and replay forwards; wall time 44.48 s. No performance claim.
+Formal frozen run submitted as t126885-t126892 (eight roots) and t126893 (all-root qualification), dynamic node001-node006 with no pin. Next: analyze all four primary CIs and all 28 registered contrasts after completion; no root/period selection or cross-stage pooling.
