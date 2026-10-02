@@ -1,0 +1,118 @@
+{
+  "protocol": "pointmaze_call_weighted_replication_stage88_v1",
+  "preflight": false,
+  "run_name": "pointmaze_call_weighted_replication_stage88_full_20261002_r1",
+  "source_revision": "294d40a6d937cb1121f7d12cc29998d8e7abe178",
+  "status_snapshot_utc": "2026-10-02T03:25:25.899Z",
+  "placement": "scheduler_dynamic_node001_node006_no_pin",
+  "tasks": [
+    {
+      "id": "t121154",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310011
+    },
+    {
+      "id": "t121155",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310023
+    },
+    {
+      "id": "t121156",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310037
+    },
+    {
+      "id": "t121157",
+      "status": "running",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310049
+    },
+    {
+      "id": "t121158",
+      "status": "running",
+      "node": "node006",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310061
+    },
+    {
+      "id": "t121159",
+      "status": "running",
+      "node": "node005",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310073
+    },
+    {
+      "id": "t121160",
+      "status": "running",
+      "node": "node001",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310089
+    },
+    {
+      "id": "t121161",
+      "status": "running",
+      "node": "node004",
+      "cpu_cores": 9,
+      "ram_mb": 8192,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/call_weighted/full",
+      "role": "native_shared_sample_MC_replication",
+      "root": 310101
+    },
+    {
+      "id": "t121162",
+      "status": "queued",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "peak_ram_mb": 0,
+      "exit_code": null,
+      "resource_family": "Freq-HRL/pointmaze_call_weighted_replication_stage88_v1/qualification",
+      "role": "all_root_MC_replication_qualification",
+      "root": null
+    }
+  ]
+}
