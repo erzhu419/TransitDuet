@@ -95,7 +95,8 @@ def load_source(root, *, protocol=spec):
 
 
 def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None,
-        training_pair_worker=None, scenario_pair_check=None, source_loader=None, actor_credit_collector=None):
+        training_pair_worker=None, scenario_pair_check=None, source_loader=None, actor_credit_collector=None,
+        training_loop=None):
     spec = protocol
     qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
     scenario_pair_check = scenario_pair_check or parts.scenario.check_scenario_pair
@@ -141,32 +142,35 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
             initialization_metadata = {} if initialize_models is None else initialize_models(period,models,cost)
             training_snapshots = {m:copy.deepcopy(model.state_dict()) for m,model in models.items()}
             history = {m:[] for m in spec.METHODS}
-            for iteration,round_roles in enumerate(roles["training_rounds"],1):
-                for method,model in models.items():
-                    actor_batches = None
-                    if actor_credit_collector is None:
-                        batches = {}
-                        for b in ("A","B"):
-                            roster = round_roles["credit_"+b]
-                            pairs = episodes(native.joint.inference_weights(model),[(s["scenario_seed"],n) for s in roster for n in s["noise_seeds"]],method,True)
-                            replicas = o["rollouts_per_scenario"]
-                            batches[b] = [pairs[i:i+replicas] for i in range(0,len(pairs),replicas)]
-                            for group,s in zip(batches[b],roster):
-                                scenario_pair_check(group,s)
-                                cost["scenario_pair_checks"] += 1
-                        batch_sets = [batches]
-                    else:
-                        actor_batches = actor_credit_collector(episodes,native.joint.inference_weights(model),
-                            round_roles,method,cost)
-                        batches = None
-                        batch_sets = actor_batches.values()
-                    mean_reward = float(np.mean([r["episode_return"] for bs in batch_sets for g in bs.values() for pairs in g for _,r in pairs]))
-                    row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost,
-                        allocation=spec.allocation(method,period),actor_batches=actor_batches)
-                    del batches, actor_batches, batch_sets
-                    row.update(iteration=iteration,credit_mean_reward_before_update=mean_reward)
-                    history[method].append(row)
-                print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
+            if training_loop is not None:
+                history = training_loop(period, models, roles, episodes, cost)
+            else:
+                for iteration,round_roles in enumerate(roles["training_rounds"],1):
+                    for method,model in models.items():
+                        actor_batches = None
+                        if actor_credit_collector is None:
+                            batches = {}
+                            for b in ("A","B"):
+                                roster = round_roles["credit_"+b]
+                                pairs = episodes(native.joint.inference_weights(model),[(s["scenario_seed"],n) for s in roster for n in s["noise_seeds"]],method,True)
+                                replicas = o["rollouts_per_scenario"]
+                                batches[b] = [pairs[i:i+replicas] for i in range(0,len(pairs),replicas)]
+                                for group,s in zip(batches[b],roster):
+                                    scenario_pair_check(group,s)
+                                    cost["scenario_pair_checks"] += 1
+                            batch_sets = [batches]
+                        else:
+                            actor_batches = actor_credit_collector(episodes,native.joint.inference_weights(model),
+                                round_roles,method,cost)
+                            batches = None
+                            batch_sets = actor_batches.values()
+                        mean_reward = float(np.mean([r["episode_return"] for bs in batch_sets for g in bs.values() for pairs in g for _,r in pairs]))
+                        row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost,
+                            allocation=spec.allocation(method,period),actor_batches=actor_batches)
+                        del batches, actor_batches, batch_sets
+                        row.update(iteration=iteration,credit_mean_reward_before_update=mean_reward)
+                        history[method].append(row)
+                    print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
             weights = {m:native.joint.inference_weights(model) for m,model in models.items()}
             weights.update(base=native.joint.inference_weights(original),zero=native.joint.inference_weights(original))
             evaluation_metadata = {}
@@ -196,7 +200,7 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
     return cell
 
 
-def qualify(cell, *, preflight, protocol=spec):
+def qualify(cell, *, preflight, protocol=spec, update_schedule=None):
     spec = protocol
     if (cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract()
             or cell["root"] not in spec.roots(preflight=preflight) or cell["preflight"] != preflight
@@ -213,11 +217,13 @@ def qualify(cell, *, preflight, protocol=spec):
         if g["effects"] != expected or not np.isfinite(list(expected.values())).all():raise ValueError("MC final reward contrasts changed")
         if set(g["trained"]) != set(spec.METHODS):raise ValueError("MC training methods changed")
         for method,t in g["trained"].items():
-            allocation = spec.allocation(method,int(p))
+            steps = ([{"iteration": i, "allocation": spec.allocation(method,int(p))} for i in range(1,o["updates"]+1)]
+                if update_schedule is None else [s for s in update_schedule(int(p),preflight=preflight) if s["method"] == method])
             if (t["evaluation_update"] != o["updates"] or t["final_freeze_check"] != "passed"
-                    or bool(t["checkpoint"]) == preflight or [r["iteration"] for r in t["history"]] != list(range(1,o["updates"]+1))):
+                    or bool(t["checkpoint"]) == preflight or [r["iteration"] for r in t["history"]] != [s["iteration"] for s in steps]):
                 raise ValueError("MC intermediate selection or final model changed")
-            for r in t["history"]:
+            for r,step in zip(t["history"],steps):
+                allocation = step["allocation"]
                 if r["freeze_check"] != "passed" or set(r["actors"]) != set(allocation):raise ValueError("Registered actor or frozen parameters changed")
                 exact = 0.
                 for a,row in r["actors"].items():
