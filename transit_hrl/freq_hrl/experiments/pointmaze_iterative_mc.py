@@ -25,17 +25,18 @@ def check_training_freeze(model, before, active):
     native.curves.support.assert_frozen(model, expected)
 
 
-def update_mean(model, batches, *, method, period, horizon, cost, allocation=None, actor_batches=None):
+def update_mean(model, batches, *, method, period, horizon, cost, allocation=None, actor_batches=None, score_builder=None):
     allocation = spec.METHODS[method] if allocation is None else allocation
+    score_builder = score_builder or parts.scenario_actor_scores
     before = copy.deepcopy(model.state_dict())
     if actor_batches is None:
-        scored = parts.scenario_actor_scores(model, batches, period=period, horizon=horizon, cost=cost, actor_names=tuple(allocation))
+        scored = score_builder(model, batches, period=period, horizon=horizon, cost=cost, actor_names=tuple(allocation))
     else:
         if set(actor_batches) != set(allocation):
             raise ValueError("Actor-specific credit must cover exactly the updated actors")
         scored = {}
         for name in allocation:
-            scored.update(parts.scenario_actor_scores(model, actor_batches[name], period=period,
+            scored.update(score_builder(model, actor_batches[name], period=period,
                 horizon=horizon, cost=cost, actor_names=(name,)))
     changed, actors = {}, {}
     for name, score in scored.items():
