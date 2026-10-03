@@ -1,0 +1,528 @@
+{
+  "cell": {
+    "cost": {
+      "actor_composition_checks": 22,
+      "actor_mean_parameter_updates": 8,
+      "actor_parameter_perturbations": 16,
+      "actor_score_backward_batches": 192,
+      "actor_score_forward_batches": 64,
+      "checkpoint_freeze_checks": 6,
+      "checkpoint_loads": 6,
+      "checkpoint_writes": 0,
+      "credit_episodes": 64,
+      "decoder_loads": 2,
+      "evaluation_episodes": 88,
+      "exact_kl_forward_batches": 16,
+      "fisher_jvp_batches": 8,
+      "forecaster_loads": 1,
+      "frozen_model_checks": 2,
+      "mc_calls": 128,
+      "native_episodes": 152,
+      "native_lower_calls": 45600,
+      "native_network_checks": 152,
+      "native_pair_checks": 8,
+      "native_steps": 45600,
+      "native_upper_calls": 684,
+      "objective_checks": 64,
+      "pairing_upper_forward_calls": 684,
+      "parameter_part_checks": 8,
+      "policy_updates": 8,
+      "scenario_pair_checks": 32,
+      "source_clone_loads": 2,
+      "training_freeze_checks": 8,
+      "training_initialization_checks": 4,
+      "training_models_initialized": 4,
+      "upper_replay_forward_calls": 0
+    },
+    "critic_fits": 0,
+    "forecaster_fits": 0,
+    "groups": {
+      "50": {
+        "actor_composition": "passed",
+        "alpha": 0.02223361635696027,
+        "checkpoint_freeze": "passed",
+        "effects": {
+          "50/base_minus_zero": 0.0663220606887549,
+          "50/common_upper_independent_lower_minus_staged_independent": 0.0008123678307185855,
+          "50/fixed_joint_common_minus_source_common": 0.057996873913417346,
+          "50/fixed_joint_independent_minus_source_independent": 0.06069927808072606,
+          "50/independent_upper_common_lower_minus_staged_independent": -0.5289529550417384,
+          "50/source_common_minus_source_independent": -0.5286996508715021,
+          "50/staged_common_minus_fixed_joint_common": -0.04969454095564174,
+          "50/staged_common_minus_independent_upper_common_lower": 0.000814122171071574,
+          "50/staged_common_minus_joint": -0.22777422140415382,
+          "50/staged_common_minus_source_common": 0.008302332957775604,
+          "50/staged_common_minus_staged_independent": -0.5281388328706669,
+          "50/staged_independent_minus_fixed_joint_independent": -0.05295776312378564,
+          "50/staged_independent_minus_joint": 0.30036461146651305,
+          "50/staged_independent_minus_source_independent": 0.007741514956940421
+        },
+        "evaluation_mean_reward": {
+          "base": 249.2815361800738,
+          "common_upper_independent_lower": 249.81193469290403,
+          "fixed_joint_common": 249.3326780331583,
+          "fixed_joint_independent": 249.8640800881971,
+          "independent_upper_common_lower": 249.28216937003157,
+          "joint": 249.51075771360678,
+          "source_common": 249.27468115924486,
+          "source_independent": 249.80338081011638,
+          "staged_common": 249.28298349220262,
+          "staged_independent": 249.8111223250733,
+          "zero": 249.21521411938505
+        },
+        "final_lower_freeze": "passed",
+        "lower_for_method": {
+          "staged_common": "source_upper_common",
+          "staged_independent": "source_upper_independent"
+        },
+        "pairing": "passed",
+        "reused_checkpoints": {
+          "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_full_20261003_r1/cells/replicate_410011/final_weights/period_50_joint_call.pt",
+          "source_upper_common": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_lower_stage99_full_20261003_r1/cells/replicate_410011/final_weights/period_50_source_upper_common.pt",
+          "source_upper_independent": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_lower_stage99_full_20261003_r1/cells/replicate_410011/final_weights/period_50_source_upper_independent.pt"
+        },
+        "scenario_pairing": "passed",
+        "source_and_Adam_unchanged": "passed",
+        "trained": {
+          "staged_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 234.19316074886785,
+                "exact_call_weighted_kl": 0.000009999999317266324,
+                "exact_sum_kl": 0.0004999999658633162,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00001
+              },
+              {
+                "credit_mean_reward_before_update": 211.18898237946377,
+                "exact_call_weighted_kl": 0.000009999829316269619,
+                "exact_sum_kl": 0.000499991465813481,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00001
+              }
+            ]
+          },
+          "staged_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 234.16774489184604,
+                "exact_call_weighted_kl": 0.000009999999486204059,
+                "exact_sum_kl": 0.0004999999743102029,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00001
+              },
+              {
+                "credit_mean_reward_before_update": 211.049609655156,
+                "exact_call_weighted_kl": 0.000009999773726492949,
+                "exact_sum_kl": 0.0004999886863246474,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00001
+              }
+            ]
+          }
+        },
+        "training_initialization": "passed",
+        "training_noise_pairing": "independent_upper_and_lower"
+      },
+      "100": {
+        "actor_composition": "passed",
+        "alpha": 0.06479194013941661,
+        "checkpoint_freeze": "passed",
+        "effects": {
+          "100/base_minus_zero": -0.2224501505704879,
+          "100/common_upper_independent_lower_minus_staged_independent": 0.0010887201412046466,
+          "100/fixed_joint_common_minus_source_common": 0.04542306499235593,
+          "100/fixed_joint_independent_minus_source_independent": 0.06078171489395601,
+          "100/independent_upper_common_lower_minus_staged_independent": -0.10290744590928114,
+          "100/source_common_minus_source_independent": -0.10272091497710534,
+          "100/staged_common_minus_fixed_joint_common": -0.03564071485560305,
+          "100/staged_common_minus_independent_upper_common_lower": 0.0011223495200169964,
+          "100/staged_common_minus_joint": 0.47745729898394274,
+          "100/staged_common_minus_source_common": 0.009782350136752882,
+          "100/staged_common_minus_staged_independent": -0.10178509638926414,
+          "100/staged_independent_minus_fixed_joint_independent": -0.05193518334504432,
+          "100/staged_independent_minus_joint": 0.5792423953732069,
+          "100/staged_independent_minus_source_independent": 0.008846531548911685
+        },
+        "evaluation_mean_reward": {
+          "base": 227.1799996423843,
+          "common_upper_independent_lower": 227.55802035898776,
+          "fixed_joint_common": 227.49078725731292,
+          "fixed_joint_independent": 227.6088668221916,
+          "independent_upper_common_lower": 227.45402419293728,
+          "joint": 226.97768924347335,
+          "source_common": 227.44536419232054,
+          "source_independent": 227.54808510729765,
+          "staged_common": 227.45514654245733,
+          "staged_independent": 227.55693163884655,
+          "zero": 227.40244979295477
+        },
+        "final_lower_freeze": "passed",
+        "lower_for_method": {
+          "staged_common": "source_upper_common",
+          "staged_independent": "source_upper_independent"
+        },
+        "pairing": "passed",
+        "reused_checkpoints": {
+          "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_full_20261003_r1/cells/replicate_410011/final_weights/period_100_joint_call.pt",
+          "source_upper_common": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_lower_stage99_full_20261003_r1/cells/replicate_410011/final_weights/period_100_source_upper_common.pt",
+          "source_upper_independent": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_lower_stage99_full_20261003_r1/cells/replicate_410011/final_weights/period_100_source_upper_independent.pt"
+        },
+        "scenario_pairing": "passed",
+        "source_and_Adam_unchanged": "passed",
+        "trained": {
+          "staged_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 189.56114343766615,
+                "exact_call_weighted_kl": 0.000004999999808427691,
+                "exact_sum_kl": 0.0004999999808427691,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000005
+              },
+              {
+                "credit_mean_reward_before_update": 184.3880104075546,
+                "exact_call_weighted_kl": 0.000004999940663318094,
+                "exact_sum_kl": 0.0004999940663318094,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000005
+              }
+            ]
+          },
+          "staged_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 189.24103849397986,
+                "exact_call_weighted_kl": 0.000005000000032601842,
+                "exact_sum_kl": 0.0005000000032601842,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000005
+              },
+              {
+                "credit_mean_reward_before_update": 183.7980242770961,
+                "exact_call_weighted_kl": 0.000004999939108999799,
+                "exact_sum_kl": 0.0004999939108999799,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000005
+              }
+            ]
+          }
+        },
+        "training_initialization": "passed",
+        "training_noise_pairing": "independent_upper_and_lower"
+      }
+    },
+    "native_planning_cost": {
+      "actor_context_evaluations": 45600,
+      "plan_ols_fits": 532,
+      "plan_ridge_predictions": 532,
+      "reference_evaluations": 45600
+    },
+    "native_trace_writes": 0,
+    "optimizer_steps": 0,
+    "preflight": true,
+    "root": 410011,
+    "source_initialization": {
+      "checkpoints": {
+        "50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "decoder_preflight": false,
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "decoder_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "historical_artifact_loads": 0,
+      "teacher_preflight": false,
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "teacher_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json"
+    },
+    "status": "complete",
+    "wall_seconds": 40.32420151587576
+  },
+  "pull_policy": "compact JSON only; no trajectories, CSV, NPZ or checkpoints",
+  "qualification_reproduction": "passed",
+  "run_name": "pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1",
+  "summary": {
+    "contract": {
+      "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+      "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+      "budget": "new_upper_conditional_KL_.0005_per_update_no_search_combined_nominal_call_weighted_lower_then_upper_proxy_.008_per_branch_not_equal_total_compute_or_trajectory_KL",
+      "checkpoint_methods": [
+        "source_upper_independent",
+        "source_upper_common",
+        "joint_call"
+      ],
+      "checkpoint_protocols": {
+        "joint_call": "pointmaze_fresh_joint_stage98_v1",
+        "source_upper_common": "pointmaze_fresh_lower_stage99_v1",
+        "source_upper_independent": "pointmaze_fresh_lower_stage99_v1"
+      },
+      "checkpoint_update": 8,
+      "compositions_upper_lower": {
+        "base": [
+          "source",
+          "source"
+        ],
+        "common_upper_independent_lower": [
+          "staged_common",
+          "source_upper_independent"
+        ],
+        "fixed_joint_common": [
+          "joint_call",
+          "source_upper_common"
+        ],
+        "fixed_joint_independent": [
+          "joint_call",
+          "source_upper_independent"
+        ],
+        "independent_upper_common_lower": [
+          "staged_independent",
+          "source_upper_common"
+        ],
+        "joint": [
+          "joint_call",
+          "joint_call"
+        ],
+        "source_common": [
+          "source",
+          "source_upper_common"
+        ],
+        "source_independent": [
+          "source",
+          "source_upper_independent"
+        ],
+        "staged_common": [
+          "staged_common",
+          "source_upper_common"
+        ],
+        "staged_independent": [
+          "staged_independent",
+          "source_upper_independent"
+        ],
+        "zero": [
+          "source",
+          "source"
+        ]
+      },
+      "confirmation": "both_uppers_retrained_from_new_U0_no_old_upper_lower_weights_all_eight_new_roots_no_Stage94_95_pooling",
+      "confirmation_of": "pointmaze_staged_upper_confirmation_stage95_v1",
+      "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+      "decision": "all_four_primary_lower_CI_bounds_positive_required_preflight_mechanical_only_no_cross_stage_pooling_or_root_period_selection",
+      "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+      "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+      "freeze": "corresponding_Stage99_lower_std_values_source_Adam_forecaster_decoder_original_Stage96_teacher_unchanged",
+      "limits": "new_teacher_staged_MC_mean_learning_not_full_actor_critic_unseen_task_or_frequency_superiority_Stage67_HOLD",
+      "lower_for_method": {
+        "staged_common": "source_upper_common",
+        "staged_independent": "source_upper_independent"
+      },
+      "methods": {
+        "50": {
+          "staged_common": {
+            "upper": 0.5
+          },
+          "staged_independent": {
+            "upper": 0.5
+          }
+        },
+        "100": {
+          "staged_common": {
+            "upper": 0.5
+          },
+          "staged_independent": {
+            "upper": 0.5
+          }
+        }
+      },
+      "noise_mapping": "original_Stage80_noise_mapping_no_upper_replay_in_training_or_evaluation",
+      "periods": [
+        50,
+        100
+      ],
+      "primary_endpoints": [
+        "50/staged_common_minus_source_common",
+        "50/staged_common_minus_staged_independent",
+        "100/staged_common_minus_source_common",
+        "100/staged_common_minus_staged_independent"
+      ],
+      "reference_run": "pointmaze_staged_upper_stage94_full_20261002_r1",
+      "sampling": "fresh_Stage100_training_eval_disjoint_roles_same_original_independent_upper_lower_pairs_for_both_learners",
+      "source": "pointmaze_fresh_teachers_stage96_v1",
+      "source_run": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+      "statistics": "unchanged_all28_equal_root_bootstrap65536_Bonferroni28_same_Stage95_seed95_95095",
+      "training": "new_U0_upper_means_given_final_Stage99_U0_trained_independent_or_common_lower_frozen_eight_updates_preflight_two",
+      "training_runs": {
+        "joint_call": "pointmaze_fresh_joint_stage98_full_20261003_r1",
+        "source_upper_common": "pointmaze_fresh_lower_stage99_full_20261003_r1",
+        "source_upper_independent": "pointmaze_fresh_lower_stage99_full_20261003_r1"
+      },
+      "variants": [
+        "base",
+        "zero",
+        "source_independent",
+        "source_common",
+        "fixed_joint_independent",
+        "fixed_joint_common",
+        "staged_independent",
+        "staged_common",
+        "common_upper_independent_lower",
+        "independent_upper_common_lower",
+        "joint"
+      ]
+    },
+    "cost": {
+      "actor_composition_checks": 22,
+      "actor_mean_parameter_updates": 8,
+      "actor_parameter_perturbations": 16,
+      "actor_score_backward_batches": 192,
+      "actor_score_forward_batches": 64,
+      "checkpoint_freeze_checks": 6,
+      "checkpoint_loads": 6,
+      "checkpoint_writes": 0,
+      "credit_episodes": 64,
+      "decoder_loads": 2,
+      "evaluation_episodes": 88,
+      "exact_kl_forward_batches": 16,
+      "fisher_jvp_batches": 8,
+      "forecaster_loads": 1,
+      "frozen_model_checks": 2,
+      "mc_calls": 128,
+      "native_episodes": 152,
+      "native_lower_calls": 45600,
+      "native_network_checks": 152,
+      "native_pair_checks": 8,
+      "native_steps": 45600,
+      "native_upper_calls": 684,
+      "objective_checks": 64,
+      "pairing_upper_forward_calls": 684,
+      "parameter_part_checks": 8,
+      "policy_updates": 8,
+      "scenario_pair_checks": 32,
+      "source_clone_loads": 2,
+      "training_freeze_checks": 8,
+      "training_initialization_checks": 4,
+      "training_models_initialized": 4,
+      "upper_replay_forward_calls": 0
+    },
+    "endpoints": {
+      "100/base_minus_zero": {
+        "mean": -0.2224501505704879
+      },
+      "100/common_upper_independent_lower_minus_staged_independent": {
+        "mean": 0.0010887201412046466
+      },
+      "100/fixed_joint_common_minus_source_common": {
+        "mean": 0.04542306499235593
+      },
+      "100/fixed_joint_independent_minus_source_independent": {
+        "mean": 0.06078171489395601
+      },
+      "100/independent_upper_common_lower_minus_staged_independent": {
+        "mean": -0.10290744590928114
+      },
+      "100/source_common_minus_source_independent": {
+        "mean": -0.10272091497710534
+      },
+      "100/staged_common_minus_fixed_joint_common": {
+        "mean": -0.03564071485560305
+      },
+      "100/staged_common_minus_independent_upper_common_lower": {
+        "mean": 0.0011223495200169964
+      },
+      "100/staged_common_minus_joint": {
+        "mean": 0.47745729898394274
+      },
+      "100/staged_common_minus_source_common": {
+        "mean": 0.009782350136752882
+      },
+      "100/staged_common_minus_staged_independent": {
+        "mean": -0.10178509638926414
+      },
+      "100/staged_independent_minus_fixed_joint_independent": {
+        "mean": -0.05193518334504432
+      },
+      "100/staged_independent_minus_joint": {
+        "mean": 0.5792423953732069
+      },
+      "100/staged_independent_minus_source_independent": {
+        "mean": 0.008846531548911685
+      },
+      "50/base_minus_zero": {
+        "mean": 0.0663220606887549
+      },
+      "50/common_upper_independent_lower_minus_staged_independent": {
+        "mean": 0.0008123678307185855
+      },
+      "50/fixed_joint_common_minus_source_common": {
+        "mean": 0.057996873913417346
+      },
+      "50/fixed_joint_independent_minus_source_independent": {
+        "mean": 0.06069927808072606
+      },
+      "50/independent_upper_common_lower_minus_staged_independent": {
+        "mean": -0.5289529550417384
+      },
+      "50/source_common_minus_source_independent": {
+        "mean": -0.5286996508715021
+      },
+      "50/staged_common_minus_fixed_joint_common": {
+        "mean": -0.04969454095564174
+      },
+      "50/staged_common_minus_independent_upper_common_lower": {
+        "mean": 0.000814122171071574
+      },
+      "50/staged_common_minus_joint": {
+        "mean": -0.22777422140415382
+      },
+      "50/staged_common_minus_source_common": {
+        "mean": 0.008302332957775604
+      },
+      "50/staged_common_minus_staged_independent": {
+        "mean": -0.5281388328706669
+      },
+      "50/staged_independent_minus_fixed_joint_independent": {
+        "mean": -0.05295776312378564
+      },
+      "50/staged_independent_minus_joint": {
+        "mean": 0.30036461146651305
+      },
+      "50/staged_independent_minus_source_independent": {
+        "mean": 0.007741514956940421
+      }
+    },
+    "mechanical_gate": "passed",
+    "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+    "performance_claim": "new_teacher_staged_upper_MC_mean_learning_given_frozen_lowers_not_frequency_superiority",
+    "primary_endpoints": [
+      "50/staged_common_minus_source_common",
+      "50/staged_common_minus_staged_independent",
+      "100/staged_common_minus_source_common",
+      "100/staged_common_minus_staged_independent"
+    ],
+    "protocol": "pointmaze_fresh_staged_upper_stage100_v1",
+    "run_name": "pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1",
+    "staged_confirmation": "mechanical_only",
+    "status": "preflight_passed"
+  }
+}
+

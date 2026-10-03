@@ -1,15 +1,15 @@
 {
   "run_name": "pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1",
   "protocol": "pointmaze_fresh_staged_upper_stage100_v1",
-  "recorded_at_utc": "2026-10-03 06:14:04 UTC",
+  "recorded_at_utc": "2026-10-03 06:30:27 UTC",
   "code_revision": "5df7a37a042583cd3dd6721b3c2428b44c6ddb0b",
   "preregistration_revision": "fd19186486",
   "source_evidence_revision": "bc43d67b4e",
   "tasks": [
     {
       "id": "t128933",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node004",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -22,21 +22,21 @@
       "cpu_cores": 3,
       "ram_mb": 3072,
       "submitted_at": 1791007971.4677396,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791008284.6620224,
+      "finished_at": 1791008371.2315917,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_fresh_staged_upper_stage100_v1 root410011",
       "signature": "Freq-HRL/pointmaze_fresh_staged_upper_stage100_v1/pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1/fresh_teacher_staged_upper_independent_credit/410011",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t128933.log",
       "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1/cells/replicate_410011/completion",
       "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1/cells/replicate_410011/completion",
       "wait_for_files": []
     },
     {
       "id": "t128934",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node004",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -49,13 +49,13 @@
       "cpu_cores": 1,
       "ram_mb": 2048,
       "submitted_at": 1791007971.5425305,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791008431.082912,
+      "finished_at": 1791008488.1323502,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_fresh_staged_upper_stage100_v1 all-root qualification",
       "signature": "Freq-HRL/pointmaze_fresh_staged_upper_stage100_v1/pointmaze_fresh_staged_upper_stage100_preflight_20261003_r1/qualification",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t128934.log",
       "result_dir": null,
       "local_result_dir": null,
       "wait_for_files": [
@@ -64,8 +64,10 @@
     }
   ],
   "full_run": "pointmaze_fresh_staged_upper_stage100_full_20261003_r1",
-  "full_status": "frozen_not_submitted",
+  "full_status": "frozen_ready_for_submission",
   "scope": "Native mechanical preflight only; train both uppers from fresh U0 with fixed registered Stage99 lowers. No reward admission, old-cohort pooling or donor selection. Full submission follows official native mechanical qualification.",
-  "artifacts": "completion markers and compact JSON only; final checkpoints server-only"
+  "artifacts": "completion markers and compact JSON only; final checkpoints server-only",
+  "native_qualification": "preflight_passed",
+  "mechanical_gate": "passed",
+  "qualification_reproduction": "passed"
 }
-
