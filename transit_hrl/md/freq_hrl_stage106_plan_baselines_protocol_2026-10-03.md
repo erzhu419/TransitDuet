@@ -15,4 +15,4 @@ Full cost:69,120 native episodes/82,944,000 steps,768 active actor-mean updates,
 ## Scope
 This compares teacher-assisted fixed-std MC actor-mean learners, not from-scratch flat PPO/SAC, matched parameter counts, full actor-critic or frequency superiority. All source models, values, Adam, std and forecast/decoder fits stay frozen. Stage67 HOLD and Stage104/105 results remain separate.
 
-Next:qualify native preflight, then run the unchanged full eight-root protocol. If trained forecast/flat closes the gap, preserve that result and narrow the algorithm claim instead of weakening the baseline.
+Completed:the [full eight-root result](freq_hrl_stage106_plan_baselines_result_2026-10-03.md) does not support the learned-plan increment claim. Conditioning still helps relative to independent joint learning, but neither period establishes conditioned joint superiority over trained forecast; trained flat is significantly better at both periods. The mandatory forecast-reference route is not a positive hierarchy claim; next diagnose optional planning with unchanged full lower feedback and retain the strong baselines.
