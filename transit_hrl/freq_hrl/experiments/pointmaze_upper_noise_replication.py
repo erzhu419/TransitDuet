@@ -12,12 +12,14 @@ from scripts import pointmaze_upper_noise_replication_stage93_spec as spec
 learning, scenario, swaps = common.learning, common.scenario, common.swaps
 
 
-def worker_pair(jobs):
+def worker_pair(jobs, *, protocol=spec):
+    spec = protocol
     if spec.NOISE_MODES[jobs[0][3]] == "common_upper_independent_lower":return common.worker_pair(jobs)
     return [scenario.worker_native(job) for job in jobs]
 
 
-def check_scenario_pair(pairs, roster, *, root):
+def check_scenario_pair(pairs, roster, *, root, protocol=spec):
+    spec = protocol
     rows = [r for _,r in pairs]
     method = rows[0]["variant"]
     if any(r["variant"] != method for r in rows):raise ValueError("Stage93 pair mixed training methods")
@@ -32,14 +34,16 @@ def check_scenario_pair(pairs, roster, *, root):
                 raise ValueError("Stage93 independent control replayed upper noise")
 
 
-def prepare_training(training, root, period, models, cost):
+def prepare_training(training, root, period, models, cost, *, protocol=spec,
+        checkpoint_protocol=common.budget_training.swap_spec):
+    spec = protocol
     original = learning.native.joint.inference_weights(models["source_upper_independent"])
     path = spec.donor_result(root,"joint_call").parent/"final_weights"/f"period_{period}_joint_call.pt"
     record = training["groups"][str(period)]["trained"]["joint_call"]
     if record["evaluation_update"] != 8 or record["final_freeze_check"] != "passed" or record["checkpoint"] != str(path):
-        raise ValueError("Stage93 requires the registered final Stage88 upper")
+        raise ValueError(f"{spec.EXPERIMENT_PROTOCOL} requires the registered final joint upper")
     donor = swaps.check_checkpoint(torch.load(path,map_location="cpu",weights_only=False),original,
-        root=root,period=period,method="joint_call",protocol=common.budget_training.swap_spec)
+        root=root,period=period,method="joint_call",protocol=checkpoint_protocol)
     cost["checkpoint_loads"] += 1
     cost["checkpoint_freeze_checks"] += 1
     for method,model in models.items():
@@ -52,7 +56,8 @@ def prepare_training(training, root, period, models, cost):
         "training_initialization":"passed","training_noise_pairing":spec.NOISE_MODES}
 
 
-def prepare_evaluation(donors, period, weights, cost):
+def prepare_evaluation(donors, period, weights, cost, *, protocol=spec):
+    spec = protocol
     for method in spec.METHODS:
         upper = donors["joint_call"]["upper_actor"] if method in ("joint_upper_independent","joint_upper_common") else weights["base"]["upper_actor"]
         torch.testing.assert_close(weights[method]["upper_actor"],upper,atol=0,rtol=0)
@@ -61,7 +66,8 @@ def prepare_evaluation(donors, period, weights, cost):
     return composed,{"actor_composition":"passed","final_upper_freeze":"passed"}
 
 
-def qualify(cell, *, preflight):
+def qualify(cell, *, preflight, protocol=spec):
+    spec = protocol
     learning.qualify(cell,preflight=preflight,protocol=spec)
     o,h = spec.options(preflight=preflight),spec.arguments(cell["root"],preflight=preflight).horizon
     for p,g in cell["groups"].items():
