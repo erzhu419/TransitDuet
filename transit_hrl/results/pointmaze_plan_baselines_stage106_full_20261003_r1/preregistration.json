@@ -1,0 +1,589 @@
+{
+  "run_name": "pointmaze_plan_baselines_stage106_full_20261003_r1",
+  "protocol": "pointmaze_plan_baselines_stage106_v1",
+  "registered_at_utc": "2026-10-03T14:07:12.549881+00:00",
+  "source_revision": "52a98887b3bb32f7335ea785a3d636949ff9840a",
+  "source_evidence_revision": "16869fde08",
+  "preflight": false,
+  "contract": {
+    "source": "pointmaze_fresh_teachers_stage96_v1",
+    "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "task_change": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "methods": {
+      "50": {
+        "joint_independent": {
+          "upper": 0.5,
+          "lower": 0.99
+        },
+        "joint_conditioned": {
+          "upper": 0.5,
+          "lower": 0.99
+        },
+        "forecast_lower": {
+          "lower": 1
+        },
+        "flat_lower": {
+          "lower": 1
+        }
+      },
+      "100": {
+        "joint_independent": {
+          "upper": 0.5,
+          "lower": 0.995
+        },
+        "joint_conditioned": {
+          "upper": 0.5,
+          "lower": 0.995
+        },
+        "forecast_lower": {
+          "lower": 1
+        },
+        "flat_lower": {
+          "lower": 1
+        }
+      }
+    },
+    "variants": [
+      "joint_base",
+      "forecast_base",
+      "flat_base",
+      "joint_independent",
+      "joint_conditioned",
+      "forecast_lower",
+      "flat_lower"
+    ],
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_forecast_lower",
+      "50/joint_conditioned_minus_flat_lower",
+      "100/joint_conditioned_minus_forecast_lower",
+      "100/joint_conditioned_minus_flat_lower"
+    ],
+    "source_cohort": "original_eight_Stage96_teachers_Stage97_decoder_no_trained_donor_or_refit",
+    "training": "eight_mean_updates_two_preflight_joint64_upper_plus64_lower_baselines128_lower_paths_per_round",
+    "baseline_sampling": "union_of_registered_upper_and_lower_credit_rosters_same_total_native_samples",
+    "budget": "nominal_per_primitive_call_weighted_KL_.001_each_update_baselines_all_to_lower_joint_as_Stage105_actual_compute_reported",
+    "forecast_lower": "causal_ridge_reference_and_velocity_only_no_upper_actor_inference_or_learned_residual",
+    "flat_lower": "physical_current_target_error_full64step_history_causal_latest_target_velocity_no_plan_forecast_or_upper_inference",
+    "initialization": "identical_original_lower392_weights_all_methods_three_own_input_semantic_base_controls_no_baseline_refit",
+    "flat_period": "teacher_initialization_index_not_flat_action_or_plan_frequency",
+    "conditioning": "only_joint_conditioned_lower_training_common_upper_innovations_independent_lower_noise",
+    "freeze": "std_values_Adam_source_models_forecaster_decoder_fixed_baseline_upper_bit_exact_unused",
+    "evaluation": "seven_fixed_final_or_initial_policies_fresh_paired_independent_noise_no_selection",
+    "statistics": "all26_equal_root_bootstrap65536_Bonferroni26_seed106_106106_no_stage_pooling",
+    "decision": "all_four_conditioned_minus_trained_forecast_and_flat_lower_CI_bounds_positive_pref_mechanical_only",
+    "limits": "teacher_assisted_MC_mean_learning_not_from_scratch_flat_PPO_SAC_equal_parameter_count_full_actor_critic_or_frequency_superiority"
+  },
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "workers": 8,
+    "credit_scenarios_per_batch": 16,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 32,
+    "updates": 8
+  },
+  "arguments_for_first_root": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 1200,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": false
+  },
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "teacher_decoder_sources": {
+    "410011": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410023": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410023/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410037": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410037/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410049": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410049/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410061": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410061/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410073": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410073/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410089": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410089/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410101": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410101/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    }
+  },
+  "compact_seed_encoding": {
+    "generator": "scripts/pointmaze_plan_baselines_stage106_spec.py:seed_roles",
+    "base_by_root": {
+      "410011": 106100000,
+      "410023": 106200000,
+      "410037": 106300000,
+      "410049": 106400000,
+      "410061": 106500000,
+      "410073": 106600000,
+      "410089": 106700000,
+      "410101": 106800000
+    },
+    "zero_based_round_stride": 10000,
+    "roster_offsets": {
+      "credit_A": 1,
+      "credit_B": 1001,
+      "lower_credit_A": 4001,
+      "lower_credit_B": 5001
+    },
+    "noise_offsets": [
+      2001,
+      2002
+    ],
+    "noise_scenario_stride": 2,
+    "evaluation_offset": 95001
+  },
+  "matched_arm_training_budget_by_period": {
+    "50": {
+      "joint_independent": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 64,
+        "active_actors": [
+          "upper",
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "upper": 0.0005,
+          "lower": 0.00099
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "joint_conditioned": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 64,
+        "active_actors": [
+          "upper",
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "upper": 0.0005,
+          "lower": 0.00099
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "forecast_lower": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 128,
+        "active_actors": [
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "lower": 0.001
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "flat_lower": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 128,
+        "active_actors": [
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "lower": 0.001
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      }
+    },
+    "100": {
+      "joint_independent": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 64,
+        "active_actors": [
+          "upper",
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "upper": 0.0005,
+          "lower": 0.000995
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "joint_conditioned": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 64,
+        "active_actors": [
+          "upper",
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "upper": 0.0005,
+          "lower": 0.000995
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "forecast_lower": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 128,
+        "active_actors": [
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "lower": 0.001
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      },
+      "flat_lower": {
+        "native_training_episodes": 1024,
+        "credit_paths_per_actor_per_update": 128,
+        "active_actors": [
+          "lower"
+        ],
+        "mean_updates_per_actor": 8,
+        "nominal_KL_per_update": {
+          "lower": 0.001
+        },
+        "nominal_call_weighted_KL_per_update": 0.001
+      }
+    }
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 8,
+    "credit_episodes": 8192,
+    "evaluation_episodes": 448,
+    "native_episodes": 8640,
+    "native_steps": 10368000,
+    "native_lower_calls": 10368000,
+    "native_upper_calls": 77184,
+    "pairing_upper_forward_calls": 77184,
+    "native_network_checks": 8640,
+    "native_pair_checks": 64,
+    "scenario_pair_checks": 4096,
+    "objective_checks": 8192,
+    "mc_calls": 12288,
+    "actor_score_forward_batches": 14336,
+    "actor_score_backward_batches": 43008,
+    "fisher_jvp_batches": 7248,
+    "exact_kl_forward_batches": 14496,
+    "actor_parameter_perturbations": 192,
+    "parameter_part_checks": 96,
+    "actor_mean_parameter_updates": 96,
+    "policy_updates": 64,
+    "training_freeze_checks": 64,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 8,
+    "upper_independent_pair_checks": 1024,
+    "lower_independent_pair_checks": 512,
+    "lower_common_pair_checks": 512,
+    "primitive_pair_checks": 2048,
+    "upper_replay_forward_calls": 9216
+  },
+  "budget_total": {
+    "source_clone_loads": 16,
+    "forecaster_loads": 8,
+    "decoder_loads": 16,
+    "training_models_initialized": 64,
+    "credit_episodes": 65536,
+    "evaluation_episodes": 3584,
+    "native_episodes": 69120,
+    "native_steps": 82944000,
+    "native_lower_calls": 82944000,
+    "native_upper_calls": 617472,
+    "pairing_upper_forward_calls": 617472,
+    "native_network_checks": 69120,
+    "native_pair_checks": 512,
+    "scenario_pair_checks": 32768,
+    "objective_checks": 65536,
+    "mc_calls": 98304,
+    "actor_score_forward_batches": 114688,
+    "actor_score_backward_batches": 344064,
+    "fisher_jvp_batches": 57984,
+    "exact_kl_forward_batches": 115968,
+    "actor_parameter_perturbations": 1536,
+    "parameter_part_checks": 768,
+    "actor_mean_parameter_updates": 768,
+    "policy_updates": 512,
+    "training_freeze_checks": 512,
+    "frozen_model_checks": 16,
+    "checkpoint_writes": 64,
+    "upper_independent_pair_checks": 8192,
+    "lower_independent_pair_checks": 4096,
+    "lower_common_pair_checks": 4096,
+    "primitive_pair_checks": 16384,
+    "upper_replay_forward_calls": 73728
+  },
+  "native_planning_budget_per_root": {
+    "plan_ols_fits": 109888,
+    "plan_ridge_predictions": 109888,
+    "reference_evaluations": 7756800,
+    "actor_context_evaluations": 7756800
+  },
+  "endpoints": [
+    "50/joint_conditioned_minus_forecast_lower",
+    "50/joint_conditioned_minus_flat_lower",
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_independent_minus_forecast_lower",
+    "50/joint_independent_minus_flat_lower",
+    "50/forecast_lower_minus_flat_lower",
+    "50/joint_conditioned_minus_joint_base",
+    "50/joint_independent_minus_joint_base",
+    "50/forecast_lower_minus_forecast_base",
+    "50/flat_lower_minus_flat_base",
+    "50/joint_base_minus_forecast_base",
+    "50/joint_base_minus_flat_base",
+    "50/forecast_base_minus_flat_base",
+    "100/joint_conditioned_minus_forecast_lower",
+    "100/joint_conditioned_minus_flat_lower",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_independent_minus_forecast_lower",
+    "100/joint_independent_minus_flat_lower",
+    "100/forecast_lower_minus_flat_lower",
+    "100/joint_conditioned_minus_joint_base",
+    "100/joint_independent_minus_joint_base",
+    "100/forecast_lower_minus_forecast_base",
+    "100/flat_lower_minus_flat_base",
+    "100/joint_base_minus_forecast_base",
+    "100/joint_base_minus_flat_base",
+    "100/forecast_base_minus_flat_base"
+  ],
+  "primary_endpoints": [
+    "50/joint_conditioned_minus_forecast_lower",
+    "50/joint_conditioned_minus_flat_lower",
+    "100/joint_conditioned_minus_forecast_lower",
+    "100/joint_conditioned_minus_flat_lower"
+  ],
+  "bootstrap": {
+    "draws": 65536,
+    "seed": [
+      106,
+      106106
+    ],
+    "family_size": 26,
+    "tail": 0.0009615384615384616,
+    "unit": "equal_root"
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192
+  },
+  "local_tests": {
+    "status": "passed",
+    "count": 7,
+    "seconds": 23.549,
+    "native_environment": false
+  },
+  "admission": {
+    "preflight": "mechanical_only_no_reward_selection",
+    "full": "only_after_preflight_passes_without_protocol_changes"
+  },
+  "artifacts": {
+    "pull": "completion_markers_compact_JSON_only",
+    "checkpoint_policy": "final_inference_weights_server_only",
+    "native_trace_writes": 0
+  },
+  "source_provisioning_inherited": {
+    "native_episodes": 25984,
+    "native_steps": 31180800,
+    "counted_separately": true
+  }
+}
