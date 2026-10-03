@@ -1,0 +1,909 @@
+{
+  "cells": [
+    {
+      "actor_change_norms": {
+        "lower_actor": 10.14882566329604,
+        "upper_actor": 5.979441074344435
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004223930649459362,
+          "initial_action_mse": 0.15004409849643707,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.003898986615240574,
+          "initial_action_mse": 0.1645435392856598,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 862.5293235258728
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 475.1390915778725
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.045854560620719645
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5382,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78426
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410011,
+      "status": "complete",
+      "wall_seconds": 738.2194465766661,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.713827657994942,
+        "upper_actor": 6.003901877166855
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004248498007655144,
+          "initial_action_mse": 0.13711467385292053,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.004035493824630976,
+          "initial_action_mse": 0.18491020798683167,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 889.9892687071338
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 512.9872142517095
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.043881129085630244
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5186,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78148
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410023,
+      "status": "complete",
+      "wall_seconds": 727.8628921802156,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.770980617580012,
+        "upper_actor": 5.937612802011962
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004291738383471966,
+          "initial_action_mse": 0.12364835292100906,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.004239496774971485,
+          "initial_action_mse": 0.1653536856174469,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 898.4201715060907
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 523.7209641969598
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.043024141982901755
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5412,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78223
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410037,
+      "status": "complete",
+      "wall_seconds": 726.0431325170211,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.942168730840669,
+        "upper_actor": 5.854131716906791
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.0042421212419867516,
+          "initial_action_mse": 0.1479441523551941,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.00520629808306694,
+          "initial_action_mse": 0.16789495944976807,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 890.3215666115757
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 531.9424156516124
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.04150814711378892
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5483,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 79016
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410049,
+      "status": "complete",
+      "wall_seconds": 726.9627688378096,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.974713780962938,
+        "upper_actor": 5.981620956994972
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004748159553855658,
+          "initial_action_mse": 0.1438589096069336,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.00457522738724947,
+          "initial_action_mse": 0.16900599002838135,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 901.5473207842606
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 478.24960458516966
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.04285323899489653
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5296,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78493
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410061,
+      "status": "complete",
+      "wall_seconds": 730.3790312837809,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.712335780544082,
+        "upper_actor": 5.742350266657214
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.003995024133473635,
+          "initial_action_mse": 0.12232626229524612,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.004584367852658033,
+          "initial_action_mse": 0.148246631026268,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 884.7120530803263
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 429.53710537388076
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.04356476518137597
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5343,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78282
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410073,
+      "status": "complete",
+      "wall_seconds": 720.3023652173579,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 10.027893934384318,
+        "upper_actor": 5.874642280385458
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004406328313052654,
+          "initial_action_mse": 0.15447987616062164,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.005501016974449158,
+          "initial_action_mse": 0.17780907452106476,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 873.5055806541712
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 571.4021978663914
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.04203088431331614
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5489,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 79136
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410089,
+      "status": "complete",
+      "wall_seconds": 734.6525790430605,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    },
+    {
+      "actor_change_norms": {
+        "lower_actor": 9.844867435235644,
+        "upper_actor": 6.212669125408806
+      },
+      "budget": {
+        "bc_optimizer_steps": 1280,
+        "checkpoint_writes": 4,
+        "controller_diagnostic_episodes": 32,
+        "controller_lower_actor_steps": 15360,
+        "controller_lower_value_steps": 15360,
+        "controller_training_episodes": 3072,
+        "controller_upper_actor_steps": 1536,
+        "controller_upper_value_steps": 1536,
+        "critic_warmup_episodes": 128,
+        "forecaster_driver_paths": 32,
+        "forecaster_observations": 38432,
+        "forecaster_rows": 35200,
+        "historical_artifact_loads": 0,
+        "label_archive_writes": 16,
+        "label_episodes": 16,
+        "native_episodes": 3248,
+        "native_steps": 3897600,
+        "riccati_solves": 1,
+        "ridge_solves": 1,
+        "warmup_actor_steps": 0,
+        "warmup_lower_value_steps": 640
+      },
+      "checkpoint_audit": {
+        "BC_lower_mean_changed_both_periods": true,
+        "BC_std_upper_value_freeze": "passed",
+        "checkpoint_loads": 4,
+        "fixed_final_controller": "passed",
+        "status": "passed",
+        "warmup_freeze": "passed"
+      },
+      "checkpoints": {
+        "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clock_final.pt",
+        "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_100_final.pt",
+        "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_50_final.pt",
+        "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/controller_final.pt"
+      },
+      "cloning": {
+        "50": {
+          "final_action_mse": 0.004486482124775648,
+          "initial_action_mse": 0.13017632067203522,
+          "sham": false,
+          "steps": 640
+        },
+        "100": {
+          "final_action_mse": 0.004209679085761309,
+          "initial_action_mse": 0.17256954312324524,
+          "sham": false,
+          "steps": 640
+        }
+      },
+      "controller_diagnostics": {
+        "final": {
+          "episodes": 16,
+          "mean_return": 819.1654948661528
+        },
+        "initial": {
+          "episodes": 16,
+          "mean_return": 527.9278965004988
+        }
+      },
+      "final_iteration": 384,
+      "fitting": {
+        "driver_paths": 32,
+        "feature_ols_fits": 35200,
+        "label_displacements": 3520000,
+        "native_steps": 0,
+        "observations": 38432,
+        "ridge_solves": 1,
+        "rows": 35200,
+        "training_displacement_mse": 0.04448854430266986
+      },
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/forecaster.npz",
+      "native_counts": {
+        "episodes": 3248,
+        "gate_calls": 5441,
+        "lower_calls": 3897600,
+        "steps": 3897600,
+        "upper_calls": 78885
+      },
+      "optimizer_totals": {
+        "lower_actor_optimizer_steps": 15360,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 15360,
+        "upper_actor_optimizer_steps": 1536,
+        "upper_advantage_optimizer_steps": 0,
+        "upper_cost_value_optimizer_steps": 0,
+        "upper_value_optimizer_steps": 1536
+      },
+      "preflight": false,
+      "protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "root": 410101,
+      "status": "complete",
+      "wall_seconds": 742.6684876899235,
+      "warmup_optimizer_totals": {
+        "lower_actor_optimizer_steps": 0,
+        "lower_advantage_optimizer_steps": 0,
+        "lower_cost_value_optimizer_steps": 0,
+        "lower_value_optimizer_steps": 640
+      }
+    }
+  ],
+  "checkpoint_loads_server_only": 32,
+  "native_replay_steps": 0,
+  "performance_confirmation": "not_tested",
+  "summary": {
+    "contract": {
+      "clone": "Stage55_tanh_command_MSE_BC64_final_lower_mean_only_std_and_upper_frozen",
+      "cohort": "eight_predeclared_new_optimizer_roots_all_retained",
+      "controller_checkpoint": "fixed_final_iteration384_one_based_no_best_checkpoint_or_reward_admission",
+      "controller_diagnostics": "same_disjoint_paths_at_initial_and_final_no_gate_no_CI",
+      "controller_training": "384_iterations_eight_fresh_paths_each_shared_PPO_update_no_selection_rollouts",
+      "critic_warmup": "Stage42_task_clock_sixteen_lower_critic_only_iterations_all_actors_and_other_values_frozen",
+      "downstream": "fresh_decoder_then_fresh_joint_and_lower_donors_then_Stage94_staged_upper_rules",
+      "downstream_controls": [
+        "zero_plan",
+        "U0",
+        "fixed_UJ",
+        "matched_independent_lower"
+      ],
+      "downstream_gate": "unchanged_four_corrected_primary_reward_endpoints_at_both_periods",
+      "historical_artifacts": "none_no_old_teacher_forecaster_decoder_or_lower_checkpoint",
+      "limits": "teacher_provisioning_only_not_unseen_teacher_performance_confirmation_not_frequency_superiority",
+      "native_initializer": "same_Stage33_history_MLP_PPO_and_balanced_jitter50_native_task",
+      "native_trace_writes": "teacher_label_archives_only_for_later_decoder_calibration",
+      "periods": [
+        50,
+        100
+      ],
+      "preflight": "separate_root410001_not_a_confirmation_teacher",
+      "teacher": "Stage55_LQR_velocity_teacher_causal_ridge_forecaster_fresh_label_states"
+    },
+    "historical_artifact_loads": 0,
+    "native_episodes": 25984,
+    "native_steps": 31180800,
+    "next": "fresh_non_reward_decoder_calibration_then_full_fresh_staged_training",
+    "performance_confirmation": "not_tested",
+    "protocol": "pointmaze_fresh_teachers_stage96_v1",
+    "roots": [
+      410011,
+      410023,
+      410037,
+      410049,
+      410061,
+      410073,
+      410089,
+      410101
+    ],
+    "run_name": "pointmaze_fresh_teachers_stage96_full_20261003_r1",
+    "status": "teacher_artifacts_ready"
+  }
+}
