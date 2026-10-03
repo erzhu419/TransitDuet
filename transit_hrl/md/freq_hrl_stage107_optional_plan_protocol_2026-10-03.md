@@ -13,4 +13,4 @@ Full cost:52,224 new native episodes/62,668,800 steps,384 lower-mean updates and
 ## Scope
 This is conditional lower adaptation to fixed upper advice above a reused strong flat policy, not joint-HRL training,unseen-task confirmation or frequency superiority. The20-contrast family evaluates this changed interface; it does not pool with or erase Stage106. Stage67 critic HOLD remains unchanged.
 
-Native preflight passed: [result](freq_hrl_stage107_optional_plan_preflight_2026-10-04.md). The [full comparison](../results/pointmaze_optional_plan_stage107_full_20261004_r1/preregistration.json) was frozen before preflight; dispatch follows mechanical passage only. If advice still fails,retain that result and investigate where planning has genuine control value before adding more upper modules.
+Native preflight passed: [result](freq_hrl_stage107_optional_plan_preflight_2026-10-04.md). The frozen [full result](freq_hrl_stage107_optional_plan_result_2026-10-04.md) is not_supported:tiny advice gains,but no confirmed learned increment over forecast. Next isolate fixed-lower learned residual content without more training or task changes.
