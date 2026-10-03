@@ -19,4 +19,6 @@ These one-root H300/two-update/four-evaluation-path contrasts are negative and a
 ## Next Step
 Launch the already-frozen eight-root full protocol unchanged: H1200, eight updates, four matched lower learners, 26-contrast Bonferroni family and all four positive primary CI lower bounds required for the global conditioning claim. Keep all fixed-final donors even if that claim fails, then test staged upper learning separately. No old-cohort pooling.
 
+Full training was submitted as t128854-t128861 with qualifier t128862, dynamically eligible on node001-006; each training task requests 9 CPU / 8192 MB RAM. No further protocol was launched.
+
 Scope: this preflight verifies native mechanics, not conditioning improvement, full actor-critic learning or frequency superiority.
