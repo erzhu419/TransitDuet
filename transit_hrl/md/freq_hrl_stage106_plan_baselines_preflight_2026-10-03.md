@@ -1,0 +1,10 @@
+# Stage106 Plan-Baseline Native Preflight
+
+t131256/t131257 finished with exit0. Native qualification and read-only reaggregation exactly match the official summary. All312 native episodes/93,600 steps,24 actor-mean updates,72 extra upper replay forwards and variant-specific planning counters match the frozen budget. Both baselines use the full union of the joint learners' credit rosters. Forecast-only has no upper inference; flat has no upper, plan or forecaster calls. Native wall79.590s; no checkpoints or raw traces were written/pulled.
+
+Single-root, short-horizon primary reward differences are50:conditioned-minus-forecast +0.028741, conditioned-minus-flat -40.047177;100:-0.102354 and -69.394012. These descriptive results have no CI and do not decide admission. All26 contrasts and own-initialization controls are retained in the16,396-byte compact pull.
+
+## Scope
+The failed r1 native cleanup call is archived, its queued analyzer cancelled and full r1 never dispatched. The repaired r2 uses the same seeds, task, sample budget and endpoints; only cleanup now follows the existing task.environment.close() API. All7 focused tests passed after that repair. This remains teacher-assisted, fixed-std MC learning, not full actor-critic or from-scratch flat PPO.
+
+Next:run the already registered full eight-root r2 comparison unchanged, including negative effects. Four corrected positive primary CI lower bounds are required for the learned-plan increment claim.
