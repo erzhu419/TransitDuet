@@ -1,15 +1,15 @@
 {
   "run_name": "pointmaze_joint_staged_stage103_preflight_20261003_r1",
   "protocol": "pointmaze_joint_staged_stage103_v1",
-  "recorded_at_utc": "2026-10-03 09:14:35 UTC",
+  "recorded_at_utc": "2026-10-03 09:28:07 UTC",
   "code_revision": "0283d61d9902bd3a07c9e48238a294f7d323af33",
   "preregistration_revision": "08b7ca2ee0",
   "source_evidence_revision": "8dc6904edd",
   "tasks": [
     {
       "id": "t130042",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node001",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -22,13 +22,13 @@
       "cpu_cores": 3,
       "ram_mb": 3072,
       "submitted_at": 1791018788.284317,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791018905.86288,
+      "finished_at": 1791019156.1768246,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_joint_staged_stage103_v1 root410011",
       "signature": "Freq-HRL/pointmaze_joint_staged_stage103_v1/pointmaze_joint_staged_stage103_preflight_20261003_r1/frozen_equal_path_joint_staged_evaluation/410011",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t130042.log",
       "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_staged_stage103_preflight_20261003_r1/cells/replicate_410011/completion",
       "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_staged_stage103_preflight_20261003_r1/cells/replicate_410011/completion",
       "wait_for_files": [],
@@ -36,8 +36,8 @@
     },
     {
       "id": "t130043",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node001",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -50,13 +50,13 @@
       "cpu_cores": 1,
       "ram_mb": 2048,
       "submitted_at": 1791018788.3292224,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791019228.3294098,
+      "finished_at": 1791019282.9851732,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_joint_staged_stage103_v1 all-root qualification",
       "signature": "Freq-HRL/pointmaze_joint_staged_stage103_v1/pointmaze_joint_staged_stage103_preflight_20261003_r1/qualification",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t130043.log",
       "result_dir": null,
       "local_result_dir": null,
       "wait_for_files": [
@@ -66,7 +66,7 @@
     }
   ],
   "full_run": "pointmaze_joint_staged_stage103_full_20261003_r1",
-  "full_status": "frozen_not_submitted",
+  "full_status": "mechanically_eligible_not_submitted",
   "budget_total": {
     "source_clone_loads": 2,
     "forecaster_loads": 1,
@@ -154,5 +154,13 @@
     }
   },
   "scope": "Mechanical native evaluation preflight only. Load final Stage102 joint, Stage99 U0-trained lower and Stage100 U0-start upper donors with no training or Stage101 UJ donor reuse. Method-path budgets matched; no reward admission or donor selection. Full follows official native mechanical qualification.",
-  "artifacts": "completion markers and compact JSON only; no local checkpoint/raw evaluation pulls or new checkpoint writes"
+  "artifacts": "completion markers and compact JSON only; no local checkpoint/raw evaluation pulls or new checkpoint writes",
+  "preflight_result": {
+    "status": "preflight_passed",
+    "mechanical_gate": "passed",
+    "official_summary_reproduced": "passed",
+    "joint_recipe_confirmation": "mechanical_only",
+    "reward_admission": "none",
+    "compact_summary": "compact_summary.json"
+  }
 }
