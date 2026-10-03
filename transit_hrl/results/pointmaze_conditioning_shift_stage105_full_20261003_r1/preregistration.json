@@ -1,0 +1,475 @@
+{
+  "run_name": "pointmaze_conditioning_shift_stage105_full_20261003_r1",
+  "protocol": "pointmaze_conditioning_shift_stage105_v1",
+  "registered_at_utc": "2026-10-03 12:47:04 UTC",
+  "source_revision": "354b1e3096b7814bad2b09fcac60a2f68fc5dfb6",
+  "source_evidence_revision": "176548634e",
+  "preflight": false,
+  "contract": {
+    "source": "pointmaze_fresh_teachers_stage96_v1",
+    "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "base",
+      "zero",
+      "joint_independent",
+      "joint_conditioned"
+    ],
+    "methods": [
+      "joint_independent",
+      "joint_conditioned"
+    ],
+    "task_change": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "source_cohort": "all_eight_original_Stage96_U0_L0_teachers_Stage97_decoder_no_Stage98_to104_trained_weights",
+    "training": "eight_simultaneous_mean_updates_per_actor_preflight_two_separate_actor_credit_pools",
+    "sampling": "same_actor_specific_scenario_noise_rosters_across_arms_original_independent_upper_credit",
+    "conditioning": "common_upper_innovations_only_in_conditioned_lower_training_independent_lower_noise",
+    "freeze": "source_std_values_Adam_forecaster_and_decoder_fixed_no_OOD_recalibration",
+    "budget": "matched_native_paths_actor_updates_and_nominal_call_weighted_KL_.001_per_round_extra_replay_reported",
+    "evaluation": "fresh_paired_original_independent_noise_after_fixed_final_update_no_selection",
+    "statistics": "all12_contrasts_equal_root_bootstrap65536_Bonferroni12_seed105_105105_no_pooling",
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_joint_independent",
+      "50/joint_conditioned_minus_base",
+      "100/joint_conditioned_minus_joint_independent",
+      "100/joint_conditioned_minus_base"
+    ],
+    "decision": "all_four_conditioned_minus_independent_and_base_primary_CI_lower_bounds_positive_preflight_mechanical_only",
+    "limits": "shifted_distribution_adaptation_from_original_teachers_not_new_initialization_cross_domain_zero_shot_full_actor_critic_or_frequency_superiority"
+  },
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "workers": 8,
+    "credit_scenarios_per_batch": 16,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 32,
+    "updates": 8
+  },
+  "arguments_for_first_root": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 1200,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": false
+  },
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "teacher_decoder_sources": {
+    "410011": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410023": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410023/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410037": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410037/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410049": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410049/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410061": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410061/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410073": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410073/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410089": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410089/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410101": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410101/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    }
+  },
+  "compact_seed_encoding": {
+    "generator": "scripts/pointmaze_conditioning_shift_stage105_spec.py:seed_roles",
+    "base_by_root": {
+      "410011": 105100000,
+      "410023": 105200000,
+      "410037": 105300000,
+      "410049": 105400000,
+      "410061": 105500000,
+      "410073": 105600000,
+      "410089": 105700000,
+      "410101": 105800000
+    },
+    "zero_based_round_stride": 10000,
+    "rounds": 8,
+    "role_offsets": {
+      "credit_A": 1,
+      "credit_B": 1001,
+      "lower_credit_A": 4001,
+      "lower_credit_B": 5001
+    },
+    "scenario_formula": "base+10000*j+role_offset+i",
+    "scenario_count_per_batch": 16,
+    "noise_formulas": [
+      "base+10000*j+role_offset+2001+2*i",
+      "base+10000*j+role_offset+2002+2*i"
+    ],
+    "evaluation_offset": 95001,
+    "evaluation_count": 32
+  },
+  "methods": [
+    "joint_independent",
+    "joint_conditioned"
+  ],
+  "compositions": {
+    "base": [
+      "source",
+      "source"
+    ],
+    "zero": [
+      "source",
+      "source"
+    ],
+    "joint_independent": [
+      "joint_independent",
+      "joint_independent"
+    ],
+    "joint_conditioned": [
+      "joint_conditioned",
+      "joint_conditioned"
+    ]
+  },
+  "matched_arm_training_budget_by_period": {
+    "50": {
+      "upper_credit_paths": 512,
+      "lower_credit_paths": 512,
+      "native_training_episodes": 1024,
+      "mean_updates_per_actor": 8,
+      "cumulative_nominal_KL_by_actor": {
+        "upper": 0.004,
+        "lower": 0.00792
+      },
+      "cumulative_nominal_call_weighted_KL": 0.008,
+      "conditioned_extra_upper_replay_forwards": 6144,
+      "independent_extra_upper_replay_forwards": 0
+    },
+    "100": {
+      "upper_credit_paths": 512,
+      "lower_credit_paths": 512,
+      "native_training_episodes": 1024,
+      "mean_updates_per_actor": 8,
+      "cumulative_nominal_KL_by_actor": {
+        "upper": 0.004,
+        "lower": 0.00796
+      },
+      "cumulative_nominal_call_weighted_KL": 0.008,
+      "conditioned_extra_upper_replay_forwards": 3072,
+      "independent_extra_upper_replay_forwards": 0
+    }
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 4,
+    "credit_episodes": 4096,
+    "evaluation_episodes": 256,
+    "native_episodes": 4352,
+    "native_steps": 5222400,
+    "native_lower_calls": 5222400,
+    "native_upper_calls": 78336,
+    "pairing_upper_forward_calls": 78336,
+    "native_network_checks": 4352,
+    "native_pair_checks": 64,
+    "scenario_pair_checks": 2048,
+    "objective_checks": 4096,
+    "mc_calls": 8192,
+    "actor_score_forward_batches": 6144,
+    "actor_score_backward_batches": 18432,
+    "fisher_jvp_batches": 2448,
+    "exact_kl_forward_batches": 4896,
+    "actor_parameter_perturbations": 128,
+    "parameter_part_checks": 64,
+    "actor_mean_parameter_updates": 64,
+    "policy_updates": 32,
+    "training_freeze_checks": 32,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 4,
+    "upper_independent_pair_checks": 1024,
+    "lower_independent_pair_checks": 512,
+    "lower_common_pair_checks": 512,
+    "actor_composition_checks": 8,
+    "upper_replay_forward_calls": 9216
+  },
+  "budget_total": {
+    "source_clone_loads": 16,
+    "forecaster_loads": 8,
+    "decoder_loads": 16,
+    "training_models_initialized": 32,
+    "credit_episodes": 32768,
+    "evaluation_episodes": 2048,
+    "native_episodes": 34816,
+    "native_steps": 41779200,
+    "native_lower_calls": 41779200,
+    "native_upper_calls": 626688,
+    "pairing_upper_forward_calls": 626688,
+    "native_network_checks": 34816,
+    "native_pair_checks": 512,
+    "scenario_pair_checks": 16384,
+    "objective_checks": 32768,
+    "mc_calls": 65536,
+    "actor_score_forward_batches": 49152,
+    "actor_score_backward_batches": 147456,
+    "fisher_jvp_batches": 19584,
+    "exact_kl_forward_batches": 39168,
+    "actor_parameter_perturbations": 1024,
+    "parameter_part_checks": 512,
+    "actor_mean_parameter_updates": 512,
+    "policy_updates": 256,
+    "training_freeze_checks": 256,
+    "frozen_model_checks": 16,
+    "checkpoint_writes": 32,
+    "upper_independent_pair_checks": 8192,
+    "lower_independent_pair_checks": 4096,
+    "lower_common_pair_checks": 4096,
+    "actor_composition_checks": 64,
+    "upper_replay_forward_calls": 73728
+  },
+  "endpoints": [
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_conditioned_minus_base",
+    "50/joint_independent_minus_base",
+    "50/joint_conditioned_minus_zero",
+    "50/joint_independent_minus_zero",
+    "50/base_minus_zero",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_conditioned_minus_base",
+    "100/joint_independent_minus_base",
+    "100/joint_conditioned_minus_zero",
+    "100/joint_independent_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "primary_endpoints": [
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_conditioned_minus_base",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_conditioned_minus_base"
+  ],
+  "statistics": {
+    "family_size": 12,
+    "familywise_alpha": 0.05,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      105,
+      105105
+    ],
+    "statistical_unit": "original_teacher_optimizer_root",
+    "method": "equal_root_percentile_bootstrap_Bonferroni12",
+    "decision": "all_four_primary_CI_lower_bounds_strictly_positive",
+    "preflight_return_admission": "none",
+    "stage_pooling": false,
+    "sequential_seed_extension": false
+  },
+  "full_admission": "native_preflight_mechanical_qualification_passed_only",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192,
+    "qualification_cpu": 1,
+    "qualification_ram_mb": 2048
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "raw_evaluation": "server_only",
+    "checkpoints": "none_preflight_four_final_policies_per_root_full_server_only",
+    "native_trace_writes": 0
+  },
+  "implementation_tests": {
+    "cases": 8,
+    "seconds": 74.503,
+    "status": "passed",
+    "scope": "5_focused_and3_unchanged_Stage102_fixture_regressions_not_native_evidence"
+  }
+}
