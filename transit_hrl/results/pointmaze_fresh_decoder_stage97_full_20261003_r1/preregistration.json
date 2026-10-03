@@ -1,0 +1,340 @@
+{
+  "protocol": "pointmaze_fresh_decoder_stage97_v1",
+  "run_name": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+  "preflight": false,
+  "source_revision": "afdfd9bf02fa917fc38bdac8aaa34cf04c838475",
+  "teacher_source_revision": "b4a9750a4b1f42931db0b92e69a23348eeef0ec3",
+  "contract": {
+    "source_protocol": "pointmaze_fresh_teachers_stage96_v1",
+    "source_run": "pointmaze_fresh_teachers_stage96_full_20261003_r1",
+    "source": "full_new_root_teachers_and_forecasters_only_even_in_preflight",
+    "labels": "all_eight_full_BC_label_paths_per_period_reconstruct_causal_lower_states_reproduce_saved_command_MSE",
+    "proposals": "fixed_root_label_period_seed_zero_upper_mean_source_Gaussian_std_no_reward_or_validation_fit",
+    "constraint": "Stage78_same_first_feasible_halving_from_min(1,BC_RMSE/original_command_change_RMS)",
+    "response": "actual_nonlinear_lower_command_change_RMS_leq_BC_command_RMSE",
+    "curve": "same_convex_blend_world_clipped_points_position_and_dt_velocity_coherent",
+    "envelope": "Stage76_same_label_velocity_q99_and_axis_support_only",
+    "probes": "zero_and_bounded_independent_native_noise_four_fresh_paths_per_period_sampling_both_actors_no_training",
+    "decision": "mechanical_only_no_return_threshold_no_alpha_retuning_no_root_selection_no_CI",
+    "selection": "both_period_decoders_frozen_before_any_native_probe_no_best_checkpoint",
+    "cost": "first_feasible_solver_variable_passes_counted_exactly_no_native_traces_or_checkpoint_writes",
+    "limits": "new_decoder_prerequisite_not_unseen_teacher_staged_reward_confirmation_not_frequency_superiority"
+  },
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "probe_episodes_per_mode_period": 4,
+    "workers": 8
+  },
+  "native_arguments": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 1200,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": false
+  },
+  "label_arguments": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 1200,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": false
+  },
+  "seed_roles": {
+    "410011": {
+      "calibration_labels": [
+        96104001,
+        96104002,
+        96104003,
+        96104004,
+        96104005,
+        96104006,
+        96104007,
+        96104008
+      ],
+      "native_probe": [
+        97105001,
+        97105002,
+        97105003,
+        97105004
+      ]
+    },
+    "410023": {
+      "calibration_labels": [
+        96114001,
+        96114002,
+        96114003,
+        96114004,
+        96114005,
+        96114006,
+        96114007,
+        96114008
+      ],
+      "native_probe": [
+        97115001,
+        97115002,
+        97115003,
+        97115004
+      ]
+    },
+    "410037": {
+      "calibration_labels": [
+        96124001,
+        96124002,
+        96124003,
+        96124004,
+        96124005,
+        96124006,
+        96124007,
+        96124008
+      ],
+      "native_probe": [
+        97125001,
+        97125002,
+        97125003,
+        97125004
+      ]
+    },
+    "410049": {
+      "calibration_labels": [
+        96134001,
+        96134002,
+        96134003,
+        96134004,
+        96134005,
+        96134006,
+        96134007,
+        96134008
+      ],
+      "native_probe": [
+        97135001,
+        97135002,
+        97135003,
+        97135004
+      ]
+    },
+    "410061": {
+      "calibration_labels": [
+        96144001,
+        96144002,
+        96144003,
+        96144004,
+        96144005,
+        96144006,
+        96144007,
+        96144008
+      ],
+      "native_probe": [
+        97145001,
+        97145002,
+        97145003,
+        97145004
+      ]
+    },
+    "410073": {
+      "calibration_labels": [
+        96154001,
+        96154002,
+        96154003,
+        96154004,
+        96154005,
+        96154006,
+        96154007,
+        96154008
+      ],
+      "native_probe": [
+        97155001,
+        97155002,
+        97155003,
+        97155004
+      ]
+    },
+    "410089": {
+      "calibration_labels": [
+        96164001,
+        96164002,
+        96164003,
+        96164004,
+        96164005,
+        96164006,
+        96164007,
+        96164008
+      ],
+      "native_probe": [
+        97165001,
+        97165002,
+        97165003,
+        97165004
+      ]
+    },
+    "410101": {
+      "calibration_labels": [
+        96174001,
+        96174002,
+        96174003,
+        96174004,
+        96174005,
+        96174006,
+        96174007,
+        96174008
+      ],
+      "native_probe": [
+        97175001,
+        97175002,
+        97175003,
+        97175004
+      ]
+    }
+  },
+  "budget_floor_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "layout_loads": 1,
+    "label_archive_loads": 16,
+    "label_state_rows": 19200,
+    "label_plan_checks": 16,
+    "bc_mse_reproductions": 2,
+    "calibration_curve_decodes": 288,
+    "calibration_upper_proposals": 288,
+    "constraint_response_evaluations": 2,
+    "offline_actor_rows": 57600,
+    "offline_actor_forward_batches": 96,
+    "frozen_model_checks": 2,
+    "native_episodes": 16,
+    "native_steps": 19200,
+    "native_upper_calls": 288,
+    "native_lower_calls": 19200,
+    "native_network_checks": 16,
+    "native_pair_checks": 8,
+    "optimizer_steps": 0,
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0
+  },
+  "realized_budget_rule": {
+    "constraint_response_evaluations": "sum(len(solver_trace)) over both periods; one ratio evaluation and each halving counted",
+    "offline_actor_rows": "(2*len(periods)+constraint_response_evaluations)*8*1200",
+    "offline_actor_forward_batches": "(2*len(periods)+constraint_response_evaluations)*8*ceil(1200/1024)"
+  },
+  "endpoints": [],
+  "full_launch_gate": "native_fresh_cohort_decoder_preflight_passed",
+  "performance_confirmation": "not_tested",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "source_checkpoints_and_label_archives": "server_only"
+  },
+  "local_tests": "15 focused unit/regression tests passed; DenseTask only; not native performance evidence",
+  "frozen_at_utc": "2026-10-03 02:42:30 UTC"
+}
