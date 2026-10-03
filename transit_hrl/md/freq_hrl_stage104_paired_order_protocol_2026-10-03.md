@@ -12,3 +12,6 @@ Stage103 did not support joint superiority at both periods. Its historical train
 
 ## Scope
 This isolates the specified simultaneous versus lower-then-upper MC training recipes under matched random rosters and nominal budgets. It remains same-task, teacher-initialized mean learning; it does not establish full actor-critic, equal realized trajectory KL or frequency superiority. Stage67 critic HOLD and all earlier negative results remain unchanged.
+
+## Dispatch
+Native preflight t130151/t130152 was submitted under code03ec49cce9 and preregistrationb0c68644fa. Both were queued in the 2026-10-03 11:21:03 UTC snapshot, eligible for dynamic node001-006 placement. All15 focused/regression cases passed, including affected-test reruns. The complete eight-root protocol is frozen but not submitted; performance evidence remains pending.
