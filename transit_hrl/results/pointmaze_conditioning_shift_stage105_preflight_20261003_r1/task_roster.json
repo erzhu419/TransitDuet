@@ -1,7 +1,7 @@
 {
   "run_name": "pointmaze_conditioning_shift_stage105_preflight_20261003_r1",
   "protocol": "pointmaze_conditioning_shift_stage105_v1",
-  "recorded_at_utc": "2026-10-03 12:56:05 UTC",
+  "recorded_at_utc": "2026-10-03 13:32:50 UTC",
   "code_revision": "354b1e3096b7814bad2b09fcac60a2f68fc5dfb6",
   "preregistration_revision": "84315f6cab",
   "source_evidence_revision": "176548634e",
@@ -162,7 +162,7 @@
     "qualification_ram_mb": 2048
   },
   "full_run": "pointmaze_conditioning_shift_stage105_full_20261003_r1",
-  "full_status": "submitted",
+  "full_status": "complete_shifted_conditioning_supported",
   "scientific_status": "native_mechanical_preflight_passed",
   "scope": "shifted_distribution_adaptation_from_original_teachers_not_new_initialization_cross_domain_zero_shot_full_actor_critic_or_frequency_superiority",
   "artifacts": {
@@ -190,5 +190,73 @@
     "t130225",
     "t130226"
   ],
-  "full_submitted_at_utc": "2026-10-03 12:54:32 UTC"
+  "full_submitted_at_utc": "2026-10-03 12:54:32 UTC",
+  "full_completed_at_utc": "2026-10-03 13:16:14 UTC",
+  "full_result": {
+    "status": "complete",
+    "mechanical_gate": "passed",
+    "official_summary_reproduced": "passed",
+    "independent_root_bootstrap_reproduced": "passed",
+    "shifted_conditioning_confirmation": "supported",
+    "primary_endpoints": {
+      "50/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          0.15939960102973671,
+          0.8721143592991365
+        ],
+        "effect": "positive",
+        "mean": 0.5265498896336833,
+        "root_signs": {
+          "negative": 1,
+          "positive": 7,
+          "zero": 0
+        }
+      },
+      "50/joint_conditioned_minus_base": {
+        "ci": [
+          5.271629645298112,
+          6.085222257029543
+        ],
+        "effect": "positive",
+        "mean": 5.720600642047781,
+        "root_signs": {
+          "negative": 0,
+          "positive": 8,
+          "zero": 0
+        }
+      },
+      "100/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          0.9173170156940311,
+          3.2033130431362316
+        ],
+        "effect": "positive",
+        "mean": 1.941251714169332,
+        "root_signs": {
+          "negative": 0,
+          "positive": 8,
+          "zero": 0
+        }
+      },
+      "100/joint_conditioned_minus_base": {
+        "ci": [
+          4.508531434048156,
+          6.617483837890349
+        ],
+        "effect": "positive",
+        "mean": 5.542214049075227,
+        "root_signs": {
+          "negative": 0,
+          "positive": 8,
+          "zero": 0
+        }
+      }
+    },
+    "family_effect_counts": {
+      "positive": 10,
+      "negative": 0,
+      "inconclusive": 2
+    },
+    "compact_summary": "../pointmaze_conditioning_shift_stage105_full_20261003_r1/compact_summary.json"
+  }
 }

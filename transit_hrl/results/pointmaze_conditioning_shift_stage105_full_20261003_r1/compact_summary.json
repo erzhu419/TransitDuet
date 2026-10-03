@@ -1,0 +1,2467 @@
+{
+  "independent_root_bootstrap_reproduced": "passed",
+  "official_summary_reproduced": "passed",
+  "pull_policy": "compact_JSON_only_no_raw_evaluation_or_checkpoint",
+  "read_only_requalification": "passed",
+  "recorded_at_utc": "2026-10-03 13:32:50 UTC",
+  "root_signs": {
+    "100/base_minus_zero": {
+      "negative": 7,
+      "positive": 1,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_joint_independent": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_zero": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_independent_minus_zero": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/base_minus_zero": {
+      "negative": 5,
+      "positive": 3,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_joint_independent": {
+      "negative": 1,
+      "positive": 7,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_zero": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/joint_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/joint_independent_minus_zero": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    }
+  },
+  "root_summaries": [
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02223361635696027,
+          "effects": {
+            "50/base_minus_zero": 0.12869383167774728,
+            "50/joint_conditioned_minus_base": 6.071325516969981,
+            "50/joint_conditioned_minus_joint_independent": 0.39642481846500033,
+            "50/joint_conditioned_minus_zero": 6.200019348647729,
+            "50/joint_independent_minus_base": 5.674900698504981,
+            "50/joint_independent_minus_zero": 5.803594530182728
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 962.9492640510382,
+            "joint_conditioned": 969.0205895680082,
+            "joint_independent": 968.6241647495431,
+            "zero": 962.8205702193604
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410011/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920247317894953,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00002574920654296875,
+                    "mean_credit_batch_cosine": 0.5621804943234303,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000111057792207,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.19631366935980182,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000249539050798,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410011/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920946211701807,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000023365020751953125,
+                    "mean_credit_batch_cosine": 0.46747409973994647,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000111269365326,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.19570196113354482,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000948437089114,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.06479194013941661,
+          "effects": {
+            "100/base_minus_zero": -0.10126904052265573,
+            "100/joint_conditioned_minus_base": 5.093404691098737,
+            "100/joint_conditioned_minus_joint_independent": 1.9221789714955833,
+            "100/joint_conditioned_minus_zero": 4.992135650576081,
+            "100/joint_independent_minus_base": 3.1712257196031537,
+            "100/joint_independent_minus_zero": 3.069956679080498
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 857.243471977763,
+            "joint_conditioned": 862.3368766688617,
+            "joint_independent": 860.4146976973661,
+            "zero": 857.3447410182857
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410011/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960740258801396,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000012040138244628906,
+                    "mean_credit_batch_cosine": 0.3242541850531778,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0040003554191117025,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000001430511474609375,
+                    "mean_credit_batch_cosine": 0.16892170724902508,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000743812992511,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410011/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960467322778893,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000013828277587890625,
+                    "mean_credit_batch_cosine": -0.09156248204510647,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000417330240351,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.20260509220391024,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000471496081296,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410011,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1041.9519683490507
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.022351753813630408,
+          "effects": {
+            "50/base_minus_zero": -0.15756809729102983,
+            "50/joint_conditioned_minus_base": 5.226233307837255,
+            "50/joint_conditioned_minus_joint_independent": 0.7652279039119989,
+            "50/joint_conditioned_minus_zero": 5.068665210546225,
+            "50/joint_independent_minus_base": 4.461005403925256,
+            "50/joint_independent_minus_zero": 4.303437306634226
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 973.756764772053,
+            "joint_conditioned": 978.9829980798904,
+            "joint_independent": 978.2177701759783,
+            "zero": 973.9143328693441
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410023/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007919260976476739,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000022649765014648438,
+                    "mean_credit_batch_cosine": 0.4865432678469525,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0040001374934793416,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.18631154242890174,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999263726346325,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410023/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.00791943995549175,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00002384185791015625,
+                    "mean_credit_batch_cosine": 0.3385215208362772,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000153026745244,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.18818941813898,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999443016026654,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.06210446874670576,
+          "effects": {
+            "100/base_minus_zero": -0.9804638206362775,
+            "100/joint_conditioned_minus_base": 3.9253047865957456,
+            "100/joint_conditioned_minus_joint_independent": 1.8616857299136989,
+            "100/joint_conditioned_minus_zero": 2.944840965959468,
+            "100/joint_independent_minus_base": 2.0636190566820467,
+            "100/joint_independent_minus_zero": 1.0831552360457692
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 841.0473510737045,
+            "joint_conditioned": 844.9726558603004,
+            "joint_independent": 843.1109701303867,
+            "zero": 842.0278148943408
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410023/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960285301519697,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00001811981201171875,
+                    "mean_credit_batch_cosine": 0.43457362316839404,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0040004380704245675,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.16998907030144378,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000289682223943,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410023/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960150858800964,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000171661376953125,
+                    "mean_credit_batch_cosine": 0.003412043587017216,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000455437252957,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.1759188475431991,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000155413173494,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410023,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1029.0433834888972
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02395786803098655,
+          "effects": {
+            "50/base_minus_zero": -0.37309847980270305,
+            "50/joint_conditioned_minus_base": 6.23918066606603,
+            "50/joint_conditioned_minus_joint_independent": 0.9352864267606869,
+            "50/joint_conditioned_minus_zero": 5.866082186263327,
+            "50/joint_independent_minus_base": 5.303894239305343,
+            "50/joint_independent_minus_zero": 4.93079575950264
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 970.9432682370582,
+            "joint_conditioned": 977.1824489031243,
+            "joint_independent": 976.2471624763637,
+            "zero": 971.316366716861
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410037/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007919545336327686,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00002384185791015625,
+                    "mean_credit_batch_cosine": 0.5930201502772428,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000245319368306,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000001430511474609375,
+                    "mean_credit_batch_cosine": 0.31914621968659274,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.00799955024271505,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410037/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007919855063718926,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000286102294921875,
+                    "mean_credit_batch_cosine": 0.21228389110738421,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000239828244295,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.3156071139068135,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999859860283811,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.07654733862332655,
+          "effects": {
+            "100/base_minus_zero": -0.6830760517409544,
+            "100/joint_conditioned_minus_base": 5.422261228254445,
+            "100/joint_conditioned_minus_joint_independent": 3.4377429427250377,
+            "100/joint_conditioned_minus_zero": 4.739185176513491,
+            "100/joint_independent_minus_base": 1.9845182855294077,
+            "100/joint_independent_minus_zero": 1.3014422337884533
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 865.8711180979649,
+            "joint_conditioned": 871.2933793262192,
+            "joint_independent": 867.8556363834942,
+            "zero": 866.5541941497058
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410037/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.0079608267919693,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000133514404296875,
+                    "mean_credit_batch_cosine": 0.09627656949257132,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000144816507545,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.20329049628989299,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000828240134374,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410037/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007959972662042982,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000152587890625,
+                    "mean_credit_batch_cosine": -0.17455043508598078,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000179510650922,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.21519593295742345,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999974457149492,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410037,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1043.9499403620139
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02217537019677013,
+          "effects": {
+            "50/base_minus_zero": -0.21542065130975985,
+            "50/joint_conditioned_minus_base": 5.62124525496586,
+            "50/joint_conditioned_minus_joint_independent": 0.9215172407913741,
+            "50/joint_conditioned_minus_zero": 5.4058246036561,
+            "50/joint_independent_minus_base": 4.699728014174486,
+            "50/joint_independent_minus_zero": 4.484307362864726
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 973.8585975577382,
+            "joint_conditioned": 979.4798428127041,
+            "joint_independent": 978.5583255719127,
+            "zero": 974.0740182090481
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410049/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007919416676905211,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000022649765014648438,
+                    "mean_credit_batch_cosine": 0.5650872353557583,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000383337170004,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.32576566963336545,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999424343648611,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410049/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007919661829793244,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000021457672119140625,
+                    "mean_credit_batch_cosine": 0.41782839040730185,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000387977772872,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.3322573471266887,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999669589348703,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.08818525442010713,
+          "effects": {
+            "100/base_minus_zero": -0.9840340453652843,
+            "100/joint_conditioned_minus_base": 7.427292243948919,
+            "100/joint_conditioned_minus_joint_independent": 4.120679432364987,
+            "100/joint_conditioned_minus_zero": 6.443258198583635,
+            "100/joint_independent_minus_base": 3.306612811583932,
+            "100/joint_independent_minus_zero": 2.3225787662186477
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 864.2714185706586,
+            "joint_conditioned": 871.6987108146077,
+            "joint_independent": 867.5780313822427,
+            "zero": 865.255452616024
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410049/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.00796011898828,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000011444091796875,
+                    "mean_credit_batch_cosine": 0.22121665161093815,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000335169035939,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.09557406200113121,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.00800012233997036,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410049/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007959611248467552,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00001049041748046875,
+                    "mean_credit_batch_cosine": 0.02121668521080205,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000347525074699,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.11697271602789597,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.0079996147237183,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410049,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1052.6740900063887
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.024605351832117577,
+          "effects": {
+            "50/base_minus_zero": -0.4366308764322433,
+            "50/joint_conditioned_minus_base": 4.933922155645764,
+            "50/joint_conditioned_minus_joint_independent": 0.8595412727478298,
+            "50/joint_conditioned_minus_zero": 4.4972912792135205,
+            "50/joint_independent_minus_base": 4.074380882897934,
+            "50/joint_independent_minus_zero": 3.6377500064656907
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 957.6681124102053,
+            "joint_conditioned": 962.602034565851,
+            "joint_independent": 961.7424932931032,
+            "zero": 958.1047432866376
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410061/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007921259539891588,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000023365020751953125,
+                    "mean_credit_batch_cosine": 0.459892260531365,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000213622702373,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.38139029817864734,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008001263812345635,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410061/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.00792115131901093,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000020503997802734375,
+                    "mean_credit_batch_cosine": 0.1977165687435666,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000213400672165,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.3872862531232945,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008001155587024375,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.07441876168779928,
+          "effects": {
+            "100/base_minus_zero": -0.3231907362855857,
+            "100/joint_conditioned_minus_base": 4.349638486369315,
+            "100/joint_conditioned_minus_joint_independent": 1.7911613859477988,
+            "100/joint_conditioned_minus_zero": 4.0264477500837295,
+            "100/joint_independent_minus_base": 2.5584771004215163,
+            "100/joint_independent_minus_zero": 2.2352863641359306
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 829.9300465059383,
+            "joint_conditioned": 834.2796849923076,
+            "joint_independent": 832.4885236063598,
+            "zero": 830.2532372422238
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410061/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007962496468645053,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00001239776611328125,
+                    "mean_credit_batch_cosine": 0.02594396635253013,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000120376420437,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.15581154519347118,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008002497672409258,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410061/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960713622081202,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000014781951904296875,
+                    "mean_credit_batch_cosine": 0.21486304547897936,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000116743365918,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.16482903052060555,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.00800071478951486,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410061,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1036.5776438610628
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.021404079396591294,
+          "effects": {
+            "50/base_minus_zero": 0.5007019390723215,
+            "50/joint_conditioned_minus_base": 5.667330044524022,
+            "50/joint_conditioned_minus_joint_independent": -0.018065316387570363,
+            "50/joint_conditioned_minus_zero": 6.168031983596343,
+            "50/joint_independent_minus_base": 5.685395360911592,
+            "50/joint_independent_minus_zero": 6.1860972999839134
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 973.4641642393323,
+            "joint_conditioned": 979.1314942838563,
+            "joint_independent": 979.149559600244,
+            "zero": 972.9634623002601
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410073/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920413916169034,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000023365020751953125,
+                    "mean_credit_batch_cosine": 0.47360193563045616,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0040001146775964945,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.2843510065903541,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000416209720964,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410073/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920315221578019,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000026226043701171875,
+                    "mean_credit_batch_cosine": 0.35279946265216316,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.00400011503594817,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.28131513324837154,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000317522296983,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.07141325623479021,
+          "effects": {
+            "100/base_minus_zero": 1.9144430177553708,
+            "100/joint_conditioned_minus_base": 6.565018845582603,
+            "100/joint_conditioned_minus_joint_independent": 0.8411622604692681,
+            "100/joint_conditioned_minus_zero": 8.479461863337974,
+            "100/joint_independent_minus_base": 5.723856585113335,
+            "100/joint_independent_minus_zero": 7.638299602868706
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 863.4555605583391,
+            "joint_conditioned": 870.0205794039218,
+            "joint_independent": 869.1794171434526,
+            "zero": 861.5411175405839
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410073/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007961002447764822,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00001430511474609375,
+                    "mean_credit_batch_cosine": 0.48566278995267764,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000000384238459,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.18507702419586175,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008001002451607207,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410073/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960528847387847,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000015735626220703125,
+                    "mean_credit_batch_cosine": 0.040362412103008345,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000016437790182,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.19546705908846818,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000529011765747,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410073,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1008.72113730805
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02344465859782292,
+          "effects": {
+            "50/base_minus_zero": -0.262810973233794,
+            "50/joint_conditioned_minus_base": 6.054803683133436,
+            "50/joint_conditioned_minus_joint_independent": 0.14249768979240685,
+            "50/joint_conditioned_minus_zero": 5.791992709899642,
+            "50/joint_independent_minus_base": 5.912305993341029,
+            "50/joint_independent_minus_zero": 5.649495020107235
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 960.3095470209593,
+            "joint_conditioned": 966.3643507040927,
+            "joint_independent": 966.2218530143002,
+            "zero": 960.5723579941931
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410089/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920707264695293,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000209808349609375,
+                    "mean_credit_batch_cosine": 0.5536339380229858,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000181140127596,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.22239494567756268,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000710887497844,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410089/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920757202075737,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00002288818359375,
+                    "mean_credit_batch_cosine": 0.43738125420020335,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000189816213618,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000001430511474609375,
+                    "mean_credit_batch_cosine": 0.22380872849065747,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000760998400011,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.09705902058915798,
+          "effects": {
+            "100/base_minus_zero": -1.0481103125130424,
+            "100/joint_conditioned_minus_base": 5.4047751483607165,
+            "100/joint_conditioned_minus_joint_independent": 0.5567983633231961,
+            "100/joint_conditioned_minus_zero": 4.356664835847674,
+            "100/joint_independent_minus_base": 4.84797678503752,
+            "100/joint_independent_minus_zero": 3.799866472524478
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 846.4715387396332,
+            "joint_conditioned": 851.876313887994,
+            "joint_independent": 851.3195155246707,
+            "zero": 847.5196490521462
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410089/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.00795996737077531,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000016689300537109375,
+                    "mean_credit_batch_cosine": 0.3583883262481608,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.003999983779580748,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000001430511474609375,
+                    "mean_credit_batch_cosine": 0.12275272427939604,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.007999967208571119,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410089/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960521342052388,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000012874603271484375,
+                    "mean_credit_batch_cosine": 0.23855843389626238,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0039999962857409435,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.13618578408798818,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000521304909797,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410089,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1044.4643422607332
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 8,
+        "actor_mean_parameter_updates": 64,
+        "actor_parameter_perturbations": 128,
+        "actor_score_backward_batches": 18432,
+        "actor_score_forward_batches": 6144,
+        "checkpoint_writes": 4,
+        "credit_episodes": 4096,
+        "decoder_loads": 2,
+        "evaluation_episodes": 256,
+        "exact_kl_forward_batches": 4896,
+        "fisher_jvp_batches": 2448,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 512,
+        "lower_independent_pair_checks": 512,
+        "mc_calls": 8192,
+        "native_episodes": 4352,
+        "native_lower_calls": 5222400,
+        "native_network_checks": 4352,
+        "native_pair_checks": 64,
+        "native_steps": 5222400,
+        "native_upper_calls": 78336,
+        "objective_checks": 4096,
+        "pairing_upper_forward_calls": 78336,
+        "parameter_part_checks": 64,
+        "policy_updates": 32,
+        "scenario_pair_checks": 2048,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 32,
+        "training_models_initialized": 4,
+        "upper_independent_pair_checks": 1024,
+        "upper_replay_forward_calls": 9216
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02338653531278691,
+          "effects": {
+            "50/base_minus_zero": 0.01931469988819856,
+            "50/joint_conditioned_minus_base": 5.950764507239903,
+            "50/joint_conditioned_minus_joint_independent": 0.20996908098774014,
+            "50/joint_conditioned_minus_zero": 5.9700792071281015,
+            "50/joint_independent_minus_base": 5.740795426252163,
+            "50/joint_independent_minus_zero": 5.760110126140361
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 979.966491365724,
+            "joint_conditioned": 985.9172558729638,
+            "joint_independent": 985.7072867919762,
+            "zero": 979.9471766658357
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410101/final_weights/period_50_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920354453389919,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000025272369384765625,
+                    "mean_credit_batch_cosine": 0.5066453777173259,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.00400010927907952,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.2988616564800808,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000356638971508,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410101/final_weights/period_50_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007920161388201553,
+                    "cumulative_nominal_KL": 0.007919999999999998,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.00002765655517578125,
+                    "mean_credit_batch_cosine": 0.31963670541762185,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.0040001032611706715,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.0000019073486328125,
+                    "mean_credit_batch_cosine": 0.3000824775007699,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000163453424965,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.06638043587269819,
+          "effects": {
+            "100/base_minus_zero": -0.1387205012740509,
+            "100/joint_conditioned_minus_base": 6.15001696239133,
+            "100/joint_conditioned_minus_joint_independent": 0.9986046271150855,
+            "100/joint_conditioned_minus_zero": 6.011296461117279,
+            "100/joint_independent_minus_base": 5.151412335276245,
+            "100/joint_independent_minus_zero": 5.012691834002194
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 850.0315385604771,
+            "joint_conditioned": 856.1815555228684,
+            "joint_independent": 855.1829508957534,
+            "zero": 850.1702590617513
+          },
+          "pairing": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "task_options": {
+            "distractor_amplitude": 0.5,
+            "distractor_dwell_seconds": [
+              0.35,
+              0.85
+            ],
+            "force_pulse_amplitude": 0.18,
+            "force_pulse_duration_seconds": [
+              0.04,
+              0.1
+            ],
+            "force_pulse_gap_seconds": [
+              0.45,
+              1.1
+            ],
+            "regime_dwell_seconds": [
+              0.4,
+              0.8
+            ],
+            "target_speed_modes": [
+              -1.25,
+              -0.55,
+              0.55,
+              1.25
+            ]
+          },
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410101/final_weights/period_100_joint_conditioned.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960361088433262,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000016689300537109375,
+                    "mean_credit_batch_cosine": 0.40614597448733014,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000505084051165,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.236576780782783,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.008000366139273773,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            },
+            "joint_independent": {
+              "checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_full_20261003_r1/cells/replicate_410101/final_weights/period_100_joint_independent.pt",
+              "evaluation_update": 8,
+              "final_freeze_check": "passed",
+              "history_summary": {
+                "actors": {
+                  "lower": {
+                    "cumulative_exact_KL": 0.007960662480155615,
+                    "cumulative_nominal_KL": 0.00796,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 0.000019311904907226562,
+                    "mean_credit_batch_cosine": 0.20125151711212436,
+                    "updates": 8
+                  },
+                  "upper": {
+                    "cumulative_exact_KL": 0.004000477144564474,
+                    "cumulative_nominal_KL": 0.004,
+                    "gradient_episodes": 512,
+                    "max_abs_old_logp_difference": 9.5367431640625e-7,
+                    "mean_credit_batch_cosine": 0.2401743933995012,
+                    "updates": 8
+                  }
+                },
+                "cumulative_exact_call_weighted_KL": 0.00800066725160126,
+                "cumulative_nominal_call_weighted_KL": 0.008,
+                "operations": 8
+              }
+            }
+          },
+          "training_credit": "separate_actor_batches_independent_upper_conditioned_lower_only"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 5222400,
+        "plan_ols_fits": 73984,
+        "plan_ridge_predictions": 73984,
+        "reference_evaluations": 5222400
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410101,
+      "source_initialization_check": "passed",
+      "wall_seconds": 1048.0251239961945
+    }
+  ],
+  "run_name": "pointmaze_conditioning_shift_stage105_full_20261003_r1",
+  "summary": {
+    "contract": {
+      "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+      "budget": "matched_native_paths_actor_updates_and_nominal_call_weighted_KL_.001_per_round_extra_replay_reported",
+      "conditioning": "common_upper_innovations_only_in_conditioned_lower_training_independent_lower_noise",
+      "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+      "decision": "all_four_conditioned_minus_independent_and_base_primary_CI_lower_bounds_positive_preflight_mechanical_only",
+      "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+      "evaluation": "fresh_paired_original_independent_noise_after_fixed_final_update_no_selection",
+      "freeze": "source_std_values_Adam_forecaster_and_decoder_fixed_no_OOD_recalibration",
+      "limits": "shifted_distribution_adaptation_from_original_teachers_not_new_initialization_cross_domain_zero_shot_full_actor_critic_or_frequency_superiority",
+      "methods": [
+        "joint_independent",
+        "joint_conditioned"
+      ],
+      "periods": [
+        50,
+        100
+      ],
+      "primary_endpoints": [
+        "50/joint_conditioned_minus_joint_independent",
+        "50/joint_conditioned_minus_base",
+        "100/joint_conditioned_minus_joint_independent",
+        "100/joint_conditioned_minus_base"
+      ],
+      "sampling": "same_actor_specific_scenario_noise_rosters_across_arms_original_independent_upper_credit",
+      "source": "pointmaze_fresh_teachers_stage96_v1",
+      "source_cohort": "all_eight_original_Stage96_U0_L0_teachers_Stage97_decoder_no_Stage98_to104_trained_weights",
+      "statistics": "all12_contrasts_equal_root_bootstrap65536_Bonferroni12_seed105_105105_no_pooling",
+      "task_change": {
+        "other_environment_parameters": "unchanged_Stage96",
+        "regime_dwell_seconds": [
+          0.4,
+          0.8
+        ],
+        "source_regime_dwell_seconds": [
+          0.8,
+          1.6
+        ],
+        "training_and_evaluation": "same_shifted_distribution"
+      },
+      "training": "eight_simultaneous_mean_updates_per_actor_preflight_two_separate_actor_credit_pools",
+      "variants": [
+        "base",
+        "zero",
+        "joint_independent",
+        "joint_conditioned"
+      ]
+    },
+    "cost": {
+      "actor_composition_checks": 64,
+      "actor_mean_parameter_updates": 512,
+      "actor_parameter_perturbations": 1024,
+      "actor_score_backward_batches": 147456,
+      "actor_score_forward_batches": 49152,
+      "checkpoint_writes": 32,
+      "credit_episodes": 32768,
+      "decoder_loads": 16,
+      "evaluation_episodes": 2048,
+      "exact_kl_forward_batches": 39168,
+      "fisher_jvp_batches": 19584,
+      "forecaster_loads": 8,
+      "frozen_model_checks": 16,
+      "lower_common_pair_checks": 4096,
+      "lower_independent_pair_checks": 4096,
+      "mc_calls": 65536,
+      "native_episodes": 34816,
+      "native_lower_calls": 41779200,
+      "native_network_checks": 34816,
+      "native_pair_checks": 512,
+      "native_steps": 41779200,
+      "native_upper_calls": 626688,
+      "objective_checks": 32768,
+      "pairing_upper_forward_calls": 626688,
+      "parameter_part_checks": 512,
+      "policy_updates": 256,
+      "scenario_pair_checks": 16384,
+      "source_clone_loads": 16,
+      "training_freeze_checks": 256,
+      "training_models_initialized": 32,
+      "upper_independent_pair_checks": 8192,
+      "upper_replay_forward_calls": 73728
+    },
+    "endpoints": {
+      "100/base_minus_zero": {
+        "ci": [
+          -0.9249061169055777,
+          0.8014394676497796
+        ],
+        "effect": "inconclusive",
+        "mean": -0.29305268632281
+      },
+      "100/joint_conditioned_minus_base": {
+        "ci": [
+          4.508531434048156,
+          6.617483837890349
+        ],
+        "effect": "positive",
+        "mean": 5.542214049075227
+      },
+      "100/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          0.9173170156940311,
+          3.2033130431362316
+        ],
+        "effect": "positive",
+        "mean": 1.941251714169332
+      },
+      "100/joint_conditioned_minus_zero": {
+        "ci": [
+          3.8306483719023956,
+          6.987526732860041
+        ],
+        "effect": "positive",
+        "mean": 5.2491613627524165
+      },
+      "100/joint_independent_minus_base": {
+        "ci": [
+          2.3579788667672466,
+          5.003932004242787
+        ],
+        "effect": "positive",
+        "mean": 3.6009623349058946
+      },
+      "100/joint_independent_minus_zero": {
+        "ci": [
+          1.646171008471601,
+          5.62301169723379
+        ],
+        "effect": "positive",
+        "mean": 3.3079096485830846
+      },
+      "50/base_minus_zero": {
+        "ci": [
+          -0.3421406391824169,
+          0.22222844240680528
+        ],
+        "effect": "inconclusive",
+        "mean": -0.09960232592890783
+      },
+      "50/joint_conditioned_minus_base": {
+        "ci": [
+          5.271629645298112,
+          6.085222257029543
+        ],
+        "effect": "positive",
+        "mean": 5.720600642047781
+      },
+      "50/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          0.15939960102973671,
+          0.8721143592991365
+        ],
+        "effect": "positive",
+        "mean": 0.5265498896336833
+      },
+      "50/joint_conditioned_minus_zero": {
+        "ci": [
+          5.010815028930314,
+          6.075797278467405
+        ],
+        "effect": "positive",
+        "mean": 5.6209983161188735
+      },
+      "50/joint_independent_minus_base": {
+        "ci": [
+          4.525462567529764,
+          5.753349369752441
+        ],
+        "effect": "positive",
+        "mean": 5.194050752414098
+      },
+      "50/joint_independent_minus_zero": {
+        "ci": [
+          4.239879434371449,
+          5.866483629988873
+        ],
+        "effect": "positive",
+        "mean": 5.09444842648519
+      }
+    },
+    "mechanical_gate": "passed",
+    "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+    "performance_claim": "fast_regime_adaptation_teacher_initialized_joint_MC_mean_learning_not_cross_domain_or_frequency_superiority",
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_joint_independent",
+      "50/joint_conditioned_minus_base",
+      "100/joint_conditioned_minus_joint_independent",
+      "100/joint_conditioned_minus_base"
+    ],
+    "protocol": "pointmaze_conditioning_shift_stage105_v1",
+    "run_name": "pointmaze_conditioning_shift_stage105_full_20261003_r1",
+    "shifted_conditioning_confirmation": "supported",
+    "status": "complete"
+  }
+}
