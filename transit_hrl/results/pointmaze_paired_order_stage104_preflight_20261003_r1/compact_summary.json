@@ -1,0 +1,1120 @@
+{
+  "official_summary_reproduced": "passed",
+  "pull_policy": "compact_JSON_only_no_raw_evaluation_or_checkpoint",
+  "read_only_requalification": "passed",
+  "recorded_at_utc": "2026-10-03 11:30:56 UTC",
+  "root_summaries": [
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 32,
+        "actor_parameter_perturbations": 64,
+        "actor_score_backward_batches": 768,
+        "actor_score_forward_batches": 256,
+        "checkpoint_writes": 0,
+        "credit_episodes": 256,
+        "decoder_loads": 2,
+        "evaluation_episodes": 48,
+        "exact_kl_forward_batches": 128,
+        "fisher_jvp_batches": 64,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "lower_common_pair_checks": 32,
+        "lower_independent_pair_checks": 32,
+        "mc_calls": 512,
+        "native_episodes": 304,
+        "native_lower_calls": 91200,
+        "native_network_checks": 304,
+        "native_pair_checks": 8,
+        "native_steps": 91200,
+        "native_upper_calls": 1368,
+        "objective_checks": 256,
+        "pairing_upper_forward_calls": 1368,
+        "parameter_part_checks": 32,
+        "phase_boundary_checks": 8,
+        "policy_updates": 24,
+        "scenario_pair_checks": 128,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 24,
+        "training_models_initialized": 8,
+        "upper_independent_pair_checks": 64,
+        "upper_replay_forward_calls": 144
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "actor_composition": "passed",
+          "alpha": 0.02223361635696027,
+          "effects": {
+            "50/base_minus_zero": -0.2226191311223218,
+            "50/joint_conditioned_minus_base": 0.6082687483129234,
+            "50/joint_conditioned_minus_joint_independent": 0.11427578156956031,
+            "50/joint_conditioned_minus_staged_common": 0.0004990214248934421,
+            "50/joint_independent_minus_base": 0.4939929667433631,
+            "50/joint_independent_minus_staged_independent": 0.00027342125641638404,
+            "50/staged_common_minus_base": 0.60776972688803,
+            "50/staged_common_minus_staged_independent": 0.11405018140108325,
+            "50/staged_independent_minus_base": 0.49371954548694674
+          },
+          "evaluation_counts": {
+            "base": 4,
+            "joint_conditioned": 4,
+            "joint_independent": 4,
+            "staged_common": 4,
+            "staged_independent": 4,
+            "zero": 4
+          },
+          "evaluation_mean_returns": {
+            "base": 236.4812782489082,
+            "joint_conditioned": 237.08954699722113,
+            "joint_independent": 236.97527121565156,
+            "staged_common": 237.08904797579623,
+            "staged_independent": 236.97499779439516,
+            "zero": 236.70389738003053
+          },
+          "matched_training_budget": {
+            "joint": {
+              "common_lower_extra_upper_replay_forwards": 48,
+              "lower_credit_paths": 16,
+              "lower_cumulative_nominal_KL": 0.00198,
+              "lower_mean_updates": 2,
+              "native_training_episodes": 32,
+              "upper_credit_paths": 16,
+              "upper_cumulative_nominal_KL": 0.001,
+              "upper_mean_updates": 2
+            },
+            "staged": {
+              "common_lower_extra_upper_replay_forwards": 48,
+              "lower_credit_paths": 16,
+              "lower_cumulative_nominal_KL": 0.00198,
+              "lower_mean_updates": 2,
+              "native_training_episodes": 32,
+              "upper_credit_paths": 16,
+              "upper_cumulative_nominal_KL": 0.001,
+              "upper_mean_updates": 2
+            },
+            "status": "matched",
+            "update_operations": {
+              "joint": 2,
+              "staged": 4
+            }
+          },
+          "pairing": "passed",
+          "phase_freeze": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000989945430504615,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.0000095367431640625,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.000499999980144492,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 230.17375112000633,
+                  "exact_call_weighted_kl": 0.0009999454301075049,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000989894618986853,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000010967254638671875,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0005000142148279008,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 2.384185791015625e-7,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 233.64969272834847,
+                  "exact_call_weighted_kl": 0.000999894903283411,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                }
+              ]
+            },
+            "joint_independent": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009899554641468293,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009417533874511719,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.000499999980144492,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 230.05265850172052,
+                  "exact_call_weighted_kl": 0.0009999554637497193,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009902297796265864,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009894371032714844,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0005000141595002486,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 4.76837158203125e-7,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 233.62302523027978,
+                  "exact_call_weighted_kl": 0.0010002300628165913,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                }
+              ]
+            },
+            "staged_common": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000989945430504615,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.0000095367431640625,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 237.19297113603267,
+                  "exact_call_weighted_kl": 0.000989945430504615,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.00099,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000989887261945595,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000011444091796875,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 232.92843939777725,
+                  "exact_call_weighted_kl": 0.000989887261945595,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.00099,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "passed"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0005000000379314154,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 223.11844256874394,
+                  "exact_call_weighted_kl": 0.000010000000758628307,
+                  "freeze_check": "passed",
+                  "iteration": 3,
+                  "nominal_call_weighted_kl": 0.00001,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0005000142256061055,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 234.38936365019975,
+                  "exact_call_weighted_kl": 0.000010000284512122111,
+                  "freeze_check": "passed",
+                  "iteration": 4,
+                  "nominal_call_weighted_kl": 0.00001,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "passed"
+                }
+              ]
+            },
+            "staged_independent": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009899554641468293,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009417533874511719,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 236.95078589946104,
+                  "exact_call_weighted_kl": 0.0009899554641468293,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.00099,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000990246348817493,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009059906005859375,
+                      "nominal_fisher_kl": 0.00099,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 232.9153260552551,
+                  "exact_call_weighted_kl": 0.000990246348817493,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.00099,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "passed"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0004999999823496887,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 223.10429488427786,
+                  "exact_call_weighted_kl": 0.000009999999646993774,
+                  "freeze_check": "passed",
+                  "iteration": 3,
+                  "nominal_call_weighted_kl": 0.00001,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 6,
+                      "exact_kl_plus": 0.0005000142416913406,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 2.384185791015625e-7,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 234.2960320481951,
+                  "exact_call_weighted_kl": 0.000010000284833826812,
+                  "freeze_check": "passed",
+                  "iteration": 4,
+                  "nominal_call_weighted_kl": 0.00001,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "passed"
+                }
+              ]
+            }
+          },
+          "training_schedule": "joint_simultaneous_vs_all_lower_then_all_upper_same_actor_rosters"
+        },
+        "100": {
+          "actor_composition": "passed",
+          "alpha": 0.06479194013941661,
+          "effects": {
+            "100/base_minus_zero": -1.0716806196502233,
+            "100/joint_conditioned_minus_base": 0.6152928634300352,
+            "100/joint_conditioned_minus_joint_independent": 0.6025239962265303,
+            "100/joint_conditioned_minus_staged_common": -0.00037697255204705016,
+            "100/joint_independent_minus_base": 0.012768867203504897,
+            "100/joint_independent_minus_staged_independent": 0.0017340406213506299,
+            "100/staged_common_minus_base": 0.6156698359820822,
+            "100/staged_common_minus_staged_independent": 0.604635009399928,
+            "100/staged_independent_minus_base": 0.011034826582154267
+          },
+          "evaluation_counts": {
+            "base": 4,
+            "joint_conditioned": 4,
+            "joint_independent": 4,
+            "staged_common": 4,
+            "staged_independent": 4,
+            "zero": 4
+          },
+          "evaluation_mean_returns": {
+            "base": 217.0893368413391,
+            "joint_conditioned": 217.70462970476913,
+            "joint_independent": 217.1021057085426,
+            "staged_common": 217.70500667732117,
+            "staged_independent": 217.10037166792125,
+            "zero": 218.1610174609893
+          },
+          "matched_training_budget": {
+            "joint": {
+              "common_lower_extra_upper_replay_forwards": 24,
+              "lower_credit_paths": 16,
+              "lower_cumulative_nominal_KL": 0.00199,
+              "lower_mean_updates": 2,
+              "native_training_episodes": 32,
+              "upper_credit_paths": 16,
+              "upper_cumulative_nominal_KL": 0.001,
+              "upper_mean_updates": 2
+            },
+            "staged": {
+              "common_lower_extra_upper_replay_forwards": 24,
+              "lower_credit_paths": 16,
+              "lower_cumulative_nominal_KL": 0.00199,
+              "lower_mean_updates": 2,
+              "native_training_episodes": 32,
+              "upper_credit_paths": 16,
+              "upper_cumulative_nominal_KL": 0.001,
+              "upper_mean_updates": 2
+            },
+            "status": "matched",
+            "update_operations": {
+              "joint": 2,
+              "staged": 4
+            }
+          },
+          "pairing": "passed",
+          "phase_freeze": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed",
+          "trained": {
+            "joint_conditioned": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009948541141488127,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009059906005859375,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0004999999885619508,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 204.4871858504526,
+                  "exact_call_weighted_kl": 0.0009998541140344322,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000995039162374426,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000005841255187988281,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0005000206656612891,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 205.86179788982957,
+                  "exact_call_weighted_kl": 0.001000039369031039,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                }
+              ]
+            },
+            "joint_independent": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009950448880091391,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009059906005859375,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0004999999885619508,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 204.26364162539707,
+                  "exact_call_weighted_kl": 0.0010000448878947586,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000994925447387904,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000007152557373046875,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    },
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0005000201720674335,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 205.54231106201047,
+                  "exact_call_weighted_kl": 0.0009999256491085783,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.001,
+                  "phase": "joint",
+                  "phase_boundary_freeze": "not_applicable"
+                }
+              ]
+            },
+            "staged_common": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009948541141488127,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009059906005859375,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 217.74232243606002,
+                  "exact_call_weighted_kl": 0.0009948541141488127,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.000995,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.000995036869708363,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000008106231689453125,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 206.6510837730415,
+                  "exact_call_weighted_kl": 0.000995036869708363,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.000995,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "passed"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0005000000264731991,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 191.00414514927897,
+                  "exact_call_weighted_kl": 0.000005000000264731991,
+                  "freeze_check": "passed",
+                  "iteration": 3,
+                  "nominal_call_weighted_kl": 0.000005,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0005000220266382546,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 205.18090306172584,
+                  "exact_call_weighted_kl": 0.000005000220266382546,
+                  "freeze_check": "passed",
+                  "iteration": 4,
+                  "nominal_call_weighted_kl": 0.000005,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "passed"
+                }
+              ]
+            },
+            "staged_independent": {
+              "checkpoint": null,
+              "evaluation_update": 2,
+              "final_freeze_check": "passed",
+              "history": [
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009950448880091391,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.000009059906005859375,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 217.29523398594904,
+                  "exact_call_weighted_kl": 0.0009950448880091391,
+                  "freeze_check": "passed",
+                  "iteration": 1,
+                  "nominal_call_weighted_kl": 0.000995,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "lower": {
+                      "decision_calls_per_episode": 300,
+                      "exact_kl_plus": 0.0009949201091886315,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0.00000667572021484375,
+                      "nominal_fisher_kl": 0.000995,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 205.89725802226266,
+                  "exact_call_weighted_kl": 0.0009949201091886315,
+                  "freeze_check": "passed",
+                  "iteration": 2,
+                  "nominal_call_weighted_kl": 0.000995,
+                  "phase": "lower",
+                  "phase_boundary_freeze": "passed"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.000499999986929923,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 1,
+                  "credit_mean_reward_before_update": 191.2916679363958,
+                  "exact_call_weighted_kl": 0.0000049999998692992295,
+                  "freeze_check": "passed",
+                  "iteration": 3,
+                  "nominal_call_weighted_kl": 0.000005,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "not_applicable"
+                },
+                {
+                  "actors": {
+                    "upper": {
+                      "decision_calls_per_episode": 3,
+                      "exact_kl_plus": 0.0005000187362861295,
+                      "gradient_episodes": 8,
+                      "max_abs_old_logp_difference": 0,
+                      "nominal_fisher_kl": 0.0005,
+                      "radius_check": "passed",
+                      "std_check": "passed"
+                    }
+                  },
+                  "credit_iteration": 2,
+                  "credit_mean_reward_before_update": 205.1309999701612,
+                  "exact_call_weighted_kl": 0.000005000187362861295,
+                  "freeze_check": "passed",
+                  "iteration": 4,
+                  "nominal_call_weighted_kl": 0.000005,
+                  "phase": "upper",
+                  "phase_boundary_freeze": "passed"
+                }
+              ]
+            }
+          },
+          "training_schedule": "joint_simultaneous_vs_all_lower_then_all_upper_same_actor_rosters"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 91200,
+        "plan_ols_fits": 1064,
+        "plan_ridge_predictions": 1064,
+        "reference_evaluations": 91200
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "preflight": true,
+      "root": 410011,
+      "seed_roles": {
+        "native_evaluation": [
+          104095001,
+          104095002,
+          104095003,
+          104095004
+        ],
+        "training_rounds": [
+          {
+            "credit_A": [
+              {
+                "noise_seeds": [
+                  104002002,
+                  104002003
+                ],
+                "scenario_seed": 104000001
+              },
+              {
+                "noise_seeds": [
+                  104002004,
+                  104002005
+                ],
+                "scenario_seed": 104000002
+              }
+            ],
+            "credit_B": [
+              {
+                "noise_seeds": [
+                  104003002,
+                  104003003
+                ],
+                "scenario_seed": 104001001
+              },
+              {
+                "noise_seeds": [
+                  104003004,
+                  104003005
+                ],
+                "scenario_seed": 104001002
+              }
+            ],
+            "lower_credit_A": [
+              {
+                "noise_seeds": [
+                  104006002,
+                  104006003
+                ],
+                "scenario_seed": 104004001
+              },
+              {
+                "noise_seeds": [
+                  104006004,
+                  104006005
+                ],
+                "scenario_seed": 104004002
+              }
+            ],
+            "lower_credit_B": [
+              {
+                "noise_seeds": [
+                  104007002,
+                  104007003
+                ],
+                "scenario_seed": 104005001
+              },
+              {
+                "noise_seeds": [
+                  104007004,
+                  104007005
+                ],
+                "scenario_seed": 104005002
+              }
+            ]
+          },
+          {
+            "credit_A": [
+              {
+                "noise_seeds": [
+                  104012002,
+                  104012003
+                ],
+                "scenario_seed": 104010001
+              },
+              {
+                "noise_seeds": [
+                  104012004,
+                  104012005
+                ],
+                "scenario_seed": 104010002
+              }
+            ],
+            "credit_B": [
+              {
+                "noise_seeds": [
+                  104013002,
+                  104013003
+                ],
+                "scenario_seed": 104011001
+              },
+              {
+                "noise_seeds": [
+                  104013004,
+                  104013005
+                ],
+                "scenario_seed": 104011002
+              }
+            ],
+            "lower_credit_A": [
+              {
+                "noise_seeds": [
+                  104016002,
+                  104016003
+                ],
+                "scenario_seed": 104014001
+              },
+              {
+                "noise_seeds": [
+                  104016004,
+                  104016005
+                ],
+                "scenario_seed": 104014002
+              }
+            ],
+            "lower_credit_B": [
+              {
+                "noise_seeds": [
+                  104017002,
+                  104017003
+                ],
+                "scenario_seed": 104015001
+              },
+              {
+                "noise_seeds": [
+                  104017004,
+                  104017005
+                ],
+                "scenario_seed": 104015002
+              }
+            ]
+          }
+        ]
+      },
+      "source_initialization": {
+        "checkpoints": {
+          "50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+          "100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+        },
+        "decoder_preflight": false,
+        "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+        "decoder_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+        "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+        "historical_artifact_loads": 0,
+        "teacher_preflight": false,
+        "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+        "teacher_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json"
+      },
+      "wall_seconds": 83.86245094565675
+    }
+  ],
+  "run_name": "pointmaze_paired_order_stage104_preflight_20261003_r1",
+  "summary": {
+    "contract": {
+      "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+      "budget": "equal_per_actor_samples_updates_and_cumulative_nominal_call_weighted_KL_common_lower_replay_matched_no_trained_donor_reuse",
+      "conditioning": "only_joint_conditioned_and_staged_common_lower_credit_share_upper_innovations_independent_lower_noise",
+      "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+      "decision": "both_joint_conditioned_minus_staged_common_primary_corrected_CI_lower_bounds_positive_preflight_mechanical_only",
+      "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+      "evaluation": "fresh_paired_original_independent_noise_six_complete_policies_only_after_all_registered_updates_no_checkpoint_selection",
+      "freeze": "std_values_source_Adam_forecaster_decoder_fixed_staged_upper_frozen_during_lower_and_learned_lower_frozen_during_upper",
+      "limits": "same_task_teacher_initialized_MC_update_order_comparison_not_full_actor_critic_equal_realized_trajectory_KL_or_frequency_superiority",
+      "methods": [
+        "joint_independent",
+        "joint_conditioned",
+        "staged_independent",
+        "staged_common"
+      ],
+      "periods": [
+        50,
+        100
+      ],
+      "primary_endpoints": [
+        "50/joint_conditioned_minus_staged_common",
+        "100/joint_conditioned_minus_staged_common"
+      ],
+      "sampling": "same_registered_scenario_noise_rosters_for_each_actor_and_update_across_all_four_learners_separate_upper_lower_pools",
+      "source": "pointmaze_fresh_teachers_stage96_v1",
+      "statistics": "all18_reward_contrasts_equal_root_bootstrap65536_Bonferroni18_seed104_104104_no_stage_pooling",
+      "training": "all_four_from_original_Stage96_U0_L0_joint_simultaneous_staged_all_lower_then_all_upper_eight_updates_per_actor_preflight_two",
+      "variants": [
+        "base",
+        "zero",
+        "joint_independent",
+        "joint_conditioned",
+        "staged_independent",
+        "staged_common"
+      ]
+    },
+    "cost": {
+      "actor_composition_checks": 12,
+      "actor_mean_parameter_updates": 32,
+      "actor_parameter_perturbations": 64,
+      "actor_score_backward_batches": 768,
+      "actor_score_forward_batches": 256,
+      "checkpoint_writes": 0,
+      "credit_episodes": 256,
+      "decoder_loads": 2,
+      "evaluation_episodes": 48,
+      "exact_kl_forward_batches": 128,
+      "fisher_jvp_batches": 64,
+      "forecaster_loads": 1,
+      "frozen_model_checks": 2,
+      "lower_common_pair_checks": 32,
+      "lower_independent_pair_checks": 32,
+      "mc_calls": 512,
+      "native_episodes": 304,
+      "native_lower_calls": 91200,
+      "native_network_checks": 304,
+      "native_pair_checks": 8,
+      "native_steps": 91200,
+      "native_upper_calls": 1368,
+      "objective_checks": 256,
+      "pairing_upper_forward_calls": 1368,
+      "parameter_part_checks": 32,
+      "phase_boundary_checks": 8,
+      "policy_updates": 24,
+      "scenario_pair_checks": 128,
+      "source_clone_loads": 2,
+      "training_freeze_checks": 24,
+      "training_models_initialized": 8,
+      "upper_independent_pair_checks": 64,
+      "upper_replay_forward_calls": 144
+    },
+    "endpoints": {
+      "100/base_minus_zero": {
+        "mean": -1.0716806196502233
+      },
+      "100/joint_conditioned_minus_base": {
+        "mean": 0.6152928634300352
+      },
+      "100/joint_conditioned_minus_joint_independent": {
+        "mean": 0.6025239962265303
+      },
+      "100/joint_conditioned_minus_staged_common": {
+        "mean": -0.00037697255204705016
+      },
+      "100/joint_independent_minus_base": {
+        "mean": 0.012768867203504897
+      },
+      "100/joint_independent_minus_staged_independent": {
+        "mean": 0.0017340406213506299
+      },
+      "100/staged_common_minus_base": {
+        "mean": 0.6156698359820822
+      },
+      "100/staged_common_minus_staged_independent": {
+        "mean": 0.604635009399928
+      },
+      "100/staged_independent_minus_base": {
+        "mean": 0.011034826582154267
+      },
+      "50/base_minus_zero": {
+        "mean": -0.2226191311223218
+      },
+      "50/joint_conditioned_minus_base": {
+        "mean": 0.6082687483129234
+      },
+      "50/joint_conditioned_minus_joint_independent": {
+        "mean": 0.11427578156956031
+      },
+      "50/joint_conditioned_minus_staged_common": {
+        "mean": 0.0004990214248934421
+      },
+      "50/joint_independent_minus_base": {
+        "mean": 0.4939929667433631
+      },
+      "50/joint_independent_minus_staged_independent": {
+        "mean": 0.00027342125641638404
+      },
+      "50/staged_common_minus_base": {
+        "mean": 0.60776972688803
+      },
+      "50/staged_common_minus_staged_independent": {
+        "mean": 0.11405018140108325
+      },
+      "50/staged_independent_minus_base": {
+        "mean": 0.49371954548694674
+      }
+    },
+    "mechanical_gate": "passed",
+    "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+    "paired_order_confirmation": "mechanical_only",
+    "performance_claim": "same_actor_roster_MC_update_order_comparison_not_full_actor_critic_or_frequency_superiority",
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_staged_common",
+      "100/joint_conditioned_minus_staged_common"
+    ],
+    "protocol": "pointmaze_paired_order_stage104_v1",
+    "run_name": "pointmaze_paired_order_stage104_preflight_20261003_r1",
+    "status": "preflight_passed"
+  }
+}

@@ -1,15 +1,15 @@
 {
   "run_name": "pointmaze_paired_order_stage104_preflight_20261003_r1",
   "protocol": "pointmaze_paired_order_stage104_v1",
-  "recorded_at_utc": "2026-10-03 11:21:03 UTC",
+  "recorded_at_utc": "2026-10-03 11:30:56 UTC",
   "code_revision": "03ec49cce976e65ae3d26ba3c222860bfc723a53",
   "preregistration_revision": "b0c68644faa106135e57ae658874534a365fffca",
   "source_evidence_revision": "4c49d5079f",
   "tasks": [
     {
       "id": "t130151",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node005",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -22,13 +22,13 @@
       "cpu_cores": 3,
       "ram_mb": 3072,
       "submitted_at": 1791026338.026812,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791026652.5800693,
+      "finished_at": 1791026757.3702877,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_paired_order_stage104_v1 root410011",
       "signature": "Freq-HRL/pointmaze_paired_order_stage104_v1/pointmaze_paired_order_stage104_preflight_20261003_r1/same_actor_rosters_joint_vs_lower_then_upper/410011",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t130151.log",
       "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_paired_order_stage104_preflight_20261003_r1/cells/replicate_410011/completion",
       "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_paired_order_stage104_preflight_20261003_r1/cells/replicate_410011/completion",
       "wait_for_files": [],
@@ -36,8 +36,8 @@
     },
     {
       "id": "t130152",
-      "status": "queued",
-      "node": null,
+      "status": "done",
+      "node": "node004",
       "require_node": null,
       "allowed_nodes": [
         "node001",
@@ -50,13 +50,13 @@
       "cpu_cores": 1,
       "ram_mb": 2048,
       "submitted_at": 1791026338.0699809,
-      "started_at": null,
-      "finished_at": null,
-      "exit_code": null,
+      "started_at": 1791026829.1462538,
+      "finished_at": 1791026884.310978,
+      "exit_code": 0,
       "description": "Freq-HRL pointmaze_paired_order_stage104_v1 all-root qualification",
       "signature": "Freq-HRL/pointmaze_paired_order_stage104_v1/pointmaze_paired_order_stage104_preflight_20261003_r1/qualification",
       "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
-      "log_path": null,
+      "log_path": "/tmp/sched_t130152.log",
       "result_dir": null,
       "local_result_dir": null,
       "wait_for_files": [
@@ -172,13 +172,21 @@
     "qualification_ram_mb": 2048
   },
   "full_run": "pointmaze_paired_order_stage104_full_20261003_r1",
-  "full_status": "frozen_not_submitted",
-  "scientific_status": "native_mechanical_preflight_pending",
+  "full_status": "mechanically_eligible_not_submitted",
+  "scientific_status": "native_mechanical_preflight_passed",
   "scope": "Four original-teacher learners with the same per-actor update rosters. Two joint rounds or two lower then two upper rounds. Native preflight checks source/std/phase freeze, exact cost and independent paired evaluation; no reward admission or donor selection. Both full primary periods remain frozen. Stage103 not-supported result and Stage67 critic HOLD preserved.",
   "artifacts": {
     "pull": "completion_markers_and_compact_JSON_only",
     "checkpoints": "none_in_preflight_only_all_final_policies_in_full_server_only",
     "raw_evaluation_rows": "server_only",
     "native_trace_writes": 0
+  },
+  "preflight_result": {
+    "status": "preflight_passed",
+    "mechanical_gate": "passed",
+    "official_summary_reproduced": "passed",
+    "paired_order_confirmation": "mechanical_only",
+    "reward_admission": "none",
+    "compact_summary": "compact_summary.json"
   }
 }
