@@ -1,0 +1,2250 @@
+{
+  "run_name": "pointmaze_fresh_joint_stage98_full_20261003_r1",
+  "protocol": "pointmaze_fresh_joint_stage98_v1",
+  "preflight": false,
+  "source_revision": "adcfc75d537b61f9501ca2105edc775a650481d7",
+  "source_teacher_revision": "b4a9750a4b1f42931db0b92e69a23348eeef0ec3",
+  "source_decoder_revision": "afdfd9bf02fa917fc38bdac8aaa34cf04c838475",
+  "frozen_at_utc": "2026-10-03 03:18:39 UTC",
+  "contract": {
+    "source": "pointmaze_fresh_teachers_stage96_v1",
+    "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "base",
+      "zero",
+      "joint_call",
+      "joint_level",
+      "lower_trained"
+    ],
+    "methods": {
+      "50": {
+        "joint_call": {
+          "upper": 0.5,
+          "lower": 0.99
+        },
+        "joint_level": {
+          "upper": 0.5,
+          "lower": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      },
+      "100": {
+        "joint_call": {
+          "upper": 0.5,
+          "lower": 0.995
+        },
+        "joint_level": {
+          "upper": 0.5,
+          "lower": 0.5
+        },
+        "lower_trained": {
+          "lower": 1
+        }
+      }
+    },
+    "training": "eight_fresh_on_policy_MC_mean_updates_no_PPO_Adam_entropy_or_reward_normalization_preflight_two",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+    "sampling": "each_method_same_exogenous_roster_8_fresh_rounds_64_episodes_all_episodes_used_by_every_active_actor_preflight2x8",
+    "noise_mapping": "unchanged_Stage80_mapping_fresh_Stage98_training_and_evaluation_roles",
+    "budget": "per_native_step_nominal_K_lower_plus_K_upper_over_period_.001_joint_call_and_lower_only_joint_level_.0005_plus_.0005_over_period",
+    "freeze": "both_std_values_source_Adam_forecaster_decoder_unchanged_lower_only_upper_actor_bit_exact_frozen",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "statistics": "unchanged_all20_reward_contrasts_equal_root_bootstrap65536_Bonferroni20_same_bootstrap_indices",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "decision": "preflight_mechanical_only_no_return_admission_keep_negative_donors_no_cross_stage_pooling",
+    "limits": "new_teacher_fixed_std_decoder_MC_mean_learning_not_full_actor_critic_or_frequency_superiority",
+    "allocation": "upper_.0005_fixed_joint_call_lower_.001_minus_.0005_over_period_no_radius_or_allocation_search",
+    "diagnostics": "nominal_and_empirical_call_weighted_old_history_conditional_KL_per_round_actor_episode_and_decision_counts",
+    "source_cohort": "all_eight_Stage96_new_teachers_full_artifacts_even_in_preflight_no_old_weights",
+    "source_run": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+    "native_task": "same_environment_parameters_and_history_states_as_Stage88_new_optimizer_roots",
+    "replication": "rebuild_joint_call_joint_level_lower_trained_from_new_L0_U0_not_old_joint_or_lower_donors",
+    "confirmation": "all_four_primary_CI_lower_bounds_strictly_positive_no_period_root_or_checkpoint_selection",
+    "downstream": "use_all_fixed_final_joint_call_donors_rebuild_matched_lowers_then_unchanged_staged_upper_rule"
+  },
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "workers": 8,
+    "credit_scenarios_per_batch": 16,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 32,
+    "updates": 8
+  },
+  "arguments": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 1200,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": false
+  },
+  "source_records": {
+    "410011": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410023": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410023/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410023_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410037": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410037/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410037_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410049": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410049/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410049_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410061": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410061/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410061_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410073": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410073/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410073_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410089": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410089/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410089_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "410101": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410101/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410101_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    }
+  },
+  "seed_encoding": "exact spec.seed_roles; scenario and evaluation start+i*step; pair=(first_start+i*pair_step,second_start+i*pair_step)",
+  "seed_roles_ranges": {
+    "410011": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98100001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98102002,
+              "second_start": 98102003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98101001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98103002,
+              "second_start": 98103003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98110001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98112002,
+              "second_start": 98112003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98111001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98113002,
+              "second_start": 98113003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98120001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98122002,
+              "second_start": 98122003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98121001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98123002,
+              "second_start": 98123003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98130001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98132002,
+              "second_start": 98132003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98131001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98133002,
+              "second_start": 98133003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98140001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98142002,
+              "second_start": 98142003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98141001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98143002,
+              "second_start": 98143003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98150001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98152002,
+              "second_start": 98152003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98151001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98153002,
+              "second_start": 98153003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98160001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98162002,
+              "second_start": 98162003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98161001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98163002,
+              "second_start": 98163003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98170001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98172002,
+              "second_start": 98172003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98171001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98173002,
+              "second_start": 98173003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98195001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410023": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98200001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98202002,
+              "second_start": 98202003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98201001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98203002,
+              "second_start": 98203003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98210001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98212002,
+              "second_start": 98212003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98211001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98213002,
+              "second_start": 98213003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98220001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98222002,
+              "second_start": 98222003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98221001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98223002,
+              "second_start": 98223003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98230001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98232002,
+              "second_start": 98232003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98231001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98233002,
+              "second_start": 98233003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98240001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98242002,
+              "second_start": 98242003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98241001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98243002,
+              "second_start": 98243003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98250001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98252002,
+              "second_start": 98252003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98251001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98253002,
+              "second_start": 98253003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98260001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98262002,
+              "second_start": 98262003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98261001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98263002,
+              "second_start": 98263003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98270001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98272002,
+              "second_start": 98272003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98271001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98273002,
+              "second_start": 98273003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98295001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410037": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98300001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98302002,
+              "second_start": 98302003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98301001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98303002,
+              "second_start": 98303003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98310001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98312002,
+              "second_start": 98312003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98311001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98313002,
+              "second_start": 98313003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98320001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98322002,
+              "second_start": 98322003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98321001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98323002,
+              "second_start": 98323003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98330001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98332002,
+              "second_start": 98332003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98331001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98333002,
+              "second_start": 98333003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98340001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98342002,
+              "second_start": 98342003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98341001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98343002,
+              "second_start": 98343003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98350001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98352002,
+              "second_start": 98352003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98351001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98353002,
+              "second_start": 98353003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98360001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98362002,
+              "second_start": 98362003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98361001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98363002,
+              "second_start": 98363003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98370001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98372002,
+              "second_start": 98372003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98371001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98373002,
+              "second_start": 98373003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98395001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410049": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98400001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98402002,
+              "second_start": 98402003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98401001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98403002,
+              "second_start": 98403003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98410001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98412002,
+              "second_start": 98412003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98411001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98413002,
+              "second_start": 98413003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98420001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98422002,
+              "second_start": 98422003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98421001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98423002,
+              "second_start": 98423003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98430001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98432002,
+              "second_start": 98432003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98431001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98433002,
+              "second_start": 98433003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98440001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98442002,
+              "second_start": 98442003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98441001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98443002,
+              "second_start": 98443003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98450001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98452002,
+              "second_start": 98452003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98451001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98453002,
+              "second_start": 98453003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98460001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98462002,
+              "second_start": 98462003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98461001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98463002,
+              "second_start": 98463003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98470001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98472002,
+              "second_start": 98472003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98471001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98473002,
+              "second_start": 98473003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98495001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410061": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98500001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98502002,
+              "second_start": 98502003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98501001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98503002,
+              "second_start": 98503003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98510001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98512002,
+              "second_start": 98512003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98511001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98513002,
+              "second_start": 98513003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98520001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98522002,
+              "second_start": 98522003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98521001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98523002,
+              "second_start": 98523003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98530001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98532002,
+              "second_start": 98532003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98531001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98533002,
+              "second_start": 98533003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98540001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98542002,
+              "second_start": 98542003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98541001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98543002,
+              "second_start": 98543003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98550001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98552002,
+              "second_start": 98552003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98551001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98553002,
+              "second_start": 98553003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98560001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98562002,
+              "second_start": 98562003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98561001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98563002,
+              "second_start": 98563003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98570001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98572002,
+              "second_start": 98572003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98571001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98573002,
+              "second_start": 98573003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98595001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410073": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98600001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98602002,
+              "second_start": 98602003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98601001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98603002,
+              "second_start": 98603003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98610001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98612002,
+              "second_start": 98612003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98611001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98613002,
+              "second_start": 98613003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98620001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98622002,
+              "second_start": 98622003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98621001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98623002,
+              "second_start": 98623003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98630001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98632002,
+              "second_start": 98632003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98631001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98633002,
+              "second_start": 98633003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98640001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98642002,
+              "second_start": 98642003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98641001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98643002,
+              "second_start": 98643003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98650001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98652002,
+              "second_start": 98652003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98651001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98653002,
+              "second_start": 98653003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98660001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98662002,
+              "second_start": 98662003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98661001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98663002,
+              "second_start": 98663003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98670001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98672002,
+              "second_start": 98672003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98671001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98673002,
+              "second_start": 98673003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98695001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410089": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98700001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98702002,
+              "second_start": 98702003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98701001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98703002,
+              "second_start": 98703003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98710001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98712002,
+              "second_start": 98712003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98711001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98713002,
+              "second_start": 98713003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98720001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98722002,
+              "second_start": 98722003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98721001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98723002,
+              "second_start": 98723003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98730001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98732002,
+              "second_start": 98732003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98731001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98733002,
+              "second_start": 98733003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98740001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98742002,
+              "second_start": 98742003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98741001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98743002,
+              "second_start": 98743003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98750001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98752002,
+              "second_start": 98752003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98751001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98753002,
+              "second_start": 98753003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98760001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98762002,
+              "second_start": 98762003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98761001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98763002,
+              "second_start": 98763003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98770001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98772002,
+              "second_start": 98772003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98771001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98773002,
+              "second_start": 98773003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98795001,
+        "count": 32,
+        "step": 1
+      }
+    },
+    "410101": {
+      "training_rounds": [
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98800001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98802002,
+              "second_start": 98802003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98801001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98803002,
+              "second_start": 98803003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98810001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98812002,
+              "second_start": 98812003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98811001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98813002,
+              "second_start": 98813003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98820001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98822002,
+              "second_start": 98822003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98821001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98823002,
+              "second_start": 98823003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98830001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98832002,
+              "second_start": 98832003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98831001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98833002,
+              "second_start": 98833003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98840001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98842002,
+              "second_start": 98842003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98841001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98843002,
+              "second_start": 98843003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98850001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98852002,
+              "second_start": 98852003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98851001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98853002,
+              "second_start": 98853003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98860001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98862002,
+              "second_start": 98862003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98861001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98863002,
+              "second_start": 98863003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        },
+        {
+          "credit_A": {
+            "scenario_seed": {
+              "start": 98870001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98872002,
+              "second_start": 98872003,
+              "count": 16,
+              "pair_step": 2
+            }
+          },
+          "credit_B": {
+            "scenario_seed": {
+              "start": 98871001,
+              "count": 16,
+              "step": 1
+            },
+            "noise_seed_pairs": {
+              "first_start": 98873002,
+              "second_start": 98873003,
+              "count": 16,
+              "pair_step": 2
+            }
+          }
+        }
+      ],
+      "native_evaluation": {
+        "start": 98895001,
+        "count": 32,
+        "step": 1
+      }
+    }
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 6,
+    "credit_episodes": 3072,
+    "evaluation_episodes": 320,
+    "native_episodes": 3392,
+    "native_steps": 4070400,
+    "native_lower_calls": 4070400,
+    "native_upper_calls": 61056,
+    "pairing_upper_forward_calls": 61056,
+    "native_network_checks": 3392,
+    "native_pair_checks": 64,
+    "scenario_pair_checks": 1536,
+    "objective_checks": 3072,
+    "mc_calls": 6144,
+    "actor_score_forward_batches": 8192,
+    "actor_score_backward_batches": 24576,
+    "fisher_jvp_batches": 3648,
+    "exact_kl_forward_batches": 7296,
+    "actor_parameter_perturbations": 160,
+    "parameter_part_checks": 80,
+    "actor_mean_parameter_updates": 80,
+    "policy_updates": 48,
+    "training_freeze_checks": 48,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 6
+  },
+  "budget_total": {
+    "source_clone_loads": 16,
+    "forecaster_loads": 8,
+    "decoder_loads": 16,
+    "training_models_initialized": 48,
+    "credit_episodes": 24576,
+    "evaluation_episodes": 2560,
+    "native_episodes": 27136,
+    "native_steps": 32563200,
+    "native_lower_calls": 32563200,
+    "native_upper_calls": 488448,
+    "pairing_upper_forward_calls": 488448,
+    "native_network_checks": 27136,
+    "native_pair_checks": 512,
+    "scenario_pair_checks": 12288,
+    "objective_checks": 24576,
+    "mc_calls": 49152,
+    "actor_score_forward_batches": 65536,
+    "actor_score_backward_batches": 196608,
+    "fisher_jvp_batches": 29184,
+    "exact_kl_forward_batches": 58368,
+    "actor_parameter_perturbations": 1280,
+    "parameter_part_checks": 640,
+    "actor_mean_parameter_updates": 640,
+    "policy_updates": 384,
+    "training_freeze_checks": 384,
+    "frozen_model_checks": 16,
+    "checkpoint_writes": 48
+  },
+  "endpoints": [
+    "50/joint_call_minus_lower_trained",
+    "50/joint_call_minus_joint_level",
+    "50/joint_level_minus_lower_trained",
+    "50/joint_call_minus_base",
+    "50/joint_call_minus_zero",
+    "50/joint_level_minus_base",
+    "50/joint_level_minus_zero",
+    "50/lower_trained_minus_base",
+    "50/lower_trained_minus_zero",
+    "50/base_minus_zero",
+    "100/joint_call_minus_lower_trained",
+    "100/joint_call_minus_joint_level",
+    "100/joint_level_minus_lower_trained",
+    "100/joint_call_minus_base",
+    "100/joint_call_minus_zero",
+    "100/joint_level_minus_base",
+    "100/joint_level_minus_zero",
+    "100/lower_trained_minus_base",
+    "100/lower_trained_minus_zero",
+    "100/base_minus_zero"
+  ],
+  "primary_endpoints": [
+    "50/joint_call_minus_lower_trained",
+    "50/joint_call_minus_joint_level",
+    "100/joint_call_minus_lower_trained",
+    "100/joint_call_minus_joint_level"
+  ],
+  "statistics": {
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      87,
+      87087
+    ],
+    "family_size": 20,
+    "correction": "Bonferroni",
+    "unit": "equal_root",
+    "pooling": "none"
+  },
+  "source_gate": {
+    "run_name": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+    "status": "decoder_artifacts_ready",
+    "all_eight_roots": true,
+    "evidence_revision": "951e696097"
+  },
+  "full_launch_gate": "native_Stage98_preflight_passed_no_reward_admission",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoint_policy": "fixed_final_inference_weights_server_only_no_intermediate_checkpoints",
+    "native_trace_writes": 0
+  },
+  "local_tests": {
+    "legacy_regression": 14,
+    "fresh_source_integration_and_protocol": 3,
+    "status": "passed_after_preflight_namespace_fix",
+    "native_performance": "not_tested"
+  }
+}
