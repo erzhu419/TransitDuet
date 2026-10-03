@@ -1,0 +1,182 @@
+{
+  "run_name": "pointmaze_conditioning_shift_stage105_preflight_20261003_r1",
+  "protocol": "pointmaze_conditioning_shift_stage105_v1",
+  "recorded_at_utc": "2026-10-03 12:53:56 UTC",
+  "code_revision": "354b1e3096b7814bad2b09fcac60a2f68fc5dfb6",
+  "preregistration_revision": "84315f6cab",
+  "source_evidence_revision": "176548634e",
+  "tasks": [
+    {
+      "id": "t130211",
+      "status": "done",
+      "node": "node001",
+      "require_node": null,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "submitted_at": 1791031699.2891736,
+      "started_at": 1791031802.6363597,
+      "finished_at": 1791031874.4202645,
+      "exit_code": 0,
+      "description": "Freq-HRL pointmaze_conditioning_shift_stage105_v1 root410011",
+      "signature": "Freq-HRL/pointmaze_conditioning_shift_stage105_v1/pointmaze_conditioning_shift_stage105_preflight_20261003_r1/fast_regime_lower_conditioning_joint_mean/410011",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "log_path": "/tmp/sched_t130211.log",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_preflight_20261003_r1/cells/replicate_410011/completion",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_preflight_20261003_r1/cells/replicate_410011/completion",
+      "wait_for_files": [],
+      "result_sync_error": null
+    },
+    {
+      "id": "t130212",
+      "status": "done",
+      "node": "node001",
+      "require_node": null,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "submitted_at": 1791031699.327265,
+      "started_at": 1791031899.5290625,
+      "finished_at": 1791031941.9978511,
+      "exit_code": 0,
+      "description": "Freq-HRL pointmaze_conditioning_shift_stage105_v1 all-root qualification",
+      "signature": "Freq-HRL/pointmaze_conditioning_shift_stage105_v1/pointmaze_conditioning_shift_stage105_preflight_20261003_r1/qualification",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "log_path": "/tmp/sched_t130212.log",
+      "result_dir": null,
+      "local_result_dir": null,
+      "wait_for_files": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_conditioning_shift_stage105_preflight_20261003_r1/cells/replicate_410011/completion/ready.json"
+      ],
+      "result_sync_error": null
+    }
+  ],
+  "budget_total": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 4,
+    "credit_episodes": 128,
+    "evaluation_episodes": 32,
+    "native_episodes": 160,
+    "native_steps": 48000,
+    "native_lower_calls": 48000,
+    "native_upper_calls": 720,
+    "pairing_upper_forward_calls": 720,
+    "native_network_checks": 160,
+    "native_pair_checks": 8,
+    "scenario_pair_checks": 64,
+    "objective_checks": 128,
+    "mc_calls": 256,
+    "actor_score_forward_batches": 128,
+    "actor_score_backward_batches": 384,
+    "fisher_jvp_batches": 32,
+    "exact_kl_forward_batches": 64,
+    "actor_parameter_perturbations": 32,
+    "parameter_part_checks": 16,
+    "actor_mean_parameter_updates": 16,
+    "policy_updates": 8,
+    "training_freeze_checks": 8,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 0,
+    "upper_independent_pair_checks": 32,
+    "lower_independent_pair_checks": 16,
+    "lower_common_pair_checks": 16,
+    "actor_composition_checks": 8,
+    "upper_replay_forward_calls": 72
+  },
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "primary_endpoints": [
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_conditioned_minus_base",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_conditioned_minus_base"
+  ],
+  "statistics": {
+    "family_size": 12,
+    "familywise_alpha": 0.05,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      105,
+      105105
+    ],
+    "statistical_unit": "original_teacher_optimizer_root",
+    "method": "equal_root_percentile_bootstrap_Bonferroni12",
+    "decision": "all_four_primary_CI_lower_bounds_strictly_positive",
+    "preflight_return_admission": "none",
+    "stage_pooling": false,
+    "sequential_seed_extension": false
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "qualification_cpu": 1,
+    "qualification_ram_mb": 2048
+  },
+  "full_run": "pointmaze_conditioning_shift_stage105_full_20261003_r1",
+  "full_status": "eligible_not_yet_submitted",
+  "scientific_status": "native_mechanical_preflight_passed",
+  "scope": "shifted_distribution_adaptation_from_original_teachers_not_new_initialization_cross_domain_zero_shot_full_actor_critic_or_frequency_superiority",
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "raw_evaluation": "server_only",
+    "checkpoints": "none_preflight_four_final_policies_per_root_full_server_only",
+    "native_trace_writes": 0
+  },
+  "preflight_result": {
+    "status": "preflight_passed",
+    "mechanical_gate": "passed",
+    "official_summary_reproduced": "passed",
+    "shifted_conditioning_confirmation": "mechanical_only",
+    "reward_admission": "none",
+    "compact_summary": "compact_summary.json"
+  }
+}
