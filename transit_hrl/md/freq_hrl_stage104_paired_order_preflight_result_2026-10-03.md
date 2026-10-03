@@ -11,4 +11,4 @@ Next: unchanged eight-root full training, both periods and all four learners fro
 ## Scope
 Mechanical eligibility does not establish joint superiority. Stage103's not-supported result stays separate; this remains same-task MC mean learning, not full actor-critic or frequency superiority. Stage67 critic HOLD remains unchanged.
 
-Full dispatch: pending under the already frozen registration.
+Full dispatch: t130162-t130169 are the eight root training tasks; t130170 is the dependent qualifier. At the 2026-10-03 11:39:13 UTC snapshot, all eight training tasks were running on node001/node004/node005/node006, and qualification was queued. Dynamic node001-006 eligibility remains unchanged, with9 CPU /8 GB per training task and1 CPU /2 GB for qualification. Code03ec49cce9, preregistrationb0c68644fa and preflight evidencedfae80d45c are fixed; full performance remains pending.
