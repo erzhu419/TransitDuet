@@ -1,0 +1,43 @@
+{
+  "run_name": "pointmaze_optional_plan_stage107_preflight_20261004_r1",
+  "protocol": "pointmaze_optional_plan_stage107_v1",
+  "preflight": true,
+  "registered_source_revision": "13b72bf04ca425471f0d0ecfa12ee43699754f27",
+  "preregistration_revision": "8f6973a92e",
+  "status": "complete",
+  "mechanical_gate": "passed",
+  "tasks": [
+    {
+      "id": "t132280",
+      "status": "done",
+      "signature": "Freq-HRL/pointmaze_optional_plan_stage107_v1/pointmaze_optional_plan_stage107_preflight_20261004_r1/strong_flat_optional_fixed_plan_hint/410011",
+      "node": "node005",
+      "exit_code": 0,
+      "submitted_at": 1791043927.6568284,
+      "started_at": 1791044022.692321,
+      "finished_at": 1791044095.0959783,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "log_path": "/tmp/sched_t132280.log",
+      "sampled_peak_ram_mb": 1412,
+      "ram_measurement": "sampled_peak"
+    },
+    {
+      "id": "t132281",
+      "status": "done",
+      "signature": "Freq-HRL/pointmaze_optional_plan_stage107_v1/pointmaze_optional_plan_stage107_preflight_20261004_r1/qualification",
+      "node": "node001",
+      "exit_code": 0,
+      "submitted_at": 1791043927.6971922,
+      "started_at": 1791044162.4712722,
+      "finished_at": 1791044299.8190546,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "log_path": "/tmp/sched_t132281.log",
+      "sampled_peak_ram_mb": null,
+      "ram_measurement": "unmeasured"
+    }
+  ],
+  "next_run": "pointmaze_optional_plan_stage107_full_20261004_r1",
+  "next_admission": "frozen_native_mechanical_preflight_only_no_reward_admission"
+}

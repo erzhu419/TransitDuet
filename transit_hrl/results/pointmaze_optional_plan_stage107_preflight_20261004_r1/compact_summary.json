@@ -1,0 +1,287 @@
+{
+  "actual_training": {
+    "all_freeze_checks": "passed",
+    "all_std_checks": "passed",
+    "exact_KL_range": [
+      0.0010000210631401802,
+      0.0010001612681152293
+    ],
+    "gradient_episodes_per_update": [
+      16
+    ],
+    "lower_mean_updates": 12,
+    "max_abs_old_logp_difference": 0.000012636184692382812,
+    "upper_updates": 0
+  },
+  "contract": {
+    "actor_inputs": "first392_exact_flat_feedback_plus4_advice_reference_minus_current_target_and_planned_minus_causal_velocity",
+    "architecture": "lower396_value398_zero_padded_first_layers_same_all_arms_no_replacement_of_current_target_error",
+    "artifacts": "server_final_weights_only_no_intermediate_checkpoint_raw_trace_or_local_native_training_compact_JSON_pull",
+    "budget": "matched_lower_samples_mean_updates_nominal_KL_.001_per_update_plan_and_upper_inference_costs_extra_reported",
+    "decision": "all_six_learned_hint_minus_blind_forecast_and_own_blinded_primary_lower_CI_bounds_positive_pref_mechanical_only",
+    "evaluation": "six_final_or_initial_policies32_fresh_independent_paired_paths_no_intermediate_selection",
+    "execution_ablation": "forecast_blinded_learned_blinded_keep_trained_lower_but_zero_advice_and_no_plan_or_upper_calls",
+    "freeze": "std_values_Adam_forecaster_decoder_donors_and_upper_unchanged_no_critic_fit",
+    "initial_policy": "all_advice_columns_zero_so_initial_lower_ignores_arbitrary_hints_same_trained_flat_function",
+    "limits": "conditional_fixed_upper_hint_learning_above_reused_strong_flat_not_joint_HRL_unseen_tasks_or_frequency_superiority",
+    "methods": [
+      "blind",
+      "forecast_hint",
+      "learned_hint"
+    ],
+    "periods": [
+      50,
+      100
+    ],
+    "primary_endpoints": [
+      "50/learned_hint_minus_blind",
+      "50/learned_hint_minus_forecast_hint",
+      "50/learned_hint_minus_learned_blinded",
+      "100/learned_hint_minus_blind",
+      "100/learned_hint_minus_forecast_hint",
+      "100/learned_hint_minus_learned_blinded"
+    ],
+    "source": "pointmaze_plan_baselines_stage106_v1",
+    "source_initialization": "all_Stage106_final_flat_lowers_and_conditioned_joint_uppers_original_forecaster_decoder_no_refit",
+    "statistics": "all20_equal_root_bootstrap65536_Bonferroni20_seed107_107107_no_pooling",
+    "task": {
+      "other_environment_parameters": "unchanged_Stage96",
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "training": "eight_lower_MC_mean_updates_preflight_two_128_native_paths_per_update_preflight16_shared_rosters",
+    "upper": "fixed_Stage106_joint_conditioned_mean_std_no_upper_updates_original_independent_stochastic_sampling",
+    "variants": [
+      "base",
+      "blind",
+      "forecast_hint",
+      "learned_hint",
+      "forecast_blinded",
+      "learned_blinded"
+    ]
+  },
+  "cost": {
+    "actor_mean_parameter_updates": 12,
+    "actor_parameter_perturbations": 24,
+    "actor_score_backward_batches": 576,
+    "actor_score_forward_batches": 192,
+    "checkpoint_writes": 0,
+    "credit_episodes": 192,
+    "decoder_loads": 2,
+    "donor_checkpoint_loads": 4,
+    "evaluation_episodes": 48,
+    "exact_kl_forward_batches": 120,
+    "expanded_model_initializations": 2,
+    "fisher_jvp_batches": 60,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 192,
+    "native_episodes": 240,
+    "native_lower_calls": 72000,
+    "native_network_checks": 240,
+    "native_pair_checks": 8,
+    "native_steps": 72000,
+    "native_upper_calls": 324,
+    "objective_checks": 192,
+    "parameter_part_checks": 12,
+    "policy_updates": 12,
+    "scenario_pair_checks": 96,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "training_freeze_checks": 12,
+    "training_models_initialized": 6
+  },
+  "descriptive_only": true,
+  "endpoints": {
+    "100/blind_minus_base": {
+      "mean": -0.1845530455517661
+    },
+    "100/forecast_blinded_minus_blind": {
+      "mean": 0.0000898045129105185
+    },
+    "100/forecast_hint_minus_base": {
+      "mean": -0.1847596564311118
+    },
+    "100/forecast_hint_minus_blind": {
+      "mean": -0.00020661087934570332
+    },
+    "100/forecast_hint_minus_forecast_blinded": {
+      "mean": -0.0002964153922562218
+    },
+    "100/learned_blinded_minus_blind": {
+      "mean": 0.00007351857779269722
+    },
+    "100/learned_hint_minus_base": {
+      "mean": -0.18480261183066204
+    },
+    "100/learned_hint_minus_blind": {
+      "mean": -0.00024956627889594074
+    },
+    "100/learned_hint_minus_forecast_hint": {
+      "mean": -0.000042955399550237416
+    },
+    "100/learned_hint_minus_learned_blinded": {
+      "mean": -0.00032308485668863796
+    },
+    "50/blind_minus_base": {
+      "mean": -0.14455960946759205
+    },
+    "50/forecast_blinded_minus_blind": {
+      "mean": -0.00008531635549502425
+    },
+    "50/forecast_hint_minus_base": {
+      "mean": -0.14507321814977558
+    },
+    "50/forecast_hint_minus_blind": {
+      "mean": -0.0005136086821835306
+    },
+    "50/forecast_hint_minus_forecast_blinded": {
+      "mean": -0.00042829232668850636
+    },
+    "50/learned_blinded_minus_blind": {
+      "mean": -0.00008490759331891695
+    },
+    "50/learned_hint_minus_base": {
+      "mean": -0.14507260679545197
+    },
+    "50/learned_hint_minus_blind": {
+      "mean": -0.0005129973278599209
+    },
+    "50/learned_hint_minus_forecast_hint": {
+      "mean": 6.11354323609703e-7
+    },
+    "50/learned_hint_minus_learned_blinded": {
+      "mean": -0.00042808973454100396
+    }
+  },
+  "first392_feedback_and_zero_padded_initial_function": "focused_local_tests_passed_no_native_trace_download",
+  "group_means": {
+    "50": {
+      "base": 282.6573668095007,
+      "blind": 282.5128072000331,
+      "forecast_blinded": 282.51272188367756,
+      "forecast_hint": 282.51229359135084,
+      "learned_blinded": 282.5127222924398,
+      "learned_hint": 282.5122942027052
+    },
+    "100": {
+      "base": 281.3535411055078,
+      "blind": 281.16898805995606,
+      "forecast_blinded": 281.16907786446893,
+      "forecast_hint": 281.1687814490767,
+      "learned_blinded": 281.1690615785338,
+      "learned_hint": 281.1687384936771
+    }
+  },
+  "local_focused_tests_passed": 9,
+  "mechanical_gate": "passed",
+  "native_planning_cost": {
+    "actor_context_evaluations": 43200,
+    "plan_ols_fits": 504,
+    "plan_ridge_predictions": 504,
+    "reference_evaluations": 43200
+  },
+  "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+  "optional_plan_confirmation": "mechanical_only",
+  "performance_admission": "not_used",
+  "performance_claim": "conditional_frozen_upper_optional_hint_learning_above_strong_flat_not_joint_HRL_or_frequency_superiority",
+  "preflight": true,
+  "primary_descriptive": {
+    "100/learned_hint_minus_blind": -0.00024956627889594074,
+    "100/learned_hint_minus_forecast_hint": -0.000042955399550237416,
+    "100/learned_hint_minus_learned_blinded": -0.00032308485668863796,
+    "50/learned_hint_minus_blind": -0.0005129973278599209,
+    "50/learned_hint_minus_forecast_hint": 6.11354323609703e-7,
+    "50/learned_hint_minus_learned_blinded": -0.00042808973454100396
+  },
+  "primary_endpoints": [
+    "50/learned_hint_minus_blind",
+    "50/learned_hint_minus_forecast_hint",
+    "50/learned_hint_minus_learned_blinded",
+    "100/learned_hint_minus_blind",
+    "100/learned_hint_minus_forecast_hint",
+    "100/learned_hint_minus_learned_blinded"
+  ],
+  "protocol": "pointmaze_optional_plan_stage107_v1",
+  "root": 410011,
+  "run_name": "pointmaze_optional_plan_stage107_preflight_20261004_r1",
+  "source_cell_reaggregation": "exactly_matches_official_qualification",
+  "source_initialization": {
+    "donor_protocol": "pointmaze_plan_baselines_stage106_v1",
+    "donor_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/result.json",
+    "donors": {
+      "50": {
+        "flat_lower": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_flat_lower.pt",
+        "joint_conditioned": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_joint_conditioned.pt"
+      },
+      "100": {
+        "flat_lower": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_flat_lower.pt",
+        "joint_conditioned": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_joint_conditioned.pt"
+      }
+    },
+    "lower_method": "flat_lower",
+    "selection": "all_eight_roots_both_periods_fixed_final_update8_no_donor_selection",
+    "teacher_decoder": {
+      "checkpoints": {
+        "50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "decoder_preflight": false,
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "decoder_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "historical_artifact_loads": 0,
+      "teacher_preflight": false,
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "teacher_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json"
+    },
+    "upper_method": "joint_conditioned"
+  },
+  "status": "preflight_passed",
+  "wall_seconds": 61.01183760398999,
+  "tasks": [
+    {
+      "id": "t132280",
+      "status": "done",
+      "signature": "Freq-HRL/pointmaze_optional_plan_stage107_v1/pointmaze_optional_plan_stage107_preflight_20261004_r1/strong_flat_optional_fixed_plan_hint/410011",
+      "node": "node005",
+      "exit_code": 0,
+      "submitted_at": 1791043927.6568284,
+      "started_at": 1791044022.692321,
+      "finished_at": 1791044095.0959783,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "log_path": "/tmp/sched_t132280.log",
+      "sampled_peak_ram_mb": 1412,
+      "ram_measurement": "sampled_peak"
+    },
+    {
+      "id": "t132281",
+      "status": "done",
+      "signature": "Freq-HRL/pointmaze_optional_plan_stage107_v1/pointmaze_optional_plan_stage107_preflight_20261004_r1/qualification",
+      "node": "node001",
+      "exit_code": 0,
+      "submitted_at": 1791043927.6971922,
+      "started_at": 1791044162.4712722,
+      "finished_at": 1791044299.8190546,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "log_path": "/tmp/sched_t132281.log",
+      "sampled_peak_ram_mb": null,
+      "ram_measurement": "unmeasured"
+    }
+  ],
+  "artifact_transfer": {
+    "source": "remote_source_cell_and_qualification_reaggregated_server_side",
+    "raw_cell_pulled": false,
+    "checkpoint_pulled": false,
+    "native_traces_pulled": false
+  }
+}
