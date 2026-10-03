@@ -16,9 +16,10 @@ from scripts import pointmaze_actor_swap_stage84_spec as spec
 native = parts.native
 
 
-def check_checkpoint(payload, source_weights, *, root, period, method, protocol=spec):
+def check_checkpoint(payload, source_weights, *, root, period, method, protocol=spec, training_protocol=None):
     spec = protocol
-    expected = {"protocol":spec.source.EXPERIMENT_PROTOCOL,"root":root,"period":period,"method":method,"updates":8}
+    trained = spec.source if training_protocol is None else training_protocol
+    expected = {"protocol":trained.EXPERIMENT_PROTOCOL,"root":root,"period":period,"method":method,"updates":8}
     if {k:v for k,v in payload.items() if k != "weights"} != expected:
         raise ValueError(f"{spec.EXPERIMENT_PROTOCOL} requires the registered final checkpoint")
     weights = payload["weights"]
@@ -27,7 +28,7 @@ def check_checkpoint(payload, source_weights, *, root, period, method, protocol=
         current = weights[name]
         if set(current) != set(original) or any(current[k].shape != original[k].shape for k in original):
             raise ValueError("Stage84 checkpoint parameter schema changed")
-        active = name.endswith("_actor") and name[:-6] in spec.source.METHODS[method]
+        active = name.endswith("_actor") and name[:-6] in trained.METHODS[method]
         if active:
             torch.testing.assert_close(current["log_std"],original["log_std"],atol=0,rtol=0)
             if all(torch.equal(current[k],original[k]) for k in original):
