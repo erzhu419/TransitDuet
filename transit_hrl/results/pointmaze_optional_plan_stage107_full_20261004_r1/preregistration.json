@@ -1,0 +1,331 @@
+{
+  "run_name": "pointmaze_optional_plan_stage107_full_20261004_r1",
+  "protocol": "pointmaze_optional_plan_stage107_v1",
+  "registered_at_utc": "2026-10-03T16:10:05Z",
+  "source_revision": "13b72bf04ca425471f0d0ecfa12ee43699754f27",
+  "source_evidence_revision": "6e256c21b3",
+  "preflight": false,
+  "contract": {
+    "source": "pointmaze_plan_baselines_stage106_v1",
+    "source_initialization": "all_Stage106_final_flat_lowers_and_conditioned_joint_uppers_original_forecaster_decoder_no_refit",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "methods": [
+      "blind",
+      "forecast_hint",
+      "learned_hint"
+    ],
+    "variants": [
+      "base",
+      "blind",
+      "forecast_hint",
+      "learned_hint",
+      "forecast_blinded",
+      "learned_blinded"
+    ],
+    "actor_inputs": "first392_exact_flat_feedback_plus4_advice_reference_minus_current_target_and_planned_minus_causal_velocity",
+    "architecture": "lower396_value398_zero_padded_first_layers_same_all_arms_no_replacement_of_current_target_error",
+    "initial_policy": "all_advice_columns_zero_so_initial_lower_ignores_arbitrary_hints_same_trained_flat_function",
+    "training": "eight_lower_MC_mean_updates_preflight_two_128_native_paths_per_update_preflight16_shared_rosters",
+    "upper": "fixed_Stage106_joint_conditioned_mean_std_no_upper_updates_original_independent_stochastic_sampling",
+    "freeze": "std_values_Adam_forecaster_decoder_donors_and_upper_unchanged_no_critic_fit",
+    "budget": "matched_lower_samples_mean_updates_nominal_KL_.001_per_update_plan_and_upper_inference_costs_extra_reported",
+    "evaluation": "six_final_or_initial_policies32_fresh_independent_paired_paths_no_intermediate_selection",
+    "execution_ablation": "forecast_blinded_learned_blinded_keep_trained_lower_but_zero_advice_and_no_plan_or_upper_calls",
+    "statistics": "all20_equal_root_bootstrap65536_Bonferroni20_seed107_107107_no_pooling",
+    "primary_endpoints": [
+      "50/learned_hint_minus_blind",
+      "50/learned_hint_minus_forecast_hint",
+      "50/learned_hint_minus_learned_blinded",
+      "100/learned_hint_minus_blind",
+      "100/learned_hint_minus_forecast_hint",
+      "100/learned_hint_minus_learned_blinded"
+    ],
+    "decision": "all_six_learned_hint_minus_blind_forecast_and_own_blinded_primary_lower_CI_bounds_positive_pref_mechanical_only",
+    "artifacts": "server_final_weights_only_no_intermediate_checkpoint_raw_trace_or_local_native_training_compact_JSON_pull",
+    "limits": "conditional_fixed_upper_hint_learning_above_reused_strong_flat_not_joint_HRL_unseen_tasks_or_frequency_superiority"
+  },
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "workers": 8,
+    "credit_scenarios_per_batch": 16,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 32,
+    "updates": 8
+  },
+  "horizon": 1200,
+  "env_id": "PointMaze_UMaze-v3",
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "periods": [
+    50,
+    100
+  ],
+  "source_for_first_root": {
+    "teacher_decoder": {
+      "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+      "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "checkpoints": {
+        "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "teacher_preflight": false,
+      "decoder_preflight": false,
+      "historical_artifact_loads": 0
+    },
+    "donor_protocol": "pointmaze_plan_baselines_stage106_v1",
+    "donor_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/result.json",
+    "lower_method": "flat_lower",
+    "upper_method": "joint_conditioned",
+    "donors": {
+      "50": {
+        "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_flat_lower.pt",
+        "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_joint_conditioned.pt"
+      },
+      "100": {
+        "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_flat_lower.pt",
+        "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_joint_conditioned.pt"
+      }
+    },
+    "selection": "all_eight_roots_both_periods_fixed_final_update8_no_donor_selection"
+  },
+  "source_cohort": "same_record_function_for_all_eight_roots_both_periods_final_update8_no_donor_selection",
+  "inherited_costs": {
+    "stage106_full_native_episodes": 69120,
+    "stage106_full_native_steps": 82944000,
+    "stage96_teacher_forecaster_and_stage97_decoder": "additional_inherited_preparation_not_in_new_stage107_costs",
+    "scope": "all_methods_share_donor_preparation_full_Stage106_campaign_reported_separately"
+  },
+  "seed_generator": {
+    "module": "scripts.pointmaze_optional_plan_stage107_spec.seed_roles",
+    "root_order": [
+      410011,
+      410023,
+      410037,
+      410049,
+      410061,
+      410073,
+      410089,
+      410101
+    ],
+    "base": 107100000,
+    "root_stride": 100000,
+    "round_stride": 10000,
+    "scenario_offsets": {
+      "credit_A": 1,
+      "credit_B": 1001,
+      "lower_credit_A": 4001,
+      "lower_credit_B": 5001
+    },
+    "scenario_index_start": 0,
+    "noise_offsets": [
+      2001,
+      2002
+    ],
+    "noise_index_multiplier": 2,
+    "evaluation_offset": 95001,
+    "evaluation_policy_noise_seed_equals_scenario_seed": true,
+    "shared_training_rosters": "all_three_methods",
+    "evaluation_pairing": "original_independent_upper_lower_noise"
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "source_cell_loads": 1,
+    "donor_checkpoint_loads": 4,
+    "expanded_model_initializations": 2,
+    "training_models_initialized": 6,
+    "credit_episodes": 6144,
+    "evaluation_episodes": 384,
+    "native_episodes": 6528,
+    "native_steps": 7833600,
+    "native_lower_calls": 7833600,
+    "native_upper_calls": 38016,
+    "native_network_checks": 6528,
+    "native_pair_checks": 64,
+    "scenario_pair_checks": 3072,
+    "objective_checks": 6144,
+    "mc_calls": 6144,
+    "actor_score_forward_batches": 12288,
+    "actor_score_backward_batches": 36864,
+    "fisher_jvp_batches": 7200,
+    "exact_kl_forward_batches": 14400,
+    "actor_parameter_perturbations": 96,
+    "parameter_part_checks": 48,
+    "actor_mean_parameter_updates": 48,
+    "policy_updates": 48,
+    "training_freeze_checks": 48,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 6
+  },
+  "budget_total": {
+    "source_clone_loads": 16,
+    "forecaster_loads": 8,
+    "decoder_loads": 16,
+    "source_cell_loads": 8,
+    "donor_checkpoint_loads": 32,
+    "expanded_model_initializations": 16,
+    "training_models_initialized": 48,
+    "credit_episodes": 49152,
+    "evaluation_episodes": 3072,
+    "native_episodes": 52224,
+    "native_steps": 62668800,
+    "native_lower_calls": 62668800,
+    "native_upper_calls": 304128,
+    "native_network_checks": 52224,
+    "native_pair_checks": 512,
+    "scenario_pair_checks": 24576,
+    "objective_checks": 49152,
+    "mc_calls": 49152,
+    "actor_score_forward_batches": 98304,
+    "actor_score_backward_batches": 294912,
+    "fisher_jvp_batches": 57600,
+    "exact_kl_forward_batches": 115200,
+    "actor_parameter_perturbations": 768,
+    "parameter_part_checks": 384,
+    "actor_mean_parameter_updates": 384,
+    "policy_updates": 384,
+    "training_freeze_checks": 384,
+    "frozen_model_checks": 16,
+    "checkpoint_writes": 48
+  },
+  "planning_budget_per_root": {
+    "plan_ols_fits": 71808,
+    "plan_ridge_predictions": 71808,
+    "reference_evaluations": 5068800,
+    "actor_context_evaluations": 5068800
+  },
+  "planning_budget_total": {
+    "plan_ols_fits": 574464,
+    "plan_ridge_predictions": 574464,
+    "reference_evaluations": 40550400,
+    "actor_context_evaluations": 40550400
+  },
+  "endpoints": [
+    "50/learned_hint_minus_blind",
+    "50/learned_hint_minus_forecast_hint",
+    "50/learned_hint_minus_learned_blinded",
+    "50/forecast_hint_minus_blind",
+    "50/blind_minus_base",
+    "50/forecast_hint_minus_base",
+    "50/learned_hint_minus_base",
+    "50/forecast_hint_minus_forecast_blinded",
+    "50/forecast_blinded_minus_blind",
+    "50/learned_blinded_minus_blind",
+    "100/learned_hint_minus_blind",
+    "100/learned_hint_minus_forecast_hint",
+    "100/learned_hint_minus_learned_blinded",
+    "100/forecast_hint_minus_blind",
+    "100/blind_minus_base",
+    "100/forecast_hint_minus_base",
+    "100/learned_hint_minus_base",
+    "100/forecast_hint_minus_forecast_blinded",
+    "100/forecast_blinded_minus_blind",
+    "100/learned_blinded_minus_blind"
+  ],
+  "primary_endpoints": [
+    "50/learned_hint_minus_blind",
+    "50/learned_hint_minus_forecast_hint",
+    "50/learned_hint_minus_learned_blinded",
+    "100/learned_hint_minus_blind",
+    "100/learned_hint_minus_forecast_hint",
+    "100/learned_hint_minus_learned_blinded"
+  ],
+  "inference": {
+    "bootstrap_draws": 65536,
+    "seed": [
+      107,
+      107107
+    ],
+    "family_size": 20,
+    "correction": "Bonferroni_two_sided_family_0.05",
+    "resampling_unit": "equal_weight_optimizer_root_not_episode",
+    "cohort_pooling": false
+  },
+  "gate": "all_six_primary_corrected_lower_CI_bounds_positive",
+  "preflight_policy": "both_runs_frozen_before_first_native_preflight_same_task_roots_metrics_no_retuning",
+  "full_admission": "successful_native_mechanical_preflight_only_no_reward_gate",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_root": 9,
+    "ram_mb_per_root": 8192,
+    "qualification_cpu": 1,
+    "qualification_ram_mb": 2048
+  },
+  "local_tests": {
+    "focused_tests_passed": 9,
+    "runtime_seconds": 13.771,
+    "native_local_training": false
+  },
+  "dependency_check": {
+    "node": "node001",
+    "files_checked": 80,
+    "missing_files": 0,
+    "torch": "2.5.1+cu121"
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoints": "final_inference_weights_server_only",
+    "native_trace_writes": 0,
+    "intermediate_checkpoints": 0
+  }
+}
