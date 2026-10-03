@@ -1,0 +1,290 @@
+{
+  "run_name": "pointmaze_fresh_decoder_stage97_preflight_20261003_r1",
+  "summary": {
+    "status": "preflight_passed",
+    "protocol": "pointmaze_fresh_decoder_stage97_v1",
+    "contract": {
+      "source_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "source_run": "pointmaze_fresh_teachers_stage96_full_20261003_r1",
+      "source": "full_new_root_teachers_and_forecasters_only_even_in_preflight",
+      "labels": "all_eight_full_BC_label_paths_per_period_reconstruct_causal_lower_states_reproduce_saved_command_MSE",
+      "proposals": "fixed_root_label_period_seed_zero_upper_mean_source_Gaussian_std_no_reward_or_validation_fit",
+      "constraint": "Stage78_same_first_feasible_halving_from_min(1,BC_RMSE/original_command_change_RMS)",
+      "response": "actual_nonlinear_lower_command_change_RMS_leq_BC_command_RMSE",
+      "curve": "same_convex_blend_world_clipped_points_position_and_dt_velocity_coherent",
+      "envelope": "Stage76_same_label_velocity_q99_and_axis_support_only",
+      "probes": "zero_and_bounded_independent_native_noise_four_fresh_paths_per_period_sampling_both_actors_no_training",
+      "decision": "mechanical_only_no_return_threshold_no_alpha_retuning_no_root_selection_no_CI",
+      "selection": "both_period_decoders_frozen_before_any_native_probe_no_best_checkpoint",
+      "cost": "first_feasible_solver_variable_passes_counted_exactly_no_native_traces_or_checkpoint_writes",
+      "limits": "new_decoder_prerequisite_not_unseen_teacher_staged_reward_confirmation_not_frequency_superiority"
+    },
+    "roots": [
+      410011
+    ],
+    "cost": {
+      "source_clone_loads": 2,
+      "forecaster_loads": 1,
+      "layout_loads": 1,
+      "label_archive_loads": 16,
+      "label_state_rows": 19200,
+      "label_plan_checks": 16,
+      "bc_mse_reproductions": 2,
+      "calibration_curve_decodes": 288,
+      "calibration_upper_proposals": 288,
+      "constraint_response_evaluations": 5,
+      "offline_actor_rows": 86400,
+      "offline_actor_forward_batches": 144,
+      "frozen_model_checks": 2,
+      "native_episodes": 16,
+      "native_steps": 4800,
+      "native_upper_calls": 72,
+      "native_lower_calls": 4800,
+      "native_network_checks": 16,
+      "native_pair_checks": 8,
+      "optimizer_steps": 0,
+      "checkpoint_writes": 0,
+      "native_trace_writes": 0
+    },
+    "performance_confirmation": "not_tested",
+    "next": "fresh_joint_and_lower_donors_then_unchanged_staged_upper_rule",
+    "run_name": "pointmaze_fresh_decoder_stage97_preflight_20261003_r1"
+  },
+  "qualification_reproduction": "passed",
+  "source_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+  "source_checkpoints": {
+    "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clock_final.pt",
+    "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt",
+    "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+    "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/controller_final.pt"
+  },
+  "wall_seconds": 10.251554979011416,
+  "seed_roles": {
+    "calibration_labels": [
+      96104001,
+      96104002,
+      96104003,
+      96104004,
+      96104005,
+      96104006,
+      96104007,
+      96104008
+    ],
+    "native_probe": [
+      97095001,
+      97095002,
+      97095003,
+      97095004
+    ]
+  },
+  "cost": {
+    "bc_mse_reproductions": 2,
+    "calibration_curve_decodes": 288,
+    "calibration_upper_proposals": 288,
+    "checkpoint_writes": 0,
+    "constraint_response_evaluations": 5,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "label_archive_loads": 16,
+    "label_plan_checks": 16,
+    "label_state_rows": 19200,
+    "layout_loads": 1,
+    "native_episodes": 16,
+    "native_lower_calls": 4800,
+    "native_network_checks": 16,
+    "native_pair_checks": 8,
+    "native_steps": 4800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 72,
+    "offline_actor_forward_batches": 144,
+    "offline_actor_rows": 86400,
+    "optimizer_steps": 0,
+    "source_clone_loads": 2
+  },
+  "native_planning_cost": {
+    "actor_context_evaluations": 4800,
+    "plan_ols_fits": 56,
+    "plan_ridge_predictions": 56,
+    "reference_evaluations": 4800
+  },
+  "groups": {
+    "50": {
+      "calibration": {
+        "alpha": 0.02223361635696027,
+        "bc_mse_reproduction": "passed",
+        "bounded_to_bc_rmse_ratio": 0.5842993959910928,
+        "constraint": "passed",
+        "data_role": "new_cohort_BC_labels_only",
+        "envelope": {
+          "axis_max": [
+            1.2503206729888916,
+            1.3027608394622803
+          ],
+          "axis_mean": [
+            0.011739647029413996,
+            -0.01697199733699866
+          ],
+          "axis_min": [
+            -1.2936174869537354,
+            -1.2481093406677246
+          ],
+          "axis_std": [
+            0.5308959760635155,
+            0.3533703459381634
+          ],
+          "data_role": "historical_BC_labels_only",
+          "position_error_q99": 0.6436611907532463,
+          "position_error_rms": 0.24136194228086313,
+          "rows": 9600,
+          "velocity_speed_q99": 1.2431425829897655,
+          "velocity_speed_rms": 0.638080721221752
+        },
+        "label_plan_checks": "passed",
+        "ratio_alpha": 0.08893446542784109,
+        "responses": {
+          "bounded": {
+            "bc_command_mse": 0.005729380718942248,
+            "command_change_rms": 0.037974655309664596
+          },
+          "original": {
+            "bc_command_mse": 0.5425398734926804,
+            "command_change_rms": 0.7307827783977278
+          },
+          "ratio": {
+            "bc_command_mse": 0.026324026350988402,
+            "command_change_rms": 0.1476756341121283
+          },
+          "zero": {
+            "bc_command_mse": 0.004223930913926109,
+            "command_change_rms": 0
+          }
+        },
+        "saved_bc_mse": 0.004223930649459362,
+        "solver_trace": [
+          {
+            "alpha": 0.08893446542784109,
+            "response": {
+              "bc_command_mse": 0.026324026350988402,
+              "command_change_rms": 0.1476756341121283
+            }
+          },
+          {
+            "alpha": 0.04446723271392054,
+            "response": {
+              "bc_command_mse": 0.010058858847724462,
+              "command_change_rms": 0.07550738442047086
+            }
+          },
+          {
+            "alpha": 0.02223361635696027,
+            "response": {
+              "bc_command_mse": 0.005729380718942248,
+              "command_change_rms": 0.037974655309664596
+            }
+          }
+        ],
+        "target_rms": 0.06499177574067437
+      },
+      "source_and_Adam_unchanged": "passed",
+      "pairing": "passed",
+      "probe_diagnostics": {
+        "bounded": {
+          "episodes": 4,
+          "native_steps": 1200,
+          "mean_return": 219.55123032633122
+        },
+        "zero": {
+          "episodes": 4,
+          "native_steps": 1200,
+          "mean_return": 219.41802018121354
+        }
+      }
+    },
+    "100": {
+      "calibration": {
+        "alpha": 0.06479194013941661,
+        "bc_mse_reproduction": "passed",
+        "bounded_to_bc_rmse_ratio": 0.7118214284684132,
+        "constraint": "passed",
+        "data_role": "new_cohort_BC_labels_only",
+        "envelope": {
+          "axis_max": [
+            1.2434124946594238,
+            1.2362152338027954
+          ],
+          "axis_mean": [
+            0.04147107979467061,
+            -0.01752511449745119
+          ],
+          "axis_min": [
+            -1.2349903583526611,
+            -1.246216893196106
+          ],
+          "axis_std": [
+            0.43629993161662695,
+            0.303556518459526
+          ],
+          "data_role": "historical_BC_labels_only",
+          "position_error_q99": 0.8946874032112148,
+          "position_error_rms": 0.28775557069045654,
+          "rows": 9600,
+          "velocity_speed_q99": 1.2149863953342317,
+          "velocity_speed_rms": 0.5334146326502762
+        },
+        "label_plan_checks": "passed",
+        "ratio_alpha": 0.12958388027883322,
+        "responses": {
+          "bounded": {
+            "bc_command_mse": 0.005718920736599051,
+            "command_change_rms": 0.04444745706922659
+          },
+          "original": {
+            "bc_command_mse": 0.2354289353659371,
+            "command_change_rms": 0.48186444335150785
+          },
+          "ratio": {
+            "bc_command_mse": 0.011368347245315833,
+            "command_change_rms": 0.08814736268879161
+          },
+          "zero": {
+            "bc_command_mse": 0.0038989864219912598,
+            "command_change_rms": 0
+          }
+        },
+        "saved_bc_mse": 0.003898986615240574,
+        "solver_trace": [
+          {
+            "alpha": 0.12958388027883322,
+            "response": {
+              "bc_command_mse": 0.011368347245315833,
+              "command_change_rms": 0.08814736268879161
+            }
+          },
+          {
+            "alpha": 0.06479194013941661,
+            "response": {
+              "bc_command_mse": 0.005718920736599051,
+              "command_change_rms": 0.04444745706922659
+            }
+          }
+        ],
+        "target_rms": 0.062441864337888404
+      },
+      "source_and_Adam_unchanged": "passed",
+      "pairing": "passed",
+      "probe_diagnostics": {
+        "bounded": {
+          "episodes": 4,
+          "native_steps": 1200,
+          "mean_return": 194.7440385210347
+        },
+        "zero": {
+          "episodes": 4,
+          "native_steps": 1200,
+          "mean_return": 194.88224945147687
+        }
+      }
+    }
+  },
+  "performance_confirmation": "not_tested"
+}
