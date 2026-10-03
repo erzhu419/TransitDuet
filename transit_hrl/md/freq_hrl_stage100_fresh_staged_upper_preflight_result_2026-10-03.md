@@ -17,4 +17,6 @@ These one-root H300/two-update/four-evaluation-path diagnostics have no CI. Uppe
 
 Next: submit the already-frozen eight-root H1200 full protocol unchanged: 22,016 native episodes / 26,419,200 steps, 256 upper-mean updates, 32 final server-only checkpoints and the 28-contrast Bonferroni family. All four primary CI lower bounds must be positive for the global staged claim; no old-cohort pooling or donor selection.
 
+Full training was submitted as t128955-t128962 with qualifier t128963, dynamically eligible on node001-006; each training task requests 9 CPU / 8192 MB RAM. No further experiment was launched.
+
 Scope: mechanically validated teacher-initialized staged MC mean learning on native PointMaze, not a performance claim, full actor-critic or frequency-superiority proof.
