@@ -6,4 +6,6 @@ Native cost: 152 episodes / 45,600 steps, eight upper updates, six donor loads, 
 
 Short refined-minus-fixed-UJ diagnostics: at50 common +0.002156, independent +0.002301; at100 common +0.000826, independent +0.000514. One root, H300, two updates and four evaluation paths per composition do not establish performance improvement. Matched-upper specialization remains a separate diagnostic.
 
-Next: submit the unchanged preregistered eight-root H1200 full cohort, with eight updates and 32 final evaluation paths per composition. Require all four corrected same-lower refined-minus-fixed-UJ CI lower bounds to be positive. No parameter, donor or root selection from these short results; Stage100 negative contrasts and Stage67 HOLD remain recorded.
+Full protocol: the unchanged preregistered eight-root H1200 cohort, with eight updates and 32 final evaluation paths per composition. Require all four corrected same-lower refined-minus-fixed-UJ CI lower bounds to be positive. No parameter, donor or root selection from these short results; Stage100 negative contrasts and Stage67 HOLD remain recorded.
+
+Dispatch: after the frozen protocol/source, budget, qualification and duplicate gates passed, scheduler accepted `t129050-t129057` (eight roots; 9 CPU / 8 GB each) and `t129058` (all-root qualification; 1 CPU / 2 GB). Dynamic eligibility is node001-006 with no required node. Full results are pending.
