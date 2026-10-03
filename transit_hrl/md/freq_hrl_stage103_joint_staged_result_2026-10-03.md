@@ -11,7 +11,7 @@ The preregistered two-period joint-superiority claim is **not supported**. All18
 
 Exact cost:3072 native evaluations /3,686,400 steps,96 donor loads/freezes,16 matched-budget checks, zero training or checkpoint writes. Native wall84.58-98.26s/root. The42,094-byte compact pull retains all endpoints and per-root means/effects; raw evaluation rows and checkpoints remain server-only.
 
-Next: a paired-training comparison with identical actor-specific scenario/noise rosters, initialization, decoder and update budgets would isolate simultaneous versus staged updating. This is not yet implemented or dispatched.
+Follow-up: [Stage104](freq_hrl_stage104_paired_order_result_2026-10-03.md) implemented and completed paired training with identical actor-specific scenario/noise rosters, initialization, decoder and update budgets. Its two-period joint-superiority claim is also not supported; it remains a separate cohort.
 
 ## Scope
 The current recipes used different training rosters, so this is not an isolated update-order effect. The evidence is same-task teacher-initialized MC mean learning, not full actor-critic or frequency superiority. Stage102 is retained as a separate cohort; its positive at50 conditioning CI is not pooled with this inconclusive replication. Stage67 critic HOLD remains unchanged.

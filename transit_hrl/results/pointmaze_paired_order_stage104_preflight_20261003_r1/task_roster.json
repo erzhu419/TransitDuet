@@ -1,7 +1,7 @@
 {
   "run_name": "pointmaze_paired_order_stage104_preflight_20261003_r1",
   "protocol": "pointmaze_paired_order_stage104_v1",
-  "recorded_at_utc": "2026-10-03 11:39:13 UTC",
+  "recorded_at_utc": "2026-10-03 12:26:55 UTC",
   "code_revision": "03ec49cce976e65ae3d26ba3c222860bfc723a53",
   "preregistration_revision": "b0c68644faa106135e57ae658874534a365fffca",
   "source_evidence_revision": "4c49d5079f",
@@ -172,7 +172,7 @@
     "qualification_ram_mb": 2048
   },
   "full_run": "pointmaze_paired_order_stage104_full_20261003_r1",
-  "full_status": "submitted",
+  "full_status": "complete_paired_order_not_supported",
   "scientific_status": "native_mechanical_preflight_passed",
   "scope": "Four original-teacher learners with the same per-actor update rosters. Two joint rounds or two lower then two upper rounds. Native preflight checks source/std/phase freeze, exact cost and independent paired evaluation; no reward admission or donor selection. Both full primary periods remain frozen. Stage103 not-supported result and Stage67 critic HOLD preserved.",
   "artifacts": {
@@ -200,5 +200,47 @@
     "t130169",
     "t130170"
   ],
-  "full_submitted_at_utc": "2026-10-03 11:39:13 UTC"
+  "full_submitted_at_utc": "2026-10-03 11:39:13 UTC",
+  "full_completed_at_utc": "2026-10-03 12:17:09 UTC",
+  "full_result": {
+    "status": "complete",
+    "mechanical_gate": "passed",
+    "official_summary_reproduced": "passed",
+    "independent_root_bootstrap_reproduced": "passed",
+    "paired_order_confirmation": "not_supported",
+    "primary_endpoints": {
+      "50/joint_conditioned_minus_staged_common": {
+        "ci": [
+          0.00715010441883468,
+          0.023579465833761137
+        ],
+        "effect": "positive",
+        "mean": 0.016219134305092364,
+        "root_signs": {
+          "negative": 1,
+          "positive": 7,
+          "zero": 0
+        }
+      },
+      "100/joint_conditioned_minus_staged_common": {
+        "ci": [
+          -0.04150793860074309,
+          0.03734814096667409
+        ],
+        "effect": "inconclusive",
+        "mean": 0.004061922361176418,
+        "root_signs": {
+          "negative": 2,
+          "positive": 6,
+          "zero": 0
+        }
+      }
+    },
+    "family_effect_counts": {
+      "positive": 13,
+      "negative": 0,
+      "inconclusive": 5
+    },
+    "compact_summary": "../pointmaze_paired_order_stage104_full_20261003_r1/compact_summary.json"
+  }
 }
