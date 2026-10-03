@@ -7,4 +7,4 @@ Single-root, short-horizon primary reward differences are50:conditioned-minus-fo
 ## Scope
 The failed r1 native cleanup call is archived, its queued analyzer cancelled and full r1 never dispatched. The repaired r2 uses the same seeds, task, sample budget and endpoints; only cleanup now follows the existing task.environment.close() API. All7 focused tests passed after that repair. This remains teacher-assisted, fixed-std MC learning, not full actor-critic or from-scratch flat PPO.
 
-Next:run the already registered full eight-root r2 comparison unchanged, including negative effects. Four corrected positive primary CI lower bounds are required for the learned-plan increment claim.
+Full r2 dispatched unchanged:t131845-t131852 are running, two roots each on node001/004/005/006; node001-006 remain eligible with no hard pin. t131853 waits for all eight completion markers. Four corrected positive primary CI lower bounds are required for the learned-plan increment claim. Next:collect the compact all-root result and preserve negative effects; no performance conclusion is available yet.
