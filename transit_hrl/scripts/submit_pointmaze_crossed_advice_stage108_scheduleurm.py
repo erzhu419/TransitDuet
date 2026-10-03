@@ -7,6 +7,7 @@ from scripts.submit_pointmaze_call_weighted_stage87_scheduleurm import task_spec
 def task_specification(run_name, root, *, preflight):
     task = previous_task(run_name, root, preflight=preflight, protocol_spec=spec)
     task.update(cpu=3 if preflight else 5, ram_mb=3072 if preflight else 4096,
+        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/frozen_execution/{'preflight' if preflight else 'full'}",
         cpu_training_justification="Native evaluation workers only; all policy weights fixed; no checkpoint writes.")
     return task
 
