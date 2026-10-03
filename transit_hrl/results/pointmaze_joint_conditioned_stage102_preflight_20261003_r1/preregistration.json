@@ -1,0 +1,365 @@
+{
+  "run_name": "pointmaze_joint_conditioned_stage102_preflight_20261003_r1",
+  "protocol": "pointmaze_joint_conditioned_stage102_v1",
+  "preflight": true,
+  "source_revision": "53615e7675412f6a2f48dd304b79a6e4d282d543",
+  "upstream_revisions": {
+    "teacher": "b4a9750a4b1f42931db0b92e69a23348eeef0ec3",
+    "decoder": "afdfd9bf02fa917fc38bdac8aaa34cf04c838475"
+  },
+  "motivation_evidence_revision": "a90053a5cb",
+  "frozen_at_utc": "2026-10-03 08:12:45 UTC",
+  "contract": {
+    "source": "pointmaze_fresh_teachers_stage96_v1",
+    "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "base",
+      "zero",
+      "joint_independent",
+      "joint_conditioned",
+      "conditioned_upper_independent_lower",
+      "independent_upper_conditioned_lower"
+    ],
+    "methods": {
+      "50": {
+        "joint_independent": {
+          "upper": 0.5,
+          "lower": 0.99
+        },
+        "joint_conditioned": {
+          "upper": 0.5,
+          "lower": 0.99
+        }
+      },
+      "100": {
+        "joint_independent": {
+          "upper": 0.5,
+          "lower": 0.995
+        },
+        "joint_conditioned": {
+          "upper": 0.5,
+          "lower": 0.995
+        }
+      }
+    },
+    "training": "both_actor_means_from_original_Stage96_U0_L0_updated_simultaneously_eight_rounds_preflight_two",
+    "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+    "baseline": "upper_same_scenario_independent_upper_lower_noise_lower_same_scenario_independent_lower_noise_common_upper_innovations_only_in_conditioned_arm",
+    "sampling": "per_method_per_update64_upper_and64_lower_paths_preflight8_each_separate_registered_roles_before_either_actor_update",
+    "noise_mapping": "original_Stage80_mapping_fresh_Stage102_roles_upper_replay_only_lower_credit_never_upper_credit_or_evaluation",
+    "budget": "both_arms_equal_native_paths_and_call_weighted_KL_.001_per_update_extra_conditioned_lower_replay_reported_separately",
+    "freeze": "std_values_source_Adam_forecaster_decoder_original_Stage96_teachers_unchanged_no_trained_donor_reuse",
+    "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+    "statistics": "all20_reward_contrasts_equal_root_bootstrap65536_Bonferroni20_seed102_102102_no_stage_pooling",
+    "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+    "decision": "all_four_conditioned_minus_independent_and_original_teacher_primary_lower_CI_bounds_positive_preflight_mechanical_only",
+    "limits": "same_task_teacher_initialized_fixed_std_decoder_joint_MC_mean_learning_not_full_actor_critic_frequency_superiority_or_equal_prior_stage_compute",
+    "allocation": "upper_.0005_fixed_joint_call_lower_.001_minus_.0005_over_period_no_radius_or_allocation_search",
+    "diagnostics": "nominal_and_empirical_call_weighted_old_history_conditional_KL_per_round_actor_episode_and_decision_counts",
+    "source_cohort": "all_eight_Stage96_new_teachers_full_artifacts_even_in_preflight_no_old_weights",
+    "source_run": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+    "native_task": "same_environment_parameters_and_history_states_as_Stage88_new_optimizer_roots",
+    "replication": "joint_training_integration_not_unchanged_Stage98_99_101_replication",
+    "confirmation": "all_four_primary_CI_lower_bounds_strictly_positive_no_period_root_or_checkpoint_selection",
+    "compositions_upper_lower": {
+      "base": [
+        "source",
+        "source"
+      ],
+      "zero": [
+        "source",
+        "source"
+      ],
+      "joint_independent": [
+        "joint_independent",
+        "joint_independent"
+      ],
+      "joint_conditioned": [
+        "joint_conditioned",
+        "joint_conditioned"
+      ],
+      "conditioned_upper_independent_lower": [
+        "joint_conditioned",
+        "joint_independent"
+      ],
+      "independent_upper_conditioned_lower": [
+        "joint_independent",
+        "joint_conditioned"
+      ]
+    },
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_joint_independent",
+      "50/joint_conditioned_minus_base",
+      "100/joint_conditioned_minus_joint_independent",
+      "100/joint_conditioned_minus_base"
+    ]
+  },
+  "optimizer_roots": [
+    410011
+  ],
+  "options": {
+    "workers": 2,
+    "credit_scenarios_per_batch": 2,
+    "rollouts_per_scenario": 2,
+    "evaluation_episodes": 4,
+    "updates": 2
+  },
+  "arguments": {
+    "env_id": "PointMaze_UMaze-v3",
+    "iterations": 384,
+    "horizon": 300,
+    "checkpoint_evaluation_interval": 8,
+    "reference_hidden_dim": 128,
+    "learning_rate": 0.0003,
+    "upper_period_seconds": 0.5,
+    "history_seconds": 0.64,
+    "fast_period_seconds": 0.04,
+    "maximum_subgoal_delta": 0.75,
+    "branch_window_seconds": 0.5,
+    "max_events_per_class": 4,
+    "ridge_alpha_grid": [
+      0.01,
+      0.1,
+      1,
+      10,
+      100,
+      1000,
+      10000
+    ],
+    "threshold_quantile": 0.75,
+    "max_offset_steps": 25,
+    "check_stride_steps": 5,
+    "regime_dwell_seconds": [
+      0.8,
+      1.6
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ],
+    "optimizer_seed": 410011,
+    "preflight": true
+  },
+  "source_artifact_templates": {
+    "teacher_result": "pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_ROOT/result.json",
+    "clone_weights": "pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_ROOT_raw/clone_PERIOD_final.pt",
+    "forecaster": "pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_ROOT_raw/forecaster.npz",
+    "decoder": "pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_ROOT/result.json",
+    "trained_donor_reuse": false
+  },
+  "seed_encoding": {
+    "function": "spec.seed_roles(root,preflight=preflight)",
+    "base_by_root": {
+      "410011": 102000000
+    },
+    "round": "j in range(options.updates)",
+    "scenario": "i in range(options.credit_scenarios_per_batch)",
+    "actor_batch_offsets": {
+      "upper/A": 1,
+      "upper/B": 1001,
+      "lower/A": 4001,
+      "lower/B": 5001
+    },
+    "scenario_seed": "base + 10000*j + offset + i",
+    "noise_pair": "base + 10000*j + offset + 2001 + 2*i, base + 10000*j + offset + 2002 + 2*i",
+    "native_evaluation": "base + 95001 + i; i in range(options.evaluation_episodes)"
+  },
+  "methods": [
+    "joint_independent",
+    "joint_conditioned"
+  ],
+  "compositions": {
+    "base": [
+      "source",
+      "source"
+    ],
+    "zero": [
+      "source",
+      "source"
+    ],
+    "joint_independent": [
+      "joint_independent",
+      "joint_independent"
+    ],
+    "joint_conditioned": [
+      "joint_conditioned",
+      "joint_conditioned"
+    ],
+    "conditioned_upper_independent_lower": [
+      "joint_conditioned",
+      "joint_independent"
+    ],
+    "independent_upper_conditioned_lower": [
+      "joint_independent",
+      "joint_conditioned"
+    ]
+  },
+  "endpoints": [
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_conditioned_minus_base",
+    "50/joint_independent_minus_base",
+    "50/joint_conditioned_minus_zero",
+    "50/joint_independent_minus_zero",
+    "50/conditioned_upper_independent_lower_minus_joint_independent",
+    "50/independent_upper_conditioned_lower_minus_joint_independent",
+    "50/joint_conditioned_minus_independent_upper_conditioned_lower",
+    "50/joint_conditioned_minus_conditioned_upper_independent_lower",
+    "50/base_minus_zero",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_conditioned_minus_base",
+    "100/joint_independent_minus_base",
+    "100/joint_conditioned_minus_zero",
+    "100/joint_independent_minus_zero",
+    "100/conditioned_upper_independent_lower_minus_joint_independent",
+    "100/independent_upper_conditioned_lower_minus_joint_independent",
+    "100/joint_conditioned_minus_independent_upper_conditioned_lower",
+    "100/joint_conditioned_minus_conditioned_upper_independent_lower",
+    "100/base_minus_zero"
+  ],
+  "primary_endpoints": [
+    "50/joint_conditioned_minus_joint_independent",
+    "50/joint_conditioned_minus_base",
+    "100/joint_conditioned_minus_joint_independent",
+    "100/joint_conditioned_minus_base"
+  ],
+  "statistics": {
+    "family_size": 20,
+    "familywise_alpha": 0.05,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": [
+      102,
+      102102
+    ],
+    "method": "equal_root_percentile_bootstrap_Bonferroni20",
+    "decision": "all_four_conditioned_minus_independent_and_original_base_CI_lower_bounds_strictly_positive",
+    "crossed_actor_diagnostics_cannot_replace_primary": true,
+    "stage_pooling": false
+  },
+  "budget_per_root": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 4,
+    "credit_episodes": 128,
+    "evaluation_episodes": 48,
+    "native_episodes": 176,
+    "native_steps": 52800,
+    "native_lower_calls": 52800,
+    "native_upper_calls": 792,
+    "pairing_upper_forward_calls": 792,
+    "native_network_checks": 176,
+    "native_pair_checks": 8,
+    "scenario_pair_checks": 64,
+    "objective_checks": 128,
+    "mc_calls": 256,
+    "actor_score_forward_batches": 128,
+    "actor_score_backward_batches": 384,
+    "fisher_jvp_batches": 32,
+    "exact_kl_forward_batches": 64,
+    "actor_parameter_perturbations": 32,
+    "parameter_part_checks": 16,
+    "actor_mean_parameter_updates": 16,
+    "policy_updates": 8,
+    "training_freeze_checks": 8,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 0,
+    "upper_independent_pair_checks": 32,
+    "lower_independent_pair_checks": 16,
+    "lower_common_pair_checks": 16,
+    "actor_composition_checks": 12,
+    "upper_replay_forward_calls": 72
+  },
+  "budget_total": {
+    "source_clone_loads": 2,
+    "forecaster_loads": 1,
+    "decoder_loads": 2,
+    "training_models_initialized": 4,
+    "credit_episodes": 128,
+    "evaluation_episodes": 48,
+    "native_episodes": 176,
+    "native_steps": 52800,
+    "native_lower_calls": 52800,
+    "native_upper_calls": 792,
+    "pairing_upper_forward_calls": 792,
+    "native_network_checks": 176,
+    "native_pair_checks": 8,
+    "scenario_pair_checks": 64,
+    "objective_checks": 128,
+    "mc_calls": 256,
+    "actor_score_forward_batches": 128,
+    "actor_score_backward_batches": 384,
+    "fisher_jvp_batches": 32,
+    "exact_kl_forward_batches": 64,
+    "actor_parameter_perturbations": 32,
+    "parameter_part_checks": 16,
+    "actor_mean_parameter_updates": 16,
+    "policy_updates": 8,
+    "training_freeze_checks": 8,
+    "frozen_model_checks": 2,
+    "checkpoint_writes": 0,
+    "upper_independent_pair_checks": 32,
+    "lower_independent_pair_checks": 16,
+    "lower_common_pair_checks": 16,
+    "actor_composition_checks": 12,
+    "upper_replay_forward_calls": 72
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 3,
+    "ram_mb_per_task": 3072,
+    "qualification_cpu": 1,
+    "qualification_ram_mb": 2048
+  },
+  "artifacts": {
+    "pull": "completion_markers_and_compact_JSON_only",
+    "checkpoints": "final_inference_weights_server_only",
+    "raw_evaluation_rows": "server_only",
+    "native_trace_writes": 0
+  },
+  "motivation": {
+    "Stage99_lower_conditioning": "supported",
+    "Stage101_upper_refinement": "supported",
+    "Stage101_matched_upper_specialization": "not_supported",
+    "frequency_superiority": "closed",
+    "Stage67_critic_route": "HOLD",
+    "donor_or_root_selection": false
+  },
+  "local_verification": {
+    "focused_and_regression_cases": 11,
+    "test_wall_seconds": 86.652,
+    "strengthened_credit_routing_fixture_cases": 1,
+    "fixture_wall_seconds": 36.991,
+    "native_performance_evidence": false
+  },
+  "dispatch_gate": "mechanical native preflight only; no short-return admission or retuning",
+  "scientific_role": "joint integration of separately validated credit rules, original same-task teachers, fresh per-actor training and evaluation",
+  "budget_interpretation": "equal native paths/per-actor samples/call-weighted_KL within Stage102; conditioned replay extra; not equal prior-stage or trajectory KL"
+}
