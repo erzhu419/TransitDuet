@@ -9,7 +9,7 @@ All nine tasks t129115-t129123 finished with exit0. Server-side qualification an
 | 100/joint_conditioned_minus_joint_independent | +1.872106 | [0.854208, 2.830962] |
 | 100/joint_conditioned_minus_base | +8.068784 | [6.691109, 9.112286] |
 
-All four contrasts are positive on every one of eight original new-teacher roots. The unchanged equal-root bootstrap65,536 / Bonferroni20 family contains 14 positive, 4 negative and 2 inconclusive endpoints. No seed, period, checkpoint or short-return admission was used; preflight negatives remain recorded.
+The at50 conditioned-minus-independent contrast is positive on7/8 roots; the other three primaries are positive on8/8. The unchanged equal-root bootstrap65,536 / Bonferroni20 family contains 14 positive, 4 negative and 2 inconclusive endpoints. No seed, period, checkpoint or short-return admission was used; preflight negatives and the negative at50 root remain recorded.
 
 The conditioning advantage is lower-driven. Swapping conditioned lower into the independent joint upper gives +0.426612 / +1.878310 at50/100, versus total joint-route differences +0.425053 / +1.872106. On the same conditioned lower, conditioned upper loses to independent upper: -0.001559 CI [-0.002823,-0.000097] at50 and -0.006203 CI [-0.010292,-0.000923] at100. It also loses on the independent lower at both periods. Keep all four negative upper-swap contrasts; this is not positive upper/lower specialization evidence.
 
