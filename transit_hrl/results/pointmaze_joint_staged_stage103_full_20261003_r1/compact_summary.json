@@ -1,0 +1,1721 @@
+{
+  "donor_checkpoint_template": "SOURCE_RUN/cells/replicate_ROOT/final_weights/period_PERIOD_METHOD.pt",
+  "donors": {
+    "joint_conditioned": "joint",
+    "joint_independent": "joint",
+    "source_upper_common": "lower",
+    "source_upper_independent": "lower",
+    "staged_common": "upper",
+    "staged_independent": "upper"
+  },
+  "independent_root_bootstrap_reproduced": "passed",
+  "method_path_training_budgets": {
+    "50": {
+      "joint": {
+        "common_lower_extra_upper_replay_forwards": 6144,
+        "lower_credit_paths": 512,
+        "lower_cumulative_nominal_KL": 0.00792,
+        "lower_mean_updates": 8,
+        "native_episodes": 1024,
+        "upper_credit_paths": 512,
+        "upper_cumulative_nominal_KL": 0.004,
+        "upper_mean_updates": 8
+      },
+      "native_horizon": 1200,
+      "scope": "method_paths_only_preparation_campaign_and_evaluation_costs_separate_not_final_trajectory_KL",
+      "staged": {
+        "common_lower_extra_upper_replay_forwards": 6144,
+        "lower_credit_paths": 512,
+        "lower_cumulative_nominal_KL": 0.00792,
+        "lower_mean_updates": 8,
+        "native_episodes": 1024,
+        "upper_credit_paths": 512,
+        "upper_cumulative_nominal_KL": 0.004,
+        "upper_mean_updates": 8
+      },
+      "status": "matched"
+    },
+    "100": {
+      "joint": {
+        "common_lower_extra_upper_replay_forwards": 3072,
+        "lower_credit_paths": 512,
+        "lower_cumulative_nominal_KL": 0.00796,
+        "lower_mean_updates": 8,
+        "native_episodes": 1024,
+        "upper_credit_paths": 512,
+        "upper_cumulative_nominal_KL": 0.004,
+        "upper_mean_updates": 8
+      },
+      "native_horizon": 1200,
+      "scope": "method_paths_only_preparation_campaign_and_evaluation_costs_separate_not_final_trajectory_KL",
+      "staged": {
+        "common_lower_extra_upper_replay_forwards": 3072,
+        "lower_credit_paths": 512,
+        "lower_cumulative_nominal_KL": 0.00796,
+        "lower_mean_updates": 8,
+        "native_episodes": 1024,
+        "upper_credit_paths": 512,
+        "upper_cumulative_nominal_KL": 0.004,
+        "upper_mean_updates": 8
+      },
+      "status": "matched"
+    }
+  },
+  "official_summary_reproduced": "passed",
+  "pull_policy": "compact_JSON_only_no_raw_evaluation_or_checkpoints",
+  "read_only_requalification": "passed",
+  "recorded_at_utc": "2026-10-03 09:51:21 UTC",
+  "root_signs": {
+    "100/base_minus_zero": {
+      "negative": 8,
+      "positive": 0,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_joint_independent": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_conditioned_minus_staged_common": {
+      "negative": 3,
+      "positive": 5,
+      "zero": 0
+    },
+    "100/joint_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/joint_independent_minus_staged_independent": {
+      "negative": 1,
+      "positive": 7,
+      "zero": 0
+    },
+    "100/staged_common_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/staged_common_minus_staged_independent": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "100/staged_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/base_minus_zero": {
+      "negative": 8,
+      "positive": 0,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_joint_independent": {
+      "negative": 2,
+      "positive": 6,
+      "zero": 0
+    },
+    "50/joint_conditioned_minus_staged_common": {
+      "negative": 1,
+      "positive": 7,
+      "zero": 0
+    },
+    "50/joint_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/joint_independent_minus_staged_independent": {
+      "negative": 2,
+      "positive": 6,
+      "zero": 0
+    },
+    "50/staged_common_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/staged_common_minus_staged_independent": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    },
+    "50/staged_independent_minus_base": {
+      "negative": 0,
+      "positive": 8,
+      "zero": 0
+    }
+  },
+  "root_summaries": [
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02223361635696027,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.2623318047173768,
+            "50/joint_conditioned_minus_base": 6.025445991623691,
+            "50/joint_conditioned_minus_joint_independent": 0.020931591731383037,
+            "50/joint_conditioned_minus_staged_common": 0.2094141876201725,
+            "50/joint_independent_minus_base": 6.004514399892308,
+            "50/joint_independent_minus_staged_independent": 0.530469895559996,
+            "50/staged_common_minus_base": 5.816031804003519,
+            "50/staged_common_minus_staged_independent": 0.34198729967120656,
+            "50/staged_independent_minus_base": 5.474044504332312
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 955.4137745326882,
+            "joint_conditioned": 961.4392205243118,
+            "joint_independent": 961.4182889325805,
+            "staged_common": 961.2298063366917,
+            "staged_independent": 960.8878190370206,
+            "zero": 955.6761063374056
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.06479194013941661,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.37534416463718046,
+            "100/joint_conditioned_minus_base": 8.231885620641581,
+            "100/joint_conditioned_minus_joint_independent": 1.5006694739909534,
+            "100/joint_conditioned_minus_staged_common": -0.9045170085458594,
+            "100/joint_independent_minus_base": 6.7312161466506275,
+            "100/joint_independent_minus_staged_independent": 0.33015905004315016,
+            "100/staged_common_minus_base": 9.13640262918744,
+            "100/staged_common_minus_staged_independent": 2.735345532579963,
+            "100/staged_independent_minus_base": 6.401057096607477
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 860.867756305612,
+            "joint_conditioned": 869.0996419262538,
+            "joint_independent": 867.5989724522627,
+            "staged_common": 870.0041589347995,
+            "staged_independent": 867.2688134022196,
+            "zero": 861.2431004702494
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410011,
+      "seed_roles": {
+        "native_evaluation": [
+          103195001,
+          103195002,
+          103195003,
+          103195004,
+          103195005,
+          103195006,
+          103195007,
+          103195008,
+          103195009,
+          103195010,
+          103195011,
+          103195012,
+          103195013,
+          103195014,
+          103195015,
+          103195016,
+          103195017,
+          103195018,
+          103195019,
+          103195020,
+          103195021,
+          103195022,
+          103195023,
+          103195024,
+          103195025,
+          103195026,
+          103195027,
+          103195028,
+          103195029,
+          103195030,
+          103195031,
+          103195032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 98.26045637996867
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.022351753813630408,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.2461788591255747,
+            "50/joint_conditioned_minus_base": 5.942049806532832,
+            "50/joint_conditioned_minus_joint_independent": 1.2862649956435455,
+            "50/joint_conditioned_minus_staged_common": 0.9227406136192862,
+            "50/joint_independent_minus_base": 4.655784810889287,
+            "50/joint_independent_minus_staged_independent": -0.005386052039412448,
+            "50/staged_common_minus_base": 5.019309192913546,
+            "50/staged_common_minus_staged_independent": 0.35813832998484685,
+            "50/staged_independent_minus_base": 4.661170862928699
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 952.65857196003,
+            "joint_conditioned": 958.6006217665628,
+            "joint_independent": 957.3143567709192,
+            "staged_common": 957.6778811529435,
+            "staged_independent": 957.3197428229587,
+            "zero": 952.9047508191555
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.06210446874670576,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -1.2418586569767527,
+            "100/joint_conditioned_minus_base": 8.517651701657169,
+            "100/joint_conditioned_minus_joint_independent": 1.4826735695998003,
+            "100/joint_conditioned_minus_staged_common": 0.43974459800285004,
+            "100/joint_independent_minus_base": 7.034978132057368,
+            "100/joint_independent_minus_staged_independent": 2.4310151889554277,
+            "100/staged_common_minus_base": 8.077907103654319,
+            "100/staged_common_minus_staged_independent": 3.473944160552378,
+            "100/staged_independent_minus_base": 4.603962943101941
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 863.5319591748187,
+            "joint_conditioned": 872.0496108764759,
+            "joint_independent": 870.5669373068761,
+            "staged_common": 871.609866278473,
+            "staged_independent": 868.1359221179206,
+            "zero": 864.7738178317954
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410023,
+      "seed_roles": {
+        "native_evaluation": [
+          103295001,
+          103295002,
+          103295003,
+          103295004,
+          103295005,
+          103295006,
+          103295007,
+          103295008,
+          103295009,
+          103295010,
+          103295011,
+          103295012,
+          103295013,
+          103295014,
+          103295015,
+          103295016,
+          103295017,
+          103295018,
+          103295019,
+          103295020,
+          103295021,
+          103295022,
+          103295023,
+          103295024,
+          103295025,
+          103295026,
+          103295027,
+          103295028,
+          103295029,
+          103295030,
+          103295031,
+          103295032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 95.15255235508084
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02395786803098655,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.4983406679973328,
+            "50/joint_conditioned_minus_base": 5.324504907373747,
+            "50/joint_conditioned_minus_joint_independent": -0.2592218108868565,
+            "50/joint_conditioned_minus_staged_common": -0.08803990573332143,
+            "50/joint_independent_minus_base": 5.583726718260603,
+            "50/joint_independent_minus_staged_independent": 0.2979945997216902,
+            "50/staged_common_minus_base": 5.412544813107068,
+            "50/staged_common_minus_staged_independent": 0.12681269456815514,
+            "50/staged_independent_minus_base": 5.285732118538913
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 942.6060872629394,
+            "joint_conditioned": 947.930592170313,
+            "joint_independent": 948.1898139811999,
+            "staged_common": 948.0186320760464,
+            "staged_independent": 947.8918193814782,
+            "zero": 943.1044279309367
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.07654733862332655,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.3163295513108828,
+            "100/joint_conditioned_minus_base": 5.995920711256421,
+            "100/joint_conditioned_minus_joint_independent": 0.16794922480327656,
+            "100/joint_conditioned_minus_staged_common": -1.37015126218353,
+            "100/joint_independent_minus_base": 5.827971486453144,
+            "100/joint_independent_minus_staged_independent": 1.081258306330934,
+            "100/staged_common_minus_base": 7.366071973439951,
+            "100/staged_common_minus_staged_independent": 2.6193587933177405,
+            "100/staged_independent_minus_base": 4.74671318012221
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 858.5197188570238,
+            "joint_conditioned": 864.5156395682802,
+            "joint_independent": 864.347690343477,
+            "staged_common": 865.8857908304637,
+            "staged_independent": 863.266432037146,
+            "zero": 858.8360484083347
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410037,
+      "seed_roles": {
+        "native_evaluation": [
+          103395001,
+          103395002,
+          103395003,
+          103395004,
+          103395005,
+          103395006,
+          103395007,
+          103395008,
+          103395009,
+          103395010,
+          103395011,
+          103395012,
+          103395013,
+          103395014,
+          103395015,
+          103395016,
+          103395017,
+          103395018,
+          103395019,
+          103395020,
+          103395021,
+          103395022,
+          103395023,
+          103395024,
+          103395025,
+          103395026,
+          103395027,
+          103395028,
+          103395029,
+          103395030,
+          103395031,
+          103395032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 94.35860214475542
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02217537019677013,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.3631934666713157,
+            "50/joint_conditioned_minus_base": 4.158891758799172,
+            "50/joint_conditioned_minus_joint_independent": 0.5301605280001418,
+            "50/joint_conditioned_minus_staged_common": 0.04513218945207953,
+            "50/joint_independent_minus_base": 3.62873123079903,
+            "50/joint_independent_minus_staged_independent": -0.39157814477344033,
+            "50/staged_common_minus_base": 4.113759569347092,
+            "50/staged_common_minus_staged_independent": 0.09345019377462194,
+            "50/staged_independent_minus_base": 4.02030937557247
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 958.339335281422,
+            "joint_conditioned": 962.4982270402212,
+            "joint_independent": 961.968066512221,
+            "staged_common": 962.453094850769,
+            "staged_independent": 962.3596446569945,
+            "zero": 958.7025287480933
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.08818525442010713,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.8391792894657328,
+            "100/joint_conditioned_minus_base": 6.796028261689926,
+            "100/joint_conditioned_minus_joint_independent": 2.0524224463194045,
+            "100/joint_conditioned_minus_staged_common": -0.6144274042952844,
+            "100/joint_independent_minus_base": 4.743605815370522,
+            "100/joint_independent_minus_staged_independent": -1.3738045860895092,
+            "100/staged_common_minus_base": 7.410455665985211,
+            "100/staged_common_minus_staged_independent": 1.2930452645251798,
+            "100/staged_independent_minus_base": 6.117410401460031
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 868.7932408376439,
+            "joint_conditioned": 875.5892690993339,
+            "joint_independent": 873.5368466530144,
+            "staged_common": 876.2036965036291,
+            "staged_independent": 874.910651239104,
+            "zero": 869.6324201271098
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410049,
+      "seed_roles": {
+        "native_evaluation": [
+          103495001,
+          103495002,
+          103495003,
+          103495004,
+          103495005,
+          103495006,
+          103495007,
+          103495008,
+          103495009,
+          103495010,
+          103495011,
+          103495012,
+          103495013,
+          103495014,
+          103495015,
+          103495016,
+          103495017,
+          103495018,
+          103495019,
+          103495020,
+          103495021,
+          103495022,
+          103495023,
+          103495024,
+          103495025,
+          103495026,
+          103495027,
+          103495028,
+          103495029,
+          103495030,
+          103495031,
+          103495032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 85.60724892420694
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.024605351832117577,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.26866026132538323,
+            "50/joint_conditioned_minus_base": 5.366152643354383,
+            "50/joint_conditioned_minus_joint_independent": 0.3608850851586993,
+            "50/joint_conditioned_minus_staged_common": 0.5908626708766995,
+            "50/joint_independent_minus_base": 5.005267558195683,
+            "50/joint_independent_minus_staged_independent": 1.2111057657220776,
+            "50/staged_common_minus_base": 4.775289972477683,
+            "50/staged_common_minus_staged_independent": 0.9811281800040774,
+            "50/staged_independent_minus_base": 3.7941617924736057
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 956.3750917704824,
+            "joint_conditioned": 961.7412444138367,
+            "joint_independent": 961.3803593286781,
+            "staged_common": 961.15038174296,
+            "staged_independent": 960.1692535629561,
+            "zero": 956.6437520318077
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.07441876168779928,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.5935854593799661,
+            "100/joint_conditioned_minus_base": 7.319429073421784,
+            "100/joint_conditioned_minus_joint_independent": 2.016002800174199,
+            "100/joint_conditioned_minus_staged_common": 0.9681797890157995,
+            "100/joint_independent_minus_base": 5.3034262732475845,
+            "100/joint_independent_minus_staged_independent": 0.023675167771514793,
+            "100/staged_common_minus_base": 6.351249284405984,
+            "100/staged_common_minus_staged_independent": 1.0714981789299145,
+            "100/staged_independent_minus_base": 5.27975110547607
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 865.173152069335,
+            "joint_conditioned": 872.4925811427568,
+            "joint_independent": 870.4765783425826,
+            "staged_common": 871.5244013537408,
+            "staged_independent": 870.452903174811,
+            "zero": 865.7667375287149
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410061,
+      "seed_roles": {
+        "native_evaluation": [
+          103595001,
+          103595002,
+          103595003,
+          103595004,
+          103595005,
+          103595006,
+          103595007,
+          103595008,
+          103595009,
+          103595010,
+          103595011,
+          103595012,
+          103595013,
+          103595014,
+          103595015,
+          103595016,
+          103595017,
+          103595018,
+          103595019,
+          103595020,
+          103595021,
+          103595022,
+          103595023,
+          103595024,
+          103595025,
+          103595026,
+          103595027,
+          103595028,
+          103595029,
+          103595030,
+          103595031,
+          103595032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 97.35002470389009
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.021404079396591294,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.27264862944173274,
+            "50/joint_conditioned_minus_base": 5.468346823007909,
+            "50/joint_conditioned_minus_joint_independent": 0.6453468071466943,
+            "50/joint_conditioned_minus_staged_common": 0.07613603416326598,
+            "50/joint_independent_minus_base": 4.823000015861215,
+            "50/joint_independent_minus_staged_independent": 0.19006076014491669,
+            "50/staged_common_minus_base": 5.392210788844643,
+            "50/staged_common_minus_staged_independent": 0.759271533128345,
+            "50/staged_independent_minus_base": 4.632939255716298
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 955.1756292489151,
+            "joint_conditioned": 960.643976071923,
+            "joint_independent": 959.9986292647762,
+            "staged_common": 960.5678400377597,
+            "staged_independent": 959.8085685046312,
+            "zero": 955.4482778783567
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.07141325623479021,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.11114238754338857,
+            "100/joint_conditioned_minus_base": 9.106794117737753,
+            "100/joint_conditioned_minus_joint_independent": 1.5155388437366746,
+            "100/joint_conditioned_minus_staged_common": 0.09137457140953842,
+            "100/joint_independent_minus_base": 7.591255274001078,
+            "100/joint_independent_minus_staged_independent": 0.3755055972523529,
+            "100/staged_common_minus_base": 9.015419546328214,
+            "100/staged_common_minus_staged_independent": 1.799669869579489,
+            "100/staged_independent_minus_base": 7.215749676748725
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 859.6682848267096,
+            "joint_conditioned": 868.7750789444474,
+            "joint_independent": 867.2595401007106,
+            "staged_common": 868.6837043730379,
+            "staged_independent": 866.8840345034582,
+            "zero": 859.779427214253
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410073,
+      "seed_roles": {
+        "native_evaluation": [
+          103695001,
+          103695002,
+          103695003,
+          103695004,
+          103695005,
+          103695006,
+          103695007,
+          103695008,
+          103695009,
+          103695010,
+          103695011,
+          103695012,
+          103695013,
+          103695014,
+          103695015,
+          103695016,
+          103695017,
+          103695018,
+          103695019,
+          103695020,
+          103695021,
+          103695022,
+          103695023,
+          103695024,
+          103695025,
+          103695026,
+          103695027,
+          103695028,
+          103695029,
+          103695030,
+          103695031,
+          103695032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 94.46838846476749
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02344465859782292,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.3218210814291709,
+            "50/joint_conditioned_minus_base": 5.726321414190359,
+            "50/joint_conditioned_minus_joint_independent": 1.1955717979411595,
+            "50/joint_conditioned_minus_staged_common": 0.6208856720146407,
+            "50/joint_independent_minus_base": 4.530749616249199,
+            "50/joint_independent_minus_staged_independent": 0.06395223705229824,
+            "50/staged_common_minus_base": 5.105435742175718,
+            "50/staged_common_minus_staged_independent": 0.638638362978817,
+            "50/staged_independent_minus_base": 4.466797379196901
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 967.5814091844877,
+            "joint_conditioned": 973.3077305986781,
+            "joint_independent": 972.1121588007368,
+            "staged_common": 972.6868449266634,
+            "staged_independent": 972.0482065636846,
+            "zero": 967.9032302659168
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.09705902058915798,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -1.3137338671595806,
+            "100/joint_conditioned_minus_base": 10.048838694425342,
+            "100/joint_conditioned_minus_joint_independent": 3.864568078949045,
+            "100/joint_conditioned_minus_staged_common": 1.6517703105823607,
+            "100/joint_independent_minus_base": 6.184270615476297,
+            "100/joint_independent_minus_staged_independent": 2.173803679226804,
+            "100/staged_common_minus_base": 8.397068383842981,
+            "100/staged_common_minus_staged_independent": 4.386601447593488,
+            "100/staged_independent_minus_base": 4.010466936249493
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 866.9673805546147,
+            "joint_conditioned": 877.01621924904,
+            "joint_independent": 873.1516511700911,
+            "staged_common": 875.3644489384576,
+            "staged_independent": 870.9778474908642,
+            "zero": 868.2811144217743
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410089,
+      "seed_roles": {
+        "native_evaluation": [
+          103795001,
+          103795002,
+          103795003,
+          103795004,
+          103795005,
+          103795006,
+          103795007,
+          103795008,
+          103795009,
+          103795010,
+          103795011,
+          103795012,
+          103795013,
+          103795014,
+          103795015,
+          103795016,
+          103795017,
+          103795018,
+          103795019,
+          103795020,
+          103795021,
+          103795022,
+          103795023,
+          103795024,
+          103795025,
+          103795026,
+          103795027,
+          103795028,
+          103795029,
+          103795030,
+          103795031,
+          103795032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 94.16068359417841
+    },
+    {
+      "cost": {
+        "actor_composition_checks": 12,
+        "actor_mean_parameter_updates": 0,
+        "actor_parameter_perturbations": 0,
+        "actor_score_backward_batches": 0,
+        "actor_score_forward_batches": 0,
+        "checkpoint_freeze_checks": 12,
+        "checkpoint_loads": 12,
+        "checkpoint_writes": 0,
+        "credit_episodes": 0,
+        "decoder_loads": 2,
+        "evaluation_episodes": 384,
+        "exact_kl_forward_batches": 0,
+        "fisher_jvp_batches": 0,
+        "forecaster_loads": 1,
+        "frozen_model_checks": 2,
+        "matched_training_budget_checks": 2,
+        "mc_calls": 0,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_checks": 64,
+        "native_steps": 460800,
+        "native_upper_calls": 6912,
+        "objective_checks": 0,
+        "pairing_upper_forward_calls": 6912,
+        "parameter_part_checks": 0,
+        "policy_updates": 0,
+        "scenario_pair_checks": 0,
+        "source_clone_loads": 2,
+        "training_freeze_checks": 0,
+        "training_models_initialized": 0,
+        "upper_replay_forward_calls": 0
+      },
+      "critic_fits": 0,
+      "forecaster_fits": 0,
+      "groups": {
+        "50": {
+          "alpha": 0.02338653531278691,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "50/base_minus_zero": -0.40203149226069357,
+            "50/joint_conditioned_minus_base": 4.9166333969670895,
+            "50/joint_conditioned_minus_joint_independent": -0.13695520159128804,
+            "50/joint_conditioned_minus_staged_common": 0.16237104613180264,
+            "50/joint_independent_minus_base": 5.0535885985583775,
+            "50/joint_independent_minus_staged_independent": 0.7290761031041768,
+            "50/staged_common_minus_base": 4.754262350835287,
+            "50/staged_common_minus_staged_independent": 0.4297498553810861,
+            "50/staged_independent_minus_base": 4.324512495454201
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 963.9317756017633,
+            "joint_conditioned": 968.8484089987305,
+            "joint_independent": 968.9853642003218,
+            "staged_common": 968.6860379525986,
+            "staged_independent": 968.2562880972175,
+            "zero": 964.333807094024
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        },
+        "100": {
+          "alpha": 0.06638043587269819,
+          "checkpoint_freeze": "passed",
+          "composition": "passed",
+          "effects": {
+            "100/base_minus_zero": -0.679935210762384,
+            "100/joint_conditioned_minus_base": 7.633528837432156,
+            "100/joint_conditioned_minus_joint_independent": 1.007828249973862,
+            "100/joint_conditioned_minus_staged_common": 0.7726400081340294,
+            "100/joint_independent_minus_base": 6.625700587458294,
+            "100/joint_independent_minus_staged_independent": 0.2504000603450862,
+            "100/staged_common_minus_base": 6.860888829298126,
+            "100/staged_common_minus_staged_independent": 0.4855883021849188,
+            "100/staged_independent_minus_base": 6.3753005271132075
+          },
+          "evaluation_counts": {
+            "base": 32,
+            "joint_conditioned": 32,
+            "joint_independent": 32,
+            "staged_common": 32,
+            "staged_independent": 32,
+            "zero": 32
+          },
+          "evaluation_mean_returns": {
+            "base": 872.746840886141,
+            "joint_conditioned": 880.380369723573,
+            "joint_independent": 879.3725414735993,
+            "staged_common": 879.6077297154391,
+            "staged_independent": 879.1221414132541,
+            "zero": 873.4267760969033
+          },
+          "matched_training_budget": "passed",
+          "pairing": "passed",
+          "registered_donor_paths": "passed",
+          "scenario_pairing": "passed",
+          "source_and_Adam_unchanged": "passed"
+        }
+      },
+      "native_planning_cost": {
+        "actor_context_evaluations": 460800,
+        "plan_ols_fits": 6528,
+        "plan_ridge_predictions": 6528,
+        "reference_evaluations": 460800
+      },
+      "native_trace_writes": 0,
+      "optimizer_steps": 0,
+      "root": 410101,
+      "seed_roles": {
+        "native_evaluation": [
+          103895001,
+          103895002,
+          103895003,
+          103895004,
+          103895005,
+          103895006,
+          103895007,
+          103895008,
+          103895009,
+          103895010,
+          103895011,
+          103895012,
+          103895013,
+          103895014,
+          103895015,
+          103895016,
+          103895017,
+          103895018,
+          103895019,
+          103895020,
+          103895021,
+          103895022,
+          103895023,
+          103895024,
+          103895025,
+          103895026,
+          103895027,
+          103895028,
+          103895029,
+          103895030,
+          103895031,
+          103895032
+        ],
+        "training_rounds": []
+      },
+      "source_initialization_check": "passed",
+      "wall_seconds": 84.58427342865616
+    }
+  ],
+  "run_name": "pointmaze_joint_staged_stage103_full_20261003_r1",
+  "summary": {
+    "contract": {
+      "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+      "budget": "equal_method_path_actor_samples_updates_common_lower_replay_and_cumulative_nominal_call_weighted_KL_not_equal_historical_campaign",
+      "compositions_upper_lower": {
+        "base": [
+          "source",
+          "source"
+        ],
+        "joint_conditioned": [
+          "joint_conditioned",
+          "joint_conditioned"
+        ],
+        "joint_independent": [
+          "joint_independent",
+          "joint_independent"
+        ],
+        "staged_common": [
+          "staged_common",
+          "source_upper_common"
+        ],
+        "staged_independent": [
+          "staged_independent",
+          "source_upper_independent"
+        ],
+        "zero": [
+          "source",
+          "source"
+        ]
+      },
+      "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+      "decision": "both_joint_conditioned_minus_staged_common_primary_corrected_CI_lower_bounds_positive_preflight_mechanical_only",
+      "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+      "evaluation": "fixed_final_donors_no_checkpoint_root_period_selection_or_recalibration",
+      "limits": "different_registered_training_rosters_paired_fresh_evaluation_recipe_comparison_not_isolated_update_order_causality_full_actor_critic_frequency_or_unseen_task_proof",
+      "methods": {},
+      "periods": [
+        50,
+        100
+      ],
+      "primary_endpoints": [
+        "50/joint_conditioned_minus_staged_common",
+        "100/joint_conditioned_minus_staged_common"
+      ],
+      "registered_final_donors": {
+        "joint_conditioned": "joint",
+        "joint_independent": "joint",
+        "source_upper_common": "lower",
+        "source_upper_independent": "lower",
+        "staged_common": "upper",
+        "staged_independent": "upper"
+      },
+      "sampling": "fresh_paired_Stage103_rollouts_original_independent_upper_lower_noise_all_six_policies",
+      "source": "pointmaze_fresh_teachers_stage96_v1",
+      "source_runs": {
+        "joint": "pointmaze_joint_conditioned_stage102_full_20261003_r1",
+        "lower": "pointmaze_fresh_lower_stage99_full_20261003_r1",
+        "upper": "pointmaze_fresh_staged_upper_stage100_full_20261003_r1"
+      },
+      "statistics": "all18_reward_contrasts_equal_root_bootstrap65536_Bonferroni18_seed103_103103",
+      "training": "none_frozen_full_Stage102_joint_Stage99_U0_lower_and_Stage100_U0_upper_only_no_Stage101_UJ_refinement",
+      "variants": [
+        "base",
+        "zero",
+        "joint_independent",
+        "joint_conditioned",
+        "staged_independent",
+        "staged_common"
+      ]
+    },
+    "cost": {
+      "actor_composition_checks": 96,
+      "actor_mean_parameter_updates": 0,
+      "actor_parameter_perturbations": 0,
+      "actor_score_backward_batches": 0,
+      "actor_score_forward_batches": 0,
+      "checkpoint_freeze_checks": 96,
+      "checkpoint_loads": 96,
+      "checkpoint_writes": 0,
+      "credit_episodes": 0,
+      "decoder_loads": 16,
+      "evaluation_episodes": 3072,
+      "exact_kl_forward_batches": 0,
+      "fisher_jvp_batches": 0,
+      "forecaster_loads": 8,
+      "frozen_model_checks": 16,
+      "matched_training_budget_checks": 16,
+      "mc_calls": 0,
+      "native_episodes": 3072,
+      "native_lower_calls": 3686400,
+      "native_network_checks": 3072,
+      "native_pair_checks": 512,
+      "native_steps": 3686400,
+      "native_upper_calls": 55296,
+      "objective_checks": 0,
+      "pairing_upper_forward_calls": 55296,
+      "parameter_part_checks": 0,
+      "policy_updates": 0,
+      "scenario_pair_checks": 0,
+      "source_clone_loads": 16,
+      "training_freeze_checks": 0,
+      "training_models_initialized": 0,
+      "upper_replay_forward_calls": 0
+    },
+    "endpoints": {
+      "100/base_minus_zero": {
+        "ci": [
+          -1.1117702029210554,
+          -0.29384584002806635
+        ],
+        "effect": "negative",
+        "mean": -0.6838885734044835
+      },
+      "100/joint_conditioned_minus_base": {
+        "ci": [
+          6.736199833341695,
+          9.210651881896252
+        ],
+        "effect": "positive",
+        "mean": 7.9562596272827655
+      },
+      "100/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          0.7764215388314089,
+          2.824274361988542
+        ],
+        "effect": "positive",
+        "mean": 1.700956585943402
+      },
+      "100/joint_conditioned_minus_staged_common": {
+        "ci": [
+          -0.8458598045715955,
+          1.1095868905061987
+        ],
+        "effect": "inconclusive",
+        "mean": 0.12932670026498805
+      },
+      "100/joint_independent_minus_base": {
+        "ci": [
+          5.32434604247072,
+          7.11496503511498
+        ],
+        "effect": "positive",
+        "mean": 6.255303041339364
+      },
+      "100/joint_independent_minus_staged_independent": {
+        "ci": [
+          -0.521795034609612,
+          1.8471665951963527
+        ],
+        "effect": "inconclusive",
+        "mean": 0.6615015579794701
+      },
+      "100/staged_common_minus_base": {
+        "ci": [
+          6.885049177275825,
+          8.773224432738118
+        ],
+        "effect": "positive",
+        "mean": 7.826932927017778
+      },
+      "100/staged_common_minus_staged_independent": {
+        "ci": [
+          1.0615501375784835,
+          3.5362151943484825
+        ],
+        "effect": "positive",
+        "mean": 2.233131443657884
+      },
+      "100/staged_independent_minus_base": {
+        "ci": [
+          4.549927210853079,
+          6.629564729706461
+        ],
+        "effect": "positive",
+        "mean": 5.593801483359894
+      },
+      "50/base_minus_zero": {
+        "ci": [
+          -0.42348374998526656,
+          -0.26066802167175324
+        ],
+        "effect": "negative",
+        "mean": -0.32940078287107255
+      },
+      "50/joint_conditioned_minus_base": {
+        "ci": [
+          4.695920361283207,
+          5.852622688597758
+        ],
+        "effect": "positive",
+        "mean": 5.366043342731148
+      },
+      "50/joint_conditioned_minus_joint_independent": {
+        "ci": [
+          -0.06082905681615669,
+          1.0253102471668223
+        ],
+        "effect": "inconclusive",
+        "mean": 0.45537297414293487
+      },
+      "50/joint_conditioned_minus_staged_common": {
+        "ci": [
+          0.02148720989315267,
+          0.6775626064986495
+        ],
+        "effect": "positive",
+        "mean": 0.3174378135180782
+      },
+      "50/joint_independent_minus_base": {
+        "ci": [
+          4.181644115549556,
+          5.589278634142785
+        ],
+        "effect": "positive",
+        "mean": 4.910670368588213
+      },
+      "50/joint_independent_minus_staged_independent": {
+        "ci": [
+          -0.12255687625102922,
+          0.8311187676009248
+        ],
+        "effect": "inconclusive",
+        "mean": 0.32821189556153785
+      },
+      "50/staged_common_minus_base": {
+        "ci": [
+          4.518527186152431,
+          5.526745222164683
+        ],
+        "effect": "positive",
+        "mean": 5.04860552921307
+      },
+      "50/staged_common_minus_staged_independent": {
+        "ci": [
+          0.20105163161477252,
+          0.7788679964548666
+        ],
+        "effect": "positive",
+        "mean": 0.4661470561863945
+      },
+      "50/staged_independent_minus_base": {
+        "ci": [
+          4.065413426893843,
+          5.16961199928161
+        ],
+        "effect": "positive",
+        "mean": 4.582458473026675
+      }
+    },
+    "joint_recipe_confirmation": "not_supported",
+    "mechanical_gate": "passed",
+    "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+    "performance_claim": "matched_method_path_joint_vs_staged_frozen_policy_comparison_not_update_order_causality_or_frequency_superiority",
+    "primary_endpoints": [
+      "50/joint_conditioned_minus_staged_common",
+      "100/joint_conditioned_minus_staged_common"
+    ],
+    "protocol": "pointmaze_joint_staged_stage103_v1",
+    "run_name": "pointmaze_joint_staged_stage103_full_20261003_r1",
+    "status": "complete"
+  }
+}

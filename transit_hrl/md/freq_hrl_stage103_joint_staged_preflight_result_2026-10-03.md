@@ -9,4 +9,6 @@ t130042/t130043 both finished on node001 with exit0. Server-only source-cell req
 ## Scope
 This compares matched method-path training recipes with different registered training rosters, not isolated update-order causality or equal historical campaign compute. It does not reopen frequency-superiority or Stage67 critic claims. Only compact JSON and completion metadata were retrieved.
 
-Full dispatch: t130084-t130091 are the eight root evaluations; t130092 is the dependent qualifier. All were queued at the 2026-10-03 09:31:56 UTC snapshot, eligible for dynamic node001-006 placement. Evaluation tasks request9 CPU /8 GB each; qualifier1 CPU /2 GB. Source code0283d61d99, preregistration08b7ca2ee0 and preflight evidencefe202c680c are fixed. Full performance is pending.
+Full dispatch: t130084-t130091 are the eight root evaluations; t130092 is the dependent qualifier. All were queued at the 2026-10-03 09:31:56 UTC snapshot, eligible for dynamic node001-006 placement. Evaluation tasks request9 CPU /8 GB each; qualifier1 CPU /2 GB. Source code0283d61d99, preregistration08b7ca2ee0 and preflight evidencefe202c680c are fixed. Full performance was pending at dispatch.
+
+Full result: all nine tasks finished with exit0; the two-period joint-superiority claim was not supported. See [the full result](freq_hrl_stage103_joint_staged_result_2026-10-03.md) and the archived compact summary.
