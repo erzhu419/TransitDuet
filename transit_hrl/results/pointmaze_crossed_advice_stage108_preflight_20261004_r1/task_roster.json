@@ -1,0 +1,42 @@
+{
+  "run_name": "pointmaze_crossed_advice_stage108_preflight_20261004_r1",
+  "protocol": "pointmaze_crossed_advice_stage108_v1",
+  "status": "complete",
+  "mechanical_gate": "passed",
+  "source_revision": "33264dd5b3caf8dfcbed5e090d3063a88f720755",
+  "preregistration_revision": "c4140ed405",
+  "tasks": [
+    {
+      "id": "t134477",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "signature": "Freq-HRL/pointmaze_crossed_advice_stage108_v1/pointmaze_crossed_advice_stage108_preflight_20261004_r1/fixed_lower_crossed_learned_forecast_noise_blind/410011",
+      "submitted_at": 1791070686.726597,
+      "started_at": 1791070808.5462053,
+      "finished_at": 1791071123.9696445,
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "log_path": "/tmp/sched_t134477.log",
+      "sampled_peak_ram_mb": null,
+      "ram_measurement": "unmeasured"
+    },
+    {
+      "id": "t134478",
+      "status": "done",
+      "node": "node002",
+      "exit_code": 0,
+      "signature": "Freq-HRL/pointmaze_crossed_advice_stage108_v1/pointmaze_crossed_advice_stage108_preflight_20261004_r1/qualification",
+      "submitted_at": 1791070686.7713223,
+      "started_at": 1791071175.8724585,
+      "finished_at": 1791071280.111407,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "log_path": "/tmp/sched_t134478.log",
+      "sampled_peak_ram_mb": null,
+      "ram_measurement": "unmeasured"
+    }
+  ],
+  "reward_admission": false,
+  "next_run": "pointmaze_crossed_advice_stage108_full_20261004_r1"
+}

@@ -9,3 +9,5 @@ Fresh32 paired paths per period,8 fixed policies,20 reward contrasts in one equa
 Full budget:4,096 native episodes/4,915,200 steps,36,864 upper calls;zero learning,critic fitting,checkpoint or raw-trace writes. Source preparation and Stage106/107 training remain separate inherited costs. Scheduler is dynamic node001-006,pref3CPU/3GiB,full5CPU/4GiB with4 workers per root. Pull compact JSON only.
 
 This is a fixed-donor plan-content diagnostic,not a new trained HRL algorithm or frequency-superiority result. If the learned residual has no confirmed benefit over forecast/noise,stop treating these upper donors as a demonstrated positive hierarchy contribution;retain all prior negative and HOLD evidence.
+
+Native preflight passed: [result](freq_hrl_stage108_crossed_advice_preflight_2026-10-04.md). The full protocol remains unchanged; admission is mechanical only.
