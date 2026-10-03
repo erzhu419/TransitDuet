@@ -72,17 +72,26 @@ def final_checkpoint(model, output, *, root, period, method, updates, protocol=s
     return str(path)
 
 
-def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None,
-        training_pair_worker=None, scenario_pair_check=None):
-    spec = protocol
-    qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
-    scenario_pair_check = scenario_pair_check or parts.scenario.check_scenario_pair
-    source = json.loads(spec.source_result(root).read_text())
+def load_source(root, *, protocol=spec):
+    source = json.loads(protocol.source_result(root).read_text())
     decoder_spec = parts.scenario.spec.source.source
     if (source["status"],source["protocol"],source["root"],source["preflight"],source["contract"]) != (
             "complete",decoder_spec.EXPERIMENT_PROTOCOL,root,False,decoder_spec.contract()):
         raise ValueError("MC training requires the frozen full Stage78 decoder")
     clones,predictor,initialization = native.curves.support.native.load_source(root,preflight=False)
+    calibrations = {str(p): source["groups"][str(p)]["calibration"] for p in protocol.PERIODS}
+    for calibration in calibrations.values():
+        native.bounded.check_calibration(calibration)
+    return clones, predictor, initialization, calibrations
+
+
+def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None,
+        training_pair_worker=None, scenario_pair_check=None, source_loader=None):
+    spec = protocol
+    qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
+    scenario_pair_check = scenario_pair_check or parts.scenario.check_scenario_pair
+    source_loader = source_loader or (lambda r: load_source(r, protocol=protocol))
+    clones,predictor,initialization,calibrations = source_loader(root)
     args,roles,o = spec.arguments(root,preflight=preflight),spec.seed_roles(root,preflight=preflight),spec.options(preflight=preflight)
     cost,groups,started = dict.fromkeys(spec.budget(preflight=preflight),0),{},time.monotonic()
     cost.update(source_clone_loads=len(clones),forecaster_loads=1,decoder_loads=len(clones))
@@ -92,8 +101,7 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
         for period in spec.PERIODS:
             original = clones[str(period)]
             snapshot = copy.deepcopy(original.state_dict())
-            calibration = source["groups"][str(period)]["calibration"]
-            native.bounded.check_calibration(calibration)
+            calibration = calibrations[str(period)]
             alpha,envelope = calibration["alpha"],calibration["envelope"]
 
             def episodes(weights,roster,variant,collect=False):
