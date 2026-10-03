@@ -12,7 +12,7 @@ All four registered primary contrasts have positive corrected CI lower bounds an
 | 100/staged_common_minus_source_common | 0.582006 | [0.415282, 0.762972] |
 | 100/staged_common_minus_staged_independent | 2.161257 | [1.059829, 3.884574] |
 
-The unchanged 65,536-draw equal-root bootstrap / Bonferroni28 family contains 14 positive, 7 negative and 7 endpoints. No old-cohort results were pooled.
+The unchanged 65,536-draw equal-root bootstrap / Bonferroni28 family contains 14 positive, 7 negative and 7 inconclusive endpoints. No old-cohort results were pooled.
 
 ## Claim Boundary
 Both newly learned uppers improve over their respective U0/fixed-lower compositions. Most common-route superiority is inherited lower contribution: source-common minus source-independent is +0.430134 / +2.224272 at periods50/100, compared with total staged-route gains +0.418844 / +2.161257.
