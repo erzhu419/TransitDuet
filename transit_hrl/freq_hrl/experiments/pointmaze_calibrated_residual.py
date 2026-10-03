@@ -49,8 +49,8 @@ class CalibratedPlan(paths.PathFactorPlan):
         return velocity
 
 
-def historical_curves(raw, model, predictor, args, root, seed, period, bounds):
-    torch.manual_seed(spec.source.counterfactual_seed(root, seed, period))
+def historical_curves(raw, model, predictor, args, root, seed, period, bounds, *, proposal_seed=None):
+    torch.manual_seed(spec.source.counterfactual_seed(root, seed, period) if proposal_seed is None else proposal_seed)
     std = model.upper_actor.log_std.detach().exp().clamp(1e-4, 3.)
     actions = torch.distributions.Normal(torch.zeros(args.horizon // period, 4), std).sample().numpy()
     plan = support.learned.ResidualPlan(predictor, period, args.maximum_subgoal_delta)
@@ -81,13 +81,17 @@ def response(command, base_command, target):
         "command_change_rms": float(np.sqrt(np.square(command.astype(np.float64) - base_command).mean()))}
 
 
-def prepare_calibration(root, period, *, model, predictor, args, roles, bounds, saved_bc_mse, cost, preflight):
+def prepare_calibration(root, period, *, model, predictor, args, roles, bounds, saved_bc_mse, cost, preflight,
+        label_archive=None, proposal_seed=None):
     cache = []
     for seed in roles["calibration_labels"]:
-        with np.load(spec.source.label_archive(root, period, seed, preflight=preflight)) as a:
+        path = (spec.source.label_archive(root, period, seed, preflight=preflight) if label_archive is None
+            else label_archive(root, period, seed))
+        with np.load(path) as a:
             raw = {k: a[k] for k in support.RAW_KEYS}
         states = support.label_states(raw, args)
-        base, original, n = historical_curves(raw, model, predictor, args, root, seed, period, bounds)
+        base, original, n = historical_curves(raw, model, predictor, args, root, seed, period, bounds,
+            proposal_seed=None if proposal_seed is None else proposal_seed(root, seed, period))
         np.testing.assert_array_equal(curve_states(states, raw["achieved_before"], base), states)
         base_command = commands(model.lower_actor, states)
         original_command = commands(model.lower_actor, curve_states(states, raw["achieved_before"], original))

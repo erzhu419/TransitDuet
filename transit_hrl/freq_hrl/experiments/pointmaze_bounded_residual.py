@@ -46,9 +46,9 @@ def calibrate(root, period, *, model, predictor, args, roles, bounds, old, cost,
     return result
 
 
-def check_calibration(c):
+def check_response_constraint(c):
     trace = c["solver_trace"]
-    if (c["ratio_reproduction"] != "passed" or c["constraint"] != "passed"
+    if (c["constraint"] != "passed"
             or c["ratio_alpha"] != previous.calibration_alpha(c["responses"]["zero"]["bc_command_mse"], c["responses"]["original"]["command_change_rms"])
             or c["target_rms"] != float(np.sqrt(c["responses"]["zero"]["bc_command_mse"]))
             or trace[0] != {"alpha": c["ratio_alpha"], "response": c["responses"]["ratio"]}
@@ -58,3 +58,9 @@ def check_calibration(c):
     for i, step in enumerate(trace[:-1]):
         if step["response"]["command_change_rms"] <= c["target_rms"] or trace[i+1]["alpha"] != step["alpha"] * .5:
             raise ValueError("Stage78 solver is not first-feasible deterministic contraction")
+
+
+def check_calibration(c):
+    check_response_constraint(c)
+    if c["ratio_reproduction"] != "passed":
+        raise ValueError("Stage78 historical ratio reproduction failed")
