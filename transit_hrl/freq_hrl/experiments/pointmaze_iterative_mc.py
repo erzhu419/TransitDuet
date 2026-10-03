@@ -25,12 +25,21 @@ def check_training_freeze(model, before, active):
     native.curves.support.assert_frozen(model, expected)
 
 
-def update_mean(model, batches, *, method, period, horizon, cost, allocation=None):
+def update_mean(model, batches, *, method, period, horizon, cost, allocation=None, actor_batches=None):
     allocation = spec.METHODS[method] if allocation is None else allocation
     before = copy.deepcopy(model.state_dict())
-    scored = parts.scenario_actor_scores(model, batches, period=period, horizon=horizon, cost=cost, actor_names=tuple(allocation))
+    if actor_batches is None:
+        scored = parts.scenario_actor_scores(model, batches, period=period, horizon=horizon, cost=cost, actor_names=tuple(allocation))
+    else:
+        if set(actor_batches) != set(allocation):
+            raise ValueError("Actor-specific credit must cover exactly the updated actors")
+        scored = {}
+        for name in allocation:
+            scored.update(parts.scenario_actor_scores(model, actor_batches[name], period=period,
+                horizon=horizon, cost=cost, actor_names=(name,)))
     changed, actors = {}, {}
     for name, score in scored.items():
+        score_batches = batches if actor_batches is None else actor_batches[name]
         gradient = np.where(score["sigma_mask"], 0., np.concatenate(list(score["gradients"].values())).mean(0))
         actor = getattr(model, name + "_actor")
         candidates, geometry, c = native.direction.matched_perturbations(actor, score["states"], gradient,
@@ -46,7 +55,7 @@ def update_mean(model, batches, *, method, period, horizon, cost, allocation=Non
             "gradient_episodes": len(score["states"])//(horizon//period if name == "upper" else horizon),
             "max_abs_old_logp_difference": max(r["max_abs_old_logp_difference"] for r in score["score_costs"].values()),
             "credit_batch_cosine": native.reliability.scores.cosine(gradients["A"].mean(0)[mask], gradients["B"].mean(0)[mask]),
-            "scenario_covariance_trace": {b: parts.scenario.group_noise(g[:,mask],len(batches[b]),len(batches[b][0]))["covariance_trace"]
+            "scenario_covariance_trace": {b: parts.scenario.group_noise(g[:,mask],len(score_batches[b]),len(score_batches[b][0]))["covariance_trace"]
                 for b,g in gradients.items()}}
     exact = sum(r["geometry"]["exact_kl"]["plus"] for r in actors.values())
     nominal = spec.FISHER_RADIUS*sum(allocation.values())
@@ -86,7 +95,7 @@ def load_source(root, *, protocol=spec):
 
 
 def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_weights=None, initialize_models=None,
-        training_pair_worker=None, scenario_pair_check=None, source_loader=None):
+        training_pair_worker=None, scenario_pair_check=None, source_loader=None, actor_credit_collector=None):
     spec = protocol
     qualifier = qualifier or (lambda c, **kw: qualify(c, protocol=protocol, **kw))
     scenario_pair_check = scenario_pair_check or parts.scenario.check_scenario_pair
@@ -104,12 +113,12 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
             calibration = calibrations[str(period)]
             alpha,envelope = calibration["alpha"],calibration["envelope"]
 
-            def episodes(weights,roster,variant,collect=False):
+            def episodes(weights,roster,variant,collect=False,*,pair_worker=training_pair_worker):
                 jobs = [(weights,s,n,variant,period,predictor,
                     0. if variant == "zero" else alpha,envelope,collect) for s,n in roster]
-                if collect and training_pair_worker is not None:
+                if collect and pair_worker is not None:
                     replicas = o["rollouts_per_scenario"]
-                    pairs = [pair for group in pool.map(training_pair_worker,
+                    pairs = [pair for group in pool.map(pair_worker,
                         [jobs[i:i+replicas] for i in range(0,len(jobs),replicas)]) for pair in group]
                 else:
                     pairs = list(pool.map(parts.scenario.worker_native,jobs))
@@ -134,19 +143,27 @@ def run(root, *, preflight, output, protocol=spec, qualifier=None, evaluation_we
             history = {m:[] for m in spec.METHODS}
             for iteration,round_roles in enumerate(roles["training_rounds"],1):
                 for method,model in models.items():
-                    batches = {}
-                    for b in ("A","B"):
-                        roster = round_roles["credit_"+b]
-                        pairs = episodes(native.joint.inference_weights(model),[(s["scenario_seed"],n) for s in roster for n in s["noise_seeds"]],method,True)
-                        replicas = o["rollouts_per_scenario"]
-                        batches[b] = [pairs[i:i+replicas] for i in range(0,len(pairs),replicas)]
-                        for group,s in zip(batches[b],roster):
-                            scenario_pair_check(group,s)
-                            cost["scenario_pair_checks"] += 1
-                    mean_reward = float(np.mean([r["episode_return"] for g in batches.values() for pairs in g for _,r in pairs]))
+                    actor_batches = None
+                    if actor_credit_collector is None:
+                        batches = {}
+                        for b in ("A","B"):
+                            roster = round_roles["credit_"+b]
+                            pairs = episodes(native.joint.inference_weights(model),[(s["scenario_seed"],n) for s in roster for n in s["noise_seeds"]],method,True)
+                            replicas = o["rollouts_per_scenario"]
+                            batches[b] = [pairs[i:i+replicas] for i in range(0,len(pairs),replicas)]
+                            for group,s in zip(batches[b],roster):
+                                scenario_pair_check(group,s)
+                                cost["scenario_pair_checks"] += 1
+                        batch_sets = [batches]
+                    else:
+                        actor_batches = actor_credit_collector(episodes,native.joint.inference_weights(model),
+                            round_roles,method,cost)
+                        batches = None
+                        batch_sets = actor_batches.values()
+                    mean_reward = float(np.mean([r["episode_return"] for bs in batch_sets for g in bs.values() for pairs in g for _,r in pairs]))
                     row = update_mean(model,batches,method=method,period=period,horizon=args.horizon,cost=cost,
-                        allocation=spec.allocation(method,period))
-                    del batches
+                        allocation=spec.allocation(method,period),actor_batches=actor_batches)
+                    del batches, actor_batches, batch_sets
                     row.update(iteration=iteration,credit_mean_reward_before_update=mean_reward)
                     history[method].append(row)
                 print(f"{spec.EXPERIMENT_PROTOCOL} {root}/{period}: registered update {iteration}/{o['updates']} done, no evaluation selection",flush=True)
@@ -217,7 +234,7 @@ def qualify(cell, *, preflight, protocol=spec):
                 native.curves.paths.check_row(r,int(p),h)
                 if r["variant"] != v or r["alpha"] != (0. if v == "zero" else g["alpha"]):raise ValueError("MC frozen decoder changed")
                 for key in planning:planning[key] += r[key]
-        n = o["updates"]*len(spec.METHODS)*2*o["credit_scenarios_per_batch"]*o["rollouts_per_scenario"]
+        n = cell["cost"]["credit_episodes"]//len(spec.PERIODS)
         for key in planning:planning[key] += n*(h if key in ("reference_evaluations","actor_context_evaluations") else h//int(p)-1)
     if planning != cell["native_planning_cost"]:raise ValueError("MC native planning budget changed")
     return cell
