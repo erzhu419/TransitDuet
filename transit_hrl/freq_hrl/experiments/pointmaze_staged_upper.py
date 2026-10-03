@@ -32,7 +32,8 @@ def check_scenario_pair(pairs, roster, *, root):
             raise ValueError("Upper credit requires independent original noise, not shared-upper replay")
 
 
-def prepare_training(training, root, period, models, cost, *, protocol=spec):
+def prepare_training(training, root, period, models, cost, *, protocol=spec,
+        joint_checkpoint_protocol=previous.common.budget_training.swap_spec):
     spec = protocol
     original = learning.native.joint.inference_weights(models["staged_independent"])
     donors,checkpoints = {},{}
@@ -41,7 +42,7 @@ def prepare_training(training, root, period, models, cost, *, protocol=spec):
         record = training[method]["groups"][str(period)]["trained"][method]
         if record["evaluation_update"] != 8 or record["final_freeze_check"] != "passed" or record["checkpoint"] != str(path):
             raise ValueError("Staged-learning donor is not the registered final update")
-        checkpoint_protocol = previous.common.budget_training.swap_spec if method == "joint_call" else spec
+        checkpoint_protocol = joint_checkpoint_protocol if method == "joint_call" else spec
         donors[method] = swaps.check_checkpoint(torch.load(path,map_location="cpu",weights_only=False),original,
             root=root,period=period,method=method,protocol=checkpoint_protocol)
         checkpoints[method] = str(path)
