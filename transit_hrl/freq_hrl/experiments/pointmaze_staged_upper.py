@@ -35,7 +35,7 @@ def check_scenario_pair(pairs, roster, *, root):
 def prepare_training(training, root, period, models, cost, *, protocol=spec,
         joint_checkpoint_protocol=previous.common.budget_training.swap_spec):
     spec = protocol
-    original = learning.native.joint.inference_weights(models["staged_independent"])
+    original = learning.native.joint.inference_weights(models[next(iter(spec.METHODS))])
     donors,checkpoints = {},{}
     for method in spec.CHECKPOINT_METHODS:
         path = spec.donor_result(root,method).parent/"final_weights"/f"period_{period}_{method}.pt"
