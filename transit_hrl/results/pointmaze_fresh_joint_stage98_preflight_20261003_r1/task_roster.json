@@ -4,7 +4,7 @@
   "source_revision": "adcfc75d537b61f9501ca2105edc775a650481d7",
   "preregistration_revision": "12ad5db3d1",
   "dispatch_revision": "12ad5db3d1",
-  "verified_at_utc": "2026-10-03 03:23:25 UTC",
+  "verified_at_utc": "2026-10-03 03:45:00 UTC",
   "preflight": true,
   "source_gate": {
     "run_name": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
@@ -37,9 +37,9 @@
   "tasks": [
     {
       "id": "t128748",
-      "status": "queued",
-      "node": null,
-      "exit_code": null,
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
       "project": "pointmaze_fresh_joint_stage98_v1",
       "signature": "Freq-HRL/pointmaze_fresh_joint_stage98_v1/pointmaze_fresh_joint_stage98_preflight_20261003_r1/fresh_teacher_call_weighted_mc/410011",
       "resource_family": "Freq-HRL/pointmaze_fresh_joint_stage98_v1/preflight",
@@ -55,18 +55,19 @@
       ],
       "require_node": null,
       "submitted_at": 1790997692.32547,
-      "started_at": null,
-      "finished_at": null,
-      "log_path": null,
+      "started_at": 1790997842.2930157,
+      "finished_at": 1790997901.7982225,
+      "log_path": "/tmp/sched_t128748.log",
       "wait_for_files": [],
       "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_preflight_20261003_r1/cells/replicate_410011/completion",
-      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_preflight_20261003_r1/cells/replicate_410011/completion"
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_preflight_20261003_r1/cells/replicate_410011/completion",
+      "peak_ram_mb": 0
     },
     {
       "id": "t128749",
-      "status": "queued",
-      "node": null,
-      "exit_code": null,
+      "status": "done",
+      "node": "node004",
+      "exit_code": 0,
       "project": "pointmaze_fresh_joint_stage98_v1",
       "signature": "Freq-HRL/pointmaze_fresh_joint_stage98_v1/pointmaze_fresh_joint_stage98_preflight_20261003_r1/qualification",
       "resource_family": "Freq-HRL/pointmaze_fresh_joint_stage98_v1/qualification",
@@ -82,14 +83,15 @@
       ],
       "require_node": null,
       "submitted_at": 1790997692.3899558,
-      "started_at": null,
-      "finished_at": null,
-      "log_path": null,
+      "started_at": 1790997959.8558328,
+      "finished_at": 1790998016.512934,
+      "log_path": "/tmp/sched_t128749.log",
       "wait_for_files": [
         "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_preflight_20261003_r1/cells/replicate_410011/completion/ready.json"
       ],
       "result_dir": null,
-      "local_result_dir": null
+      "local_result_dir": null,
+      "peak_ram_mb": 0
     }
   ],
   "native_budget_total": {
@@ -103,5 +105,8 @@
   },
   "performance_confirmation": "not_tested",
   "pull_policy": "completion_markers_and_compact_JSON_only_no_checkpoint_or_native_traces",
-  "next": "qualify_native_preflight_then_full_joint_donors_then_matched_lower_rebuild"
+  "next": "launch_unchanged_frozen_full_joint_donor_cohort",
+  "preflight_status": "preflight_passed",
+  "qualification_reproduction": "passed",
+  "sampling_note": "peak_ram_mb=0 is unmeasured, not zero process memory"
 }
