@@ -1,0 +1,626 @@
+{
+  "cell": {
+    "cost": {
+      "actor_composition_checks": 24,
+      "actor_mean_parameter_updates": 16,
+      "actor_parameter_perturbations": 32,
+      "actor_score_backward_batches": 384,
+      "actor_score_forward_batches": 128,
+      "checkpoint_freeze_checks": 2,
+      "checkpoint_loads": 2,
+      "checkpoint_writes": 0,
+      "credit_episodes": 128,
+      "decoder_loads": 2,
+      "evaluation_episodes": 96,
+      "exact_kl_forward_batches": 96,
+      "fisher_jvp_batches": 48,
+      "forecaster_loads": 1,
+      "frozen_model_checks": 2,
+      "mc_calls": 256,
+      "native_episodes": 224,
+      "native_lower_calls": 67200,
+      "native_network_checks": 224,
+      "native_pair_checks": 8,
+      "native_steps": 67200,
+      "native_upper_calls": 1008,
+      "objective_checks": 128,
+      "pairing_upper_forward_calls": 1008,
+      "parameter_part_checks": 16,
+      "policy_updates": 16,
+      "scenario_pair_checks": 64,
+      "source_clone_loads": 2,
+      "training_freeze_checks": 16,
+      "training_initialization_checks": 8,
+      "training_models_initialized": 8,
+      "upper_replay_forward_calls": 144
+    },
+    "critic_fits": 0,
+    "forecaster_fits": 0,
+    "groups": {
+      "50": {
+        "actor_composition": "passed",
+        "alpha": 0.02223361635696027,
+        "checkpoint_freeze": "passed",
+        "effects": {
+          "50/base_minus_zero": -0.6306530879853582,
+          "50/joint_common_minus_joint": -0.570316261908502,
+          "50/joint_common_minus_joint_fixed": -0.005156944895190918,
+          "50/joint_common_minus_joint_source_common": -0.0007731293564248176,
+          "50/joint_common_minus_source_joint_common": 0.05153648549052292,
+          "50/joint_common_minus_zero": -0.547692751989139,
+          "50/joint_source_common_minus_joint_matched": -0.003991351036432889,
+          "50/joint_source_common_minus_source_common": 0.051527766225262894,
+          "50/source_common_minus_source_matched": -0.005040286155740148,
+          "50/source_common_minus_zero": -0.5984473888579771,
+          "50/source_joint_common_minus_source_common": -0.0007818486216848441,
+          "50/source_joint_common_minus_source_fixed": -0.006221990392063503,
+          "50/source_joint_common_minus_source_joint": -0.5791174030626891
+        },
+        "evaluation_mean_reward": {
+          "base": 233.02831355837782,
+          "joint": 233.68159015628257,
+          "joint_common": 233.11127389437402,
+          "joint_fixed": 233.11643083926924,
+          "joint_matched": 233.11603837476687,
+          "joint_source_common": 233.11204702373044,
+          "source_common": 233.06051925750523,
+          "source_fixed": 233.06595939927558,
+          "source_joint": 233.6388548119462,
+          "source_joint_common": 233.0597374088835,
+          "source_matched": 233.06555954366092,
+          "zero": 233.65896664636318
+        },
+        "final_upper_freeze": "passed",
+        "pairing": "passed",
+        "reused_checkpoints": {
+          "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_full_20261003_r1/cells/replicate_410011/final_weights/period_50_joint_call.pt"
+        },
+        "scenario_pairing": "passed",
+        "source_and_Adam_unchanged": "passed",
+        "trained": {
+          "joint_upper_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 230.8087045583781,
+                "exact_call_weighted_kl": 0.0009899172491412776,
+                "exact_sum_kl": 0.0009899172491412776,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00099
+              },
+              {
+                "credit_mean_reward_before_update": 228.1810270762196,
+                "exact_call_weighted_kl": 0.0009900222652696467,
+                "exact_sum_kl": 0.0009900222652696467,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00099
+              }
+            ]
+          },
+          "joint_upper_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 230.89312009040628,
+                "exact_call_weighted_kl": 0.0009899804542001691,
+                "exact_sum_kl": 0.0009899804542001691,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00099
+              },
+              {
+                "credit_mean_reward_before_update": 228.09566617742962,
+                "exact_call_weighted_kl": 0.0009899536936627917,
+                "exact_sum_kl": 0.0009899536936627917,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00099
+              }
+            ]
+          },
+          "source_upper_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 230.78366436342392,
+                "exact_call_weighted_kl": 0.0009899014320365498,
+                "exact_sum_kl": 0.0009899014320365498,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00099
+              },
+              {
+                "credit_mean_reward_before_update": 228.10854612499088,
+                "exact_call_weighted_kl": 0.0009900493103548868,
+                "exact_sum_kl": 0.0009900493103548868,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00099
+              }
+            ]
+          },
+          "source_upper_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 230.87330927061058,
+                "exact_call_weighted_kl": 0.0009899694668302258,
+                "exact_sum_kl": 0.0009899694668302258,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.00099
+              },
+              {
+                "credit_mean_reward_before_update": 228.0221233608632,
+                "exact_call_weighted_kl": 0.0009899454225452355,
+                "exact_sum_kl": 0.0009899454225452355,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.00099
+              }
+            ]
+          }
+        },
+        "training_initialization": "passed",
+        "training_noise_pairing": {
+          "joint_upper_common": "common_upper_independent_lower",
+          "joint_upper_independent": "independent_upper_and_lower",
+          "source_upper_common": "common_upper_independent_lower",
+          "source_upper_independent": "independent_upper_and_lower"
+        }
+      },
+      "100": {
+        "actor_composition": "passed",
+        "alpha": 0.06479194013941661,
+        "checkpoint_freeze": "passed",
+        "effects": {
+          "100/base_minus_zero": -1.1406994370503085,
+          "100/joint_common_minus_joint": -0.726890043822614,
+          "100/joint_common_minus_joint_fixed": -0.014754779528082906,
+          "100/joint_common_minus_joint_source_common": -0.0012637798400234601,
+          "100/joint_common_minus_source_joint_common": 0.07509058822893167,
+          "100/joint_common_minus_zero": -0.9533150585520502,
+          "100/joint_source_common_minus_joint_matched": -0.01508746189530541,
+          "100/joint_source_common_minus_source_common": 0.0750845404676852,
+          "100/source_common_minus_source_matched": -0.015373888594517382,
+          "100/source_common_minus_zero": -1.027135819179712,
+          "100/source_joint_common_minus_source_common": -0.0012698276012699239,
+          "100/source_joint_common_minus_source_fixed": -0.01503401084645617,
+          "100/source_joint_common_minus_source_joint": -0.7323658562877071
+        },
+        "evaluation_mean_reward": {
+          "base": 204.31282534399682,
+          "joint": 205.22709976631768,
+          "joint_common": 204.50020972249507,
+          "joint_fixed": 204.5149645020232,
+          "joint_matched": 204.51656096423042,
+          "joint_source_common": 204.5014735023351,
+          "source_common": 204.42638896186742,
+          "source_fixed": 204.44015314511262,
+          "source_joint": 205.15748499055388,
+          "source_joint_common": 204.42511913426617,
+          "source_matched": 204.44176285046194,
+          "zero": 205.45352478104712
+        },
+        "final_upper_freeze": "passed",
+        "pairing": "passed",
+        "reused_checkpoints": {
+          "joint_call": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_joint_stage98_full_20261003_r1/cells/replicate_410011/final_weights/period_100_joint_call.pt"
+        },
+        "scenario_pairing": "passed",
+        "source_and_Adam_unchanged": "passed",
+        "trained": {
+          "joint_upper_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 206.38310456134144,
+                "exact_call_weighted_kl": 0.0009948887630592187,
+                "exact_sum_kl": 0.0009948887630592187,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000995
+              },
+              {
+                "credit_mean_reward_before_update": 196.75534282922774,
+                "exact_call_weighted_kl": 0.0009950491446738862,
+                "exact_sum_kl": 0.0009950491446738862,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000995
+              }
+            ]
+          },
+          "joint_upper_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 207.1403320868271,
+                "exact_call_weighted_kl": 0.000995384545730664,
+                "exact_sum_kl": 0.000995384545730664,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000995
+              },
+              {
+                "credit_mean_reward_before_update": 196.52582714083576,
+                "exact_call_weighted_kl": 0.0009948729447948577,
+                "exact_sum_kl": 0.0009948729447948577,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000995
+              }
+            ]
+          },
+          "source_upper_common": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 206.34372286313106,
+                "exact_call_weighted_kl": 0.0009949031172040608,
+                "exact_sum_kl": 0.0009949031172040608,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000995
+              },
+              {
+                "credit_mean_reward_before_update": 196.68384285813923,
+                "exact_call_weighted_kl": 0.0009950619672580302,
+                "exact_sum_kl": 0.0009950619672580302,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000995
+              }
+            ]
+          },
+          "source_upper_independent": {
+            "checkpoint": null,
+            "evaluation_update": 2,
+            "final_freeze_check": "passed",
+            "history": [
+              {
+                "credit_mean_reward_before_update": 207.11683101751683,
+                "exact_call_weighted_kl": 0.000995394380409537,
+                "exact_sum_kl": 0.000995394380409537,
+                "freeze_check": "passed",
+                "iteration": 1,
+                "nominal_call_weighted_kl": 0.000995
+              },
+              {
+                "credit_mean_reward_before_update": 196.45220808021796,
+                "exact_call_weighted_kl": 0.0009948823022456988,
+                "exact_sum_kl": 0.0009948823022456988,
+                "freeze_check": "passed",
+                "iteration": 2,
+                "nominal_call_weighted_kl": 0.000995
+              }
+            ]
+          }
+        },
+        "training_initialization": "passed",
+        "training_noise_pairing": {
+          "joint_upper_common": "common_upper_independent_lower",
+          "joint_upper_independent": "independent_upper_and_lower",
+          "source_upper_common": "common_upper_independent_lower",
+          "source_upper_independent": "independent_upper_and_lower"
+        }
+      }
+    },
+    "native_planning_cost": {
+      "actor_context_evaluations": 67200,
+      "plan_ols_fits": 784,
+      "plan_ridge_predictions": 784,
+      "reference_evaluations": 67200
+    },
+    "native_trace_writes": 0,
+    "optimizer_steps": 0,
+    "preflight": true,
+    "root": 410011,
+    "source_initialization": {
+      "checkpoints": {
+        "50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+        "100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+      },
+      "decoder_preflight": false,
+      "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+      "decoder_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+      "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+      "historical_artifact_loads": 0,
+      "teacher_preflight": false,
+      "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+      "teacher_result": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json"
+    },
+    "status": "complete",
+    "wall_seconds": 62.4346313867718
+  },
+  "pull_policy": "compact JSON only; no native trajectories, CSV, NPZ or checkpoint transfer",
+  "qualification_reproduction": "passed",
+  "run_name": "pointmaze_fresh_lower_stage99_preflight_20261003_r1",
+  "summary": {
+    "conditioning_confirmation": "mechanical_only",
+    "contract": {
+      "artifacts": "server_final_inference_weights_only_no_intermediate_checkpoints_or_raw_traces_local_compact_JSON_and_completion_only",
+      "baseline": "same_exogenous_scenario_time_aligned_other_independent_action_noise_rollout_MC_return",
+      "budget": "same_per_learner_lower_KL_.00099_at50_.000995_at100_and64_episodes_8updates_no_search_independent_controls_retrained",
+      "checkpoint_methods": [
+        "joint_call"
+      ],
+      "checkpoint_protocols": {
+        "joint_call": "pointmaze_fresh_joint_stage98_v1"
+      },
+      "checkpoint_update": 8,
+      "compositions_upper_lower": {
+        "base": [
+          "source",
+          "source"
+        ],
+        "joint": [
+          "joint_call",
+          "joint_call"
+        ],
+        "joint_common": [
+          "joint_call",
+          "joint_upper_common"
+        ],
+        "joint_fixed": [
+          "joint_call",
+          "joint_upper_independent"
+        ],
+        "joint_matched": [
+          "joint_call",
+          "source_upper_independent"
+        ],
+        "joint_source_common": [
+          "joint_call",
+          "source_upper_common"
+        ],
+        "source_common": [
+          "source",
+          "source_upper_common"
+        ],
+        "source_fixed": [
+          "source",
+          "joint_upper_independent"
+        ],
+        "source_joint": [
+          "source",
+          "joint_call"
+        ],
+        "source_joint_common": [
+          "source",
+          "joint_upper_common"
+        ],
+        "source_matched": [
+          "source",
+          "source_upper_independent"
+        ],
+        "zero": [
+          "source",
+          "source"
+        ]
+      },
+      "conditional_baseline": "other_rollout_lower_actions_independent_given_shared_upper_innovations_and_scenario_upper_is_not_trained",
+      "credit": "fresh_on_policy_undiscounted_native_task_episode_MC_upper_option_rewards_restore_constant_call_cost",
+      "decision": "preflight_mechanical_only_all_four_positive_primary_CIs_for_conditioning_claim_no_performance_admission_or_root_rescue",
+      "decoder": "full_Stage97_new_teacher_BC_response_first_feasible_scales_and_envelopes_no_recalibration",
+      "downstream": "retain_all_registered_final_lowers_then_unchanged_staged_upper_rule_no_Stage94_95_pooling",
+      "evaluation": "only_after_registered_last_update_no_best_checkpoint_early_stop_or_radius_allocation_search",
+      "freeze": "U0_or_final_Stage98_UJ_bit_exact_all_std_values_source_Adam_forecaster_decoder_original_teacher_unchanged",
+      "limits": "new_teacher_fixed_upper_conditional_lower_MC_mean_learning_not_full_actor_critic_or_frequency_superiority",
+      "methods": {
+        "50": {
+          "joint_upper_common": {
+            "lower": 0.99
+          },
+          "joint_upper_independent": {
+            "lower": 0.99
+          },
+          "source_upper_common": {
+            "lower": 0.99
+          },
+          "source_upper_independent": {
+            "lower": 0.99
+          }
+        },
+        "100": {
+          "joint_upper_common": {
+            "lower": 0.995
+          },
+          "joint_upper_independent": {
+            "lower": 0.995
+          },
+          "source_upper_common": {
+            "lower": 0.995
+          },
+          "source_upper_independent": {
+            "lower": 0.995
+          }
+        }
+      },
+      "noise_mapping": "unchanged_Stage80_independent_mapping_common_upper_replay_training_only_no_replay_in_eval",
+      "periods": [
+        50,
+        100
+      ],
+      "primary_endpoints": [
+        "50/source_common_minus_source_matched",
+        "50/joint_common_minus_joint_fixed",
+        "100/source_common_minus_source_matched",
+        "100/joint_common_minus_joint_fixed"
+      ],
+      "reference_run": "pointmaze_upper_common_noise_stage92_full_20261002_r1",
+      "replication": "all_eight_new_Stage96_teachers_full_Stage97_decoders_Stage98_final_UJ_no_old_lower_weight_reuse",
+      "sampling": "fresh_Stage99_rosters_all_four_methods_same64_episodes_per_update_common_only_replays_first_upper_innovations_to_second_replica",
+      "source": "pointmaze_fresh_teachers_stage96_v1",
+      "source_run": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
+      "statistics": "same_all26_reward_contrasts_equal_root_bootstrap65536_Bonferroni26_same_Stage93_bootstrap_indices",
+      "training": "same_four_Stage93_lower_mean_learners_new_L0_U0_and_final_Stage98_UJ_fixed_eight_updates_preflight_two",
+      "training_noise_pairing": {
+        "joint_upper_common": "common_upper_independent_lower",
+        "joint_upper_independent": "independent_upper_and_lower",
+        "source_upper_common": "common_upper_independent_lower",
+        "source_upper_independent": "independent_upper_and_lower"
+      },
+      "training_runs": {
+        "joint_call": "pointmaze_fresh_joint_stage98_full_20261003_r1"
+      },
+      "variants": [
+        "base",
+        "zero",
+        "source_matched",
+        "source_fixed",
+        "source_common",
+        "source_joint_common",
+        "source_joint",
+        "joint_matched",
+        "joint_fixed",
+        "joint_source_common",
+        "joint_common",
+        "joint"
+      ]
+    },
+    "cost": {
+      "actor_composition_checks": 24,
+      "actor_mean_parameter_updates": 16,
+      "actor_parameter_perturbations": 32,
+      "actor_score_backward_batches": 384,
+      "actor_score_forward_batches": 128,
+      "checkpoint_freeze_checks": 2,
+      "checkpoint_loads": 2,
+      "checkpoint_writes": 0,
+      "credit_episodes": 128,
+      "decoder_loads": 2,
+      "evaluation_episodes": 96,
+      "exact_kl_forward_batches": 96,
+      "fisher_jvp_batches": 48,
+      "forecaster_loads": 1,
+      "frozen_model_checks": 2,
+      "mc_calls": 256,
+      "native_episodes": 224,
+      "native_lower_calls": 67200,
+      "native_network_checks": 224,
+      "native_pair_checks": 8,
+      "native_steps": 67200,
+      "native_upper_calls": 1008,
+      "objective_checks": 128,
+      "pairing_upper_forward_calls": 1008,
+      "parameter_part_checks": 16,
+      "policy_updates": 16,
+      "scenario_pair_checks": 64,
+      "source_clone_loads": 2,
+      "training_freeze_checks": 16,
+      "training_initialization_checks": 8,
+      "training_models_initialized": 8,
+      "upper_replay_forward_calls": 144
+    },
+    "endpoints": {
+      "100/base_minus_zero": {
+        "mean": -1.1406994370503085
+      },
+      "100/joint_common_minus_joint": {
+        "mean": -0.726890043822614
+      },
+      "100/joint_common_minus_joint_fixed": {
+        "mean": -0.014754779528082906
+      },
+      "100/joint_common_minus_joint_source_common": {
+        "mean": -0.0012637798400234601
+      },
+      "100/joint_common_minus_source_joint_common": {
+        "mean": 0.07509058822893167
+      },
+      "100/joint_common_minus_zero": {
+        "mean": -0.9533150585520502
+      },
+      "100/joint_source_common_minus_joint_matched": {
+        "mean": -0.01508746189530541
+      },
+      "100/joint_source_common_minus_source_common": {
+        "mean": 0.0750845404676852
+      },
+      "100/source_common_minus_source_matched": {
+        "mean": -0.015373888594517382
+      },
+      "100/source_common_minus_zero": {
+        "mean": -1.027135819179712
+      },
+      "100/source_joint_common_minus_source_common": {
+        "mean": -0.0012698276012699239
+      },
+      "100/source_joint_common_minus_source_fixed": {
+        "mean": -0.01503401084645617
+      },
+      "100/source_joint_common_minus_source_joint": {
+        "mean": -0.7323658562877071
+      },
+      "50/base_minus_zero": {
+        "mean": -0.6306530879853582
+      },
+      "50/joint_common_minus_joint": {
+        "mean": -0.570316261908502
+      },
+      "50/joint_common_minus_joint_fixed": {
+        "mean": -0.005156944895190918
+      },
+      "50/joint_common_minus_joint_source_common": {
+        "mean": -0.0007731293564248176
+      },
+      "50/joint_common_minus_source_joint_common": {
+        "mean": 0.05153648549052292
+      },
+      "50/joint_common_minus_zero": {
+        "mean": -0.547692751989139
+      },
+      "50/joint_source_common_minus_joint_matched": {
+        "mean": -0.003991351036432889
+      },
+      "50/joint_source_common_minus_source_common": {
+        "mean": 0.051527766225262894
+      },
+      "50/source_common_minus_source_matched": {
+        "mean": -0.005040286155740148
+      },
+      "50/source_common_minus_zero": {
+        "mean": -0.5984473888579771
+      },
+      "50/source_joint_common_minus_source_common": {
+        "mean": -0.0007818486216848441
+      },
+      "50/source_joint_common_minus_source_fixed": {
+        "mean": -0.006221990392063503
+      },
+      "50/source_joint_common_minus_source_joint": {
+        "mean": -0.5791174030626891
+      }
+    },
+    "mechanical_gate": "passed",
+    "native_trial_prerequisite": "Stage67_critic_route_HOLD_unchanged_independent_MC_training_protocol",
+    "performance_claim": "new_teacher_fixed_upper_conditional_lower_MC_mean_learning_not_frequency_superiority",
+    "primary_endpoints": [
+      "50/source_common_minus_source_matched",
+      "50/joint_common_minus_joint_fixed",
+      "100/source_common_minus_source_matched",
+      "100/joint_common_minus_joint_fixed"
+    ],
+    "protocol": "pointmaze_fresh_lower_stage99_v1",
+    "run_name": "pointmaze_fresh_lower_stage99_preflight_20261003_r1",
+    "status": "preflight_passed"
+  }
+}
+
