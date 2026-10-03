@@ -95,13 +95,25 @@
   ],
   "full_run": {
     "run_name": "pointmaze_fresh_decoder_stage97_full_20261003_r1",
-    "status": "frozen_not_submitted",
-    "launch_gate": "native_fresh_cohort_decoder_preflight_passed"
+    "status": "submitted",
+    "launch_gate": "native_fresh_cohort_decoder_preflight_passed",
+    "tasks": [
+      "t128664",
+      "t128665",
+      "t128666",
+      "t128667",
+      "t128668",
+      "t128669",
+      "t128670",
+      "t128671",
+      "t128672"
+    ],
+    "submitted_snapshot_at_utc": "2026-10-03 02:59:34 UTC"
   },
   "performance_confirmation": "not_tested",
   "pull_policy": "completion_markers_and_compact_JSON_only_no_checkpoint_or_native_traces",
   "preflight_status": "preflight_passed",
   "qualification_reproduction": "passed",
   "sampling_note": "peak_ram_mb=0 is unmeasured, not zero process memory",
-  "next": "launch_unchanged_frozen_full_decoder_prerequisite"
+  "next": "wait_for_full_decoder_qualification_then_rebuild_fresh_joint_and_lower_donors"
 }
