@@ -1,0 +1,511 @@
+{
+  "cell": {
+    "budget": {
+      "bc_optimizer_steps": 8,
+      "checkpoint_writes": 4,
+      "controller_diagnostic_episodes": 4,
+      "controller_lower_actor_steps": 8,
+      "controller_lower_value_steps": 8,
+      "controller_training_episodes": 2,
+      "controller_upper_actor_steps": 8,
+      "controller_upper_value_steps": 8,
+      "critic_warmup_episodes": 2,
+      "forecaster_driver_paths": 2,
+      "forecaster_observations": 602,
+      "forecaster_rows": 400,
+      "historical_artifact_loads": 0,
+      "label_archive_writes": 4,
+      "label_episodes": 4,
+      "native_episodes": 12,
+      "native_steps": 3600,
+      "riccati_solves": 1,
+      "ridge_solves": 1,
+      "warmup_actor_steps": 0,
+      "warmup_lower_value_steps": 8
+    },
+    "checkpoints": {
+      "clock": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/clock_final.pt",
+      "clone_100": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/clone_100_final.pt",
+      "clone_50": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/clone_50_final.pt",
+      "controller": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/controller_final.pt"
+    },
+    "config": {
+      "actor_anchor_zero_state_indices": [],
+      "clip_ratio": 0.2,
+      "constraint_dual_normalization": "none",
+      "constraint_dual_scale_ema_beta": 0.95,
+      "constraint_dual_scale_floor": 0.000001,
+      "cost_value_coef": 0.5,
+      "deployment_action_transform": "identity",
+      "deployment_frequency_anchor_state_replay": false,
+      "deployment_frequency_closed_loop_restoration_filter": false,
+      "deployment_frequency_closed_loop_restoration_funnel_multiplier": 3,
+      "deployment_frequency_closed_loop_restoration_min_reduction": 0.0001,
+      "deployment_frequency_closed_loop_trust_region": false,
+      "deployment_frequency_closed_loop_trust_region_backtracks": 8,
+      "deployment_frequency_groupwise_robust": false,
+      "deployment_frequency_ppo_trust_region": false,
+      "deployment_frequency_ppo_trust_region_backtracks": 8,
+      "deployment_frequency_projection_cvar_alpha": 0.5,
+      "deployment_frequency_projection_objective": "worst_group",
+      "deployment_frequency_restoration_freeze_reward_actor": false,
+      "device": "cpu",
+      "entropy_coef": 0.001,
+      "epochs": 4,
+      "gae_lambda": 0.95,
+      "gamma": 0.995,
+      "hf_action_dim": 0,
+      "hf_learning_rate": 0,
+      "hf_state_dim": 0,
+      "hidden_dim": 128,
+      "init_log_std": -0.7,
+      "lower_action_dim": 2,
+      "lower_actor_anchor_coef": 0,
+      "lower_constraint_max_backtracks": 8,
+      "lower_constraint_reward_tolerance": 1e-8,
+      "lower_constraint_step_scale": 1,
+      "lower_constraint_update_mode": "scalarized",
+      "lower_cost_activation_threshold": 1e-12,
+      "lower_cost_critic": false,
+      "lower_cost_state_dim": 0,
+      "lower_cost_target": 0,
+      "lower_deployment_frequency_action_scale": 1,
+      "lower_deployment_frequency_dual_lr": 0,
+      "lower_deployment_frequency_lambda_init": 0,
+      "lower_deployment_frequency_max_lambda": 100,
+      "lower_deployment_frequency_max_projection_steps": 1,
+      "lower_deployment_frequency_reference_reduction_fraction": 0,
+      "lower_deployment_frequency_reward_tolerance": 1e-8,
+      "lower_deployment_frequency_rms_budget": 0,
+      "lower_deployment_frequency_step_scale": 1,
+      "lower_deployment_frequency_target_tolerance": 0,
+      "lower_deployment_frequency_window": 32,
+      "lower_dual_lr": 0,
+      "lower_lambda_init": 0,
+      "lower_learning_rate": 0.0003,
+      "lower_max_lambda": 100,
+      "lower_projection_consistency_coef": 0,
+      "lower_skip_inactive_cost_value_update": false,
+      "lower_state_dim": 392,
+      "lower_value_state_dim": 394,
+      "lower_zero_init_cost_value": false,
+      "max_grad_norm": 1,
+      "minibatch_size": 1024,
+      "projection_consistency_advantage_temperature": 1,
+      "projection_consistency_advantage_weight_clip": 5,
+      "projection_consistency_max_backtracks": 8,
+      "projection_consistency_reward_tolerance": 0,
+      "projection_consistency_step_scale": 1,
+      "projection_consistency_update_mode": "scalarized",
+      "projection_consistency_weighting": "uniform",
+      "promotion_advantage_coef": 0,
+      "promotion_advantage_huber_delta": 0.1,
+      "promotion_advantage_learning_rate": 0,
+      "promotion_counterfactual_coef": 0,
+      "promotion_entropy_coef": 0.01,
+      "promotion_init_logit": 0,
+      "promotion_learning_rate": 0.0003,
+      "promotion_rate_budget": 1,
+      "promotion_rate_coef": 0,
+      "promotion_state_dim": 0,
+      "raw_feature_dim": 0,
+      "raw_history_window": 0,
+      "state_encoder": "mlp",
+      "upper_action_dim": 4,
+      "upper_actor_anchor_coef": 0,
+      "upper_constraint_max_backtracks": 8,
+      "upper_constraint_reward_tolerance": 1e-8,
+      "upper_constraint_step_scale": 1,
+      "upper_constraint_update_mode": "scalarized",
+      "upper_cost_activation_threshold": 1e-12,
+      "upper_cost_critic": false,
+      "upper_cost_state_dim": 0,
+      "upper_cost_target": 0,
+      "upper_deployment_frequency_action_scale": 1,
+      "upper_deployment_frequency_dual_lr": 0,
+      "upper_deployment_frequency_lambda_init": 0,
+      "upper_deployment_frequency_max_lambda": 100,
+      "upper_deployment_frequency_max_projection_steps": 1,
+      "upper_deployment_frequency_reference_reduction_fraction": 0,
+      "upper_deployment_frequency_reward_tolerance": 1e-8,
+      "upper_deployment_frequency_rms_budget": 0,
+      "upper_deployment_frequency_step_scale": 1,
+      "upper_deployment_frequency_target_tolerance": 0,
+      "upper_deployment_frequency_window": 8,
+      "upper_dual_lr": 0,
+      "upper_lambda_init": 0,
+      "upper_learning_rate": 0.0003,
+      "upper_max_lambda": 100,
+      "upper_projection_consistency_coef": 0,
+      "upper_projection_consistency_objective": "raw_mean",
+      "upper_projection_target_aggregation": "macro_mean",
+      "upper_skip_inactive_cost_value_update": false,
+      "upper_state_dim": 390,
+      "upper_zero_init_cost_value": false,
+      "value_coef": 0.5
+    },
+    "contract": {
+      "clone": "Stage55_tanh_command_MSE_BC64_final_lower_mean_only_std_and_upper_frozen",
+      "cohort": "eight_predeclared_new_optimizer_roots_all_retained",
+      "controller_checkpoint": "fixed_final_iteration384_one_based_no_best_checkpoint_or_reward_admission",
+      "controller_diagnostics": "same_disjoint_paths_at_initial_and_final_no_gate_no_CI",
+      "controller_training": "384_iterations_eight_fresh_paths_each_shared_PPO_update_no_selection_rollouts",
+      "critic_warmup": "Stage42_task_clock_sixteen_lower_critic_only_iterations_all_actors_and_other_values_frozen",
+      "downstream": "fresh_decoder_then_fresh_joint_and_lower_donors_then_Stage94_staged_upper_rules",
+      "downstream_controls": [
+        "zero_plan",
+        "U0",
+        "fixed_UJ",
+        "matched_independent_lower"
+      ],
+      "downstream_gate": "unchanged_four_corrected_primary_reward_endpoints_at_both_periods",
+      "historical_artifacts": "none_no_old_teacher_forecaster_decoder_or_lower_checkpoint",
+      "limits": "teacher_provisioning_only_not_unseen_teacher_performance_confirmation_not_frequency_superiority",
+      "native_initializer": "same_Stage33_history_MLP_PPO_and_balanced_jitter50_native_task",
+      "native_trace_writes": "teacher_label_archives_only_for_later_decoder_calibration",
+      "periods": [
+        50,
+        100
+      ],
+      "preflight": "separate_root410001_not_a_confirmation_teacher",
+      "teacher": "Stage55_LQR_velocity_teacher_causal_ridge_forecaster_fresh_label_states"
+    },
+    "fitting": {
+      "driver_paths": 2,
+      "feature_ols_fits": 400,
+      "label_displacements": 40000,
+      "native_steps": 0,
+      "observations": 602,
+      "ridge_solves": 1,
+      "rows": 400,
+      "training_displacement_mse": 0.0046096231488320155
+    },
+    "forecaster": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/forecaster.npz",
+    "groups": {
+      "50": {
+        "clone_checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/clone_50_final.pt",
+        "cloning": {
+          "final_action_mse": 0.22667492926120758,
+          "initial_action_mse": 0.2346561998128891,
+          "sham": false,
+          "steps": 4
+        },
+        "label_archive_directory": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/50/teacher/labels/0/deterministic",
+        "label_rows": [
+          {
+            "decision_steps": [
+              0,
+              50,
+              100,
+              150,
+              200,
+              250
+            ],
+            "episode_length": 300,
+            "episode_return": 130.03201126640164,
+            "gate_inference_calls": 0,
+            "lower_inference_calls": 300,
+            "seed": 96094001,
+            "upper_inference_calls": 6
+          },
+          {
+            "decision_steps": [
+              0,
+              50,
+              100,
+              150,
+              200,
+              250
+            ],
+            "episode_length": 300,
+            "episode_return": 127.45264045127112,
+            "gate_inference_calls": 0,
+            "lower_inference_calls": 300,
+            "seed": 96094002,
+            "upper_inference_calls": 6
+          }
+        ]
+      },
+      "100": {
+        "clone_checkpoint": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/clone_100_final.pt",
+        "cloning": {
+          "final_action_mse": 0.14862790703773499,
+          "initial_action_mse": 0.1559939831495285,
+          "sham": false,
+          "steps": 4
+        },
+        "label_archive_directory": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_preflight_20261003_r1/cells/replicate_410001_raw/100/teacher/labels/0/deterministic",
+        "label_rows": [
+          {
+            "decision_steps": [
+              0,
+              100,
+              200
+            ],
+            "episode_length": 300,
+            "episode_return": 165.61291173914833,
+            "gate_inference_calls": 0,
+            "lower_inference_calls": 300,
+            "seed": 96094001,
+            "upper_inference_calls": 3
+          },
+          {
+            "decision_steps": [
+              0,
+              100,
+              200
+            ],
+            "episode_length": 300,
+            "episode_return": 160.91517480074015,
+            "gate_inference_calls": 0,
+            "lower_inference_calls": 300,
+            "seed": 96094002,
+            "upper_inference_calls": 3
+          }
+        ]
+      }
+    },
+    "historical_artifact_loads": 0,
+    "native_counts": {
+      "episodes": 12,
+      "gate_calls": 19,
+      "lower_calls": 3600,
+      "steps": 3600,
+      "upper_calls": 67
+    },
+    "options": {
+      "bc_epochs": 4,
+      "controller_diagnostic_paths": 2,
+      "controller_iterations": 2,
+      "controller_paths_per_iteration": 1,
+      "critic_warmup_iterations": 2,
+      "fitting_paths": 2,
+      "label_paths": 2,
+      "warmup_paths_per_iteration": 1,
+      "workers": 2
+    },
+    "preflight": true,
+    "protocol": "pointmaze_fresh_teachers_stage96_v1",
+    "records": {
+      "controller": {
+        "actor_change_norms": {
+          "lower_actor": 0.3601243917188528,
+          "upper_actor": 0.3816988088751466
+        },
+        "diagnostics": {
+          "final": [
+            {
+              "decision_steps": [
+                0,
+                75,
+                110,
+                154,
+                206,
+                256
+              ],
+              "episode_length": 300,
+              "episode_return": 164.73814326036194,
+              "gate_inference_calls": 0,
+              "lower_inference_calls": 300,
+              "seed": 96095001,
+              "upper_inference_calls": 6
+            },
+            {
+              "decision_steps": [
+                0,
+                53,
+                116,
+                173,
+                207,
+                269
+              ],
+              "episode_length": 300,
+              "episode_return": 100.8829005970803,
+              "gate_inference_calls": 0,
+              "lower_inference_calls": 300,
+              "seed": 96095002,
+              "upper_inference_calls": 6
+            }
+          ],
+          "initial": [
+            {
+              "decision_steps": [
+                0,
+                75,
+                110,
+                154,
+                206,
+                256
+              ],
+              "episode_length": 300,
+              "episode_return": 194.20082096299438,
+              "gate_inference_calls": 0,
+              "lower_inference_calls": 300,
+              "seed": 96095001,
+              "upper_inference_calls": 6
+            },
+            {
+              "decision_steps": [
+                0,
+                53,
+                116,
+                173,
+                207,
+                269
+              ],
+              "episode_length": 300,
+              "episode_return": 183.6490590166809,
+              "gate_inference_calls": 0,
+              "lower_inference_calls": 300,
+              "seed": 96095002,
+              "upper_inference_calls": 6
+            }
+          ]
+        },
+        "final_iteration": 2,
+        "history": [
+          {
+            "iteration": 1,
+            "native_steps": 300,
+            "optimizer_steps": {
+              "lower_actor_optimizer_steps": 4,
+              "lower_advantage_optimizer_steps": 0,
+              "lower_cost_value_optimizer_steps": 0,
+              "lower_value_optimizer_steps": 4,
+              "upper_actor_optimizer_steps": 4,
+              "upper_advantage_optimizer_steps": 0,
+              "upper_cost_value_optimizer_steps": 0,
+              "upper_value_optimizer_steps": 4
+            },
+            "seeds": [
+              96090001
+            ]
+          },
+          {
+            "iteration": 2,
+            "native_steps": 300,
+            "optimizer_steps": {
+              "lower_actor_optimizer_steps": 4,
+              "lower_advantage_optimizer_steps": 0,
+              "lower_cost_value_optimizer_steps": 0,
+              "lower_value_optimizer_steps": 4,
+              "upper_actor_optimizer_steps": 4,
+              "upper_advantage_optimizer_steps": 0,
+              "upper_cost_value_optimizer_steps": 0,
+              "upper_value_optimizer_steps": 4
+            },
+            "seeds": [
+              96090002
+            ]
+          }
+        ]
+      },
+      "warmup": {
+        "actor_and_other_value_freeze": "passed",
+        "history": [
+          {
+            "iteration": 1,
+            "optimizer_steps": {
+              "lower_actor_optimizer_steps": 0,
+              "lower_advantage_optimizer_steps": 0,
+              "lower_cost_value_optimizer_steps": 0,
+              "lower_value_optimizer_steps": 4
+            },
+            "seeds": [
+              96093501
+            ]
+          },
+          {
+            "iteration": 2,
+            "optimizer_steps": {
+              "lower_actor_optimizer_steps": 0,
+              "lower_advantage_optimizer_steps": 0,
+              "lower_cost_value_optimizer_steps": 0,
+              "lower_value_optimizer_steps": 4
+            },
+            "seeds": [
+              96093502
+            ]
+          }
+        ]
+      }
+    },
+    "root": 410001,
+    "seed_roles": {
+      "controller_diagnostic": [
+        96095001,
+        96095002
+      ],
+      "controller_training": [
+        96090001,
+        96090002
+      ],
+      "critic_warmup": [
+        96093501,
+        96093502
+      ],
+      "fitting": [
+        96093701,
+        96093702
+      ],
+      "labels": [
+        96094001,
+        96094002
+      ]
+    },
+    "status": "complete",
+    "wall_seconds": 8.261961093172431
+  },
+  "checkpoint_audit": {
+    "BC_lower_mean_changed_both_periods": true,
+    "BC_std_upper_and_values_freeze": "passed",
+    "checkpoint_loads": 4,
+    "controller_to_clock_actor_and_upper_value_freeze": "passed",
+    "diagnostic_final_mean": 132.81052192872113,
+    "diagnostic_initial_mean": 188.92493998983764,
+    "final_iteration": 2,
+    "label_archives_checked": 4,
+    "label_plan_and_velocity_shapes": "passed",
+    "performance_gate": "not_applied",
+    "status": "passed"
+  },
+  "summary": {
+    "contract": {
+      "clone": "Stage55_tanh_command_MSE_BC64_final_lower_mean_only_std_and_upper_frozen",
+      "cohort": "eight_predeclared_new_optimizer_roots_all_retained",
+      "controller_checkpoint": "fixed_final_iteration384_one_based_no_best_checkpoint_or_reward_admission",
+      "controller_diagnostics": "same_disjoint_paths_at_initial_and_final_no_gate_no_CI",
+      "controller_training": "384_iterations_eight_fresh_paths_each_shared_PPO_update_no_selection_rollouts",
+      "critic_warmup": "Stage42_task_clock_sixteen_lower_critic_only_iterations_all_actors_and_other_values_frozen",
+      "downstream": "fresh_decoder_then_fresh_joint_and_lower_donors_then_Stage94_staged_upper_rules",
+      "downstream_controls": [
+        "zero_plan",
+        "U0",
+        "fixed_UJ",
+        "matched_independent_lower"
+      ],
+      "downstream_gate": "unchanged_four_corrected_primary_reward_endpoints_at_both_periods",
+      "historical_artifacts": "none_no_old_teacher_forecaster_decoder_or_lower_checkpoint",
+      "limits": "teacher_provisioning_only_not_unseen_teacher_performance_confirmation_not_frequency_superiority",
+      "native_initializer": "same_Stage33_history_MLP_PPO_and_balanced_jitter50_native_task",
+      "native_trace_writes": "teacher_label_archives_only_for_later_decoder_calibration",
+      "periods": [
+        50,
+        100
+      ],
+      "preflight": "separate_root410001_not_a_confirmation_teacher",
+      "teacher": "Stage55_LQR_velocity_teacher_causal_ridge_forecaster_fresh_label_states"
+    },
+    "historical_artifact_loads": 0,
+    "native_episodes": 12,
+    "native_steps": 3600,
+    "next": "fresh_non_reward_decoder_calibration_then_full_fresh_staged_training",
+    "performance_confirmation": "not_tested",
+    "protocol": "pointmaze_fresh_teachers_stage96_v1",
+    "roots": [
+      410001
+    ],
+    "run_name": "pointmaze_fresh_teachers_stage96_preflight_20261003_r1",
+    "status": "preflight_passed"
+  }
+}
