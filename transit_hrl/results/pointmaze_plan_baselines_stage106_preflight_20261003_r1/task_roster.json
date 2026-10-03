@@ -1,0 +1,42 @@
+{
+  "run_name": "pointmaze_plan_baselines_stage106_preflight_20261003_r1",
+  "protocol": "pointmaze_plan_baselines_stage106_v1",
+  "state": "failed_native_API_cleanup_not_performance_evidence",
+  "recorded_at_utc": "2026-10-03T14:15:05.289238+00:00",
+  "code_revision": "52a98887b3bb32f7335ea785a3d636949ff9840a",
+  "cause": "AttributeError: PointMazeRegimeTask has no close; use task.environment.close() as the existing native runner does",
+  "final_result_written": false,
+  "full_dispatched": false,
+  "metrics_used_for_selection": false,
+  "retry": "r2_same_seeds_task_budget_and_endpoints_after_cleanup_API_repair",
+  "tasks": [
+    {
+      "id": "t130450",
+      "status": "failed",
+      "node": "node005",
+      "cpu_cores": 3,
+      "ram_mb": 3072,
+      "submitted_at": 1791036490.0895488,
+      "started_at": 1791036616.02265,
+      "finished_at": 1791036665.6299596,
+      "exit_code": 1,
+      "log_path": "/tmp/sched_t130450.log",
+      "signature": "Freq-HRL/pointmaze_plan_baselines_stage106_v1/pointmaze_plan_baselines_stage106_preflight_20261003_r1/matched_native_samples_joint_forecast_flat/410011",
+      "last_block_reason": "launcher exit-status sentinel recorded rc=1; err_pattern: Traceback (most recent call, Error:"
+    },
+    {
+      "id": "t130451",
+      "status": "cancelled",
+      "node": null,
+      "cpu_cores": 1,
+      "ram_mb": 2048,
+      "submitted_at": 1791036490.1262372,
+      "started_at": null,
+      "finished_at": 1791036852.8833845,
+      "exit_code": null,
+      "log_path": null,
+      "signature": "Freq-HRL/pointmaze_plan_baselines_stage106_v1/pointmaze_plan_baselines_stage106_preflight_20261003_r1/qualification",
+      "last_block_reason": "user batch cancel"
+    }
+  ]
+}

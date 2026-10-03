@@ -69,7 +69,10 @@ class PlanBaselinesTest(unittest.TestCase):
                 patch.object(experiment.forecast, "plan_points", side_effect=AssertionError("flat invoked forecast")):
             pairs = []
             for shift in (0., 1.):
-                with patch.object(experiment.native.joint, "_make_task", return_value=DenseTask(shift)):
+                task = DenseTask(shift)
+                native_task = SimpleNamespace(environment=task.environment, reset=task.reset, step=task.step,
+                    action_low=task.action_low, action_high=task.action_high)
+                with patch.object(experiment.native.joint, "_make_task", return_value=native_task):
                     pairs.append(experiment.primitive_episode((weights, 106001, 106002, "flat_lower", 50, None, .02, {}, True)))
             b, row = pairs[0]
             self.assertIsInstance(b, LevelTrajectoryBatch)

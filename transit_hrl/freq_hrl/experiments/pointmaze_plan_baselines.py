@@ -89,7 +89,7 @@ def primitive_episode(job):
             "reference_evaluations": 0 if plan is None else plan.calls,
             "actor_context_evaluations": 0 if plan is None else plan.context_calls}
     finally:
-        task.close()
+        task.environment.close()
 
 
 def primitive_pair_check(group, roster, *, root):
