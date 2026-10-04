@@ -33,5 +33,6 @@ learning; use gradient agreement and final paired returns to choose the next tra
 Implementation revision: `34ab26669b`; 14 focused tests passed.
 Native preflight `t135460` and independent aggregation `t135461` passed mechanically.
 Frozen full run: `pointmaze_upper_suffix_credit_stage118_full_20261005_r1`, workers
-`t135464`-`t135471`, aggregation `t135472`. Formal results are pending; no preflight
-performance metric changed the registered experiment.
+`t135464`-`t135471`, aggregation `t135472`. All completed; all four corrected CIs
+crossed zero and the formal gain gate was not supported. No preflight performance
+metric changed the registered experiment. Stage119 addresses native gradient estimation.

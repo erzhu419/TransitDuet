@@ -25,13 +25,13 @@ def intervention_action(variant):
     return action
 
 
-def episode(weights, lower_state, *, query, panel, variant, period, predictor, calibration):
+def episode(weights, lower_state, *, query, panel, variant, period, predictor, calibration, upper=None):
     model, args = base.source.native._WORKER
     model.load_state_dict(weights)
     lower = base.lower_branch(model, lower_state)
     start = query["start"]
-    if start % period or not 0 < start < args.horizon - period:
-        raise ValueError("local plan probe requires an interior complete option and continuation")
+    if start % period or not 0 <= start <= args.horizon - period:
+        raise ValueError("local plan probe requires a complete decision-aligned option")
     prefix_seed = base.source.scenario.spec.noise_seeds(
         args.optimizer_seed, query["scenario_seed"], query["prefix_noise_seed"])[1]
     suffix_seed = base.source.scenario.spec.noise_seeds(
@@ -43,7 +43,7 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
     task = base.source.native.joint._make_task(env_id=args.env_id, seed=query["scenario_seed"],
         horizon=args.horizon, **base.source.native.joint._task_options(args))
     rewards, distances, commands, means, measurements, innovations = [], [], [], [], [], []
-    query_state = None
+    query_state, upper_state_at_query = None, None
     action_count, position_square, velocity_square, clipped_points = 0, 0., 0., 0
     try:
         observation = task.reset()
@@ -55,9 +55,14 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
             measurements.append(observation.task_measurement.copy())
             if step == start:
                 query_state = np.r_[feedback, observation.achieved_goal].copy()
+                upper_state_at_query = history.upper_state(observation, oracle_context=None)
             if variant != "forecast" and step % period == 0:
                 action = intervention_action(variant) if step == start else np.zeros(spec.ACTION_DIM)
-                action_count += int(np.any(action))
+                action_count += int(step == start and variant in spec.DIRECTIONS)
+                if upper is not None:
+                    state_now = history.upper_state(observation, oracle_context=None)
+                    with torch.inference_mode():
+                        action = action + upper.distribution(torch.as_tensor(state_now).view(1, -1)).mean[0].numpy()
                 plan.decode(action=action, observation=observation, history=history, step=step,
                     world_low=low, world_high=high)
                 if step == start:
@@ -90,13 +95,14 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
             "option_return": float(reward[start:start + period].sum()),
             "tail_return": float(reward[start + period:].sum()), "suffix_return": float(reward[start:].sum()),
             "tracking_squared_error_integral": float(np.dot(distances, distances) * scale.dt_seconds),
-            "upper_actor_calls": 0, "lower_calls": args.horizon, "intervention_decisions": action_count,
+            "upper_actor_calls": args.horizon // period if upper is not None and variant != "forecast" else 0,
+            "lower_calls": args.horizon, "intervention_decisions": action_count,
             "plan_renewals": args.horizon // period, "plan_fits": plan.ols_fits,
             "reference_evaluations": plan.calls, "actor_context_evaluations": plan.context_calls,
             "plan_position_delta_rms": float(np.sqrt(position_square / (2 * (period + 1)))),
             "plan_velocity_delta_rms": float(np.sqrt(velocity_square / (2 * period))),
             "plan_bound_point_fraction": clipped_points / (2 * (period + 1))}
-        audit = {"query_state": query_state, "prefix_rewards": reward[:start],
+        audit = {"query_state": query_state, "upper_state": upper_state_at_query, "prefix_rewards": reward[:start],
             "rewards": reward, "commands": np.asarray(commands), "means": np.asarray(means),
             "measurements": np.asarray(measurements), "innovations": np.asarray(innovations)}
         return row, audit
