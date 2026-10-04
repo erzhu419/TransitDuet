@@ -10,4 +10,4 @@ Full budget:4,096 native episodes/4,915,200 steps,36,864 upper calls;zero learni
 
 This is a fixed-donor plan-content diagnostic,not a new trained HRL algorithm or frequency-superiority result. If the learned residual has no confirmed benefit over forecast/noise,stop treating these upper donors as a demonstrated positive hierarchy contribution;retain all prior negative and HOLD evidence.
 
-Native preflight passed: [result](freq_hrl_stage108_crossed_advice_preflight_2026-10-04.md). The full protocol remains unchanged; admission is mechanical only.
+Native preflight passed: [result](freq_hrl_stage108_crossed_advice_preflight_2026-10-04.md). Full study is complete: [result](freq_hrl_stage108_crossed_advice_result_2026-10-04.md). Learned-residual confirmation is not_supported;all4 primary CIs cross0. No performance rescue tuning follows.

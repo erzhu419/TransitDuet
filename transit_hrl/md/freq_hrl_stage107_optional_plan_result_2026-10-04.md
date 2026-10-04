@@ -18,3 +18,5 @@ Mean blind/forecast/learned rewards:1152.225505/1152.230007/1152.230059 at50;114
 Exact new cost:52,224 native episodes/62,668,800 steps,384 lower-mean updates,304,128 native upper calls,574,464 OLS/ridge fits each,48 final server-only checkpoints. Native wall1527.24-1546.64s/root;sampled process-tree peaks5118-5413MiB. The complete inherited Stage106 campaign and Stage96/97 preparation are separate costs. See [compact evidence](../results/pointmaze_optional_plan_stage107_full_20261004_r1/compact_summary.json).
 
 Next:fixed-policy crossed execution. Keep each learned/forecast lower fixed and swap forecast,learned residual,zero-mean same-std upper noise,and blind advice on fresh paired paths. This separates learned upper content from different lower weights and random residuals;no new training,alpha tuning,task change or weaker feedback. Stage106 negative evidence and Stage67 critic HOLD remain unchanged.
+
+Follow-up complete: [Stage108](freq_hrl_stage108_crossed_advice_result_2026-10-04.md). Fixing the lower and matching upper innovations still yields no confirmed learned increment over forecast/noise. Stage107 is retained separately,not pooled.
