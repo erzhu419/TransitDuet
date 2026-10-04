@@ -20,8 +20,9 @@ def load_weights(root, period, arm):
     return payload["weights"]
 
 
-def branch_metrics(model, state):
+def branch_metrics(model, actor_state, state):
     actor = trainer.branch(model)
+    actor.load_state_dict(actor_state)
     tensor = torch.as_tensor(state, dtype=torch.float32)
     with torch.inference_mode():
         output = actor.distribution(tensor).mean
@@ -43,8 +44,8 @@ def diagnostic_episode(job):
     forecast_batch, forecast_row, _ = trainer.native_episode(source_weights, forecast_weights,
         seed=seed, noise_seed=seed, arm="forecast", period=period, predictor=predictor,
         calibration=calibration, args=args, collect=True)
-    learned = branch_metrics(source.native._WORKER[0], learned_batch.state)
-    forecast = branch_metrics(source.native._WORKER[0], forecast_batch.state)
+    learned = branch_metrics(source.native._WORKER[0], learned_weights, learned_batch.state)
+    forecast = branch_metrics(source.native._WORKER[0], forecast_weights, forecast_batch.state)
     learned_advice = learned.pop("advice")
     forecast_advice = forecast.pop("advice")
     cosine = np.sum(learned_advice * forecast_advice, axis=1) / np.maximum(

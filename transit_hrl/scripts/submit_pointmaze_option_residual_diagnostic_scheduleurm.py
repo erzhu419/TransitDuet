@@ -22,7 +22,7 @@ def task_specification(run_name, root):
 
 
 def main():
-    run_name = "pointmaze_option_residual_diagnostic_stage112_full_20261004_r1"
+    run_name = "pointmaze_option_residual_diagnostic_stage112_full_20261004_r2"
     tasks = [task_specification(run_name, root) for root in spec.roots()]
     execute_bulk(tasks, dry_run=False, intent_label=spec.EXPERIMENT_PROTOCOL + ":" + run_name)
 
