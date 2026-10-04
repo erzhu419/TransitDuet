@@ -230,9 +230,13 @@ def residual_update(actor, score, *, cost):
     dweight = torch.as_tensor(tangent[:weight_size], dtype=actor.readout.weight.dtype).reshape_as(actor.readout.weight)
     dbias = torch.as_tensor(tangent[weight_size:], dtype=actor.readout.bias.dtype).reshape_as(actor.readout.bias)
     states = torch.as_tensor(score["states"], dtype=torch.float32)
-    std = actor.base.log_std.detach().exp().clamp(1e-4, 3.)
     dmean = states @ dweight.t() + dbias
-    fisher = float(torch.square(dmean / std).sum(-1).mean().item())
+    old_distribution = actor.distribution(states)
+    full_std = old_distribution.stddev.detach().clamp(1e-4, 3.)
+    if full_std.shape[-1] < dmean.shape[-1]:
+        raise ValueError("residual branch distribution is narrower than its trainable readout")
+    fisher_std = full_std[..., -dmean.shape[-1]:]
+    fisher = float(torch.square(dmean / fisher_std).sum(-1).mean().item())
     if not np.isfinite(fisher) or fisher <= 0.:
         raise ValueError("residual branch Fisher geometry is undefined")
     step = float(np.sqrt(2. * spec.FISHER_RADIUS / fisher))
@@ -241,10 +245,9 @@ def residual_update(actor, score, *, cost):
     with torch.no_grad():
         candidate.readout.weight.add_(dweight, alpha=step)
         candidate.readout.bias.add_(dbias, alpha=step)
-        old_mean = actor.distribution(states).mean
         new = candidate.distribution(states)
         kl = float(torch.distributions.kl_divergence(
-            torch.distributions.Normal(old_mean, std),
+            torch.distributions.Normal(old_distribution.mean, full_std),
             torch.distributions.Normal(new.mean, new.stddev)).sum(-1).mean().item())
     if not .5 * spec.FISHER_RADIUS <= kl <= 2. * spec.FISHER_RADIUS:
         raise ValueError("residual branch KL radius failed")

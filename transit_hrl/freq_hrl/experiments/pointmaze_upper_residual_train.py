@@ -37,16 +37,17 @@ def plan_for_arm(arm, predictor, period, calibration, args):
 
 
 def native_episode(source_weights, lower_state, upper_state, *, seed, noise_seed, arm, period,
-        predictor, calibration, args, collect, upper_sample):
+        predictor, calibration, args, collect, upper_sample,
+        upper_factory=upper_branch, plan_factory=plan_for_arm):
     model, _ = source.native._WORKER
     model.load_state_dict(source_weights)
     lower = lower_branch(model, lower_state)
-    upper = None if upper_state is None else upper_branch(model)
+    upper = None if upper_state is None else upper_factory(model)
     if upper is not None:
         upper.load_state_dict(upper_state)
     policy_seed, lower_seed = source.scenario.spec.noise_seeds(args.optimizer_seed, seed, noise_seed)
     torch.manual_seed(policy_seed)
-    plan = plan_for_arm(arm, predictor, period, calibration, args)
+    plan = plan_factory(arm, predictor, period, calibration, args)
     scale = source.native.joint.scale_for(args)
     task = source.native.joint._make_task(env_id=args.env_id, seed=seed, horizon=args.horizon,
         **source.native.joint._task_options(args))
@@ -216,7 +217,9 @@ def load_lower_state(root, period, protocol=spec):
     return payload["weights"]
 
 
-def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify_fn=None):
+def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify_fn=None,
+        upper_factory=upper_branch, training_pair_fn=training_pair,
+        evaluation_group_fn=evaluation_group):
     if qualify_fn is None:
         qualify_fn = qualify
     if root not in protocol.roots(preflight=preflight):
@@ -235,7 +238,7 @@ def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify
             source_snapshot = copy.deepcopy(model.state_dict())
             source_weights = source.native.joint.inference_weights(model)
             lower_state = load_lower_state(root, period, protocol)
-            upper = upper_branch(model)
+            upper = upper_factory(model)
             histories = []
             for iteration, round_roles in enumerate(roles["training_rounds"], 1):
                 pair_groups = {}
@@ -243,7 +246,7 @@ def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify
                     roster = round_roles[name]
                     jobs = [(source_weights, lower_state, copy.deepcopy(upper.state_dict()), row["scenario_seed"], row["noise_seeds"],
                         period, predictor, calibrations[str(period)], args) for row in roster]
-                    pairs = list(pool.map(training_pair, jobs)); pair_groups[name[-1]] = pairs
+                    pairs = list(pool.map(training_pair_fn, jobs)); pair_groups[name[-1]] = pairs
                     for pair, registered in zip(pairs, roster):
                         if ([row["noise_seed"] for row in pair["rows"]] != registered["noise_seeds"]
                                 or any(row["seed"] != registered["scenario_seed"] for row in pair["rows"])
@@ -262,7 +265,7 @@ def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify
                 history["iteration"] = iteration; histories.append(history)
             evaluation = {variant: [] for variant in protocol.ARMS}
             for seed in roles["native_evaluation"]:
-                group = pool.submit(evaluation_group, (source_weights, lower_state, copy.deepcopy(upper.state_dict()), seed,
+                group = pool.submit(evaluation_group_fn, (source_weights, lower_state, copy.deepcopy(upper.state_dict()), seed,
                     period, predictor, calibrations[str(period)], args)).result()
                 if group["pairing"] != "passed": raise ValueError("upper residual pairing failed")
                 for variant, row in group["evaluation"].items():
@@ -276,7 +279,7 @@ def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify
                 cost["native_pair_checks"] += 1
             source.native.curves.support.assert_frozen(model, source_snapshot)
             cost["frozen_model_checks"] += 1
-            torch.testing.assert_close(upper.base.state_dict(), upper_branch(model).base.state_dict(), atol=0, rtol=0)
+            torch.testing.assert_close(upper.base.state_dict(), upper_factory(model).base.state_dict(), atol=0, rtol=0)
             if not preflight:
                 path = output.parent / "final_weights" / f"period_{period}_upper.pt"; path.parent.mkdir(parents=True, exist_ok=True)
                 torch.save({"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "period": period, "weights": upper.state_dict()}, path)
