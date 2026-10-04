@@ -107,10 +107,12 @@ def native_episode(source_weights, lower_state, upper_state, *, seed, noise_seed
                 duration=np.ones(args.horizon, dtype=np.int64), done=done)
             if upper_data["state"]:
                 upper_done = np.zeros(len(upper_data["state"]), dtype=np.float32); upper_done[-1] = 1.
+                upper_reward = np.asarray([np.sum(rewards[start:start + period])
+                    for start in range(0, args.horizon, period)], dtype=np.float32)
                 upper_batch = LevelTrajectoryBatch(
                     state=np.asarray(upper_data["state"], dtype=np.float32),
                     action=np.asarray(upper_data["action"], dtype=np.float32),
-                    reward=np.zeros(len(upper_data["state"]), dtype=np.float32),
+                    reward=upper_reward,
                     duration=np.ones(len(upper_data["state"]), dtype=np.int64), done=upper_done,
                     old_logp=np.asarray(upper_data["old_logp"], dtype=np.float32),
                     old_value=np.zeros(len(upper_data["state"]), dtype=np.float32))
@@ -136,7 +138,7 @@ def training_pair(job):
         "rows": [out[2] for out in outputs], "innovations": [out[3] for out in outputs], "pairing": "passed"}
 
 
-def score_upper(actor, pair_groups, *, horizon, period, cost):
+def score_upper(actor, pair_groups, *, horizon, period, cost, protocol=spec):
     """Compute separate paired MC score gradients for the registered A/B arms."""
     gradients, states, score_costs, signal_rms = {}, [], {}, {}
     decisions = horizon // period
@@ -152,7 +154,7 @@ def score_upper(actor, pair_groups, *, horizon, period, cost):
         upper = concat_level_batches(batches)
         repeated = np.repeat(signal, decisions)
         scored, score_cost = lower_training.residual_actor_gradients(actor, upper, {"scenario": repeated},
-            clip_ratio=.2, chunk_size=spec.CHUNK_SIZE)
+            clip_ratio=.2, chunk_size=protocol.CHUNK_SIZE)
         gradients[name] = scored["scenario"]
         states.append(upper.state)
         score_costs[name] = score_cost
@@ -180,11 +182,11 @@ def evaluation_group(job):
     return {"seed": seed, "evaluation": rows, "pairing": "passed"}
 
 
-def paired_effects(period, evaluation, seeds):
-    if set(evaluation) != set(spec.ARMS) or any([row["seed"] for row in rows] != seeds for rows in evaluation.values()):
+def paired_effects(period, evaluation, seeds, protocol=spec):
+    if set(evaluation) != set(protocol.ARMS) or any([row["seed"] for row in rows] != seeds for rows in evaluation.values()):
         raise ValueError("upper residual evaluation roster changed")
     return {f"{period}/{a}_minus_{b}": float(np.mean([x["episode_return"] - y["episode_return"]
-        for x, y in zip(evaluation[a], evaluation[b])])) for a, b in spec.CONTRASTS}
+        for x, y in zip(evaluation[a], evaluation[b])])) for a, b in protocol.CONTRASTS}
 
 
 def check_row(row, *, period, horizon, variant=None):
@@ -205,8 +207,8 @@ def check_row(row, *, period, horizon, variant=None):
         raise ValueError("upper residual evaluation variant changed")
 
 
-def load_lower_state(root, period):
-    path = spec.lower_checkpoint(root, period)
+def load_lower_state(root, period, protocol=spec):
+    path = protocol.lower_checkpoint(root, period)
     payload = torch.load(path, map_location="cpu", weights_only=False)
     if (payload.get("protocol"), payload.get("root"), payload.get("period"), payload.get("arm")) != (
             "pointmaze_option_residual_train_stage112_v1", root, period, "learned"):
@@ -214,23 +216,25 @@ def load_lower_state(root, period):
     return payload["weights"]
 
 
-def run(root, *, preflight, output):
-    if root not in spec.roots(preflight=preflight):
+def run(root, *, preflight, output, protocol=spec, score_fn=score_upper, qualify_fn=None):
+    if qualify_fn is None:
+        qualify_fn = qualify
+    if root not in protocol.roots(preflight=preflight):
         raise ValueError("upper residual root changed")
-    source_cell = json.loads(spec.source_result(root).read_text())
+    source_cell = json.loads(protocol.source_result(root).read_text())
     source.qualify(source_cell, preflight=False)
     models, predictor, _, calibrations = source.load_source(root)
-    args, roles, options = spec.arguments(root, preflight=preflight), spec.seed_roles(root, preflight=preflight), spec.options(preflight=preflight)
-    cost, groups = dict.fromkeys(spec.budget(preflight=preflight), 0), {}
+    args, roles, options = protocol.arguments(root, preflight=preflight), protocol.seed_roles(root, preflight=preflight), protocol.options(preflight=preflight)
+    cost, groups = dict.fromkeys(protocol.budget(preflight=preflight), 0), {}
     cost.update(source_cell_loads=1, source_clone_loads=len(models), lower_checkpoint_loads=len(models),
         upper_branch_initializations=len(models))
     with ProcessPoolExecutor(max_workers=options["workers"], mp_context=mp.get_context("spawn"),
             initializer=source.native.init_worker, initargs=(models["50"].config, args)) as pool:
-        for period in spec.PERIODS:
+        for period in protocol.PERIODS:
             model = models[str(period)]
             source_snapshot = copy.deepcopy(model.state_dict())
             source_weights = source.native.joint.inference_weights(model)
-            lower_state = load_lower_state(root, period)
+            lower_state = load_lower_state(root, period, protocol)
             upper = upper_branch(model)
             histories = []
             for iteration, round_roles in enumerate(roles["training_rounds"], 1):
@@ -253,10 +257,10 @@ def run(root, *, preflight, output):
                             cost["planning_fits"] += row["plan_ols_fits"]; cost["planning_predictions"] += row["plan_ridge_predictions"]
                             cost["planning_reference_calls"] += row["reference_evaluations"]; cost["planning_context_calls"] += row["actor_context_evaluations"]
                         cost["scenario_pair_checks"] += 1
-                score = score_upper(upper, pair_groups, horizon=args.horizon, period=period, cost=cost)
+                score = score_fn(upper, pair_groups, horizon=args.horizon, period=period, cost=cost, protocol=protocol)
                 history = lower_training.residual_update(upper, score, cost=cost)
                 history["iteration"] = iteration; histories.append(history)
-            evaluation = {variant: [] for variant in spec.ARMS}
+            evaluation = {variant: [] for variant in protocol.ARMS}
             for seed in roles["native_evaluation"]:
                 group = pool.submit(evaluation_group, (source_weights, lower_state, copy.deepcopy(upper.state_dict()), seed,
                     period, predictor, calibrations[str(period)], args)).result()
@@ -275,17 +279,18 @@ def run(root, *, preflight, output):
             torch.testing.assert_close(upper.base.state_dict(), upper_branch(model).base.state_dict(), atol=0, rtol=0)
             if not preflight:
                 path = output.parent / "final_weights" / f"period_{period}_upper.pt"; path.parent.mkdir(parents=True, exist_ok=True)
-                torch.save({"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "period": period, "weights": upper.state_dict()}, path)
+                torch.save({"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "period": period, "weights": upper.state_dict()}, path)
             cost["checkpoint_writes"] += int(not preflight)
-            groups[str(period)] = {"evaluation": evaluation, "effects": paired_effects(period, evaluation, roles["native_evaluation"]),
+            groups[str(period)] = {"evaluation": evaluation, "effects": paired_effects(period, evaluation, roles["native_evaluation"], protocol),
                 "history": histories, "source_and_lower_unchanged": "passed"}
-    if cost != spec.budget(preflight=preflight):
-        details = {k: (cost[k], spec.budget(preflight=preflight)[k]) for k in cost if cost[k] != spec.budget(preflight=preflight)[k]}
+    if cost != protocol.budget(preflight=preflight):
+        details = {k: (cost[k], protocol.budget(preflight=preflight)[k]) for k in cost if cost[k] != protocol.budget(preflight=preflight)[k]}
         raise ValueError(f"upper residual budget mismatch: {details}")
-    result = {"status": "complete", "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "root": root,
+    result = {"status": "complete", "protocol": protocol.EXPERIMENT_PROTOCOL, "contract": protocol.contract(), "root": root,
         "preflight": preflight, "seed_roles": roles, "cost": cost, "groups": groups}
+    qualify_fn(result, preflight=preflight)
     write_json(output, result); write_json(Path(output).parent / "completion" / "ready.json",
-        {"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
+        {"protocol": protocol.EXPERIMENT_PROTOCOL, "root": root, "preflight": preflight})
     return result
 
 
