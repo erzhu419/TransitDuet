@@ -20,3 +20,11 @@ Preflight is mechanical only: one root/query per period, 72 300-step episodes, 2
 extension or epsilon selection. Schedule dynamically on node001-node006; only logs/compact
 JSON return locally, no raw trajectories or checkpoints. A failed gain gate redirects work
 to the plan/lower interface, not another residual-capacity sweep.
+
+## Execution
+
+Implementation revision: `2d0f285d52`; 20 focused tests passed.
+Native preflight `t135429` and independent aggregation `t135430` passed mechanically.
+Frozen full run: `pointmaze_local_plan_gain_stage117_full_20261004_r1`, workers
+`t135432`-`t135439`, aggregation `t135440`. All eight workers launched; performance
+results are pending. No preflight metric was used to revise the full protocol.
