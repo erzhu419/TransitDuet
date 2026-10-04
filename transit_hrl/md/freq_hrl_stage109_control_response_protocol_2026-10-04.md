@@ -1,0 +1,11 @@
+# Stage109 Current-Lower Control Response
+
+Stage108 did not confirm learned-upper value over forecast or zero-mean noise. Before changing the upper objective, measure whether the inherited Stage97 scale is appropriate for the Stage107 optional-advice lower. The old bound used waypoint-clone command error; the current actor preserves all392 flat feedback features and has four separate advice inputs.
+
+All8 registered roots and both periods use the final Stage107 learned-hint lower and fixed Stage106 upper. Each trajectory executes only the causal forecast, with the existing task/reward/noise and H1200. Every fifth pre-action state is reused for all hypothetical advice inputs; physical feedback and history are identical. Decode with the exact existing Bernstein/tanh/world-clip/blend mapping at old alpha or alpha1. Probe upper mean, mean+std*z, zero-mean std*z, and +/-0.25 in each of four latent coordinates. Zero residual must exactly reproduce forecast. No probe action drives the environment.
+
+Report raw-mean and tanh-mean command response, fixed-covariance Gaussian KL (mean and q99), hint magnitude, and both singular values of the central-secant action-to-command Jacobian. The .001 reference is the previous lower-update scale, not a certified safety constraint. Root summaries have equal weight; no reward CI, scale selection, retraining, or inherited/new evidence pooling.
+
+Full:8 roots x2 periods x8 fresh paths =128 native episodes/153,600 steps;25 probes at240 states/path =768,000 hypothetical lower-mean rows. Preflight:1 root x2 periods x2 paths,H300, mechanical admission only. Both cohorts are frozen before preflight. Scheduler dynamic node001-006;pref3CPU/3GiB,full5CPU/4GiB,2/4 workers. Source checkpoint reads stay on server;pull compact JSON only. No new checkpoint or raw trajectory writes. Existing source preparation costs remain separate.
+
+This is a policy-response diagnostic, not closed-loop controllable gain or performance improvement. It can justify a separate current-lower calibration/action-conditioned study, but cannot turn Stage108 into a positive hierarchy result. Stage67 critic HOLD and prior negative evidence remain unchanged.
