@@ -1,0 +1,33 @@
+{
+  "run": "pointmaze_option_residual_diagnostic_stage112_full_20261004_r2",
+  "protocol": "pointmaze_option_residual_diagnostic_stage112_v1",
+  "source_revision": "868ea96d90",
+  "diagnostic_task": "t135152",
+  "status": "complete",
+  "raw_artifacts": "server_only",
+  "budget": {
+    "native_episodes": 128,
+    "native_steps": 153600,
+    "return_pairs": 64,
+    "checkpoint_loads": 4
+  },
+  "periods": {
+    "50": {
+      "return_difference": {"mean": 0.000003577056489234565, "ci": [-0.0000009088920220889918, 0.000008050901298517488]},
+      "advice_cosine": {"mean": 0.9988527800187117, "ci": [0.9987234201958575, 0.9989634981213299]},
+      "learned_advice_norm": 0.7110070267366797,
+      "forecast_advice_norm": 0.7112508851208235,
+      "learned_residual_correction_norm": 0.00932392044342123,
+      "forecast_residual_correction_norm": 0.009323837206466123
+    },
+    "100": {
+      "return_difference": {"mean": 0.000006036255754793274, "ci": [-0.000006138038467717877, 0.00001920142822736087]},
+      "advice_cosine": {"mean": 0.9987213478715407, "ci": [0.9985409941130023, 0.9988768603141287]},
+      "learned_advice_norm": 0.9130687660602677,
+      "forecast_advice_norm": 0.9133196220837437,
+      "learned_residual_correction_norm": 0.015906456450466067,
+      "forecast_residual_correction_norm": 0.015906407963484526
+    }
+  },
+  "interpretation": "Learned and forecast branches are operationally indistinguishable in advice geometry and residual correction; no return improvement is supported."
+}

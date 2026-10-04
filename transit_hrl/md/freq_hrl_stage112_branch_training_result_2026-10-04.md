@@ -20,6 +20,12 @@ The branch gain gate required learned to beat blind, causal forecast, and learne
 
 The learned residual therefore adds useful action correction over blind advice, but the learned plan does not outperform the causal forecast. Upper learning is withheld. This is a valid negative result, not evidence for end-to-end learned promotion or full actor-critic HRL.
 
+## Diagnostic
+
+A frozen follow-up compared the final learned and forecast branches on 32 fresh paired episodes per period. Advice cosine was `0.998853` at period 50 and `0.998721` at period 100. Advice norms and residual correction norms were also effectively identical. Learned minus forecast return was `+0.00000358` with CI `[-0.00000091, +0.00000805]` at period 50 and `+0.00000604` with CI `[-0.00000614, +0.00001920]` at period 100.
+
+The current learned branch is therefore operationally forecast-equivalent in this protocol. The residual learner is active relative to blind advice, but the learned plan does not provide a distinguishable control signal.
+
 ## Next Step
 
-Do not reopen upper training. First run a compact frozen diagnostic comparing learned and forecast plan/action contexts and their residual readout outputs under the same paired paths. The purpose is to determine whether the failure is indistinguishable plan context, residual collapse to the forecast branch, or a genuinely inferior learned plan. Only a pre-registered diagnostic-supported change should justify another training cohort.
+Do not reopen upper training or claim end-to-end promotion. Any next cohort must first change the plan representation or training signal so learned and forecast plans are causally distinguishable, then preregister a new ablation. Tuning the gate or adding seeds to this collapsed branch is not justified.
