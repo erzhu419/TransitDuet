@@ -9,3 +9,5 @@ The4 primary descriptive means are tiny and mixed:50 learned-minus-forecast -0.0
 See [compact evidence](../results/pointmaze_crossed_advice_stage108_preflight_20261004_r1/compact_summary.json) and [frozen full protocol](../results/pointmaze_crossed_advice_stage108_full_20261004_r1/preregistration.json). Next:unchanged8-root fixed-policy execution,4,096 episodes/4,915,200 steps;all20 contrasts and4 primary corrected CI bounds. No Stage107 pooling or rescue tuning.
 
 Full dispatch: `t134562-t134569` running on node001 (40 requested CPU total,no node pins,all node001-006 eligible); `t134570` waits for all8 roots. See [roster](../results/pointmaze_crossed_advice_stage108_full_20261004_r1/task_roster.json). This is scheduler placement,not a protocol change.
+
+Terminal follow-up: all9 tasks done/exit0; [full result](freq_hrl_stage108_crossed_advice_result_2026-10-04.md) is not_supported. The dispatch sentence above records the earlier launch snapshot.
