@@ -1,0 +1,30 @@
+{
+  "run": "pointmaze_option_residual_train_stage112_preflight_20261004_r1",
+  "worker_task": "t135137",
+  "qualification_task": "t135122",
+  "source_revision": "811f46f143",
+  "status": "preflight_passed",
+  "mechanical_gate": "passed",
+  "branch_gain_gate": "mechanical_only",
+  "performance_claim": "branch_only_learned_advice_gain_with_advice_blinded_ablation",
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "cost": {
+    "native_episodes": 240,
+    "native_steps": 72000,
+    "native_upper_calls": 324,
+    "training_episodes": 192,
+    "evaluation_episodes": 48,
+    "residual_parameter_updates": 12,
+    "residual_fisher_batches": 60,
+    "planning_renewals": 648
+  },
+  "endpoint_means": {
+    "50/learned_minus_blind": 0.00020091927041221425,
+    "50/learned_minus_forecast": -0.000003853191969938052,
+    "50/learned_minus_learned_blinded": 0.00023868095215107132,
+    "100/learned_minus_blind": -0.0008737447937789966,
+    "100/learned_minus_forecast": -0.000005204615817433478,
+    "100/learned_minus_learned_blinded": -0.0005701799170765298
+  },
+  "raw_artifacts": "server_only"
+}
