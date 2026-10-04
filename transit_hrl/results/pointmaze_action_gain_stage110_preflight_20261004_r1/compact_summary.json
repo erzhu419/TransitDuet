@@ -1,0 +1,422 @@
+{
+  "status": "preflight_passed",
+  "protocol": "pointmaze_action_gain_stage110_v1",
+  "contract": {
+    "source": "pointmaze_control_response_stage109_v1",
+    "donors": "all8_Stage107_final_learned_hint_lowers_fixed_Stage106_upper",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "forecast",
+      "blind",
+      "zero",
+      "mean",
+      "axis0_plus",
+      "axis0_minus",
+      "axis1_plus",
+      "axis1_minus",
+      "axis2_plus",
+      "axis2_minus",
+      "axis3_plus",
+      "axis3_minus"
+    ],
+    "feedback": "all392_flat_features_plus4_advice_same396_actor398_value",
+    "upper": "deterministic_current_mean_with_fixed_plus_minus0.25_coordinate_offset_every_renewal_std_unchanged_unused",
+    "decoder": "existing_Bernstein_tanh_clip_full_alpha1_no_scale_search_zero_action_exact_forecast",
+    "lower": "same_frozen_learned_hint_lower_original_stochastic_Gaussian_box_action_paired_per_step_noise",
+    "panels": "fresh_disjoint_A_B8_paths_each_per_root_period_pref2_no_candidate_selection",
+    "statistics": "36_equal_root_pooled_panel_effects_bootstrap65536_Bonferroni36_seed110_110110",
+    "directional_signal": "central_slope_Rplus_minus_Rminus_over2epsilon_curvature_Rplus_plus_Rminus_minus2Rmean_overepsilon_squared",
+    "gain_gate": "per_period_any_direction_minus_forecast_corrected_CI_positive_with_matching_nonzero_slope_CI_and_same_sign_A_B_equal_root_slopes",
+    "decision": "diagnostic_gain_detected_both_periods_partial_or_not_supported_no_production_action_selection",
+    "admission": "frozen_pref_full_before_native_pref_mechanical_admission_only",
+    "artifacts": "no_training_checkpoint_or_trace_writes_temporary_pair_audits_discarded_server_compact_JSON_pull",
+    "limits": "whole_episode_upper_bias_direction_diagnostic_not_local_Q_learned_policy_superiority_or_frequency_superiority"
+  },
+  "mechanical_gate": "passed",
+  "root_rows": [
+    {
+      "root": 410011,
+      "cost": {
+        "actor_context_evaluations": 26400,
+        "external_measurement_pair_checks": 88,
+        "initial_feedback_pair_checks": 88,
+        "lower_innovation_pair_checks": 88,
+        "native_episodes": 96,
+        "native_lower_calls": 28800,
+        "native_network_checks": 96,
+        "native_pair_groups": 8,
+        "native_steps": 28800,
+        "native_upper_calls": 324,
+        "plan_ols_fits": 308,
+        "plan_renewals": 396,
+        "plan_ridge_predictions": 308,
+        "reference_evaluations": 26400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 8
+      },
+      "wall_seconds": 25.76055845199153,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -4.663656909542624e-7,
+            "50/axis0_minus_minus_forecast": 0.000493835448878599,
+            "50/axis0_plus_minus_forecast": -0.000016724366631137855,
+            "50/axis0_slope": -0.0010211196310194737,
+            "50/axis1_curvature": -0.0006987914689489116,
+            "50/axis1_minus_minus_forecast": 0.003152026861883428,
+            "50/axis1_plus_minus_forecast": -0.002718561098589589,
+            "50/axis1_slope": -0.011741175920946034,
+            "50/axis2_curvature": -0.000003381839178473456,
+            "50/axis2_minus_minus_forecast": -0.0000486602582299156,
+            "50/axis2_plus_minus_forecast": 0.0005255891233844068,
+            "50/axis2_slope": 0.0011484987632286447,
+            "50/axis3_curvature": 0.00007314402228075778,
+            "50/axis3_minus_minus_forecast": -0.002200782318794836,
+            "50/axis3_plus_minus_forecast": 0.002682494050333162,
+            "50/axis3_slope": 0.009766552738255996,
+            "50/forecast_minus_blind": 0.00035679370429875235,
+            "50/mean_minus_forecast": 0.0002385701150586783
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": -0.0000087707467173459,
+              "50/axis0_minus_minus_forecast": 0.0005796798616017895,
+              "50/axis0_plus_minus_forecast": 0.0002020667550084454,
+              "50/axis0_slope": -0.0007552262131866883,
+              "50/axis1_curvature": -0.0008848238721839152,
+              "50/axis1_minus_minus_forecast": 0.0022602310985178065,
+              "50/axis1_plus_minus_forecast": -0.0015332378022776538,
+              "50/axis1_slope": -0.007586937801590921,
+              "50/axis2_curvature": 0.000002166857484553475,
+              "50/axis2_minus_minus_forecast": 0.00048053194831254586,
+              "50/axis2_plus_minus_forecast": 0.00030189826853188606,
+              "50/axis2_slope": -0.0003572673595613196,
+              "50/axis3_curvature": -0.00006080146340536885,
+              "50/axis3_minus_minus_forecast": 0.000624089566343855,
+              "50/axis3_plus_minus_forecast": 0.00015440513047337845,
+              "50/axis3_slope": -0.0009393688717409532,
+              "50/forecast_minus_blind": -0.00007618597541636518,
+              "50/mean_minus_forecast": 0.0003911473941400345
+            },
+            "B": {
+              "50/axis0_curvature": 0.000007838015335437376,
+              "50/axis0_minus_minus_forecast": 0.00040799103615540844,
+              "50/axis0_plus_minus_forecast": -0.0002355154882707211,
+              "50/axis0_slope": -0.001287013048852259,
+              "50/axis1_curvature": -0.0005127590657139081,
+              "50/axis1_minus_minus_forecast": 0.0040438226252490495,
+              "50/axis1_plus_minus_forecast": -0.0039038843949015245,
+              "50/axis1_slope": -0.015895414040301148,
+              "50/axis2_curvature": -0.000008930535841500387,
+              "50/axis2_minus_minus_forecast": -0.0005778524647723771,
+              "50/axis2_plus_minus_forecast": 0.0007492799782369275,
+              "50/axis2_slope": 0.002654264886018609,
+              "50/axis3_curvature": 0.0002070895079668844,
+              "50/axis3_minus_minus_forecast": -0.005025654203933527,
+              "50/axis3_plus_minus_forecast": 0.005210582970192945,
+              "50/axis3_slope": 0.020472474348252945,
+              "50/forecast_minus_blind": 0.0007897733840138699,
+              "50/mean_minus_forecast": 0.0000859928359773221
+            }
+          },
+          "max_lower_innovation_pair_error": 0.0000011920928955078125
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.00002260946530441288,
+            "100/axis0_minus_minus_forecast": 0.0004067426451541678,
+            "100/axis0_plus_minus_forecast": -0.00006219434332876972,
+            "100/axis0_slope": -0.000937873976965875,
+            "100/axis1_curvature": -0.0002917232145591697,
+            "100/axis1_minus_minus_forecast": 0.0015085524889144608,
+            "100/axis1_plus_minus_forecast": -0.001180823796417485,
+            "100/axis1_slope": -0.005378752570663892,
+            "100/axis2_curvature": -0.00000352706365447375,
+            "100/axis2_minus_minus_forecast": -0.00031864274370718704,
+            "100/axis2_plus_minus_forecast": 0.0006643836956357063,
+            "100/axis2_slope": 0.0019660528786857867,
+            "100/axis3_curvature": -0.00009372075692226645,
+            "100/axis3_minus_minus_forecast": -0.0008511512573647906,
+            "100/axis3_plus_minus_forecast": 0.001191255103449862,
+            "100/axis3_slope": 0.004084812721629305,
+            "100/forecast_minus_blind": 0.00156485397758388,
+            "100/mean_minus_forecast": 0.00017298069670346194
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.00002244563256681431,
+              "100/axis0_minus_minus_forecast": 0.0003514772464541238,
+              "100/axis0_plus_minus_forecast": 0.00006461179759753577,
+              "100/axis0_slope": -0.0005737308977131761,
+              "100/axis1_curvature": -0.0003753337387024658,
+              "100/axis1_minus_minus_forecast": 0.0018925638230200548,
+              "100/axis1_plus_minus_forecast": -0.0014985302856018734,
+              "100/axis1_slope": -0.006782188217243856,
+              "100/axis2_curvature": -0.0000016984176909318194,
+              "100/axis2_minus_minus_forecast": -0.00010309205737257798,
+              "100/axis2_plus_minus_forecast": 0.0005204778023824019,
+              "100/axis2_slope": 0.0012471397195099598,
+              "100/axis3_curvature": -0.00004794666801899439,
+              "100/axis3_minus_minus_forecast": -0.00040917806580864635,
+              "100/axis3_plus_minus_forecast": 0.0008236732951445447,
+              "100/axis3_slope": 0.002465702721906382,
+              "100/forecast_minus_blind": 0.0000743814330803616,
+              "100/mean_minus_forecast": 0.00020874594804354274
+            },
+            "B": {
+              "100/axis0_curvature": -0.000022773298042011447,
+              "100/axis0_minus_minus_forecast": 0.0004620080438542118,
+              "100/axis0_plus_minus_forecast": -0.0001890004842550752,
+              "100/axis0_slope": -0.001302017056218574,
+              "100/axis1_curvature": -0.00020811269041587366,
+              "100/axis1_minus_minus_forecast": 0.0011245411548088668,
+              "100/axis1_plus_minus_forecast": -0.0008631173072330967,
+              "100/axis1_slope": -0.003975316924083927,
+              "100/axis2_curvature": -0.0000053557096180156805,
+              "100/axis2_minus_minus_forecast": -0.0005341934300417961,
+              "100/axis2_plus_minus_forecast": 0.0008082895888890107,
+              "100/axis2_slope": 0.0026849660378616136,
+              "100/axis3_curvature": -0.0001394948458255385,
+              "100/axis3_minus_minus_forecast": -0.0012931244489209348,
+              "100/axis3_plus_minus_forecast": 0.0015588369117551792,
+              "100/axis3_slope": 0.005703922721352228,
+              "100/forecast_minus_blind": 0.003055326522087398,
+              "100/mean_minus_forecast": 0.00013721544536338115
+            }
+          },
+          "max_lower_innovation_pair_error": 0.0000011920928955078125
+        }
+      }
+    }
+  ],
+  "endpoints": {
+    "50/mean_minus_forecast": {
+      "mean": 0.0002385701150586783
+    },
+    "50/axis0_plus_minus_forecast": {
+      "mean": -0.000016724366631137855
+    },
+    "50/axis0_minus_minus_forecast": {
+      "mean": 0.000493835448878599
+    },
+    "50/axis1_plus_minus_forecast": {
+      "mean": -0.002718561098589589
+    },
+    "50/axis1_minus_minus_forecast": {
+      "mean": 0.003152026861883428
+    },
+    "50/axis2_plus_minus_forecast": {
+      "mean": 0.0005255891233844068
+    },
+    "50/axis2_minus_minus_forecast": {
+      "mean": -0.0000486602582299156
+    },
+    "50/axis3_plus_minus_forecast": {
+      "mean": 0.002682494050333162
+    },
+    "50/axis3_minus_minus_forecast": {
+      "mean": -0.002200782318794836
+    },
+    "50/axis0_slope": {
+      "mean": -0.0010211196310194737
+    },
+    "50/axis1_slope": {
+      "mean": -0.011741175920946034
+    },
+    "50/axis2_slope": {
+      "mean": 0.0011484987632286447
+    },
+    "50/axis3_slope": {
+      "mean": 0.009766552738255996
+    },
+    "50/axis0_curvature": {
+      "mean": -4.663656909542624e-7
+    },
+    "50/axis1_curvature": {
+      "mean": -0.0006987914689489116
+    },
+    "50/axis2_curvature": {
+      "mean": -0.000003381839178473456
+    },
+    "50/axis3_curvature": {
+      "mean": 0.00007314402228075778
+    },
+    "50/forecast_minus_blind": {
+      "mean": 0.00035679370429875235
+    },
+    "100/mean_minus_forecast": {
+      "mean": 0.00017298069670346194
+    },
+    "100/axis0_plus_minus_forecast": {
+      "mean": -0.00006219434332876972
+    },
+    "100/axis0_minus_minus_forecast": {
+      "mean": 0.0004067426451541678
+    },
+    "100/axis1_plus_minus_forecast": {
+      "mean": -0.001180823796417485
+    },
+    "100/axis1_minus_minus_forecast": {
+      "mean": 0.0015085524889144608
+    },
+    "100/axis2_plus_minus_forecast": {
+      "mean": 0.0006643836956357063
+    },
+    "100/axis2_minus_minus_forecast": {
+      "mean": -0.00031864274370718704
+    },
+    "100/axis3_plus_minus_forecast": {
+      "mean": 0.001191255103449862
+    },
+    "100/axis3_minus_minus_forecast": {
+      "mean": -0.0008511512573647906
+    },
+    "100/axis0_slope": {
+      "mean": -0.000937873976965875
+    },
+    "100/axis1_slope": {
+      "mean": -0.005378752570663892
+    },
+    "100/axis2_slope": {
+      "mean": 0.0019660528786857867
+    },
+    "100/axis3_slope": {
+      "mean": 0.004084812721629305
+    },
+    "100/axis0_curvature": {
+      "mean": -0.00002260946530441288
+    },
+    "100/axis1_curvature": {
+      "mean": -0.0002917232145591697
+    },
+    "100/axis2_curvature": {
+      "mean": -0.00000352706365447375
+    },
+    "100/axis3_curvature": {
+      "mean": -0.00009372075692226645
+    },
+    "100/forecast_minus_blind": {
+      "mean": 0.00156485397758388
+    }
+  },
+  "cost": {
+    "native_episodes": 96,
+    "native_steps": 28800,
+    "native_lower_calls": 28800,
+    "native_upper_calls": 324,
+    "plan_renewals": 396,
+    "plan_ols_fits": 308,
+    "plan_ridge_predictions": 308,
+    "reference_evaluations": 26400,
+    "actor_context_evaluations": 26400,
+    "native_network_checks": 96,
+    "native_pair_groups": 8,
+    "initial_feedback_pair_checks": 88,
+    "external_measurement_pair_checks": 88,
+    "lower_innovation_pair_checks": 88,
+    "zero_forecast_command_checks": 8,
+    "source_freeze_checks": 2
+  },
+  "native_trial_prerequisite": "Stage67_critic_HOLD_unchanged",
+  "performance_claim": "frozen_whole_episode_bias_direction_gain_not_a_learned_HRL_policy_or_local_Q",
+  "equal_root_panel_effects": {
+    "A": {
+      "50/mean_minus_forecast": 0.0003911473941400345,
+      "50/axis0_plus_minus_forecast": 0.0002020667550084454,
+      "50/axis0_minus_minus_forecast": 0.0005796798616017895,
+      "50/axis1_plus_minus_forecast": -0.0015332378022776538,
+      "50/axis1_minus_minus_forecast": 0.0022602310985178065,
+      "50/axis2_plus_minus_forecast": 0.00030189826853188606,
+      "50/axis2_minus_minus_forecast": 0.00048053194831254586,
+      "50/axis3_plus_minus_forecast": 0.00015440513047337845,
+      "50/axis3_minus_minus_forecast": 0.000624089566343855,
+      "50/axis0_slope": -0.0007552262131866883,
+      "50/axis1_slope": -0.007586937801590921,
+      "50/axis2_slope": -0.0003572673595613196,
+      "50/axis3_slope": -0.0009393688717409532,
+      "50/axis0_curvature": -0.0000087707467173459,
+      "50/axis1_curvature": -0.0008848238721839152,
+      "50/axis2_curvature": 0.000002166857484553475,
+      "50/axis3_curvature": -0.00006080146340536885,
+      "50/forecast_minus_blind": -0.00007618597541636518,
+      "100/mean_minus_forecast": 0.00020874594804354274,
+      "100/axis0_plus_minus_forecast": 0.00006461179759753577,
+      "100/axis0_minus_minus_forecast": 0.0003514772464541238,
+      "100/axis1_plus_minus_forecast": -0.0014985302856018734,
+      "100/axis1_minus_minus_forecast": 0.0018925638230200548,
+      "100/axis2_plus_minus_forecast": 0.0005204778023824019,
+      "100/axis2_minus_minus_forecast": -0.00010309205737257798,
+      "100/axis3_plus_minus_forecast": 0.0008236732951445447,
+      "100/axis3_minus_minus_forecast": -0.00040917806580864635,
+      "100/axis0_slope": -0.0005737308977131761,
+      "100/axis1_slope": -0.006782188217243856,
+      "100/axis2_slope": 0.0012471397195099598,
+      "100/axis3_slope": 0.002465702721906382,
+      "100/axis0_curvature": -0.00002244563256681431,
+      "100/axis1_curvature": -0.0003753337387024658,
+      "100/axis2_curvature": -0.0000016984176909318194,
+      "100/axis3_curvature": -0.00004794666801899439,
+      "100/forecast_minus_blind": 0.0000743814330803616
+    },
+    "B": {
+      "50/mean_minus_forecast": 0.0000859928359773221,
+      "50/axis0_plus_minus_forecast": -0.0002355154882707211,
+      "50/axis0_minus_minus_forecast": 0.00040799103615540844,
+      "50/axis1_plus_minus_forecast": -0.0039038843949015245,
+      "50/axis1_minus_minus_forecast": 0.0040438226252490495,
+      "50/axis2_plus_minus_forecast": 0.0007492799782369275,
+      "50/axis2_minus_minus_forecast": -0.0005778524647723771,
+      "50/axis3_plus_minus_forecast": 0.005210582970192945,
+      "50/axis3_minus_minus_forecast": -0.005025654203933527,
+      "50/axis0_slope": -0.001287013048852259,
+      "50/axis1_slope": -0.015895414040301148,
+      "50/axis2_slope": 0.002654264886018609,
+      "50/axis3_slope": 0.020472474348252945,
+      "50/axis0_curvature": 0.000007838015335437376,
+      "50/axis1_curvature": -0.0005127590657139081,
+      "50/axis2_curvature": -0.000008930535841500387,
+      "50/axis3_curvature": 0.0002070895079668844,
+      "50/forecast_minus_blind": 0.0007897733840138699,
+      "100/mean_minus_forecast": 0.00013721544536338115,
+      "100/axis0_plus_minus_forecast": -0.0001890004842550752,
+      "100/axis0_minus_minus_forecast": 0.0004620080438542118,
+      "100/axis1_plus_minus_forecast": -0.0008631173072330967,
+      "100/axis1_minus_minus_forecast": 0.0011245411548088668,
+      "100/axis2_plus_minus_forecast": 0.0008082895888890107,
+      "100/axis2_minus_minus_forecast": -0.0005341934300417961,
+      "100/axis3_plus_minus_forecast": 0.0015588369117551792,
+      "100/axis3_minus_minus_forecast": -0.0012931244489209348,
+      "100/axis0_slope": -0.001302017056218574,
+      "100/axis1_slope": -0.003975316924083927,
+      "100/axis2_slope": 0.0026849660378616136,
+      "100/axis3_slope": 0.005703922721352228,
+      "100/axis0_curvature": -0.000022773298042011447,
+      "100/axis1_curvature": -0.00020811269041587366,
+      "100/axis2_curvature": -0.0000053557096180156805,
+      "100/axis3_curvature": -0.0001394948458255385,
+      "100/forecast_minus_blind": 0.003055326522087398
+    }
+  },
+  "eligible_diagnostic_directions": {
+    "50": [],
+    "100": []
+  },
+  "closed_loop_gain": "mechanical_only",
+  "run_name": "pointmaze_action_gain_stage110_preflight_20261004_r1",
+  "pull_policy": "compact_qualified_summary_only_no_state_trace_or_checkpoint"
+}

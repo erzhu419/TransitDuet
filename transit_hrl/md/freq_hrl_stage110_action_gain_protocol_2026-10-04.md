@@ -11,3 +11,5 @@ Full budget:3,072 episodes/3,686,400 steps,41,472 upper calls. Scheduler dynamic
 ## Limitations
 
 This is a whole-episode upper-bias direction diagnostic,not a local action-conditioned Q,learned-policy advantage,or frequency-superiority claim. It changes deployment from old stochastic/attenuated upper execution and is a separate development protocol;do not pool it with Stage108. Gain magnitude must be reported even when statistically detectable. Stage67 critic HOLD remains unchanged.
+
+Six focused tests passed. Native preflight t134593 on node005 passed all96 episodes/28,800 steps,including8 forecast/zero command identities and88 actual lower-innovation pairs;max innovation mismatch1.192e-6. [Preflight compact](../results/pointmaze_action_gain_stage110_preflight_20261004_r1/compact_summary.json). The previously frozen full cohort is admitted mechanically without inspecting reward signs for selection.
