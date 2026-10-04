@@ -1,0 +1,1904 @@
+{
+  "status": "complete",
+  "protocol": "pointmaze_action_gain_stage110_v1",
+  "contract": {
+    "source": "pointmaze_control_response_stage109_v1",
+    "donors": "all8_Stage107_final_learned_hint_lowers_fixed_Stage106_upper",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "forecast",
+      "blind",
+      "zero",
+      "mean",
+      "axis0_plus",
+      "axis0_minus",
+      "axis1_plus",
+      "axis1_minus",
+      "axis2_plus",
+      "axis2_minus",
+      "axis3_plus",
+      "axis3_minus"
+    ],
+    "feedback": "all392_flat_features_plus4_advice_same396_actor398_value",
+    "upper": "deterministic_current_mean_with_fixed_plus_minus0.25_coordinate_offset_every_renewal_std_unchanged_unused",
+    "decoder": "existing_Bernstein_tanh_clip_full_alpha1_no_scale_search_zero_action_exact_forecast",
+    "lower": "same_frozen_learned_hint_lower_original_stochastic_Gaussian_box_action_paired_per_step_noise",
+    "panels": "fresh_disjoint_A_B8_paths_each_per_root_period_pref2_no_candidate_selection",
+    "statistics": "36_equal_root_pooled_panel_effects_bootstrap65536_Bonferroni36_seed110_110110",
+    "directional_signal": "central_slope_Rplus_minus_Rminus_over2epsilon_curvature_Rplus_plus_Rminus_minus2Rmean_overepsilon_squared",
+    "gain_gate": "per_period_any_direction_minus_forecast_corrected_CI_positive_with_matching_nonzero_slope_CI_and_same_sign_A_B_equal_root_slopes",
+    "decision": "diagnostic_gain_detected_both_periods_partial_or_not_supported_no_production_action_selection",
+    "admission": "frozen_pref_full_before_native_pref_mechanical_admission_only",
+    "artifacts": "no_training_checkpoint_or_trace_writes_temporary_pair_audits_discarded_server_compact_JSON_pull",
+    "limits": "whole_episode_upper_bias_direction_diagnostic_not_local_Q_learned_policy_superiority_or_frequency_superiority"
+  },
+  "mechanical_gate": "passed",
+  "root_rows": [
+    {
+      "root": 410011,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 147.71797972777858,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -0.00003020764552275068,
+            "50/axis0_minus_minus_forecast": -0.0002797531430616118,
+            "50/axis0_plus_minus_forecast": -0.00031033276603409377,
+            "50/axis0_slope": -0.00006115924594496391,
+            "50/axis1_curvature": 0.00012438462408681517,
+            "50/axis1_minus_minus_forecast": -0.0012974985010600903,
+            "50/axis1_plus_minus_forecast": 0.0007170746087439284,
+            "50/axis1_slope": 0.004029146219608037,
+            "50/axis2_curvature": 0.00001074034071280039,
+            "50/axis2_minus_minus_forecast": -0.00019349167878601747,
+            "50/axis2_plus_minus_forecast": -0.0003940349812552313,
+            "50/axis2_slope": -0.0004010866049384276,
+            "50/axis3_curvature": 0.00006775066003683605,
+            "50/axis3_minus_minus_forecast": 0.003586251417473818,
+            "50/axis3_plus_minus_forecast": -0.004170214932514682,
+            "50/axis3_slope": -0.015512932699977,
+            "50/forecast_minus_blind": 0.0037749733580909606,
+            "50/mean_minus_forecast": -0.00029409896565368854
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": -0.000022344791432260536,
+              "50/axis0_minus_minus_forecast": 0.00010394197818186512,
+              "50/axis0_plus_minus_forecast": -0.00017971950100559297,
+              "50/axis0_slope": -0.0005673229583749162,
+              "50/axis1_curvature": -0.00027552986193768447,
+              "50/axis1_minus_minus_forecast": -0.0006904432408703087,
+              "50/axis1_plus_minus_forecast": 0.000598841651026305,
+              "50/axis1_slope": 0.0025785697837932275,
+              "50/axis2_curvature": -0.000003376462700543925,
+              "50/axis2_minus_minus_forecast": 0.00008578377381240898,
+              "50/axis2_plus_minus_forecast": -0.00016037577614724796,
+              "50/axis2_slope": -0.0004923190999193139,
+              "50/axis3_curvature": -0.00016589050301263342,
+              "50/axis3_minus_minus_forecast": 0.0026708449900070264,
+              "50/axis3_plus_minus_forecast": -0.0027555941198329492,
+              "50/axis3_slope": -0.010852878219679951,
+              "50/forecast_minus_blind": 0.003160235010255974,
+              "50/mean_minus_forecast": -0.00003719048669381664
+            },
+            "B": {
+              "50/axis0_curvature": -0.00003807049961324083,
+              "50/axis0_minus_minus_forecast": -0.0006634482643050887,
+              "50/axis0_plus_minus_forecast": -0.00044094603106259456,
+              "50/axis0_slope": 0.00044500446648498837,
+              "50/axis1_curvature": 0.0005242991101113148,
+              "50/axis1_minus_minus_forecast": -0.001904553761249872,
+              "50/axis1_plus_minus_forecast": 0.0008353075664615517,
+              "50/axis1_slope": 0.005479722655422847,
+              "50/axis2_curvature": 0.000024857144126144703,
+              "50/axis2_minus_minus_forecast": -0.00047276713138444393,
+              "50/axis2_plus_minus_forecast": -0.0006276941863632146,
+              "50/axis2_slope": -0.00030985410995754137,
+              "50/axis3_curvature": 0.0003013918230863055,
+              "50/axis3_minus_minus_forecast": 0.00450165784494061,
+              "50/axis3_plus_minus_forecast": -0.005584835745196415,
+              "50/axis3_slope": -0.02017298718027405,
+              "50/forecast_minus_blind": 0.004389711705925947,
+              "50/mean_minus_forecast": -0.0005510074446135604
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1150.8032438793389,
+            "blind": 1150.7994689059806,
+            "zero": 1150.8032438793389,
+            "mean": 1150.8029497803732,
+            "axis0_plus": 1150.8029335465728,
+            "axis0_minus": 1150.8029641261958,
+            "axis1_plus": 1150.8039609539476,
+            "axis1_minus": 1150.801946380838,
+            "axis2_plus": 1150.8028498443575,
+            "axis2_minus": 1150.8030503876603,
+            "axis3_plus": 1150.7990736644065,
+            "axis3_minus": 1150.8068301307562
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": 0.000023422700451192213,
+            "100/axis0_minus_minus_forecast": 0.0006101136189613499,
+            "100/axis0_plus_minus_forecast": -0.0005505525932676392,
+            "100/axis0_slope": -0.002321332424457978,
+            "100/axis1_curvature": 0.00021708008853238425,
+            "100/axis1_minus_minus_forecast": -0.0011856144546555925,
+            "100/axis1_plus_minus_forecast": 0.001257279067161221,
+            "100/axis1_slope": 0.004885787043633627,
+            "100/axis2_curvature": -0.000014412149539566599,
+            "100/axis2_minus_minus_forecast": -0.0001243045243626284,
+            "100/axis2_plus_minus_forecast": 0.0001815008719177058,
+            "100/axis2_slope": 0.0006116107925606684,
+            "100/axis3_curvature": 0.000008022536349017173,
+            "100/axis3_minus_minus_forecast": 0.0014222647114365827,
+            "100/axis3_plus_minus_forecast": -0.0013636661960276797,
+            "100/axis3_slope": -0.005571861814928525,
+            "100/forecast_minus_blind": 0.006608347468173292,
+            "100/mean_minus_forecast": 0.000029048553457755588
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.000046721348553546704,
+              "100/axis0_minus_minus_forecast": 0.0007089592152738078,
+              "100/axis0_plus_minus_forecast": -0.0005731905201002974,
+              "100/axis0_slope": -0.0025642994707482103,
+              "100/axis1_curvature": -0.00021493688200280303,
+              "100/axis1_minus_minus_forecast": -0.0006021783778464851,
+              "100/axis1_plus_minus_forecast": 0.0007274336022931038,
+              "100/axis1_slope": 0.002659223960279178,
+              "100/axis2_curvature": -0.00002849806878657546,
+              "100/axis2_minus_minus_forecast": -0.00032983686878651497,
+              "100/axis2_plus_minus_forecast": 0.0004667445189738828,
+              "100/axis2_slope": 0.0015931627755207955,
+              "100/axis3_curvature": -0.00005667527784680715,
+              "100/axis3_minus_minus_forecast": 0.0011685986050053998,
+              "100/axis3_plus_minus_forecast": -0.0010334520304695616,
+              "100/axis3_slope": -0.004404101270949923,
+              "100/forecast_minus_blind": 0.004328031292828882,
+              "100/mean_minus_forecast": 0.0000693443897432644
+            },
+            "B": {
+              "100/axis0_curvature": 0.00009356674945593113,
+              "100/axis0_minus_minus_forecast": 0.0005112680226488919,
+              "100/axis0_plus_minus_forecast": -0.000527914666434981,
+              "100/axis0_slope": -0.002078365378167746,
+              "100/axis1_curvature": 0.0006490970590675715,
+              "100/axis1_minus_minus_forecast": -0.0017690505314646998,
+              "100/axis1_plus_minus_forecast": 0.0017871245320293383,
+              "100/axis1_slope": 0.007112350126988076,
+              "100/axis2_curvature": -3.262302925577387e-7,
+              "100/axis2_minus_minus_forecast": 0.00008122782006125817,
+              "100/axis2_plus_minus_forecast": -0.00010374277513847119,
+              "100/axis2_slope": -0.0003699411903994587,
+              "100/axis3_curvature": 0.0000727203505448415,
+              "100/axis3_minus_minus_forecast": 0.0016759308178677657,
+              "100/axis3_plus_minus_forecast": -0.0016938803615857978,
+              "100/axis3_slope": -0.006739622358907127,
+              "100/forecast_minus_blind": 0.008888663643517702,
+              "100/mean_minus_forecast": -0.000011247282827753224
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1145.0178819553767,
+            "blind": 1145.0112736079086,
+            "zero": 1145.0178819553767,
+            "mean": 1145.01791100393,
+            "axis0_plus": 1145.0173314027834,
+            "axis0_minus": 1145.0184920689958,
+            "axis1_plus": 1145.0191392344439,
+            "axis1_minus": 1145.016696340922,
+            "axis2_plus": 1145.0180634562485,
+            "axis2_minus": 1145.0177576508522,
+            "axis3_plus": 1145.0165182891806,
+            "axis3_minus": 1145.019304220088
+          },
+          "max_lower_innovation_pair_error": 0.0000013113021850585938
+        }
+      }
+    },
+    {
+      "root": 410023,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 149.20749077014625,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -0.00009174070237349952,
+            "50/axis0_minus_minus_forecast": -0.001222926872486596,
+            "50/axis0_plus_minus_forecast": -0.002929208760065194,
+            "50/axis0_slope": -0.0034125637751571958,
+            "50/axis1_curvature": 0.0004896801337963552,
+            "50/axis1_minus_minus_forecast": 0.004117162197090352,
+            "50/axis1_plus_minus_forecast": -0.008232959027353104,
+            "50/axis1_slope": -0.02470024244888691,
+            "50/axis2_curvature": 1.8381479094387032e-7,
+            "50/axis2_minus_minus_forecast": -0.0018072100531014712,
+            "50/axis2_plus_minus_forecast": -0.0023391802970991193,
+            "50/axis2_slope": -0.0010639404879952963,
+            "50/axis3_curvature": -0.000012673458058998222,
+            "50/axis3_minus_minus_forecast": 0.0007021982496979717,
+            "50/axis3_plus_minus_forecast": -0.004849392179451684,
+            "50/axis3_slope": -0.01110318085829931,
+            "50/forecast_minus_blind": 0.009269624645497743,
+            "50/mean_minus_forecast": -0.0020732009193125123
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": 0.00007740714954707073,
+              "50/axis0_minus_minus_forecast": 0.0006294825768407009,
+              "50/axis0_plus_minus_forecast": -0.0003771552912326115,
+              "50/axis0_slope": -0.0020132757361466247,
+              "50/axis1_curvature": -0.004028512211334601,
+              "50/axis1_minus_minus_forecast": 0.005941399628284216,
+              "50/axis1_plus_minus_forecast": -0.00594569230270281,
+              "50/axis1_slope": -0.023774183861974052,
+              "50/axis2_curvature": 0.000022495578377856873,
+              "50/axis2_minus_minus_forecast": 0.0003166736348134691,
+              "50/axis2_plus_minus_forecast": -0.00006777832231819048,
+              "50/axis2_slope": -0.0007689039142633192,
+              "50/axis3_curvature": -0.0010486222181498306,
+              "50/axis3_minus_minus_forecast": 0.0025605317421764084,
+              "50/axis3_plus_minus_forecast": -0.0023785812920209537,
+              "50/axis3_slope": -0.009878226068394724,
+              "50/forecast_minus_blind": 0.00898970042652536,
+              "50/mean_minus_forecast": 0.00012374466939490958
+            },
+            "B": {
+              "50/axis0_curvature": -0.00026088855429406976,
+              "50/axis0_minus_minus_forecast": -0.003075336321813893,
+              "50/axis0_plus_minus_forecast": -0.005481262228897776,
+              "50/axis0_slope": -0.004811851814167767,
+              "50/axis1_curvature": 0.005007872478927311,
+              "50/axis1_minus_minus_forecast": 0.002292924765896487,
+              "50/axis1_plus_minus_forecast": -0.010520225752003398,
+              "50/axis1_slope": -0.02562630103579977,
+              "50/axis2_curvature": -0.000022127948795969132,
+              "50/axis2_minus_minus_forecast": -0.0039310937410164115,
+              "50/axis2_plus_minus_forecast": -0.004610582271880048,
+              "50/axis2_slope": -0.0013589770617272734,
+              "50/axis3_curvature": 0.0010232753020318341,
+              "50/axis3_minus_minus_forecast": -0.001156135242780465,
+              "50/axis3_plus_minus_forecast": -0.007320203066882414,
+              "50/axis3_slope": -0.012328135648203897,
+              "50/forecast_minus_blind": 0.009549548864470125,
+              "50/mean_minus_forecast": -0.004270146508019934
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1153.24461476121,
+            "blind": 1153.2353451365643,
+            "zero": 1153.24461476121,
+            "mean": 1153.2425415602906,
+            "axis0_plus": 1153.2416855524498,
+            "axis0_minus": 1153.2433918343374,
+            "axis1_plus": 1153.2363818021827,
+            "axis1_minus": 1153.248731923407,
+            "axis2_plus": 1153.2422755809127,
+            "axis2_minus": 1153.242807551157,
+            "axis3_plus": 1153.2397653690305,
+            "axis3_minus": 1153.2453169594596
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.00013647127661897684,
+            "100/axis0_minus_minus_forecast": -0.0001239023304293596,
+            "100/axis0_plus_minus_forecast": 0.00007290955194605431,
+            "100/axis0_slope": 0.00039362376475082783,
+            "100/axis1_curvature": 0.00041849862873277743,
+            "100/axis1_minus_minus_forecast": 0.00010653404822846824,
+            "100/axis1_plus_minus_forecast": -0.00012284120764149975,
+            "100/axis1_slope": -0.000458750511739936,
+            "100/axis2_curvature": -0.00012531167521956377,
+            "100/axis2_minus_minus_forecast": 0.0002774353394414675,
+            "100/axis2_plus_minus_forecast": -0.00032773064283730946,
+            "100/axis2_slope": -0.0012103319645575539,
+            "100/axis3_curvature": 0.0008833520669213613,
+            "100/axis3_minus_minus_forecast": -0.0004737361304449905,
+            "100/axis3_plus_minus_forecast": 0.0004864823109471672,
+            "100/axis3_slope": 0.0019204368827843155,
+            "100/forecast_minus_blind": 0.0028025767222601417,
+            "100/mean_minus_forecast": -0.000021231661847309624
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.0001778168998498586,
+              "100/axis0_minus_minus_forecast": 0.00011415907493983468,
+              "100/axis0_plus_minus_forecast": -0.00009850955501633507,
+              "100/axis0_slope": -0.0004253372599123395,
+              "100/axis1_curvature": -0.00019179868468199857,
+              "100/axis1_minus_minus_forecast": 0.0004032780438762984,
+              "100/axis1_plus_minus_forecast": -0.00038850238553322924,
+              "100/axis1_slope": -0.0015835608588190553,
+              "100/axis2_curvature": -0.000036933985029463656,
+              "100/axis2_minus_minus_forecast": 0.000265174895673681,
+              "100/axis2_plus_minus_forecast": -0.00024072019354548502,
+              "100/axis2_slope": -0.001011790178438332,
+              "100/axis3_curvature": -0.00011876812550326576,
+              "100/axis3_minus_minus_forecast": 0.00015743158908776422,
+              "100/axis3_plus_minus_forecast": -0.00013809152068233743,
+              "100/axis3_slope": -0.0005910462195402033,
+              "100/forecast_minus_blind": 0.003896373922515295,
+              "100/mean_minus_forecast": 0.000013381538082057887
+            },
+            "B": {
+              "100/axis0_curvature": -0.00009512565338809509,
+              "100/axis0_minus_minus_forecast": -0.0003619637357985539,
+              "100/axis0_plus_minus_forecast": 0.0002443286589084437,
+              "100/axis0_slope": 0.0012125847894139952,
+              "100/axis1_curvature": 0.0010287959421475534,
+              "100/axis1_minus_minus_forecast": -0.00019020994741936192,
+              "100/axis1_plus_minus_forecast": 0.00014281997025022974,
+              "100/axis1_slope": 0.0006660598353391833,
+              "100/axis2_curvature": -0.00021368936540966388,
+              "100/axis2_minus_minus_forecast": 0.00028969578320925393,
+              "100/axis2_plus_minus_forecast": -0.0004147410921291339,
+              "100/axis2_slope": -0.0014088737506767757,
+              "100/axis3_curvature": 0.0018854722593459883,
+              "100/axis3_minus_minus_forecast": -0.0011049038499777453,
+              "100/axis3_plus_minus_forecast": 0.0011110561425766718,
+              "100/axis3_slope": 0.004431919985108834,
+              "100/forecast_minus_blind": 0.0017087795220049884,
+              "100/mean_minus_forecast": -0.000055844861776677135
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1147.0595541576317,
+            "blind": 1147.0567515809093,
+            "zero": 1147.0595541576317,
+            "mean": 1147.0595329259695,
+            "axis0_plus": 1147.0596270671836,
+            "axis0_minus": 1147.059430255301,
+            "axis1_plus": 1147.0594313164238,
+            "axis1_minus": 1147.0596606916797,
+            "axis2_plus": 1147.0592264269887,
+            "axis2_minus": 1147.059831592971,
+            "axis3_plus": 1147.0600406399426,
+            "axis3_minus": 1147.0590804215012
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410037,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 149.4755269936286,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": 0.0000671346069793799,
+            "50/axis0_minus_minus_forecast": -0.00023214121341652572,
+            "50/axis0_plus_minus_forecast": -0.00044199699512148527,
+            "50/axis0_slope": -0.0004197115634099191,
+            "50/axis1_curvature": 0.000855105930895661,
+            "50/axis1_minus_minus_forecast": 0.0005519975494365781,
+            "50/axis1_plus_minus_forecast": -0.0011768875502298215,
+            "50/axis1_slope": -0.003457770199332799,
+            "50/axis2_curvature": -0.0000157766776283097,
+            "50/axis2_minus_minus_forecast": -0.00001966993055191324,
+            "50/axis2_plus_minus_forecast": -0.0006596502332740783,
+            "50/axis2_slope": -0.0012799606054443302,
+            "50/axis3_curvature": 0.00007162788187997648,
+            "50/axis3_minus_minus_forecast": 0.0021874587865795547,
+            "50/axis3_plus_minus_forecast": -0.0028613161654504893,
+            "50/axis3_slope": -0.010097549904060088,
+            "50/forecast_minus_blind": 0.0018379732938313964,
+            "50/mean_minus_forecast": -0.0003391670607300057
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": -0.00003227937213523546,
+              "50/axis0_minus_minus_forecast": -0.000252537140113418,
+              "50/axis0_plus_minus_forecast": -0.0006754665518258207,
+              "50/axis0_slope": -0.0008458588234248055,
+              "50/axis1_curvature": 0.0006966103519516764,
+              "50/axis1_minus_minus_forecast": 0.00042452379690871567,
+              "50/axis1_plus_minus_forecast": -0.0013069718810925224,
+              "50/axis1_slope": -0.003462991356002476,
+              "50/axis2_curvature": -0.00003694487713801209,
+              "50/axis2_minus_minus_forecast": 0.0002171036744016419,
+              "50/axis2_plus_minus_forecast": -0.0011453989604603976,
+              "50/axis2_slope": -0.002725005269724079,
+              "50/axis3_curvature": -0.00011819064548035385,
+              "50/axis3_minus_minus_forecast": 0.0033606323770527524,
+              "50/axis3_plus_minus_forecast": -0.004294005523604483,
+              "50/axis3_slope": -0.01530927580131447,
+              "50/forecast_minus_blind": 0.0024707712495910528,
+              "50/mean_minus_forecast": -0.0004629931155761824
+            },
+            "B": {
+              "50/axis0_curvature": 0.00016654858609399525,
+              "50/axis0_minus_minus_forecast": -0.00021174528671963344,
+              "50/axis0_plus_minus_forecast": -0.00020852743841714982,
+              "50/axis0_slope": 0.000006435696604967234,
+              "50/axis1_curvature": 0.0010136015098396456,
+              "50/axis1_minus_minus_forecast": 0.0006794713019644405,
+              "50/axis1_plus_minus_forecast": -0.0010468032193671206,
+              "50/axis1_slope": -0.0034525490426631222,
+              "50/axis2_curvature": 0.000005391521881392691,
+              "50/axis2_minus_minus_forecast": -0.0002564435355054684,
+              "50/axis2_plus_minus_forecast": -0.00017390150608775912,
+              "50/axis2_slope": 0.00016508405883541855,
+              "50/axis3_curvature": 0.0002614464092403068,
+              "50/axis3_minus_minus_forecast": 0.001014285196106357,
+              "50/axis3_plus_minus_forecast": -0.0014286268072964958,
+              "50/axis3_slope": -0.004885824006805706,
+              "50/forecast_minus_blind": 0.00120517533807174,
+              "50/mean_minus_forecast": -0.00021534100588382898
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1149.2235595768866,
+            "blind": 1149.2217216035926,
+            "zero": 1149.2235595768866,
+            "mean": 1149.223220409826,
+            "axis0_plus": 1149.2231175798913,
+            "axis0_minus": 1149.2233274356731,
+            "axis1_plus": 1149.2223826893364,
+            "axis1_minus": 1149.224111574436,
+            "axis2_plus": 1149.222899926653,
+            "axis2_minus": 1149.223539906956,
+            "axis3_plus": 1149.2206982607208,
+            "axis3_minus": 1149.225747035673
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.0003757656545531063,
+            "100/axis0_minus_minus_forecast": -0.0005518892727707225,
+            "100/axis0_plus_minus_forecast": 0.0007623531605247535,
+            "100/axis0_slope": 0.002628484866590952,
+            "100/axis1_curvature": -0.0006220913987817767,
+            "100/axis1_minus_minus_forecast": 0.0013502019674120902,
+            "100/axis1_plus_minus_forecast": -0.0011551334387576162,
+            "100/axis1_slope": -0.005010670812339413,
+            "100/axis2_curvature": -0.00024633121120132273,
+            "100/axis2_minus_minus_forecast": -0.00007659516285229984,
+            "100/axis2_plus_minus_forecast": 0.0002951487032873956,
+            "100/axis2_slope": 0.0007434877322793909,
+            "100/axis3_curvature": 0.0025327193643533974,
+            "100/axis3_minus_minus_forecast": -0.0010741946451418016,
+            "100/axis3_plus_minus_forecast": 0.0014664388465206457,
+            "100/axis3_slope": 0.005081266983324895,
+            "100/forecast_minus_blind": 0.005445153823700366,
+            "100/mean_minus_forecast": 0.00011697462055337837
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.000008363010238099378,
+              "100/axis0_minus_minus_forecast": -0.0003965669944818728,
+              "100/axis0_plus_minus_forecast": 0.0010697422121381805,
+              "100/axis0_slope": 0.0029326184132401067,
+              "100/axis1_curvature": -0.00015812799301784253,
+              "100/axis1_minus_minus_forecast": 0.0018438325466547667,
+              "100/axis1_plus_minus_forecast": -0.001180017640507458,
+              "100/axis1_slope": -0.0060477003743244495,
+              "100/axis2_curvature": -0.000024160847715393174,
+              "100/axis2_minus_minus_forecast": 0.00030157305548073055,
+              "100/axis2_plus_minus_forecast": 0.0003706147972764029,
+              "100/axis2_slope": 0.0001380834835913447,
+              "100/axis3_curvature": -0.00014548137733072508,
+              "100/axis3_minus_minus_forecast": -0.0015622201094913635,
+              "100/axis3_plus_minus_forecast": 0.0022268254290906953,
+              "100/axis3_slope": 0.0075780910771641175,
+              "100/forecast_minus_blind": 0.004140925375224924,
+              "100/mean_minus_forecast": 0.0003368489528554619
+            },
+            "B": {
+              "100/axis0_curvature": -0.0007431682988681132,
+              "100/axis0_minus_minus_forecast": -0.0007072115510595722,
+              "100/axis0_plus_minus_forecast": 0.00045496410891132655,
+              "100/axis0_slope": 0.0023243513199417976,
+              "100/axis1_curvature": -0.0010860548045457108,
+              "100/axis1_minus_minus_forecast": 0.0008565713881694137,
+              "100/axis1_plus_minus_forecast": -0.0011302492370077744,
+              "100/axis1_slope": -0.003973641250354376,
+              "100/axis2_curvature": -0.0004685015746872523,
+              "100/axis2_minus_minus_forecast": -0.0004547633811853302,
+              "100/axis2_plus_minus_forecast": 0.00021968260929838834,
+              "100/axis2_slope": 0.0013488919809674371,
+              "100/axis3_curvature": 0.00521092010603752,
+              "100/axis3_minus_minus_forecast": -0.0005861691807922398,
+              "100/axis3_plus_minus_forecast": 0.0007060522639505962,
+              "100/axis3_slope": 0.002584442889485672,
+              "100/forecast_minus_blind": 0.006749382272175808,
+              "100/mean_minus_forecast": -0.00010289971174870516
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1138.2176570510496,
+            "blind": 1138.212211897226,
+            "zero": 1138.2176570510496,
+            "mean": 1138.2177740256702,
+            "axis0_plus": 1138.2184194042102,
+            "axis0_minus": 1138.217105161777,
+            "axis1_plus": 1138.216501917611,
+            "axis1_minus": 1138.219007253017,
+            "axis2_plus": 1138.217952199753,
+            "axis2_minus": 1138.217580455887,
+            "axis3_plus": 1138.2191234898962,
+            "axis3_minus": 1138.2165828564046
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410049,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 150.22437345888466,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": 0.0005231665559222165,
+            "50/axis0_minus_minus_forecast": -0.0008861678982583499,
+            "50/axis0_plus_minus_forecast": 0.0008567913858854581,
+            "50/axis0_slope": 0.003485918568287616,
+            "50/axis1_curvature": -0.00036842139252257766,
+            "50/axis1_minus_minus_forecast": -0.006419980349534171,
+            "50/axis1_plus_minus_forecast": 0.0063348795904119015,
+            "50/axis1_slope": 0.025509719879892145,
+            "50/axis2_curvature": -0.0000164107077580411,
+            "50/axis2_minus_minus_forecast": 0.00008160484107122556,
+            "50/axis2_plus_minus_forecast": -0.00014470493233886828,
+            "50/axis2_slope": -0.0004526195468201877,
+            "50/axis3_curvature": -0.0002849786797014531,
+            "50/axis3_minus_minus_forecast": 0.0000025760387387663286,
+            "50/axis3_plus_minus_forecast": -0.00008246162829550485,
+            "50/axis3_slope": -0.00017007533406854236,
+            "50/forecast_minus_blind": 0.004120635814743423,
+            "50/mean_minus_forecast": -0.000031037211059015135
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": 0.0011537248883541906,
+              "50/axis0_minus_minus_forecast": -0.0004103530770578345,
+              "50/axis0_plus_minus_forecast": 0.0005881414786301775,
+              "50/axis0_slope": 0.001996989111376024,
+              "50/axis1_curvature": 0.0018914156416940386,
+              "50/axis1_minus_minus_forecast": -0.008295275966958116,
+              "50/axis1_plus_minus_forecast": 0.008519170040671042,
+              "50/axis1_slope": 0.033628892015258316,
+              "50/axis2_curvature": 0.00000407290553994244,
+              "50/axis2_minus_minus_forecast": 0.00003155487959816128,
+              "50/axis2_plus_minus_forecast": 0.00007438027310513462,
+              "50/axis2_slope": 0.00008565078701394668,
+              "50/axis3_curvature": -0.0006997143836997566,
+              "50/axis3_minus_minus_forecast": 0.0005743543745211355,
+              "50/axis3_plus_minus_forecast": -0.0005124059274521642,
+              "50/axis3_slope": -0.0021735206039465993,
+              "50/forecast_minus_blind": 0.006737595177469302,
+              "50/mean_minus_forecast": 0.00005284029802510304
+            },
+            "B": {
+              "50/axis0_curvature": -0.00010739177650975762,
+              "50/axis0_minus_minus_forecast": -0.0013619827194588652,
+              "50/axis0_plus_minus_forecast": 0.0011254412931407387,
+              "50/axis0_slope": 0.004974848025199208,
+              "50/axis1_curvature": -0.002628258426739194,
+              "50/axis1_minus_minus_forecast": -0.004544684732110227,
+              "50/axis1_plus_minus_forecast": 0.004150589140152761,
+              "50/axis1_slope": 0.017390547744525975,
+              "50/axis2_curvature": -0.00003689432105602464,
+              "50/axis2_minus_minus_forecast": 0.00013165480254428985,
+              "50/axis2_plus_minus_forecast": -0.00036379013778287117,
+              "50/axis2_slope": -0.000990889880654322,
+              "50/axis3_curvature": 0.00012975702429685043,
+              "50/axis3_minus_minus_forecast": -0.0005692022970436028,
+              "50/axis3_plus_minus_forecast": 0.0003474826708611545,
+              "50/axis3_slope": 0.0018333699358095146,
+              "50/forecast_minus_blind": 0.0015036764520175439,
+              "50/mean_minus_forecast": -0.00011491472014313331
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1153.3826503809664,
+            "blind": 1153.3785297451516,
+            "zero": 1153.3826503809664,
+            "mean": 1153.3826193437553,
+            "axis0_plus": 1153.3835071723522,
+            "axis0_minus": 1153.381764213068,
+            "axis1_plus": 1153.3889852605566,
+            "axis1_minus": 1153.3762304006168,
+            "axis2_plus": 1153.382505676034,
+            "axis2_minus": 1153.3827319858074,
+            "axis3_plus": 1153.3825679193378,
+            "axis3_minus": 1153.3826529570051
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.00013640355109600932,
+            "100/axis0_minus_minus_forecast": -0.00048115956860783626,
+            "100/axis0_plus_minus_forecast": -0.000123587276618764,
+            "100/axis0_slope": 0.0007151445839781445,
+            "100/axis1_curvature": -0.0004096832162758801,
+            "100/axis1_minus_minus_forecast": -0.0022789708585122526,
+            "100/axis1_plus_minus_forecast": 0.001657144034155067,
+            "100/axis1_slope": 0.007872229785334639,
+            "100/axis2_curvature": -0.00006166289449538453,
+            "100/axis2_minus_minus_forecast": -0.0002711066503593429,
+            "100/axis2_plus_minus_forecast": -0.00032896890382971833,
+            "100/axis2_slope": -0.00011572450694075087,
+            "100/axis3_curvature": 0.0007696376019339368,
+            "100/axis3_minus_minus_forecast": 0.0002835408775183623,
+            "100/axis3_plus_minus_forecast": -0.0008316601507516452,
+            "100/axis3_slope": -0.002230402056540015,
+            "100/forecast_minus_blind": 0.008741717820811346,
+            "100/mean_minus_forecast": -0.00029811081166997155
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.00010579054742265726,
+              "100/axis0_minus_minus_forecast": -0.0009352821384993604,
+              "100/axis0_plus_minus_forecast": 0.0007143324552600916,
+              "100/axis0_slope": 0.003299229187518904,
+              "100/axis1_curvature": -0.0013139711491021444,
+              "100/axis1_minus_minus_forecast": -0.003895438236980908,
+              "100/axis1_plus_minus_forecast": 0.003598977266165093,
+              "100/axis1_slope": 0.014988831006292003,
+              "100/axis2_curvature": -0.000019776230146817397,
+              "100/axis2_minus_minus_forecast": -0.0002331545925642331,
+              "100/axis2_plus_minus_forecast": 0.00001758080423996944,
+              "100/axis2_slope": 0.0005014707936084051,
+              "100/axis3_curvature": 0.0004836389016418252,
+              "100/axis3_minus_minus_forecast": 0.0015039134130745424,
+              "100/axis3_plus_minus_forecast": -0.0016880237558041244,
+              "100/axis3_slope": -0.006383874337757334,
+              "100/forecast_minus_blind": 0.012871882738124896,
+              "100/mean_minus_forecast": -0.00010716888704109806
+            },
+            "B": {
+              "100/axis0_curvature": -0.0001670165547693614,
+              "100/axis0_minus_minus_forecast": -0.000027036998716312155,
+              "100/axis0_plus_minus_forecast": -0.0009615070084976196,
+              "100/axis0_slope": -0.001868940019562615,
+              "100/axis1_curvature": 0.0004946047165503842,
+              "100/axis1_minus_minus_forecast": -0.0006625034800435969,
+              "100/axis1_plus_minus_forecast": -0.0002846891978549593,
+              "100/axis1_slope": 0.0007556285643772753,
+              "100/axis2_curvature": -0.00010354955884395167,
+              "100/axis2_minus_minus_forecast": -0.0003090587081544527,
+              "100/axis2_plus_minus_forecast": -0.0006755186118994061,
+              "100/axis2_slope": -0.0007329198074899068,
+              "100/axis3_curvature": 0.0010556363022260484,
+              "100/axis3_minus_minus_forecast": -0.0009368316580378178,
+              "100/axis3_plus_minus_forecast": 0.000024703454300833982,
+              "100/axis3_slope": 0.0019230702246773035,
+              "100/forecast_minus_blind": 0.004611552903497795,
+              "100/mean_minus_forecast": -0.000489052736298845
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1135.873490254852,
+            "blind": 1135.8647485370311,
+            "zero": 1135.873490254852,
+            "mean": 1135.8731921440403,
+            "axis0_plus": 1135.8733666675753,
+            "axis0_minus": 1135.8730090952834,
+            "axis1_plus": 1135.8751473988862,
+            "axis1_minus": 1135.8712112839935,
+            "axis2_plus": 1135.873161285948,
+            "axis2_minus": 1135.8732191482015,
+            "axis3_plus": 1135.8726585947013,
+            "axis3_minus": 1135.8737737957294
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410061,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 146.57199507718906,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -0.000016542498542548856,
+            "50/axis0_minus_minus_forecast": -0.00005538623943834864,
+            "50/axis0_plus_minus_forecast": -0.00007678674792543916,
+            "50/axis0_slope": -0.00004280101697418104,
+            "50/axis1_curvature": 0.00020921252826155978,
+            "50/axis1_minus_minus_forecast": -0.0004672023140841475,
+            "50/axis1_plus_minus_forecast": 0.0003491390159240382,
+            "50/axis1_slope": 0.0016326826600163713,
+            "50/axis2_curvature": -0.000016515100014657946,
+            "50/axis2_minus_minus_forecast": -0.00005170490848627196,
+            "50/axis2_plus_minus_forecast": -0.00008046636642689009,
+            "50/axis2_slope": -0.00005752291588123626,
+            "50/axis3_curvature": 0.00008707701408638968,
+            "50/axis3_minus_minus_forecast": 0.00104650011704166,
+            "50/axis3_plus_minus_forecast": -0.0011721968847240305,
+            "50/axis3_slope": -0.004437394003531381,
+            "50/forecast_minus_blind": 0.0030229151450811287,
+            "50/mean_minus_forecast": -0.00006556954056691211
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": 0.0000028156600819784217,
+              "50/axis0_minus_minus_forecast": -0.00044652647051179883,
+              "50/axis0_plus_minus_forecast": -0.0007542523553070168,
+              "50/axis0_slope": -0.000615451769590436,
+              "50/axis1_curvature": 0.0007903633595560677,
+              "50/axis1_minus_minus_forecast": 0.0004340808042400113,
+              "50/axis1_plus_minus_forecast": -0.0015856378988132747,
+              "50/axis1_slope": -0.004039437406106572,
+              "50/axis2_curvature": -0.000023272118596651126,
+              "50/axis2_minus_minus_forecast": -0.0005494993423553751,
+              "50/axis2_plus_minus_forecast": -0.0006529099696024332,
+              "50/axis2_slope": -0.00020682125449411615,
+              "50/axis3_curvature": 0.0009211583173964755,
+              "50/axis3_minus_minus_forecast": 0.0009254357382246781,
+              "50/axis3_plus_minus_forecast": -0.002068818147847651,
+              "50/axis3_slope": -0.005988507772144658,
+              "50/forecast_minus_blind": 0.0031103345870917565,
+              "50/mean_minus_forecast": -0.000600477402258548
+            },
+            "B": {
+              "50/axis0_curvature": -0.00003590065716707613,
+              "50/axis0_minus_minus_forecast": 0.00033575399163510156,
+              "50/axis0_plus_minus_forecast": 0.0006006788594561385,
+              "50/axis0_slope": 0.0005298497356420739,
+              "50/axis1_curvature": -0.00037193830303294817,
+              "50/axis1_minus_minus_forecast": -0.0013684854324083062,
+              "50/axis1_plus_minus_forecast": 0.002283915930661351,
+              "50/axis1_slope": 0.0073048027261393145,
+              "50/axis2_curvature": -0.000009758081432664767,
+              "50/axis2_minus_minus_forecast": 0.0004460895253828312,
+              "50/axis2_plus_minus_forecast": 0.000491977236748653,
+              "50/axis2_slope": 0.00009177542273164363,
+              "50/axis3_curvature": -0.0007470042892236961,
+              "50/axis3_minus_minus_forecast": 0.0011675644958586417,
+              "50/axis3_plus_minus_forecast": -0.00027557562160041016,
+              "50/axis3_slope": -0.002886280234918104,
+              "50/forecast_minus_blind": 0.002935495703070501,
+              "50/mean_minus_forecast": 0.00046933832112472373
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1146.9732209075148,
+            "blind": 1146.9701979923698,
+            "zero": 1146.9732209075148,
+            "mean": 1146.973155337974,
+            "axis0_plus": 1146.9731441207668,
+            "axis0_minus": 1146.9731655212754,
+            "axis1_plus": 1146.9735700465305,
+            "axis1_minus": 1146.9727537052008,
+            "axis2_plus": 1146.9731404411482,
+            "axis2_minus": 1146.9731692026062,
+            "axis3_plus": 1146.9720487106301,
+            "axis3_minus": 1146.974267407632
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": 0.00005838709648742224,
+            "100/axis0_minus_minus_forecast": -0.00006439409418135256,
+            "100/axis0_plus_minus_forecast": -0.0000016441849481907411,
+            "100/axis0_slope": 0.00012549981846632363,
+            "100/axis1_curvature": 0.0007501009213228826,
+            "100/axis1_minus_minus_forecast": 0.00012635723662413056,
+            "100/axis1_plus_minus_forecast": -0.0001491634017014576,
+            "100/axis1_slope": -0.0005510412766511763,
+            "100/axis2_curvature": -0.00001894282240755274,
+            "100/axis2_minus_minus_forecast": -0.00020655218744991544,
+            "100/axis2_plus_minus_forecast": 0.00013568078831838193,
+            "100/axis2_slope": 0.0006844659515365947,
+            "100/axis3_curvature": -0.00006015903227307717,
+            "100/axis3_minus_minus_forecast": 0.0004728383534313707,
+            "100/axis3_plus_minus_forecast": -0.0005462857655800235,
+            "100/axis3_slope": -0.0020382482380227884,
+            "100/forecast_minus_blind": 0.004169104420256531,
+            "100/mean_minus_forecast": -0.000034843736330003594
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.000012679518476943485,
+              "100/axis0_minus_minus_forecast": -0.00035983577444653747,
+              "100/axis0_plus_minus_forecast": 0.00028360976548924555,
+              "100/axis0_slope": 0.001286891079871566,
+              "100/axis1_curvature": 0.0005716117248084629,
+              "100/axis1_minus_minus_forecast": -0.0003134712430039599,
+              "100/axis1_plus_minus_forecast": 0.00027376343669516245,
+              "100/axis1_slope": 0.0011744693593982447,
+              "100/axis2_curvature": 0.000003893263965437654,
+              "100/axis2_minus_minus_forecast": -0.000009686703918987405,
+              "100/axis2_plus_minus_forecast": -0.00006550350622092083,
+              "100/axis2_slope": -0.00011163360460386684,
+              "100/axis3_curvature": -0.000049839457460620906,
+              "100/axis3_minus_minus_forecast": -0.00021675053645253683,
+              "100/axis3_plus_minus_forecast": 0.00013820203133718678,
+              "100/axis3_slope": 0.0007099051355794472,
+              "100/forecast_minus_blind": 0.0061931194734370365,
+              "100/mean_minus_forecast": -0.00003771676952624148
+            },
+            "B": {
+              "100/axis0_curvature": 0.00012945371145178797,
+              "100/axis0_minus_minus_forecast": 0.00023104758608383236,
+              "100/axis0_plus_minus_forecast": -0.00028689813538562703,
+              "100/axis0_slope": -0.0010358914429389188,
+              "100/axis1_curvature": 0.0009285901178373024,
+              "100/axis1_minus_minus_forecast": 0.000566185716252221,
+              "100/axis1_plus_minus_forecast": -0.0005720902400980776,
+              "100/axis1_slope": -0.0022765519127005973,
+              "100/axis2_curvature": -0.000041778908780543134,
+              "100/axis2_minus_minus_forecast": -0.00040341767098084347,
+              "100/axis2_plus_minus_forecast": 0.0003368650828576847,
+              "100/axis2_slope": 0.0014805655076770563,
+              "100/axis3_curvature": -0.00007047860708553344,
+              "100/axis3_minus_minus_forecast": 0.0011624272433152782,
+              "100/axis3_plus_minus_forecast": -0.0012307735624972338,
+              "100/axis3_slope": -0.004786401611625024,
+              "100/forecast_minus_blind": 0.002145089367076025,
+              "100/mean_minus_forecast": -0.00003197070313376571
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1136.1325353216407,
+            "blind": 1136.1283662172204,
+            "zero": 1136.1325353216407,
+            "mean": 1136.1325004779046,
+            "axis0_plus": 1136.1325336774557,
+            "axis0_minus": 1136.1324709275466,
+            "axis1_plus": 1136.1323861582391,
+            "axis1_minus": 1136.1326616788774,
+            "axis2_plus": 1136.132671002429,
+            "axis2_minus": 1136.1323287694534,
+            "axis3_plus": 1136.131989035875,
+            "axis3_minus": 1136.1330081599942
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410073,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 151.66816431982443,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": 0.000011297999662929215,
+            "50/axis0_minus_minus_forecast": -0.00044859106802164206,
+            "50/axis0_plus_minus_forecast": -0.0005377994146442688,
+            "50/axis0_slope": -0.00017841669324525355,
+            "50/axis1_curvature": -0.0013962508410259034,
+            "50/axis1_minus_minus_forecast": -0.0013572503983567685,
+            "50/axis1_plus_minus_forecast": 0.00028288811313359474,
+            "50/axis1_slope": 0.0032802770229807265,
+            "50/axis2_curvature": -0.00001548692125652451,
+            "50/axis2_minus_minus_forecast": -0.00044639599117601847,
+            "50/axis2_plus_minus_forecast": -0.0005416685490189366,
+            "50/axis2_slope": -0.0001905451156858362,
+            "50/axis3_curvature": 0.0009828975025811815,
+            "50/axis3_minus_minus_forecast": -0.0014504547459637251,
+            "50/axis3_plus_minus_forecast": 0.0005247892322586267,
+            "50/axis3_slope": 0.003950487956444704,
+            "50/forecast_minus_blind": 0.0028898832856754098,
+            "50/mean_minus_forecast": -0.000493548303822422
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": 5.469819370773621e-7,
+              "50/axis0_minus_minus_forecast": -0.00013293645878320604,
+              "50/axis0_plus_minus_forecast": -0.000043261466629473944,
+              "50/axis0_slope": 0.00017934998430746418,
+              "50/axis1_curvature": -0.0019985231419923366,
+              "50/axis1_minus_minus_forecast": -0.002125566164693282,
+              "50/axis1_plus_minus_forecast": 0.0018244263563929053,
+              "50/axis1_slope": 0.007899985042172375,
+              "50/axis2_curvature": -0.000031771989597473294,
+              "50/axis2_minus_minus_forecast": 0.00009461841989377717,
+              "50/axis2_plus_minus_forecast": -0.0002728362810557883,
+              "50/axis2_slope": -0.0007349094018991309,
+              "50/axis3_curvature": 0.00016118383427965455,
+              "50/axis3_minus_minus_forecast": 0.0012198546505715058,
+              "50/axis3_plus_minus_forecast": -0.0013860127727411964,
+              "50/axis3_slope": -0.005211734846625404,
+              "50/forecast_minus_blind": 0.005719865665525958,
+              "50/mean_minus_forecast": -0.00008811605590608451
+            },
+            "B": {
+              "50/axis0_curvature": 0.000022049017388781067,
+              "50/axis0_minus_minus_forecast": -0.0007642456772600781,
+              "50/axis0_plus_minus_forecast": -0.0010323373626590637,
+              "50/axis0_slope": -0.0005361833707979713,
+              "50/axis1_curvature": -0.0007939785400594701,
+              "50/axis1_minus_minus_forecast": -0.0005889346320202549,
+              "50/axis1_plus_minus_forecast": -0.0012586501301257158,
+              "50/axis1_slope": -0.0013394309962109219,
+              "50/axis2_curvature": 7.981470844242722e-7,
+              "50/axis2_minus_minus_forecast": -0.0009874104022458141,
+              "50/axis2_plus_minus_forecast": -0.0008105008169820849,
+              "50/axis2_slope": 0.0003538191705274585,
+              "50/axis3_curvature": 0.0018046111708827084,
+              "50/axis3_minus_minus_forecast": -0.004120764142498956,
+              "50/axis3_plus_minus_forecast": 0.00243559123725845,
+              "50/axis3_slope": 0.013112710759514812,
+              "50/forecast_minus_blind": 0.000059900905824861184,
+              "50/mean_minus_forecast": -0.0008989805517387595
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1154.6665032526705,
+            "blind": 1154.6636133693846,
+            "zero": 1154.6665032526705,
+            "mean": 1154.6660097043666,
+            "axis0_plus": 1154.665965453256,
+            "axis0_minus": 1154.6660546616024,
+            "axis1_plus": 1154.6667861407836,
+            "axis1_minus": 1154.6651460022722,
+            "axis2_plus": 1154.6659615841213,
+            "axis2_minus": 1154.6660568566792,
+            "axis3_plus": 1154.6670280419025,
+            "axis3_minus": 1154.6650527979245
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": 0.00009654792438595905,
+            "100/axis0_minus_minus_forecast": -0.0008608531659177743,
+            "100/axis0_plus_minus_forecast": -0.000683683852898298,
+            "100/axis0_slope": 0.0003543386260389525,
+            "100/axis1_curvature": 0.0019084743935309234,
+            "100/axis1_minus_minus_forecast": -0.001090574455659521,
+            "100/axis1_plus_minus_forecast": -0.00034071715879235853,
+            "100/axis1_slope": 0.0014997145937343248,
+            "100/axis2_curvature": 0.00006298315520325559,
+            "100/axis2_minus_minus_forecast": -0.0008309770802412686,
+            "100/axis2_plus_minus_forecast": -0.0007156577366771444,
+            "100/axis2_slope": 0.00023063868712824842,
+            "100/axis3_curvature": 0.0008144724274643522,
+            "100/axis3_minus_minus_forecast": 0.00042440838053892094,
+            "100/axis3_plus_minus_forecast": -0.001924075117884172,
+            "100/axis3_slope": -0.004696966996846186,
+            "100/forecast_minus_blind": 0.007066551591734083,
+            "100/mean_minus_forecast": -0.0007752856320308865
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": 0.00005937904552411055,
+              "100/axis0_minus_minus_forecast": -0.0002647411178315906,
+              "100/axis0_plus_minus_forecast": -0.0017007006443918726,
+              "100/axis0_slope": -0.002871919053120564,
+              "100/axis1_curvature": 0.0037922006031294586,
+              "100/axis1_minus_minus_forecast": -0.0015083753376927689,
+              "100/axis1_plus_minus_forecast": -0.00022376507712351668,
+              "100/axis1_slope": 0.0025692205211385044,
+              "100/axis2_curvature": 0.00011043650465580868,
+              "100/axis2_minus_minus_forecast": -0.0008972666707052213,
+              "100/axis2_plus_minus_forecast": -0.0010649840003793543,
+              "100/axis2_slope": -0.000335434659348266,
+              "100/axis3_curvature": 0.0006649274428127683,
+              "100/axis3_minus_minus_forecast": -0.0013307052110178574,
+              "100/axis3_plus_minus_forecast": -0.000596889776346643,
+              "100/axis3_slope": 0.001467630869342429,
+              "100/forecast_minus_blind": 0.010882525397903464,
+              "100/mean_minus_forecast": -0.0009845764762701492
+            },
+            "B": {
+              "100/axis0_curvature": 0.00013371680324780755,
+              "100/axis0_minus_minus_forecast": -0.001456965214003958,
+              "100/axis0_plus_minus_forecast": 0.0003333329385952766,
+              "100/axis0_slope": 0.003580596305198469,
+              "100/axis1_curvature": 0.0000247481839323882,
+              "100/axis1_minus_minus_forecast": -0.000672773573626273,
+              "100/axis1_plus_minus_forecast": -0.0004576692404612004,
+              "100/axis1_slope": 0.0004302086663301452,
+              "100/axis2_curvature": 0.000015529805750702508,
+              "100/axis2_minus_minus_forecast": -0.0007646874897773159,
+              "100/axis2_plus_minus_forecast": -0.0003663314729749345,
+              "100/axis2_slope": 0.0007967120336047628,
+              "100/axis3_curvature": 0.0009640174121159362,
+              "100/axis3_minus_minus_forecast": 0.0021795219720956993,
+              "100/axis3_plus_minus_forecast": -0.003251260459421701,
+              "100/axis3_slope": -0.0108615648630348,
+              "100/forecast_minus_blind": 0.003250577785564701,
+              "100/mean_minus_forecast": -0.0005659947877916238
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1141.9602180066001,
+            "blind": 1141.9531514550085,
+            "zero": 1141.9602180066001,
+            "mean": 1141.9594427209681,
+            "axis0_plus": 1141.9595343227475,
+            "axis0_minus": 1141.9593571534342,
+            "axis1_plus": 1141.9598772894415,
+            "axis1_minus": 1141.9591274321444,
+            "axis2_plus": 1141.9595023488637,
+            "axis2_minus": 1141.9593870295203,
+            "axis3_plus": 1141.9582939314823,
+            "axis3_minus": 1141.9606424149806
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410089,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 148.8274673349224,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -0.000045686566409131046,
+            "50/axis0_minus_minus_forecast": -0.00043456076890890927,
+            "50/axis0_plus_minus_forecast": -0.00022186328281748047,
+            "50/axis0_slope": 0.0004253949721828576,
+            "50/axis1_curvature": 0.0009869179366432945,
+            "50/axis1_minus_minus_forecast": -0.002743211375289434,
+            "50/axis1_plus_minus_forecast": 0.0021513251050180315,
+            "50/axis1_slope": 0.00978907296061493,
+            "50/axis2_curvature": -0.00002344567110412754,
+            "50/axis2_minus_minus_forecast": -0.0002860341017765222,
+            "50/axis2_plus_minus_forecast": -0.0003689998939648831,
+            "50/axis2_slope": -0.00016593158437672173,
+            "50/axis3_curvature": 0.000499424241752422,
+            "50/axis3_minus_minus_forecast": 0.0011954122856394633,
+            "50/axis3_plus_minus_forecast": -0.001817766911855756,
+            "50/axis3_slope": -0.006026358394990439,
+            "50/forecast_minus_blind": 0.004681481638755258,
+            "50/mean_minus_forecast": -0.00032678432064869867
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": -0.00005996540221531177,
+              "50/axis0_minus_minus_forecast": -0.0005102236156915296,
+              "50/axis0_plus_minus_forecast": 0.0001349995630732792,
+              "50/axis0_slope": 0.0012904463575296177,
+              "50/axis1_curvature": 0.0015417037075167173,
+              "50/axis1_minus_minus_forecast": -0.0021031347811799606,
+              "50/axis1_plus_minus_forecast": 0.001828015047919962,
+              "50/axis1_slope": 0.007862299658199845,
+              "50/axis2_curvature": -0.000027523891731107142,
+              "50/axis2_minus_minus_forecast": -0.00043581662467317983,
+              "50/axis2_plus_minus_forecast": 0.0000626201664601922,
+              "50/axis2_slope": 0.000996873582266744,
+              "50/axis3_curvature": 0.0016267117325696745,
+              "50/axis3_minus_minus_forecast": 0.001763878422906373,
+              "50/axis3_plus_minus_forecast": -0.002033685154600562,
+              "50/axis3_slope": -0.00759512715501387,
+              "50/forecast_minus_blind": 0.003248621049920075,
+              "50/mean_minus_forecast": -0.00018573810748989672
+            },
+            "B": {
+              "50/axis0_curvature": -0.00003140773060295032,
+              "50/axis0_minus_minus_forecast": -0.0003588979221262889,
+              "50/axis0_plus_minus_forecast": -0.0005787261287082401,
+              "50/axis0_slope": -0.00043965641316390247,
+              "50/axis1_curvature": 0.0004321321657698718,
+              "50/axis1_minus_minus_forecast": -0.003383287969398907,
+              "50/axis1_plus_minus_forecast": 0.002474635162116101,
+              "50/axis1_slope": 0.011715846263030016,
+              "50/axis2_curvature": -0.00001936745047714794,
+              "50/axis2_minus_minus_forecast": -0.0001362515788798646,
+              "50/axis2_plus_minus_forecast": -0.0008006199543899584,
+              "50/axis2_slope": -0.0013287367510201875,
+              "50/axis3_curvature": -0.0006278632490648306,
+              "50/axis3_minus_minus_forecast": 0.0006269461483725536,
+              "50/axis3_plus_minus_forecast": -0.0016018486691109501,
+              "50/axis3_slope": -0.0044575896349670074,
+              "50/forecast_minus_blind": 0.006114342227590441,
+              "50/mean_minus_forecast": -0.0004678305338075006
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1150.7727950126946,
+            "blind": 1150.7681135310559,
+            "zero": 1150.7727950126946,
+            "mean": 1150.7724682283738,
+            "axis0_plus": 1150.7725731494115,
+            "axis0_minus": 1150.7723604519256,
+            "axis1_plus": 1150.7749463377995,
+            "axis1_minus": 1150.7700518013194,
+            "axis2_plus": 1150.7724260128007,
+            "axis2_minus": 1150.7725089785927,
+            "axis3_plus": 1150.7709772457824,
+            "axis3_minus": 1150.7739904249802
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.00035060814434473286,
+            "100/axis0_minus_minus_forecast": 0.00020540461713380864,
+            "100/axis0_plus_minus_forecast": -0.00012198647949901442,
+            "100/axis0_slope": -0.0006547821932656461,
+            "100/axis1_curvature": 0.0005272267585496593,
+            "100/axis1_minus_minus_forecast": -0.0013334965574927082,
+            "100/axis1_plus_minus_forecast": 0.0014717793765726128,
+            "100/axis1_slope": 0.005610551868130642,
+            "100/axis2_curvature": 0.0003023170615961135,
+            "100/axis2_minus_minus_forecast": -0.00037942944223345876,
+            "100/axis2_plus_minus_forecast": 0.0005036554052395559,
+            "100/axis2_slope": 0.0017661696949460293,
+            "100/axis3_curvature": 0.0005669855868291052,
+            "100/axis3_minus_minus_forecast": 0.000023550683650341853,
+            "100/axis3_plus_minus_forecast": 0.00011721706216860639,
+            "100/axis3_slope": 0.00018733275703652907,
+            "100/forecast_minus_blind": 0.0058816464126181245,
+            "100/mean_minus_forecast": 0.000052665573321064585
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.0006857810094516026,
+              "100/axis0_minus_minus_forecast": -0.00012907401116990513,
+              "100/axis0_plus_minus_forecast": -0.00012696322673377836,
+              "100/axis0_slope": 0.000004221568872253556,
+              "100/axis1_curvature": 0.001312228888309619,
+              "100/axis1_minus_minus_forecast": -0.0012550863990838934,
+              "100/axis1_plus_minus_forecast": 0.0011239247798471297,
+              "100/axis1_slope": 0.004758022357862046,
+              "100/axis2_curvature": 0.0006265579095270368,
+              "100/axis2_minus_minus_forecast": -0.0007374155802324367,
+              "100/axis2_plus_minus_forecast": 0.0005633995248217616,
+              "100/axis2_slope": 0.0026016302101083966,
+              "100/axis3_curvature": 0.0015567784348604619,
+              "100/axis3_minus_minus_forecast": 0.0016258997000875297,
+              "100/axis3_plus_minus_forecast": -0.001741776972636444,
+              "100/axis3_slope": -0.0067353533454479475,
+              "100/forecast_minus_blind": 0.007450508573100478,
+              "100/mean_minus_forecast": -0.00010658796239226831
+            },
+            "B": {
+              "100/axis0_curvature": -0.000015435279237863142,
+              "100/axis0_minus_minus_forecast": 0.0005398832454375224,
+              "100/axis0_plus_minus_forecast": -0.00011700973226425049,
+              "100/axis0_slope": -0.0013137859554035458,
+              "100/axis1_curvature": -0.00025777537121030036,
+              "100/axis1_minus_minus_forecast": -0.001411906715901523,
+              "100/axis1_plus_minus_forecast": 0.001819633973298096,
+              "100/axis1_slope": 0.006463081378399238,
+              "100/axis2_curvature": -0.000021923786334809847,
+              "100/axis2_minus_minus_forecast": -0.00002144330423448082,
+              "100/axis2_plus_minus_forecast": 0.00044391128565735016,
+              "100/axis2_slope": 0.000930709179783662,
+              "100/axis3_curvature": -0.00042280726120225154,
+              "100/axis3_minus_minus_forecast": -0.001578798332786846,
+              "100/axis3_plus_minus_forecast": 0.001976211096973657,
+              "100/axis3_slope": 0.007110018859521006,
+              "100/forecast_minus_blind": 0.004312784252135771,
+              "100/mean_minus_forecast": 0.00021191910903439748
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1135.4262602392864,
+            "blind": 1135.4203785928735,
+            "zero": 1135.4262602392864,
+            "mean": 1135.4263129048595,
+            "axis0_plus": 1135.4261382528068,
+            "axis0_minus": 1135.4264656439034,
+            "axis1_plus": 1135.4277320186627,
+            "axis1_minus": 1135.4249267427288,
+            "axis2_plus": 1135.4267638946915,
+            "axis2_minus": 1135.425880809844,
+            "axis3_plus": 1135.4263774563483,
+            "axis3_minus": 1135.4262837899698
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    },
+    {
+      "root": 410101,
+      "cost": {
+        "actor_context_evaluations": 422400,
+        "external_measurement_pair_checks": 352,
+        "initial_feedback_pair_checks": 352,
+        "lower_innovation_pair_checks": 352,
+        "native_episodes": 384,
+        "native_lower_calls": 460800,
+        "native_network_checks": 384,
+        "native_pair_groups": 32,
+        "native_steps": 460800,
+        "native_upper_calls": 5184,
+        "plan_ols_fits": 5984,
+        "plan_renewals": 6336,
+        "plan_ridge_predictions": 5984,
+        "reference_evaluations": 422400,
+        "source_freeze_checks": 2,
+        "zero_forecast_command_checks": 32
+      },
+      "wall_seconds": 148.49747556401417,
+      "groups": {
+        "50": {
+          "effects": {
+            "50/axis0_curvature": -0.00003125375405943487,
+            "50/axis0_minus_minus_forecast": -0.00043400618712041705,
+            "50/axis0_plus_minus_forecast": -0.0003214085718354909,
+            "50/axis0_slope": 0.00022519523056985236,
+            "50/axis1_curvature": -0.0006933422268957656,
+            "50/axis1_minus_minus_forecast": -0.002636371579541219,
+            "50/axis1_plus_minus_forecast": 0.001839576291075673,
+            "50/axis1_slope": 0.008951895741233784,
+            "50/axis2_curvature": -0.000007729833669145592,
+            "50/axis2_minus_minus_forecast": -0.0006104001413120841,
+            "50/axis2_plus_minus_forecast": -0.0001435443725767982,
+            "50/axis2_slope": 0.0009337115374705718,
+            "50/axis3_curvature": 0.0010605261572891322,
+            "50/axis3_minus_minus_forecast": 0.00044276396862130696,
+            "50/axis3_plus_minus_forecast": -0.0011299424830752969,
+            "50/axis3_slope": -0.0031454129033932077,
+            "50/forecast_minus_blind": 0.004888178647945551,
+            "50/mean_minus_forecast": -0.0003767306996280695
+          },
+          "panel_effects": {
+            "A": {
+              "50/axis0_curvature": -0.00002709066484385403,
+              "50/axis0_minus_minus_forecast": -0.00012707872306805257,
+              "50/axis0_plus_minus_forecast": -0.00013936358487853795,
+              "50/axis0_slope": -0.000024569723620970763,
+              "50/axis1_curvature": -0.0013269814371597022,
+              "50/axis1_minus_minus_forecast": -0.003190326673149002,
+              "50/axis1_plus_minus_forecast": 0.0028426411919042494,
+              "50/axis1_slope": 0.012065935730106503,
+              "50/axis2_curvature": -0.0000032549869501963258,
+              "50/axis2_minus_minus_forecast": -0.00032003472102815067,
+              "50/axis2_plus_minus_forecast": 0.00005508214292149205,
+              "50/axis2_slope": 0.0007502337278992854,
+              "50/axis3_curvature": 0.0005237460845819442,
+              "50/axis3_minus_minus_forecast": -0.000007701840729623655,
+              "50/axis3_plus_minus_forecast": -0.00022431317037785448,
+              "50/axis3_slope": -0.00043322265929646164,
+              "50/forecast_minus_blind": 0.005079567142246333,
+              "50/mean_minus_forecast": -0.00013237457068271397
+            },
+            "B": {
+              "50/axis0_curvature": -0.00003541684327501571,
+              "50/axis0_minus_minus_forecast": -0.0007409336511727815,
+              "50/axis0_plus_minus_forecast": -0.0005034535587924438,
+              "50/axis0_slope": 0.0004749601847606755,
+              "50/axis1_curvature": -0.00005970301663182909,
+              "50/axis1_minus_minus_forecast": -0.002082416485933436,
+              "50/axis1_plus_minus_forecast": 0.0008365113902470966,
+              "50/axis1_slope": 0.005837855752361065,
+              "50/axis2_curvature": -0.000012204680388094857,
+              "50/axis2_minus_minus_forecast": -0.0009007655615960175,
+              "50/axis2_plus_minus_forecast": -0.00034217088807508844,
+              "50/axis2_slope": 0.0011171893470418581,
+              "50/axis3_curvature": 0.0015973062299963203,
+              "50/axis3_minus_minus_forecast": 0.0008932297779722376,
+              "50/axis3_plus_minus_forecast": -0.0020355717957727393,
+              "50/axis3_slope": -0.005857603147489954,
+              "50/forecast_minus_blind": 0.00469679015364477,
+              "50/mean_minus_forecast": -0.000621086828573425
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1152.1076992551443,
+            "blind": 1152.1028110764964,
+            "zero": 1152.1076992551443,
+            "mean": 1152.1073225244447,
+            "axis0_plus": 1152.1073778465725,
+            "axis0_minus": 1152.1072652489574,
+            "axis1_plus": 1152.1095388314354,
+            "axis1_minus": 1152.1050628835649,
+            "axis2_plus": 1152.107555710772,
+            "axis2_minus": 1152.107088855003,
+            "axis3_plus": 1152.1065693126613,
+            "axis3_minus": 1152.108142019113
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        },
+        "100": {
+          "effects": {
+            "100/axis0_curvature": -0.00021037500891907257,
+            "100/axis0_minus_minus_forecast": 0.00015494150588324374,
+            "100/axis0_plus_minus_forecast": -0.0007776844439888464,
+            "100/axis0_slope": -0.0018652518997441803,
+            "100/axis1_curvature": -0.00035370513796806335,
+            "100/axis1_minus_minus_forecast": -0.001247319451223916,
+            "100/axis1_plus_minus_forecast": 0.0006156183800101189,
+            "100/axis1_slope": 0.00372587566246807,
+            "100/axis2_curvature": 0.0000569895091757644,
+            "100/axis2_minus_minus_forecast": -0.0004968202315041026,
+            "100/axis2_plus_minus_forecast": -0.00010921242424899447,
+            "100/axis2_slope": 0.0007752156145102163,
+            "100/axis3_curvature": 0.0012395057406138221,
+            "100/axis3_minus_minus_forecast": -0.000700248716938745,
+            "100/axis3_plus_minus_forecast": 0.0001681233256363157,
+            "100/axis3_slope": 0.0017367440851501215,
+            "100/forecast_minus_blind": 0.011380396149704097,
+            "100/mean_minus_forecast": -0.00030479725003829117
+          },
+          "panel_effects": {
+            "A": {
+              "100/axis0_curvature": -0.0003290182930868468,
+              "100/axis0_minus_minus_forecast": 0.00018006338495979435,
+              "100/axis0_plus_minus_forecast": -0.0007477599526737322,
+              "100/axis0_slope": -0.001855646675267053,
+              "100/axis1_curvature": -0.0008703515723027522,
+              "100/axis1_minus_minus_forecast": -0.0013453080143221996,
+              "100/axis1_plus_minus_forecast": 0.0007437781165435808,
+              "100/axis1_slope": 0.004178172261731561,
+              "100/axis2_curvature": 0.000023985673578863498,
+              "100/axis2_minus_minus_forecast": -0.00042999278190336554,
+              "100/axis2_plus_minus_forecast": -0.00011564103795080882,
+              "100/axis2_slope": 0.0006287034879051134,
+              "100/axis3_curvature": 0.0002616172205307521,
+              "100/axis3_minus_minus_forecast": -0.000684580867442719,
+              "100/axis3_plus_minus_forecast": 0.0001537990192161942,
+              "100/axis3_slope": 0.0016767597733178263,
+              "100/forecast_minus_blind": 0.014640666231088062,
+              "100/mean_minus_forecast": -0.00027356646222642667
+            },
+            "B": {
+              "100/axis0_curvature": -0.00009173172475129832,
+              "100/axis0_minus_minus_forecast": 0.00012981962680669312,
+              "100/axis0_plus_minus_forecast": -0.0008076089353039606,
+              "100/axis0_slope": -0.0018748571242213075,
+              "100/axis1_curvature": 0.00016294129636662547,
+              "100/axis1_minus_minus_forecast": -0.0011493308881256326,
+              "100/axis1_plus_minus_forecast": 0.000487458643476657,
+              "100/axis1_slope": 0.003273579063204579,
+              "100/axis2_curvature": 0.0000899933447726653,
+              "100/axis2_minus_minus_forecast": -0.0005636476811048396,
+              "100/axis2_plus_minus_forecast": -0.00010278381054718011,
+              "100/axis2_slope": 0.0009217277411153191,
+              "100/axis3_curvature": 0.002217394260696892,
+              "100/axis3_minus_minus_forecast": -0.0007159165664347711,
+              "100/axis3_plus_minus_forecast": 0.00018244763205643721,
+              "100/axis3_slope": 0.0017967283969824166,
+              "100/forecast_minus_blind": 0.008120126068320133,
+              "100/mean_minus_forecast": -0.00033602803785015567
+            }
+          },
+          "variant_return_means": {
+            "forecast": 1141.6569277202484,
+            "blind": 1141.6455473240985,
+            "zero": 1141.6569277202484,
+            "mean": 1141.6566229229984,
+            "axis0_plus": 1141.6561500358043,
+            "axis0_minus": 1141.657082661754,
+            "axis1_plus": 1141.6575433386283,
+            "axis1_minus": 1141.655680400797,
+            "axis2_plus": 1141.656818507824,
+            "axis2_minus": 1141.6564309000169,
+            "axis3_plus": 1141.6570958435739,
+            "axis3_minus": 1141.6562274715316
+          },
+          "max_lower_innovation_pair_error": 0.000001430511474609375
+        }
+      }
+    }
+  ],
+  "endpoints": {
+    "50/mean_minus_forecast": {
+      "mean": -0.0005000171276776655,
+      "ci": [
+        -0.001392643942571381,
+        -0.00011383794264752112
+      ],
+      "effect": "negative"
+    },
+    "50/axis0_plus_minus_forecast": {
+      "mean": -0.0004978256440697493,
+      "ci": [
+        -0.0019171770888526396,
+        0.000385287154605507
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis0_minus_minus_forecast": {
+      "mean": -0.00049919167383905,
+      "ci": [
+        -0.0009290079875605706,
+        -0.00018089983055169512
+      ],
+      "effect": "negative"
+    },
+    "50/axis1_plus_minus_forecast": {
+      "mean": 0.00028312951834053024,
+      "ci": [
+        -0.004607148757821533,
+        0.004024852433937909
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis1_minus_minus_forecast": {
+      "mean": -0.0012815443464173626,
+      "ci": [
+        -0.004391183470296045,
+        0.001969137981546357
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis2_plus_minus_forecast": {
+      "mean": -0.0005840312032443506,
+      "ci": [
+        -0.0015753100916615637,
+        -0.00014033237964561351
+      ],
+      "effect": "negative"
+    },
+    "50/axis2_minus_minus_forecast": {
+      "mean": -0.00041666274551488414,
+      "ci": [
+        -0.0012081276849603324,
+        -0.0000074239819642940574
+      ],
+      "effect": "negative"
+    },
+    "50/axis3_plus_minus_forecast": {
+      "mean": -0.001944812744138602,
+      "ci": [
+        -0.003946752422917976,
+        -0.00018439911728583902
+      ],
+      "effect": "negative"
+    },
+    "50/axis3_minus_minus_forecast": {
+      "mean": 0.000964088264728602,
+      "ci": [
+        -0.0005230564187343282,
+        0.0025908069463937977
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis0_slope": {
+      "mean": 0.000002732059538601561,
+      "ci": [
+        -0.002059173489872279,
+        0.002082064345195305
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis1_slope": {
+      "mean": 0.0031293477295157857,
+      "ci": [
+        -0.012806393109272562,
+        0.016829491484303596
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis2_slope": {
+      "mean": -0.000334736915458933,
+      "ci": [
+        -0.0009792345612744668,
+        0.0003965232097679856
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis3_slope": {
+      "mean": -0.005817802017734408,
+      "ci": [
+        -0.012296342363384838,
+        0.00047842821420985296
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis0_curvature": {
+      "mean": 0.00004827099945714508,
+      "ci": [
+        -0.00006303980262600817,
+        0.0003171148867604502
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis1_curvature": {
+      "mean": 0.00002591083665492988,
+      "ci": [
+        -0.0008554938413064169,
+        0.0007809878889002562
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis2_curvature": {
+      "mean": -0.000010555094490882766,
+      "ci": [
+        -0.00001975393982848554,
+        0.0000026199638227808464
+      ],
+      "effect": "inconclusive"
+    },
+    "50/axis3_curvature": {
+      "mean": 0.0003089564149831858,
+      "ci": [
+        -0.00011600385550695572,
+        0.0008468843170135187
+      ],
+      "effect": "inconclusive"
+    },
+    "50/forecast_minus_blind": {
+      "mean": 0.004310708228702609,
+      "ci": [
+        0.0026031963165905427,
+        0.00711512313609397
+      ],
+      "effect": "positive"
+    },
+    "100/mean_minus_forecast": {
+      "mean": -0.000154447543073033,
+      "ci": [
+        -0.0005054614470250129,
+        0.00006584280232679873
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis0_plus_minus_forecast": {
+      "mean": -0.0001779845148437431,
+      "ci": [
+        -0.0006405772749265201,
+        0.0003766960811960328
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis0_minus_minus_forecast": {
+      "mean": -0.00013896733624108037,
+      "ci": [
+        -0.0006323858806194238,
+        0.00034973469700183557
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis1_plus_minus_forecast": {
+      "mean": 0.00040424570637576096,
+      "ci": [
+        -0.0006016093174784909,
+        0.0013846435906394838
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis1_minus_minus_forecast": {
+      "mean": -0.0006941103156599127,
+      "ci": [
+        -0.0017466110441350935,
+        0.0005705404813407408
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis2_plus_minus_forecast": {
+      "mean": -0.000045697992353765926,
+      "ci": [
+        -0.00046641337846364816,
+        0.00034752647011088194
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis2_minus_minus_forecast": {
+      "mean": -0.00026354374244519363,
+      "ci": [
+        -0.0006102520820814306,
+        0.00006843730565840378
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis3_plus_minus_forecast": {
+      "mean": -0.00030342821062134817,
+      "ci": [
+        -0.0013922594940218858,
+        0.0008063046958740665
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis3_minus_minus_forecast": {
+      "mean": 0.00004730293925625517,
+      "ci": [
+        -0.0007205162976848811,
+        0.0009117818547217382
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis0_slope": {
+      "mean": -0.00007803435720532548,
+      "ci": [
+        -0.0016420328449802495,
+        0.0015521080268097959
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis1_slope": {
+      "mean": 0.0021967120440713472,
+      "ci": [
+        -0.0022566307312850142,
+        0.006163305820223286
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis2_slope": {
+      "mean": 0.0004356915001828554,
+      "ci": [
+        -0.0005086220194393531,
+        0.001255382961577567
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis3_slope": {
+      "mean": -0.0007014622997552067,
+      "ci": [
+        -0.004245698899181767,
+        0.002952167836772657
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis0_curvature": {
+      "mean": -0.00012890823927591555,
+      "ci": [
+        -0.0003130334277396211,
+        0.000044173641467656945
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis1_curvature": {
+      "mean": 0.00030448762970536336,
+      "ci": [
+        -0.00040259217523974655,
+        0.0012348007829814378
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis2_curvature": {
+      "mean": -0.0000055463783610321116,
+      "ci": [
+        -0.00016288276718808467,
+        0.00017147728379995897
+      ],
+      "effect": "inconclusive"
+    },
+    "100/axis3_curvature": {
+      "mean": 0.0008443170365239894,
+      "ci": [
+        0.00015313106581515967,
+        0.0017961804815627147
+      ],
+      "effect": "positive"
+    },
+    "100/forecast_minus_blind": {
+      "mean": 0.006511936801157248,
+      "ci": [
+        0.003984772180985048,
+        0.009502754204016028
+      ],
+      "effect": "positive"
+    }
+  },
+  "cost": {
+    "native_episodes": 3072,
+    "native_steps": 3686400,
+    "native_lower_calls": 3686400,
+    "native_upper_calls": 41472,
+    "plan_renewals": 50688,
+    "plan_ols_fits": 47872,
+    "plan_ridge_predictions": 47872,
+    "reference_evaluations": 3379200,
+    "actor_context_evaluations": 3379200,
+    "native_network_checks": 3072,
+    "native_pair_groups": 256,
+    "initial_feedback_pair_checks": 2816,
+    "external_measurement_pair_checks": 2816,
+    "lower_innovation_pair_checks": 2816,
+    "zero_forecast_command_checks": 256,
+    "source_freeze_checks": 16
+  },
+  "native_trial_prerequisite": "Stage67_critic_HOLD_unchanged",
+  "performance_claim": "frozen_whole_episode_bias_direction_gain_not_a_learned_HRL_policy_or_local_Q",
+  "equal_root_panel_effects": {
+    "A": {
+      "50/mean_minus_forecast": -0.0001662880963984037,
+      "50/axis0_plus_minus_forecast": -0.00018075971364694965,
+      "50/axis0_minus_minus_forecast": -0.0001432788662754092,
+      "50/axis1_plus_minus_forecast": 0.0008468490256632322,
+      "50/axis1_minus_minus_forecast": -0.0012005928246772157,
+      "50/axis2_plus_minus_forecast": -0.00026340209088715483,
+      "50/axis2_minus_minus_forecast": -0.0000699520381921559,
+      "50/axis3_plus_minus_forecast": -0.0019566770135597267,
+      "50/axis3_minus_minus_forecast": 0.001633478806841282,
+      "50/axis0_slope": -0.0000749616947430809,
+      "50/axis1_slope": 0.004094883700680896,
+      "50/axis2_slope": -0.00038690010538999786,
+      "50/axis3_slope": -0.007180311640802017,
+      "50/axis0_curvature": 0.00013660180616170692,
+      "50/axis1_curvature": -0.00033868169896322797,
+      "50/axis2_curvature": -0.000012446980349523074,
+      "50/axis3_curvature": 0.00015004777731064678,
+      "50/forecast_minus_blind": 0.0048145862885782265,
+      "100/mean_minus_forecast": -0.00013625520959692494,
+      "100/axis0_plus_minus_forecast": -0.00014742993325356224,
+      "100/axis0_minus_minus_forecast": -0.0001352897951569787,
+      "100/axis1_plus_minus_forecast": 0.0005844490122974833,
+      "100/axis1_minus_minus_forecast": -0.0008340933772998937,
+      "100/axis2_plus_minus_forecast": -0.000008563636598069024,
+      "100/axis2_minus_minus_forecast": -0.0002588256558695434,
+      "100/axis3_plus_minus_forecast": -0.0003349259470368793,
+      "100/axis3_minus_minus_forecast": 0.00008269832285634493,
+      "100/axis0_slope": -0.000024280276193167083,
+      "100/axis1_slope": 0.002837084779194754,
+      "100/axis2_slope": 0.0005005240385429488,
+      "100/axis3_slope": -0.0008352485397864484,
+      "100/axis0_curvature": -0.00016334894769443054,
+      "100/axis1_curvature": 0.00036585686689249997,
+      "100/axis2_curvature": 0.00008193802750611212,
+      "100/axis3_curvature": 0.00032452472021304857,
+      "100/forecast_minus_blind": 0.00805050412552788
+    },
+    "B": {
+      "50/mean_minus_forecast": -0.0008337461589569273,
+      "50/axis0_plus_minus_forecast": -0.0008148915744925489,
+      "50/axis0_minus_minus_forecast": -0.0008551044814026909,
+      "50/axis1_plus_minus_forecast": -0.0002805899889821717,
+      "50/axis1_minus_minus_forecast": -0.0013624958681575094,
+      "50/axis2_plus_minus_forecast": -0.0009046603156015465,
+      "50/axis2_minus_minus_forecast": -0.0007633734528376124,
+      "50/axis3_plus_minus_forecast": -0.0019329484747174774,
+      "50/axis3_minus_minus_forecast": 0.000294697722615922,
+      "50/axis0_slope": 0.00008042581382028402,
+      "50/axis1_slope": 0.0021638117583506755,
+      "50/axis2_slope": -0.0002825737255278682,
+      "50/axis3_slope": -0.004455292394666799,
+      "50/axis0_curvature": -0.000040059807247416757,
+      "50/axis1_curvature": 0.00039050337227308773,
+      "50/axis2_curvature": -0.000008663208632242458,
+      "50/axis3_curvature": 0.00046786505265572487,
+      "50/forecast_minus_blind": 0.003806830168826991,
+      "100/mean_minus_forecast": -0.00017263987654914104,
+      "100/axis0_plus_minus_forecast": -0.000208539096433924,
+      "100/axis0_minus_minus_forecast": -0.00014264487732518205,
+      "100/axis1_plus_minus_forecast": 0.00022404240045403867,
+      "100/axis1_minus_minus_forecast": -0.0005541272540199316,
+      "100/axis2_plus_minus_forecast": -0.00008283234810946283,
+      "100/axis2_minus_minus_forecast": -0.00026826182902084383,
+      "100/axis3_plus_minus_forecast": -0.00027193047420581706,
+      "100/axis3_minus_minus_forecast": 0.000011907555656165414,
+      "100/axis0_slope": -0.00013178843821748387,
+      "100/axis1_slope": 0.0015563393089479405,
+      "100/axis2_slope": 0.000370858961822762,
+      "100/axis3_slope": -0.000567676059723965,
+      "100/axis0_curvature": -0.00009446753085740056,
+      "100/axis1_curvature": 0.00024311839251822676,
+      "100/axis2_curvature": -0.00009303078422817634,
+      "100/axis3_curvature": 0.0013641093528349302,
+      "100/forecast_minus_blind": 0.0049733694767866155
+    }
+  },
+  "eligible_diagnostic_directions": {
+    "50": [],
+    "100": []
+  },
+  "closed_loop_gain": "not_supported",
+  "run_name": "pointmaze_action_gain_stage110_full_20261004_r1",
+  "pull_policy": "qualified_compact_aggregate_root_effects_panel_effects_and_variant_means_only_no_state_or_checkpoint"
+}

@@ -20,3 +20,5 @@ Do not launch an alpha sweep or extend the old donor reward matrix. Next measure
 ## Limitations
 
 These are conditional same-state policy responses,not actual closed-loop performance gains. .001 is only the earlier lower-update KL reference;mean KL below it is not a safety/no-harm bound. Quantiles in the compact summary are averaged episode quantiles,not a pooled percentile. This diagnostic does not select a production alpha,prove the sole cause of Stage108's negative result,or change its hierarchy claim boundary. Stage67 critic HOLD and all prior negative evidence remain in place.
+
+Follow-up [Stage110](freq_hrl_stage110_action_gain_result_2026-10-04.md) completed the frozen native directional matrix. No coordinate direction meets the corrected gain/slope/A-B gate. The next development step is a trainable optional residual path above the preserved strong flat function,rather than more scale/bias tuning.
