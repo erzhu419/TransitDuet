@@ -26,5 +26,7 @@ to the plan/lower interface, not another residual-capacity sweep.
 Implementation revision: `2d0f285d52`; 20 focused tests passed.
 Native preflight `t135429` and independent aggregation `t135430` passed mechanically.
 Frozen full run: `pointmaze_local_plan_gain_stage117_full_20261004_r1`, workers
-`t135432`-`t135439`, aggregation `t135440`. All eight workers launched; performance
-results are pending. No preflight metric was used to revise the full protocol.
+`t135432`-`t135439`, aggregation `t135440`. All tasks completed; corrected local-plan
+gain and gradient-repeatability gates passed at both periods. This is conditional
+headroom, not a learned-policy gain. No preflight metric revised the full protocol.
+The matched credit training follow-up is Stage118.
