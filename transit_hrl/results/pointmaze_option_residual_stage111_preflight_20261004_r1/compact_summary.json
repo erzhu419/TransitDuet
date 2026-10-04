@@ -1,0 +1,88 @@
+{
+  "status": "preflight_passed",
+  "protocol": "pointmaze_option_residual_stage111_v1",
+  "contract": {
+    "source": "pointmaze_optional_plan_stage107_v1",
+    "donors": "all8_final_Stage107_blind_lowers_fixed_Stage106_upper",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "arms": [
+      "blind",
+      "forecast",
+      "learned"
+    ],
+    "architecture": "frozen396_base_with_zero_advice_plus_trainable_zero_linear396_to2_readout_same_all_arms_std_fixed",
+    "initial_policy": "exact_strong_flat_mean_and_std_for_arbitrary_advice_no_extra_exploration",
+    "intervention": "readout_bias_axis_plus_minus0.05_raw_Gaussian_mean_for_one_option_only_then_zero_to_episode_end",
+    "query_states": "fresh12_scenarios_per_root_period_balanced_start300_600_900_pref2_start100_replayed_prefix",
+    "noise": "same_prefix_and_state_A_B_independent_suffix_noise_common_across5_interventions_within_each_panel",
+    "credit": "undiscounted_suffix_return_central_difference_two_action_bias_axes_no_critic_or_option_truncation",
+    "advice": "same_query392_feedback_plus4_blind_forecast_or_deterministic_upper_full_alpha1_advice_zero_branch_identity_only",
+    "statistics": "six_equal_root_endpoints_bootstrap65536_Bonferroni6_seed111_111111",
+    "gate": "both_periods_positive_corrected_CI_for_local_credit_cosine_and_dot_RMS_descriptive",
+    "admission": "pref_mechanical_only_frozen_full_before_pref_no_tuning_on_pref",
+    "artifacts": "server_scalar_queries_only_no_native_trace_checkpoint_or_training_writes_compact_pull",
+    "limits": "conditional_local_bias_credit_replication_not_policy_gain_advice_or_hierarchy_superiority_Stage67_HOLD_unchanged"
+  },
+  "mechanical_gate": "passed",
+  "endpoints": {
+    "50/local_credit_cosine": {
+      "mean": 0.9419869506765994
+    },
+    "50/local_credit_dot": {
+      "mean": 17.96159461448449
+    },
+    "50/local_credit_rms": {
+      "mean": 4.398665102423434
+    },
+    "100/local_credit_cosine": {
+      "mean": 0.6492047352521015
+    },
+    "100/local_credit_dot": {
+      "mean": 25.447039450083075
+    },
+    "100/local_credit_rms": {
+      "mean": 6.274290031653524
+    }
+  },
+  "cost": {
+    "native_episodes": 40,
+    "native_steps": 12000,
+    "native_lower_calls": 12000,
+    "native_pair_groups": 4,
+    "network_freeze_checks": 4,
+    "prefix_pair_checks": 36,
+    "exogenous_pair_checks": 36,
+    "innovation_pair_checks": 32,
+    "suffix_credit_identity_checks": 32,
+    "branch_zero_checks": 12,
+    "advice_upper_calls": 4,
+    "advice_ols_fits": 8,
+    "advice_ridge_predictions": 8,
+    "advice_reference_calls": 8,
+    "advice_context_calls": 8,
+    "source_freeze_checks": 2
+  },
+  "native_trial_prerequisite": "Stage67_critic_HOLD_unchanged",
+  "performance_claim": "none_local_action_bias_credit_only_no_policy_training",
+  "local_credit_gate": "mechanical_only",
+  "period_credit_gate": {},
+  "run_name": "pointmaze_option_residual_stage111_preflight_20261004_r1",
+  "wall_seconds": [
+    12.27562705008313
+  ]
+}
