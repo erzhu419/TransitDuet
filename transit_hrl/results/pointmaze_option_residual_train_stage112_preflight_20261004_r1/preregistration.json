@@ -1,0 +1,113 @@
+{
+  "admission": "preflight_qualification_must_pass_before_full",
+  "artifacts": {
+    "local": [
+      "preregistration.json",
+      "compact_summary.json",
+      "scheduler_tasks.json"
+    ],
+    "raw": "server_only"
+  },
+  "budget": {
+    "actor_score_backward_batches": 144,
+    "actor_score_forward_batches": 72,
+    "branch_initializations": 6,
+    "checkpoint_writes": 0,
+    "decoder_loads": 2,
+    "donor_checkpoint_loads": 2,
+    "evaluation_episodes": 48,
+    "forecaster_loads": 1,
+    "frozen_model_checks": 2,
+    "mc_calls": 192,
+    "native_episodes": 240,
+    "native_lower_calls": 72000,
+    "native_network_checks": 240,
+    "native_pair_checks": 8,
+    "native_steps": 72000,
+    "native_upper_calls": 324,
+    "objective_checks": 192,
+    "planning_context_calls": 43200,
+    "planning_fits": 504,
+    "planning_predictions": 504,
+    "planning_reference_calls": 43200,
+    "planning_renewals": 648,
+    "residual_fisher_batches": 72,
+    "residual_kl_checks": 12,
+    "residual_parameter_updates": 12,
+    "scenario_pair_checks": 96,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "training_episodes": 192,
+    "training_freeze_checks": 12
+  },
+  "contract": {
+    "architecture": "OptionalActionResidual396_to2_zero_initialized_frozen_Stage107_blind_lower_donor",
+    "arms": [
+      "blind",
+      "forecast",
+      "learned"
+    ],
+    "artifacts": "server_final_branch_weights_only_no_intermediate_checkpoint_or_native_trace_pull_compact_JSON",
+    "credit": "scenario_leave_other_out_exact_lower_returns_no_fitted_critic",
+    "decision": "learned_minus_blind_forecast_and_own_blinded_positive_corrected_CI_required_before_upper_learning",
+    "evaluation": "six_final_or_initial_policies32_fresh_paired_paths_with_forecast_and_learned_advice_blinded",
+    "freeze": "Stage111_blind_donor_base_upper_std_values_Adam_and_critic_fixed",
+    "limits": "branch_only_teacher_initialized_MC_mean_training_not_full_actor_critic_or_end_to_end_HRL",
+    "periods": [
+      50,
+      100
+    ],
+    "primary_endpoints": [
+      "50/learned_minus_blind",
+      "50/learned_minus_forecast",
+      "50/learned_minus_learned_blinded",
+      "100/learned_minus_blind",
+      "100/learned_minus_forecast",
+      "100/learned_minus_learned_blinded"
+    ],
+    "source": "pointmaze_option_residual_stage111_v1",
+    "statistics": "all12_equal_root_bootstrap65536_Bonferroni12_seed112_112112_no_selection",
+    "task": {
+      "other_environment_parameters": "unchanged_Stage96",
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "training": "eight_mean_only_MC_updates_each_arm_128_native_paths_update_frozen_upper_value_std_and_base",
+    "upper": "fixed_deterministic_Stage106_upper_for_learned_plan_no_upper_update",
+    "variants": [
+      "base",
+      "blind",
+      "forecast",
+      "learned",
+      "forecast_blinded",
+      "learned_blinded"
+    ]
+  },
+  "endpoints": {
+    "gate": "supported_both_periods",
+    "primary": "branch_return_gain",
+    "secondary": "branch_action_alignment"
+  },
+  "mode": "preflight",
+  "protocol": "pointmaze_option_residual_train_stage112_v1",
+  "registered_utc": "2026-10-04T03:47:38.599150+00:00",
+  "roots": [
+    410011
+  ],
+  "run": "pointmaze_option_residual_train_stage112_preflight_20261004_r1",
+  "scheduler": {
+    "hard_pin": false,
+    "memory_mib": 3072,
+    "placement": "dynamic_node001_node006",
+    "workers_per_task": 3
+  },
+  "source_evidence_revision": "c4dda64a02",
+  "source_revision": "cc6a41df6fa42cce4e7f66d4bca88387895cecc5"
+}
