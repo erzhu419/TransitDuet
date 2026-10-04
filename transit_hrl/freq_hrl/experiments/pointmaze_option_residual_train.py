@@ -375,7 +375,10 @@ def qualify(cell, *, preflight):
     if cell["seed_roles"] != spec.seed_roles(root, preflight=preflight):
         mismatches.append("seed_roles")
     if cell["cost"] != spec.budget(preflight=preflight):
-        mismatches.append("cost")
+        expected_cost = spec.budget(preflight=preflight)
+        details = [f"{key}={cell['cost'][key]}!={expected_cost[key]}" for key in expected_cost
+            if cell["cost"][key] != expected_cost[key]]
+        mismatches.append("cost[" + ";".join(details) + "]")
     if set(cell["groups"]) != {str(p) for p in spec.PERIODS}:
         mismatches.append("period_groups")
     if any(cell[k] for k in ("optimizer_steps", "critic_fits", "upper_updates", "native_trace_writes")):
