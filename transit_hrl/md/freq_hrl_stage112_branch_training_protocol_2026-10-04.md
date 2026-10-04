@@ -1,0 +1,7 @@
+# Stage112 Branch-Only Training Protocol
+
+Stage111 established reproducible local option credit. Stage112 updates only a zero-initialized `396 -> 2` action-mean residual above the final blind flat donor. The donor lower network, exploration scale, lower value, upper actor/value, Adam state and critic are frozen. Blind, causal forecast and calibrated learned-plan arms receive the same eight mean-only MC updates and the same native sample budget.
+
+Each update uses four registered scenario groups, 128 lower trajectories per period/arm/update, exact lower returns and scenario leave-other-out signals. The residual step is Fisher-normalized to nominal KL .001. Upper decisions are deterministic and frozen; no upper gradient is calculated. Final evaluation uses fresh paired scenarios for `base`, all three trained arms, and forecast/learned arms with advice removed. The primary gate requires learned minus blind, learned minus forecast and learned minus own advice-blinded corrected CIs to be positive in both periods.
+
+Preflight is one root with two scenarios, two updates and four evaluation episodes; it is mechanical only. Full is all eight roots, eight updates and 32 evaluation episodes. Final residual weights are server-side only; no intermediate checkpoints, native traces or raw trajectory pulls. A passed branch gate is learned-policy evidence for the residual path, not full actor-critic HRL or upper-policy evidence.

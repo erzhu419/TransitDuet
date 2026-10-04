@@ -13,6 +13,10 @@ from . import pointmaze_feasible_credit as statistics
 from .pointmaze_root_response import write_json
 from scripts import pointmaze_option_residual_stage111_spec as spec
 
+# Re-export the frozen optional-plan runtime for the next branch-only stage.
+native, baseline, scenario = source.native, source.baseline, source.scenario
+advice_state = source.advice_state
+
 
 def load_source(root):
     originals, predictor, _, calibrations = source.load_source(root)

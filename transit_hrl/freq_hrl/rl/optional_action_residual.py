@@ -21,6 +21,10 @@ class OptionalActionResidual(nn.Module):
         base = self.base.distribution(self.flat_input(state))
         return torch.distributions.Normal(base.mean + self.readout(state), base.stddev)
 
+    def log_prob_entropy(self, state, action):
+        distribution = self.distribution(state)
+        return distribution.log_prob(action).sum(-1), distribution.entropy().sum(-1)
+
     def forward_with_mean(self, state, sample=True):
         distribution = self.distribution(state)
         action = distribution.rsample() if sample else distribution.mean
