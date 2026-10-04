@@ -37,3 +37,11 @@ at both periods. Deployment uses a causal policy forward, never future branch se
 Training has more native simulation than Stage118 and uses deterministic upper means;
 this is not an equal-budget single-factor superiority test. The target is learned upper
 gain transfer, not full joint actor-critic, learned promotion, or practical materiality.
+
+## Execution
+
+Implementation revision: `6fdfb1ed08`; 30 focused and regression tests passed.
+Native preflight `t135483` and independent aggregation `t135484` passed mechanically.
+Frozen full run: `pointmaze_native_plan_gradient_stage119_full_20261005_r1`, workers
+`t135487`-`t135494`, aggregation `t135495`. All eight workers launched; formal results
+are pending. No preflight metric revised the registered protocol.
