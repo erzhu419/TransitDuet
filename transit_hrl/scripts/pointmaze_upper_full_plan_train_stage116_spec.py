@@ -1,0 +1,68 @@
+"""Frozen Stage116 specification for a fully trainable explicit plan head."""
+
+from scripts import pointmaze_upper_wide_plan_train_stage115_spec as base
+
+ROOT, PERIODS = base.ROOT, base.PERIODS
+EXPERIMENT_PROTOCOL = "pointmaze_upper_full_plan_train_stage116_v1"
+POLICY = "complete_explicit_bernstein_plan_coordinate_local_option_credit"
+RUNNER_SCRIPT = "scripts/run_pointmaze_upper_full_plan_train_stage116.py"
+ANALYZER_SCRIPT = "scripts/analyze_pointmaze_upper_full_plan_train_stage116.py"
+SOURCE_RUN, LOWER_RUN = base.SOURCE_RUN, base.LOWER_RUN
+ARMS, CONTRASTS, ENDPOINTS = base.ARMS, base.CONTRASTS, base.ENDPOINTS
+BOOTSTRAP_DRAWS, BOOTSTRAP_SEED, CHUNK_SIZE = 65536, (116, 116116), base.CHUNK_SIZE
+PLAN_BASIS = base.PLAN_BASIS
+
+
+def roots(*, preflight):
+    return base.roots(preflight=preflight)
+
+
+def arguments(root, *, preflight):
+    return base.arguments(root, preflight=preflight)
+
+
+def options(*, preflight):
+    return base.options(preflight=preflight)
+
+
+def source_result(root):
+    return base.source_result(root)
+
+
+def lower_checkpoint(root, period):
+    return base.lower_checkpoint(root, period)
+
+
+def seed_roles(root, *, preflight):
+    roots(preflight=preflight).index(root)
+    base_seed = 116000000 if preflight else 116100000 + roots(preflight=False).index(root) * 100000
+    o = options(preflight=preflight)
+    rounds = [{name: [{"scenario_seed": base_seed + 10000 * j + offset + i,
+        "noise_seeds": [base_seed + 10000 * j + offset + 2001 + 2 * i,
+            base_seed + 10000 * j + offset + 2002 + 2 * i]}
+        for i in range(o["credit_scenarios_per_batch"])]
+        for name, offset in (("credit_A", 1), ("credit_B", 1001))}
+        for j in range(o["updates"])]
+    return {"training_rounds": rounds,
+        "native_evaluation": list(range(base_seed + 95001,
+            base_seed + 95001 + o["evaluation_episodes"]))}
+
+
+def budget(*, preflight):
+    return base.budget(preflight=preflight)
+
+
+def contract():
+    return {"source": SOURCE_RUN, "lower_source": LOWER_RUN,
+        "architecture": "forecast_anchored_Bernstein_basis5_upper_readout390_to8_all_zero_initialized",
+        "training": "decision_aligned_local_option_return_updates_all_eight_plan_coordinates_critic_std_and_donor_upper_base_frozen",
+        "representation": "alpha1_forecast_base_plus_complete_anchored_basis5_plan_coordinates",
+        "plan_coordinates": "per_entity_coefficients_[anchor,donor0,donor1,extra0,extra1]_all_readout_coordinates_trainable",
+        "credit": "per_upper_decision_undiscounted_option_return_leave_other_out_over_paired_noise",
+        "arms": list(ARMS), "primary_endpoints": list(ENDPOINTS),
+        "statistics": "all4_equal_root_bootstrap65536_Bonferroni4_seed116_116116_no_selection",
+        "decision": "positive_CI_for_learned_minus_forecast_and_learned_minus_learned_blinded_both_periods",
+        "freeze": "Stage112_learned_lower_branch_Stage111_source_upper_base_upper_std_values_and_critic",
+        "artifacts": "server_final_upper_weights_only_compact_JSON_no_native_trace_pull",
+        "limits": "upper_branch_only_not_full_joint_actor_critic_until_gate"}
+
