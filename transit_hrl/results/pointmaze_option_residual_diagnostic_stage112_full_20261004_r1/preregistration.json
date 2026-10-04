@@ -1,0 +1,39 @@
+{
+  "protocol": "pointmaze_option_residual_diagnostic_stage112_v1",
+  "run": "pointmaze_option_residual_diagnostic_stage112_full_20261004_r1",
+  "registered_utc": "2026-10-04T05:31:29Z",
+  "source_revision": "ac7dcb38abfc316497c6cd9d1d48eb228850701d",
+  "source_evidence_revision": "7683867de8",
+  "contract": {
+    "source": "pointmaze_option_residual_stage111_v1",
+    "full_run": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+    "comparison": "learned_final_branch_vs_forecast_final_branch_same_seed_and_noise",
+    "frozen": "Stage112_final_weights_and_Stage111_source_no_training_or_checkpoint_write",
+    "metrics": ["return_difference", "advice_norm", "residual_correction_norm", "advice_cosine"],
+    "selection": "single_root_410011_fixed_before_reading_diagnostic_results",
+    "statistics": "32_fresh_pairs_per_period_percentile_bootstrap65536_seed112300",
+    "raw_artifacts": "server_only_compact_scalar_pull"
+  },
+  "root": 410011,
+  "periods": [50, 100],
+  "episodes_per_arm_period": 32,
+  "budget": {
+    "native_episodes": 128,
+    "native_steps": 1536000,
+    "native_lower_calls": 1536000,
+    "checkpoint_loads": 4,
+    "return_pairs": 64,
+    "bootstrap_draws": 786432
+  },
+  "scheduler": {
+    "placement": "dynamic_node001_node006",
+    "hard_pin": false,
+    "workers_per_task": 3,
+    "memory_mib": 3072
+  },
+  "artifacts": {
+    "raw": "server_only",
+    "local": ["preregistration.json", "compact_summary.json", "scheduler_tasks.json"]
+  },
+  "admission": "fixed_diagnostic_after_stage112_branch_gate_not_supported"
+}
