@@ -12,6 +12,8 @@ Cost:3,072 episodes/3,686,400 steps,41,472 upper calls;47,872 OLS fits and47,872
 
 Preserve all8 strong blind/flat functions as a frozen base;add a zero-initialized optional action-residual branch. Match blind/forecast/learned architecture,samples and update budget. Qualify independent paired native option credit before upper learning. Use a new protocol,not another alpha/seed rescue of these upper donors.
 
+[Stage111](freq_hrl_stage111_option_residual_result_2026-10-04.md) completed the new residual path and passed both periods' local-credit gate;matched branch-only policy training is next. This does not reverse Stage110's result.
+
 ## Limitations
 
 Whole-episode bias interventions do not rule out local/root-specific learnable gain. [Root alignment](../results/pointmaze_action_gain_stage110_full_20261004_r1/root_gradient_diagnostics.json) is exploratory. Stage67 critic HOLD and Stage108's negative hierarchy boundary remain unchanged.
