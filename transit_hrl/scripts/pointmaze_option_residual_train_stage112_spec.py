@@ -73,7 +73,7 @@ def budget(*, preflight):
         "native_pair_checks": len(PERIODS)*o["evaluation_episodes"], "objective_checks": credit,
         "mc_calls": credit, "actor_score_forward_batches": score_batches*len(ARMS)*len(PERIODS)*o["updates"],
         "actor_score_backward_batches": score_batches*2*len(ARMS)*len(PERIODS)*o["updates"],
-        "residual_fisher_batches": score_batches*len(ARMS)*len(PERIODS)*o["updates"],
+        "residual_fisher_batches": math.ceil(n*h/CHUNK_SIZE)*len(ARMS)*len(PERIODS)*o["updates"],
         "residual_kl_checks": len(ARMS)*len(PERIODS)*o["updates"],
         "residual_parameter_updates": len(ARMS)*len(PERIODS)*o["updates"],
         "training_freeze_checks": len(ARMS)*len(PERIODS)*o["updates"],

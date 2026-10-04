@@ -304,7 +304,8 @@ def run(root, *, preflight, output):
                             for row in rows:
                                 check_row(row, period=period, horizon=args.horizon)
                                 for key, value in (("training_episodes", 1), ("native_episodes", 1), ("native_steps", args.horizon),
-                                    ("native_lower_calls", args.horizon), ("native_network_checks", 1)):
+                                    ("native_lower_calls", args.horizon), ("native_upper_calls", row["upper_calls"]),
+                                    ("native_network_checks", 1)):
                                     cost[key] += value
                                 for key, value in (("planning_renewals", row["plan_renewals"]), ("planning_fits", row["plan_ols_fits"]),
                                     ("planning_predictions", row["plan_ridge_predictions"]), ("planning_reference_calls", row["reference_evaluations"]),
@@ -329,7 +330,8 @@ def run(root, *, preflight, output):
                     check_row(row, period=period, horizon=args.horizon, variant=variant)
                     evaluation[variant].append(row)
                     for key, value in (("evaluation_episodes", 1), ("native_episodes", 1), ("native_steps", args.horizon),
-                        ("native_lower_calls", args.horizon), ("native_network_checks", 1)):
+                        ("native_lower_calls", args.horizon), ("native_upper_calls", row["upper_calls"]),
+                        ("native_network_checks", 1)):
                         cost[key] += value
                     for key, value in (("planning_renewals", row["plan_renewals"]), ("planning_fits", row["plan_ols_fits"]),
                         ("planning_predictions", row["plan_ridge_predictions"]), ("planning_reference_calls", row["reference_evaluations"]),

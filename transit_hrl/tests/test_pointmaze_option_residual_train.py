@@ -77,6 +77,8 @@ class OptionResidualTrainTest(unittest.TestCase):
         self.assertEqual(budget["evaluation_episodes"], 384)
         self.assertEqual(budget["native_episodes"], 6528)
         self.assertEqual(budget["native_upper_calls"], 38016)
+        self.assertEqual(budget["residual_fisher_batches"], 7200)
+        self.assertEqual(spec.budget(preflight=True)["residual_fisher_batches"], 60)
         self.assertEqual(budget["planning_renewals"], 76032)
         self.assertEqual(spec.contract()["decision"],
             "learned_minus_blind_forecast_and_own_blinded_positive_corrected_CI_required_before_upper_learning")
