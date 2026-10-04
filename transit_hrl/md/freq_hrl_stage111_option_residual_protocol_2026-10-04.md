@@ -1,0 +1,9 @@
+# Stage111 Local Option Residual Credit
+
+Stage108/110 did not support the old advisory donor or whole-episode upper bias as a hierarchy gain. This step introduces a separate zero-initialized linear action-mean residual above all8 final Stage107 blind donors. The base always receives its original392 feedback features with4 zero advice columns; base weights, exploration std, upper, critic and Adam remain fixed. Blind/forecast/learned residual inputs have the same396-dimensional architecture and initial function.
+
+Before any policy update, qualify local option credit. Per root/period50/100,12 fresh scenarios have balanced query starts300/600/900. Replay each prefix exactly, then execute zero or either signed0.05 raw-action bias on either of2 axes for just one option, restoring flat for the full remaining episode. A/B share the decision state but use independent suffix noise; each panel's5 interventions share its noise. Central differences use undiscounted suffix return, not truncated option reward or a fitted critic.
+
+Full cohort:8 roots,1,920 episodes/2,304,000 native steps;4 workers/root dynamically scheduled on node001-006. Preflight:1 root,2 queries/start100,H300,2 workers;mechanical admission only. Six equal-root endpoints use65,536 bootstrap draws,Bonferroni6,seed(111,111111). Proceed to residual learning only if both periods' local-credit cosine and dot have positive corrected CI lower bounds. RMS is descriptive. Freeze both cohorts before preflight;no epsilon/seed/period search. Preserve all negative results.
+
+No training,checkpoint or native trace writes. Keep scalar query results server-side;pull compact JSON/logs only. The conditional action-bias gate does not prove advice value or hierarchy superiority and does not reopen the Stage67 critic HOLD. Next,if qualified:matched blind/forecast/learned branch-only training before any upper update.
