@@ -38,8 +38,8 @@ class OptionResidualTrainTest(unittest.TestCase):
         before = copy.deepcopy(actor.base.state_dict())
         cost = {key: 0 for key in ("residual_fisher_batches", "residual_kl_checks",
             "residual_parameter_updates", "training_freeze_checks")}
-        row = experiment.residual_update(actor, {"gradients": {"A": gradients["scenario"][None],
-            "B": gradients["scenario"][None]}, "states": state.numpy(), "score_costs": {}, "signal_rms": {}}, cost=cost)
+        row = experiment.residual_update(actor, {"gradients": {"A": gradients["scenario"],
+            "B": gradients["scenario"]}, "states": state.numpy(), "score_costs": {}, "signal_rms": {}}, cost=cost)
         self.assertEqual(row["geometry"]["radius_check"], "passed")
         self.assertAlmostEqual(row["geometry"]["exact_kl"], spec.FISHER_RADIUS, places=6)
         torch.testing.assert_close(actor.base.state_dict(), before, atol=0, rtol=0)

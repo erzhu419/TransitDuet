@@ -221,7 +221,7 @@ def residual_actor_gradients(actor, lower, signals, *, clip_ratio, chunk_size):
 
 
 def residual_update(actor, score, *, cost):
-    gradient = np.concatenate([score["gradients"]["A"], score["gradients"]["B"]]).mean(0)
+    gradient = np.stack([score["gradients"]["A"], score["gradients"]["B"]], axis=0).mean(0)
     norm = float(np.linalg.norm(gradient))
     if not np.isfinite(norm) or norm == 0.:
         raise ValueError("residual branch gradient is undefined")
