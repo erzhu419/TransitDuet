@@ -1,0 +1,191 @@
+{
+  "run_name": "pointmaze_control_response_stage109_preflight_20261004_r1",
+  "protocol": "pointmaze_control_response_stage109_v1",
+  "registered_at_utc": "2026-10-04T00:31:32.585705+00:00",
+  "source_revision": "81df2abbad2cf3f14b76f27612d0273b0e3ed4c8",
+  "source_evidence_revision": "84490aa2ed",
+  "preflight": true,
+  "contract": {
+    "source": "pointmaze_crossed_advice_stage108_v1",
+    "donors": "all_Stage107_final_learned_hint_lowers_Stage106_upper_no_selection",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "trajectory": "frozen_learned_hint_lower_executing_causal_forecast_only_H1200_prefH300",
+    "states": "every5th_native_state_all392_flat_feedback_preserved_counterfactual_advice_only",
+    "probe_actions": "upper_mean_mean_plus_std_z_zero_mean_std_z_and_mean_plus_minus_0.25_in_each_of4_latent_coordinates",
+    "decoder": "exact_existing_Bernstein_tanh_clip_then_blend_legacy_alpha_or1_zero_action_identity",
+    "probes": [
+      "forecast",
+      "blind",
+      "zero",
+      "legacy_mean",
+      "legacy_sample",
+      "legacy_noise",
+      "legacy_axis0_plus",
+      "legacy_axis0_minus",
+      "legacy_axis1_plus",
+      "legacy_axis1_minus",
+      "legacy_axis2_plus",
+      "legacy_axis2_minus",
+      "legacy_axis3_plus",
+      "legacy_axis3_minus",
+      "full_mean",
+      "full_sample",
+      "full_noise",
+      "full_axis0_plus",
+      "full_axis0_minus",
+      "full_axis1_plus",
+      "full_axis1_minus",
+      "full_axis2_plus",
+      "full_axis2_minus",
+      "full_axis3_plus",
+      "full_axis3_minus"
+    ],
+    "lower": "fixed_current_lower_raw_Gaussian_mean_and_tanh_mean_same_std",
+    "metrics": "command_RMS_same_covariance_KL_q99_two_singular_values_of_central_secant_Jacobian",
+    "KL_reference": 0.001,
+    "KL_reference_role": "existing_lower_update_scale_descriptive_only_not_a_safety_or_performance_bound",
+    "statistics": "equal_root_descriptive_summary_no_reward_CI_no_pooling_no_scale_selection",
+    "admission": "preflight_mechanics_only_full_all8_roots_already_frozen",
+    "artifacts": "compact_JSON_no_trace_checkpoint_gradient_update_or_critic_fit",
+    "limits": "same_state_policy_response_not_closed_loop_gain_reward_advantage_or_proof_of_root_cause"
+  },
+  "optimizer_roots": [
+    410011
+  ],
+  "options": {
+    "workers": 2,
+    "evaluation_episodes": 2
+  },
+  "horizon": 300,
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "source_for_first_root": {
+    "initialization": {
+      "teacher_decoder": {
+        "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+        "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+        "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+        "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+        "checkpoints": {
+          "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+          "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+        },
+        "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+        "teacher_preflight": false,
+        "decoder_preflight": false,
+        "historical_artifact_loads": 0
+      },
+      "donor_protocol": "pointmaze_plan_baselines_stage106_v1",
+      "donor_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/result.json",
+      "lower_method": "flat_lower",
+      "upper_method": "joint_conditioned",
+      "donors": {
+        "50": {
+          "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_flat_lower.pt",
+          "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_joint_conditioned.pt"
+        },
+        "100": {
+          "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_flat_lower.pt",
+          "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_joint_conditioned.pt"
+        }
+      },
+      "selection": "all_eight_roots_both_periods_fixed_final_update8_no_donor_selection"
+    },
+    "donor_protocol": "pointmaze_optional_plan_stage107_v1",
+    "donor_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/result.json",
+    "donors": {
+      "50": {
+        "learned_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_50_learned_hint.pt",
+        "forecast_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_50_forecast_hint.pt"
+      },
+      "100": {
+        "learned_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_100_learned_hint.pt",
+        "forecast_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_100_forecast_hint.pt"
+      }
+    },
+    "selection": "all_eight_roots_both_periods_final_update8_no_donor_selection"
+  },
+  "seed_roles": {
+    "410011": {
+      "native_evaluation": [
+        109095001,
+        109095002
+      ],
+      "probe_noise": "NumPy_SeedSequence_109_root_scenario_period_same_z_for_mean_plus_std_z_and_std_z"
+    }
+  },
+  "budget_per_root": {
+    "native_episodes": 4,
+    "native_steps": 1200,
+    "native_lower_calls": 1200,
+    "native_upper_calls": 0,
+    "probe_states": 240,
+    "probe_lower_mean_rows": 6000,
+    "probe_upper_distribution_rows": 18,
+    "probe_forecast_reconstructions": 18,
+    "probe_residual_curve_decodes": 414,
+    "forecast_ols_fits": 14,
+    "forecast_ridge_predictions": 14,
+    "worker_bounds_environment_constructions": 2,
+    "native_network_checks": 4,
+    "probe_network_checks": 4,
+    "counterfactual_feedback_checks": 4,
+    "forecast_replay_checks": 4,
+    "zero_action_identity_checks": 4,
+    "source_freeze_checks": 2
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu": 3,
+    "ram_mb": 3072
+  },
+  "artifacts": "server_checkpoint_reads_only_compact_JSON_pull_no_new_checkpoint_or_raw_trace",
+  "full_admission": "mechanical_preflight_only_no_reward_or_response_threshold"
+}
