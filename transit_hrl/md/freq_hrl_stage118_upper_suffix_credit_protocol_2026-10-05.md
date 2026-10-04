@@ -27,3 +27,11 @@ mechanical only. No best-iteration selection, seed extension or preflight tuning
 Schedule dynamically on node001-node006; weights and raw trajectories stay server-side.
 If this fails, the supported local intervention has not transferred to score-gradient
 learning; use gradient agreement and final paired returns to choose the next training change.
+
+## Execution
+
+Implementation revision: `34ab26669b`; 14 focused tests passed.
+Native preflight `t135460` and independent aggregation `t135461` passed mechanically.
+Frozen full run: `pointmaze_upper_suffix_credit_stage118_full_20261005_r1`, workers
+`t135464`-`t135471`, aggregation `t135472`. Formal results are pending; no preflight
+performance metric changed the registered experiment.
