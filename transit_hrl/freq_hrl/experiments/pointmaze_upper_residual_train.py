@@ -232,7 +232,6 @@ def run(root, *, preflight, output):
             source_weights = source.native.joint.inference_weights(model)
             lower_state = load_lower_state(root, period)
             upper = upper_branch(model)
-            initial_upper = copy.deepcopy(upper.state_dict())
             histories = []
             for iteration, round_roles in enumerate(roles["training_rounds"], 1):
                 pair_groups = {}
@@ -279,7 +278,7 @@ def run(root, *, preflight, output):
                 torch.save({"protocol": spec.EXPERIMENT_PROTOCOL, "root": root, "period": period, "weights": upper.state_dict()}, path)
             cost["checkpoint_writes"] += int(not preflight)
             groups[str(period)] = {"evaluation": evaluation, "effects": paired_effects(period, evaluation, roles["native_evaluation"]),
-                "history": histories, "source_and_lower_unchanged": "passed", "initial_upper": initial_upper}
+                "history": histories, "source_and_lower_unchanged": "passed"}
     if cost != spec.budget(preflight=preflight):
         details = {k: (cost[k], spec.budget(preflight=preflight)[k]) for k in cost if cost[k] != spec.budget(preflight=preflight)[k]}
         raise ValueError(f"upper residual budget mismatch: {details}")
