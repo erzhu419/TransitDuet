@@ -1,0 +1,220 @@
+{
+  "run_name": "pointmaze_action_gain_stage110_preflight_20261004_r1",
+  "protocol": "pointmaze_action_gain_stage110_v1",
+  "registered_at_utc": "2026-10-04T00:55:24.603537+00:00",
+  "source_revision": "36e9b258e28878218c6553630365f6dbe222f4ed",
+  "source_evidence_revision": "9525853236",
+  "preflight": true,
+  "contract": {
+    "source": "pointmaze_control_response_stage109_v1",
+    "donors": "all8_Stage107_final_learned_hint_lowers_fixed_Stage106_upper",
+    "task": {
+      "regime_dwell_seconds": [
+        0.4,
+        0.8
+      ],
+      "source_regime_dwell_seconds": [
+        0.8,
+        1.6
+      ],
+      "other_environment_parameters": "unchanged_Stage96",
+      "training_and_evaluation": "same_shifted_distribution"
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "variants": [
+      "forecast",
+      "blind",
+      "zero",
+      "mean",
+      "axis0_plus",
+      "axis0_minus",
+      "axis1_plus",
+      "axis1_minus",
+      "axis2_plus",
+      "axis2_minus",
+      "axis3_plus",
+      "axis3_minus"
+    ],
+    "feedback": "all392_flat_features_plus4_advice_same396_actor398_value",
+    "upper": "deterministic_current_mean_with_fixed_plus_minus0.25_coordinate_offset_every_renewal_std_unchanged_unused",
+    "decoder": "existing_Bernstein_tanh_clip_full_alpha1_no_scale_search_zero_action_exact_forecast",
+    "lower": "same_frozen_learned_hint_lower_original_stochastic_Gaussian_box_action_paired_per_step_noise",
+    "panels": "fresh_disjoint_A_B8_paths_each_per_root_period_pref2_no_candidate_selection",
+    "statistics": "36_equal_root_pooled_panel_effects_bootstrap65536_Bonferroni36_seed110_110110",
+    "directional_signal": "central_slope_Rplus_minus_Rminus_over2epsilon_curvature_Rplus_plus_Rminus_minus2Rmean_overepsilon_squared",
+    "gain_gate": "per_period_any_direction_minus_forecast_corrected_CI_positive_with_matching_nonzero_slope_CI_and_same_sign_A_B_equal_root_slopes",
+    "decision": "diagnostic_gain_detected_both_periods_partial_or_not_supported_no_production_action_selection",
+    "admission": "frozen_pref_full_before_native_pref_mechanical_admission_only",
+    "artifacts": "no_training_checkpoint_or_trace_writes_temporary_pair_audits_discarded_server_compact_JSON_pull",
+    "limits": "whole_episode_upper_bias_direction_diagnostic_not_local_Q_learned_policy_superiority_or_frequency_superiority"
+  },
+  "optimizer_roots": [
+    410011
+  ],
+  "options": {
+    "workers": 2,
+    "paths_per_panel": 2
+  },
+  "horizon": 300,
+  "task_options": {
+    "regime_dwell_seconds": [
+      0.4,
+      0.8
+    ],
+    "target_speed_modes": [
+      -1.25,
+      -0.55,
+      0.55,
+      1.25
+    ],
+    "force_pulse_amplitude": 0.18,
+    "force_pulse_duration_seconds": [
+      0.04,
+      0.1
+    ],
+    "force_pulse_gap_seconds": [
+      0.45,
+      1.1
+    ],
+    "distractor_amplitude": 0.5,
+    "distractor_dwell_seconds": [
+      0.35,
+      0.85
+    ]
+  },
+  "source_for_first_root": {
+    "initialization": {
+      "teacher_decoder": {
+        "teacher_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011/result.json",
+        "decoder_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_decoder_stage97_full_20261003_r1/cells/replicate_410011/result.json",
+        "teacher_protocol": "pointmaze_fresh_teachers_stage96_v1",
+        "decoder_protocol": "pointmaze_fresh_decoder_stage97_v1",
+        "checkpoints": {
+          "50": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_50_final.pt",
+          "100": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/clone_100_final.pt"
+        },
+        "forecaster": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_fresh_teachers_stage96_full_20261003_r1/cells/replicate_410011_raw/forecaster.npz",
+        "teacher_preflight": false,
+        "decoder_preflight": false,
+        "historical_artifact_loads": 0
+      },
+      "donor_protocol": "pointmaze_plan_baselines_stage106_v1",
+      "donor_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/result.json",
+      "lower_method": "flat_lower",
+      "upper_method": "joint_conditioned",
+      "donors": {
+        "50": {
+          "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_flat_lower.pt",
+          "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_50_joint_conditioned.pt"
+        },
+        "100": {
+          "flat_lower": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_flat_lower.pt",
+          "joint_conditioned": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_plan_baselines_stage106_full_20261003_r2/cells/replicate_410011/final_weights/period_100_joint_conditioned.pt"
+        }
+      },
+      "selection": "all_eight_roots_both_periods_fixed_final_update8_no_donor_selection"
+    },
+    "donor_protocol": "pointmaze_optional_plan_stage107_v1",
+    "donor_result": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/result.json",
+    "donors": {
+      "50": {
+        "learned_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_50_learned_hint.pt",
+        "forecast_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_50_forecast_hint.pt"
+      },
+      "100": {
+        "learned_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_100_learned_hint.pt",
+        "forecast_hint": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_optional_plan_stage107_full_20261004_r1/cells/replicate_410011/final_weights/period_100_forecast_hint.pt"
+      }
+    },
+    "selection": "all_eight_roots_both_periods_final_update8_no_donor_selection"
+  },
+  "seed_roles": {
+    "410011": {
+      "panels": {
+        "A": [
+          110095001,
+          110095002
+        ],
+        "B": [
+          110096001,
+          110096002
+        ]
+      }
+    }
+  },
+  "budget_per_root": {
+    "native_episodes": 96,
+    "native_steps": 28800,
+    "native_lower_calls": 28800,
+    "native_upper_calls": 324,
+    "plan_renewals": 396,
+    "plan_ols_fits": 308,
+    "plan_ridge_predictions": 308,
+    "reference_evaluations": 26400,
+    "actor_context_evaluations": 26400,
+    "native_network_checks": 96,
+    "native_pair_groups": 8,
+    "initial_feedback_pair_checks": 88,
+    "external_measurement_pair_checks": 88,
+    "lower_innovation_pair_checks": 88,
+    "zero_forecast_command_checks": 8,
+    "source_freeze_checks": 2
+  },
+  "endpoints": [
+    "50/mean_minus_forecast",
+    "50/axis0_plus_minus_forecast",
+    "50/axis0_minus_minus_forecast",
+    "50/axis1_plus_minus_forecast",
+    "50/axis1_minus_minus_forecast",
+    "50/axis2_plus_minus_forecast",
+    "50/axis2_minus_minus_forecast",
+    "50/axis3_plus_minus_forecast",
+    "50/axis3_minus_minus_forecast",
+    "50/axis0_slope",
+    "50/axis1_slope",
+    "50/axis2_slope",
+    "50/axis3_slope",
+    "50/axis0_curvature",
+    "50/axis1_curvature",
+    "50/axis2_curvature",
+    "50/axis3_curvature",
+    "50/forecast_minus_blind",
+    "100/mean_minus_forecast",
+    "100/axis0_plus_minus_forecast",
+    "100/axis0_minus_minus_forecast",
+    "100/axis1_plus_minus_forecast",
+    "100/axis1_minus_minus_forecast",
+    "100/axis2_plus_minus_forecast",
+    "100/axis2_minus_minus_forecast",
+    "100/axis3_plus_minus_forecast",
+    "100/axis3_minus_minus_forecast",
+    "100/axis0_slope",
+    "100/axis1_slope",
+    "100/axis2_slope",
+    "100/axis3_slope",
+    "100/axis0_curvature",
+    "100/axis1_curvature",
+    "100/axis2_curvature",
+    "100/axis3_curvature",
+    "100/forecast_minus_blind"
+  ],
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu": 3,
+    "ram_mb": 3072
+  },
+  "artifacts": "server_source_reads_only_compact_JSON_pull_no_checkpoint_or_raw_trace",
+  "full_admission": "mechanical_preflight_only_no_reward_selection",
+  "tests": "6_focused_tests_passed_4.178_seconds"
+}
