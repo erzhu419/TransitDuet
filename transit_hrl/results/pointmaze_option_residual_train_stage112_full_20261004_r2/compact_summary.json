@@ -1,0 +1,32 @@
+{
+  "run": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+  "protocol": "pointmaze_option_residual_train_stage112_v1",
+  "source_revision": "811f46f143",
+  "source_evidence_revision": "c4dda64a02",
+  "status": "complete",
+  "mechanical_gate": "passed",
+  "branch_gain_gate": "not_supported",
+  "upper_learning_admitted": false,
+  "cost": {
+    "roots": 8,
+    "native_episodes": 52224,
+    "native_steps": 62668800,
+    "training_episodes": 49152,
+    "evaluation_episodes": 3072,
+    "native_upper_calls": 304128,
+    "residual_parameter_updates": 384,
+    "residual_fisher_batches": 57600,
+    "checkpoint_writes": 48
+  },
+  "primary_endpoints": {
+    "50/learned_minus_blind": {"mean": 0.005751865998734118, "ci": [0.0036032902340368267, 0.007913403827770615], "effect": "positive"},
+    "50/learned_minus_forecast": {"mean": -0.0000036744659963616755, "ci": [-0.00001806571808060653, 0.000004842239918367852], "effect": "inconclusive"},
+    "50/learned_minus_learned_blinded": {"mean": 0.005684197183188466, "ci": [0.003573697372307727, 0.007846520011633717], "effect": "positive"},
+    "100/learned_minus_blind": {"mean": 0.014894163397646487, "ci": [0.007110218425829706, 0.025333187617307296], "effect": "positive"},
+    "100/learned_minus_forecast": {"mean": -0.00001410185273531539, "ci": [-0.00004048767445894503, -0.0000001748076634555673], "effect": "negative"},
+    "100/learned_minus_learned_blinded": {"mean": 0.015549092082722815, "ci": [0.007590441735001896, 0.025656160184788057], "effect": "positive"}
+  },
+  "gate_detail": {"50": false, "100": false},
+  "raw_artifacts": "server_only",
+  "interpretation": "Residual advice improves over blind, but learned planning does not improve over causal forecast; upper learning is withheld."
+}
