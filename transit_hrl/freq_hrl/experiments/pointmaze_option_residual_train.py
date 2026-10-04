@@ -365,12 +365,23 @@ def run(root, *, preflight, output):
 
 def qualify(cell, *, preflight):
     root = cell["root"]
-    if (cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract()
-            or root not in spec.roots(preflight=preflight) or cell["preflight"] != preflight
-            or cell["source_record"] != spec.source_record(root) or cell["seed_roles"] != spec.seed_roles(root, preflight=preflight)
-            or cell["cost"] != spec.budget(preflight=preflight) or set(cell["groups"]) != {str(p) for p in spec.PERIODS}
-            or any(cell[k] for k in ("optimizer_steps", "critic_fits", "upper_updates", "native_trace_writes"))):
-        raise ValueError("Stage112 protocol, source, budget or freeze changed")
+    mismatches = []
+    if cell["status"] != "complete" or cell["protocol"] != spec.EXPERIMENT_PROTOCOL or cell["contract"] != spec.contract():
+        mismatches.append("protocol_or_contract")
+    if root not in spec.roots(preflight=preflight) or cell["preflight"] != preflight:
+        mismatches.append("root_or_mode")
+    if cell["source_record"] != spec.source_record(root):
+        mismatches.append("source_record")
+    if cell["seed_roles"] != spec.seed_roles(root, preflight=preflight):
+        mismatches.append("seed_roles")
+    if cell["cost"] != spec.budget(preflight=preflight):
+        mismatches.append("cost")
+    if set(cell["groups"]) != {str(p) for p in spec.PERIODS}:
+        mismatches.append("period_groups")
+    if any(cell[k] for k in ("optimizer_steps", "critic_fits", "upper_updates", "native_trace_writes")):
+        mismatches.append("frozen_training_paths")
+    if mismatches:
+        raise ValueError("Stage112 qualification mismatch: " + ",".join(mismatches))
     h = spec.arguments(root, preflight=preflight).horizon
     for p, group in cell["groups"].items():
         if group["source_and_Adam_unchanged"] != "passed" or group["task_options"] != spec.task_options(root, preflight=preflight):
