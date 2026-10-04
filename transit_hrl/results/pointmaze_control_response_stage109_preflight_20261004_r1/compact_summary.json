@@ -1,0 +1,907 @@
+{
+  "status": "qualified",
+  "protocol": "pointmaze_control_response_stage109_v1",
+  "preflight": true,
+  "root_rows": [
+    {
+      "root": 410011,
+      "groups": {
+        "50": {
+          "alpha": 0.02223361635696027,
+          "responses": {
+            "blind": {
+              "command_delta_rms": 0.0001860321004391728,
+              "position_hint_rms": 0,
+              "raw_mean_delta_rms": 0.00020800544340433428,
+              "same_covariance_KL_mean": 0.0000011392765656503606,
+              "same_covariance_KL_q99": 0.000004117125974395921,
+              "velocity_hint_rms": 0
+            },
+            "forecast": {
+              "command_delta_rms": 0,
+              "position_hint_rms": 0.19316787272691727,
+              "raw_mean_delta_rms": 0,
+              "same_covariance_KL_mean": 0,
+              "same_covariance_KL_q99": 0,
+              "velocity_hint_rms": 0.8527072072029114
+            },
+            "full_axis0_minus": {
+              "command_delta_rms": 0.0000649414503890238,
+              "position_hint_rms": 0.17366746068000793,
+              "raw_mean_delta_rms": 0.00007146026480314463,
+              "same_covariance_KL_mean": 1.327261928008363e-7,
+              "same_covariance_KL_q99": 4.419637432406244e-7,
+              "velocity_hint_rms": 0.8664150238037109
+            },
+            "full_axis0_plus": {
+              "command_delta_rms": 0.00006655906729238963,
+              "position_hint_rms": 0.2160266786813736,
+              "raw_mean_delta_rms": 0.0000730826850579859,
+              "same_covariance_KL_mean": 1.3964481365342632e-7,
+              "same_covariance_KL_q99": 4.5512437296564593e-7,
+              "velocity_hint_rms": 0.928482711315155
+            },
+            "full_axis1_minus": {
+              "command_delta_rms": 0.00006483152973304297,
+              "position_hint_rms": 0.16971536725759506,
+              "raw_mean_delta_rms": 0.00006912694183158419,
+              "same_covariance_KL_mean": 1.2464786231652385e-7,
+              "same_covariance_KL_q99": 4.05738439646666e-7,
+              "velocity_hint_rms": 0.8174050152301788
+            },
+            "full_axis1_plus": {
+              "command_delta_rms": 0.00006254849535330381,
+              "position_hint_rms": 0.22056785225868225,
+              "raw_mean_delta_rms": 0.0000666778002669881,
+              "same_covariance_KL_mean": 1.1573889450861164e-7,
+              "same_covariance_KL_q99": 3.884902521356323e-7,
+              "velocity_hint_rms": 0.9596849977970123
+            },
+            "full_axis2_minus": {
+              "command_delta_rms": 0.00008497093926546253,
+              "position_hint_rms": 0.20081853866577148,
+              "raw_mean_delta_rms": 0.00008927766121776688,
+              "same_covariance_KL_mean": 2.2572451984340536e-7,
+              "same_covariance_KL_q99": 7.123997546578095e-7,
+              "velocity_hint_rms": 0.9044575393199921
+            },
+            "full_axis2_plus": {
+              "command_delta_rms": 0.00008213385659866348,
+              "position_hint_rms": 0.19112873822450638,
+              "raw_mean_delta_rms": 0.00008661703134236326,
+              "same_covariance_KL_mean": 2.123528024538282e-7,
+              "same_covariance_KL_q99": 6.900826746404147e-7,
+              "velocity_hint_rms": 0.8914680778980255
+            },
+            "full_axis3_minus": {
+              "command_delta_rms": 0.00008187347541751671,
+              "position_hint_rms": 0.202532559633255,
+              "raw_mean_delta_rms": 0.00008383487088118384,
+              "same_covariance_KL_mean": 1.994445745892774e-7,
+              "same_covariance_KL_q99": 6.457454244486031e-7,
+              "velocity_hint_rms": 0.9123125374317169
+            },
+            "full_axis3_plus": {
+              "command_delta_rms": 0.00008408719724730295,
+              "position_hint_rms": 0.19108757376670837,
+              "raw_mean_delta_rms": 0.0000863878022518198,
+              "same_covariance_KL_mean": 2.1236260454744083e-7,
+              "same_covariance_KL_q99": 6.850254178639046e-7,
+              "velocity_hint_rms": 0.8700268864631653
+            },
+            "full_mean": {
+              "command_delta_rms": 0.000010456390095424106,
+              "position_hint_rms": 0.19023438543081284,
+              "raw_mean_delta_rms": 0.000010825423567942604,
+              "same_covariance_KL_mean": 3.3204132014111034e-9,
+              "same_covariance_KL_q99": 7.768859015715225e-9,
+              "velocity_hint_rms": 0.8455265164375305
+            },
+            "full_noise": {
+              "command_delta_rms": 0.00025652878159743023,
+              "position_hint_rms": 0.2361326664686203,
+              "raw_mean_delta_rms": 0.0002670550225394218,
+              "same_covariance_KL_mean": 0.0000019476335607786884,
+              "same_covariance_KL_q99": 0.00001385172987797129,
+              "velocity_hint_rms": 1.1838420033454895
+            },
+            "full_sample": {
+              "command_delta_rms": 0.0002545316798984742,
+              "position_hint_rms": 0.23398249596357346,
+              "raw_mean_delta_rms": 0.00026508416946478017,
+              "same_covariance_KL_mean": 0.000001917969204379458,
+              "same_covariance_KL_q99": 0.0000137111074882413,
+              "velocity_hint_rms": 1.1734715700149536
+            },
+            "full_secant": {
+              "command_Jacobian_frobenius_rms": 0.0008372048823082003,
+              "largest_singular_mean": 0.0007116743748075255,
+              "sample_minus_noise_command_rms": 0.000012679526099002245,
+              "smallest_singular_mean": 0.0003156606373231949
+            },
+            "legacy_axis0_minus": {
+              "command_delta_rms": 0.0000014396703819777043,
+              "position_hint_rms": 0.1926235929131508,
+              "raw_mean_delta_rms": 0.0000015934214800835611,
+              "same_covariance_KL_mean": 6.598984218717401e-11,
+              "same_covariance_KL_q99": 2.199273159748301e-10,
+              "velocity_hint_rms": 0.8518323302268982
+            },
+            "legacy_axis0_plus": {
+              "command_delta_rms": 0.0000014877729746185856,
+              "position_hint_rms": 0.19356778264045715,
+              "raw_mean_delta_rms": 0.0000016447233789427263,
+              "same_covariance_KL_mean": 7.062795737732009e-11,
+              "same_covariance_KL_q99": 2.2948388843380194e-10,
+              "velocity_hint_rms": 0.8532426059246063
+            },
+            "legacy_axis1_minus": {
+              "command_delta_rms": 0.0000014407960286896015,
+              "position_hint_rms": 0.19252945482730865,
+              "raw_mean_delta_rms": 0.0000015465355184925552,
+              "same_covariance_KL_mean": 6.236696144646808e-11,
+              "same_covariance_KL_q99": 1.964874682879489e-10,
+              "velocity_hint_rms": 0.8508881032466888
+            },
+            "legacy_axis1_plus": {
+              "command_delta_rms": 0.0000013914408413129932,
+              "position_hint_rms": 0.19366387277841568,
+              "raw_mean_delta_rms": 0.000001495788957254482,
+              "same_covariance_KL_mean": 5.820693760350901e-11,
+              "same_covariance_KL_q99": 1.9586401897953205e-10,
+              "velocity_hint_rms": 0.8541812598705292
+            },
+            "legacy_axis2_minus": {
+              "command_delta_rms": 0.0000018848121231813192,
+              "position_hint_rms": 0.19320835918188095,
+              "raw_mean_delta_rms": 0.0000019845924102742403,
+              "same_covariance_KL_mean": 1.114429477887266e-10,
+              "same_covariance_KL_q99": 3.5856136546794355e-10,
+              "velocity_hint_rms": 0.8526619970798492
+            },
+            "legacy_axis2_plus": {
+              "command_delta_rms": 0.0000018150049373717395,
+              "position_hint_rms": 0.1929825246334076,
+              "raw_mean_delta_rms": 0.0000019181275490228447,
+              "same_covariance_KL_mean": 1.0410705871070641e-10,
+              "same_covariance_KL_q99": 3.4093085821976183e-10,
+              "velocity_hint_rms": 0.8524097204208374
+            },
+            "legacy_axis3_minus": {
+              "command_delta_rms": 0.0000018124484265736381,
+              "position_hint_rms": 0.19323230534791946,
+              "raw_mean_delta_rms": 0.0000018575181236066143,
+              "same_covariance_KL_mean": 9.787979528481009e-11,
+              "same_covariance_KL_q99": 3.2011896411271755e-10,
+              "velocity_hint_rms": 0.8530862629413605
+            },
+            "legacy_axis3_plus": {
+              "command_delta_rms": 0.0000018721453359871464,
+              "position_hint_rms": 0.19296147674322128,
+              "raw_mean_delta_rms": 0.0000019307387593726315,
+              "same_covariance_KL_mean": 1.0596299747271256e-10,
+              "same_covariance_KL_q99": 3.395373072141886e-10,
+              "velocity_hint_rms": 0.8519885838031769
+            },
+            "legacy_mean": {
+              "command_delta_rms": 2.3416557982869393e-7,
+              "position_hint_rms": 0.19309239834547043,
+              "raw_mean_delta_rms": 2.518269623977828e-7,
+              "same_covariance_KL_mean": 1.7774892809248588e-12,
+              "same_covariance_KL_q99": 4.912790391893023e-12,
+              "velocity_hint_rms": 0.8525091409683228
+            },
+            "legacy_noise": {
+              "command_delta_rms": 0.000005704378522967742,
+              "position_hint_rms": 0.19292714446783066,
+              "raw_mean_delta_rms": 0.000005932509957412971,
+              "same_covariance_KL_mean": 9.612474334085918e-10,
+              "same_covariance_KL_q99": 6.856339008358211e-9,
+              "velocity_hint_rms": 0.8504422903060913
+            },
+            "legacy_sample": {
+              "command_delta_rms": 0.0000056579312143184094,
+              "position_hint_rms": 0.19285786151885986,
+              "raw_mean_delta_rms": 0.000005883833987150745,
+              "same_covariance_KL_mean": 9.45244453005232e-10,
+              "same_covariance_KL_q99": 6.777349434526298e-9,
+              "velocity_hint_rms": 0.850168913602829
+            },
+            "legacy_secant": {
+              "command_Jacobian_frobenius_rms": 0.00001857804624903433,
+              "largest_singular_mean": 0.00001578179744781929,
+              "sample_minus_noise_command_rms": 2.8264649145470437e-7,
+              "smallest_singular_mean": 0.0000070130664226732025
+            },
+            "zero": {
+              "command_delta_rms": 0,
+              "position_hint_rms": 0.19316787272691727,
+              "raw_mean_delta_rms": 0,
+              "same_covariance_KL_mean": 0,
+              "same_covariance_KL_q99": 0,
+              "velocity_hint_rms": 0.8527072072029114
+            }
+          },
+          "upper_mean_rms": 0.029300662749311944,
+          "upper_std_rms": 0.40493594802366256,
+          "upper_tanh_mean_rms": 0.029288548509252985
+        },
+        "100": {
+          "alpha": 0.06479194013941661,
+          "responses": {
+            "blind": {
+              "command_delta_rms": 0.00016077383004843885,
+              "position_hint_rms": 0,
+              "raw_mean_delta_rms": 0.00018446326605571392,
+              "same_covariance_KL_mean": 8.926040705320773e-7,
+              "same_covariance_KL_q99": 0.000003479098854351657,
+              "velocity_hint_rms": 0
+            },
+            "forecast": {
+              "command_delta_rms": 0,
+              "position_hint_rms": 0.28522174060344696,
+              "raw_mean_delta_rms": 0,
+              "same_covariance_KL_mean": 0,
+              "same_covariance_KL_q99": 0,
+              "velocity_hint_rms": 0.7707976400852203
+            },
+            "full_axis0_minus": {
+              "command_delta_rms": 0.00003776873284561691,
+              "position_hint_rms": 0.2698206752538681,
+              "raw_mean_delta_rms": 0.0000402918861907307,
+              "same_covariance_KL_mean": 4.2759760499801184e-8,
+              "same_covariance_KL_q99": 1.367799838032979e-7,
+              "velocity_hint_rms": 0.7781538367271423
+            },
+            "full_axis0_plus": {
+              "command_delta_rms": 0.000038279670745353564,
+              "position_hint_rms": 0.30527183413505554,
+              "raw_mean_delta_rms": 0.00004102561467902704,
+              "same_covariance_KL_mean": 4.405344202396961e-8,
+              "same_covariance_KL_q99": 1.4176619937501805e-7,
+              "velocity_hint_rms": 0.7929660975933075
+            },
+            "full_axis1_minus": {
+              "command_delta_rms": 0.0000266118160682971,
+              "position_hint_rms": 0.2626834064722061,
+              "raw_mean_delta_rms": 0.000029096515151064212,
+              "same_covariance_KL_mean": 2.2196670792325198e-8,
+              "same_covariance_KL_q99": 6.879736847679939e-8,
+              "velocity_hint_rms": 0.7524725198745728
+            },
+            "full_axis1_plus": {
+              "command_delta_rms": 0.00002577280447896616,
+              "position_hint_rms": 0.3138568550348282,
+              "raw_mean_delta_rms": 0.0000279795146538918,
+              "same_covariance_KL_mean": 2.077497624804623e-8,
+              "same_covariance_KL_q99": 5.839876116843733e-8,
+              "velocity_hint_rms": 0.8159586787223816
+            },
+            "full_axis2_minus": {
+              "command_delta_rms": 0.00003144382768021133,
+              "position_hint_rms": 0.28870122134685516,
+              "raw_mean_delta_rms": 0.00003279462188307592,
+              "same_covariance_KL_mean": 2.9578065983493098e-8,
+              "same_covariance_KL_q99": 9.497357053397856e-8,
+              "velocity_hint_rms": 0.7857851088047028
+            },
+            "full_axis2_plus": {
+              "command_delta_rms": 0.0000311607861772788,
+              "position_hint_rms": 0.2876031994819641,
+              "raw_mean_delta_rms": 0.000032339873435067074,
+              "same_covariance_KL_mean": 2.8952365913207433e-8,
+              "same_covariance_KL_q99": 9.010924783292037e-8,
+              "velocity_hint_rms": 0.7859258055686951
+            },
+            "full_axis3_minus": {
+              "command_delta_rms": 0.000027000854012977343,
+              "position_hint_rms": 0.2901245504617691,
+              "raw_mean_delta_rms": 0.000028629424222276512,
+              "same_covariance_KL_mean": 2.23574754058133e-8,
+              "same_covariance_KL_q99": 7.582720818720512e-8,
+              "velocity_hint_rms": 0.7868255972862244
+            },
+            "full_axis3_plus": {
+              "command_delta_rms": 0.00002758398871010049,
+              "position_hint_rms": 0.2886675149202347,
+              "raw_mean_delta_rms": 0.000029631062273985578,
+              "same_covariance_KL_mean": 2.3685737998555134e-8,
+              "same_covariance_KL_q99": 8.350953020329704e-8,
+              "velocity_hint_rms": 0.7831502556800842
+            },
+            "full_mean": {
+              "command_delta_rms": 0.000003919909941524298,
+              "position_hint_rms": 0.28421369194984436,
+              "raw_mean_delta_rms": 0.000004256753136338264,
+              "same_covariance_KL_mean": 4.819215538805039e-10,
+              "same_covariance_KL_q99": 1.8595892100319442e-9,
+              "velocity_hint_rms": 0.7712737023830414
+            },
+            "full_noise": {
+              "command_delta_rms": 0.00009938431442454502,
+              "position_hint_rms": 0.3158827871084213,
+              "raw_mean_delta_rms": 0.00010630195752200785,
+              "same_covariance_KL_mean": 3.1257162384183715e-7,
+              "same_covariance_KL_q99": 0.00000201997320118861,
+              "velocity_hint_rms": 0.8481599390506744
+            },
+            "full_sample": {
+              "command_delta_rms": 0.00009859435126748266,
+              "position_hint_rms": 0.31564316153526306,
+              "raw_mean_delta_rms": 0.0001055618416284689,
+              "same_covariance_KL_mean": 3.0745435147712294e-7,
+              "same_covariance_KL_q99": 0.0000019738182710988593,
+              "velocity_hint_rms": 0.8483313620090485
+            },
+            "full_secant": {
+              "command_Jacobian_frobenius_rms": 0.00034958618047437507,
+              "largest_singular_mean": 0.0002838541165879258,
+              "sample_minus_noise_command_rms": 0.000003578508461727809,
+              "smallest_singular_mean": 0.0001443796650602968
+            },
+            "legacy_axis0_minus": {
+              "command_delta_rms": 0.000002441301128515973,
+              "position_hint_rms": 0.2840098738670349,
+              "raw_mean_delta_rms": 0.000002600981410770663,
+              "same_covariance_KL_mean": 1.7799905207886622e-10,
+              "same_covariance_KL_q99": 5.700812747110404e-10,
+              "velocity_hint_rms": 0.7703980803489685
+            },
+            "legacy_axis0_plus": {
+              "command_delta_rms": 0.0000024859140756093688,
+              "position_hint_rms": 0.2863156199455261,
+              "raw_mean_delta_rms": 0.0000026704116959410503,
+              "same_covariance_KL_mean": 1.8664781754149223e-10,
+              "same_covariance_KL_q99": 5.961431057827617e-10,
+              "velocity_hint_rms": 0.7713424265384674
+            },
+            "legacy_axis1_minus": {
+              "command_delta_rms": 0.0000017254925836631407,
+              "position_hint_rms": 0.2834956794977188,
+              "raw_mean_delta_rms": 0.0000018918953765795643,
+              "same_covariance_KL_mean": 9.390093710234729e-11,
+              "same_covariance_KL_q99": 2.890398264504672e-10,
+              "velocity_hint_rms": 0.7687650620937347
+            },
+            "legacy_axis1_plus": {
+              "command_delta_rms": 0.000001670983641129278,
+              "position_hint_rms": 0.28684201836586,
+              "raw_mean_delta_rms": 0.000001810700579370042,
+              "same_covariance_KL_mean": 8.705241926993453e-11,
+              "same_covariance_KL_q99": 2.4669200321311275e-10,
+              "velocity_hint_rms": 0.772961437702179
+            },
+            "legacy_axis2_minus": {
+              "command_delta_rms": 0.000002037217541007979,
+              "position_hint_rms": 0.28521260619163513,
+              "raw_mean_delta_rms": 0.0000021254766628491413,
+              "same_covariance_KL_mean": 1.2417775869194774e-10,
+              "same_covariance_KL_q99": 4.049992205493486e-10,
+              "velocity_hint_rms": 0.7708697617053986
+            },
+            "legacy_axis2_plus": {
+              "command_delta_rms": 0.00000202061129158279,
+              "position_hint_rms": 0.28511954843997955,
+              "raw_mean_delta_rms": 0.00000209817326202646,
+              "same_covariance_KL_mean": 1.2188093794634938e-10,
+              "same_covariance_KL_q99": 3.8632544422565123e-10,
+              "velocity_hint_rms": 0.7708726823329926
+            },
+            "legacy_axis3_minus": {
+              "command_delta_rms": 0.0000017535151612486724,
+              "position_hint_rms": 0.28523412346839905,
+              "raw_mean_delta_rms": 0.0000018647744372792075,
+              "same_covariance_KL_mean": 9.47252098895767e-11,
+              "same_covariance_KL_q99": 3.1641330589721705e-10,
+              "velocity_hint_rms": 0.7710150182247162
+            },
+            "legacy_axis3_plus": {
+              "command_delta_rms": 0.0000017861536001758563,
+              "position_hint_rms": 0.2851087152957916,
+              "raw_mean_delta_rms": 0.0000019215070843174154,
+              "same_covariance_KL_mean": 9.96068442517377e-11,
+              "same_covariance_KL_q99": 3.523530329417284e-10,
+              "velocity_hint_rms": 0.7707235217094421
+            },
+            "legacy_mean": {
+              "command_delta_rms": 2.592052574429931e-7,
+              "position_hint_rms": 0.28514887392520905,
+              "raw_mean_delta_rms": 2.8275456358893835e-7,
+              "same_covariance_KL_mean": 2.132382990628584e-12,
+              "same_covariance_KL_q99": 8.621410542126523e-12,
+              "velocity_hint_rms": 0.7708098590373993
+            },
+            "legacy_noise": {
+              "command_delta_rms": 0.000006436321001357574,
+              "position_hint_rms": 0.28552843630313873,
+              "raw_mean_delta_rms": 0.0000068922499841488515,
+              "same_covariance_KL_mean": 1.3146772708857788e-9,
+              "same_covariance_KL_q99": 8.46170848063938e-9,
+              "velocity_hint_rms": 0.7685611248016357
+            },
+            "legacy_sample": {
+              "command_delta_rms": 0.000006387938539073805,
+              "position_hint_rms": 0.2854969948530197,
+              "raw_mean_delta_rms": 0.000006845683403335024,
+              "same_covariance_KL_mean": 1.2941643521923872e-9,
+              "same_covariance_KL_q99": 8.299289825646831e-9,
+              "velocity_hint_rms": 0.7685922682285309
+            },
+            "legacy_secant": {
+              "command_Jacobian_frobenius_rms": 0.00002265206620271866,
+              "largest_singular_mean": 0.00001838642952630194,
+              "sample_minus_noise_command_rms": 2.3247881997857481e-7,
+              "smallest_singular_mean": 0.000009364694990455406
+            },
+            "zero": {
+              "command_delta_rms": 0,
+              "position_hint_rms": 0.28522174060344696,
+              "raw_mean_delta_rms": 0,
+              "same_covariance_KL_mean": 0,
+              "same_covariance_KL_q99": 0,
+              "velocity_hint_rms": 0.7707976400852203
+            }
+          },
+          "upper_mean_rms": 0.019519357750944245,
+          "upper_std_rms": 0.40493594802366256,
+          "upper_tanh_mean_rms": 0.019514395807910263
+        }
+      },
+      "wall_seconds": 5.365290877874941
+    }
+  ],
+  "equal_root_response_means": {
+    "50": {
+      "forecast": {
+        "command_delta_rms": 0,
+        "position_hint_rms": 0.19316787272691727,
+        "raw_mean_delta_rms": 0,
+        "same_covariance_KL_mean": 0,
+        "same_covariance_KL_q99": 0,
+        "velocity_hint_rms": 0.8527072072029114
+      },
+      "blind": {
+        "command_delta_rms": 0.0001860321004391728,
+        "position_hint_rms": 0,
+        "raw_mean_delta_rms": 0.00020800544340433428,
+        "same_covariance_KL_mean": 0.0000011392765656503606,
+        "same_covariance_KL_q99": 0.000004117125974395921,
+        "velocity_hint_rms": 0
+      },
+      "zero": {
+        "command_delta_rms": 0,
+        "position_hint_rms": 0.19316787272691727,
+        "raw_mean_delta_rms": 0,
+        "same_covariance_KL_mean": 0,
+        "same_covariance_KL_q99": 0,
+        "velocity_hint_rms": 0.8527072072029114
+      },
+      "legacy_mean": {
+        "command_delta_rms": 2.3416557982869393e-7,
+        "position_hint_rms": 0.19309239834547043,
+        "raw_mean_delta_rms": 2.518269623977828e-7,
+        "same_covariance_KL_mean": 1.7774892809248588e-12,
+        "same_covariance_KL_q99": 4.912790391893023e-12,
+        "velocity_hint_rms": 0.8525091409683228
+      },
+      "legacy_sample": {
+        "command_delta_rms": 0.0000056579312143184094,
+        "position_hint_rms": 0.19285786151885986,
+        "raw_mean_delta_rms": 0.000005883833987150745,
+        "same_covariance_KL_mean": 9.45244453005232e-10,
+        "same_covariance_KL_q99": 6.777349434526298e-9,
+        "velocity_hint_rms": 0.850168913602829
+      },
+      "legacy_noise": {
+        "command_delta_rms": 0.000005704378522967742,
+        "position_hint_rms": 0.19292714446783066,
+        "raw_mean_delta_rms": 0.000005932509957412971,
+        "same_covariance_KL_mean": 9.612474334085918e-10,
+        "same_covariance_KL_q99": 6.856339008358211e-9,
+        "velocity_hint_rms": 0.8504422903060913
+      },
+      "legacy_axis0_plus": {
+        "command_delta_rms": 0.0000014877729746185856,
+        "position_hint_rms": 0.19356778264045715,
+        "raw_mean_delta_rms": 0.0000016447233789427263,
+        "same_covariance_KL_mean": 7.062795737732009e-11,
+        "same_covariance_KL_q99": 2.2948388843380194e-10,
+        "velocity_hint_rms": 0.8532426059246063
+      },
+      "legacy_axis0_minus": {
+        "command_delta_rms": 0.0000014396703819777043,
+        "position_hint_rms": 0.1926235929131508,
+        "raw_mean_delta_rms": 0.0000015934214800835611,
+        "same_covariance_KL_mean": 6.598984218717401e-11,
+        "same_covariance_KL_q99": 2.199273159748301e-10,
+        "velocity_hint_rms": 0.8518323302268982
+      },
+      "legacy_axis1_plus": {
+        "command_delta_rms": 0.0000013914408413129932,
+        "position_hint_rms": 0.19366387277841568,
+        "raw_mean_delta_rms": 0.000001495788957254482,
+        "same_covariance_KL_mean": 5.820693760350901e-11,
+        "same_covariance_KL_q99": 1.9586401897953205e-10,
+        "velocity_hint_rms": 0.8541812598705292
+      },
+      "legacy_axis1_minus": {
+        "command_delta_rms": 0.0000014407960286896015,
+        "position_hint_rms": 0.19252945482730865,
+        "raw_mean_delta_rms": 0.0000015465355184925552,
+        "same_covariance_KL_mean": 6.236696144646808e-11,
+        "same_covariance_KL_q99": 1.964874682879489e-10,
+        "velocity_hint_rms": 0.8508881032466888
+      },
+      "legacy_axis2_plus": {
+        "command_delta_rms": 0.0000018150049373717395,
+        "position_hint_rms": 0.1929825246334076,
+        "raw_mean_delta_rms": 0.0000019181275490228447,
+        "same_covariance_KL_mean": 1.0410705871070641e-10,
+        "same_covariance_KL_q99": 3.4093085821976183e-10,
+        "velocity_hint_rms": 0.8524097204208374
+      },
+      "legacy_axis2_minus": {
+        "command_delta_rms": 0.0000018848121231813192,
+        "position_hint_rms": 0.19320835918188095,
+        "raw_mean_delta_rms": 0.0000019845924102742403,
+        "same_covariance_KL_mean": 1.114429477887266e-10,
+        "same_covariance_KL_q99": 3.5856136546794355e-10,
+        "velocity_hint_rms": 0.8526619970798492
+      },
+      "legacy_axis3_plus": {
+        "command_delta_rms": 0.0000018721453359871464,
+        "position_hint_rms": 0.19296147674322128,
+        "raw_mean_delta_rms": 0.0000019307387593726315,
+        "same_covariance_KL_mean": 1.0596299747271256e-10,
+        "same_covariance_KL_q99": 3.395373072141886e-10,
+        "velocity_hint_rms": 0.8519885838031769
+      },
+      "legacy_axis3_minus": {
+        "command_delta_rms": 0.0000018124484265736381,
+        "position_hint_rms": 0.19323230534791946,
+        "raw_mean_delta_rms": 0.0000018575181236066143,
+        "same_covariance_KL_mean": 9.787979528481009e-11,
+        "same_covariance_KL_q99": 3.2011896411271755e-10,
+        "velocity_hint_rms": 0.8530862629413605
+      },
+      "full_mean": {
+        "command_delta_rms": 0.000010456390095424106,
+        "position_hint_rms": 0.19023438543081284,
+        "raw_mean_delta_rms": 0.000010825423567942604,
+        "same_covariance_KL_mean": 3.3204132014111034e-9,
+        "same_covariance_KL_q99": 7.768859015715225e-9,
+        "velocity_hint_rms": 0.8455265164375305
+      },
+      "full_sample": {
+        "command_delta_rms": 0.0002545316798984742,
+        "position_hint_rms": 0.23398249596357346,
+        "raw_mean_delta_rms": 0.00026508416946478017,
+        "same_covariance_KL_mean": 0.000001917969204379458,
+        "same_covariance_KL_q99": 0.0000137111074882413,
+        "velocity_hint_rms": 1.1734715700149536
+      },
+      "full_noise": {
+        "command_delta_rms": 0.00025652878159743023,
+        "position_hint_rms": 0.2361326664686203,
+        "raw_mean_delta_rms": 0.0002670550225394218,
+        "same_covariance_KL_mean": 0.0000019476335607786884,
+        "same_covariance_KL_q99": 0.00001385172987797129,
+        "velocity_hint_rms": 1.1838420033454895
+      },
+      "full_axis0_plus": {
+        "command_delta_rms": 0.00006655906729238963,
+        "position_hint_rms": 0.2160266786813736,
+        "raw_mean_delta_rms": 0.0000730826850579859,
+        "same_covariance_KL_mean": 1.3964481365342632e-7,
+        "same_covariance_KL_q99": 4.5512437296564593e-7,
+        "velocity_hint_rms": 0.928482711315155
+      },
+      "full_axis0_minus": {
+        "command_delta_rms": 0.0000649414503890238,
+        "position_hint_rms": 0.17366746068000793,
+        "raw_mean_delta_rms": 0.00007146026480314463,
+        "same_covariance_KL_mean": 1.327261928008363e-7,
+        "same_covariance_KL_q99": 4.419637432406244e-7,
+        "velocity_hint_rms": 0.8664150238037109
+      },
+      "full_axis1_plus": {
+        "command_delta_rms": 0.00006254849535330381,
+        "position_hint_rms": 0.22056785225868225,
+        "raw_mean_delta_rms": 0.0000666778002669881,
+        "same_covariance_KL_mean": 1.1573889450861164e-7,
+        "same_covariance_KL_q99": 3.884902521356323e-7,
+        "velocity_hint_rms": 0.9596849977970123
+      },
+      "full_axis1_minus": {
+        "command_delta_rms": 0.00006483152973304297,
+        "position_hint_rms": 0.16971536725759506,
+        "raw_mean_delta_rms": 0.00006912694183158419,
+        "same_covariance_KL_mean": 1.2464786231652385e-7,
+        "same_covariance_KL_q99": 4.05738439646666e-7,
+        "velocity_hint_rms": 0.8174050152301788
+      },
+      "full_axis2_plus": {
+        "command_delta_rms": 0.00008213385659866348,
+        "position_hint_rms": 0.19112873822450638,
+        "raw_mean_delta_rms": 0.00008661703134236326,
+        "same_covariance_KL_mean": 2.123528024538282e-7,
+        "same_covariance_KL_q99": 6.900826746404147e-7,
+        "velocity_hint_rms": 0.8914680778980255
+      },
+      "full_axis2_minus": {
+        "command_delta_rms": 0.00008497093926546253,
+        "position_hint_rms": 0.20081853866577148,
+        "raw_mean_delta_rms": 0.00008927766121776688,
+        "same_covariance_KL_mean": 2.2572451984340536e-7,
+        "same_covariance_KL_q99": 7.123997546578095e-7,
+        "velocity_hint_rms": 0.9044575393199921
+      },
+      "full_axis3_plus": {
+        "command_delta_rms": 0.00008408719724730295,
+        "position_hint_rms": 0.19108757376670837,
+        "raw_mean_delta_rms": 0.0000863878022518198,
+        "same_covariance_KL_mean": 2.1236260454744083e-7,
+        "same_covariance_KL_q99": 6.850254178639046e-7,
+        "velocity_hint_rms": 0.8700268864631653
+      },
+      "full_axis3_minus": {
+        "command_delta_rms": 0.00008187347541751671,
+        "position_hint_rms": 0.202532559633255,
+        "raw_mean_delta_rms": 0.00008383487088118384,
+        "same_covariance_KL_mean": 1.994445745892774e-7,
+        "same_covariance_KL_q99": 6.457454244486031e-7,
+        "velocity_hint_rms": 0.9123125374317169
+      },
+      "legacy_secant": {
+        "command_Jacobian_frobenius_rms": 0.00001857804624903433,
+        "largest_singular_mean": 0.00001578179744781929,
+        "sample_minus_noise_command_rms": 2.8264649145470437e-7,
+        "smallest_singular_mean": 0.0000070130664226732025
+      },
+      "full_secant": {
+        "command_Jacobian_frobenius_rms": 0.0008372048823082003,
+        "largest_singular_mean": 0.0007116743748075255,
+        "sample_minus_noise_command_rms": 0.000012679526099002245,
+        "smallest_singular_mean": 0.0003156606373231949
+      }
+    },
+    "100": {
+      "forecast": {
+        "command_delta_rms": 0,
+        "position_hint_rms": 0.28522174060344696,
+        "raw_mean_delta_rms": 0,
+        "same_covariance_KL_mean": 0,
+        "same_covariance_KL_q99": 0,
+        "velocity_hint_rms": 0.7707976400852203
+      },
+      "blind": {
+        "command_delta_rms": 0.00016077383004843885,
+        "position_hint_rms": 0,
+        "raw_mean_delta_rms": 0.00018446326605571392,
+        "same_covariance_KL_mean": 8.926040705320773e-7,
+        "same_covariance_KL_q99": 0.000003479098854351657,
+        "velocity_hint_rms": 0
+      },
+      "zero": {
+        "command_delta_rms": 0,
+        "position_hint_rms": 0.28522174060344696,
+        "raw_mean_delta_rms": 0,
+        "same_covariance_KL_mean": 0,
+        "same_covariance_KL_q99": 0,
+        "velocity_hint_rms": 0.7707976400852203
+      },
+      "legacy_mean": {
+        "command_delta_rms": 2.592052574429931e-7,
+        "position_hint_rms": 0.28514887392520905,
+        "raw_mean_delta_rms": 2.8275456358893835e-7,
+        "same_covariance_KL_mean": 2.132382990628584e-12,
+        "same_covariance_KL_q99": 8.621410542126523e-12,
+        "velocity_hint_rms": 0.7708098590373993
+      },
+      "legacy_sample": {
+        "command_delta_rms": 0.000006387938539073805,
+        "position_hint_rms": 0.2854969948530197,
+        "raw_mean_delta_rms": 0.000006845683403335024,
+        "same_covariance_KL_mean": 1.2941643521923872e-9,
+        "same_covariance_KL_q99": 8.299289825646831e-9,
+        "velocity_hint_rms": 0.7685922682285309
+      },
+      "legacy_noise": {
+        "command_delta_rms": 0.000006436321001357574,
+        "position_hint_rms": 0.28552843630313873,
+        "raw_mean_delta_rms": 0.0000068922499841488515,
+        "same_covariance_KL_mean": 1.3146772708857788e-9,
+        "same_covariance_KL_q99": 8.46170848063938e-9,
+        "velocity_hint_rms": 0.7685611248016357
+      },
+      "legacy_axis0_plus": {
+        "command_delta_rms": 0.0000024859140756093688,
+        "position_hint_rms": 0.2863156199455261,
+        "raw_mean_delta_rms": 0.0000026704116959410503,
+        "same_covariance_KL_mean": 1.8664781754149223e-10,
+        "same_covariance_KL_q99": 5.961431057827617e-10,
+        "velocity_hint_rms": 0.7713424265384674
+      },
+      "legacy_axis0_minus": {
+        "command_delta_rms": 0.000002441301128515973,
+        "position_hint_rms": 0.2840098738670349,
+        "raw_mean_delta_rms": 0.000002600981410770663,
+        "same_covariance_KL_mean": 1.7799905207886622e-10,
+        "same_covariance_KL_q99": 5.700812747110404e-10,
+        "velocity_hint_rms": 0.7703980803489685
+      },
+      "legacy_axis1_plus": {
+        "command_delta_rms": 0.000001670983641129278,
+        "position_hint_rms": 0.28684201836586,
+        "raw_mean_delta_rms": 0.000001810700579370042,
+        "same_covariance_KL_mean": 8.705241926993453e-11,
+        "same_covariance_KL_q99": 2.4669200321311275e-10,
+        "velocity_hint_rms": 0.772961437702179
+      },
+      "legacy_axis1_minus": {
+        "command_delta_rms": 0.0000017254925836631407,
+        "position_hint_rms": 0.2834956794977188,
+        "raw_mean_delta_rms": 0.0000018918953765795643,
+        "same_covariance_KL_mean": 9.390093710234729e-11,
+        "same_covariance_KL_q99": 2.890398264504672e-10,
+        "velocity_hint_rms": 0.7687650620937347
+      },
+      "legacy_axis2_plus": {
+        "command_delta_rms": 0.00000202061129158279,
+        "position_hint_rms": 0.28511954843997955,
+        "raw_mean_delta_rms": 0.00000209817326202646,
+        "same_covariance_KL_mean": 1.2188093794634938e-10,
+        "same_covariance_KL_q99": 3.8632544422565123e-10,
+        "velocity_hint_rms": 0.7708726823329926
+      },
+      "legacy_axis2_minus": {
+        "command_delta_rms": 0.000002037217541007979,
+        "position_hint_rms": 0.28521260619163513,
+        "raw_mean_delta_rms": 0.0000021254766628491413,
+        "same_covariance_KL_mean": 1.2417775869194774e-10,
+        "same_covariance_KL_q99": 4.049992205493486e-10,
+        "velocity_hint_rms": 0.7708697617053986
+      },
+      "legacy_axis3_plus": {
+        "command_delta_rms": 0.0000017861536001758563,
+        "position_hint_rms": 0.2851087152957916,
+        "raw_mean_delta_rms": 0.0000019215070843174154,
+        "same_covariance_KL_mean": 9.96068442517377e-11,
+        "same_covariance_KL_q99": 3.523530329417284e-10,
+        "velocity_hint_rms": 0.7707235217094421
+      },
+      "legacy_axis3_minus": {
+        "command_delta_rms": 0.0000017535151612486724,
+        "position_hint_rms": 0.28523412346839905,
+        "raw_mean_delta_rms": 0.0000018647744372792075,
+        "same_covariance_KL_mean": 9.47252098895767e-11,
+        "same_covariance_KL_q99": 3.1641330589721705e-10,
+        "velocity_hint_rms": 0.7710150182247162
+      },
+      "full_mean": {
+        "command_delta_rms": 0.000003919909941524298,
+        "position_hint_rms": 0.28421369194984436,
+        "raw_mean_delta_rms": 0.000004256753136338264,
+        "same_covariance_KL_mean": 4.819215538805039e-10,
+        "same_covariance_KL_q99": 1.8595892100319442e-9,
+        "velocity_hint_rms": 0.7712737023830414
+      },
+      "full_sample": {
+        "command_delta_rms": 0.00009859435126748266,
+        "position_hint_rms": 0.31564316153526306,
+        "raw_mean_delta_rms": 0.0001055618416284689,
+        "same_covariance_KL_mean": 3.0745435147712294e-7,
+        "same_covariance_KL_q99": 0.0000019738182710988593,
+        "velocity_hint_rms": 0.8483313620090485
+      },
+      "full_noise": {
+        "command_delta_rms": 0.00009938431442454502,
+        "position_hint_rms": 0.3158827871084213,
+        "raw_mean_delta_rms": 0.00010630195752200785,
+        "same_covariance_KL_mean": 3.1257162384183715e-7,
+        "same_covariance_KL_q99": 0.00000201997320118861,
+        "velocity_hint_rms": 0.8481599390506744
+      },
+      "full_axis0_plus": {
+        "command_delta_rms": 0.000038279670745353564,
+        "position_hint_rms": 0.30527183413505554,
+        "raw_mean_delta_rms": 0.00004102561467902704,
+        "same_covariance_KL_mean": 4.405344202396961e-8,
+        "same_covariance_KL_q99": 1.4176619937501805e-7,
+        "velocity_hint_rms": 0.7929660975933075
+      },
+      "full_axis0_minus": {
+        "command_delta_rms": 0.00003776873284561691,
+        "position_hint_rms": 0.2698206752538681,
+        "raw_mean_delta_rms": 0.0000402918861907307,
+        "same_covariance_KL_mean": 4.2759760499801184e-8,
+        "same_covariance_KL_q99": 1.367799838032979e-7,
+        "velocity_hint_rms": 0.7781538367271423
+      },
+      "full_axis1_plus": {
+        "command_delta_rms": 0.00002577280447896616,
+        "position_hint_rms": 0.3138568550348282,
+        "raw_mean_delta_rms": 0.0000279795146538918,
+        "same_covariance_KL_mean": 2.077497624804623e-8,
+        "same_covariance_KL_q99": 5.839876116843733e-8,
+        "velocity_hint_rms": 0.8159586787223816
+      },
+      "full_axis1_minus": {
+        "command_delta_rms": 0.0000266118160682971,
+        "position_hint_rms": 0.2626834064722061,
+        "raw_mean_delta_rms": 0.000029096515151064212,
+        "same_covariance_KL_mean": 2.2196670792325198e-8,
+        "same_covariance_KL_q99": 6.879736847679939e-8,
+        "velocity_hint_rms": 0.7524725198745728
+      },
+      "full_axis2_plus": {
+        "command_delta_rms": 0.0000311607861772788,
+        "position_hint_rms": 0.2876031994819641,
+        "raw_mean_delta_rms": 0.000032339873435067074,
+        "same_covariance_KL_mean": 2.8952365913207433e-8,
+        "same_covariance_KL_q99": 9.010924783292037e-8,
+        "velocity_hint_rms": 0.7859258055686951
+      },
+      "full_axis2_minus": {
+        "command_delta_rms": 0.00003144382768021133,
+        "position_hint_rms": 0.28870122134685516,
+        "raw_mean_delta_rms": 0.00003279462188307592,
+        "same_covariance_KL_mean": 2.9578065983493098e-8,
+        "same_covariance_KL_q99": 9.497357053397856e-8,
+        "velocity_hint_rms": 0.7857851088047028
+      },
+      "full_axis3_plus": {
+        "command_delta_rms": 0.00002758398871010049,
+        "position_hint_rms": 0.2886675149202347,
+        "raw_mean_delta_rms": 0.000029631062273985578,
+        "same_covariance_KL_mean": 2.3685737998555134e-8,
+        "same_covariance_KL_q99": 8.350953020329704e-8,
+        "velocity_hint_rms": 0.7831502556800842
+      },
+      "full_axis3_minus": {
+        "command_delta_rms": 0.000027000854012977343,
+        "position_hint_rms": 0.2901245504617691,
+        "raw_mean_delta_rms": 0.000028629424222276512,
+        "same_covariance_KL_mean": 2.23574754058133e-8,
+        "same_covariance_KL_q99": 7.582720818720512e-8,
+        "velocity_hint_rms": 0.7868255972862244
+      },
+      "legacy_secant": {
+        "command_Jacobian_frobenius_rms": 0.00002265206620271866,
+        "largest_singular_mean": 0.00001838642952630194,
+        "sample_minus_noise_command_rms": 2.3247881997857481e-7,
+        "smallest_singular_mean": 0.000009364694990455406
+      },
+      "full_secant": {
+        "command_Jacobian_frobenius_rms": 0.00034958618047437507,
+        "largest_singular_mean": 0.0002838541165879258,
+        "sample_minus_noise_command_rms": 0.000003578508461727809,
+        "smallest_singular_mean": 0.0001443796650602968
+      }
+    }
+  },
+  "cost": {
+    "counterfactual_feedback_checks": 4,
+    "forecast_ols_fits": 14,
+    "forecast_replay_checks": 4,
+    "forecast_ridge_predictions": 14,
+    "native_episodes": 4,
+    "native_lower_calls": 1200,
+    "native_network_checks": 4,
+    "native_steps": 1200,
+    "native_upper_calls": 0,
+    "probe_forecast_reconstructions": 18,
+    "probe_lower_mean_rows": 6000,
+    "probe_network_checks": 4,
+    "probe_residual_curve_decodes": 414,
+    "probe_states": 240,
+    "probe_upper_distribution_rows": 18,
+    "source_freeze_checks": 2,
+    "worker_bounds_environment_constructions": 2,
+    "zero_action_identity_checks": 4
+  },
+  "performance_claim": "not_tested_same_state_response_only",
+  "KL_reference": 0.001,
+  "run_name": "pointmaze_control_response_stage109_preflight_20261004_r1",
+  "pull_policy": "remote_qualified_aggregate_only_no_native_states_or_checkpoints"
+}
