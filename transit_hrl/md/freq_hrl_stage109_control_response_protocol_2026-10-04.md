@@ -11,3 +11,5 @@ Full:8 roots x2 periods x8 fresh paths =128 native episodes/153,600 steps;25 pro
 This is a policy-response diagnostic, not closed-loop controllable gain or performance improvement. It can justify a separate current-lower calibration/action-conditioned study, but cannot turn Stage108 into a positive hierarchy result. Stage67 critic HOLD and prior negative evidence remain unchanged.
 
 The5 focused tests pass. Native preflight t134578 on node004 produced a qualified4-episode/1,200-step result; all6,000 hypothetical mean rows passed causal forecast replay, zero-action identity, unchanged feedback and frozen networks. [Preflight aggregate](../results/pointmaze_control_response_stage109_preflight_20261004_r1/compact_summary.json). Full is admitted mechanically with the already frozen cohort and no threshold on response or reward.
+
+Full t134580-t134588 completed with exit0. [Result and next step](freq_hrl_stage109_control_response_result_2026-10-04.md).
