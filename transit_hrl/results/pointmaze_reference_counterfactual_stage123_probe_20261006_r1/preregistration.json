@@ -1,0 +1,284 @@
+{
+  "artifacts": "scalar_result_JSON_only_no_native_traces_or_checkpoint_writes",
+  "coordinate_variants": [
+    "zero",
+    "axis0_plus",
+    "axis0_minus",
+    "axis1_plus",
+    "axis1_minus",
+    "axis2_plus",
+    "axis2_minus",
+    "axis3_plus",
+    "axis3_minus",
+    "axis4_plus",
+    "axis4_minus",
+    "axis5_plus",
+    "axis5_minus",
+    "axis6_plus",
+    "axis6_minus",
+    "axis7_plus",
+    "axis7_minus"
+  ],
+  "crossfit": "A_action_gradient_direction_tested_in_B_and_B_in_A_both_signs_fixed_norm_epsilon",
+  "epsilon": 0.005,
+  "native_budget_per_root": {
+    "actor_pullback_backward_batches": 4,
+    "actor_pullback_forward_batches": 4,
+    "checkpoint_writes": 0,
+    "native_donor_response_calls": 1459200,
+    "native_episodes": 608,
+    "native_steps": 729600,
+    "native_trace_writes": 0,
+    "native_upper_calls": 10944,
+    "optimizer_steps": 0,
+    "queries": 16
+  },
+  "periods": [
+    50,
+    100
+  ],
+  "policy_updates": 0,
+  "protocol": "pointmaze_reference_counterfactual_stage123_v1",
+  "purpose": "Native causal reference credit mechanism diagnosis, not learned policy validation; all earlier results remain unchanged.",
+  "queries": {
+    "410011": [
+      {
+        "prefix_noise_seed": 123120001,
+        "scenario_seed": 123100001,
+        "start": 0,
+        "suffix_noise_seeds": {
+          "A": 123130001,
+          "B": 123130002
+        }
+      },
+      {
+        "prefix_noise_seed": 123120002,
+        "scenario_seed": 123100002,
+        "start": 0,
+        "suffix_noise_seeds": {
+          "A": 123130003,
+          "B": 123130004
+        }
+      },
+      {
+        "prefix_noise_seed": 123120003,
+        "scenario_seed": 123100003,
+        "start": 300,
+        "suffix_noise_seeds": {
+          "A": 123130005,
+          "B": 123130006
+        }
+      },
+      {
+        "prefix_noise_seed": 123120004,
+        "scenario_seed": 123100004,
+        "start": 300,
+        "suffix_noise_seeds": {
+          "A": 123130007,
+          "B": 123130008
+        }
+      },
+      {
+        "prefix_noise_seed": 123120005,
+        "scenario_seed": 123100005,
+        "start": 600,
+        "suffix_noise_seeds": {
+          "A": 123130009,
+          "B": 123130010
+        }
+      },
+      {
+        "prefix_noise_seed": 123120006,
+        "scenario_seed": 123100006,
+        "start": 600,
+        "suffix_noise_seeds": {
+          "A": 123130011,
+          "B": 123130012
+        }
+      },
+      {
+        "prefix_noise_seed": 123120007,
+        "scenario_seed": 123100007,
+        "start": 900,
+        "suffix_noise_seeds": {
+          "A": 123130013,
+          "B": 123130014
+        }
+      },
+      {
+        "prefix_noise_seed": 123120008,
+        "scenario_seed": 123100008,
+        "start": 900,
+        "suffix_noise_seeds": {
+          "A": 123130015,
+          "B": 123130016
+        }
+      }
+    ],
+    "410023": [
+      {
+        "prefix_noise_seed": 123220001,
+        "scenario_seed": 123200001,
+        "start": 0,
+        "suffix_noise_seeds": {
+          "A": 123230001,
+          "B": 123230002
+        }
+      },
+      {
+        "prefix_noise_seed": 123220002,
+        "scenario_seed": 123200002,
+        "start": 0,
+        "suffix_noise_seeds": {
+          "A": 123230003,
+          "B": 123230004
+        }
+      },
+      {
+        "prefix_noise_seed": 123220003,
+        "scenario_seed": 123200003,
+        "start": 300,
+        "suffix_noise_seeds": {
+          "A": 123230005,
+          "B": 123230006
+        }
+      },
+      {
+        "prefix_noise_seed": 123220004,
+        "scenario_seed": 123200004,
+        "start": 300,
+        "suffix_noise_seeds": {
+          "A": 123230007,
+          "B": 123230008
+        }
+      },
+      {
+        "prefix_noise_seed": 123220005,
+        "scenario_seed": 123200005,
+        "start": 600,
+        "suffix_noise_seeds": {
+          "A": 123230009,
+          "B": 123230010
+        }
+      },
+      {
+        "prefix_noise_seed": 123220006,
+        "scenario_seed": 123200006,
+        "start": 600,
+        "suffix_noise_seeds": {
+          "A": 123230011,
+          "B": 123230012
+        }
+      },
+      {
+        "prefix_noise_seed": 123220007,
+        "scenario_seed": 123200007,
+        "start": 900,
+        "suffix_noise_seeds": {
+          "A": 123230013,
+          "B": 123230014
+        }
+      },
+      {
+        "prefix_noise_seed": 123220008,
+        "scenario_seed": 123200008,
+        "start": 900,
+        "suffix_noise_seeds": {
+          "A": 123230015,
+          "B": 123230016
+        }
+      }
+    ]
+  },
+  "roots": [
+    410011,
+    410023
+  ],
+  "source_protocol": "pointmaze_joint_reference_stage121_v3",
+  "source_revision": "861fc210bdb62a6f7ba69622ad97a966a92027ec",
+  "tasks": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_reference_counterfactual_stage123.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410011/result.json",
+      "cpu": 5,
+      "cpu_training_justification": "Four independent native query workers plus parent; paired complete-suffix counterfactual credit; no optimizer or checkpoint writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage123 exact reference native credit root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_reference_counterfactual_stage123_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_reference_counterfactual_stage123_v1/native_credit_probe",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_reference_counterfactual_stage123_v1/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/reference_counterfactual/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_reference_counterfactual_stage123.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410023/result.json",
+      "cpu": 5,
+      "cpu_training_justification": "Four independent native query workers plus parent; paired complete-suffix counterfactual credit; no optimizer or checkpoint writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage123 exact reference native credit root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_reference_counterfactual_stage123_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_reference_counterfactual_stage123_v1/native_credit_probe",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_reference_counterfactual_stage123_v1/pointmaze_reference_counterfactual_stage123_probe_20261006_r1/reference_counterfactual/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "teacher_input": "forecast_advice_unchanged_curve_delta_enters_only_registered_bounded_donor_reference_response"
+}

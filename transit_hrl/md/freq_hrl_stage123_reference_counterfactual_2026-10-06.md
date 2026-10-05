@@ -34,3 +34,11 @@ not immediate full-scale joint training.
 Five targeted tests passed: zero reproduces Stage121 forecast, common prefix
 and innovations, full-suffix identities, causal-state pullback, and actual
 episode/call budgets with zero policy adoption. No existing training code changed.
+
+## Run Receipt
+
+Code `861fc210bd`; run `pointmaze_reference_counterfactual_stage123_probe_20261006_r1`.
+`t135874` root410011 and `t135875` root410023 are accepted, initially queued.
+Both allow dynamic node001-node006 placement, five CPUs/8GiB per task.
+Fixed commands, query/noise rosters and measured budgets are preregistered;
+only small result JSON will be fetched. No full-training extension submitted.
