@@ -1,0 +1,320 @@
+{
+  "actor_critic_and_teacher_unchanged": "passed",
+  "checkpoint_writes": 0,
+  "groups": {
+    "100": {
+      "flat": {
+        "lower": {
+          "critic_MSE": 692.4373168945312,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.21448361153136963,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.761402125190393,
+              "max_logp_replay_error": 1.239776611328125e-05,
+              "noise_fold_gradient_cosine": 0.09720077888781323,
+              "noise_fold_gradient_norms": [
+                0.03717510728506512,
+                0.027472531193893607
+              ],
+              "phase_mean_variance_fraction": 4.2797685200781835e-30
+            },
+            "source_critic": {
+              "advantage_std": 14.078489303588867,
+              "max_logp_replay_error": 1.239776611328125e-05,
+              "noise_fold_gradient_cosine": 0.11617965727129223,
+              "noise_fold_gradient_norms": [
+                0.025510693416075772,
+                0.03429549811719
+              ],
+              "phase_mean_variance_fraction": 0.9452771544456482
+            }
+          }
+        },
+        "upper": null
+      },
+      "forecast": {
+        "lower": {
+          "critic_MSE": 692.3131713867188,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.23018115526629204,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.7612356032008454,
+              "max_logp_replay_error": 1.2040138244628906e-05,
+              "noise_fold_gradient_cosine": 0.08946487519185302,
+              "noise_fold_gradient_norms": [
+                0.037714385383100076,
+                0.02766631460621265
+              ],
+              "phase_mean_variance_fraction": 4.964853485973561e-30
+            },
+            "source_critic": {
+              "advantage_std": 14.077363967895508,
+              "max_logp_replay_error": 1.2040138244628906e-05,
+              "noise_fold_gradient_cosine": 0.12244732239793882,
+              "noise_fold_gradient_norms": [
+                0.026425958502701376,
+                0.0344095427768824
+              ],
+              "phase_mean_variance_fraction": 0.9452736973762512
+            }
+          }
+        },
+        "upper": null
+      },
+      "initial_sampled_joint_minus_forecast": -3.0645437903925057,
+      "joint": {
+        "lower": {
+          "critic_MSE": 804.8595581054688,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.4385328067755911,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.4479227223428794,
+              "max_logp_replay_error": 1.2636184692382812e-05,
+              "noise_fold_gradient_cosine": 0.24084176077008138,
+              "noise_fold_gradient_norms": [
+                0.03860794229337898,
+                0.039193645914241536
+              ],
+              "phase_mean_variance_fraction": 5.564110316464644e-30
+            },
+            "source_critic": {
+              "advantage_std": 15.002469062805176,
+              "max_logp_replay_error": 1.2636184692382812e-05,
+              "noise_fold_gradient_cosine": 0.16122708128622396,
+              "noise_fold_gradient_norms": [
+                0.02534564995816934,
+                0.03773960072656838
+              ],
+              "phase_mean_variance_fraction": 0.9589952230453491
+            }
+          }
+        },
+        "upper": {
+          "critic_MSE": 945.6226196289062,
+          "decisions_per_episode": 12,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": -0.07306235224212143,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.58158506503923,
+              "max_logp_replay_error": 0.0,
+              "noise_fold_gradient_cosine": -0.07168104171414189,
+              "noise_fold_gradient_norms": [
+                15.804424994850544,
+                18.668550691046526
+              ],
+              "phase_mean_variance_fraction": 1.1306374578752727e-29
+            },
+            "source_critic": {
+              "advantage_std": 15.636408805847168,
+              "max_logp_replay_error": 0.0,
+              "noise_fold_gradient_cosine": -0.0732731658199951,
+              "noise_fold_gradient_norms": [
+                18.12524868279479,
+                21.269385711648454
+              ],
+              "phase_mean_variance_fraction": 0.9592514634132385
+            }
+          }
+        }
+      }
+    },
+    "50": {
+      "flat": {
+        "lower": {
+          "critic_MSE": 550.263427734375,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.5503558823252565,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.6800614483982446,
+              "max_logp_replay_error": 1.9311904907226562e-05,
+              "noise_fold_gradient_cosine": -0.1761329680088586,
+              "noise_fold_gradient_norms": [
+                0.0379807392260316,
+                0.0390677800682003
+              ],
+              "phase_mean_variance_fraction": 4.83420569943898e-30
+            },
+            "source_critic": {
+              "advantage_std": 12.664366722106934,
+              "max_logp_replay_error": 1.9311904907226562e-05,
+              "noise_fold_gradient_cosine": 0.0906213855596401,
+              "noise_fold_gradient_norms": [
+                0.026616099352661942,
+                0.03826962746892367
+              ],
+              "phase_mean_variance_fraction": 0.9353228211402893
+            }
+          }
+        },
+        "upper": null
+      },
+      "forecast": {
+        "lower": {
+          "critic_MSE": 550.1341552734375,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.5528149397164334,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.6804167334024593,
+              "max_logp_replay_error": 1.52587890625e-05,
+              "noise_fold_gradient_cosine": -0.17341058325746964,
+              "noise_fold_gradient_norms": [
+                0.03811545563167443,
+                0.03915219270983724
+              ],
+              "phase_mean_variance_fraction": 5.1981498240944864e-30
+            },
+            "source_critic": {
+              "advantage_std": 12.663191795349121,
+              "max_logp_replay_error": 1.52587890625e-05,
+              "noise_fold_gradient_cosine": 0.09548870781777649,
+              "noise_fold_gradient_norms": [
+                0.026917400705406706,
+                0.038392523285513395
+              ],
+              "phase_mean_variance_fraction": 0.9352985620498657
+            }
+          }
+        },
+        "upper": null
+      },
+      "initial_sampled_joint_minus_forecast": -0.8176009987119386,
+      "joint": {
+        "lower": {
+          "critic_MSE": 577.2420043945312,
+          "decisions_per_episode": 1200,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.5925630096924643,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.2616388617798533,
+              "max_logp_replay_error": 1.4781951904296875e-05,
+              "noise_fold_gradient_cosine": -0.2618659810737613,
+              "noise_fold_gradient_norms": [
+                0.03759897083902506,
+                0.041833939398348965
+              ],
+              "phase_mean_variance_fraction": 6.71931254531711e-30
+            },
+            "source_critic": {
+              "advantage_std": 12.843199729919434,
+              "max_logp_replay_error": 1.4781951904296875e-05,
+              "noise_fold_gradient_cosine": 0.0953403150992582,
+              "noise_fold_gradient_norms": [
+                0.0271840951291958,
+                0.03893752767597155
+              ],
+              "phase_mean_variance_fraction": 0.9504799246788025
+            }
+          }
+        },
+        "upper": {
+          "critic_MSE": 627.42236328125,
+          "decisions_per_episode": 24,
+          "episodes": 16,
+          "pooled_baseline_direction_cosine": 0.3452485678859098,
+          "signals": {
+            "noise_fold_LOO_phase": {
+              "advantage_std": 3.4060880839289296,
+              "max_logp_replay_error": 0.0,
+              "noise_fold_gradient_cosine": 0.3760685665967733,
+              "noise_fold_gradient_norms": [
+                12.86457915790906,
+                17.913447084507503
+              ],
+              "phase_mean_variance_fraction": 8.718704993270593e-30
+            },
+            "source_critic": {
+              "advantage_std": 13.172006607055664,
+              "max_logp_replay_error": 0.0,
+              "noise_fold_gradient_cosine": 0.2260376596649833,
+              "noise_fold_gradient_norms": [
+                13.518494155535198,
+                12.390698424303878
+              ],
+              "phase_mean_variance_fraction": 0.9486631155014038
+            }
+          }
+        }
+      }
+    }
+  },
+  "kind": "frozen_first_round_credit_diagnosis_not_native_gain_confirmation",
+  "native_episodes": 96,
+  "native_steps": 115200,
+  "native_trace_writes": 0,
+  "optimizer_steps": 0,
+  "protocol": "pointmaze_joint_reference_credit_stage122_v1",
+  "root": 410023,
+  "roster": [
+    {
+      "noise_seeds": [
+        121202001,
+        121202002
+      ],
+      "scenario_seed": 121200001
+    },
+    {
+      "noise_seeds": [
+        121202003,
+        121202004
+      ],
+      "scenario_seed": 121200002
+    },
+    {
+      "noise_seeds": [
+        121202005,
+        121202006
+      ],
+      "scenario_seed": 121200003
+    },
+    {
+      "noise_seeds": [
+        121202007,
+        121202008
+      ],
+      "scenario_seed": 121200004
+    },
+    {
+      "noise_seeds": [
+        121202009,
+        121202010
+      ],
+      "scenario_seed": 121200005
+    },
+    {
+      "noise_seeds": [
+        121202011,
+        121202012
+      ],
+      "scenario_seed": 121200006
+    },
+    {
+      "noise_seeds": [
+        121202013,
+        121202014
+      ],
+      "scenario_seed": 121200007
+    },
+    {
+      "noise_seeds": [
+        121202015,
+        121202016
+      ],
+      "scenario_seed": 121200008
+    }
+  ],
+  "source_protocol": "pointmaze_joint_reference_stage121_v3",
+  "source_training_round": 1,
+  "status": "complete"
+}

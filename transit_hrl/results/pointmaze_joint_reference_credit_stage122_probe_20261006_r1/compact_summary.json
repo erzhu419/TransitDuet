@@ -1,0 +1,131 @@
+{
+  "cost": {
+    "checkpoint_writes": 0,
+    "native_episodes": 192,
+    "native_steps": 230400,
+    "native_trace_writes": 0,
+    "optimizer_steps": 0
+  },
+  "diagnosis": "LOO_reduces_advantage_variance_upper_period50_direction_improves_but_period100_and_lower_not_stably_repaired",
+  "initial_sampled_upper_cost": [
+    {
+      "joint_minus_forecast": -3.2391918652739378,
+      "period": 100,
+      "root": 410011
+    },
+    {
+      "joint_minus_forecast": -0.900350309401432,
+      "period": 50,
+      "root": 410011
+    },
+    {
+      "joint_minus_forecast": -3.0645437903925057,
+      "period": 100,
+      "root": 410023
+    },
+    {
+      "joint_minus_forecast": -0.8176009987119386,
+      "period": 50,
+      "root": 410023
+    }
+  ],
+  "next_step": "frozen_exact_reference_native_counterfactual_suffix_credit_with_independent_noise_direction_test",
+  "performance_claim": "no_policy_updated_no_learned_gain_confirmation",
+  "protocol": "pointmaze_joint_reference_credit_stage122_v1",
+  "roots": [
+    410011,
+    410023
+  ],
+  "rows": [
+    {
+      "LOO_advantage_std": 3.8218469683381198,
+      "LOO_noise_gradient_cosine": -0.0003351036251372416,
+      "level": "upper",
+      "original_advantage_std": 15.48357105255127,
+      "original_noise_gradient_cosine": 0.00939031241840344,
+      "original_phase_variance_fraction": 0.9503610134124756,
+      "period": 100,
+      "root": 410011,
+      "variance_ratio": 0.060926232569589504
+    },
+    {
+      "LOO_advantage_std": 3.5873579107472975,
+      "LOO_noise_gradient_cosine": 0.2626281685150998,
+      "level": "lower",
+      "original_advantage_std": 14.865262985229492,
+      "original_noise_gradient_cosine": 0.7431602064377907,
+      "original_phase_variance_fraction": 0.9523190259933472,
+      "period": 100,
+      "root": 410011,
+      "variance_ratio": 0.058237701105417386
+    },
+    {
+      "LOO_advantage_std": 3.3985497790874644,
+      "LOO_noise_gradient_cosine": 0.23197039411211487,
+      "level": "upper",
+      "original_advantage_std": 12.759627342224121,
+      "original_noise_gradient_cosine": -0.16855681146757187,
+      "original_phase_variance_fraction": 0.9449753761291504,
+      "period": 50,
+      "root": 410011,
+      "variance_ratio": 0.0709432842504799
+    },
+    {
+      "LOO_advantage_std": 3.2765472476423017,
+      "LOO_noise_gradient_cosine": 0.029104019121961734,
+      "level": "lower",
+      "original_advantage_std": 12.435402870178223,
+      "original_noise_gradient_cosine": 0.6701999304290384,
+      "original_phase_variance_fraction": 0.946116030216217,
+      "period": 50,
+      "root": 410011,
+      "variance_ratio": 0.0694245622947471
+    },
+    {
+      "LOO_advantage_std": 3.58158506503923,
+      "LOO_noise_gradient_cosine": -0.07168104171414189,
+      "level": "upper",
+      "original_advantage_std": 15.636408805847168,
+      "original_noise_gradient_cosine": -0.0732731658199951,
+      "original_phase_variance_fraction": 0.9592514634132385,
+      "period": 100,
+      "root": 410023,
+      "variance_ratio": 0.05246582522343859
+    },
+    {
+      "LOO_advantage_std": 3.4479227223428794,
+      "LOO_noise_gradient_cosine": 0.24084176077008138,
+      "level": "lower",
+      "original_advantage_std": 15.002469062805176,
+      "original_noise_gradient_cosine": 0.16122708128622396,
+      "original_phase_variance_fraction": 0.9589952230453491,
+      "period": 100,
+      "root": 410023,
+      "variance_ratio": 0.052818926132765
+    },
+    {
+      "LOO_advantage_std": 3.4060880839289296,
+      "LOO_noise_gradient_cosine": 0.3760685665967733,
+      "level": "upper",
+      "original_advantage_std": 13.172006607055664,
+      "original_noise_gradient_cosine": 0.2260376596649833,
+      "original_phase_variance_fraction": 0.9486631155014038,
+      "period": 50,
+      "root": 410023,
+      "variance_ratio": 0.06686638893720526
+    },
+    {
+      "LOO_advantage_std": 3.2616388617798533,
+      "LOO_noise_gradient_cosine": -0.2618659810737613,
+      "level": "lower",
+      "original_advantage_std": 12.843199729919434,
+      "original_noise_gradient_cosine": 0.0953403150992582,
+      "original_phase_variance_fraction": 0.9504799246788025,
+      "period": 50,
+      "root": 410023,
+      "variance_ratio": 0.06449488504574687
+    }
+  ],
+  "stage121_gate": "negative_not_reopened",
+  "status": "complete"
+}
