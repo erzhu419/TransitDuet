@@ -23,3 +23,11 @@ This is a diagnosis, not a training intervention or performance confirmation.
 Lower variance or positive score cosine alone is not sufficient to adopt a new
 policy: a subsequent fresh native direction/update test would still be required.
 Stage121 results and all earlier HOLD/gain gates remain unchanged.
+
+## Run Receipt
+
+Code `8835182e99`; four probe tests and six Stage121 regression tests passed.
+Run `pointmaze_joint_reference_credit_stage122_probe_20261006_r1`:
+`t135869` root410011 and `t135870` root410023, both accepted and queued.
+No aggregator or full performance run submitted. Scheduler commands and fixed
+rosters are recorded in the compact preregistration; only result JSON is fetched.

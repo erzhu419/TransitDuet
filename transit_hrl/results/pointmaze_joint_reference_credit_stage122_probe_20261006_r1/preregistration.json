@@ -1,0 +1,228 @@
+{
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "native_episodes": 96,
+    "native_steps": 115200,
+    "native_trace_writes": 0,
+    "optimizer_steps": 0
+  },
+  "periods": [
+    50,
+    100
+  ],
+  "policy_updates": 0,
+  "protocol": "pointmaze_joint_reference_credit_stage122_v1",
+  "purpose": "Diagnose time-to-go baseline and independent-noise direction stability; no native gain or confirmation claim.",
+  "roots": [
+    410011,
+    410023
+  ],
+  "rosters": {
+    "410011": [
+      {
+        "noise_seeds": [
+          121102001,
+          121102002
+        ],
+        "scenario_seed": 121100001
+      },
+      {
+        "noise_seeds": [
+          121102003,
+          121102004
+        ],
+        "scenario_seed": 121100002
+      },
+      {
+        "noise_seeds": [
+          121102005,
+          121102006
+        ],
+        "scenario_seed": 121100003
+      },
+      {
+        "noise_seeds": [
+          121102007,
+          121102008
+        ],
+        "scenario_seed": 121100004
+      },
+      {
+        "noise_seeds": [
+          121102009,
+          121102010
+        ],
+        "scenario_seed": 121100005
+      },
+      {
+        "noise_seeds": [
+          121102011,
+          121102012
+        ],
+        "scenario_seed": 121100006
+      },
+      {
+        "noise_seeds": [
+          121102013,
+          121102014
+        ],
+        "scenario_seed": 121100007
+      },
+      {
+        "noise_seeds": [
+          121102015,
+          121102016
+        ],
+        "scenario_seed": 121100008
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": [
+          121202001,
+          121202002
+        ],
+        "scenario_seed": 121200001
+      },
+      {
+        "noise_seeds": [
+          121202003,
+          121202004
+        ],
+        "scenario_seed": 121200002
+      },
+      {
+        "noise_seeds": [
+          121202005,
+          121202006
+        ],
+        "scenario_seed": 121200003
+      },
+      {
+        "noise_seeds": [
+          121202007,
+          121202008
+        ],
+        "scenario_seed": 121200004
+      },
+      {
+        "noise_seeds": [
+          121202009,
+          121202010
+        ],
+        "scenario_seed": 121200005
+      },
+      {
+        "noise_seeds": [
+          121202011,
+          121202012
+        ],
+        "scenario_seed": 121200006
+      },
+      {
+        "noise_seeds": [
+          121202013,
+          121202014
+        ],
+        "scenario_seed": 121200007
+      },
+      {
+        "noise_seeds": [
+          121202015,
+          121202016
+        ],
+        "scenario_seed": 121200008
+      }
+    ]
+  },
+  "signals": [
+    "source_critic",
+    "noise_fold_LOO_phase"
+  ],
+  "source_protocol": "pointmaze_joint_reference_stage121_v3",
+  "source_revision": "8835182e99278287e8c28a6ab5564223fc4e250b",
+  "tasks": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/diagnose_pointmaze_joint_reference_credit_stage122.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410011/result.json",
+      "cpu": 5,
+      "cpu_training_justification": "Four native rollout workers plus parent; frozen score diagnosis; no optimizer, checkpoint or trace writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage122 frozen joint credit root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_joint_reference_credit_stage122_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_joint_reference_credit_stage122_v1/diagnosis",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_joint_reference_credit_stage122_v1/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/frozen_credit/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/diagnose_pointmaze_joint_reference_credit_stage122.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410023/result.json",
+      "cpu": 5,
+      "cpu_training_justification": "Four native rollout workers plus parent; frozen score diagnosis; no optimizer, checkpoint or trace writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage122 frozen joint credit root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_joint_reference_credit_stage122_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_joint_reference_credit_stage122_v1/diagnosis",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_joint_reference_credit_stage122_v1/pointmaze_joint_reference_credit_stage122_probe_20261006_r1/frozen_credit/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ]
+}
