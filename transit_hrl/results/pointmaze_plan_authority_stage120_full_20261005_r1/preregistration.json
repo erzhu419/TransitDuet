@@ -1,0 +1,415 @@
+{
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_context_evaluations": 1286400,
+    "external_pair_checks": 1064,
+    "frozen_source_checks": 2,
+    "innovation_pair_checks": 1056,
+    "lower_checkpoint_loads": 2,
+    "native_episodes": 1072,
+    "native_lower_calls": 1286400,
+    "native_pair_groups": 8,
+    "native_steps": 1286400,
+    "plan_fits": 18224,
+    "plan_renewals": 19296,
+    "prefix_pair_checks": 1064,
+    "reference_donor_calls": 1267200,
+    "reference_evaluations": 1286400,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "suffix_credit_checks": 1072,
+    "zero_forecast_checks": 32
+  },
+  "contract": {
+    "amplitudes": {
+      "large": 1.0,
+      "small": 0.05
+    },
+    "artifacts": "scalar_JSON_only_no_training_checkpoint_or_native_trace_writes",
+    "channels": [
+      "advice",
+      "reference"
+    ],
+    "decision": "train_new_channel_only_if_both_period_large_reference_gain_CI_above0.5_and_advantage_CI_above0",
+    "freeze": "all8_Stage112_final_learned_lowers_full392_feedback_std_forecaster_task_and_clock",
+    "limits": "finite_candidate_conditional_headroom_not_global_upper_bound_causal_policy_or_joint_HRL_equal_compute",
+    "lower_source": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+    "minimum_gain": 0.5,
+    "plan": "forecast_anchored_basis5_eight_coordinate_curve_one_option_all_other_options_zero",
+    "queries": "fresh_scenarios_first_quarter_half_three_quarter_option_independent_A_B_suffix_noise",
+    "reference": "unchanged_lower_mean_plus_bounded_frozen_donor_response_to_curve_minus_forecast_position_velocity",
+    "reference_limit": 0.05,
+    "selection": "A_selects_direction_including_zero_B_scores_full_suffix_then_reverse_not_deployable",
+    "source": "pointmaze_option_residual_stage111_full_20261004_r1",
+    "statistics": "all8_equal_root_bootstrap65536_Bonferroni10_no_seed_extension",
+    "zero": "both_channels_exactly_reproduce_forecast_commands_and_returns"
+  },
+  "endpoints": [
+    "50/advice_small_gain",
+    "50/advice_large_gain",
+    "50/reference_small_gain",
+    "50/reference_large_gain",
+    "50/reference_large_minus_advice_large",
+    "100/advice_small_gain",
+    "100/advice_large_gain",
+    "100/reference_small_gain",
+    "100/reference_large_gain",
+    "100/reference_large_minus_advice_large"
+  ],
+  "optimizer_roots": [
+    410011,
+    410023,
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "options": {
+    "queries": 4,
+    "workers": 4
+  },
+  "preflight": false,
+  "protocol": "pointmaze_plan_authority_stage120_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 5,
+    "ram_mb_per_task": 8192,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410011": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120101001,
+          "scenario_seed": 120195001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120110001,
+            "B": 120111001
+          }
+        },
+        {
+          "prefix_noise_seed": 120101002,
+          "scenario_seed": 120195002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120110002,
+            "B": 120111002
+          }
+        },
+        {
+          "prefix_noise_seed": 120101003,
+          "scenario_seed": 120195003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120110003,
+            "B": 120111003
+          }
+        },
+        {
+          "prefix_noise_seed": 120101004,
+          "scenario_seed": 120195004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120110004,
+            "B": 120111004
+          }
+        }
+      ]
+    },
+    "410023": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120201001,
+          "scenario_seed": 120295001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120210001,
+            "B": 120211001
+          }
+        },
+        {
+          "prefix_noise_seed": 120201002,
+          "scenario_seed": 120295002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120210002,
+            "B": 120211002
+          }
+        },
+        {
+          "prefix_noise_seed": 120201003,
+          "scenario_seed": 120295003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120210003,
+            "B": 120211003
+          }
+        },
+        {
+          "prefix_noise_seed": 120201004,
+          "scenario_seed": 120295004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120210004,
+            "B": 120211004
+          }
+        }
+      ]
+    },
+    "410037": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120301001,
+          "scenario_seed": 120395001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120310001,
+            "B": 120311001
+          }
+        },
+        {
+          "prefix_noise_seed": 120301002,
+          "scenario_seed": 120395002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120310002,
+            "B": 120311002
+          }
+        },
+        {
+          "prefix_noise_seed": 120301003,
+          "scenario_seed": 120395003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120310003,
+            "B": 120311003
+          }
+        },
+        {
+          "prefix_noise_seed": 120301004,
+          "scenario_seed": 120395004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120310004,
+            "B": 120311004
+          }
+        }
+      ]
+    },
+    "410049": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120401001,
+          "scenario_seed": 120495001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120410001,
+            "B": 120411001
+          }
+        },
+        {
+          "prefix_noise_seed": 120401002,
+          "scenario_seed": 120495002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120410002,
+            "B": 120411002
+          }
+        },
+        {
+          "prefix_noise_seed": 120401003,
+          "scenario_seed": 120495003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120410003,
+            "B": 120411003
+          }
+        },
+        {
+          "prefix_noise_seed": 120401004,
+          "scenario_seed": 120495004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120410004,
+            "B": 120411004
+          }
+        }
+      ]
+    },
+    "410061": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120501001,
+          "scenario_seed": 120595001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120510001,
+            "B": 120511001
+          }
+        },
+        {
+          "prefix_noise_seed": 120501002,
+          "scenario_seed": 120595002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120510002,
+            "B": 120511002
+          }
+        },
+        {
+          "prefix_noise_seed": 120501003,
+          "scenario_seed": 120595003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120510003,
+            "B": 120511003
+          }
+        },
+        {
+          "prefix_noise_seed": 120501004,
+          "scenario_seed": 120595004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120510004,
+            "B": 120511004
+          }
+        }
+      ]
+    },
+    "410073": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120601001,
+          "scenario_seed": 120695001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120610001,
+            "B": 120611001
+          }
+        },
+        {
+          "prefix_noise_seed": 120601002,
+          "scenario_seed": 120695002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120610002,
+            "B": 120611002
+          }
+        },
+        {
+          "prefix_noise_seed": 120601003,
+          "scenario_seed": 120695003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120610003,
+            "B": 120611003
+          }
+        },
+        {
+          "prefix_noise_seed": 120601004,
+          "scenario_seed": 120695004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120610004,
+            "B": 120611004
+          }
+        }
+      ]
+    },
+    "410089": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120701001,
+          "scenario_seed": 120795001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120710001,
+            "B": 120711001
+          }
+        },
+        {
+          "prefix_noise_seed": 120701002,
+          "scenario_seed": 120795002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120710002,
+            "B": 120711002
+          }
+        },
+        {
+          "prefix_noise_seed": 120701003,
+          "scenario_seed": 120795003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120710003,
+            "B": 120711003
+          }
+        },
+        {
+          "prefix_noise_seed": 120701004,
+          "scenario_seed": 120795004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120710004,
+            "B": 120711004
+          }
+        }
+      ]
+    },
+    "410101": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120801001,
+          "scenario_seed": 120895001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120810001,
+            "B": 120811001
+          }
+        },
+        {
+          "prefix_noise_seed": 120801002,
+          "scenario_seed": 120895002,
+          "start": 300,
+          "suffix_noise_seeds": {
+            "A": 120810002,
+            "B": 120811002
+          }
+        },
+        {
+          "prefix_noise_seed": 120801003,
+          "scenario_seed": 120895003,
+          "start": 600,
+          "suffix_noise_seeds": {
+            "A": 120810003,
+            "B": 120811003
+          }
+        },
+        {
+          "prefix_noise_seed": 120801004,
+          "scenario_seed": 120895004,
+          "start": 900,
+          "suffix_noise_seeds": {
+            "A": 120810004,
+            "B": 120811004
+          }
+        }
+      ]
+    }
+  },
+  "source_revision": "1bb51f58b83deab2bf167c7704433474bcb14d9c"
+}

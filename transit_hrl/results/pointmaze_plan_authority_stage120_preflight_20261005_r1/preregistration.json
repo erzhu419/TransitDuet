@@ -1,0 +1,101 @@
+{
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "completion_markers_and_compact_JSON_only"
+  },
+  "budget_per_root": {
+    "actor_context_evaluations": 80400,
+    "external_pair_checks": 266,
+    "frozen_source_checks": 2,
+    "innovation_pair_checks": 264,
+    "lower_checkpoint_loads": 2,
+    "native_episodes": 268,
+    "native_lower_calls": 80400,
+    "native_pair_groups": 2,
+    "native_steps": 80400,
+    "plan_fits": 938,
+    "plan_renewals": 1206,
+    "prefix_pair_checks": 266,
+    "reference_donor_calls": 79200,
+    "reference_evaluations": 80400,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "suffix_credit_checks": 268,
+    "zero_forecast_checks": 8
+  },
+  "contract": {
+    "amplitudes": {
+      "large": 1.0,
+      "small": 0.05
+    },
+    "artifacts": "scalar_JSON_only_no_training_checkpoint_or_native_trace_writes",
+    "channels": [
+      "advice",
+      "reference"
+    ],
+    "decision": "train_new_channel_only_if_both_period_large_reference_gain_CI_above0.5_and_advantage_CI_above0",
+    "freeze": "all8_Stage112_final_learned_lowers_full392_feedback_std_forecaster_task_and_clock",
+    "limits": "finite_candidate_conditional_headroom_not_global_upper_bound_causal_policy_or_joint_HRL_equal_compute",
+    "lower_source": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+    "minimum_gain": 0.5,
+    "plan": "forecast_anchored_basis5_eight_coordinate_curve_one_option_all_other_options_zero",
+    "queries": "fresh_scenarios_first_quarter_half_three_quarter_option_independent_A_B_suffix_noise",
+    "reference": "unchanged_lower_mean_plus_bounded_frozen_donor_response_to_curve_minus_forecast_position_velocity",
+    "reference_limit": 0.05,
+    "selection": "A_selects_direction_including_zero_B_scores_full_suffix_then_reverse_not_deployable",
+    "source": "pointmaze_option_residual_stage111_full_20261004_r1",
+    "statistics": "all8_equal_root_bootstrap65536_Bonferroni10_no_seed_extension",
+    "zero": "both_channels_exactly_reproduce_forecast_commands_and_returns"
+  },
+  "endpoints": [
+    "50/advice_small_gain",
+    "50/advice_large_gain",
+    "50/reference_small_gain",
+    "50/reference_large_gain",
+    "50/reference_large_minus_advice_large",
+    "100/advice_small_gain",
+    "100/advice_large_gain",
+    "100/reference_small_gain",
+    "100/reference_large_gain",
+    "100/reference_large_minus_advice_large"
+  ],
+  "optimizer_roots": [
+    410011
+  ],
+  "options": {
+    "queries": 1,
+    "workers": 1
+  },
+  "preflight": true,
+  "protocol": "pointmaze_plan_authority_stage120_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 2,
+    "ram_mb_per_task": 4096,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410011": {
+      "queries": [
+        {
+          "prefix_noise_seed": 120001001,
+          "scenario_seed": 120095001,
+          "start": 0,
+          "suffix_noise_seeds": {
+            "A": 120010001,
+            "B": 120011001
+          }
+        }
+      ]
+    }
+  },
+  "source_revision": "1bb51f58b83deab2bf167c7704433474bcb14d9c"
+}
