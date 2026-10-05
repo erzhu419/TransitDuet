@@ -68,9 +68,11 @@ Stage67 HOLD and the Stage120 result stay unchanged.
 
 ## Run Receipt
 
-Code revision `a7f220eb70`:53tests and3subtests passed. Version2 native preflight
-`t135835/t135836` passed104episodes/124,800steps at horizon1200.
-Version2 full run `pointmaze_joint_reference_stage121_full_20261006_r2` was
-stopped for the overly strict likelihood check. Both excluded full runs retain
-abort records. Version3 admission requires its full-batch native preflight.
+Code revision `300720c1a9`:53tests and3subtests passed, plus the worker-budget test.
+Version3 full-batch native preflight `t135855/t135856` passed248episodes/
+297,600steps at horizon1200, including456lower and8upper actor/critic steps each.
+Full run `pointmaze_joint_reference_stage121_full_20261006_r3`: workers
+`t135857-t135864`, aggregator `t135865`, dynamic node001/004/005/006 placement.
+Root410011 passed period50 update7/8 after both numerical repairs. The excluded
+version1/version2 full runs retain their abort records; neither contributes results.
 Full performance conclusions await all8 final evaluations and corrected CIs.

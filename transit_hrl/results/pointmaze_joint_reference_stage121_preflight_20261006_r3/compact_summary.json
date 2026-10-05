@@ -1,0 +1,118 @@
+{
+  "contract": {
+    "architecture": "upper392_to8_zero_mean_Bernstein5_lower402_to2_zero_bounded_residual",
+    "arms": [
+      "source_flat",
+      "source_forecast",
+      "flat",
+      "forecast",
+      "joint",
+      "joint_blinded",
+      "upper_transfer"
+    ],
+    "artifacts": "final_inference_weights_server_only_scalar_JSON_no_native_trace_writes",
+    "budget": "equal_fresh_native_paths_for_flat_forecast_joint_not_equal_parameters_or_total_compute",
+    "credit_precision": "Python_float_trace_recursion_float32_storage_native_preflight_horizon1200",
+    "critic_initialization": "remaining_steps_upper_bound_of_exp_minus_distance_return_no_fitted_evaluation_prior",
+    "decision": "both_period_joint_minus_trained_flat_forecast_CI_above0.5_and_own_blinded_source_forecast_CI_above0",
+    "endpoints": [
+      "50/joint_minus_flat",
+      "50/joint_minus_forecast",
+      "50/joint_minus_joint_blinded",
+      "50/joint_minus_source_forecast",
+      "50/upper_transfer_minus_forecast",
+      "100/joint_minus_flat",
+      "100/joint_minus_forecast",
+      "100/joint_minus_joint_blinded",
+      "100/joint_minus_source_forecast",
+      "100/upper_transfer_minus_forecast"
+    ],
+    "execution": "frozen_Stage112_teacher_mean_plus_bounded_Stage120_donor_reference_response_plus_bounded_learned_residual",
+    "feedback": "all392_lower_feedback_plus4_causal_forecast_advice_plus4_curve_minus_forecast_plus2_clock",
+    "freeze": "teacher_function_forecaster_task_std_all_source_weights_no_stage120_gate_change",
+    "initial_policy": "zero_upper_mean_and_lower_readout_exact_source_forecast_mean_std",
+    "limits": "new_joint_control_development_not_Stage120_confirmation_promotion_strict_routing_or_domain_general_proof_Stage67_HOLD",
+    "logp_replay_tolerance": 0.0002,
+    "lower_source": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+    "minimum_episode_gain": 0.5,
+    "native_preflight": "same16_paths_per_method_update_and1200_steps_as_full_two_updates",
+    "ppo": {
+      "clip_ratio": 0.2,
+      "entropy": 0.0,
+      "epochs": 2,
+      "learning_rate": 0.0003,
+      "lower_std": "source_frozen",
+      "minibatch": 1024,
+      "upper_std": 0.15
+    },
+    "reference_limit": 0.05,
+    "residual_limit": 0.05,
+    "source": "pointmaze_option_residual_stage111_full_20261004_r1",
+    "statistics": "all8_equal_root_bootstrap65536_Bonferroni10_fresh_rosters_fixed_update8",
+    "training": "shared_SMDP_PPO_both_actors_and_reward_critics_gamma1_lambda1_true_option_durations"
+  },
+  "cost": {
+    "checkpoint_writes": 0,
+    "credit_checks": 192,
+    "evaluation_episodes": 56,
+    "evaluation_pair_groups": 8,
+    "lower_actor_optimizer_steps": 456,
+    "lower_checkpoint_loads": 2,
+    "lower_value_optimizer_steps": 456,
+    "native_donor_response_calls": 595200,
+    "native_episodes": 248,
+    "native_lower_calls": 297600,
+    "native_steps": 297600,
+    "native_upper_calls": 1440,
+    "planning_fits": 2856,
+    "planning_reference_calls": 201600,
+    "planning_renewals": 3024,
+    "ppo_updates": 12,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "training_episodes": 192,
+    "upper_actor_optimizer_steps": 8,
+    "upper_value_optimizer_steps": 8
+  },
+  "endpoints": {
+    "100/joint_minus_flat": {
+      "mean": 0.9793387201672203
+    },
+    "100/joint_minus_forecast": {
+      "mean": 0.9747518047352628
+    },
+    "100/joint_minus_joint_blinded": {
+      "mean": 1.1278735700618086
+    },
+    "100/joint_minus_source_forecast": {
+      "mean": -0.2916810162852812
+    },
+    "100/upper_transfer_minus_forecast": {
+      "mean": 1.1334777801922655
+    },
+    "50/joint_minus_flat": {
+      "mean": 0.011781021282047277
+    },
+    "50/joint_minus_forecast": {
+      "mean": 0.011812381544814343
+    },
+    "50/joint_minus_joint_blinded": {
+      "mean": -0.2896053195987065
+    },
+    "50/joint_minus_source_forecast": {
+      "mean": -0.9821458594440173
+    },
+    "50/upper_transfer_minus_forecast": {
+      "mean": -0.24647269269934213
+    }
+  },
+  "joint_gain_gate": "mechanical_only",
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "new_joint_PPO_reference_control_development",
+  "period_joint_gain_gate": {},
+  "protocol": "pointmaze_joint_reference_stage121_v3",
+  "run_name": "pointmaze_joint_reference_stage121_preflight_20261006_r3",
+  "stage120_gate": "inconclusive_no_automatic_seed_extension_unchanged",
+  "status": "preflight_passed"
+}
