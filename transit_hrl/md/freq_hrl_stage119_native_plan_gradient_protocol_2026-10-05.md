@@ -43,5 +43,11 @@ gain transfer, not full joint actor-critic, learned promotion, or practical mate
 Implementation revision: `6fdfb1ed08`; 30 focused and regression tests passed.
 Native preflight `t135483` and independent aggregation `t135484` passed mechanically.
 Frozen full run: `pointmaze_native_plan_gradient_stage119_full_20261005_r1`, workers
-`t135487`-`t135494`, aggregation `t135495`. All eight workers launched; formal results
-are pending. No preflight metric revised the registered protocol.
+`t135487`-`t135494`, aggregation `t135495`: all completed. All four corrected gain CIs
+are positive. Native FD minus forecast: 50 +0.000754095 [0.000356859, 0.001227664];
+100 +0.000723879 [0.000149439, 0.001367555]. Versus Stage118 suffix: 50 +0.000836132
+[0.000337152, 0.001566506]; 100 +0.000832845 [0.000060412, 0.001764939]. Native-gradient
+A/B cosine averaged 0.828454/0.779179 (64/64 positive each). Forecast returns were
+1151.673/1140.940: the improvement is statistically positive but practically tiny.
+No preflight metric revised the registered protocol. Next: bounded plan-authority test,
+not another upper-only seed extension.

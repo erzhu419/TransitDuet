@@ -25,7 +25,21 @@ def intervention_action(variant):
     return action
 
 
-def episode(weights, lower_state, *, query, panel, variant, period, predictor, calibration, upper=None):
+def reference_tracking_distribution(lower, state, position_delta, velocity_delta, limit):
+    original = lower.distribution(state)
+    feedback = lower.flat_input(state)
+    shifted = feedback.clone()
+    shifted[..., 4:6] += torch.as_tensor(position_delta, dtype=state.dtype)
+    shifted[..., 390:392] += torch.as_tensor(velocity_delta, dtype=state.dtype)
+    response = lower.base.distribution(shifted).mean - lower.base.distribution(feedback).mean
+    correction = limit * torch.tanh(response / limit)
+    return torch.distributions.Normal(original.mean + correction, original.stddev), correction
+
+
+def episode(weights, lower_state, *, query, panel, variant, period, predictor, calibration, upper=None,
+        action_delta=None, execution="advice", reference_limit=.05):
+    if execution not in ("advice", "reference"):
+        raise ValueError("unknown plan execution channel")
     model, args = base.source.native._WORKER
     model.load_state_dict(weights)
     lower = base.lower_branch(model, lower_state)
@@ -45,6 +59,7 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
     rewards, distances, commands, means, measurements, innovations = [], [], [], [], [], []
     query_state, upper_state_at_query = None, None
     action_count, position_square, velocity_square, clipped_points = 0, 0., 0., 0
+    reference_donor_calls, correction_square, correction_peak = 0, 0., 0.
     try:
         observation = task.reset()
         low, high = base.source.native.joint.pointmaze_goal_bounds(task.environment)
@@ -57,7 +72,7 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
                 query_state = np.r_[feedback, observation.achieved_goal].copy()
                 upper_state_at_query = history.upper_state(observation, oracle_context=None)
             if variant != "forecast" and step % period == 0:
-                action = intervention_action(variant) if step == start else np.zeros(spec.ACTION_DIM)
+                action = (intervention_action(variant) if action_delta is None else np.asarray(action_delta)) if step == start else np.zeros(spec.ACTION_DIM)
                 action_count += int(step == start and variant in spec.DIRECTIONS)
                 if upper is not None:
                     state_now = history.upper_state(observation, oracle_context=None)
@@ -65,6 +80,8 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
                         action = action + upper.distribution(torch.as_tensor(state_now).view(1, -1)).mean[0].numpy()
                 plan.decode(action=action, observation=observation, history=history, step=step,
                     world_low=low, world_high=high)
+                if execution == "reference":
+                    reference_delta = plan.points.astype(np.float64) - plan.base_points
                 if step == start:
                     delta = plan.points.astype(np.float64) - plan.base_points
                     position_square = float(np.square(delta).sum())
@@ -76,7 +93,16 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
             state = base.source.advice_state(feedback, observation, reference, velocity)
             with torch.inference_mode():
                 torch.manual_seed((prefix_seed if step < start else suffix_seed) + step)
-                distribution = lower.distribution(torch.as_tensor(state).view(1, -1))
+                tensor = torch.as_tensor(state).view(1, -1)
+                if execution == "reference" and variant != "forecast":
+                    age = step % period
+                    distribution, correction = reference_tracking_distribution(lower, tensor, reference_delta[age],
+                        (reference_delta[age + 1] - reference_delta[age]) / scale.dt_seconds, reference_limit)
+                    reference_donor_calls += 2
+                    correction_square += float(correction.double().square().sum())
+                    correction_peak = max(correction_peak, float(correction.abs().max()))
+                else:
+                    distribution = lower.distribution(tensor)
                 raw = distribution.rsample()[0]
                 means.append(distribution.mean[0].numpy().copy())
                 innovations.append(((raw - distribution.mean[0]) / distribution.stddev[0]).numpy())
@@ -101,7 +127,10 @@ def episode(weights, lower_state, *, query, panel, variant, period, predictor, c
             "reference_evaluations": plan.calls, "actor_context_evaluations": plan.context_calls,
             "plan_position_delta_rms": float(np.sqrt(position_square / (2 * (period + 1)))),
             "plan_velocity_delta_rms": float(np.sqrt(velocity_square / (2 * period))),
-            "plan_bound_point_fraction": clipped_points / (2 * (period + 1))}
+            "plan_bound_point_fraction": clipped_points / (2 * (period + 1)),
+            "execution": execution, "reference_donor_calls": reference_donor_calls,
+            "reference_correction_rms": float(np.sqrt(correction_square / (2 * args.horizon))),
+            "reference_correction_peak": correction_peak}
         audit = {"query_state": query_state, "upper_state": upper_state_at_query, "prefix_rewards": reward[:start],
             "rewards": reward, "commands": np.asarray(commands), "means": np.asarray(means),
             "measurements": np.asarray(measurements), "innovations": np.asarray(innovations)}
@@ -163,9 +192,10 @@ def worker_query(job):
                 for key in ("commands", "means", "rewards"):
                     np.testing.assert_array_equal(audit[key], reference[key])
             start, stop = query["start"], query["start"] + period
+            tail_delta = audit["commands"][stop:] - reference["commands"][stop:]
             row.update(query_mean_delta_rms=float(np.sqrt(np.square(audit["means"][start] - reference["means"][start]).mean())),
                 option_command_delta_rms=float(np.sqrt(np.square(audit["commands"][start:stop] - reference["commands"][start:stop]).mean())),
-                tail_command_delta_rms=float(np.sqrt(np.square(audit["commands"][stop:] - reference["commands"][stop:]).mean())))
+                tail_command_delta_rms=float(np.sqrt(np.square(tail_delta).mean())) if tail_delta.size else 0.)
             rows[variant] = row
         panels[panel] = rows
     model, _ = base.source.native._WORKER
