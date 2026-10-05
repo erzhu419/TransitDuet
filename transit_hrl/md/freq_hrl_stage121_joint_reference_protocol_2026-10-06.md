@@ -10,6 +10,13 @@ objectives and statistical thresholds are unchanged; native preflight now also
 uses1200steps to exercise the actual long-episode path. The0.002 return-identity
 check is unchanged. A regression reproduces the old error before the repair.
 
+Version3 repairs a false-positive likelihood check, not the policy. Native
+probe `t135853` replayed the first full round: scalar-versus-saved logprob error0,
+maximum batch-versus-scalar error0.0000314713 (mean difference0.00000190735,
+std0.185932). The float32 replay tolerance is0.0002, a probability-ratio error
+about0.02%, far below PPO's20% clipping range. Performance thresholds are unchanged.
+Version2 full is excluded; version3 preflight uses the full16paths/update/method.
+
 ## Method
 
 - Reuse the shared SMDP-PPO trainer. Joint updates both actors and both reward
@@ -51,7 +58,7 @@ before it and are not tuned using its returns.
 
 ## Execution And Limits
 
-Use scheduler dynamic placement on node001-node006: two workers+parent/4GiB
+Use scheduler dynamic placement on node001-node006: four workers+parent/4GiB
 preflight; four workers+parent/8GiB full. Raw training arrays stay in server RAM.
 Only final inference weights are saved server-side; pull compact JSON and logs.
 No changes to original FreqDuet/TransitDuet. This tests learned joint plan/control,
@@ -62,7 +69,7 @@ Stage67 HOLD and the Stage120 result stay unchanged.
 
 Code revision `a7f220eb70`:53tests and3subtests passed. Version2 native preflight
 `t135835/t135836` passed104episodes/124,800steps at horizon1200.
-Full run `pointmaze_joint_reference_stage121_full_20261006_r2`: workers
-`t135837-t135844`, aggregator `t135845`; all8 workers started dynamically on
-node001/004/005/006. Version1 abort is recorded in its `abort_receipt.json`.
+Version2 full run `pointmaze_joint_reference_stage121_full_20261006_r2` was
+stopped for the overly strict likelihood check. Both excluded full runs retain
+abort records. Version3 admission requires its full-batch native preflight.
 Full performance conclusions await all8 final evaluations and corrected CIs.

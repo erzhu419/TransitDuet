@@ -248,8 +248,8 @@ def update(trainer, batches, *, optimizer_seed):
                 logp, _ = actor.log_prob_entropy(torch.as_tensor(level.state[start:stop]),
                                                 torch.as_tensor(level.action[start:stop]))
             replay_error = max(replay_error, float(np.abs(logp.numpy() - level.old_logp[start:stop]).max()))
-    if replay_error > 3e-5:
-        raise ValueError("Stage121 execution and PPO likelihood disagree")
+    if replay_error > spec.LOGP_REPLAY_TOLERANCE:
+        raise ValueError(f"Stage121 execution and PPO likelihood disagree: max_error={replay_error:.9g}")
     before = weights(trainer)
     np.random.seed(optimizer_seed)
     torch.manual_seed(optimizer_seed)
@@ -366,7 +366,7 @@ def qualify(cell, *, preflight):
             if len(history) != o["updates"] or [r["update"] for r in history] != list(range(1, o["updates"] + 1)):
                 raise ValueError("Stage121 PPO update sequence changed")
             for report in history:
-                if report["old_logp_replay_max_error"] > 3e-5 or report["episodes"] != o["scenarios_per_update"] * o["rollouts_per_scenario"]:
+                if report["old_logp_replay_max_error"] > spec.LOGP_REPLAY_TOLERANCE or report["episodes"] != o["scenarios_per_update"] * o["rollouts_per_scenario"]:
                     raise ValueError("Stage121 PPO likelihood or path budget changed")
                 if report["optimizer_seed"] != spec.optimizer_seed(root, int(period), report["update"]):
                     raise ValueError("Stage121 PPO optimizer seed changed")

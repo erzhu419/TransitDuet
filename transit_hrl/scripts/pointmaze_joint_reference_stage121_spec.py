@@ -8,7 +8,7 @@ ROOT, PERIODS = source.ROOT, source.PERIODS
 roots = source.roots
 source_result, lower_checkpoint = source.source_result, source.lower_checkpoint
 SOURCE_RUN, LOWER_RUN = source.SOURCE_RUN, source.LOWER_RUN
-EXPERIMENT_PROTOCOL = "pointmaze_joint_reference_stage121_v2"
+EXPERIMENT_PROTOCOL = "pointmaze_joint_reference_stage121_v3"
 POLICY = "joint_smdp_ppo_frozen_teacher_bounded_reference_tracking"
 RUNNER_SCRIPT = "scripts/run_pointmaze_joint_reference_stage121.py"
 ANALYZER_SCRIPT = "scripts/analyze_pointmaze_joint_reference_stage121.py"
@@ -20,6 +20,7 @@ ENDPOINTS = tuple(f"{p}/{a}_minus_{b}" for p in PERIODS for a, b in CONTRASTS)
 BOOTSTRAP_DRAWS, BOOTSTRAP_SEED = 65536, (121, 121121)
 REFERENCE_LIMIT, RESIDUAL_LIMIT, MINIMUM_GAIN = .05, .05, .5
 UPPER_STD, LEARNING_RATE, EPOCHS, MINIBATCH = .15, 3e-4, 2, 1024
+LOGP_REPLAY_TOLERANCE = 2e-4
 UPPER_STATE_DIM, LOWER_STATE_DIM, UPPER_ACTION_DIM = 392, 402, 8
 
 
@@ -30,8 +31,8 @@ def arguments(root, *, preflight):
 
 
 def options(*, preflight):
-    return {"workers": 2 if preflight else 4, "updates": 2 if preflight else 8,
-            "scenarios_per_update": 2 if preflight else 8, "rollouts_per_scenario": 2,
+    return {"workers": 4, "updates": 2 if preflight else 8,
+            "scenarios_per_update": 8, "rollouts_per_scenario": 2,
             "evaluation_episodes": 4 if preflight else 32}
 
 
@@ -84,6 +85,8 @@ def contract():
         "initial_policy": "zero_upper_mean_and_lower_readout_exact_source_forecast_mean_std",
         "training": "shared_SMDP_PPO_both_actors_and_reward_critics_gamma1_lambda1_true_option_durations",
         "credit_precision": "Python_float_trace_recursion_float32_storage_native_preflight_horizon1200",
+        "logp_replay_tolerance": LOGP_REPLAY_TOLERANCE,
+        "native_preflight": "same16_paths_per_method_update_and1200_steps_as_full_two_updates",
         "critic_initialization": "remaining_steps_upper_bound_of_exp_minus_distance_return_no_fitted_evaluation_prior",
         "ppo": {"epochs": EPOCHS, "minibatch": MINIBATCH, "learning_rate": LEARNING_RATE,
                 "clip_ratio": .2, "entropy": 0., "upper_std": UPPER_STD, "lower_std": "source_frozen"},

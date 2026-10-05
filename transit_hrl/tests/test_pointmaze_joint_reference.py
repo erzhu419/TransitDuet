@@ -124,14 +124,22 @@ def test_native_joint_ppo_changes_both_actors_and_critics_but_not_teacher_or_std
     bad[0].lower.old_logp += .1
     with pytest.raises(ValueError, match="likelihood disagree"):
         experiment.update(twin, bad, optimizer_seed=121004)
+    rounded = copy.deepcopy(batches)
+    for batch in rounded:
+        batch.lower.old_logp += 1e-4
+    tolerates_roundoff = experiment.make_trainer(models["50"], teachers["50"], args)
+    roundoff_report = experiment.update(tolerates_roundoff, rounded, optimizer_seed=121004)
+    assert roundoff_report["old_logp_replay_max_error"] < spec.LOGP_REPLAY_TOLERANCE
 
 
 def test_reduced_runner_updates_all_methods_with_exact_native_optimizer_budget(source_data, tmp_path):
     models, pred, cal, args, teachers = source_data
     original_args = spec.arguments
+    original_options = spec.options
     short = lambda root, **kw: SimpleNamespace(**{**vars(original_args(root, **kw)), "horizon": 100})
+    small = lambda **kw: {**original_options(**kw), "scenarios_per_update": 2, "workers": 1}
     experiment.write_json(tmp_path / "source.json", {})
-    with patch.object(spec, "arguments", side_effect=short), \
+    with patch.object(spec, "arguments", side_effect=short), patch.object(spec, "options", side_effect=small), \
             patch.object(spec, "source_result", return_value=tmp_path / "source.json"), \
             patch.object(experiment.source, "qualify", side_effect=lambda cell, **kw: cell), \
             patch.object(experiment.source, "load_source", return_value=(models, pred, {}, cal)), \
@@ -170,6 +178,9 @@ def test_budget_rosters_and_dynamic_scheduler():
     assert spec.budget(preflight=False)["native_episodes"] * 8 == 9728
     assert spec.budget(preflight=False)["native_steps"] * 8 == 11673600
     assert len(spec.ENDPOINTS) == 10
+    assert spec.LOGP_REPLAY_TOLERANCE < .2 / 100
+    assert spec.options(preflight=True)["scenarios_per_update"] == spec.options(preflight=False)["scenarios_per_update"]
+    assert spec.arguments(410011, preflight=True).horizon == spec.arguments(410011, preflight=False).horizon
     seen = set()
     for preflight in (True, False):
         for root in spec.roots(preflight=preflight):

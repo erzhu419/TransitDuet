@@ -1,0 +1,43 @@
+{
+  "diagnostics": {
+    "flat/lower": {
+      "batch_scalar_logp_error": 1.7642974853515625e-05,
+      "batch_scalar_mean_error": 1.1920928955078125e-06,
+      "index": 12126,
+      "max_batch_saved_logp_error": 1.7642974853515625e-05,
+      "minimum_std": 0.1859324872493744,
+      "scalar_saved_logp_error": 0.0
+    },
+    "forecast/lower": {
+      "batch_scalar_logp_error": 1.3589859008789062e-05,
+      "batch_scalar_mean_error": 8.046627044677734e-07,
+      "index": 10,
+      "max_batch_saved_logp_error": 1.3589859008789062e-05,
+      "minimum_std": 0.1859324872493744,
+      "scalar_saved_logp_error": 0.0
+    },
+    "joint/lower": {
+      "batch_scalar_logp_error": 3.147125244140625e-05,
+      "batch_scalar_mean_error": 1.9073486328125e-06,
+      "index": 2581,
+      "max_batch_saved_logp_error": 3.147125244140625e-05,
+      "minimum_std": 0.1859324872493744,
+      "scalar_saved_logp_error": 0.0
+    },
+    "joint/upper": {
+      "batch_scalar_logp_error": 0.0,
+      "batch_scalar_mean_error": 0.0,
+      "index": 0,
+      "max_batch_saved_logp_error": 0.0,
+      "minimum_std": 0.14999999105930328,
+      "scalar_saved_logp_error": 0.0
+    }
+  },
+  "kind": "native_likelihood_numerical_probe_only",
+  "native_episodes": 48,
+  "native_steps": 57600,
+  "optimizer_steps": 0,
+  "period": 50,
+  "protocol": "pointmaze_joint_reference_stage121_v2",
+  "root": 410011
+}
