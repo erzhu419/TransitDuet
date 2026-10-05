@@ -1,0 +1,135 @@
+{
+  "contract": {
+    "amplitudes": {
+      "large": 1.0,
+      "small": 0.05
+    },
+    "artifacts": "scalar_JSON_only_no_training_checkpoint_or_native_trace_writes",
+    "channels": [
+      "advice",
+      "reference"
+    ],
+    "decision": "train_new_channel_only_if_both_period_large_reference_gain_CI_above0.5_and_advantage_CI_above0",
+    "freeze": "all8_Stage112_final_learned_lowers_full392_feedback_std_forecaster_task_and_clock",
+    "limits": "finite_candidate_conditional_headroom_not_global_upper_bound_causal_policy_or_joint_HRL_equal_compute",
+    "lower_source": "pointmaze_option_residual_train_stage112_full_20261004_r2",
+    "minimum_gain": 0.5,
+    "plan": "forecast_anchored_basis5_eight_coordinate_curve_one_option_all_other_options_zero",
+    "queries": "fresh_scenarios_first_quarter_half_three_quarter_option_independent_A_B_suffix_noise",
+    "reference": "unchanged_lower_mean_plus_bounded_frozen_donor_response_to_curve_minus_forecast_position_velocity",
+    "reference_limit": 0.05,
+    "selection": "A_selects_direction_including_zero_B_scores_full_suffix_then_reverse_not_deployable",
+    "source": "pointmaze_option_residual_stage111_full_20261004_r1",
+    "statistics": "all8_equal_root_bootstrap65536_Bonferroni10_no_seed_extension",
+    "zero": "both_channels_exactly_reproduce_forecast_commands_and_returns"
+  },
+  "cost": {
+    "actor_context_evaluations": 10291200,
+    "external_pair_checks": 8512,
+    "frozen_source_checks": 16,
+    "innovation_pair_checks": 8448,
+    "lower_checkpoint_loads": 16,
+    "native_episodes": 8576,
+    "native_lower_calls": 10291200,
+    "native_pair_groups": 64,
+    "native_steps": 10291200,
+    "plan_fits": 145792,
+    "plan_renewals": 154368,
+    "prefix_pair_checks": 8512,
+    "reference_donor_calls": 10137600,
+    "reference_evaluations": 10291200,
+    "source_cell_loads": 8,
+    "source_clone_loads": 16,
+    "suffix_credit_checks": 8576,
+    "zero_forecast_checks": 256
+  },
+  "endpoints": {
+    "100/advice_large_gain": {
+      "ci": [
+        0.003698955910306445,
+        0.0080072019517754
+      ],
+      "effect": "positive",
+      "mean": 0.005987615166053395
+    },
+    "100/advice_small_gain": {
+      "ci": [
+        0.0002523667997449408,
+        0.0005298805799473172
+      ],
+      "effect": "positive",
+      "mean": 0.0004002213129252752
+    },
+    "100/reference_large_gain": {
+      "ci": [
+        0.6056500466527783,
+        0.9347255012607801
+      ],
+      "effect": "positive",
+      "mean": 0.7675308859401024
+    },
+    "100/reference_large_minus_advice_large": {
+      "ci": [
+        0.5998880149509622,
+        0.9275538043279195
+      ],
+      "effect": "positive",
+      "mean": 0.761543270774049
+    },
+    "100/reference_small_gain": {
+      "ci": [
+        0.38314873716674214,
+        0.6462502454738681
+      ],
+      "effect": "positive",
+      "mean": 0.5185214312963708
+    },
+    "50/advice_large_gain": {
+      "ci": [
+        0.0020760131508570367,
+        0.003858080638329354
+      ],
+      "effect": "positive",
+      "mean": 0.002874466811351617
+    },
+    "50/advice_small_gain": {
+      "ci": [
+        0.00014580948276421424,
+        0.00025944012080625356
+      ],
+      "effect": "positive",
+      "mean": 0.00019644297025944724
+    },
+    "50/reference_large_gain": {
+      "ci": [
+        0.20332979942854731,
+        0.33968885901170953
+      ],
+      "effect": "positive",
+      "mean": 0.2603956471417641
+    },
+    "50/reference_large_minus_advice_large": {
+      "ci": [
+        0.20108958640251462,
+        0.33612270149667545
+      ],
+      "effect": "positive",
+      "mean": 0.2575211803304125
+    },
+    "50/reference_small_gain": {
+      "ci": [
+        0.15325993424007223,
+        0.2452933293266238
+      ],
+      "effect": "positive",
+      "mean": 0.19366522913835738
+    }
+  },
+  "mechanical_gate": "passed",
+  "native_trial_prerequisite": "hold_Stage67_credit_gate_unchanged",
+  "performance_claim": "bounded_one_option_conditional_headroom_not_deployable_policy_or_joint_HRL",
+  "plan_authority_decision": "inconclusive_no_automatic_seed_extension",
+  "protocol": "pointmaze_plan_authority_stage120_v1",
+  "run_name": "pointmaze_plan_authority_stage120_full_20261005_r1",
+  "status": "complete"
+}
