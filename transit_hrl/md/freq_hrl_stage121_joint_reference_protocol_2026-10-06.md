@@ -57,3 +57,12 @@ Only final inference weights are saved server-side; pull compact JSON and logs.
 No changes to original FreqDuet/TransitDuet. This tests learned joint plan/control,
 not learned promotion, strict frequency responsibility or domain-general superiority.
 Stage67 HOLD and the Stage120 result stay unchanged.
+
+## Run Receipt
+
+Code revision `a7f220eb70`:53tests and3subtests passed. Version2 native preflight
+`t135835/t135836` passed104episodes/124,800steps at horizon1200.
+Full run `pointmaze_joint_reference_stage121_full_20261006_r2`: workers
+`t135837-t135844`, aggregator `t135845`; all8 workers started dynamically on
+node001/004/005/006. Version1 abort is recorded in its `abort_receipt.json`.
+Full performance conclusions await all8 final evaluations and corrected CIs.

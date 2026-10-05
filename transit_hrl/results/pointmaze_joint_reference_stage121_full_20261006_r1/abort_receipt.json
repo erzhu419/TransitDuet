@@ -1,0 +1,14 @@
+{
+  "protocol": "pointmaze_joint_reference_stage121_v1",
+  "status": "aborted_numerical_error",
+  "source_revision": "e3a71e7acb",
+  "failure": "NumPy2 float32 trace recursion failed native full-episode return identity",
+  "observed_return_error": 0.00208226,
+  "unchanged_return_identity_tolerance": 0.002,
+  "failed_tasks": ["t135824", "t135833"],
+  "cancelled_tasks": ["t135825", "t135826", "t135827", "t135828", "t135829", "t135830", "t135831", "t135832", "t135834"],
+  "scheduler_kill_failures": 0,
+  "admit_performance_results": false,
+  "repair": "Python-float GAE recursion; regression reproduced failure before repair",
+  "rerun": "v2 with identical full-run seeds, budgets, actors and performance thresholds"
+}
