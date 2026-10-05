@@ -4,6 +4,12 @@ Stage120 remains `inconclusive_no_automatic_seed_extension`: reference authority
 improved, but period50 did not reach the registered conditional gain of 0.5.
 Stage121 is a new joint-control development experiment, not confirmation of that gate.
 
+Version2 fixes float32 GAE trace accumulation under NumPy2. The aborted version1
+full run and its automatic retries are excluded. Full-run seeds, budgets, actors,
+objectives and statistical thresholds are unchanged; native preflight now also
+uses1200steps to exercise the actual long-episode path. The0.002 return-identity
+check is unchanged. A regression reproduces the old error before the repair.
+
 ## Method
 
 - Reuse the shared SMDP-PPO trainer. Joint updates both actors and both reward

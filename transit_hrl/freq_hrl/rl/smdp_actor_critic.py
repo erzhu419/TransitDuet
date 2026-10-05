@@ -3028,9 +3028,11 @@ class FrequencySeparatedActorCriticPPO:
         advantage = np.zeros_like(signal)
         last = 0.0
         for index in range(signal.size - 1, -1, -1):
-            trace_continue = 1.0 - done[index]
+            # Keep the recursion in Python floats; NumPy float32 scalars would
+            # downcast every accumulated trace under NumPy 2 promotion rules.
+            trace_continue = 1.0 - float(done[index])
             if explicit:
-                bootstrap_continue = 1.0 - terminals[index]
+                bootstrap_continue = 1.0 - float(terminals[index])
                 successor_value = float(next_values[index])
             else:
                 bootstrap_continue = trace_continue

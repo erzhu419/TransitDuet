@@ -922,6 +922,20 @@ class FrequencySeparatedActorCriticTest(unittest.TestCase):
                 upper_dual_lr=0.1,
             ))
 
+    def test_long_undiscounted_credit_does_not_accumulate_float32_trace_error(self):
+        model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
+            upper_state_dim=1, lower_state_dim=1, upper_action_dim=1,
+            lower_action_dim=1, lower_cost_critic=False, gamma=1., gae_lambda=1.))
+        rewards = np.random.default_rng(121).uniform(.92, 1., (2, 1200)).astype(np.float32)
+        for period in (1, 50, 100):
+            signal = rewards.reshape(2, -1, period).sum(-1, dtype=np.float64).astype(np.float32)
+            expected = np.cumsum(signal[:, ::-1], axis=1, dtype=np.float64)[:, ::-1].astype(np.float32)
+            done = np.zeros_like(signal); done[:, -1] = 1.
+            values = np.tile(np.arange(1200, 0, -period, dtype=np.float32), 2)
+            _, returns = model._gae(signal.ravel(), done.ravel(),
+                np.full(signal.size, period), values)
+            np.testing.assert_allclose(returns.reshape(signal.shape), expected, atol=1.5e-4, rtol=0)
+
     def test_smdp_truncation_uses_duration_aware_bootstrap(self):
         model = FrequencySeparatedActorCriticPPO(SMDPPPOConfig(
             upper_state_dim=1,
