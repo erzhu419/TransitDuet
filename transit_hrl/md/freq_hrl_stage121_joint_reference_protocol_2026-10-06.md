@@ -73,6 +73,30 @@ Version3 full-batch native preflight `t135855/t135856` passed248episodes/
 297,600steps at horizon1200, including456lower and8upper actor/critic steps each.
 Full run `pointmaze_joint_reference_stage121_full_20261006_r3`: workers
 `t135857-t135864`, aggregator `t135865`, dynamic node001/004/005/006 placement.
-Root410011 passed period50 update7/8 after both numerical repairs. The excluded
-version1/version2 full runs retain their abort records; neither contributes results.
-Full performance conclusions await all8 final evaluations and corrected CIs.
+All nine tasks are DONE. All8 roots passed the frozen mechanical contract:
+9,728episodes/11,673,600steps,384PPO updates,48server-only final checkpoints.
+The excluded version1/version2 runs contribute no performance results.
+
+## Result And Next Step
+
+The joint gain gate failed at both periods. All ten registered corrected CIs
+are negative; this is a performance failure, not inconclusive seed shortage.
+
+| Period | Joint - forecast | Corrected CI | Joint - own blinded | Corrected CI |
+| --- | ---: | --- | ---: | --- |
+| 50 | -2.226981 | [-4.490007, -0.909053] | -2.263548 | [-4.539509, -0.917229] |
+| 100 | -3.265315 | [-6.130523, -0.957834] | -3.113553 | [-6.286079, -0.513534] |
+
+Both failures coexist: forecast lower fine-tuning loses1.311296/2.079270 return
+against its frozen source; activating learned upper loses another2.263548/3.113553
+against its own blinded lower. Upper transfer is also negative. Upper is active,
+not collapsed to forecast: reference RMS0.046060/0.040216 at limit0.05 and plan
+delta RMS0.154868/0.083125. These ablations identify harmful learned control;
+they do not establish whether saturation, critic error or score noise caused it.
+
+Upper critic training loss remains high (period100 mean1246.8 at update1,
+1431.0 at update8); linear critics barely remove the source upper-bound error.
+Stage122 therefore first diagnoses independent-noise actor directions for the
+original baseline versus noise-fold leave-one-scenario-out phase baselines.
+No policy updates or extra seeds for Stage121. Stage67 HOLD and Stage120 gate
+remain unchanged. Compact summary and diagnostics are stored with this run.
