@@ -31,7 +31,7 @@ def arguments(root, *, preflight):
 
 
 def options(*, preflight):
-    return {"workers": 4, "updates": 2 if preflight else 8,
+    return {"workers": 4 if preflight else 8, "updates": 2 if preflight else 8,
             "scenarios_per_update": 8, "rollouts_per_scenario": 2,
             "evaluation_episodes": 4 if preflight else 32}
 

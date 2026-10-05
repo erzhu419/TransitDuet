@@ -59,7 +59,8 @@ before it and are not tuned using its returns.
 ## Execution And Limits
 
 Use scheduler dynamic placement on node001-node006: four workers+parent/4GiB
-preflight; four workers+parent/8GiB full. Raw training arrays stay in server RAM.
+preflight; eight workers+parent/8GiB full (one worker per training scenario).
+Rollout and optimizer seeds are independent of worker assignment. Raw arrays stay in server RAM.
 Only final inference weights are saved server-side; pull compact JSON and logs.
 No changes to original FreqDuet/TransitDuet. This tests learned joint plan/control,
 not learned promotion, strict frequency responsibility or domain-general superiority.
