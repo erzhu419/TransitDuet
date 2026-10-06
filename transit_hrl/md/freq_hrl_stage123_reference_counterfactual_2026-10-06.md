@@ -42,3 +42,21 @@ Code `861fc210bd`; run `pointmaze_reference_counterfactual_stage123_probe_202610
 Both allow dynamic node001-node006 placement, five CPUs/8GiB per task.
 Fixed commands, query/noise rosters and measured budgets are preregistered;
 only small result JSON will be fetched. No full-training extension submitted.
+
+## Completed Result
+
+Both tasks are DONE (node004/node006). Fetched only36.6KB compact JSON.
+
+| Root / period | Native gradient cosine | Actor pullback cosine | Crossfit plus-zero |
+| --- | ---: | ---: | ---: |
+| 410011 / 50 | 0.917 | 0.835 | +0.120 |
+| 410011 / 100 | 0.798 | 0.846 | +0.117 |
+| 410023 / 50 | 0.900 | 0.817 | +0.107 |
+| 410023 / 100 | 0.894 | 0.941 | +0.144 |
+
+63/64 crossfit gains are positive. Retain the weak case: root410011,
+period50, scenario123100006, start600, B-to-A gain=-0.001275.
+All32 query gradient cosines are positive. Native credit is usable here.
+Next: Stage124 learns one fixed-radius upper mean step from these cached
+labels and tests fresh full episodes. This result does not establish learned
+episode-policy improvement or change the earlier failed joint-training result.

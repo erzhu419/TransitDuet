@@ -1,0 +1,97 @@
+{
+  "crossfit_positive": 63,
+  "crossfit_total": 64,
+  "equal_root_mean_crossfit_plus_zero": {
+    "100": 0.1306329262172703,
+    "50": 0.11358451119208546
+  },
+  "kind": "native_action_credit_development_not_learned_policy_confirmation",
+  "nonpositive_crossfit": [
+    {
+      "direction": "B_to_A",
+      "minus_zero": -0.008886036460125979,
+      "period": 50,
+      "plus_minus": 0.0076108365223035435,
+      "plus_zero": -0.0012751999378224355,
+      "query": {
+        "prefix_noise_seed": 123120006,
+        "scenario_seed": 123100006,
+        "start": 600,
+        "suffix_noise_seeds": {
+          "A": 123130011,
+          "B": 123130012
+        }
+      },
+      "root": 410011
+    }
+  ],
+  "protocol": "pointmaze_reference_counterfactual_stage123_v1",
+  "root_period_summaries": [
+    {
+      "actor_pullback_cosine": 0.8354561354917568,
+      "crossfit_plus_minus": 0.24384033666289184,
+      "crossfit_plus_zero": 0.11970477132813429,
+      "native_gradient_cosine": 0.9166539349536993,
+      "native_gradient_rms": {
+        "A": 9.875719191675445,
+        "B": 9.755329087378446
+      },
+      "period": 50,
+      "root": 410011
+    },
+    {
+      "actor_pullback_cosine": 0.8462031141179217,
+      "crossfit_plus_minus": 0.2441634922186573,
+      "crossfit_plus_zero": 0.11735415667856586,
+      "native_gradient_cosine": 0.7984668597309732,
+      "native_gradient_rms": {
+        "A": 9.74419077930059,
+        "B": 12.348445307469103
+      },
+      "period": 100,
+      "root": 410011
+    },
+    {
+      "actor_pullback_cosine": 0.8169046364982714,
+      "crossfit_plus_minus": 0.22038413804797585,
+      "crossfit_plus_zero": 0.10746425105603663,
+      "native_gradient_cosine": 0.9003501347720219,
+      "native_gradient_rms": {
+        "A": 8.605363118053393,
+        "B": 7.977109085398424
+      },
+      "period": 50,
+      "root": 410023
+    },
+    {
+      "actor_pullback_cosine": 0.9412838599311008,
+      "crossfit_plus_minus": 0.2938563383859041,
+      "crossfit_plus_zero": 0.14391169575597473,
+      "native_gradient_cosine": 0.8941578883843025,
+      "native_gradient_rms": {
+        "A": 11.710636281601916,
+        "B": 11.4974381964413
+      },
+      "period": 100,
+      "root": 410023
+    }
+  ],
+  "run_name": "pointmaze_reference_counterfactual_stage123_probe_20261006_r1",
+  "status": "complete",
+  "tasks": [
+    135874,
+    135875
+  ],
+  "total_cost": {
+    "actor_pullback_backward_batches": 8,
+    "actor_pullback_forward_batches": 8,
+    "checkpoint_writes": 0,
+    "native_donor_response_calls": 2918400,
+    "native_episodes": 1216,
+    "native_steps": 1459200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 21888,
+    "optimizer_steps": 0,
+    "queries": 32
+  }
+}

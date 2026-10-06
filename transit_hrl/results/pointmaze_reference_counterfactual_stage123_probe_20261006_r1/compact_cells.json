@@ -1,0 +1,1835 @@
+{
+  "cells": [
+    {
+      "cost": {
+        "actor_pullback_backward_batches": 4,
+        "actor_pullback_forward_batches": 4,
+        "checkpoint_writes": 0,
+        "native_donor_response_calls": 1459200,
+        "native_episodes": 608,
+        "native_steps": 729600,
+        "native_trace_writes": 0,
+        "native_upper_calls": 10944,
+        "optimizer_steps": 0,
+        "queries": 16
+      },
+      "epsilon": 0.005,
+      "groups": {
+        "100": {
+          "queries": [
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.15590774566567234,
+                  "plus_minus": 0.3088155730767994,
+                  "plus_zero": 0.15290782741112707
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1621354247117779,
+                  "plus_minus": 0.3227168450400768,
+                  "plus_zero": 0.16058142032829892
+                }
+              },
+              "gradients": {
+                "A": [
+                  -4.964763279076578,
+                  -5.673822371090864,
+                  -11.509860410274086,
+                  -12.336034969894172,
+                  -7.364643684445582,
+                  -12.569572555594277,
+                  -10.490831739775786,
+                  -19.37204334594753
+                ],
+                "B": [
+                  -5.4298079152431455,
+                  -6.759224532083863,
+                  -11.195553492598265,
+                  -11.636847612612655,
+                  -8.268738173978818,
+                  -14.499216661511127,
+                  -9.417201634778394,
+                  -15.781637503937418
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.022091751918196678,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9906132724637481,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120001,
+                "scenario_seed": 123100001,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123130001,
+                  "B": 123130002
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.20856828673822747,
+                  "plus_minus": 0.41495868156607685,
+                  "plus_zero": 0.20639039482784938
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1793309281490565,
+                  "plus_minus": 0.3519231070497426,
+                  "plus_zero": 0.17259217890068612
+                }
+              },
+              "gradients": {
+                "A": [
+                  -9.922533291455693,
+                  -10.708266498272678,
+                  6.987661768948783,
+                  6.7447626838657015,
+                  -9.881628001312492,
+                  -23.17194179490798,
+                  7.079953218362789,
+                  15.848162136398969
+                ],
+                "B": [
+                  -9.767577248794623,
+                  -10.844344290308072,
+                  7.5819055245347045,
+                  7.984349307002958,
+                  -10.951033958394873,
+                  -32.02936584516465,
+                  8.435326933863507,
+                  13.060646829217148
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.022794097661972046,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.982134441509321,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120002,
+                "scenario_seed": 123100002,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123130003,
+                  "B": 123130004
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.14333236558127282,
+                  "plus_minus": 0.2753184840016729,
+                  "plus_zero": 0.1319861184204001
+                },
+                "B_to_A": {
+                  "minus_zero": -0.10938603078568576,
+                  "plus_minus": 0.17338870806668183,
+                  "plus_zero": 0.06400267728099607
+                }
+              },
+              "gradients": {
+                "A": [
+                  3.0323090707156553,
+                  -0.634186890113142,
+                  12.52192350251562,
+                  12.122244451882125,
+                  -5.256290881015957,
+                  -7.547645950478454,
+                  9.757075012714722,
+                  20.497579416712597
+                ],
+                "B": [
+                  -7.9491396802609415,
+                  -10.968689382093544,
+                  7.2107440060790395,
+                  7.353726534233829,
+                  -12.856963302112945,
+                  -41.02624717863819,
+                  4.536931998040927,
+                  11.30073461347365
+                ]
+              },
+              "max_innovation_error": 1.1920928955078125e-06,
+              "max_reference_peak": 0.023897817358374596,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.5643009051043688,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120003,
+                "scenario_seed": 123100003,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123130005,
+                  "B": 123130006
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.09598661669065223,
+                  "plus_minus": 0.19021848749343917,
+                  "plus_zero": 0.09423187080278694
+                },
+                "B_to_A": {
+                  "minus_zero": -0.09356291318886178,
+                  "plus_minus": 0.1855752766986143,
+                  "plus_zero": 0.0920123635097525
+                }
+              },
+              "gradients": {
+                "A": [
+                  -4.211712891685693,
+                  3.0783677566660117,
+                  9.204911502126834,
+                  7.979485572491285,
+                  9.414337833572972,
+                  6.585525892944588,
+                  5.93491780983868,
+                  -3.9217395284936174
+                ],
+                "B": [
+                  -5.398354333658517,
+                  0.7508372999723179,
+                  9.484903421002855,
+                  9.203732637661233,
+                  7.604314228456133,
+                  6.152529514815797,
+                  8.084424965772996,
+                  -3.1107492786759394
+                ]
+              },
+              "max_innovation_error": 1.2218952178955078e-06,
+              "max_reference_peak": 0.023574670776724815,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9768791202487974,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120004,
+                "scenario_seed": 123100004,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123130007,
+                  "B": 123130008
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.1432179599922847,
+                  "plus_minus": 0.27942020707803294,
+                  "plus_zero": 0.13620224708574824
+                },
+                "B_to_A": {
+                  "minus_zero": -0.15184661549164957,
+                  "plus_minus": 0.3009105150161986,
+                  "plus_zero": 0.14906389952454902
+                }
+              },
+              "gradients": {
+                "A": [
+                  -8.10263215564646,
+                  -6.705283237045023,
+                  -0.6090022479725121,
+                  -8.513528273772408,
+                  -6.105831474803836,
+                  -24.64157105995355,
+                  -9.46206623125363,
+                  7.9072241831568135
+                ],
+                "B": [
+                  -3.3859615141295762,
+                  -2.0612734054566317,
+                  1.2839545171459577,
+                  -7.533477797312571,
+                  -3.2764684977223624,
+                  -22.08103756087212,
+                  -8.223066999914863,
+                  14.325107820309313
+                ]
+              },
+              "max_innovation_error": 6.556510925292969e-07,
+              "max_reference_peak": 0.022434843704104424,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9446994689218118,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120005,
+                "scenario_seed": 123100005,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123130009,
+                  "B": 123130010
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.054867398488454455,
+                  "plus_minus": 0.09297226374781076,
+                  "plus_zero": 0.0381048652593563
+                },
+                "B_to_A": {
+                  "minus_zero": -0.04319219266972141,
+                  "plus_minus": 0.05472624873573295,
+                  "plus_zero": 0.011534056066011544
+                }
+              },
+              "gradients": {
+                "A": [
+                  1.6832402979957806,
+                  -4.868829595409352,
+                  -3.897304144959435,
+                  -4.304858680347934,
+                  -2.5395326427883447,
+                  16.130233999376742,
+                  -5.769304567058953,
+                  -5.232007507174785
+                ],
+                "B": [
+                  1.5022585393580812,
+                  -4.120825243546733,
+                  -5.433382870819514,
+                  -3.1767883728434754,
+                  -0.9794438938797612,
+                  18.72169897077356,
+                  1.7226040727223335,
+                  31.770787451455362
+                ]
+              },
+              "max_innovation_error": 6.556510925292969e-07,
+              "max_reference_peak": 0.023894881829619408,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.2501609834538685,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120006,
+                "scenario_seed": 123100006,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123130011,
+                  "B": 123130012
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.22217554846361054,
+                  "plus_minus": 0.4414111212689136,
+                  "plus_zero": 0.21923557280530304
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1624831186363167,
+                  "plus_minus": 0.31366352687678045,
+                  "plus_zero": 0.15118040824046375
+                }
+              },
+              "gradients": {
+                "A": [
+                  4.38309222654425,
+                  -1.8337503523412124,
+                  6.749046246920898,
+                  10.170951892808944,
+                  -4.074131457292651,
+                  10.52112768559823,
+                  12.290080418017624,
+                  23.91436695886
+                ],
+                "B": [
+                  6.177760238773544,
+                  1.3106336094836024,
+                  5.713497331169037,
+                  10.193897333044788,
+                  -0.07525505249645903,
+                  18.418860469103038,
+                  12.531684152980915,
+                  36.58411758503348
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.02274153009057045,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9695745071991669,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120007,
+                "scenario_seed": 123100007,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123130013,
+                  "B": 123130014
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.05237608049571918,
+                  "plus_minus": 0.10206714932138539,
+                  "plus_zero": 0.04969106882566621
+                },
+                "B_to_A": {
+                  "minus_zero": -0.05058014289249968,
+                  "plus_minus": 0.09852968046055821,
+                  "plus_zero": 0.04794953756805853
+                }
+              },
+              "gradients": {
+                "A": [
+                  -0.9467760311622442,
+                  -4.190487394851061,
+                  6.356836447417891,
+                  3.8857548899954963,
+                  1.4490053069607711,
+                  6.931119226203464,
+                  2.2024310071572017,
+                  2.1303319493540585
+                ],
+                "B": [
+                  -2.2241165508489757,
+                  -4.6760245324264815,
+                  6.224239786217822,
+                  2.176384883892979,
+                  1.5406000111397589,
+                  7.694967579215017,
+                  -0.09711627123465405,
+                  -3.546843873061789
+                ]
+              },
+              "max_innovation_error": 1.2218952178955078e-06,
+              "max_reference_peak": 0.02147674188017845,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8462592576128343,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120008,
+                "scenario_seed": 123100008,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123130015,
+                  "B": 123130016
+                }
+              }
+            }
+          ],
+          "summary": {
+            "actor_pullback_cosine": 0.8462031141179217,
+            "crossfit_plus_minus": 0.2441634922186573,
+            "crossfit_plus_zero": 0.11735415667856586,
+            "native_gradient_cosine": 0.7984668597309732,
+            "native_gradient_rms": {
+              "A": 9.74419077930059,
+              "B": 12.348445307469103
+            }
+          }
+        },
+        "50": {
+          "queries": [
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.17343676544169284,
+                  "plus_minus": 0.3461672162711693,
+                  "plus_zero": 0.17273045082947647
+                },
+                "B_to_A": {
+                  "minus_zero": -0.17407573229070294,
+                  "plus_minus": 0.3476470025502749,
+                  "plus_zero": 0.17357127025957197
+                }
+              },
+              "gradients": {
+                "A": [
+                  -0.8821843508940219,
+                  -3.44454893800048,
+                  -4.1129570734028675,
+                  -5.254377739925076,
+                  -4.905191491525329,
+                  -19.479810429447753,
+                  -6.103451599506116,
+                  -23.84460055573072
+                ],
+                "B": [
+                  -0.07038747039587179,
+                  -3.4328566337990196,
+                  -4.087792028667536,
+                  -5.114143810828864,
+                  -5.740700696765089,
+                  -22.746032732220556,
+                  -5.408761188618882,
+                  -20.416045838828722
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.04064713791012764,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9885587681643991,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120001,
+                "scenario_seed": 123100001,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123130001,
+                  "B": 123130002
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.21839514106795832,
+                  "plus_minus": 0.4359627691494552,
+                  "plus_zero": 0.21756762808149688
+                },
+                "B_to_A": {
+                  "minus_zero": -0.21961238839958241,
+                  "plus_minus": 0.43798827593604983,
+                  "plus_zero": 0.21837588753646742
+                }
+              },
+              "gradients": {
+                "A": [
+                  -3.584938922267611,
+                  -5.130006731269532,
+                  1.9650589204502467,
+                  4.096620258542316,
+                  -6.492939135432607,
+                  -29.371604672383,
+                  5.4225673724431545,
+                  24.735762524915117
+                ],
+                "B": [
+                  -3.3609408831580367,
+                  -5.078544471052737,
+                  2.4426972820037918,
+                  4.120052264579499,
+                  -6.628548096819031,
+                  -30.27509405417277,
+                  5.2497294212116685,
+                  23.18481960171539
+                ]
+              },
+              "max_innovation_error": 1.1920928955078125e-06,
+              "max_reference_peak": 0.04339311644434929,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9989073942291505,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120002,
+                "scenario_seed": 123100002,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123130003,
+                  "B": 123130004
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.16198003713657272,
+                  "plus_minus": 0.31696859044745906,
+                  "plus_zero": 0.15498855331088635
+                },
+                "B_to_A": {
+                  "minus_zero": -0.16664030009269482,
+                  "plus_minus": 0.32252504875373234,
+                  "plus_zero": 0.15588474866103752
+                }
+              },
+              "gradients": {
+                "A": [
+                  4.378256772861278,
+                  3.4317273619763,
+                  3.7026991800871656,
+                  6.133778127605183,
+                  1.5440292571838654,
+                  -7.201568443838369,
+                  7.759617510191674,
+                  32.01007435542351
+                ],
+                "B": [
+                  3.5093930299353815,
+                  0.7893170460192778,
+                  4.011569612282528,
+                  6.3960655375581155,
+                  -2.5551177974648454,
+                  -23.124680686669308,
+                  7.588689547992544,
+                  22.86788669237012
+                ]
+              },
+              "max_innovation_error": 1.2218952178955078e-06,
+              "max_reference_peak": 0.04480571672320366,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8501100699710976,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120003,
+                "scenario_seed": 123100003,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123130005,
+                  "B": 123130006
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.11534823396164029,
+                  "plus_minus": 0.22902648566650896,
+                  "plus_zero": 0.11367825170486867
+                },
+                "B_to_A": {
+                  "minus_zero": -0.12869707767333693,
+                  "plus_minus": 0.2555807663701444,
+                  "plus_zero": 0.12688368869680744
+                }
+              },
+              "gradients": {
+                "A": [
+                  -4.141384097829359,
+                  -5.9293090599453535,
+                  4.395164349830338,
+                  5.4339895813768635,
+                  -4.19060778298217,
+                  20.73106826547928,
+                  5.679884638448129,
+                  7.92932236120123
+                ],
+                "B": [
+                  -3.6947870336121014,
+                  -5.742033672595426,
+                  4.6450189116853835,
+                  5.3508446059822745,
+                  -4.428971362438006,
+                  17.686552898646823,
+                  5.160179993163183,
+                  7.984594644426579
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.0411796048283577,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9971671665131692,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120004,
+                "scenario_seed": 123100004,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123130007,
+                  "B": 123130008
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.08140487636717353,
+                  "plus_minus": 0.14457790029621265,
+                  "plus_zero": 0.06317302392903912
+                },
+                "B_to_A": {
+                  "minus_zero": -0.10830657626399898,
+                  "plus_minus": 0.20883332993696513,
+                  "plus_zero": 0.10052675367296615
+                }
+              },
+              "gradients": {
+                "A": [
+                  -0.4902186565800548,
+                  -2.031892637933197,
+                  5.730850783322694,
+                  4.813952599567983,
+                  -3.8215664582367026,
+                  -20.608793912094825,
+                  0.574745985534264,
+                  -4.220500178189468
+                ],
+                "B": [
+                  0.3025808154916376,
+                  -0.15177029495134775,
+                  5.301449280329962,
+                  5.502245340267109,
+                  -0.6137547850812552,
+                  -12.871121429770938,
+                  2.628075152983911,
+                  3.491905070302437
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.0422811321914196,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8766999180981947,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120005,
+                "scenario_seed": 123100005,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123130009,
+                  "B": 123130010
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.0030357878973745756,
+                  "plus_minus": 0.003167779080854416,
+                  "plus_zero": 0.0001319911834798404
+                },
+                "B_to_A": {
+                  "minus_zero": -0.008886036460125979,
+                  "plus_minus": 0.0076108365223035435,
+                  "plus_zero": -0.0012751999378224355
+                }
+              },
+              "gradients": {
+                "A": [
+                  5.803705361859102,
+                  3.9001327040523392,
+                  -1.9294378606446116,
+                  -2.0526885171648246,
+                  -0.49630075641289295,
+                  -3.030714534747858,
+                  -2.0419067292209547,
+                  -4.620281394829817
+                ],
+                "B": [
+                  5.235928173408411,
+                  3.3791950976365115,
+                  -2.736855670650584,
+                  -2.6323524907297724,
+                  -0.8653830838738941,
+                  -2.8421706289464055,
+                  -1.923857187921385,
+                  12.802806761237662
+                ]
+              },
+              "max_innovation_error": 1.2516975402832031e-06,
+              "max_reference_peak": 0.04364600405097008,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.055582432798093835,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120006,
+                "scenario_seed": 123100006,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123130011,
+                  "B": 123130012
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.17006082205352868,
+                  "plus_minus": 0.33748460996213225,
+                  "plus_zero": 0.16742378790860357
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1575213580472905,
+                  "plus_minus": 0.3125546978133116,
+                  "plus_zero": 0.15503333976602107
+                }
+              },
+              "gradients": {
+                "A": [
+                  5.934127223400765,
+                  2.4230657817440715,
+                  0.3119222136319877,
+                  1.7750039916847982,
+                  -3.0888173469065805,
+                  -24.14402690324664,
+                  3.338680866716004,
+                  18.67020326576494
+                ],
+                "B": [
+                  5.79280973341838,
+                  3.5568088671539044,
+                  -1.2159318224689741,
+                  1.9780501737386658,
+                  -0.9359461875988018,
+                  -16.332299739883638,
+                  4.437756354701605,
+                  28.956556661125887
+                ]
+              },
+              "max_innovation_error": 1.2516975402832031e-06,
+              "max_reference_peak": 0.04462520033121109,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.922073463199111,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120007,
+                "scenario_seed": 123100007,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123130013,
+                  "B": 123130014
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.04886739937148832,
+                  "plus_minus": 0.09595309844610256,
+                  "plus_zero": 0.04708569907461424
+                },
+                "B_to_A": {
+                  "minus_zero": -0.04990051283095909,
+                  "plus_minus": 0.09939697940359338,
+                  "plus_zero": 0.04949646657263429
+                }
+              },
+              "gradients": {
+                "A": [
+                  4.613301078205723,
+                  1.8213403063043643,
+                  3.4574615091855776,
+                  3.464034970818375,
+                  -2.3830715913788936,
+                  -5.3754176692734745,
+                  2.572658603492073,
+                  2.925003210077648
+                ],
+                "B": [
+                  4.484936871557466,
+                  1.4699263911666094,
+                  3.6644790025775364,
+                  3.3313857323832963,
+                  -2.7895248369020464,
+                  -5.752188914885892,
+                  2.037205111099638,
+                  0.10326216630005547
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.04323862865567207,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9544982462441427,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123120008,
+                "scenario_seed": 123100008,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123130015,
+                  "B": 123130016
+                }
+              }
+            }
+          ],
+          "summary": {
+            "actor_pullback_cosine": 0.8354561354917568,
+            "crossfit_plus_minus": 0.24384033666289184,
+            "crossfit_plus_zero": 0.11970477132813429,
+            "native_gradient_cosine": 0.9166539349536993,
+            "native_gradient_rms": {
+              "A": 9.875719191675445,
+              "B": 9.755329087378446
+            }
+          }
+        }
+      },
+      "kind": "native_reference_counterfactual_credit_diagnosis_not_learned_policy_validation",
+      "protocol": "pointmaze_reference_counterfactual_stage123_v1",
+      "root": 410011,
+      "source_protocol": "pointmaze_joint_reference_stage121_v3",
+      "status": "complete",
+      "teacher_upper_lower_and_source_frozen": "passed"
+    },
+    {
+      "cost": {
+        "actor_pullback_backward_batches": 4,
+        "actor_pullback_forward_batches": 4,
+        "checkpoint_writes": 0,
+        "native_donor_response_calls": 1459200,
+        "native_episodes": 608,
+        "native_steps": 729600,
+        "native_trace_writes": 0,
+        "native_upper_calls": 10944,
+        "optimizer_steps": 0,
+        "queries": 16
+      },
+      "epsilon": 0.005,
+      "groups": {
+        "100": {
+          "queries": [
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.12389647802660875,
+                  "plus_minus": 0.24259081881336897,
+                  "plus_zero": 0.11869434078676022
+                },
+                "B_to_A": {
+                  "minus_zero": -0.133673746822069,
+                  "plus_minus": 0.26544825803534877,
+                  "plus_zero": 0.13177451121327977
+                }
+              },
+              "gradients": {
+                "A": [
+                  -11.864359124365365,
+                  -9.576393806878514,
+                  -4.929614915045022,
+                  -3.2664164214793345,
+                  -5.502576296021289,
+                  -11.858187553571042,
+                  3.0967848577802215,
+                  23.07525112469193
+                ],
+                "B": [
+                  -11.199795395987167,
+                  -8.214987117139572,
+                  -5.629907764296149,
+                  -4.656440723056221,
+                  -4.481149277035001,
+                  4.932643508846013,
+                  1.7443828496197966,
+                  22.947622764240805
+                ]
+              },
+              "max_innovation_error": 1.341104507446289e-06,
+              "max_reference_peak": 0.0217931866645813,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8425459193549351,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220001,
+                "scenario_seed": 123200001,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123230001,
+                  "B": 123230002
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.14321517456323818,
+                  "plus_minus": 0.2744067345270196,
+                  "plus_zero": 0.1311915599637814
+                },
+                "B_to_A": {
+                  "minus_zero": -0.17625503617023242,
+                  "plus_minus": 0.350418091185702,
+                  "plus_zero": 0.17416305501546958
+                }
+              },
+              "gradients": {
+                "A": [
+                  11.70583111806991,
+                  12.803662053829612,
+                  4.449366790959175,
+                  4.936591316254635,
+                  12.702625521978916,
+                  33.85583362282887,
+                  6.165283446057401,
+                  8.510251461916596
+                ],
+                "B": [
+                  11.918891509412788,
+                  12.152904070921977,
+                  4.325520158818108,
+                  5.938250658755351,
+                  10.611777044960036,
+                  12.738436561312483,
+                  8.737749691749741,
+                  19.861899960437768
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.026568783447146416,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8172409973986069,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220002,
+                "scenario_seed": 123200002,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123230003,
+                  "B": 123230004
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.15580695265475697,
+                  "plus_minus": 0.30119438891495065,
+                  "plus_zero": 0.14538743626019368
+                },
+                "B_to_A": {
+                  "minus_zero": -0.17407919572042374,
+                  "plus_minus": 0.33702425600949937,
+                  "plus_zero": 0.16294506028907563
+                }
+              },
+              "gradients": {
+                "A": [
+                  -5.698340469325558,
+                  -6.076278071066099,
+                  -2.7152237981454164,
+                  -5.995292944794528,
+                  -6.715137992864584,
+                  -31.289214347407324,
+                  -0.4019497879312439,
+                  4.201836901529532
+                ],
+                "B": [
+                  -2.2790953813569104,
+                  -2.9992467898296127,
+                  -4.976428727775328,
+                  -7.242895322224285,
+                  -4.718486423814738,
+                  -28.301298556857546,
+                  -0.9164626076540117,
+                  0.6441849153929979
+                ]
+              },
+              "max_innovation_error": 1.430511474609375e-06,
+              "max_reference_peak": 0.024889066815376282,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9806219108834681,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220003,
+                "scenario_seed": 123200003,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123230005,
+                  "B": 123230006
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.2029241135094253,
+                  "plus_minus": 0.4019330098001319,
+                  "plus_zero": 0.19900889629070662
+                },
+                "B_to_A": {
+                  "minus_zero": -0.20748152519706764,
+                  "plus_minus": 0.41149318987970673,
+                  "plus_zero": 0.2040116646826391
+                }
+              },
+              "gradients": {
+                "A": [
+                  -2.8661937242873137,
+                  -8.392033008408362,
+                  -9.459881539351045,
+                  -9.546424599886905,
+                  -8.176001456479298,
+                  6.459990217547329,
+                  -11.043333285601875,
+                  -34.17854274010779
+                ],
+                "B": [
+                  -3.2025398303289876,
+                  -8.726295322503574,
+                  -9.62750397545733,
+                  -9.495556124181803,
+                  -8.310014818630407,
+                  5.514214574156995,
+                  -11.020929732501372,
+                  -33.03396272631289
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.02639211155474186,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9995139537705018,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220004,
+                "scenario_seed": 123200004,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123230007,
+                  "B": 123230008
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.10665867406555662,
+                  "plus_minus": 0.20707620658799897,
+                  "plus_zero": 0.10041753252244234
+                },
+                "B_to_A": {
+                  "minus_zero": -0.11418415202297183,
+                  "plus_minus": 0.21708295617543172,
+                  "plus_zero": 0.10289880415245989
+                }
+              },
+              "gradients": {
+                "A": [
+                  -4.697039858820062,
+                  4.6422499845562015,
+                  -3.3044326135723168,
+                  -3.3803099072883924,
+                  5.892599915125629,
+                  -29.502850492508514,
+                  -3.815877021838787,
+                  -2.2301907284372646
+                ],
+                "B": [
+                  -4.618042204822359,
+                  4.084257661088486,
+                  -5.949009512244174,
+                  -6.336382828351361,
+                  5.452880554275907,
+                  -19.278622991282646,
+                  -4.726070411788896,
+                  20.27257659942734
+                ]
+              },
+              "max_innovation_error": 1.3709068298339844e-06,
+              "max_reference_peak": 0.02517305314540863,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.6762754143355416,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220005,
+                "scenario_seed": 123200005,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123230009,
+                  "B": 123230010
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.0969693477798046,
+                  "plus_minus": 0.19064867027873333,
+                  "plus_zero": 0.09367932249892874
+                },
+                "B_to_A": {
+                  "minus_zero": -0.09322220057470076,
+                  "plus_minus": 0.18107967409650882,
+                  "plus_zero": 0.08785747352180806
+                }
+              },
+              "gradients": {
+                "A": [
+                  -5.613762972882341,
+                  -10.872631037534575,
+                  -6.774134919987773,
+                  -6.1896758085367765,
+                  -8.672851392680059,
+                  -3.2434800723876833,
+                  -4.696415332784909,
+                  7.624119953356967
+                ],
+                "B": [
+                  -6.13301193350253,
+                  -11.634735121435824,
+                  -3.567973294343574,
+                  -1.2782206089354986,
+                  -9.633328828226695,
+                  -5.142518286675113,
+                  0.7811664169935284,
+                  11.707483395400686
+                ]
+              },
+              "max_innovation_error": 1.341104507446289e-06,
+              "max_reference_peak": 0.02621196210384369,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.8988200333735923,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220006,
+                "scenario_seed": 123200006,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123230011,
+                  "B": 123230012
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.15486955110065992,
+                  "plus_minus": 0.305923212044263,
+                  "plus_zero": 0.15105366094360306
+                },
+                "B_to_A": {
+                  "minus_zero": -0.14698916761034297,
+                  "plus_minus": 0.2871802749933181,
+                  "plus_zero": 0.14019110738297513
+                }
+              },
+              "gradients": {
+                "A": [
+                  -7.465993384346348,
+                  -4.027849911619796,
+                  -1.654674787738486,
+                  -6.481938753574923,
+                  -1.8389085052547216,
+                  -18.67946479036391,
+                  -8.618526705748764,
+                  16.88244399375094
+                ],
+                "B": [
+                  -9.916983086947084,
+                  -6.976870136293201,
+                  -4.8955381051541735,
+                  -9.042523046912265,
+                  -4.363136485346786,
+                  -18.56847374816084,
+                  -9.667707776748102,
+                  15.215481036602796
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.023196693509817123,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9782583785188578,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220007,
+                "scenario_seed": 123200007,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123230013,
+                  "B": 123230014
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.20872821273542286,
+                  "plus_minus": 0.4135366122393407,
+                  "plus_zero": 0.20480839950391783
+                },
+                "B_to_A": {
+                  "minus_zero": -0.160160753525588,
+                  "plus_minus": 0.3146650605931427,
+                  "plus_zero": 0.1545043070675547
+                }
+              },
+              "gradients": {
+                "A": [
+                  1.6725385381505475,
+                  3.828014072064434,
+                  -4.985125066707496,
+                  -2.5369629080557843,
+                  7.702349648963036,
+                  28.459722938760024,
+                  2.551388221417028,
+                  8.799332903902268
+                ],
+                "B": [
+                  0.5394001608749477,
+                  4.108006507323125,
+                  -7.662713220776141,
+                  -6.483577700322485,
+                  8.489169312809963,
+                  38.29385774769207,
+                  -1.340566327291981,
+                  7.799026907991902
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.0239881444722414,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9842277207003455,
+              "native_steps": 45600,
+              "native_upper_calls": 456,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220008,
+                "scenario_seed": 123200008,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123230015,
+                  "B": 123230016
+                }
+              }
+            }
+          ],
+          "summary": {
+            "actor_pullback_cosine": 0.9412838599311008,
+            "crossfit_plus_minus": 0.2938563383859041,
+            "crossfit_plus_zero": 0.14391169575597473,
+            "native_gradient_cosine": 0.8941578883843025,
+            "native_gradient_rms": {
+              "A": 11.710636281601916,
+              "B": 11.4974381964413
+            }
+          }
+        },
+        "50": {
+          "queries": [
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.14684753242886472,
+                  "plus_minus": 0.28811208508159325,
+                  "plus_zero": 0.14126455265272853
+                },
+                "B_to_A": {
+                  "minus_zero": -0.15470647062738863,
+                  "plus_minus": 0.30564505458573876,
+                  "plus_zero": 0.15093858395835014
+                }
+              },
+              "gradients": {
+                "A": [
+                  -5.063702761822242,
+                  -7.0241904201566285,
+                  -1.057883881003363,
+                  -1.2861504925240297,
+                  -8.094456135813743,
+                  -24.41455343528105,
+                  -1.3448717182427572,
+                  7.046687796332662
+                ],
+                "B": [
+                  -5.249229203081995,
+                  -7.047655213705184,
+                  -0.8557935379940318,
+                  -1.1068342468206538,
+                  -7.811955432453033,
+                  -23.305135864484328,
+                  -1.2902546833629458,
+                  4.351883930689837
+                ]
+              },
+              "max_innovation_error": 1.341104507446289e-06,
+              "max_reference_peak": 0.04335446655750275,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9958737931530984,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220001,
+                "scenario_seed": 123200001,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123230001,
+                  "B": 123230002
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.1635405537765564,
+                  "plus_minus": 0.32527985799379167,
+                  "plus_zero": 0.16173930421723526
+                },
+                "B_to_A": {
+                  "minus_zero": -0.18545556970184407,
+                  "plus_minus": 0.3705074696651991,
+                  "plus_zero": 0.18505189996335503
+                }
+              },
+              "gradients": {
+                "A": [
+                  3.320988050199958,
+                  6.397669653438243,
+                  1.9085595215074136,
+                  2.202081277164325,
+                  8.308148675746452,
+                  31.75430298942956,
+                  2.1598086579842857,
+                  4.533494669271931
+                ],
+                "B": [
+                  3.6685894425545484,
+                  6.41869697749371,
+                  1.7059939490309262,
+                  1.9963337632589173,
+                  7.786878625302052,
+                  26.42136830177151,
+                  2.2234323710790704,
+                  10.579189200757355
+                ]
+              },
+              "max_innovation_error": 1.3113021850585938e-06,
+              "max_reference_peak": 0.04531930759549141,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9744788969540207,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220002,
+                "scenario_seed": 123200002,
+                "start": 0,
+                "suffix_noise_seeds": {
+                  "A": 123230003,
+                  "B": 123230004
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.0465497489298059,
+                  "plus_minus": 0.0708058342345339,
+                  "plus_zero": 0.024256085304728003
+                },
+                "B_to_A": {
+                  "minus_zero": -0.12517619166624172,
+                  "plus_minus": 0.24010658652309758,
+                  "plus_zero": 0.11493039485685586
+                }
+              },
+              "gradients": {
+                "A": [
+                  -1.1923080213932735,
+                  -3.5656805951248316,
+                  5.272944845387428,
+                  4.548672168527901,
+                  -5.687187881073896,
+                  -14.579374154504876,
+                  1.769422243455665,
+                  21.39725349766195
+                ],
+                "B": [
+                  -0.4422540229484184,
+                  -1.1438791214004596,
+                  4.243078855552085,
+                  0.6209007849065529,
+                  -1.2959305667777699,
+                  -4.270439230276679,
+                  -3.330932469725667,
+                  3.8211202944125944
+                ]
+              },
+              "max_innovation_error": 1.430511474609375e-06,
+              "max_reference_peak": 0.04465566202998161,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.7813122512489611,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220003,
+                "scenario_seed": 123200003,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123230005,
+                  "B": 123230006
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.12971868123418062,
+                  "plus_minus": 0.25211452243001986,
+                  "plus_zero": 0.12239584119583924
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1383902988261525,
+                  "plus_minus": 0.27133034176267756,
+                  "plus_zero": 0.13294004293652506
+                }
+              },
+              "gradients": {
+                "A": [
+                  4.102883750670117,
+                  -0.0148482828763008,
+                  -3.732877515972177,
+                  -4.111809432822611,
+                  -3.6882402810647363,
+                  -10.941813337831263,
+                  -4.05923700875519,
+                  -20.7730440521118
+                ],
+                "B": [
+                  4.187965325763798,
+                  -0.32220283771948743,
+                  -3.733346809485738,
+                  -4.287421035110128,
+                  -3.867604038327954,
+                  -11.068275864454336,
+                  -4.027504779128321,
+                  -18.52805823515382
+                ]
+              },
+              "max_innovation_error": 1.3709068298339844e-06,
+              "max_reference_peak": 0.04528508707880974,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9979924964321834,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220004,
+                "scenario_seed": 123200004,
+                "start": 300,
+                "suffix_noise_seeds": {
+                  "A": 123230007,
+                  "B": 123230008
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.05309283890187544,
+                  "plus_minus": 0.10429058368652022,
+                  "plus_zero": 0.05119774478464478
+                },
+                "B_to_A": {
+                  "minus_zero": -0.03943779005737724,
+                  "plus_minus": 0.0754524707233486,
+                  "plus_zero": 0.036014680665971355
+                }
+              },
+              "gradients": {
+                "A": [
+                  -5.732011586280805,
+                  -6.1927856580496154,
+                  -0.699405956981991,
+                  -0.8612008245108882,
+                  -4.136031123903194,
+                  -1.1393994784498318,
+                  -0.5992874640242007,
+                  4.042960276615304
+                ],
+                "B": [
+                  -6.397854920771806,
+                  -6.321329439879264,
+                  -1.4698894402158658,
+                  -1.9709401354248257,
+                  -0.12690019516412576,
+                  7.809669104972272,
+                  -1.9039897276229567,
+                  8.228915282199978
+                ]
+              },
+              "max_innovation_error": 1.430511474609375e-06,
+              "max_reference_peak": 0.04007338732481003,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.6810068695602869,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220005,
+                "scenario_seed": 123200005,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123230009,
+                  "B": 123230010
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.12130950351365755,
+                  "plus_minus": 0.24177752565299215,
+                  "plus_zero": 0.12046802213933461
+                },
+                "B_to_A": {
+                  "minus_zero": -0.11414322430471202,
+                  "plus_minus": 0.22569408916763223,
+                  "plus_zero": 0.11155086486292021
+                }
+              },
+              "gradients": {
+                "A": [
+                  1.8174733645764718,
+                  -3.5230012313945736,
+                  -2.5847293780088876,
+                  -1.2571723068276697,
+                  -6.743924121394684,
+                  -19.00625279262158,
+                  0.07475746222098678,
+                  6.533169246392845
+                ],
+                "B": [
+                  2.269977060700512,
+                  -3.2566482150855336,
+                  -2.316063762975773,
+                  -1.0621910179793304,
+                  -6.261851355543513,
+                  -18.41908782239443,
+                  0.817508733325667,
+                  12.11213586653912
+                ]
+              },
+              "max_innovation_error": 1.430511474609375e-06,
+              "max_reference_peak": 0.04306023567914963,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9706466625267327,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220006,
+                "scenario_seed": 123200006,
+                "start": 600,
+                "suffix_noise_seeds": {
+                  "A": 123230011,
+                  "B": 123230012
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.05230671605721682,
+                  "plus_minus": 0.10234510778872163,
+                  "plus_zero": 0.05003839173150482
+                },
+                "B_to_A": {
+                  "minus_zero": -0.042624467933933374,
+                  "plus_minus": 0.07544394248770914,
+                  "plus_zero": 0.03281947455377576
+                }
+              },
+              "gradients": {
+                "A": [
+                  0.19821666371626634,
+                  0.7036014698542203,
+                  4.437914052664382,
+                  6.713725500054579,
+                  0.931853478738276,
+                  -2.3877750498172645,
+                  3.670883190238783,
+                  -6.8007439938867265
+                ],
+                "B": [
+                  -2.527068480634398,
+                  -5.003444398903412,
+                  4.135344509597871,
+                  3.224272982589582,
+                  -6.088391134574067,
+                  -8.999322027909784,
+                  -1.2345910437716157,
+                  -9.972508542438163
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.04346485808491707,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.6017216041849572,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220007,
+                "scenario_seed": 123200007,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123230013,
+                  "B": 123230014
+                }
+              }
+            },
+            {
+              "crossfit": {
+                "A_to_B": {
+                  "minus_zero": -0.15138870755868084,
+                  "plus_minus": 0.2990015787527227,
+                  "plus_zero": 0.14761287119404187
+                },
+                "B_to_A": {
+                  "minus_zero": -0.1420298963525397,
+                  "plus_minus": 0.2782391582313153,
+                  "plus_zero": 0.13620926187877558
+                }
+              },
+              "gradients": {
+                "A": [
+                  0.17562771806751698,
+                  3.25814413797616,
+                  -0.7316037816451626,
+                  -5.855466427408373,
+                  3.7926736629913194,
+                  20.99865525946143,
+                  -5.824986363916196,
+                  -11.863768752027681
+                ],
+                "B": [
+                  -0.4048793346214552,
+                  2.8274839045366207,
+                  -1.274706309419571,
+                  -6.263266269729684,
+                  3.3408677666500353,
+                  21.824799293483466,
+                  -5.48788208878932,
+                  -14.391881643069837
+                ]
+              },
+              "max_innovation_error": 7.152557373046875e-07,
+              "max_reference_peak": 0.043575599789619446,
+              "native_donor_response_calls": 91200,
+              "native_episodes": 38,
+              "native_gradient_cosine": 0.9965140956544212,
+              "native_steps": 45600,
+              "native_upper_calls": 912,
+              "policy_freeze": "passed",
+              "prefix_suffix_noise_and_authority_checks": "passed",
+              "query": {
+                "prefix_noise_seed": 123220008,
+                "scenario_seed": 123200008,
+                "start": 900,
+                "suffix_noise_seeds": {
+                  "A": 123230015,
+                  "B": 123230016
+                }
+              }
+            }
+          ],
+          "summary": {
+            "actor_pullback_cosine": 0.8169046364982714,
+            "crossfit_plus_minus": 0.22038413804797585,
+            "crossfit_plus_zero": 0.10746425105603663,
+            "native_gradient_cosine": 0.9003501347720219,
+            "native_gradient_rms": {
+              "A": 8.605363118053393,
+              "B": 7.977109085398424
+            }
+          }
+        }
+      },
+      "kind": "native_reference_counterfactual_credit_diagnosis_not_learned_policy_validation",
+      "protocol": "pointmaze_reference_counterfactual_stage123_v1",
+      "root": 410023,
+      "source_protocol": "pointmaze_joint_reference_stage121_v3",
+      "status": "complete",
+      "teacher_upper_lower_and_source_frozen": "passed"
+    }
+  ],
+  "run_name": "pointmaze_reference_counterfactual_stage123_probe_20261006_r1"
+}
