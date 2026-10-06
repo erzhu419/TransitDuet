@@ -1,0 +1,586 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "four_final_upper_candidates_per_root_server_only",
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only",
+    "raw_state_writes": 0
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 384,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "gradient_audit_episodes": 64,
+    "gradient_audit_pair_groups": 16,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 14054400,
+    "native_episodes": 5856,
+    "native_return_fits": 12,
+    "native_steps": 7027200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 109440,
+    "optimizer_steps": 0,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 30
+  },
+  "calibration": {
+    "crossfit": "A_on_B_and_B_on_A_not_used_for_selection",
+    "evaluation_selection": false,
+    "fitted_step_interval": [
+      0,
+      1
+    ],
+    "full_policy_steps": [
+      0,
+      1,
+      -1
+    ],
+    "objective": "paired_native_episode_return_quadratic"
+  },
+  "code_revision": "7c129e55372a3ddf1733b792ff466c352d305870",
+  "contrasts": [
+    [
+      "complete",
+      "source_flat"
+    ],
+    [
+      "complete",
+      "source_forecast"
+    ],
+    [
+      "complete",
+      "coarse"
+    ],
+    [
+      "complete",
+      "complete_descent"
+    ],
+    [
+      "complete",
+      "complete_blinded"
+    ]
+  ],
+  "credit_design": {
+    "coarse_inverse_time_fraction_weighting": true,
+    "coarse_starts": [
+      0,
+      300,
+      600,
+      900
+    ],
+    "common_prefix_and_suffix_noise": true,
+    "complete_recovery_suffix": true,
+    "complete_starts": "all decision starts from0 through horizon-period",
+    "coordinates": 8,
+    "damping": 1.0,
+    "epsilon": 0.005,
+    "fisher_radius": 0.0005555555555555556,
+    "shared_all_decision_fisher_states": true,
+    "shared_label_cost_not_compute_efficiency_comparison": true
+  },
+  "evidence_role": "two_development_roots_native_temporal_credit_coverage_not_joint_HRL_confirmation",
+  "fixed_actor": {
+    "action_dim": 8,
+    "hidden_dim": 0,
+    "lower_residual_limit": 0.05,
+    "reference_limit": 0.05,
+    "standard_deviation": 0.15,
+    "state_dim": 392
+  },
+  "fixed_source": "Stage111 source and Stage112 exact lower teacher; Stage121 zero residual and bounded response; no Stage124/126 candidate used",
+  "fresh_evaluation_seeds": {
+    "410011": [
+      127190001,
+      127190002,
+      127190003,
+      127190004,
+      127190005,
+      127190006,
+      127190007,
+      127190008,
+      127190009,
+      127190010,
+      127190011,
+      127190012,
+      127190013,
+      127190014,
+      127190015,
+      127190016,
+      127190017,
+      127190018,
+      127190019,
+      127190020,
+      127190021,
+      127190022,
+      127190023,
+      127190024,
+      127190025,
+      127190026,
+      127190027,
+      127190028,
+      127190029,
+      127190030,
+      127190031,
+      127190032
+    ],
+    "410023": [
+      127290001,
+      127290002,
+      127290003,
+      127290004,
+      127290005,
+      127290006,
+      127290007,
+      127290008,
+      127290009,
+      127290010,
+      127290011,
+      127290012,
+      127290013,
+      127290014,
+      127290015,
+      127290016,
+      127290017,
+      127290018,
+      127290019,
+      127290020,
+      127290021,
+      127290022,
+      127290023,
+      127290024,
+      127290025,
+      127290026,
+      127290027,
+      127290028,
+      127290029,
+      127290030,
+      127290031,
+      127290032
+    ]
+  },
+  "gradient_audit": {
+    "full_policy_central_secant_scale": 0.1,
+    "not_used_for_selection": true,
+    "prediction": "sum native local gradients dotted with unit policy mean changes per complete training trajectory"
+  },
+  "inherited_cost": "source and teacher training shared; no Stage123 label replay or Stage124 candidate required",
+  "label_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 127110001,
+          "B": 127120001
+        },
+        "scenario_seed": 127100001
+      },
+      {
+        "noise_seeds": {
+          "A": 127110002,
+          "B": 127120002
+        },
+        "scenario_seed": 127100002
+      },
+      {
+        "noise_seeds": {
+          "A": 127110003,
+          "B": 127120003
+        },
+        "scenario_seed": 127100003
+      },
+      {
+        "noise_seeds": {
+          "A": 127110004,
+          "B": 127120004
+        },
+        "scenario_seed": 127100004
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 127210001,
+          "B": 127220001
+        },
+        "scenario_seed": 127200001
+      },
+      {
+        "noise_seeds": {
+          "A": 127210002,
+          "B": 127220002
+        },
+        "scenario_seed": 127200002
+      },
+      {
+        "noise_seeds": {
+          "A": 127210003,
+          "B": 127220003
+        },
+        "scenario_seed": 127200003
+      },
+      {
+        "noise_seeds": {
+          "A": 127210004,
+          "B": 127220004
+        },
+        "scenario_seed": 127200004
+      }
+    ]
+  },
+  "methods": [
+    "coarse",
+    "complete"
+  ],
+  "minimum_episode_gain": 0.5,
+  "periods": [
+    50,
+    100
+  ],
+  "protocol": "pointmaze_credit_coverage_stage127_v1",
+  "roots": [
+    410011,
+    410023
+  ],
+  "run_name": "pointmaze_credit_coverage_stage127_pilot_20261006_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_credit_coverage_stage127.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410011/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Decision-aligned native coordinate interventions plus matched calibration and deployment; all rollouts single-threaded; final upper weights stay server-side.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage127 temporal credit coverage root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_credit_coverage_stage127_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_credit_coverage_stage127_v1/native_credit_coverage",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_credit_coverage_stage127_v1/pointmaze_credit_coverage_stage127_pilot_20261006_r1/credit_coverage/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_credit_coverage_stage127.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410023/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Decision-aligned native coordinate interventions plus matched calibration and deployment; all rollouts single-threaded; final upper weights stay server-side.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage127 temporal credit coverage root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_credit_coverage_stage127_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_credit_coverage_stage127_v1/native_credit_coverage",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_coverage_stage127_pilot_20261006_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_credit_coverage_stage127_v1/pointmaze_credit_coverage_stage127_pilot_20261006_r1/credit_coverage/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "tests": "Stage127 four focused tests passed; unchanged Stage126 four tests passed",
+  "training_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 127140001,
+          "B": 127150001
+        },
+        "scenario_seed": 127130001
+      },
+      {
+        "noise_seeds": {
+          "A": 127140002,
+          "B": 127150002
+        },
+        "scenario_seed": 127130002
+      },
+      {
+        "noise_seeds": {
+          "A": 127140003,
+          "B": 127150003
+        },
+        "scenario_seed": 127130003
+      },
+      {
+        "noise_seeds": {
+          "A": 127140004,
+          "B": 127150004
+        },
+        "scenario_seed": 127130004
+      },
+      {
+        "noise_seeds": {
+          "A": 127140005,
+          "B": 127150005
+        },
+        "scenario_seed": 127130005
+      },
+      {
+        "noise_seeds": {
+          "A": 127140006,
+          "B": 127150006
+        },
+        "scenario_seed": 127130006
+      },
+      {
+        "noise_seeds": {
+          "A": 127140007,
+          "B": 127150007
+        },
+        "scenario_seed": 127130007
+      },
+      {
+        "noise_seeds": {
+          "A": 127140008,
+          "B": 127150008
+        },
+        "scenario_seed": 127130008
+      },
+      {
+        "noise_seeds": {
+          "A": 127140009,
+          "B": 127150009
+        },
+        "scenario_seed": 127130009
+      },
+      {
+        "noise_seeds": {
+          "A": 127140010,
+          "B": 127150010
+        },
+        "scenario_seed": 127130010
+      },
+      {
+        "noise_seeds": {
+          "A": 127140011,
+          "B": 127150011
+        },
+        "scenario_seed": 127130011
+      },
+      {
+        "noise_seeds": {
+          "A": 127140012,
+          "B": 127150012
+        },
+        "scenario_seed": 127130012
+      },
+      {
+        "noise_seeds": {
+          "A": 127140013,
+          "B": 127150013
+        },
+        "scenario_seed": 127130013
+      },
+      {
+        "noise_seeds": {
+          "A": 127140014,
+          "B": 127150014
+        },
+        "scenario_seed": 127130014
+      },
+      {
+        "noise_seeds": {
+          "A": 127140015,
+          "B": 127150015
+        },
+        "scenario_seed": 127130015
+      },
+      {
+        "noise_seeds": {
+          "A": 127140016,
+          "B": 127150016
+        },
+        "scenario_seed": 127130016
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 127240001,
+          "B": 127250001
+        },
+        "scenario_seed": 127230001
+      },
+      {
+        "noise_seeds": {
+          "A": 127240002,
+          "B": 127250002
+        },
+        "scenario_seed": 127230002
+      },
+      {
+        "noise_seeds": {
+          "A": 127240003,
+          "B": 127250003
+        },
+        "scenario_seed": 127230003
+      },
+      {
+        "noise_seeds": {
+          "A": 127240004,
+          "B": 127250004
+        },
+        "scenario_seed": 127230004
+      },
+      {
+        "noise_seeds": {
+          "A": 127240005,
+          "B": 127250005
+        },
+        "scenario_seed": 127230005
+      },
+      {
+        "noise_seeds": {
+          "A": 127240006,
+          "B": 127250006
+        },
+        "scenario_seed": 127230006
+      },
+      {
+        "noise_seeds": {
+          "A": 127240007,
+          "B": 127250007
+        },
+        "scenario_seed": 127230007
+      },
+      {
+        "noise_seeds": {
+          "A": 127240008,
+          "B": 127250008
+        },
+        "scenario_seed": 127230008
+      },
+      {
+        "noise_seeds": {
+          "A": 127240009,
+          "B": 127250009
+        },
+        "scenario_seed": 127230009
+      },
+      {
+        "noise_seeds": {
+          "A": 127240010,
+          "B": 127250010
+        },
+        "scenario_seed": 127230010
+      },
+      {
+        "noise_seeds": {
+          "A": 127240011,
+          "B": 127250011
+        },
+        "scenario_seed": 127230011
+      },
+      {
+        "noise_seeds": {
+          "A": 127240012,
+          "B": 127250012
+        },
+        "scenario_seed": 127230012
+      },
+      {
+        "noise_seeds": {
+          "A": 127240013,
+          "B": 127250013
+        },
+        "scenario_seed": 127230013
+      },
+      {
+        "noise_seeds": {
+          "A": 127240014,
+          "B": 127250014
+        },
+        "scenario_seed": 127230014
+      },
+      {
+        "noise_seeds": {
+          "A": 127240015,
+          "B": 127250015
+        },
+        "scenario_seed": 127230015
+      },
+      {
+        "noise_seeds": {
+          "A": 127240016,
+          "B": 127250016
+        },
+        "scenario_seed": 127230016
+      }
+    ]
+  },
+  "variants": [
+    "source_flat",
+    "source_forecast",
+    "coarse",
+    "complete",
+    "complete_descent",
+    "complete_blinded"
+  ]
+}
