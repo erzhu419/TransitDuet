@@ -29,3 +29,10 @@ Two-root development, not joint-HRL or independent confirmation. The native
 return quadratic is approximate; crossfit and fresh deployment must check it.
 A zero fitted step is recorded as inactive upper, not a successful learned
 plan. Stage124 failure and earlier HOLD/negative gates remain unchanged.
+
+## Run Receipt
+
+Code `404191251d`; run `pointmaze_policy_curvature_stage125_pilot_20261006_r1`.
+`t135907` root410011 and `t135908` root410023 accepted, initially queued.
+Fixed commands, training/evaluation rosters, budgets and fitting objective are
+saved in `preregistration.json`. No Stage124 seed extension submitted.
