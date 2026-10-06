@@ -31,3 +31,10 @@ This changes optimization geometry, not available information. Sparse cached
 labels and two development roots still limit generalization evidence. The
 natural direction may fail; a zero learned step is inactive, not upper gain.
 No earlier HOLD/negative result, promotion or joint-HRL claim is changed.
+
+## Run Receipt
+
+Code `c891f819d2`; run `pointmaze_native_geometry_stage126_pilot_20261006_r1`.
+`t135928` root410011 and `t135929` root410023 accepted, initially queued.
+Fixed commands, normalization/damping, matched calibration, fresh rosters and
+budgets are saved in `preregistration.json`. No Stage125 seed extension submitted.
