@@ -30,3 +30,11 @@ cannot confirm joint HRL, frequency-specific value or learned promotion.
 Stage119 used native derivatives on a much weaker advice channel; this tests
 decision coverage on the unchanged Stage121 bounded response channel instead.
 Negative gradients, failed transfer and inactive steps are retained.
+
+## Run Receipt
+
+Code `7c129e5537`, registration `f8e18cce25`; four focused tests passed,
+plus four existing geometry tests. Run
+`pointmaze_credit_coverage_stage127_pilot_20261006_r1`: `t136168` root410011
+and `t136169` root410023 accepted, initially queued. Fixed tasks and rosters
+are in `preregistration.json`; no original FreqDuet code was changed.
