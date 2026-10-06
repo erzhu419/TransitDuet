@@ -36,3 +36,10 @@ strong warm-start lower; their cost is not comparable to free PPO labels.
 Success requires fresh full-episode gain, not training-surrogate alignment.
 Stage67 HOLD and the Stage121 negative result remain unchanged. Promotion,
 strict LF/HF responsibility separation and cross-domain proof remain open.
+
+## Run Receipt
+
+Code `0c85dcfee0`; run `pointmaze_native_upper_step_stage124_pilot_20261006_r1`.
+`t135891` root410011 and `t135892` root410023 accepted, initially queued.
+Commands, cache identity, fixed radius, fresh scenarios and separate inherited
+cost are saved in `preregistration.json`. No joint-training extension submitted.
