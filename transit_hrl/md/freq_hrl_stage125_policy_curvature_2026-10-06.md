@@ -36,3 +36,14 @@ Code `404191251d`; run `pointmaze_policy_curvature_stage125_pilot_20261006_r1`.
 `t135907` root410011 and `t135908` root410023 accepted, initially queued.
 Fixed commands, training/evaluation rosters, budgets and fitting objective are
 saved in `preregistration.json`. No Stage124 seed extension submitted.
+
+## Completed Result
+
+Both tasks DONE (node004/node006); fetched35.6KB JSON only. Pooled scales
+for root410011 p50/p100 are1/1; root410023 scales are0.1473/0.9590.
+Fresh ascent-minus-forecast gains: -0.09993/-0.03277 and+0.04230/+0.21833.
+Equal-root means=-0.02882/+0.09278. Shrinking root410023 p50 improves over
+its unit step by+0.23621, but its B-to-A training crossfit remains-0.04714.
+No practical gain claim closes. Root410011's positive training gains do not
+transfer. Next: matched empirical-Fisher versus Euclidean direction learning,
+with independent new calibration/evaluation, not another scalar-only adjustment.

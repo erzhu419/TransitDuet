@@ -1,0 +1,109 @@
+{
+  "equal_root_mean": {
+    "100": {
+      "ascent_minus_flat": 0.09978314839991143,
+      "ascent_minus_forecast": 0.0927817815272185,
+      "ascent_minus_unit_step": -0.0019887077734601633
+    },
+    "50": {
+      "ascent_minus_flat": -0.025079522269905397,
+      "ascent_minus_forecast": -0.02881601607643347,
+      "ascent_minus_unit_step": 0.11810419868394106
+    }
+  },
+  "kind": "two_root_native_step_development_mixed_not_material_gain_confirmation",
+  "minimum_episode_gain": 0.5,
+  "next_step": "Test a damped empirical-Fisher preconditioned native upper direction against the Euclidean direction, with matched new full-policy step calibration and fresh deployment scenes.",
+  "protocol": "pointmaze_policy_curvature_stage125_v1",
+  "root_period_summaries": [
+    {
+      "ascent_minus_flat": -0.09621695781908102,
+      "ascent_minus_forecast": -0.09993236300222463,
+      "ascent_minus_unit_step": 0.0,
+      "crossfit_gains": {
+        "A_to_B": 0.2563746784695127,
+        "B_to_A": 0.23841380871942874
+      },
+      "period": 50,
+      "positive_scenarios": 14,
+      "root": 410011,
+      "scale": 1.0,
+      "scenarios": 32,
+      "training_predicted_gain": 0.24739424359445294,
+      "upper_weight_delta_rms": 1.619165090554815e-05
+    },
+    {
+      "ascent_minus_flat": -0.022287745953256888,
+      "ascent_minus_forecast": -0.03276896938033502,
+      "ascent_minus_unit_step": 0.0,
+      "crossfit_gains": {
+        "A_to_B": 0.11600201535824795,
+        "B_to_A": 0.09412326449633213
+      },
+      "period": 100,
+      "positive_scenarios": 17,
+      "root": 410011,
+      "scale": 1.0,
+      "scenarios": 32,
+      "training_predicted_gain": 0.10506263992729359,
+      "upper_weight_delta_rms": 1.3063935521641913e-05
+    },
+    {
+      "ascent_minus_flat": 0.046057913279270224,
+      "ascent_minus_forecast": 0.04230033084935769,
+      "ascent_minus_unit_step": 0.23620839736788213,
+      "crossfit_gains": {
+        "A_to_B": 0.00909899515313839,
+        "B_to_A": -0.047138338779376454
+      },
+      "period": 50,
+      "positive_scenarios": 22,
+      "root": 410023,
+      "scale": 0.1472609815341751,
+      "scenarios": 32,
+      "training_predicted_gain": 0.012355714187914528,
+      "upper_weight_delta_rms": 2.3804424901982437e-06
+    },
+    {
+      "ascent_minus_flat": 0.22185404275307974,
+      "ascent_minus_forecast": 0.21833253243477202,
+      "ascent_minus_unit_step": -0.0039774155469203265,
+      "crossfit_gains": {
+        "A_to_B": 0.15717881644471277,
+        "B_to_A": 0.08481327890184787
+      },
+      "period": 100,
+      "positive_scenarios": 23,
+      "root": 410023,
+      "scale": 0.959000351074056,
+      "scenarios": 32,
+      "training_predicted_gain": 0.12775439602594896,
+      "upper_weight_delta_rms": 1.4745018432658247e-05
+    }
+  ],
+  "run_name": "pointmaze_policy_curvature_stage125_pilot_20261006_r1",
+  "status": "complete",
+  "tasks": [
+    135907,
+    135908
+  ],
+  "total_new_cost": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 256,
+    "crossfit_pair_groups": 128,
+    "evaluation_episodes": 768,
+    "evaluation_pair_groups": 128,
+    "native_donor_response_calls": 3379200,
+    "native_episodes": 1408,
+    "native_return_fits": 12,
+    "native_steps": 1689600,
+    "native_trace_writes": 0,
+    "native_upper_calls": 13824,
+    "optimizer_steps": 0,
+    "source_cell_loads": 2,
+    "training_episodes": 384,
+    "training_pair_groups": 128,
+    "upper_candidate_weight_steps": 16,
+    "upper_checkpoint_loads": 8
+  }
+}
