@@ -1,0 +1,112 @@
+{
+  "earlier_gates": "Stage67_HOLD_Stage120_inconclusive_Stage121_full_negative_unchanged",
+  "equal_root_means": {
+    "100": {
+      "natural_minus_euclidean": 0.03491829821416914,
+      "natural_minus_forecast": 0.03491829821416914
+    },
+    "50": {
+      "natural_minus_euclidean": 0.0416465114035951,
+      "natural_minus_forecast": 0.061514674845813744
+    }
+  },
+  "minimum_episode_gain": 0.5,
+  "new_cost": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 384,
+    "crossfit_pair_groups": 128,
+    "empirical_fisher_solves": 4,
+    "evaluation_episodes": 768,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_cache_loads": 2,
+    "native_donor_response_calls": 4377600,
+    "native_episodes": 1824,
+    "native_return_fits": 24,
+    "native_steps": 2188800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 21312,
+    "optimizer_steps": 0,
+    "training_direction_forward_batches": 8,
+    "training_episodes": 640,
+    "training_pair_groups": 128,
+    "training_state_replays": 32,
+    "upper_candidate_weight_steps": 36,
+    "upper_checkpoint_loads": 8
+  },
+  "next_question": "decision_complete_native_credit_transfer_with_shared_geometry",
+  "protocol": "pointmaze_native_geometry_stage126_v1",
+  "rows": [
+    {
+      "cached_query_negative_alignments": 0,
+      "learned_upper_status": "active_development",
+      "natural_minus_descent": 0.3696339346043658,
+      "natural_minus_euclidean": 0.0832930228071902,
+      "natural_minus_forecast": 0.12302934969162749,
+      "period": 50,
+      "root": 410011,
+      "scale": 0.388724436206099,
+      "training_crossfit": {
+        "A_to_B": 0.05701588274523317,
+        "B_to_A": -0.019902044936273455
+      },
+      "training_pooled_slope": 0.21943727839819616,
+      "upper_mean_rms": 0.0007183169662394291
+    },
+    {
+      "cached_query_negative_alignments": 0,
+      "learned_upper_status": "active_development",
+      "natural_minus_descent": 0.1930873498201251,
+      "natural_minus_euclidean": 0.06983659642833828,
+      "natural_minus_forecast": 0.06983659642833828,
+      "period": 100,
+      "root": 410011,
+      "scale": 0.5053122320618528,
+      "training_crossfit": {
+        "A_to_B": 0.0,
+        "B_to_A": -0.09771204405383571
+      },
+      "training_pooled_slope": 0.0872605440841916,
+      "upper_mean_rms": 0.000901296247170686
+    },
+    {
+      "cached_query_negative_alignments": 0,
+      "learned_upper_status": "inactive_zero_step",
+      "natural_minus_descent": 0.0,
+      "natural_minus_euclidean": 0.0,
+      "natural_minus_forecast": 0.0,
+      "period": 50,
+      "root": 410023,
+      "scale": 0.0,
+      "training_crossfit": {
+        "A_to_B": 0.0,
+        "B_to_A": 0.0
+      },
+      "training_pooled_slope": -0.08256083074497056,
+      "upper_mean_rms": 0.0
+    },
+    {
+      "cached_query_negative_alignments": 0,
+      "learned_upper_status": "inactive_zero_step",
+      "natural_minus_descent": 0.0,
+      "natural_minus_euclidean": 0.0,
+      "natural_minus_forecast": 0.0,
+      "period": 100,
+      "root": 410023,
+      "scale": 0.0,
+      "training_crossfit": {
+        "A_to_B": 0.0,
+        "B_to_A": 0.0
+      },
+      "training_pooled_slope": -0.07980509956537318,
+      "upper_mean_rms": 0.0
+    }
+  ],
+  "run_name": "pointmaze_native_geometry_stage126_pilot_20261006_r1",
+  "tasks": {
+    "410011": "t135928",
+    "410023": "t135929"
+  },
+  "verdict": "partial_local_geometry_gain_not_material_or_independent_confirmation"
+}

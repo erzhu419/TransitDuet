@@ -38,3 +38,18 @@ Code `c891f819d2`; run `pointmaze_native_geometry_stage126_pilot_20261006_r1`.
 `t135928` root410011 and `t135929` root410023 accepted, initially queued.
 Fixed commands, normalization/damping, matched calibration, fresh rosters and
 budgets are saved in `preregistration.json`. No Stage125 seed extension submitted.
+
+## Completed Result
+
+Both tasks finished with the registered budget:1,824episodes/2,188,800steps.
+Root410011 natural-minus-forecast is+0.123029(period50)/+0.069837(period100),
+and natural-minus-Euclidean is+0.083293/+0.069837. Root410023 selects scale0
+at both periods: learned action and response are zero, so this is inactive,
+not a successful upper policy. Equal-root effects are+0.061515/+0.034918,
+below the unchanged0.5 practical-gain threshold.
+
+All32 cached-query natural first-order alignments are positive, but root410023
+has negative full-policy training slopes. Root410011 also has negative B-to-A
+crossfit gains. Geometry improves local alignment, not reliable deployment.
+Next test: fresh decision-complete native credit versus sparse-time credit,
+with identical actor, Fisher geometry, authority and training-only calibration.
