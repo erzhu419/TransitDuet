@@ -43,3 +43,15 @@ Code `0c85dcfee0`; run `pointmaze_native_upper_step_stage124_pilot_20261006_r1`.
 `t135891` root410011 and `t135892` root410023 accepted, initially queued.
 Commands, cache identity, fixed radius, fresh scenarios and separate inherited
 cost are saved in `preregistration.json`. No joint-training extension submitted.
+
+## Completed Result
+
+Both tasks DONE (node004/node006); fetched21.8KB result JSON only.
+Ascent-minus-forecast: root410011 p50=-0.0074, p100=+0.1796;
+root410023 p50=-0.1788, p100=-0.0357. Equal-root means=-0.0931/+0.0719.
+Positive opposite-sign effects remain at both periods. Their odd component
+is+0.2263/+0.1479, while the even deployment component is-0.3194/-0.0760.
+This is consistent with closed-loop curvature/interactions cancelling the
+direction signal; it does not identify their unique cause. No gain gate closed.
+Next: Stage125 estimates step size using new training-only full-policy returns.
+Keep this evaluation unchanged; no retrospective radius choice or seed extension.

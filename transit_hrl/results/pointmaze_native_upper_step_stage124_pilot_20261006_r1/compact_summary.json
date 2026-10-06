@@ -1,0 +1,105 @@
+{
+  "diagnosis": "Opposite-sign contrasts retain positive direction signal, but negative even deployment response cancels it. This is consistent with closed-loop curvature/interactions, not proof of their unique cause.",
+  "equal_root_mean": {
+    "100": {
+      "ascent_minus_descent": 0.295893815346556,
+      "ascent_minus_flat": 0.07868880591757232,
+      "ascent_minus_forecast": 0.07192969090879231,
+      "even_deployment_effect": -0.0760172167644857,
+      "odd_direction_effect": 0.147946907673278
+    },
+    "50": {
+      "ascent_minus_descent": 0.45268087987948746,
+      "ascent_minus_flat": -0.0888127028315644,
+      "ascent_minus_forecast": -0.09309050088819859,
+      "even_deployment_effect": -0.3194309408279423,
+      "odd_direction_effect": 0.22634043993974373
+    }
+  },
+  "kind": "two_root_development_negative_period50_mixed_period100_not_confirmation",
+  "minimum_episode_gain": 0.5,
+  "next_step": "Train policy step size from fresh training-only full-policy native returns; do not rescale Stage124 using its evaluation returns or extend its seeds.",
+  "protocol": "pointmaze_native_upper_step_stage124_v1",
+  "root_period_summaries": [
+    {
+      "ascent_minus_descent": 0.45571383089325224,
+      "ascent_minus_flat": -0.001777915395251739,
+      "ascent_minus_forecast": -0.007400741334357974,
+      "even_deployment_effect": -0.2352576567809841,
+      "lower_frozen": "passed",
+      "odd_direction_effect": 0.22785691544662612,
+      "period": 50,
+      "positive_scenarios": 15,
+      "reference_correction_rms": 0.013192706085024552,
+      "root": 410011,
+      "scenarios": 32,
+      "upper_mean_rms": 0.0017810529038135643
+    },
+    {
+      "ascent_minus_descent": 0.5082146553395859,
+      "ascent_minus_flat": 0.19065644448669872,
+      "ascent_minus_forecast": 0.17959099598720485,
+      "even_deployment_effect": -0.07451633168258809,
+      "lower_frozen": "passed",
+      "odd_direction_effect": 0.25410732766979294,
+      "period": 100,
+      "positive_scenarios": 22,
+      "reference_correction_rms": 0.005013987979095339,
+      "root": 410011,
+      "scenarios": 32,
+      "upper_mean_rms": 0.0016133974173257264
+    },
+    {
+      "ascent_minus_descent": 0.4496479288657227,
+      "ascent_minus_flat": -0.17584749026787705,
+      "ascent_minus_forecast": -0.1787802604420392,
+      "even_deployment_effect": -0.40360422487490055,
+      "lower_frozen": "passed",
+      "odd_direction_effect": 0.22482396443286135,
+      "period": 50,
+      "positive_scenarios": 15,
+      "reference_correction_rms": 0.011866989812493218,
+      "root": 410023,
+      "scenarios": 32,
+      "upper_mean_rms": 0.0019525433957016942
+    },
+    {
+      "ascent_minus_descent": 0.08357297535352615,
+      "ascent_minus_flat": -0.03327883265155407,
+      "ascent_minus_forecast": -0.03573161416962023,
+      "even_deployment_effect": -0.0775181018463833,
+      "lower_frozen": "passed",
+      "odd_direction_effect": 0.04178648767676307,
+      "period": 100,
+      "positive_scenarios": 14,
+      "reference_correction_rms": 0.005204571160291377,
+      "root": 410023,
+      "scenarios": 32,
+      "upper_mean_rms": 0.0016519109508321631
+    }
+  ],
+  "run_name": "pointmaze_native_upper_step_stage124_pilot_20261006_r1",
+  "status": "complete",
+  "tasks": [
+    135891,
+    135892
+  ],
+  "total_new_cost": {
+    "actor_pullback_backward_batches": 8,
+    "actor_pullback_forward_batches": 8,
+    "checkpoint_writes": 8,
+    "evaluation_episodes": 640,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_cache_loads": 2,
+    "native_donor_response_calls": 1612800,
+    "native_episodes": 672,
+    "native_steps": 806400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 5184,
+    "optimizer_steps": 0,
+    "training_state_replays": 32,
+    "upper_candidate_weight_steps": 8
+  }
+}
