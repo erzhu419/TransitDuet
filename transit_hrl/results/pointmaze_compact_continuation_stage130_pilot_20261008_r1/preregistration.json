@@ -1,0 +1,613 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "four_final_upper_candidates_per_root_server_only",
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only",
+    "raw_state_writes": 0
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 448,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 14054400,
+    "native_episodes": 5856,
+    "native_return_fits": 12,
+    "native_steps": 7027200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 111744,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 22,
+    "upper_checkpoint_loads": 2
+  },
+  "calibration": {
+    "baseline": "learned_single_step_compact_not_forecast",
+    "crossfit": "A_on_B_and_B_on_A_not_used_for_selection",
+    "evaluation_selection": false,
+    "fitted_step_interval": [
+      0,
+      1
+    ],
+    "objective": "paired_native_episode_return_quadratic",
+    "policy_steps": [
+      0,
+      1,
+      -1
+    ]
+  },
+  "code_revision": "cb9bc1d6bc5a82843ad476d6a53a7a79542cf0f6",
+  "contrasts": [
+    [
+      "refresh",
+      "source_forecast"
+    ],
+    [
+      "refresh",
+      "single"
+    ],
+    [
+      "refresh",
+      "stale"
+    ],
+    [
+      "refresh",
+      "refresh_descent"
+    ],
+    [
+      "refresh",
+      "refresh_blinded"
+    ],
+    [
+      "stale",
+      "single"
+    ]
+  ],
+  "development_interpretation": {
+    "equal_root_means_at_both_periods_required": true,
+    "independent_confirmation": false,
+    "material_forecast_gain_threshold": 0.5,
+    "refresh_minus_single": "must improve at both periods before new confirmation",
+    "refresh_minus_stale": "reported separately; no relabeling-benefit claim without positive differences"
+  },
+  "evaluation_seeds": {
+    "410011": [
+      130190001,
+      130190002,
+      130190003,
+      130190004,
+      130190005,
+      130190006,
+      130190007,
+      130190008,
+      130190009,
+      130190010,
+      130190011,
+      130190012,
+      130190013,
+      130190014,
+      130190015,
+      130190016,
+      130190017,
+      130190018,
+      130190019,
+      130190020,
+      130190021,
+      130190022,
+      130190023,
+      130190024,
+      130190025,
+      130190026,
+      130190027,
+      130190028,
+      130190029,
+      130190030,
+      130190031,
+      130190032
+    ],
+    "410023": [
+      130290001,
+      130290002,
+      130290003,
+      130290004,
+      130290005,
+      130290006,
+      130290007,
+      130290008,
+      130290009,
+      130290010,
+      130290011,
+      130290012,
+      130290013,
+      130290014,
+      130290015,
+      130290016,
+      130290017,
+      130290018,
+      130290019,
+      130290020,
+      130290021,
+      130290022,
+      130290023,
+      130290024,
+      130290025,
+      130290026,
+      130290027,
+      130290028,
+      130290029,
+      130290030,
+      130290031,
+      130290032
+    ]
+  },
+  "evidence_role": "two_development_root_current_policy_credit_not_independent_confirmation",
+  "fixed_recipe": {
+    "action_dim": 8,
+    "actor_std": 0.15,
+    "added_policy_updates": 1,
+    "damping": 1.0,
+    "epsilon": 0.005,
+    "lower_and_critics": "frozen",
+    "lower_residual_limit": 0.05,
+    "per_update_fisher_radius": 0.0005555555555555556,
+    "reference_limit": 0.05,
+    "state_dim": 392,
+    "summary_dim": 26
+  },
+  "inherited_cost": "Stage128 cost reported separately; its source-label and pretrained-controller history remains inherited, not counted as new Stage130 work",
+  "label_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 130110001,
+          "B": 130120001
+        },
+        "scenario_seed": 130100001
+      },
+      {
+        "noise_seeds": {
+          "A": 130110002,
+          "B": 130120002
+        },
+        "scenario_seed": 130100002
+      },
+      {
+        "noise_seeds": {
+          "A": 130110003,
+          "B": 130120003
+        },
+        "scenario_seed": 130100003
+      },
+      {
+        "noise_seeds": {
+          "A": 130110004,
+          "B": 130120004
+        },
+        "scenario_seed": 130100004
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 130210001,
+          "B": 130220001
+        },
+        "scenario_seed": 130200001
+      },
+      {
+        "noise_seeds": {
+          "A": 130210002,
+          "B": 130220002
+        },
+        "scenario_seed": 130200002
+      },
+      {
+        "noise_seeds": {
+          "A": 130210003,
+          "B": 130220003
+        },
+        "scenario_seed": 130200003
+      },
+      {
+        "noise_seeds": {
+          "A": 130210004,
+          "B": 130220004
+        },
+        "scenario_seed": 130200004
+      }
+    ]
+  },
+  "limitations": [
+    "Per-update Fisher radius matches, not cumulative distance from zero.",
+    "Two development roots do not establish independent confirmation.",
+    "Joint HRL, promotion and frequency-specific gates are unchanged."
+  ],
+  "methods": {
+    "refresh": "fresh compact native gradient at Stage128 compact policy",
+    "stale": "Stage128 compact displacement from zero, renormalized at the same current-policy states and radius"
+  },
+  "new_total_budget": {
+    "checkpoint_writes": 8,
+    "crossfit_episodes": 384,
+    "crossfit_pair_groups": 128,
+    "empirical_fisher_solves": 4,
+    "evaluation_episodes": 896,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 16,
+    "fisher_jvp_batches": 8,
+    "label_episodes": 9792,
+    "label_queries": 576,
+    "native_donor_response_calls": 28108800,
+    "native_episodes": 11712,
+    "native_return_fits": 24,
+    "native_steps": 14054400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 223488,
+    "optimizer_steps": 0,
+    "source_cell_loads": 2,
+    "training_episodes": 640,
+    "training_pair_groups": 128,
+    "upper_candidate_weight_steps": 44,
+    "upper_checkpoint_loads": 4
+  },
+  "optimizer_roots": [
+    410011,
+    410023
+  ],
+  "periods": [
+    50,
+    100
+  ],
+  "protocol": "pointmaze_compact_continuation_stage130_v1",
+  "run_name": "pointmaze_compact_continuation_stage130_pilot_20261008_r1",
+  "scheduler": {
+    "aggregation": "after_completion_no_waiting_aggregator",
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null,
+    "workers_per_task": 16
+  },
+  "source_availability": "four Stage128 source upper checkpoints read on node004; identities and calibration fits match completed source JSON; all are nonzero",
+  "source_protocol": "pointmaze_credit_transfer_stage128_v1",
+  "source_run": "pointmaze_credit_transfer_stage128_pilot_20261007_r1",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_compact_continuation_stage130.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410011/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; current-policy native credit and equal-radius stale continuation; lower remains frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage130 current-policy compact continuation root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_compact_continuation_stage130_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_compact_continuation_stage130_v1/compact_continuation",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_compact_continuation_stage130_v1/pointmaze_compact_continuation_stage130_pilot_20261008_r1/compact_continuation/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_compact_continuation_stage130.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410023/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; current-policy native credit and equal-radius stale continuation; lower remains frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage130 current-policy compact continuation root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_compact_continuation_stage130_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_compact_continuation_stage130_v1/compact_continuation",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_compact_continuation_stage130_pilot_20261008_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_compact_continuation_stage130_v1/pointmaze_compact_continuation_stage130_pilot_20261008_r1/compact_continuation/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "training_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 130140001,
+          "B": 130150001
+        },
+        "scenario_seed": 130130001
+      },
+      {
+        "noise_seeds": {
+          "A": 130140002,
+          "B": 130150002
+        },
+        "scenario_seed": 130130002
+      },
+      {
+        "noise_seeds": {
+          "A": 130140003,
+          "B": 130150003
+        },
+        "scenario_seed": 130130003
+      },
+      {
+        "noise_seeds": {
+          "A": 130140004,
+          "B": 130150004
+        },
+        "scenario_seed": 130130004
+      },
+      {
+        "noise_seeds": {
+          "A": 130140005,
+          "B": 130150005
+        },
+        "scenario_seed": 130130005
+      },
+      {
+        "noise_seeds": {
+          "A": 130140006,
+          "B": 130150006
+        },
+        "scenario_seed": 130130006
+      },
+      {
+        "noise_seeds": {
+          "A": 130140007,
+          "B": 130150007
+        },
+        "scenario_seed": 130130007
+      },
+      {
+        "noise_seeds": {
+          "A": 130140008,
+          "B": 130150008
+        },
+        "scenario_seed": 130130008
+      },
+      {
+        "noise_seeds": {
+          "A": 130140009,
+          "B": 130150009
+        },
+        "scenario_seed": 130130009
+      },
+      {
+        "noise_seeds": {
+          "A": 130140010,
+          "B": 130150010
+        },
+        "scenario_seed": 130130010
+      },
+      {
+        "noise_seeds": {
+          "A": 130140011,
+          "B": 130150011
+        },
+        "scenario_seed": 130130011
+      },
+      {
+        "noise_seeds": {
+          "A": 130140012,
+          "B": 130150012
+        },
+        "scenario_seed": 130130012
+      },
+      {
+        "noise_seeds": {
+          "A": 130140013,
+          "B": 130150013
+        },
+        "scenario_seed": 130130013
+      },
+      {
+        "noise_seeds": {
+          "A": 130140014,
+          "B": 130150014
+        },
+        "scenario_seed": 130130014
+      },
+      {
+        "noise_seeds": {
+          "A": 130140015,
+          "B": 130150015
+        },
+        "scenario_seed": 130130015
+      },
+      {
+        "noise_seeds": {
+          "A": 130140016,
+          "B": 130150016
+        },
+        "scenario_seed": 130130016
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 130240001,
+          "B": 130250001
+        },
+        "scenario_seed": 130230001
+      },
+      {
+        "noise_seeds": {
+          "A": 130240002,
+          "B": 130250002
+        },
+        "scenario_seed": 130230002
+      },
+      {
+        "noise_seeds": {
+          "A": 130240003,
+          "B": 130250003
+        },
+        "scenario_seed": 130230003
+      },
+      {
+        "noise_seeds": {
+          "A": 130240004,
+          "B": 130250004
+        },
+        "scenario_seed": 130230004
+      },
+      {
+        "noise_seeds": {
+          "A": 130240005,
+          "B": 130250005
+        },
+        "scenario_seed": 130230005
+      },
+      {
+        "noise_seeds": {
+          "A": 130240006,
+          "B": 130250006
+        },
+        "scenario_seed": 130230006
+      },
+      {
+        "noise_seeds": {
+          "A": 130240007,
+          "B": 130250007
+        },
+        "scenario_seed": 130230007
+      },
+      {
+        "noise_seeds": {
+          "A": 130240008,
+          "B": 130250008
+        },
+        "scenario_seed": 130230008
+      },
+      {
+        "noise_seeds": {
+          "A": 130240009,
+          "B": 130250009
+        },
+        "scenario_seed": 130230009
+      },
+      {
+        "noise_seeds": {
+          "A": 130240010,
+          "B": 130250010
+        },
+        "scenario_seed": 130230010
+      },
+      {
+        "noise_seeds": {
+          "A": 130240011,
+          "B": 130250011
+        },
+        "scenario_seed": 130230011
+      },
+      {
+        "noise_seeds": {
+          "A": 130240012,
+          "B": 130250012
+        },
+        "scenario_seed": 130230012
+      },
+      {
+        "noise_seeds": {
+          "A": 130240013,
+          "B": 130250013
+        },
+        "scenario_seed": 130230013
+      },
+      {
+        "noise_seeds": {
+          "A": 130240014,
+          "B": 130250014
+        },
+        "scenario_seed": 130230014
+      },
+      {
+        "noise_seeds": {
+          "A": 130240015,
+          "B": 130250015
+        },
+        "scenario_seed": 130230015
+      },
+      {
+        "noise_seeds": {
+          "A": 130240016,
+          "B": 130250016
+        },
+        "scenario_seed": 130230016
+      }
+    ]
+  },
+  "variants": [
+    "source_flat",
+    "source_forecast",
+    "single",
+    "refresh",
+    "stale",
+    "refresh_descent",
+    "refresh_blinded"
+  ],
+  "verification": "8 tests passed in28.72s; nonzero-policy native prefix, current-relative double-precision KL, exact native budget and training-only fit selection"
+}
