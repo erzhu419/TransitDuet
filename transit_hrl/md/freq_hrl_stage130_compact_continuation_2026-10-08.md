@@ -22,6 +22,14 @@ Advance only with material refresh-minus-forecast gains and positive refresh
 increments; refresh-minus-stale separately tests the value of relabeling.
 No new confirmation roots until this development result warrants it.
 
+## Run Receipt
+
+Implementation `cb9bc1d6bc`, registration `4873d4b5f4`; eight tests passed.
+All four learned source uppers were read on node004 with matching source fits.
+Run `pointmaze_compact_continuation_stage130_pilot_20261008_r1`:
+`t136504` root410011 and `t136505` root410023 accepted. Full task specifications,
+fresh seed roles, incremental budget and scheduler receipt are saved with the run.
+
 ## Limitations
 
 This adds a policy-improvement step, not equal total distance from zero. Only
