@@ -24,6 +24,14 @@ Per root:4,896label+320training+192crossfit+768evaluation=6,176episodes/
 No waiting aggregation task: aggregate small JSON after the workers finish.
 Four final upper weights/root remain server-side; no raw states/traces pulled.
 
+## Run Receipt
+
+Implementation `75ec71ca4c`, registration `e05721e12f`; eight focused tests
+passed. All six source/forecast/lower artifact sets were read on node004.
+Run `pointmaze_compact_replication_stage129_frozen_20261007_r1`:
+`t136469-t136474` accepted, ordered by the six roots above. Task specifications,
+seed roles, budgets and scheduler receipt are saved under this run directory.
+
 ## Limitations
 
 Source policies were used in earlier research; these are not untouched external
