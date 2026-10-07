@@ -32,6 +32,26 @@ Run `pointmaze_compact_replication_stage129_frozen_20261007_r1`:
 `t136469-t136474` accepted, ordered by the six roots above. Task specifications,
 seed roles, budgets and scheduler receipt are saved under this run directory.
 
+## Completed Result (2026-10-08)
+
+All six tasks completed;37,056episodes/44,467,200steps. Only178,968bytes of
+compact JSON were fetched. All12 compact-minus-forecast and compact-minus-raw
+root/period means are positive; all24 compact calibration crossfits are positive.
+Root-cluster bootstrap CIs use the four-endpoint Bonferroni correction:
+
+| Period | Compact minus forecast | Compact minus raw |
+|---|---|---|
+|50|+0.869393 [0.721655,1.014687]|+0.647773 [0.491357,0.776041]|
+|100|+0.314953 [0.168861,0.440607]|+0.258889 [0.159622,0.340867]|
+
+Positive incremental upper value replicates at both periods. Material gain0.5
+closes only at50; at100 even the CI upper is below0.5. More seeds are not the
+main remedy. Five of six period100 calibration fits select the unit-step cap,
+with positive fitted derivative there; this motivates testing a second local
+policy update, not proving that it will help. Return to the two development
+roots, refresh native labels at the learned policy, and compare against an
+equal-radius continuation of the old direction. Keep this replication intact.
+
 ## Limitations
 
 Source policies were used in earlier research; these are not untouched external
