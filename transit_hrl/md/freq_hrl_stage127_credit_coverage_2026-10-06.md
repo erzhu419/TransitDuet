@@ -30,6 +30,8 @@ cannot confirm joint HRL, frequency-specific value or learned promotion.
 Stage119 used native derivatives on a much weaker advice channel; this tests
 decision coverage on the unchanged Stage121 bounded response channel instead.
 Negative gradients, failed transfer and inactive steps are retained.
+Label-scene secants use0.1 scale, while separate calibration uses+/-1;
+their gap alone does not distinguish scene overfitting from nonlinear response.
 
 ## Run Receipt
 
@@ -51,6 +53,6 @@ credit does not win consistently.
 Complete local-gradient sums track native whole-policy secants on label scenes
 (cosines0.999841-0.999997). Credit wiring is correct there. Their positive
 secants+1.386 to+2.026 do not reliably transfer to separate calibration scenes;
-root410023 period100 has pooled unit secant-0.050214. This indicates a scene-
-transfer bottleneck, not a missing temporal sum alone. Next: leave-scene-out
-credit validation and a fixed, noninvertible causal summary of raw history.
+root410023 period100 has pooled unit secant-0.050214. Transfer remains
+unresolved. Next: scene-held-out secants at the same0.1 scale, and a fixed,
+noninvertible causal summary of raw history.

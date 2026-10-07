@@ -27,6 +27,16 @@ Only compact JSON returns locally; four final upper weights remain server-side.
 ## Limitations
 
 Four scenes/two development roots cannot establish generalization at paper
-scale. Compression may remove useful information and must earn its gain on
+scale. The Stage127 scene-transfer hypothesis is not a settled cause; its
+label audit and calibration used different perturbation scales. Compression
+may remove useful information and must earn its gain on
 new scenes. This does not change prior negative gates or establish learned
 promotion, frequency-specific value or joint-HRL training.
+
+## Run Receipt
+
+Code `0ef1c8a606`, registration `67db90dff0`; four focused tests and four
+Stage127 regression tests passed. Run
+`pointmaze_credit_transfer_stage128_pilot_20261007_r1`: `t136457` root410011
+and `t136458` root410023 accepted, initially queued. Full task specifications,
+fresh rosters and inherited/new budgets are saved in `preregistration.json`.
