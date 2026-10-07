@@ -1,0 +1,124 @@
+{
+  "earlier_gates": "Stage67_HOLD_Stage120_inconclusive_Stage121_full_negative_unchanged",
+  "equal_root_means": {
+    "100": {
+      "complete_minus_coarse": 0.0840952535040671,
+      "complete_minus_forecast": 0.1321368829204026
+    },
+    "50": {
+      "complete_minus_coarse": -0.06598015793128553,
+      "complete_minus_forecast": 0.1067928653730057
+    }
+  },
+  "minimum_episode_gain": 0.5,
+  "new_cost": {
+    "checkpoint_writes": 8,
+    "crossfit_episodes": 384,
+    "crossfit_pair_groups": 128,
+    "empirical_fisher_solves": 4,
+    "evaluation_episodes": 768,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 16,
+    "fisher_jvp_batches": 8,
+    "gradient_audit_episodes": 128,
+    "gradient_audit_pair_groups": 32,
+    "label_episodes": 9792,
+    "label_queries": 576,
+    "native_donor_response_calls": 28108800,
+    "native_episodes": 11712,
+    "native_return_fits": 24,
+    "native_steps": 14054400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 218880,
+    "optimizer_steps": 0,
+    "training_episodes": 640,
+    "training_pair_groups": 128,
+    "upper_candidate_weight_steps": 60
+  },
+  "next_question": "leave_scene_out_credit_transfer_and_noninvertible_causal_compression",
+  "protocol": "pointmaze_credit_coverage_stage127_v1",
+  "rows": [
+    {
+      "complete_minus_coarse": -0.1605668378687497,
+      "complete_minus_descent": 0.715364324975603,
+      "complete_minus_forecast": 0.16539271871901917,
+      "crossfit": {
+        "A_to_B": 0.20323120087326174,
+        "B_to_A": 0.22387644704861032
+      },
+      "gradient_consistency_cosine": 0.9998412204161569,
+      "label_scene_full_policy_secant": 2.026443489649523,
+      "label_scene_local_gradient_sum": 1.7971506379622006,
+      "learned_upper_status": "active_development",
+      "period": 50,
+      "root": 410011,
+      "scale": 1.0,
+      "separate_training_unit_secant": 0.40881078452396835
+    },
+    {
+      "complete_minus_coarse": 0.1681905070081342,
+      "complete_minus_descent": 0.7453772632253788,
+      "complete_minus_forecast": 0.2642737658408052,
+      "crossfit": {
+        "A_to_B": 0.3918504097709956,
+        "B_to_A": 0.3326093651238011
+      },
+      "gradient_consistency_cosine": 0.9999969866757109,
+      "label_scene_full_policy_secant": 1.3864039534827555,
+      "label_scene_local_gradient_sum": 1.3542785423749195,
+      "learned_upper_status": "active_development",
+      "period": 100,
+      "root": 410011,
+      "scale": 1.0,
+      "separate_training_unit_secant": 0.46754084421284503
+    },
+    {
+      "complete_minus_coarse": 0.028606522006178636,
+      "complete_minus_descent": 0.4251698906798538,
+      "complete_minus_forecast": 0.04819301202699222,
+      "crossfit": {
+        "A_to_B": 0.06802146504544737,
+        "B_to_A": 0.006305050892891018
+      },
+      "gradient_consistency_cosine": 0.9998795223754461,
+      "label_scene_full_policy_secant": 1.772691054895006,
+      "label_scene_local_gradient_sum": 1.5748690674414243,
+      "learned_upper_status": "active_development",
+      "period": 50,
+      "root": 410023,
+      "scale": 0.5132658232686967,
+      "separate_training_unit_secant": 0.23920040523334052
+    },
+    {
+      "complete_minus_coarse": 0.0,
+      "complete_minus_descent": 0.0,
+      "complete_minus_forecast": 0.0,
+      "crossfit": {
+        "A_to_B": 0.0,
+        "B_to_A": -0.006399440910143994
+      },
+      "gradient_consistency_cosine": 0.9999931748067543,
+      "label_scene_full_policy_secant": 1.3939758810444403,
+      "label_scene_local_gradient_sum": 1.3656684449894656,
+      "learned_upper_status": "inactive_zero_step",
+      "period": 100,
+      "root": 410023,
+      "scale": 0.0,
+      "separate_training_unit_secant": -0.050213870062329136
+    }
+  ],
+  "run_name": "pointmaze_credit_coverage_stage127_pilot_20261006_r1",
+  "tasks": {
+    "410011": {
+      "id": "t136168",
+      "node": "node004",
+      "status": "done"
+    },
+    "410023": {
+      "id": "t136169",
+      "node": "node006",
+      "status": "done"
+    }
+  },
+  "verdict": "native_credit_consistent_but_temporal_coverage_not_stable_material_gain"
+}

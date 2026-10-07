@@ -38,3 +38,19 @@ plus four existing geometry tests. Run
 `pointmaze_credit_coverage_stage127_pilot_20261006_r1`: `t136168` root410011
 and `t136169` root410023 accepted, initially queued. Fixed tasks and rosters
 are in `preregistration.json`; no original FreqDuet code was changed.
+
+## Completed Result
+
+Both tasks completed on node004/node006:11,712episodes/14,054,400steps.
+Complete-minus-forecast: root410011+0.165393/+0.264274(period50/100),
+root410023+0.048193/0. Root410023 period100 is inactive. Equal-root gains
+are+0.106793/+0.132137, below the unchanged0.5 practical threshold.
+Complete-minus-coarse is-0.160567/+0.168191 and+0.028607/0: complete temporal
+credit does not win consistently.
+
+Complete local-gradient sums track native whole-policy secants on label scenes
+(cosines0.999841-0.999997). Credit wiring is correct there. Their positive
+secants+1.386 to+2.026 do not reliably transfer to separate calibration scenes;
+root410023 period100 has pooled unit secant-0.050214. This indicates a scene-
+transfer bottleneck, not a missing temporal sum alone. Next: leave-scene-out
+credit validation and a fixed, noninvertible causal summary of raw history.
