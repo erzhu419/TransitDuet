@@ -1,0 +1,607 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "four_final_upper_candidates_per_root_server_only",
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only",
+    "raw_state_writes": 0
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 20,
+    "evaluation_episodes": 384,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 40,
+    "fisher_jvp_batches": 20,
+    "leave_scene_out_fits": 16,
+    "native_donor_response_calls": 2995200,
+    "native_episodes": 1248,
+    "native_return_fits": 12,
+    "native_steps": 1497600,
+    "native_trace_writes": 0,
+    "native_upper_calls": 17280,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "training_state_replays": 288,
+    "transfer_audit_episodes": 64,
+    "transfer_audit_pair_groups": 16,
+    "upper_candidate_weight_steps": 86
+  },
+  "calibration": {
+    "crossfit": "A_on_B_and_B_on_A_not_used_for_selection",
+    "evaluation_selection": false,
+    "fitted_step_interval": [
+      0,
+      1
+    ],
+    "full_policy_steps": [
+      0,
+      1,
+      -1
+    ],
+    "objective": "paired_native_episode_return_quadratic"
+  },
+  "code_revision": "0ef1c8a606ec217d50a39802f36f3eb89fd60ddc",
+  "contrasts": [
+    [
+      "compact",
+      "source_flat"
+    ],
+    [
+      "compact",
+      "source_forecast"
+    ],
+    [
+      "compact",
+      "raw"
+    ],
+    [
+      "compact",
+      "compact_descent"
+    ],
+    [
+      "compact",
+      "compact_blinded"
+    ]
+  ],
+  "evidence_role": "two_development_roots_native_scene_credit_transfer_not_joint_HRL_confirmation",
+  "fixed_actor": {
+    "action_dim": 8,
+    "hidden_dim": 0,
+    "lower_residual_limit": 0.05,
+    "reference_limit": 0.05,
+    "standard_deviation": 0.15,
+    "state_dim": 392
+  },
+  "fixed_source": "Stage111 source and Stage112 exact lower teacher; Stage121 zero residual and bounded response; only Stage127 native derivative labels reused",
+  "fresh_evaluation_seeds": {
+    "410011": [
+      128190001,
+      128190002,
+      128190003,
+      128190004,
+      128190005,
+      128190006,
+      128190007,
+      128190008,
+      128190009,
+      128190010,
+      128190011,
+      128190012,
+      128190013,
+      128190014,
+      128190015,
+      128190016,
+      128190017,
+      128190018,
+      128190019,
+      128190020,
+      128190021,
+      128190022,
+      128190023,
+      128190024,
+      128190025,
+      128190026,
+      128190027,
+      128190028,
+      128190029,
+      128190030,
+      128190031,
+      128190032
+    ],
+    "410023": [
+      128290001,
+      128290002,
+      128290003,
+      128290004,
+      128290005,
+      128290006,
+      128290007,
+      128290008,
+      128290009,
+      128290010,
+      128290011,
+      128290012,
+      128290013,
+      128290014,
+      128290015,
+      128290016,
+      128290017,
+      128290018,
+      128290019,
+      128290020,
+      128290021,
+      128290022,
+      128290023,
+      128290024,
+      128290025,
+      128290026,
+      128290027,
+      128290028,
+      128290029,
+      128290030,
+      128290031,
+      128290032
+    ]
+  },
+  "inherited_Stage127_cost_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 384,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "gradient_audit_episodes": 64,
+    "gradient_audit_pair_groups": 16,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 14054400,
+    "native_episodes": 5856,
+    "native_return_fits": 12,
+    "native_steps": 7027200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 109440,
+    "optimizer_steps": 0,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 30
+  },
+  "leave_scene_out": {
+    "fit_scenes_per_fold": 3,
+    "folds": 4,
+    "held_out_unit": "whole scene with both noise panels",
+    "hyperparameter_selection": false,
+    "native_secant_scale": 0.1,
+    "prediction": "sum native local credit per held-out trajectory"
+  },
+  "methods": [
+    "raw",
+    "compact"
+  ],
+  "minimum_episode_gain": 0.5,
+  "periods": [
+    50,
+    100
+  ],
+  "protocol": "pointmaze_credit_transfer_stage128_v1",
+  "representations": {
+    "compact": "noninvertible26: physical/tracking6, clocks2, six-channel current/64-step mean/OLS trend18; mapped back into original actor weights",
+    "damping": 1.0,
+    "future_access": false,
+    "geometry_differs_by_subspace": true,
+    "lower_inputs_changed": false,
+    "new_observations": false,
+    "oracle_access": false,
+    "radius_on_original_states": 0.0005555555555555556,
+    "raw": "unchanged392 physical tracking history clocks"
+  },
+  "roots": [
+    410011,
+    410023
+  ],
+  "run_name": "pointmaze_credit_transfer_stage128_pilot_20261007_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "source_label_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 127110001,
+          "B": 127120001
+        },
+        "scenario_seed": 127100001
+      },
+      {
+        "noise_seeds": {
+          "A": 127110002,
+          "B": 127120002
+        },
+        "scenario_seed": 127100002
+      },
+      {
+        "noise_seeds": {
+          "A": 127110003,
+          "B": 127120003
+        },
+        "scenario_seed": 127100003
+      },
+      {
+        "noise_seeds": {
+          "A": 127110004,
+          "B": 127120004
+        },
+        "scenario_seed": 127100004
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 127210001,
+          "B": 127220001
+        },
+        "scenario_seed": 127200001
+      },
+      {
+        "noise_seeds": {
+          "A": 127210002,
+          "B": 127220002
+        },
+        "scenario_seed": 127200002
+      },
+      {
+        "noise_seeds": {
+          "A": 127210003,
+          "B": 127220003
+        },
+        "scenario_seed": 127200003
+      },
+      {
+        "noise_seeds": {
+          "A": 127210004,
+          "B": 127220004
+        },
+        "scenario_seed": 127200004
+      }
+    ]
+  },
+  "source_run": "pointmaze_credit_coverage_stage127_pilot_20261006_r1",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_credit_transfer_stage128.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410011/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Native cache state replays, scene-held-out secants and matched deployment; fixed causal compression vs raw history; final upper weights server-only.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage128 scene credit transfer root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_credit_transfer_stage128_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_credit_transfer_stage128_v1/native_credit_transfer",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_credit_transfer_stage128_v1/pointmaze_credit_transfer_stage128_pilot_20261007_r1/credit_transfer/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_credit_transfer_stage128.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410023/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Native cache state replays, scene-held-out secants and matched deployment; fixed causal compression vs raw history; final upper weights server-only.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage128 scene credit transfer root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_credit_transfer_stage128_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_credit_transfer_stage128_v1/native_credit_transfer",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_credit_transfer_stage128_pilot_20261007_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_credit_transfer_stage128_v1/pointmaze_credit_transfer_stage128_pilot_20261007_r1/credit_transfer/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "tests": "four focused Stage128 tests plus four Stage127 regressions passed",
+  "training_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 128120001,
+          "B": 128130001
+        },
+        "scenario_seed": 128100001
+      },
+      {
+        "noise_seeds": {
+          "A": 128120002,
+          "B": 128130002
+        },
+        "scenario_seed": 128100002
+      },
+      {
+        "noise_seeds": {
+          "A": 128120003,
+          "B": 128130003
+        },
+        "scenario_seed": 128100003
+      },
+      {
+        "noise_seeds": {
+          "A": 128120004,
+          "B": 128130004
+        },
+        "scenario_seed": 128100004
+      },
+      {
+        "noise_seeds": {
+          "A": 128120005,
+          "B": 128130005
+        },
+        "scenario_seed": 128100005
+      },
+      {
+        "noise_seeds": {
+          "A": 128120006,
+          "B": 128130006
+        },
+        "scenario_seed": 128100006
+      },
+      {
+        "noise_seeds": {
+          "A": 128120007,
+          "B": 128130007
+        },
+        "scenario_seed": 128100007
+      },
+      {
+        "noise_seeds": {
+          "A": 128120008,
+          "B": 128130008
+        },
+        "scenario_seed": 128100008
+      },
+      {
+        "noise_seeds": {
+          "A": 128120009,
+          "B": 128130009
+        },
+        "scenario_seed": 128100009
+      },
+      {
+        "noise_seeds": {
+          "A": 128120010,
+          "B": 128130010
+        },
+        "scenario_seed": 128100010
+      },
+      {
+        "noise_seeds": {
+          "A": 128120011,
+          "B": 128130011
+        },
+        "scenario_seed": 128100011
+      },
+      {
+        "noise_seeds": {
+          "A": 128120012,
+          "B": 128130012
+        },
+        "scenario_seed": 128100012
+      },
+      {
+        "noise_seeds": {
+          "A": 128120013,
+          "B": 128130013
+        },
+        "scenario_seed": 128100013
+      },
+      {
+        "noise_seeds": {
+          "A": 128120014,
+          "B": 128130014
+        },
+        "scenario_seed": 128100014
+      },
+      {
+        "noise_seeds": {
+          "A": 128120015,
+          "B": 128130015
+        },
+        "scenario_seed": 128100015
+      },
+      {
+        "noise_seeds": {
+          "A": 128120016,
+          "B": 128130016
+        },
+        "scenario_seed": 128100016
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 128220001,
+          "B": 128230001
+        },
+        "scenario_seed": 128200001
+      },
+      {
+        "noise_seeds": {
+          "A": 128220002,
+          "B": 128230002
+        },
+        "scenario_seed": 128200002
+      },
+      {
+        "noise_seeds": {
+          "A": 128220003,
+          "B": 128230003
+        },
+        "scenario_seed": 128200003
+      },
+      {
+        "noise_seeds": {
+          "A": 128220004,
+          "B": 128230004
+        },
+        "scenario_seed": 128200004
+      },
+      {
+        "noise_seeds": {
+          "A": 128220005,
+          "B": 128230005
+        },
+        "scenario_seed": 128200005
+      },
+      {
+        "noise_seeds": {
+          "A": 128220006,
+          "B": 128230006
+        },
+        "scenario_seed": 128200006
+      },
+      {
+        "noise_seeds": {
+          "A": 128220007,
+          "B": 128230007
+        },
+        "scenario_seed": 128200007
+      },
+      {
+        "noise_seeds": {
+          "A": 128220008,
+          "B": 128230008
+        },
+        "scenario_seed": 128200008
+      },
+      {
+        "noise_seeds": {
+          "A": 128220009,
+          "B": 128230009
+        },
+        "scenario_seed": 128200009
+      },
+      {
+        "noise_seeds": {
+          "A": 128220010,
+          "B": 128230010
+        },
+        "scenario_seed": 128200010
+      },
+      {
+        "noise_seeds": {
+          "A": 128220011,
+          "B": 128230011
+        },
+        "scenario_seed": 128200011
+      },
+      {
+        "noise_seeds": {
+          "A": 128220012,
+          "B": 128230012
+        },
+        "scenario_seed": 128200012
+      },
+      {
+        "noise_seeds": {
+          "A": 128220013,
+          "B": 128230013
+        },
+        "scenario_seed": 128200013
+      },
+      {
+        "noise_seeds": {
+          "A": 128220014,
+          "B": 128230014
+        },
+        "scenario_seed": 128200014
+      },
+      {
+        "noise_seeds": {
+          "A": 128220015,
+          "B": 128230015
+        },
+        "scenario_seed": 128200015
+      },
+      {
+        "noise_seeds": {
+          "A": 128220016,
+          "B": 128230016
+        },
+        "scenario_seed": 128200016
+      }
+    ]
+  },
+  "variants": [
+    "source_flat",
+    "source_forecast",
+    "raw",
+    "compact",
+    "compact_descent",
+    "compact_blinded"
+  ]
+}
