@@ -40,3 +40,19 @@ Stage127 regression tests passed. Run
 `pointmaze_credit_transfer_stage128_pilot_20261007_r1`: `t136457` root410011
 and `t136458` root410023 accepted, initially queued. Full task specifications,
 fresh rosters and inherited/new budgets are saved in `preregistration.json`.
+
+## Completed Result
+
+Both tasks completed:2,496episodes/2,995,200new steps. Compact-minus-forecast
+is+0.935483/+0.524526(root410011 periods50/100),+0.919379/+0.219561(root410023).
+Compact-minus-raw is+0.759954/+0.450027 and+0.795817/+0.270056. All compact
+steps are active and all eight calibration crossfits are positive. Equal-root
+gains+0.927431/+0.372044 clear0.5 only at period50; two development roots do
+not provide independent confirmation.
+
+Compact held-scene native secants are positive in15/16folds, raw in12/16.
+Keep the negative compact fold(root410023,p100,scene127200004,-0.074825) and
+the sign disagreement(root410011,p100,scene127100002: prediction-0.212894,
+native secant+0.673550). Local credit is not a uniform held-scene bound.
+Freeze this method next; replicate on six other source-policy roots with
+fresh label/calibration/evaluation scenes and root-cluster corrected CIs.

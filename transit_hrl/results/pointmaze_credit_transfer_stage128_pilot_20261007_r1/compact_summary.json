@@ -1,0 +1,131 @@
+{
+  "earlier_gates": "Stage67_HOLD_Stage120_inconclusive_Stage121_full_negative_unchanged",
+  "equal_root_means": {
+    "100": {
+      "compact_minus_forecast": 0.3720436093982187,
+      "compact_minus_raw": 0.36004189242202855
+    },
+    "50": {
+      "compact_minus_forecast": 0.9274311014732497,
+      "compact_minus_raw": 0.7778857912670993
+    }
+  },
+  "held_scene_prediction_sign_disagreements": [
+    {
+      "held_out_scenario": 127100002,
+      "local_credit_prediction": -0.21289350530548545,
+      "method": "compact",
+      "native_secant_at_point1": 0.6735495476362985,
+      "period": 100,
+      "root": 410011
+    }
+  ],
+  "minimum_episode_gain": 0.5,
+  "new_cost": {
+    "checkpoint_writes": 8,
+    "crossfit_episodes": 384,
+    "crossfit_pair_groups": 128,
+    "empirical_fisher_solves": 40,
+    "evaluation_episodes": 768,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 80,
+    "fisher_jvp_batches": 40,
+    "leave_scene_out_fits": 32,
+    "native_donor_response_calls": 5990400,
+    "native_episodes": 2496,
+    "native_return_fits": 24,
+    "native_steps": 2995200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 34560,
+    "optimizer_steps": 0,
+    "source_cell_loads": 2,
+    "training_episodes": 640,
+    "training_pair_groups": 128,
+    "training_state_replays": 576,
+    "transfer_audit_episodes": 128,
+    "transfer_audit_pair_groups": 32,
+    "upper_candidate_weight_steps": 172
+  },
+  "next_question": "frozen_method_replication_on_six_additional_source_roots_with_fresh_native_labels_and_scenes",
+  "protocol": "pointmaze_credit_transfer_stage128_v1",
+  "rows": [
+    {
+      "compact_minus_forecast": 0.9354830167782211,
+      "compact_minus_raw": 0.7599544318201907,
+      "compact_scale": 1.0,
+      "period": 50,
+      "positive_held_scene_secants": {
+        "compact": 4,
+        "raw": 3
+      },
+      "root": 410011,
+      "training_crossfit": {
+        "A_to_B": 0.773435403512579,
+        "B_to_A": 0.8646563080124281
+      },
+      "upper_mean_rms": 0.001845314990885317
+    },
+    {
+      "compact_minus_forecast": 0.5245260165330095,
+      "compact_minus_raw": 0.4500274584540662,
+      "compact_scale": 1.0,
+      "period": 100,
+      "positive_held_scene_secants": {
+        "compact": 4,
+        "raw": 4
+      },
+      "root": 410011,
+      "training_crossfit": {
+        "A_to_B": 0.3937762292626843,
+        "B_to_A": 0.4694018985184698
+      },
+      "upper_mean_rms": 0.001996166482033483
+    },
+    {
+      "compact_minus_forecast": 0.9193791861682783,
+      "compact_minus_raw": 0.7958171507140079,
+      "compact_scale": 1.0,
+      "period": 50,
+      "positive_held_scene_secants": {
+        "compact": 4,
+        "raw": 3
+      },
+      "root": 410023,
+      "training_crossfit": {
+        "A_to_B": 0.9789264026891829,
+        "B_to_A": 0.9544388444274148
+      },
+      "upper_mean_rms": 0.0018229086028722678
+    },
+    {
+      "compact_minus_forecast": 0.2195612022634279,
+      "compact_minus_raw": 0.2700563263899909,
+      "compact_scale": 1.0,
+      "period": 100,
+      "positive_held_scene_secants": {
+        "compact": 3,
+        "raw": 2
+      },
+      "root": 410023,
+      "training_crossfit": {
+        "A_to_B": 0.44233472212845015,
+        "B_to_A": 0.3868711724208538
+      },
+      "upper_mean_rms": 0.0020662059943691684
+    }
+  ],
+  "run_name": "pointmaze_credit_transfer_stage128_pilot_20261007_r1",
+  "tasks": {
+    "410011": {
+      "id": "t136457",
+      "node": "node004",
+      "status": "done"
+    },
+    "410023": {
+      "id": "t136458",
+      "node": "node006",
+      "status": "done"
+    }
+  },
+  "verdict": "all_four_compact_gains_positive_development_only_period100_material_gate_not_closed"
+}
