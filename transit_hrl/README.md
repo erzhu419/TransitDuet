@@ -13,6 +13,9 @@ frequency-routing development on eight roots: both service-cost comparisons
 are inconclusive, with slightly worse correct-routing point estimates. See
 `md/freq_hrl_stage145_native_preservation_2026-10-09.md` and
 `md/freq_hrl_stage146_native_routing_2026-10-09.md`.
+Stage147 reuses frozen native checkpoints to diagnose input scaling,
+saturation, band sensitivity and upper/lower physical control authority;
+see `md/freq_hrl_stage147_native_diagnostics_2026-10-09.md`.
 
 PointMaze is frozen at Stage144. Its upper-conditioning gains are not a
 positive frequency-routing or joint-HRL result. The remainder of this README
