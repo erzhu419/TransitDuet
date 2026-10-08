@@ -1,0 +1,550 @@
+{
+  "analysis": "Retain both stds, roots, periods, signs and upper evaluation modes. Match training-state mean-output RMS, not KL across stds. Report exploration cost separately from each std learning increment and their difference. Fresh std-specific query labels are required. Forecast and warm-mean shared table assignments are aliases, not new native episodes. No evaluation winner, return fit, confirmation CI or automatic seed extension.",
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only"
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "collection_episodes": 64,
+    "counterfactual_episodes": 1152,
+    "credit_checks": 1216,
+    "empirical_fisher_solves": 4,
+    "evaluation_alias_assignments": 256,
+    "evaluation_episodes": 768,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "lower_actor_optimizer_steps": 0,
+    "lower_checkpoint_loads": 2,
+    "lower_value_optimizer_steps": 0,
+    "mean_score_forward_batches": 4,
+    "native_donor_response_calls": 4761600,
+    "native_episodes": 1984,
+    "native_lower_calls": 2380800,
+    "native_steps": 2380800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 36864,
+    "planning_fits": 36032,
+    "planning_reference_calls": 2380800,
+    "planning_renewals": 38016,
+    "policy_geometry_forward_batches": 12,
+    "score_gradient_batches": 20,
+    "source_cell_loads": 2,
+    "upper_actor_optimizer_steps": 0,
+    "upper_candidate_weight_steps": 8,
+    "upper_checkpoint_loads": 2,
+    "upper_value_optimizer_steps": 0
+  },
+  "contract": {
+    "artifacts": "full_native_query_cost_compact_JSON_no_checkpoint_or_trace_writes_inherited_cost_separate",
+    "authority": 0.05,
+    "damping": 1.0,
+    "evaluation": "fresh_paired_mean_and_sampled_upper_both_signs_same_innovations",
+    "freeze": "all_lower_critics_teacher_forecaster_authority_and_warm_mean_std_only_varies_as_registered",
+    "limits": "exploration_and_objective_diagnosis_not_equal_KL_no_evaluation_winner_CI_or_joint_HRL_claim",
+    "mean_step_RMS": 0.0017677669529663686,
+    "optimizer": "existing_standardized_damped_Fisher_score_no_Adam_or_critic_updates",
+    "radii": {
+      "original": 0.0005555555555555556,
+      "reduced": 0.004999999999999999
+    },
+    "reuse": "one_forecast_and_one_warm_mean_execution_per_scene_shared_across_scale_mode_tables_aliases_counted",
+    "source": "pointmaze_score_geometry_stage139_probe_20261008_r1",
+    "training": "fresh_paired_scenarios_and_noise_folds_fresh_single_option_mean_baseline_credits_per_std",
+    "upper_stds": {
+      "original": 0.15,
+      "reduced": 0.05
+    },
+    "warm_source": "pointmaze_native_selection_replication_stage135_frozen_20261008_r1"
+  },
+  "contrasts": [
+    [
+      "warm_start",
+      "source_forecast"
+    ],
+    [
+      "natural_plus",
+      "warm_start"
+    ],
+    [
+      "natural_minus",
+      "warm_start"
+    ],
+    [
+      "natural_plus",
+      "natural_minus"
+    ],
+    [
+      "natural_plus",
+      "source_forecast"
+    ]
+  ],
+  "focused_tests": {
+    "passed": 10,
+    "scope": "source-preserving std change, fresh std-specific credits, inverse-variance KL and equal mean-output RMS, no optimizer updates, cross-std mode noise pairing, shared forecast/warm-mean aliases and exact reduced-run budget"
+  },
+  "inherited_budget": {
+    "Stage135_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 128,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15590400,
+      "native_episodes": 6496,
+      "native_policy_selections": 2,
+      "native_return_fits": 12,
+      "native_steps": 7795200,
+      "native_trace_writes": 0,
+      "native_upper_calls": 119808,
+      "optimizer_steps": 0,
+      "selection_episodes": 192,
+      "selection_pair_groups": 64,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    },
+    "Stage136_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "credit_checks": 32,
+      "evaluation_episodes": 384,
+      "lower_actor_optimizer_steps": 152,
+      "lower_checkpoint_loads": 2,
+      "lower_diagnostic_gradient_batches": 80,
+      "lower_value_optimizer_steps": 152,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 5760,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "ppo_update_calls": 8,
+      "source_cell_loads": 1,
+      "source_clone_loads": 2,
+      "training_comparator_episodes": 64,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_diagnostic_gradient_batches": 8,
+      "upper_value_optimizer_steps": 8
+    },
+    "Stage137_per_root": {
+      "checkpoint_writes": 0,
+      "credit_checks": 32,
+      "evaluation_episodes": 448,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 7488,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "policy_geometry_forward_batches": 14,
+      "replay_episodes": 32,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "Stage138_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "counterfactual_episodes": 576,
+      "credit_checks": 608,
+      "evaluation_episodes": 384,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 2380800,
+      "native_episodes": 992,
+      "native_lower_calls": 1190400,
+      "native_steps": 1190400,
+      "native_trace_writes": 0,
+      "native_upper_calls": 17856,
+      "planning_fits": 18016,
+      "planning_reference_calls": 1190400,
+      "planning_renewals": 19008,
+      "score_gradient_batches": 8,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 8
+    },
+    "Stage139_per_root": {
+      "checkpoint_writes": 0,
+      "counterfactual_episodes": 0,
+      "credit_checks": 32,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 64,
+      "evaluation_episodes": 960,
+      "exact_kl_forward_batches": 12,
+      "fisher_jvp_batches": 6,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "mean_score_forward_batches": 2,
+      "native_donor_response_calls": 2380800,
+      "native_episodes": 992,
+      "native_lower_calls": 1190400,
+      "native_steps": 1190400,
+      "native_trace_writes": 0,
+      "native_upper_calls": 16704,
+      "planning_fits": 16864,
+      "planning_reference_calls": 1190400,
+      "planning_renewals": 17856,
+      "replay_episodes": 32,
+      "score_gradient_batches": 10,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_candidate_weight_steps": 12,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "earlier_source_chain": "retained_source_run_JSON_lineage_not_zero_not_a_flattened_total"
+  },
+  "modes": [
+    "mean",
+    "sampled"
+  ],
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "protocol": "pointmaze_exploration_match_stage140_v1",
+  "run_name": "pointmaze_exploration_match_stage140_probe_20261008_r1",
+  "scheduler": {
+    "aggregator_task": false,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410037": {
+      "evaluation": [
+        140190001,
+        140190002,
+        140190003,
+        140190004,
+        140190005,
+        140190006,
+        140190007,
+        140190008,
+        140190009,
+        140190010,
+        140190011,
+        140190012,
+        140190013,
+        140190014,
+        140190015,
+        140190016,
+        140190017,
+        140190018,
+        140190019,
+        140190020,
+        140190021,
+        140190022,
+        140190023,
+        140190024,
+        140190025,
+        140190026,
+        140190027,
+        140190028,
+        140190029,
+        140190030,
+        140190031,
+        140190032
+      ],
+      "training": [
+        {
+          "noise_seeds": {
+            "A": 140110001,
+            "B": 140120001
+          },
+          "scenario_seed": 140100001
+        },
+        {
+          "noise_seeds": {
+            "A": 140110002,
+            "B": 140120002
+          },
+          "scenario_seed": 140100002
+        },
+        {
+          "noise_seeds": {
+            "A": 140110003,
+            "B": 140120003
+          },
+          "scenario_seed": 140100003
+        },
+        {
+          "noise_seeds": {
+            "A": 140110004,
+            "B": 140120004
+          },
+          "scenario_seed": 140100004
+        },
+        {
+          "noise_seeds": {
+            "A": 140110005,
+            "B": 140120005
+          },
+          "scenario_seed": 140100005
+        },
+        {
+          "noise_seeds": {
+            "A": 140110006,
+            "B": 140120006
+          },
+          "scenario_seed": 140100006
+        },
+        {
+          "noise_seeds": {
+            "A": 140110007,
+            "B": 140120007
+          },
+          "scenario_seed": 140100007
+        },
+        {
+          "noise_seeds": {
+            "A": 140110008,
+            "B": 140120008
+          },
+          "scenario_seed": 140100008
+        }
+      ]
+    },
+    "410049": {
+      "evaluation": [
+        140290001,
+        140290002,
+        140290003,
+        140290004,
+        140290005,
+        140290006,
+        140290007,
+        140290008,
+        140290009,
+        140290010,
+        140290011,
+        140290012,
+        140290013,
+        140290014,
+        140290015,
+        140290016,
+        140290017,
+        140290018,
+        140290019,
+        140290020,
+        140290021,
+        140290022,
+        140290023,
+        140290024,
+        140290025,
+        140290026,
+        140290027,
+        140290028,
+        140290029,
+        140290030,
+        140290031,
+        140290032
+      ],
+      "training": [
+        {
+          "noise_seeds": {
+            "A": 140210001,
+            "B": 140220001
+          },
+          "scenario_seed": 140200001
+        },
+        {
+          "noise_seeds": {
+            "A": 140210002,
+            "B": 140220002
+          },
+          "scenario_seed": 140200002
+        },
+        {
+          "noise_seeds": {
+            "A": 140210003,
+            "B": 140220003
+          },
+          "scenario_seed": 140200003
+        },
+        {
+          "noise_seeds": {
+            "A": 140210004,
+            "B": 140220004
+          },
+          "scenario_seed": 140200004
+        },
+        {
+          "noise_seeds": {
+            "A": 140210005,
+            "B": 140220005
+          },
+          "scenario_seed": 140200005
+        },
+        {
+          "noise_seeds": {
+            "A": 140210006,
+            "B": 140220006
+          },
+          "scenario_seed": 140200006
+        },
+        {
+          "noise_seeds": {
+            "A": 140210007,
+            "B": 140220007
+          },
+          "scenario_seed": 140200007
+        },
+        {
+          "noise_seeds": {
+            "A": 140210008,
+            "B": 140220008
+          },
+          "scenario_seed": 140200008
+        }
+      ]
+    }
+  },
+  "source_availability": {
+    "Stage135_selected_upper_files": 4,
+    "Stage139_completed_cells": 2,
+    "node": "node005",
+    "selected_methods": {
+      "410037": {
+        "100": "stale",
+        "50": "refresh"
+      },
+      "410049": {
+        "100": "refresh",
+        "50": "refresh"
+      }
+    }
+  },
+  "source_revision": "a493a6f381fe39020b7ea4020b3a95f6316f55f2",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_exploration_match_stage140.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Fresh paired native single-option counterfactual credits at two registered upper stds, existing damped Fisher score and equal mean-output RMS steps; mean/sampled evaluation with shared baselines and full-prefix query costs; no checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage140 paired upper exploration with equal mean-output steps root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_exploration_match_stage140_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_exploration_match_stage140_v1/native_exploration_match",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_exploration_match_stage140_v1/pointmaze_exploration_match_stage140_probe_20261008_r1/paired_upper_std_015_005_fresh_option_credit_equal_mean_step_Fisher/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_exploration_match_stage140.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Fresh paired native single-option counterfactual credits at two registered upper stds, existing damped Fisher score and equal mean-output RMS steps; mean/sampled evaluation with shared baselines and full-prefix query costs; no checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage140 paired upper exploration with equal mean-output steps root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_exploration_match_stage140_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_exploration_match_stage140_v1/native_exploration_match",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_exploration_match_stage140_probe_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_exploration_match_stage140_v1/pointmaze_exploration_match_stage140_probe_20261008_r1/paired_upper_std_015_005_fresh_option_credit_equal_mean_step_Fisher/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "upper_stds": {
+    "original": 0.15,
+    "reduced": 0.05
+  },
+  "variants": [
+    "source_forecast",
+    "warm_start",
+    "natural_plus",
+    "natural_minus"
+  ]
+}
