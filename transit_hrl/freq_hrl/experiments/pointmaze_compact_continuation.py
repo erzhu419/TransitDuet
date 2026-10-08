@@ -123,10 +123,11 @@ def run(root, output, *, protocol_spec=spec):
             teacher = joint.base.load_lower_state(root, period, protocol=joint.spec)
             trainer = joint.make_trainer(model, teacher, args)
             origin = copy.deepcopy(trainer.upper_actor.state_dict())
-            path = spec.source_result(root).parent/"final_weights"/f"period_{period}_compact_upper.pt"
+            path = spec.source_result(root).parent/"final_weights"/f"period_{period}_{spec.SOURCE_METHOD}_upper.pt"
             saved = torch.load(path, map_location="cpu", weights_only=False)
             if (saved["protocol"], saved["root"], saved["period"], saved["method"], saved["fit"]) != (
-                    spec.source.PROTOCOL, root, period, "compact", cached["groups"][p]["training_native_return_fits"]["compact"]["pooled"]):
+                    spec.source.PROTOCOL, root, period, spec.SOURCE_METHOD,
+                    cached["groups"][p]["training_native_return_fits"][spec.SOURCE_METHOD]["pooled"]):
                 raise ValueError("Stage130 learned source upper changed")
             current = saved["weights"]
             trainer.upper_actor.load_state_dict(current)
@@ -172,7 +173,7 @@ def run(root, output, *, protocol_spec=spec):
             plus = {m: curvature.scaled_upper(current, directions[m]["plus"], fits[m]["pooled"]["scale"]) for m in spec.METHODS}
             minus = curvature.scaled_upper(current, directions["refresh"]["minus"], fits["refresh"]["pooled"]["scale"])
             cost["upper_candidate_weight_steps"] += 11
-            variants = [("source_flat", origin, "flat"), ("source_forecast", origin, "forecast"), ("single", current, "joint"),
+            variants = [("source_flat", origin, "flat"), ("source_forecast", origin, "forecast"), (spec.SOURCE_BASELINE, current, "joint"),
                 ("refresh", plus["refresh"], "joint"), ("stale", plus["stale"], "joint"),
                 ("refresh_descent", minus, "joint"), ("refresh_blinded", plus["refresh"], "forecast")]
             seeds = spec.evaluation_seeds(root)

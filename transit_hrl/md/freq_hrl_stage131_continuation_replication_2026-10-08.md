@@ -30,6 +30,24 @@ Run `pointmaze_continuation_replication_stage131_frozen_20261008_r1`:
 `t136526-t136531` accepted, ordered by the six roots above. Task specifications,
 fresh seed roles, new/inherited budgets and scheduler receipt are saved with the run.
 
+## Completed Result
+
+All six tasks completed;37,824new episodes/45,388,800steps,187,402bytes fetched.
+Six-endpoint corrected root-cluster bootstrap intervals:
+
+| Period | Refresh minus forecast | Refresh minus single | Refresh minus stale |
+|---|---|---|---|
+|50|+1.438688 [1.052682,1.667235]|+0.485376 [0.185617,0.663596]|+0.071236 [-0.100068,0.266523]|
+|100|+0.688348 [0.421125,0.878955]|+0.330307 [0.224276,0.418890]|+0.110088 [0.034931,0.170537]|
+
+Continuation increments replicate at both periods; relabeling replicates at100,
+not universally. Material forecast gain closes at50 only. Keep root410049's
+period50 increment-0.012623, its negative A-to-B crossfit-0.049395, and
+root410037's period100 refresh-minus-stale-0.010491. Five of six period100
+calibration fits hit scale1 with positive fitted endpoint slope. Return to the
+two development roots to test a third local update; do not merge development
+roots into this CI or lower0.5. This test cannot erase the Stage131 result.
+
 ## Limitations
 
 These source policies were used in earlier research and the one-step replication;

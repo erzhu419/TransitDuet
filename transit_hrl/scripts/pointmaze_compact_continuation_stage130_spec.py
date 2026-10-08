@@ -6,6 +6,7 @@ ROOT, ROOTS, PERIODS = source.ROOT, source.ROOTS, source.PERIODS
 PROTOCOL = "pointmaze_compact_continuation_stage130_v1"
 EVIDENCE_ROLE = "two_development_root_current_policy_credit_not_independent_confirmation"
 SOURCE_RUN = "pointmaze_credit_transfer_stage128_pilot_20261007_r1"
+SOURCE_METHOD, SOURCE_BASELINE = "compact", "single"
 PANELS, METHODS = source.PANELS, ("refresh", "stale")
 WORKERS, LABEL_SCENARIOS, TRAINING_SCENARIOS, EVALUATION_EPISODES = 16, 4, 16, 32
 DAMPING, FISHER_RADIUS, MINIMUM_GAIN = source.DAMPING, source.FISHER_RADIUS, source.MINIMUM_GAIN

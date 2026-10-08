@@ -7,16 +7,17 @@ import torch
 
 from freq_hrl.experiments import pointmaze_compact_continuation as kernel
 from freq_hrl.experiments import pointmaze_continuation_replication as experiment
+from scripts import pointmaze_third_update_stage132_spec as third_step
 from test_pointmaze_joint_reference import source_data
 from test_pointmaze_native_upper_step import native_task
 from test_pointmaze_update_isolation import ImmediatePool
 
 
-def test_shared_kernel_uses_fresh_root_source_protocol_and_training_roles(source_data, tmp_path):
+@pytest.mark.parametrize("spec", (experiment.spec, third_step))
+def test_shared_kernel_uses_source_protocol_method_baseline_and_training_roles(source_data, tmp_path, spec):
     models, predictor, cal, original_args, teachers = source_data
     args = copy.copy(original_args)
-    args.optimizer_seed = 410037
-    spec, root = experiment.spec, 410037
+    root = args.optimizer_seed = spec.ROOTS[0]
     cache = tmp_path/"source"/"result.json"
     groups = {}
     for period in spec.PERIODS:
@@ -24,11 +25,11 @@ def test_shared_kernel_uses_fresh_root_source_protocol_and_training_roles(source
         with torch.no_grad():
             actor.net[0].bias.copy_(torch.arange(1., 9.)*.001)
         fit = {"scale": 1.}
-        path = cache.parent/"final_weights"/f"period_{period}_compact_upper.pt"
+        path = cache.parent/"final_weights"/f"period_{period}_{spec.SOURCE_METHOD}_upper.pt"
         path.parent.mkdir(parents=True, exist_ok=True)
         torch.save({"protocol": spec.source.PROTOCOL, "root": root, "period": period,
-            "method": "compact", "fit": fit, "weights": actor.state_dict()}, path)
-        groups[str(period)] = {"training_native_return_fits": {"compact": {"pooled": fit}}}
+            "method": spec.SOURCE_METHOD, "fit": fit, "weights": actor.state_dict()}, path)
+        groups[str(period)] = {"training_native_return_fits": {spec.SOURCE_METHOD: {"pooled": fit}}}
     source_cost = spec.source.budget()
     kernel.write_json(cache, {"status": "complete", "protocol": spec.source.PROTOCOL,
         "root": root, "cost": source_cost, "groups": groups})
@@ -54,6 +55,8 @@ def test_shared_kernel_uses_fresh_root_source_protocol_and_training_roles(source
         for p, g in result["groups"].items():
             assert g["evaluation_seeds"] == spec.evaluation_seeds(root)
             assert g["effects"]["refresh_minus_source_forecast"] == g["effects"]["refresh_minus_refresh_blinded"]
+            assert g["mean_metrics"][spec.SOURCE_BASELINE]["upper_mean_rms"] > 0.
+            assert f"refresh_minus_{spec.SOURCE_BASELINE}" in g["effects"]
     assert result["protocol"] == spec.PROTOCOL and result["source_protocol"] == spec.source.PROTOCOL
     assert result["inherited_source_cost"] == source_cost and result["kind"] == spec.EVIDENCE_ROLE
     assert result["cost"]["native_episodes"] == 162 and result["cost"]["native_steps"] == 16200
@@ -118,3 +121,17 @@ def test_replication_freezes_recipe_and_uses_disjoint_fresh_scenes():
         assert not labels & train and not (labels|train) & evaluation
         assert not (labels|train|evaluation) & (seen|old)
         seen.update(labels|train|evaluation)
+
+
+def test_third_step_retains_geometry_and_names_the_actual_source_and_budget():
+    spec = third_step
+    assert spec.SOURCE_METHOD == "refresh" and spec.SOURCE_BASELINE == "two_step"
+    assert "single" not in spec.VARIANTS and spec.source.PROTOCOL == kernel.spec.PROTOCOL
+    assert spec.FISHER_RADIUS == spec.source.FISHER_RADIUS and spec.EPSILON == spec.source.EPSILON
+    assert spec.budget()["native_episodes"] == 5856 and spec.budget()["native_steps"] == 7027200
+    for root in spec.ROOTS:
+        old = {s for r in spec.source.label_roles(root)+spec.source.training_roles(root)
+            for s in (r["scenario_seed"], *r["noise_seeds"].values())} | set(spec.source.evaluation_seeds(root))
+        fresh = {s for r in spec.label_roles(root)+spec.training_roles(root)
+            for s in (r["scenario_seed"], *r["noise_seeds"].values())} | set(spec.evaluation_seeds(root))
+        assert not fresh & old
