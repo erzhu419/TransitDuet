@@ -32,6 +32,16 @@ Eight workers+parent/8GiB, scheduler dynamic node001-node006. No checkpoints or
 trace writes; only scalar JSON is pulled. Stage135 and immediate earlier source
 costs remain separate, with the rest of the source chain inherited.
 
+## Run Receipt
+
+Implementation `273f6ba6c5`, registration `1d80ae9c80`; nine related tests passed,
+including a reduced native-path runner and exact joint/separate parameter
+identity. Both completed source cells and all four selected upper files are
+available on node004; no checkpoint was downloaded. Run
+`pointmaze_warm_start_joint_stage136_probe_20261008_r1`: `t136900` root410037 and
+`t136901` root410049 accepted, initial snapshot queued. No waiting aggregator
+task and no Stage136 performance result yet.
+
 ## Limitations
 
 This does not fix the critic or guarantee joint PPO improves. It tests a warm
