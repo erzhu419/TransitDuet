@@ -24,6 +24,15 @@ Per root32replay+32mean collection+1,152queries+704evaluation=1,920episodes,
 costs remain separate. Two roots3,840episodes/4,608,000steps. Sixteen workers
 plus parent/12GiB, dynamic node001-node006, no aggregator. Compact JSON only.
 
+## Run Receipt
+
+Implementation/results commit87336e2f82; preregistration commit1732eda848,
+pushed before submission. Eleven related focused tests passed. Metadata reads
+confirmed both Stage140 source cells and all four selected warm upper files.
+Run: pointmaze_mean_option_query_stage141_probe_20261008_r1.
+t136997/root410037 and t136998/root410049 were queued at receipt time, with
+no assigned node. Preregistration and compact dispatch receipt are retained.
+
 ## Limitations
 
 This compares a query-augmented smoothed mean-option gradient with an already
