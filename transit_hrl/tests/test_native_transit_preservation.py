@@ -91,6 +91,17 @@ class NativeTransitPreservationTest(unittest.TestCase):
         prefix = run([0, 2, 4, 1])
         self.assertEqual(prefix, run([0, 2, 4, 1, 1000])[:4])
 
+    def test_native_negative_binomial_core_is_also_preserved(self):
+        a = shared.CausalNegativeBinomialHarmonicBandState(60, period_s=1440, fourier_k=2)
+        b = reference.CausalNegativeBinomialHarmonicBandState(60, period_s=1440, fourier_k=2)
+        for step, count in [(0, 0), (1, 3), (4, 25), (5, 2), (10, 1)]:
+            a.update(count, step=step)
+            b.update(count, step=step)
+            np.testing.assert_array_equal(a.theta, b.theta)
+            np.testing.assert_array_equal(a.cov, b.cov)
+            self.assertEqual(a.forecast(3), b.forecast(3))
+            self.assertEqual(a.high, b.high)
+
     def test_native_raw_history_retains_bins(self):
         tracker = adapter.DemandFrequencyTracker.from_config({
             "method": "raw_history", "bin_sec": 60,
