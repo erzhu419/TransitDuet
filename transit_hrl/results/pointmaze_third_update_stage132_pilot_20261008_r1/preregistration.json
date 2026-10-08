@@ -1,0 +1,641 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "four_final_upper_candidates_per_root_server_only",
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only",
+    "raw_state_writes": 0
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 448,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 14054400,
+    "native_episodes": 5856,
+    "native_return_fits": 12,
+    "native_steps": 7027200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 111744,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 22,
+    "upper_checkpoint_loads": 2
+  },
+  "calibration": {
+    "baseline": "learned_two_step_not_single_or_forecast",
+    "crossfit": "A_on_B_and_B_on_A_not_used_for_selection",
+    "evaluation_selection": false,
+    "fitted_step_interval": [
+      0,
+      1
+    ],
+    "objective": "paired_native_episode_return_quadratic",
+    "policy_steps": [
+      0,
+      1,
+      -1
+    ]
+  },
+  "code_revision": "e811b9eaac707cdac8fc699b17847db9e1fa5c0e",
+  "contrasts": [
+    [
+      "refresh",
+      "source_forecast"
+    ],
+    [
+      "refresh",
+      "two_step"
+    ],
+    [
+      "refresh",
+      "stale"
+    ],
+    [
+      "refresh",
+      "refresh_descent"
+    ],
+    [
+      "refresh",
+      "refresh_blinded"
+    ],
+    [
+      "stale",
+      "two_step"
+    ]
+  ],
+  "development_interpretation": {
+    "independent_confirmation": false,
+    "minimum_forecast_gain": 0.5,
+    "refresh_minus_stale": "radial-control comparison reported separately; not a fully stale three-step route",
+    "refresh_minus_two_step": "positive equal-root fresh-evaluation increments required before another frozen replication",
+    "require_both_periods": true
+  },
+  "evaluation_seeds": {
+    "410011": [
+      132190001,
+      132190002,
+      132190003,
+      132190004,
+      132190005,
+      132190006,
+      132190007,
+      132190008,
+      132190009,
+      132190010,
+      132190011,
+      132190012,
+      132190013,
+      132190014,
+      132190015,
+      132190016,
+      132190017,
+      132190018,
+      132190019,
+      132190020,
+      132190021,
+      132190022,
+      132190023,
+      132190024,
+      132190025,
+      132190026,
+      132190027,
+      132190028,
+      132190029,
+      132190030,
+      132190031,
+      132190032
+    ],
+    "410023": [
+      132290001,
+      132290002,
+      132290003,
+      132290004,
+      132290005,
+      132290006,
+      132290007,
+      132290008,
+      132290009,
+      132290010,
+      132290011,
+      132290012,
+      132290013,
+      132290014,
+      132290015,
+      132290016,
+      132290017,
+      132290018,
+      132290019,
+      132290020,
+      132290021,
+      132290022,
+      132290023,
+      132290024,
+      132290025,
+      132290026,
+      132290027,
+      132290028,
+      132290029,
+      132290030,
+      132290031,
+      132290032
+    ]
+  },
+  "evidence_role": "two_development_root_third_update_not_independent_confirmation",
+  "fixed_recipe": {
+    "action_dim": 8,
+    "actor_std": 0.15,
+    "added_policy_updates": 1,
+    "damping": 1.0,
+    "epsilon": 0.005,
+    "lower_and_critics": "frozen",
+    "lower_residual_limit": 0.05,
+    "per_update_fisher_radius": 0.0005555555555555556,
+    "reference_limit": 0.05,
+    "state_dim": 392,
+    "summary_dim": 26,
+    "total_policy_updates": 3
+  },
+  "inherited_budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 448,
+    "evaluation_pair_groups": 64,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 14054400,
+    "native_episodes": 5856,
+    "native_return_fits": 12,
+    "native_steps": 7027200,
+    "native_trace_writes": 0,
+    "native_upper_calls": 111744,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 22,
+    "upper_checkpoint_loads": 2
+  },
+  "label_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 132110001,
+          "B": 132120001
+        },
+        "scenario_seed": 132100001
+      },
+      {
+        "noise_seeds": {
+          "A": 132110002,
+          "B": 132120002
+        },
+        "scenario_seed": 132100002
+      },
+      {
+        "noise_seeds": {
+          "A": 132110003,
+          "B": 132120003
+        },
+        "scenario_seed": 132100003
+      },
+      {
+        "noise_seeds": {
+          "A": 132110004,
+          "B": 132120004
+        },
+        "scenario_seed": 132100004
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 132210001,
+          "B": 132220001
+        },
+        "scenario_seed": 132200001
+      },
+      {
+        "noise_seeds": {
+          "A": 132210002,
+          "B": 132220002
+        },
+        "scenario_seed": 132200002
+      },
+      {
+        "noise_seeds": {
+          "A": 132210003,
+          "B": 132220003
+        },
+        "scenario_seed": 132200003
+      },
+      {
+        "noise_seeds": {
+          "A": 132210004,
+          "B": 132220004
+        },
+        "scenario_seed": 132200004
+      }
+    ]
+  },
+  "limitations": [
+    "Two development roots do not establish independent confirmation.",
+    "Per-update geometry matches, not cumulative distance from zero or total training cost.",
+    "Radial control starts from the same two-step learned source, not a fully stale three-step training route.",
+    "Stage131 gate and negative root-level results retained; joint HRL, promotion and frequency-specific gates unchanged."
+  ],
+  "methods": {
+    "refresh": "fresh compact native gradient at learned two-step Stage130 refresh source",
+    "stale": "radial continuation of complete two-step parameter displacement from zero, renormalized at identical current-policy states and update radius"
+  },
+  "new_total_budget": {
+    "checkpoint_writes": 8,
+    "crossfit_episodes": 384,
+    "crossfit_pair_groups": 128,
+    "empirical_fisher_solves": 4,
+    "evaluation_episodes": 896,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 16,
+    "fisher_jvp_batches": 8,
+    "label_episodes": 9792,
+    "label_queries": 576,
+    "native_donor_response_calls": 28108800,
+    "native_episodes": 11712,
+    "native_return_fits": 24,
+    "native_steps": 14054400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 223488,
+    "optimizer_steps": 0,
+    "source_cell_loads": 2,
+    "training_episodes": 640,
+    "training_pair_groups": 128,
+    "upper_candidate_weight_steps": 44,
+    "upper_checkpoint_loads": 4
+  },
+  "optimizer_roots": [
+    410011,
+    410023
+  ],
+  "periods": [
+    50,
+    100
+  ],
+  "protocol": "pointmaze_third_update_stage132_v1",
+  "run_name": "pointmaze_third_update_stage132_pilot_20261008_r1",
+  "scheduler": {
+    "aggregation": "after_completion_no_waiting_aggregator",
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null,
+    "workers_per_task": 16
+  },
+  "shared_kernel": "freq_hrl.experiments.pointmaze_compact_continuation.run",
+  "source_availability": "four learned two-step source upper checkpoints read on node004; source identities and fits match, all nonzero",
+  "source_baseline": "two_step",
+  "source_method": "refresh",
+  "source_protocol": "pointmaze_compact_continuation_stage130_v1",
+  "source_run": "pointmaze_compact_continuation_stage130_pilot_20261008_r1",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_stage132.py --optimizer-seed 410011 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410011/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; third local improvement from a learned two-step source, paired radial control, lower frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage132 third compact local update root410011",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410011/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_stage132_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_stage132_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410011/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_stage132_v1/pointmaze_third_update_stage132_pilot_20261008_r1/third_update/410011",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_stage132.py --optimizer-seed 410023 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410023/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; third local improvement from a learned two-step source, paired radial control, lower frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage132 third compact local update root410023",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410023/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_stage132_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_stage132_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_stage132_pilot_20261008_r1/cells/replicate_410023/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_stage132_v1/pointmaze_third_update_stage132_pilot_20261008_r1/third_update/410023",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "training_roles": {
+    "410011": [
+      {
+        "noise_seeds": {
+          "A": 132140001,
+          "B": 132150001
+        },
+        "scenario_seed": 132130001
+      },
+      {
+        "noise_seeds": {
+          "A": 132140002,
+          "B": 132150002
+        },
+        "scenario_seed": 132130002
+      },
+      {
+        "noise_seeds": {
+          "A": 132140003,
+          "B": 132150003
+        },
+        "scenario_seed": 132130003
+      },
+      {
+        "noise_seeds": {
+          "A": 132140004,
+          "B": 132150004
+        },
+        "scenario_seed": 132130004
+      },
+      {
+        "noise_seeds": {
+          "A": 132140005,
+          "B": 132150005
+        },
+        "scenario_seed": 132130005
+      },
+      {
+        "noise_seeds": {
+          "A": 132140006,
+          "B": 132150006
+        },
+        "scenario_seed": 132130006
+      },
+      {
+        "noise_seeds": {
+          "A": 132140007,
+          "B": 132150007
+        },
+        "scenario_seed": 132130007
+      },
+      {
+        "noise_seeds": {
+          "A": 132140008,
+          "B": 132150008
+        },
+        "scenario_seed": 132130008
+      },
+      {
+        "noise_seeds": {
+          "A": 132140009,
+          "B": 132150009
+        },
+        "scenario_seed": 132130009
+      },
+      {
+        "noise_seeds": {
+          "A": 132140010,
+          "B": 132150010
+        },
+        "scenario_seed": 132130010
+      },
+      {
+        "noise_seeds": {
+          "A": 132140011,
+          "B": 132150011
+        },
+        "scenario_seed": 132130011
+      },
+      {
+        "noise_seeds": {
+          "A": 132140012,
+          "B": 132150012
+        },
+        "scenario_seed": 132130012
+      },
+      {
+        "noise_seeds": {
+          "A": 132140013,
+          "B": 132150013
+        },
+        "scenario_seed": 132130013
+      },
+      {
+        "noise_seeds": {
+          "A": 132140014,
+          "B": 132150014
+        },
+        "scenario_seed": 132130014
+      },
+      {
+        "noise_seeds": {
+          "A": 132140015,
+          "B": 132150015
+        },
+        "scenario_seed": 132130015
+      },
+      {
+        "noise_seeds": {
+          "A": 132140016,
+          "B": 132150016
+        },
+        "scenario_seed": 132130016
+      }
+    ],
+    "410023": [
+      {
+        "noise_seeds": {
+          "A": 132240001,
+          "B": 132250001
+        },
+        "scenario_seed": 132230001
+      },
+      {
+        "noise_seeds": {
+          "A": 132240002,
+          "B": 132250002
+        },
+        "scenario_seed": 132230002
+      },
+      {
+        "noise_seeds": {
+          "A": 132240003,
+          "B": 132250003
+        },
+        "scenario_seed": 132230003
+      },
+      {
+        "noise_seeds": {
+          "A": 132240004,
+          "B": 132250004
+        },
+        "scenario_seed": 132230004
+      },
+      {
+        "noise_seeds": {
+          "A": 132240005,
+          "B": 132250005
+        },
+        "scenario_seed": 132230005
+      },
+      {
+        "noise_seeds": {
+          "A": 132240006,
+          "B": 132250006
+        },
+        "scenario_seed": 132230006
+      },
+      {
+        "noise_seeds": {
+          "A": 132240007,
+          "B": 132250007
+        },
+        "scenario_seed": 132230007
+      },
+      {
+        "noise_seeds": {
+          "A": 132240008,
+          "B": 132250008
+        },
+        "scenario_seed": 132230008
+      },
+      {
+        "noise_seeds": {
+          "A": 132240009,
+          "B": 132250009
+        },
+        "scenario_seed": 132230009
+      },
+      {
+        "noise_seeds": {
+          "A": 132240010,
+          "B": 132250010
+        },
+        "scenario_seed": 132230010
+      },
+      {
+        "noise_seeds": {
+          "A": 132240011,
+          "B": 132250011
+        },
+        "scenario_seed": 132230011
+      },
+      {
+        "noise_seeds": {
+          "A": 132240012,
+          "B": 132250012
+        },
+        "scenario_seed": 132230012
+      },
+      {
+        "noise_seeds": {
+          "A": 132240013,
+          "B": 132250013
+        },
+        "scenario_seed": 132230013
+      },
+      {
+        "noise_seeds": {
+          "A": 132240014,
+          "B": 132250014
+        },
+        "scenario_seed": 132230014
+      },
+      {
+        "noise_seeds": {
+          "A": 132240015,
+          "B": 132250015
+        },
+        "scenario_seed": 132230015
+      },
+      {
+        "noise_seeds": {
+          "A": 132240016,
+          "B": 132250016
+        },
+        "scenario_seed": 132230016
+      }
+    ]
+  },
+  "variants": [
+    "source_flat",
+    "source_forecast",
+    "two_step",
+    "refresh",
+    "stale",
+    "refresh_descent",
+    "refresh_blinded"
+  ],
+  "verification": "10 tests passed in45.78s; explicit source method and baseline across the shared native kernel, exact measured budget, training-only fits, unchanged root-cluster inference"
+}
