@@ -26,7 +26,8 @@ def select_native_candidate(rows):
         "selection_data": "separate_native_validation_at_actual_pooled_fit_weights"}
 
 
-def run(root, output):
+def run(root, output, *, protocol_spec=spec):
+    spec = protocol_spec
     output = output.resolve()
     cached = json.loads(spec.source_result(root).read_text())
     if (cached["status"], cached["protocol"], cached["root"], cached["cost"]) != ("complete", spec.source.PROTOCOL, root, spec.source.budget()):

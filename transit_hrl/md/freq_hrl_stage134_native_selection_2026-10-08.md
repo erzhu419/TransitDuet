@@ -36,7 +36,26 @@ node004; the native runner checks checkpoint protocol and source fits on load.
 Run `pointmaze_native_selection_stage134_pilot_20261008_r1`:
 `t136566` root410011 and `t136567` root410023 accepted; initial snapshot queued.
 Exact task specifications, all four seed-role sets, budgets and compact scheduler
-receipt are saved with the run. No Stage134 performance result is available yet.
+receipt are saved with the run; no outcomes were available at registration.
+
+## Completed Result
+
+Both tasks done on node004/node006;12,096episodes/14,515,200steps,68,777bytes
+fetched. Budget, four separate seed-role sets, selection rule and paired aliases match.
+
+| Period | Selected minus forecast | Selected minus two_step | Selected minus refresh | Selected minus radial |
+|---|---|---|---|---|
+|50|+1.980800|+0.498933|0|+0.106315|
+|100|+1.280096|+0.376703|+0.084827|+0.045282|
+
+All four root-period increments are positive and forecast gains exceed0.5.
+Development gate met. Validation selects refresh for both period50 roots;
+at100 it selects radial for410011 and refresh for410023. The radial choice
+improves410011's new evaluation return by0.169654 over fixed refresh.
+All four choices also match the pooled-fit prediction rule, so this does not
+establish added value of the192validation episodes/root. Stage135 freezes the
+selector and adds a fit-only comparator. These are two-root development means,
+not confirmation intervals; do not merge them into the six-root inference.
 
 ## Limitations
 

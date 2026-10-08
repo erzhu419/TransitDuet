@@ -5,6 +5,8 @@ import pytest
 import torch
 
 from freq_hrl.experiments import pointmaze_native_selection as experiment
+from freq_hrl.experiments import pointmaze_native_selection_replication as replication
+from scripts import pointmaze_third_update_replication_stage133_spec as previous_replication
 from test_pointmaze_joint_reference import source_data
 from test_pointmaze_native_upper_step import native_task
 from test_pointmaze_update_isolation import ImmediatePool
@@ -21,9 +23,10 @@ def test_selection_uses_measured_increment_and_can_decline_update(refresh, radia
     assert selected["mean_incremental_returns"] == pytest.approx({"two_step": 0., "refresh": refresh, "stale": radial})
 
 
-def test_native_selection_uses_separate_validation_before_evaluation_and_exact_budget(source_data, tmp_path):
+@pytest.mark.parametrize("spec", (experiment.spec, replication.spec))
+def test_native_selection_uses_separate_validation_before_evaluation_and_exact_budget(source_data, tmp_path, spec):
     models, predictor, cal, args, teachers = source_data
-    spec, kernel = experiment.spec, experiment.kernel
+    kernel = experiment.kernel
     root = args.optimizer_seed = spec.ROOTS[0]
     cache = tmp_path/"source"/"result.json"
     groups = {}
@@ -66,7 +69,7 @@ def test_native_selection_uses_separate_validation_before_evaluation_and_exact_b
         stack.enter_context(patch.object(kernel, "fit_method", side_effect=fit))
         stack.enter_context(patch.object(experiment, "select_native_candidate", side_effect=select))
         stack.enter_context(patch.object(experiment.curvature, "worker_group", side_effect=worker))
-        result = experiment.run(root, tmp_path/"candidate"/"result.json")
+        result = experiment.run(root, tmp_path/"candidate"/"result.json", protocol_spec=spec)
         assert result["cost"] == spec.budget()
         assert set(fit_seeds) == {r["scenario_seed"] for r in spec.training_roles(root)}
         assert selected_seeds == [{r["scenario_seed"] for r in spec.validation_roles(root)}]*2
@@ -102,6 +105,29 @@ def test_validation_rosters_are_disjoint_from_fit_evaluation_and_previous_steps(
         old.update(s for r in spec.source.source.training_roles(root)
             for s in (r["scenario_seed"], *r["noise_seeds"].values()))
         old.update(spec.source.source.evaluation_seeds(root))
+        for part in parts:
+            assert not part & (old|seen)
+            seen.update(part)
+
+
+def test_replication_keeps_recipe_two_step_source_and_fresh_roles():
+    spec, seen = replication.spec, set()
+    assert spec.source.PROTOCOL == "pointmaze_continuation_replication_stage131_v1"
+    assert not set(spec.ROOTS) & set(experiment.spec.ROOTS)
+    assert spec.VARIANTS == experiment.spec.VARIANTS and spec.CONTRASTS == experiment.spec.CONTRASTS
+    assert spec.FISHER_RADIUS == experiment.spec.FISHER_RADIUS and spec.EPSILON == experiment.spec.EPSILON
+    assert spec.budget()["native_episodes"] == 6496 and spec.budget()["native_steps"] == 7795200
+    assert spec.budget()["selection_episodes"] == 192 and spec.budget()["evaluation_episodes"] == 896
+    assert len(spec.ENDPOINTS) == 10
+    for root in spec.ROOTS:
+        old = set()
+        for earlier in (spec.source, spec.source.source, previous_replication):
+            old.update(s for r in earlier.label_roles(root)+earlier.training_roles(root)
+                for s in (r["scenario_seed"], *r["noise_seeds"].values()))
+            old.update(earlier.evaluation_seeds(root))
+        parts = [{s for r in roles for s in (r["scenario_seed"], *r["noise_seeds"].values())}
+            for roles in (spec.label_roles(root), spec.training_roles(root), spec.validation_roles(root))]
+        parts.append(set(spec.evaluation_seeds(root)))
         for part in parts:
             assert not part & (old|seen)
             seen.update(part)
