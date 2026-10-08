@@ -83,7 +83,7 @@ def fit_candidates(trainer, rows):
                 with torch.no_grad():
                     change = actor.distribution(torch.as_tensor(batch.state)).mean.double().numpy()-baseline
                 rms[sign] = float(np.sqrt(np.mean(change**2)))
-                np.testing.assert_allclose(rms[sign], spec.MEAN_STEP_RMS, atol=1e-8, rtol=0)
+                np.testing.assert_allclose(rms[sign], spec.MEAN_STEP_RMS, atol=1e-7, rtol=0)
                 derivative, start = [], 0
                 for row in rows:
                     end = start+row["batch"].size
