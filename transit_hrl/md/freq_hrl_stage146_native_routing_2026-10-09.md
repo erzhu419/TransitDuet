@@ -35,6 +35,9 @@ Seventeen focused tests passed. Three-control preflight `t137220`/`t137221`/
 network sizes, exogenous demand and 2/4 upper/lower updates per cell. No
 performance CI is computed from this short preflight.
 
+Full development is registered as `t137265` through `t137288`: 24 independent
+method/root tasks, 7,680 native episodes, dynamically scheduled on node001-006.
+
 ## Limitations
 
 The controls retain a common upper forecast, so this is conditional routing
