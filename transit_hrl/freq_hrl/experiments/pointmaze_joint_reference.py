@@ -103,7 +103,8 @@ def finish_batch(data, rewards, duration):
         reward=np.asarray(rewards, dtype=np.float32), duration=np.full(n, duration, dtype=np.int64), done=done)
 
 
-def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, envelope, collect):
+def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, envelope, collect,
+        upper_override=None):
     policy_seed, lower_seed = source.scenario.spec.noise_seeds(args.optimizer_seed, seed, noise_seed)
     plan = (wide.WideBernsteinPlan(predictor, period, args.maximum_subgoal_delta, envelope) if arm == "joint"
         else source.baseline.forecast.PlanReference("ridge_velocity", predictor, period) if arm == "forecast" else None)
@@ -129,6 +130,8 @@ def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, e
                     torch.manual_seed(policy_seed + step)
                     distribution = trainer.upper_actor.distribution(torch.as_tensor(state).view(1, -1))
                     raw = distribution.sample()[0] if collect else distribution.mean[0]
+                    if upper_override is not None and step == upper_override["step"]:
+                        raw = torch.as_tensor(upper_override["action"], dtype=raw.dtype)
                     logp = distribution.log_prob(raw).sum().item()
                     value = trainer.upper_value(torch.as_tensor(state).view(1, -1)).item()
                 plan.decode(action=raw.numpy(), observation=obs, history=history, step=step, world_low=low, world_high=high)

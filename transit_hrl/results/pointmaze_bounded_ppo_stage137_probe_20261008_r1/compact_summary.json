@@ -1,0 +1,368 @@
+{
+  "cost": {
+    "checkpoint_writes": 0,
+    "credit_checks": 64,
+    "evaluation_episodes": 896,
+    "exact_kl_forward_batches": 16,
+    "fisher_jvp_batches": 8,
+    "lower_actor_optimizer_steps": 0,
+    "lower_checkpoint_loads": 4,
+    "lower_value_optimizer_steps": 0,
+    "native_donor_response_calls": 2304000,
+    "native_episodes": 960,
+    "native_lower_calls": 1152000,
+    "native_steps": 1152000,
+    "native_trace_writes": 0,
+    "native_upper_calls": 14976,
+    "planning_fits": 16320,
+    "planning_reference_calls": 1152000,
+    "planning_renewals": 17280,
+    "policy_geometry_forward_batches": 28,
+    "replay_episodes": 64,
+    "source_cell_loads": 4,
+    "upper_actor_optimizer_steps": 8,
+    "upper_checkpoint_loads": 4,
+    "upper_value_optimizer_steps": 8
+  },
+  "diagnosis": "Radius reduces large damage but bounded/projection forward updates are mixed and negative on average; do not adopt reverse direction or choose evaluation winners. Next isolate native option-specific actor credit at unchanged exploration and radius.",
+  "fetched_bytes": 93561,
+  "kind": "two_root_scale_subspace_diagnosis_not_confirmation",
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "periods": {
+    "100": {
+      "effects": {
+        "bounded_adam_minus_minus_warm_start": {
+          "mean": -0.03897636135617333,
+          "root_means": [
+            0.004563516966733516,
+            -0.08251623967908017
+          ]
+        },
+        "bounded_adam_plus_minus_bounded_adam_minus": {
+          "mean": 0.023301568067736866,
+          "root_means": [
+            -0.07426028542052876,
+            0.12086342155600249
+          ]
+        },
+        "bounded_adam_plus_minus_raw_adam": {
+          "mean": 3.1790381191667088,
+          "root_means": [
+            4.646003295667725,
+            1.7120729426656922
+          ]
+        },
+        "bounded_adam_plus_minus_warm_start": {
+          "mean": -0.01567479328843646,
+          "root_means": [
+            -0.06969676845379524,
+            0.03834718187692232
+          ]
+        },
+        "compact_adam_minus_minus_warm_start": {
+          "mean": -0.03839356255237192,
+          "root_means": [
+            0.004786789100009514,
+            -0.08157391420475335
+          ]
+        },
+        "compact_adam_plus_minus_bounded_adam_plus": {
+          "mean": -0.0005768129265142363,
+          "root_means": [
+            -2.8240928919842645e-05,
+            -0.00112538492410863
+          ]
+        },
+        "compact_adam_plus_minus_compact_adam_minus": {
+          "mean": 0.02214195633742122,
+          "root_means": [
+            -0.0745117984827246,
+            0.11879571115756704
+          ]
+        },
+        "compact_adam_plus_minus_warm_start": {
+          "mean": -0.016251606214950698,
+          "root_means": [
+            -0.06972500938271509,
+            0.03722179695281369
+          ]
+        },
+        "raw_adam_minus_warm_start": {
+          "mean": -3.194712912455145,
+          "root_means": [
+            -4.7157000641215205,
+            -1.67372576078877
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 0.8882177664031019,
+          "root_means": [
+            1.0742584473532446,
+            0.7021770854529592
+          ]
+        }
+      },
+      "raw_Adam_KL": [
+        0.15222755095965487,
+        0.10666449038921068
+      ],
+      "raw_KL_multiple_of_fixed_radius": [
+        274.0095917273788,
+        191.99608270057922
+      ],
+      "raw_weight_energy_outside_compact": [
+        0.44662043790002665,
+        0.45141522397693534
+      ],
+      "tracking_error_reduction_positive_is_better": {
+        "bounded_adam_minus_minus_warm_start": {
+          "mean": -7.590520029163996e-05,
+          "root_means": [
+            -6.591435500349994e-06,
+            -0.00014521896508292993
+          ]
+        },
+        "bounded_adam_plus_minus_bounded_adam_minus": {
+          "mean": 8.827903062967157e-05,
+          "root_means": [
+            -5.83527974809732e-05,
+            0.00023491085874031634
+          ]
+        },
+        "bounded_adam_plus_minus_raw_adam": {
+          "mean": 0.0036456573132156926,
+          "root_means": [
+            0.00527410549563591,
+            0.002017209130795475
+          ]
+        },
+        "bounded_adam_plus_minus_warm_start": {
+          "mean": 1.2373830338031607e-05,
+          "root_means": [
+            -6.494423298132319e-05,
+            8.96918936573864e-05
+          ]
+        },
+        "compact_adam_minus_minus_warm_start": {
+          "mean": -7.53869709444051e-05,
+          "root_means": [
+            -6.7988221097685245e-06,
+            -0.00014397511977904168
+          ]
+        },
+        "compact_adam_plus_minus_bounded_adam_plus": {
+          "mean": -6.29386455392681e-07,
+          "root_means": [
+            1.9878065286968623e-07,
+            -1.4575535636550483e-06
+          ]
+        },
+        "compact_adam_plus_minus_compact_adam_minus": {
+          "mean": 8.713141482704403e-05,
+          "root_means": [
+            -5.794663021868498e-05,
+            0.00023220945987277304
+          ]
+        },
+        "compact_adam_plus_minus_warm_start": {
+          "mean": 1.1744443882638926e-05,
+          "root_means": [
+            -6.47454523284535e-05,
+            8.823434009373136e-05
+          ]
+        },
+        "raw_adam_minus_warm_start": {
+          "mean": -0.0036332834828776608,
+          "root_means": [
+            -0.005339049728617233,
+            -0.0019275172371380884
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 0.0013483744842099285,
+          "root_means": [
+            0.0014357408732856626,
+            0.0012610080951341942
+          ]
+        }
+      }
+    },
+    "50": {
+      "effects": {
+        "bounded_adam_minus_minus_warm_start": {
+          "mean": -0.19377248841554362,
+          "root_means": [
+            -0.2727800052369176,
+            -0.11476497159416965
+          ]
+        },
+        "bounded_adam_plus_minus_bounded_adam_minus": {
+          "mean": 0.1535968273151198,
+          "root_means": [
+            0.28949908393338575,
+            0.017694570696853873
+          ]
+        },
+        "bounded_adam_plus_minus_raw_adam": {
+          "mean": 2.9612336961906536,
+          "root_means": [
+            3.5881630436982945,
+            2.3343043486830126
+          ]
+        },
+        "bounded_adam_plus_minus_warm_start": {
+          "mean": -0.04017566110042381,
+          "root_means": [
+            0.01671907869646816,
+            -0.09707040089731578
+          ]
+        },
+        "compact_adam_minus_minus_warm_start": {
+          "mean": -0.19401633859336798,
+          "root_means": [
+            -0.2733393487423754,
+            -0.11469332844436053
+          ]
+        },
+        "compact_adam_plus_minus_bounded_adam_plus": {
+          "mean": -0.00027682024188990795,
+          "root_means": [
+            -1.898748085693569e-05,
+            -0.0005346530029228802
+          ]
+        },
+        "compact_adam_plus_minus_compact_adam_minus": {
+          "mean": 0.15356385725105426,
+          "root_means": [
+            0.29003943995798664,
+            0.017088274544121873
+          ]
+        },
+        "compact_adam_plus_minus_warm_start": {
+          "mean": -0.04045248134231372,
+          "root_means": [
+            0.016700091215611224,
+            -0.09760505390023866
+          ]
+        },
+        "raw_adam_minus_warm_start": {
+          "mean": -3.0014093572910774,
+          "root_means": [
+            -3.5714439650018264,
+            -2.4313747495803284
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 1.6713843105474204,
+          "root_means": [
+            1.9693531853296875,
+            1.3734154357651533
+          ]
+        }
+      },
+      "raw_Adam_KL": [
+        0.10027006152690648,
+        0.11477511770208675
+      ],
+      "raw_KL_multiple_of_fixed_radius": [
+        180.48611074843168,
+        206.59521186375613
+      ],
+      "raw_weight_energy_outside_compact": [
+        0.45726714422232395,
+        0.4857669847291951
+      ],
+      "tracking_error_reduction_positive_is_better": {
+        "bounded_adam_minus_minus_warm_start": {
+          "mean": -0.00022460225791558273,
+          "root_means": [
+            -0.0002589877873043629,
+            -0.00019021672852680257
+          ]
+        },
+        "bounded_adam_plus_minus_bounded_adam_minus": {
+          "mean": 0.00025078498563204006,
+          "root_means": [
+            0.00032939685744438375,
+            0.00017217311381969636
+          ]
+        },
+        "bounded_adam_plus_minus_raw_adam": {
+          "mean": 0.0021993538888943364,
+          "root_means": [
+            0.002487979750073031,
+            0.0019107280277156416
+          ]
+        },
+        "bounded_adam_plus_minus_warm_start": {
+          "mean": 2.6182727716457326e-05,
+          "root_means": [
+            7.040907014002086e-05,
+            -1.804361470710621e-05
+          ]
+        },
+        "compact_adam_minus_minus_warm_start": {
+          "mean": -0.0002250163992740618,
+          "root_means": [
+            -0.0002592938188885677,
+            -0.00019073897965955593
+          ]
+        },
+        "compact_adam_plus_minus_bounded_adam_plus": {
+          "mean": -6.256796177223165e-08,
+          "root_means": [
+            -2.473172008813241e-07,
+            1.221812773368608e-07
+          ]
+        },
+        "compact_adam_plus_minus_compact_adam_minus": {
+          "mean": 0.0002511365590287469,
+          "root_means": [
+            0.00032945557182770724,
+            0.00017281754622978658
+          ]
+        },
+        "compact_adam_plus_minus_warm_start": {
+          "mean": 2.6120159754685094e-05,
+          "root_means": [
+            7.016175293913954e-05,
+            -1.792143342976935e-05
+          ]
+        },
+        "raw_adam_minus_warm_start": {
+          "mean": -0.002173171161177879,
+          "root_means": [
+            -0.0024175706799330105,
+            -0.0019287716424227477
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 0.0019482896630509568,
+          "root_means": [
+            0.0021206278471447176,
+            0.0017759514789571962
+          ]
+        }
+      }
+    }
+  },
+  "protocol": "pointmaze_bounded_ppo_stage137_v1",
+  "status": "complete",
+  "tasks": [
+    {
+      "id": "t136920",
+      "node": "node004",
+      "root": 410037,
+      "status": "done"
+    },
+    {
+      "id": "t136921",
+      "node": "node006",
+      "root": 410049,
+      "status": "done"
+    }
+  ]
+}

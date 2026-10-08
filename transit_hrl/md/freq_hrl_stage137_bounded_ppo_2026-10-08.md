@@ -31,8 +31,32 @@ Implementation `54683cd906`, registration `68ee62bb39`; seven related tests
 passed, including exact update replay and reduced runner budget. Both Stage136
 source cells and four Stage135 selected upper files are available on node004.
 Run `pointmaze_bounded_ppo_stage137_probe_20261008_r1`: `t136920` root410037,
-`t136921` root410049 accepted, initial snapshot queued. No waiting aggregator
-or Stage137 performance result yet.
+`t136921` root410049 are DONE on node004/node006.93,561bytes of compact JSON
+were fetched, without checkpoints or raw trajectories.
+
+## Result And Next Step
+
+Both cells pass replay, freeze and exact accounting:960episodes/1,152,000steps.
+Raw Adam KL0.100270-0.152228 is180.49-274.01times the fixed radius. Bounding
+reduces damage but does not establish an improving direction:
+
+| Period | Raw Adam - warm | Bounded plus - warm | Compact plus - warm | Bounded plus - minus |
+| --- | ---: | ---: | ---: | ---: |
+| 50 | -3.001409 | -0.040176 | -0.040452 | 0.153597 |
+| 100 | -3.194713 | -0.015675 | -0.016252 | 0.023302 |
+
+Forward bounded/compact gains are positive in two of four root-periods. Both
+reverse averages are negative. Projection discards44.7%-48.6% of weight-step
+energy but has almost identical deployed results; discarded parameter energy
+does not establish relevant control leakage. Tracking reductions are mixed,
+and reward/tracking signs need not agree because reward is nonlinear.
+
+Stage138 changes actor credit alone: replace one sampled option by its current
+mean at the identical prefix, replay the stochastic continuation with the same
+innovations, and use the paired full-return difference. Keep std0.15 and the
+fixed KL radius, shared on-policy batch, critic targets and frozen lower.
+Fresh training/evaluation scenes, both update signs, no evaluation winner or
+confirmation CI. The stochastic-training/mean-deployment mismatch remains open.
 
 ## Limitations
 
