@@ -1,0 +1,549 @@
+{
+  "analysis": "Retain all roots, periods, optimizer directions, signs and both upper modes. Report initial-score direction cosines and return/tracking changes. Separate sampled gains from deployed-mean gains; neither implies the other. Cached label replay is not fresh training confirmation. No evaluation winner, native-return fit, confirmation CI or automatic seed extension.",
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only"
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "counterfactual_episodes": 0,
+    "credit_checks": 32,
+    "empirical_fisher_solves": 2,
+    "evaluation_alias_assignments": 64,
+    "evaluation_episodes": 960,
+    "exact_kl_forward_batches": 12,
+    "fisher_jvp_batches": 6,
+    "lower_actor_optimizer_steps": 0,
+    "lower_checkpoint_loads": 2,
+    "lower_value_optimizer_steps": 0,
+    "mean_score_forward_batches": 2,
+    "native_donor_response_calls": 2380800,
+    "native_episodes": 992,
+    "native_lower_calls": 1190400,
+    "native_steps": 1190400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 16704,
+    "planning_fits": 16864,
+    "planning_reference_calls": 1190400,
+    "planning_renewals": 17856,
+    "replay_episodes": 32,
+    "score_gradient_batches": 10,
+    "source_cell_loads": 2,
+    "upper_actor_optimizer_steps": 4,
+    "upper_candidate_weight_steps": 12,
+    "upper_checkpoint_loads": 2,
+    "upper_value_optimizer_steps": 4
+  },
+  "contract": {
+    "artifacts": "compact_JSON_no_checkpoint_or_trace_writes_inherited_label_cost_not_zero",
+    "authority": 0.05,
+    "damping": 1.0,
+    "evaluation": "fresh_paired_mean_and_sampled_upper_same_upper_lower_innovations_both_signs",
+    "forecast": "one_native_forecast_execution_shared_by_both_upper_modes_cost_and_alias_counted",
+    "freeze": "all_deployed_lower_critics_teacher_forecaster_std_and_authority",
+    "geometry": "same_option_credit_Adam_displacement_or_anchor_score_or_existing_standardized_damped_Fisher_mean",
+    "limits": "optimizer_objective_diagnosis_no_evaluation_winner_confirmation_CI_or_joint_HRL_claim",
+    "radius": 0.0005555555555555556,
+    "source": "pointmaze_option_credit_stage138_probe_20261008_r1",
+    "training": "exact_Stage138_sampled_state_and_cached_single_option_credit_replay_not_new_labels",
+    "upper_std": 0.15,
+    "warm_source": "pointmaze_native_selection_replication_stage135_frozen_20261008_r1"
+  },
+  "contrasts": [
+    [
+      "warm_start",
+      "source_forecast"
+    ],
+    [
+      "adam_plus",
+      "warm_start"
+    ],
+    [
+      "adam_minus",
+      "warm_start"
+    ],
+    [
+      "score_plus",
+      "warm_start"
+    ],
+    [
+      "score_minus",
+      "warm_start"
+    ],
+    [
+      "natural_score_plus",
+      "warm_start"
+    ],
+    [
+      "natural_score_minus",
+      "warm_start"
+    ],
+    [
+      "score_plus",
+      "adam_plus"
+    ],
+    [
+      "natural_score_plus",
+      "adam_plus"
+    ],
+    [
+      "natural_score_plus",
+      "score_plus"
+    ],
+    [
+      "adam_plus",
+      "adam_minus"
+    ],
+    [
+      "score_plus",
+      "score_minus"
+    ],
+    [
+      "natural_score_plus",
+      "natural_score_minus"
+    ]
+  ],
+  "focused_tests": {
+    "passed": 17,
+    "scope": "default native behavior, stochastic evaluation without batches, analytic/autograd score identity, equal KL, cached-credit and Adam replay, shared forecast alias accounting, frozen control and exact reduced runner budget"
+  },
+  "inherited_budget": {
+    "Stage135_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 128,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15590400,
+      "native_episodes": 6496,
+      "native_policy_selections": 2,
+      "native_return_fits": 12,
+      "native_steps": 7795200,
+      "native_trace_writes": 0,
+      "native_upper_calls": 119808,
+      "optimizer_steps": 0,
+      "selection_episodes": 192,
+      "selection_pair_groups": 64,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    },
+    "Stage136_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "credit_checks": 32,
+      "evaluation_episodes": 384,
+      "lower_actor_optimizer_steps": 152,
+      "lower_checkpoint_loads": 2,
+      "lower_diagnostic_gradient_batches": 80,
+      "lower_value_optimizer_steps": 152,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 5760,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "ppo_update_calls": 8,
+      "source_cell_loads": 1,
+      "source_clone_loads": 2,
+      "training_comparator_episodes": 64,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_diagnostic_gradient_batches": 8,
+      "upper_value_optimizer_steps": 8
+    },
+    "Stage137_per_root": {
+      "checkpoint_writes": 0,
+      "credit_checks": 32,
+      "evaluation_episodes": 448,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 7488,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "policy_geometry_forward_batches": 14,
+      "replay_episodes": 32,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "Stage138_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "counterfactual_episodes": 576,
+      "credit_checks": 608,
+      "evaluation_episodes": 384,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 2380800,
+      "native_episodes": 992,
+      "native_lower_calls": 1190400,
+      "native_steps": 1190400,
+      "native_trace_writes": 0,
+      "native_upper_calls": 17856,
+      "planning_fits": 18016,
+      "planning_reference_calls": 1190400,
+      "planning_renewals": 19008,
+      "score_gradient_batches": 8,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 8
+    },
+    "earlier_source_chain": "retained_source_run_JSON_lineage_not_zero_not_a_flattened_total"
+  },
+  "methods": [
+    "adam",
+    "score",
+    "natural_score"
+  ],
+  "modes": [
+    "mean",
+    "sampled"
+  ],
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "protocol": "pointmaze_score_geometry_stage139_v1",
+  "run_name": "pointmaze_score_geometry_stage139_probe_20261008_r1",
+  "scheduler": {
+    "aggregator_task": false,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410037": {
+      "evaluation": [
+        139190001,
+        139190002,
+        139190003,
+        139190004,
+        139190005,
+        139190006,
+        139190007,
+        139190008,
+        139190009,
+        139190010,
+        139190011,
+        139190012,
+        139190013,
+        139190014,
+        139190015,
+        139190016,
+        139190017,
+        139190018,
+        139190019,
+        139190020,
+        139190021,
+        139190022,
+        139190023,
+        139190024,
+        139190025,
+        139190026,
+        139190027,
+        139190028,
+        139190029,
+        139190030,
+        139190031,
+        139190032
+      ],
+      "replayed_training": [
+        {
+          "noise_seeds": {
+            "A": 138110001,
+            "B": 138120001
+          },
+          "scenario_seed": 138100001
+        },
+        {
+          "noise_seeds": {
+            "A": 138110002,
+            "B": 138120002
+          },
+          "scenario_seed": 138100002
+        },
+        {
+          "noise_seeds": {
+            "A": 138110003,
+            "B": 138120003
+          },
+          "scenario_seed": 138100003
+        },
+        {
+          "noise_seeds": {
+            "A": 138110004,
+            "B": 138120004
+          },
+          "scenario_seed": 138100004
+        },
+        {
+          "noise_seeds": {
+            "A": 138110005,
+            "B": 138120005
+          },
+          "scenario_seed": 138100005
+        },
+        {
+          "noise_seeds": {
+            "A": 138110006,
+            "B": 138120006
+          },
+          "scenario_seed": 138100006
+        },
+        {
+          "noise_seeds": {
+            "A": 138110007,
+            "B": 138120007
+          },
+          "scenario_seed": 138100007
+        },
+        {
+          "noise_seeds": {
+            "A": 138110008,
+            "B": 138120008
+          },
+          "scenario_seed": 138100008
+        }
+      ]
+    },
+    "410049": {
+      "evaluation": [
+        139290001,
+        139290002,
+        139290003,
+        139290004,
+        139290005,
+        139290006,
+        139290007,
+        139290008,
+        139290009,
+        139290010,
+        139290011,
+        139290012,
+        139290013,
+        139290014,
+        139290015,
+        139290016,
+        139290017,
+        139290018,
+        139290019,
+        139290020,
+        139290021,
+        139290022,
+        139290023,
+        139290024,
+        139290025,
+        139290026,
+        139290027,
+        139290028,
+        139290029,
+        139290030,
+        139290031,
+        139290032
+      ],
+      "replayed_training": [
+        {
+          "noise_seeds": {
+            "A": 138210001,
+            "B": 138220001
+          },
+          "scenario_seed": 138200001
+        },
+        {
+          "noise_seeds": {
+            "A": 138210002,
+            "B": 138220002
+          },
+          "scenario_seed": 138200002
+        },
+        {
+          "noise_seeds": {
+            "A": 138210003,
+            "B": 138220003
+          },
+          "scenario_seed": 138200003
+        },
+        {
+          "noise_seeds": {
+            "A": 138210004,
+            "B": 138220004
+          },
+          "scenario_seed": 138200004
+        },
+        {
+          "noise_seeds": {
+            "A": 138210005,
+            "B": 138220005
+          },
+          "scenario_seed": 138200005
+        },
+        {
+          "noise_seeds": {
+            "A": 138210006,
+            "B": 138220006
+          },
+          "scenario_seed": 138200006
+        },
+        {
+          "noise_seeds": {
+            "A": 138210007,
+            "B": 138220007
+          },
+          "scenario_seed": 138200007
+        },
+        {
+          "noise_seeds": {
+            "A": 138210008,
+            "B": 138220008
+          },
+          "scenario_seed": 138200008
+        }
+      ]
+    }
+  },
+  "source_availability": {
+    "Stage135_selected_upper_files": 4,
+    "Stage138_completed_cells": 2,
+    "node": "node004",
+    "selected_methods": {
+      "410037": {
+        "100": "stale",
+        "50": "refresh"
+      },
+      "410049": {
+        "100": "refresh",
+        "50": "refresh"
+      }
+    }
+  },
+  "source_revision": "fdea4f9d9aa3aa00f1740cbd137c8b705487e14f",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_score_geometry_stage139.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Replay cached native on-policy option-credit batch, original upper PPO update, direct score and inherited damped Fisher solve; equal-KL mean/sampled native evaluation; no new labels or checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage139 cached-credit score geometry and mean/sampled deployment root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_score_geometry_stage139_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_score_geometry_stage139_v1/native_score_geometry",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_score_geometry_stage139_v1/pointmaze_score_geometry_stage139_probe_20261008_r1/cached_option_credit_Adam_score_damped_Fisher_mean_or_sampled/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_score_geometry_stage139.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Replay cached native on-policy option-credit batch, original upper PPO update, direct score and inherited damped Fisher solve; equal-KL mean/sampled native evaluation; no new labels or checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage139 cached-credit score geometry and mean/sampled deployment root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_score_geometry_stage139_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_score_geometry_stage139_v1/native_score_geometry",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_score_geometry_stage139_probe_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_score_geometry_stage139_v1/pointmaze_score_geometry_stage139_probe_20261008_r1/cached_option_credit_Adam_score_damped_Fisher_mean_or_sampled/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "variants": [
+    "source_forecast",
+    "warm_start",
+    "adam_plus",
+    "adam_minus",
+    "score_plus",
+    "score_minus",
+    "natural_score_plus",
+    "natural_score_minus"
+  ]
+}
