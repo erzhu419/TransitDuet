@@ -23,6 +23,14 @@ Require positive fresh-evaluation increments over two_step and material forecast
 gains at both periods before another frozen replication. Report radial-control
 differences separately; negative results stop a claim of benefit from this step.
 
+## Run Receipt
+
+Implementation `e811b9eaac`, registration `1bd180103b`; ten tests passed.
+All four two-step source uppers were read on node004 with matching source fits.
+Run `pointmaze_third_update_stage132_pilot_20261008_r1`:
+`t136539` root410011 and `t136540` root410023 accepted. Task specifications,
+fresh seed roles, new/inherited budgets and scheduler receipt are saved with the run.
+
 ## Limitations
 
 This adds a third training step and simulation cost. Radial continuation shares

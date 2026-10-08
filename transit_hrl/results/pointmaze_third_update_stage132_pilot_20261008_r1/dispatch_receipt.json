@@ -1,0 +1,34 @@
+{
+  "aggregation": "after_worker_completion_no_waiting_aggregator",
+  "protocol": "pointmaze_third_update_stage132_v1",
+  "registration_revision": "1bd180103bcb1903e76b0ca4e2aca5036d4d3dc8",
+  "run_name": "pointmaze_third_update_stage132_pilot_20261008_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null,
+    "workers_per_task": 16
+  },
+  "tasks": [
+    {
+      "id": "t136540",
+      "node": null,
+      "signature": "Freq-HRL/pointmaze_third_update_stage132_v1/pointmaze_third_update_stage132_pilot_20261008_r1/third_update/410023",
+      "status": "queued"
+    },
+    {
+      "id": "t136539",
+      "node": null,
+      "signature": "Freq-HRL/pointmaze_third_update_stage132_v1/pointmaze_third_update_stage132_pilot_20261008_r1/third_update/410011",
+      "status": "queued"
+    }
+  ]
+}
