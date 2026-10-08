@@ -24,6 +24,16 @@ Six17CPU/12GiB tasks,16workers each,dynamic node001-node006,no hard node pin or
 waiting aggregation task. Four final upper weights/root stay server-side;
 pull compact JSON only.
 
+## Run Receipt
+
+Implementation `506b981ebc`, registration `a661716dd0`;13 unique test cases
+passed, including the corrected budget's native-path retest. All12 two-step
+source upper checkpoints were verified on node004 without downloading weights.
+Run `pointmaze_third_update_replication_stage133_frozen_20261008_r1`:
+`t136544-t136549` accepted, ordered by the six roots above; initial snapshot
+queued. Exact task specifications, seed roles and budgets are preregistered;
+compact dispatch receipt saved with the run. No result or CI is available yet.
+
 ## Limitations
 
 These six roots were used in earlier experiments and two previous replications;
