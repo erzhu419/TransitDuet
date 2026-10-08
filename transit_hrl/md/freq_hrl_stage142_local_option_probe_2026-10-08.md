@@ -33,6 +33,25 @@ Run: pointmaze_local_option_probe_stage142_probe_20261008_r1.
 t137081/root410037 and t137082/root410049 were queued at receipt time, with
 no assigned node. Preregistration and compact dispatch receipt are retained.
 
+## Completed Result
+
+t137081 finished on node004; t137082 on node006. Pulled248,367bytes of compact
+JSON only. Exact contract, budgets, seeds, paired means and update RMS pass.
+Total3,840episodes/4,608,000steps; no checkpoint or trace pulled.
+
+| Period | Mean wide increment | Mean local increment | Sampled wide | Sampled local |
+| --- | ---: | ---: | ---: | ---: |
+| 50 | +0.116027 | +0.146525 | +0.054345 | +0.050964 |
+| 100 | -0.114989 | -0.100711 | +0.017012 | +0.013702 |
+
+Local improves mean over wide on average, but only two of four root-periods;
+both period100 local mean increments are negative(-0.001039/-0.200382).
+Query-gradient wide/local cosines are0.893842-0.944620. At100, even-response
+RMS falls0.316133/0.331456 to0.020071/0.020064, while local noise-fold cosines
+remain0.112662/0.123746. Curvature is reduced without stable learning transfer;
+do not adopt local probes as a confirmed winner. Next: same-label raw392D versus
+existing causal26D update conditioning, both probe caches, no new queries.
+
 ## Limitations
 
 Negative even response alone is not evidence that the central gradient is biased;
