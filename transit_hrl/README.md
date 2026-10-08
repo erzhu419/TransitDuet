@@ -4,8 +4,18 @@ This directory is the isolated workspace for the general Freq-HRL direction.
 Existing `FreqDuet/` and `transit_duet/` code should be treated as read-only
 references unless a file is intentionally copied into this tree first.
 
-The active research mainline is now **plan-validity qualification for
-goal-conditioned HRL**:
+The active research mainline is **mechanism-preserving native Transit**.
+`native_freqduet` preserves the current FreqDuet simulator, physical actions,
+rewards and RE-SAC backend while using the extracted shared count-harmonic
+encoder. Stage145 qualifies feature and learned-control equivalence before a
+matched native frequency-routing experiment. See
+`md/freq_hrl_stage145_native_preservation_2026-10-09.md`.
+
+PointMaze is frozen at Stage144. Its upper-conditioning gains are not a
+positive frequency-routing or joint-HRL result. The remainder of this README
+records the earlier protocols and their evidence boundaries chronologically.
+
+The earlier **plan-validity qualification for goal-conditioned HRL** used:
 
 - the upper policy emits a state-space goal or plan at a physical-time macro
   interval;

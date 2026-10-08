@@ -1,0 +1,50 @@
+{
+  "contract": {
+    "artifacts": "compact_JSON_only_temporary_arrays_removed_no_checkpoints",
+    "candidate": "same_runner_using_freq_hrl_count_harmonic",
+    "comparison": "all_non_wall_episode_fields_actions_and_final_network_arrays_exact",
+    "config": "F_freqduet_harmonic_hiro",
+    "eval_episodes": 1,
+    "preflight_overrides": {
+      "demand_end_time_s": 3600,
+      "effective_trip_num": 24,
+      "evaluation_end_time_s": 5400,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "service_start_hour": 6,
+      "updates_per_episode_each_level": 2,
+      "upper_batch_size": 8
+    },
+    "purpose": "native_extraction_equivalence_not_performance_claim",
+    "reference": "preserved_native_original_count_estimator",
+    "require_learning": "both_level_update_calls_and_actor_parameter_changes",
+    "train_episodes": 2,
+    "unchanged": [
+      "physical_actions",
+      "reward",
+      "RE-SAC_backend",
+      "historical_OD_prior",
+      "log_count_RLS",
+      "feature_layout"
+    ],
+    "upper_warmup": 1
+  },
+  "protocol": "native_transit_preservation_stage145_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 2048,
+    "require_node": null
+  },
+  "seeds": [
+    37
+  ],
+  "source_revision": "972c19104e65932af49f80345be88813e4ab8d30"
+}
