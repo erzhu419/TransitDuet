@@ -38,6 +38,22 @@ performance CI is computed from this short preflight.
 Full development is registered as `t137265` through `t137288`: 24 independent
 method/root tasks, 7,680 native episodes, dynamically scheduled on node001-006.
 
+## Completed Development
+
+All 24 tasks are done and passed matched qualification: 471,398,400 native
+ticks, 2,700 upper and 9,000 lower updates per cell. Correct-minus-history
+service cost is +0.009188, adjusted CI [-0.029595, +0.056931];
+correct-minus-swapped is +0.017403, CI [-0.011361, +0.052311]. Both are
+inconclusive, with slightly worse point estimates in all five regimes.
+Restricted wait differences are +0.012456 and +0.002025 minutes respectively.
+The correct upper is smoother, but lower LF power remains 0.985689 and no
+service advantage follows. Training curves improve in all groups; neither
+missing updates nor an untrained actor explains the null result.
+
+Next: frozen-checkpoint input-scale, saturation and frequency-dependence
+diagnostics, plus neutral-upper/zero-holding interventions. Do not expand
+seeds or change the registered outcome on these results.
+
 ## Limitations
 
 The controls retain a common upper forecast, so this is conditional routing

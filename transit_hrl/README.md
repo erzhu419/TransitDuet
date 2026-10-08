@@ -8,8 +8,9 @@ The active research mainline is **mechanism-preserving native Transit**.
 `native_freqduet` preserves the current FreqDuet simulator, physical actions,
 rewards and RE-SAC backend while using the extracted shared count-harmonic
 encoder. Stage145 qualified feature and learned-control equivalence on two
-roots with zero action/network differences. Stage146 registers a matched native
-frequency-routing performance experiment. See
+roots with zero action/network differences. Stage146 completed matched native
+frequency-routing development on eight roots: both service-cost comparisons
+are inconclusive, with slightly worse correct-routing point estimates. See
 `md/freq_hrl_stage145_native_preservation_2026-10-09.md` and
 `md/freq_hrl_stage146_native_routing_2026-10-09.md`.
 

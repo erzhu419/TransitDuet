@@ -1,0 +1,295 @@
+{
+  "comparisons": {
+    "raw_history_common": {
+      "family_adjusted_primary_ci": [
+        -0.029595343749999947,
+        0.056930506250000124
+      ],
+      "primary_direction": "negative_is_better",
+      "primary_mean_delta": 0.00918811875000014,
+      "primary_status": "inconclusive",
+      "root_deltas": [
+        {
+          "avg_wait_observed_min": -0.00409999999999755,
+          "ep_reward": -4.752449999999953,
+          "headway_cv": 0.0010650000000000104,
+          "lower_lf_drift_ratio": -9.006064783201317e-05,
+          "passenger_unserved_rate": 1.0350000000000983e-05,
+          "peak_fleet": 0.0,
+          "restricted_wait_horizon_min": -0.0007500000000000284,
+          "root": 101,
+          "service_cost_restricted": 0.0010607000000004696,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.34847854648903775
+        },
+        {
+          "avg_wait_observed_min": 0.020649999999999835,
+          "ep_reward": 13.94315000000006,
+          "headway_cv": 0.012870000000000048,
+          "lower_lf_drift_ratio": -0.00026265042230677604,
+          "passenger_unserved_rate": 5.10500000000004e-05,
+          "peak_fleet": -0.15000000000000036,
+          "restricted_wait_horizon_min": 0.03324999999999889,
+          "root": 113,
+          "service_cost_restricted": -0.04604544999999982,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.31628354390222224
+        },
+        {
+          "avg_wait_observed_min": -0.001100000000000989,
+          "ep_reward": 37.774200000000064,
+          "headway_cv": -0.006154999999999994,
+          "lower_lf_drift_ratio": 0.00016921929617053078,
+          "passenger_unserved_rate": 6.3500000000004525e-06,
+          "peak_fleet": -0.049999999999998934,
+          "restricted_wait_horizon_min": -0.0009000000000014552,
+          "root": 127,
+          "service_cost_restricted": -0.027031100000000752,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.025682165790827906
+        },
+        {
+          "avg_wait_observed_min": 0.012849999999996697,
+          "ep_reward": 61.248450000000275,
+          "headway_cv": -0.012844999999999995,
+          "lower_lf_drift_ratio": 2.8494793072098012e-05,
+          "passenger_unserved_rate": -3.0399999999998137e-05,
+          "peak_fleet": 0.1999999999999993,
+          "restricted_wait_horizon_min": 0.004199999999997317,
+          "root": 139,
+          "service_cost_restricted": 0.07077415000000054,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.026519085345631962
+        },
+        {
+          "avg_wait_observed_min": 0.009249999999999758,
+          "ep_reward": 168.14634999999998,
+          "headway_cv": -0.004744999999999999,
+          "lower_lf_drift_ratio": -7.166358747001667e-05,
+          "passenger_unserved_rate": -3.265000000000039e-05,
+          "peak_fleet": 0.3000000000000007,
+          "restricted_wait_horizon_min": -0.0006499999999984851,
+          "root": 151,
+          "service_cost_restricted": 0.12003599999999981,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.000765484033631678
+        },
+        {
+          "avg_wait_observed_min": 0.009949999999999903,
+          "ep_reward": -30.23765000000003,
+          "headway_cv": 0.006579999999999947,
+          "lower_lf_drift_ratio": 7.811181561334646e-05,
+          "passenger_unserved_rate": 1.2400000000000952e-05,
+          "peak_fleet": -0.09999999999999964,
+          "restricted_wait_horizon_min": 0.013550000000000395,
+          "root": 163,
+          "service_cost_restricted": -0.025333500000000342,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.006237016285514536
+        },
+        {
+          "avg_wait_observed_min": 0.009100000000000996,
+          "ep_reward": 124.90035000000012,
+          "headway_cv": 0.012615000000000043,
+          "lower_lf_drift_ratio": -0.00011285477665468058,
+          "passenger_unserved_rate": 0.00010389999999999878,
+          "peak_fleet": -0.15000000000000036,
+          "restricted_wait_horizon_min": 0.041349999999999554,
+          "root": 179,
+          "service_cost_restricted": -0.04522199999999943,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.005670523677336456
+        },
+        {
+          "avg_wait_observed_min": 0.010450000000000514,
+          "ep_reward": -19.756650000000263,
+          "headway_cv": 0.003474999999999978,
+          "lower_lf_drift_ratio": -0.00017896034515552106,
+          "passenger_unserved_rate": 2.5000000000371947e-07,
+          "peak_fleet": 0.05000000000000071,
+          "restricted_wait_horizon_min": 0.009600000000002495,
+          "root": 191,
+          "service_cost_restricted": 0.025266150000000653,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.025333656809825165
+        }
+      ],
+      "scenario_primary_deltas": {
+        "high_noise": 0.0023592187499999473,
+        "hour_burst": 0.0025264375000000616,
+        "low_noise": 0.02795396875000003,
+        "ood_period": 0.0072966250000000565,
+        "persistent_shift": 0.005804343750000329
+      },
+      "secondary_mean_deltas": {
+        "avg_wait_observed_min": 0.008381249999999896,
+        "ep_reward": 43.90821875000003,
+        "headway_cv": 0.0016075000000000048,
+        "lower_lf_drift_ratio": -5.5045484320379034e-05,
+        "passenger_unserved_rate": 1.5156250000000846e-05,
+        "peak_fleet": 0.012500000000000178,
+        "restricted_wait_horizon_min": 0.012456249999999836,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": -0.09437125279175347
+      }
+    },
+    "swapped_common": {
+      "family_adjusted_primary_ci": [
+        -0.011360506250000013,
+        0.05231069937499988
+      ],
+      "primary_direction": "negative_is_better",
+      "primary_mean_delta": 0.017402868749999884,
+      "primary_status": "inconclusive",
+      "root_deltas": [
+        {
+          "avg_wait_observed_min": 0.004050000000001219,
+          "ep_reward": -40.435399999999845,
+          "headway_cv": 0.007769999999999971,
+          "lower_lf_drift_ratio": 2.213794137373437e-05,
+          "passenger_unserved_rate": 8.400000000000421e-06,
+          "peak_fleet": 0.0,
+          "restricted_wait_horizon_min": 0.006099999999999994,
+          "root": 101,
+          "service_cost_restricted": 0.008442700000000247,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.004116837082108315
+        },
+        {
+          "avg_wait_observed_min": 0.006350000000001188,
+          "ep_reward": 22.079749999999876,
+          "headway_cv": 0.004315000000000013,
+          "lower_lf_drift_ratio": -0.0001604790917910659,
+          "passenger_unserved_rate": 2.9299999999999465e-05,
+          "peak_fleet": -0.09999999999999964,
+          "restricted_wait_horizon_min": 0.014450000000000074,
+          "root": 113,
+          "service_cost_restricted": -0.035742299999999894,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.0013803511951782513
+        },
+        {
+          "avg_wait_observed_min": -9.999999999976694e-05,
+          "ep_reward": -36.65259999999989,
+          "headway_cv": 0.001669999999999977,
+          "lower_lf_drift_ratio": 4.154129730016276e-05,
+          "passenger_unserved_rate": 6.200000000001343e-06,
+          "peak_fleet": -0.049999999999998934,
+          "restricted_wait_horizon_min": -0.0005499999999987182,
+          "root": 127,
+          "service_cost_restricted": -0.019189300000000742,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.001894046425941143
+        },
+        {
+          "avg_wait_observed_min": -0.004300000000004189,
+          "ep_reward": 31.96650000000045,
+          "headway_cv": -0.00607000000000002,
+          "lower_lf_drift_ratio": 7.623795908373587e-05,
+          "passenger_unserved_rate": 2.200000000002547e-06,
+          "peak_fleet": 0.05000000000000071,
+          "restricted_wait_horizon_min": -0.0037999999999982492,
+          "root": 139,
+          "service_cost_restricted": 0.01441440000000016,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.000641831303433429
+        },
+        {
+          "avg_wait_observed_min": -0.001549999999998164,
+          "ep_reward": 54.30634999999984,
+          "headway_cv": -0.005924999999999986,
+          "lower_lf_drift_ratio": -0.00010031871262183856,
+          "passenger_unserved_rate": -2.790000000000084e-05,
+          "peak_fleet": 0.25,
+          "restricted_wait_horizon_min": -0.00975000000000037,
+          "root": 151,
+          "service_cost_restricted": 0.09712684999999932,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 8.705448674544759e-05
+        },
+        {
+          "avg_wait_observed_min": 0.009900000000001796,
+          "ep_reward": -14.522700000000214,
+          "headway_cv": 0.002534999999999954,
+          "lower_lf_drift_ratio": -0.0001360336759527181,
+          "passenger_unserved_rate": 1.2300000000001546e-05,
+          "peak_fleet": -0.049999999999998934,
+          "restricted_wait_horizon_min": 0.013149999999997775,
+          "root": 163,
+          "service_cost_restricted": -0.008583800000000252,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.00120723560707438
+        },
+        {
+          "avg_wait_observed_min": 0.0016000000000016001,
+          "ep_reward": 19.632949999999937,
+          "headway_cv": -0.00026999999999999247,
+          "lower_lf_drift_ratio": 5.566758487096646e-05,
+          "passenger_unserved_rate": -2.4900000000003045e-05,
+          "peak_fleet": 0.15000000000000036,
+          "restricted_wait_horizon_min": -0.006149999999996325,
+          "root": 179,
+          "service_cost_restricted": 0.061495550000000065,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.0015355273317014624
+        },
+        {
+          "avg_wait_observed_min": 0.0038499999999981327,
+          "ep_reward": -36.907900000000154,
+          "headway_cv": 0.00017499999999998073,
+          "lower_lf_drift_ratio": -0.00012495538910217707,
+          "passenger_unserved_rate": -3.6999999999953737e-06,
+          "peak_fleet": 0.05000000000000071,
+          "restricted_wait_horizon_min": 0.0027500000000024727,
+          "root": 191,
+          "service_cost_restricted": 0.021258850000000162,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": -0.005285445359772492
+        }
+      ],
+      "scenario_primary_deltas": {
+        "high_noise": 0.013941687499999966,
+        "hour_burst": 0.0008465937499999299,
+        "low_noise": 0.026958781250000022,
+        "ood_period": 0.018835718750000063,
+        "persistent_shift": 0.02643156250000006
+      },
+      "secondary_mean_deltas": {
+        "avg_wait_observed_min": 0.002475000000000227,
+        "ep_reward": -0.06663125000000036,
+        "headway_cv": 0.0005249999999999873,
+        "lower_lf_drift_ratio": -4.077526085490002e-05,
+        "passenger_unserved_rate": 2.3750000000075794e-07,
+        "peak_fleet": 0.03750000000000053,
+        "restricted_wait_horizon_min": 0.0020250000000008317,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": -0.001996777477308003
+      }
+    }
+  },
+  "native_steps": 471398400,
+  "optimizer_roots": [
+    101,
+    113,
+    127,
+    139,
+    151,
+    163,
+    179,
+    191
+  ],
+  "parameter_counts": {
+    "lower": {
+      "policy_net": 6466,
+      "q_net": 106250
+    },
+    "upper": {
+      "policy_net": 5378,
+      "q_net": 95370
+    }
+  },
+  "preflight": false,
+  "protocol": "native_transit_routing_stage146_v1",
+  "software_qualified": true,
+  "stage": "development_not_independent_confirmation"
+}
