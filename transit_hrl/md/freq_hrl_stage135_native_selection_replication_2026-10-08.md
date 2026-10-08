@@ -31,6 +31,16 @@ validation episodes/root. Six17CPU/12GiB dynamic tasks on node001-node006;
 no hard pins or waiting aggregation task. Four candidate weights/root stay
 server-side; only compact JSON pulled.
 
+## Run Receipt
+
+Implementation `ea612cdb44`, registration `eea3ba405f`;12 related tests passed.
+The six completed Stage131 source cells and12 upper files are available on
+node004; the native runner checks checkpoint protocol and source fits on load.
+Run `pointmaze_native_selection_replication_stage135_frozen_20261008_r1`:
+`t136631-t136636` accepted, ordered by the six roots above; initial snapshot
+queued. Exact task specifications, seed roles, ten endpoints, budget and compact
+scheduler receipt are saved with the run. No Stage135 performance result yet.
+
 ## Limitations
 
 Previously used source roots: internal frozen-method replication, not untouched
