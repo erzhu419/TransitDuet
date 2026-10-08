@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Schedule frozen native diagnostics with shared server-side checkpoints."""
+"""Schedule replay recovery and frozen native diagnostics on the CPU pool."""
 
 import argparse
 import json
@@ -19,18 +19,22 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 
 def task_specification(run_name, method, root, *, preflight):
     task = routing_task(run_name, method, root, preflight=preflight)
-    command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/run_native_transit_diagnostics_stage147.py",
+    # The preflight restores root101. Other cells need the same recorded replay;
+    # never stage a results parent, because scheduler input sync uses --delete.
+    script = "scripts/restore_native_transit_stage146_checkpoint.py" if (
+        preflight or (method, root) != ("correct", spec.ROOTS[0])) else (
+        "scripts/run_native_transit_diagnostics_stage147.py")
+    command = [DEFAULT_LINUX_PYTHON, "-u", script,
         "--method", method, "--seed", str(root), "--output", str(Path(task["result_dir"]) / "result.json")]
     if preflight:
         command.append("--preflight")
     task.update(project=spec.EXPERIMENT_PROTOCOL,
         description=f"Freq-HRL frozen native diagnostics {method} seed{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{method}/{root}",
-        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{'preflight' if preflight else 'diagnostics'}",
+        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{'preflight_recovery' if preflight else 'recovery_diagnostics'}",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
             "MKL_NUM_THREADS=1 FREQDUET_TORCH_THREADS=1 CUDA_VISIBLE_DEVICES= " + shlex.join(command),
-        ram_mb=2048, cpu_training_justification="Frozen native evaluation only; server-side final checkpoint reuse, no training or checkpoint downloads.")
-    task["stage_input_paths"].append(str(ROOT / "results" / spec.SOURCE_RUN / "cells"))
+        ram_mb=3072, cpu_training_justification="Exact recorded native training replay to recover lost server checkpoints, then frozen diagnostic evaluation; no new optimizer roots or checkpoint downloads.")
     return task
 
 
@@ -62,7 +66,7 @@ def main():
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "cells": [{"method": method, "root": root} for method, root in pairs],
         "tasks": len(tasks), "scheduler": {"allowed_nodes": tasks[0]["allowed_nodes"],
-            "require_node": None, "cpu_per_task": 1, "ram_mb_per_task": 2048},
+            "require_node": None, "cpu_per_task": 1, "ram_mb_per_task": 3072},
     })
     execute_bulk(tasks, dry_run=args.dry_run, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{args.run_name}")
 

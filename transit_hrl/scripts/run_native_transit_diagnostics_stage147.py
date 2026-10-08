@@ -19,7 +19,7 @@ from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_js
 from scripts import run_native_transit_routing_stage146 as routing
 from scripts.run_native_transit_preservation_stage145 import NATIVE, model_arrays
 
-EXPERIMENT_PROTOCOL = "native_transit_diagnostics_stage147_v1"
+EXPERIMENT_PROTOCOL = "native_transit_diagnostics_stage147_v2"
 SOURCE_RUN = "native_transit_routing_stage146_development_20261009_r1"
 ROOTS = routing.ROOTS
 METHODS = routing.METHODS
@@ -35,6 +35,8 @@ def contract(preflight):
         "purpose": "frozen_mechanism_diagnosis_not_new_performance_claim",
         "source_protocol": routing.EXPERIMENT_PROTOCOL, "source_run": SOURCE_RUN,
         "checkpoint_ep": 299, "training_updates": 0,
+        "checkpoint_provenance": "recorded_training_replay_after_staging_loss",
+        "replay_verification": ["training_demand_counts", "recorded_training_curve", "updates", "actor_change_max_abs"],
         "scenarios": ["low_noise"] if preflight else list(routing.SCENARIOS),
         "scene_seeds": "first_registered_stage146_scene_per_root_and_regime",
         "conditions": {method: list(conditions(method, preflight=preflight)) for method in METHODS},

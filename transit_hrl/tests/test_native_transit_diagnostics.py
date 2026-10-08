@@ -10,6 +10,8 @@ from freq_hrl.domains.transit.native_diagnostics import NativePolicyProbe, FEATU
 from scripts import run_native_transit_diagnostics_stage147 as spec
 from scripts import run_native_transit_routing_stage146 as routing
 from scripts.analyze_native_transit_diagnostics_stage147 import summarize
+from scripts.restore_native_transit_stage146_checkpoint import verify_training_row
+from scripts.submit_native_transit_diagnostics_stage147_scheduleurm import task_specification
 
 
 class NativeDiagnosticsTest(unittest.TestCase):
@@ -129,6 +131,27 @@ class NativeDiagnosticsTest(unittest.TestCase):
                 rows.pop()
             with self.assertRaisesRegex(ValueError, "Incomplete"):
                 summarize(cells)
+
+    def test_scheduler_stages_code_not_mutable_results_or_checkpoints(self):
+        for preflight in (True, False):
+            task = task_specification("test_native_diagnostics", "correct", 101, preflight=preflight)
+            self.assertEqual([p.split("/")[-1] for p in task["stage_input_paths"]],
+                             ["scripts", "freq_hrl", "native_freqduet"])
+            self.assertIsNone(task["require_node"])
+            self.assertEqual(len(task["allowed_nodes"]), 6)
+            self.assertEqual("restore_native_transit_stage146_checkpoint.py" in task["cmd"], preflight)
+        task = task_specification("test_native_diagnostics", "swapped_common", 113, preflight=False)
+        self.assertIn("restore_native_transit_stage146_checkpoint.py", task["cmd"])
+
+    def test_recovery_rejects_changed_recorded_training(self):
+        row = {key: 1 for key in ("ep", "N_fleet", "simulation_end_time_s", "done_reason",
+            "passengers_generated", "passengers_unserved", "trips_completed", "ep_steps", *routing.METRICS)}
+        source = {"training_demand_counts": [1, 1]}
+        verify_training_row(row, source, {1: dict(row)})
+        with self.assertRaisesRegex(RuntimeError, "changed demand"):
+            verify_training_row(dict(row, passengers_generated=2), source, {1: dict(row)})
+        with self.assertRaisesRegex(RuntimeError, "training outcome"):
+            verify_training_row(dict(row, ep_reward=2), source, {1: dict(row)})
 
 
 if __name__ == "__main__":
