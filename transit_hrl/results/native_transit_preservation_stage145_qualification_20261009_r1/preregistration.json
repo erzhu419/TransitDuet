@@ -1,0 +1,42 @@
+{
+  "contract": {
+    "artifacts": "compact_JSON_only_temporary_arrays_removed_no_checkpoints",
+    "candidate": "same_runner_using_freq_hrl_count_harmonic",
+    "comparison": "all_non_wall_episode_fields_actions_and_final_network_arrays_exact",
+    "config": "F_freqduet_harmonic_hiro",
+    "eval_episodes": 2,
+    "preflight_overrides": {},
+    "purpose": "native_extraction_equivalence_not_performance_claim",
+    "reference": "preserved_native_original_count_estimator",
+    "require_learning": "both_level_update_calls_and_actor_parameter_changes",
+    "train_episodes": 32,
+    "unchanged": [
+      "physical_actions",
+      "reward",
+      "RE-SAC_backend",
+      "historical_OD_prior",
+      "log_count_RLS",
+      "feature_layout"
+    ],
+    "upper_warmup": 30
+  },
+  "protocol": "native_transit_preservation_stage145_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "seeds": [
+    37,
+    49
+  ],
+  "source_revision": "a45575e3db45a145e6e6577201ed2afb963fcc52"
+}

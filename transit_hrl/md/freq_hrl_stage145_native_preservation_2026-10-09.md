@@ -38,6 +38,10 @@ arrays compared. Upper/lower updates were 2/4 per implementation, both actors
 changed, and all comparisons were exact (maximum difference 0). Local focused
 coverage is 15 passing tests, including the extracted negative-binomial path.
 
+Full qualification is running as `t137142` (seed37, node004) and `t137143`
+(seed49, node006), dynamically placed across the six-node pool. Its 136 native
+episodes are still pending evidence; the short preflight is not a substitute.
+
 ## Next
 
 After native extraction qualifies, register a matched-budget native
