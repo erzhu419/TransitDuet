@@ -24,6 +24,15 @@ Per root32replay+32collection+1,152queries+704evaluation=1,920episodes,
 3,840episodes/4,608,000steps. Prior queries remain separately accounted.
 Sixteen workers+parent/12GiB, dynamic node001-node006; compact JSON only.
 
+## Run Receipt
+
+Implementation/results commitbc877d1a5f; preregistration commit746057d7ae,
+pushed before submission. Fifteen related focused tests passed. Metadata reads
+confirmed both Stage141 source cells and all four selected warm upper files.
+Run: pointmaze_local_option_probe_stage142_probe_20261008_r1.
+t137081/root410037 and t137082/root410049 were queued at receipt time, with
+no assigned node. Preregistration and compact dispatch receipt are retained.
+
 ## Limitations
 
 Negative even response alone is not evidence that the central gradient is biased;
