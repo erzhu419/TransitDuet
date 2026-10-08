@@ -35,6 +35,27 @@ t136990/root410037 and t136991/root410049 were queued at receipt time;
 neither had an assigned node. Dynamic node001-node006, no aggregator.
 Preregistration and compact dispatch receipt are retained in the run directory.
 
+## Completed Result
+
+t136990 finished on node005; t136991 on node001. Pulled297,302bytes of compact
+JSON only. Exact budgets, registered seeds, paired means and mean-step RMS pass.
+Total3,968episodes/4,761,600steps; no checkpoint or native trace pulled.
+
+Equal-root Fisher-plus return increment over warm:
+
+| Period | Mean std0.15 | Mean std0.05 | Sampled std0.15 | Sampled std0.05 |
+| --- | ---: | ---: | ---: | ---: |
+| 50 | +0.144867 | +0.156576 | +0.022887 | +0.067652 |
+| 100 | -0.077936 | -0.067526 | +0.017315 | +0.032048 |
+
+Reduced std improves the learning increment at all four root-periods in both
+deployment modes, but mean still fails root410049/period100(-0.149377).
+Warm sampled-minus-mean losses shrink from2.439557/4.115205 to2.152174/2.676937.
+Even reduced-std Fisher remains below forecast in sampled deployment by
+0.329550/1.954542 at50/100. Noise reduction helps, not a closed learning claim.
+Next: mean-trajectory antithetic option queries versus replayed stochastic
+credit, fixed step and fresh evaluation, with added query cost explicit.
+
 ## Limitations
 
 Mean-output RMS matches on each training-state batch, not decoded physical control
