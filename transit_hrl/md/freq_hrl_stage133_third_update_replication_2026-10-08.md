@@ -34,6 +34,29 @@ Run `pointmaze_third_update_replication_stage133_frozen_20261008_r1`:
 queued. Exact task specifications, seed roles and budgets are preregistered;
 compact dispatch receipt saved with the run. No result or CI is available yet.
 
+## Completed Result
+
+All six tasks done;37,824new episodes/45,388,800steps,189,705bytes fetched.
+Root-cluster bootstrap with the registered six-endpoint correction:
+
+| Period | Refresh minus forecast | Refresh minus two_step | Refresh minus radial control |
+|---|---|---|---|
+|50|+1.692570 [1.262723,2.078879]|+0.296363 [-0.003752,0.537638]|-0.123952 [-0.439070,0.312238]|
+|100|+1.013725 [0.761035,1.238418]|+0.275861 [0.133304,0.407301]|-0.056256 [-0.288838,0.212736]|
+
+Forecast material gates pass at both periods. Third-step incremental gain passes
+at100 only, so the composite continuation gate remains not_closed. Relabeling
+superiority is not supported at either period. Retain root410101's period50
+increment-0.134374 and all negative radial-control differences. Do not lower
+the threshold or add a fourth update to claim a passing composite result.
+
+At410061/410089/410101, both-period calibration already favored radial
+continuation. At410101/50, the quadratic fit predicts+0.082177 but both
+crossfit gains are negative; the fresh evaluation increment is-0.134374.
+Stage134 tests candidate selection with separately held-out native validation
+at the actual pooled-fit weights, followed by fresh evaluation. No retrospective
+selection result from Stage133 is independent confirmation.
+
 ## Limitations
 
 These six roots were used in earlier experiments and two previous replications;
