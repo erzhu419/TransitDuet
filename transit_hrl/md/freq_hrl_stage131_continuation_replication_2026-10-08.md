@@ -22,6 +22,14 @@ New cost/root:4,896label+320calibration+192crossfit+896evaluation=6,304episodes/
 16workers+parent/12GiB, dynamic node001-node006; no waiting aggregation job.
 Only compact JSON pulled; four final upper weights/root stay server-side.
 
+## Run Receipt
+
+Implementation `5549f583d5`, registration `01154fb6ec`; eight tests passed.
+All12 learned source uppers were read on node004 with matching source fits.
+Run `pointmaze_continuation_replication_stage131_frozen_20261008_r1`:
+`t136526-t136531` accepted, ordered by the six roots above. Task specifications,
+fresh seed roles, new/inherited budgets and scheduler receipt are saved with the run.
+
 ## Limitations
 
 These source policies were used in earlier research and the one-step replication;
