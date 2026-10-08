@@ -32,8 +32,29 @@ identity, all three exact KL radii, cached label/update replay, shared-forecast
 accounting, noise pairing and the reduced native runner. The four selected warm
 upper files remain available on node004. Run
 `pointmaze_score_geometry_stage139_probe_20261008_r1`: `t136981` root410037 is
-running on node005; `t136982` root410049 is running on node001. Nodes are dynamic,
+DONE on node005; `t136982` root410049 is DONE on node001. Nodes are dynamic,
 not pinned. No waiting aggregator, checkpoint pull or local native training.
+
+## Result And Next Step
+
+Both cells pass accounting/replay/pairing:1,984episodes/2,380,800steps;
+231,656bytes fetched. Equal-root return increments over warm:
+
+| Period | Mean Adam | Mean score | Mean Fisher | Sampled Fisher | Warm sampled - mean |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 50 | -0.023746 | -0.078600 | 0.114565 | 0.021511 | -2.576071 |
+| 100 | 0.034907 | 0.010362 | 0.020063 | 0.029585 | -4.965593 |
+
+Fisher improves sampled return in all four root-periods, but mean deployment in
+only three:root410037/period100 is-0.062834. It is not a stable gain or confirmation.
+Fisher and raw-score parameter directions have cosine0.012-0.062; Adam/score
+cosine0.525-0.573. Positive local loss descent does not guarantee native gain.
+The exploration penalty is much larger than the incremental learning gain.
+
+Stage140 compares std0.15/0.05 with new paired scenarios and freshly queried
+single-option credits. Keep the same mean-output RMS update, rather than equal
+KL across different stds:radius scales with inverse variance. Retain both signs,
+mean/sampled evaluation and the fixed strong lower. No evaluation winner or CI.
 
 ## Limitations
 
