@@ -30,6 +30,11 @@ secondary. Grouped qualification requires matching network sizes, updates,
 clocks and exogenous passenger realizations. Only compact JSON is downloaded;
 final inference checkpoints remain in server-side sibling artifact directories.
 
+Seventeen focused tests passed. Three-control preflight `t137220`/`t137221`/
+`t137222` passed grouped qualification: 9 native episodes, 48,600 ticks, identical
+network sizes, exogenous demand and 2/4 upper/lower updates per cell. No
+performance CI is computed from this short preflight.
+
 ## Limitations
 
 The controls retain a common upper forecast, so this is conditional routing

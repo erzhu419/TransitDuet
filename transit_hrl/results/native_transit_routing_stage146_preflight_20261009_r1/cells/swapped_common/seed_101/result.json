@@ -1,0 +1,143 @@
+{
+  "actor_change_max_abs": {
+    "lower": 0.001203089952468872,
+    "upper": 0.0006004124879837036
+  },
+  "actor_dims": {
+    "lower": 33,
+    "upper": 16
+  },
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_and_server_only_final_inference_checkpoint",
+    "checkpoint": "last_training_episode_no_selection",
+    "demand_end_time_s": 3600,
+    "evaluation_episodes_per_scenario": 1,
+    "evaluation_fleet": 12,
+    "evaluation_scenarios": [
+      "low_noise"
+    ],
+    "independence_unit": "optimizer_root_with_disjoint_paired_eval_scenarios",
+    "methods": [
+      "correct",
+      "raw_history_common",
+      "swapped_common"
+    ],
+    "preflight": true,
+    "preflight_overrides": {
+      "effective_trip_num": 24,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "updates_per_episode": 2,
+      "upper_batch_size": 8
+    },
+    "primary": "equal_scenario_mean_service_cost_restricted_correct_minus_control",
+    "primary_controls": [
+      "raw_history_common",
+      "swapped_common"
+    ],
+    "shared_upper_slots": [
+      "LF_forecast",
+      "HF_energy",
+      "OD_entropy",
+      "OD_HF_energy"
+    ],
+    "stage": "development_not_independent_confirmation",
+    "statistics": "paired_optimizer_root_bootstrap_10000_two_contrasts_Bonferroni",
+    "train_episodes": 2,
+    "training_clock_s": 5400,
+    "upper_warmup": 1
+  },
+  "evaluation": [
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 7.379,
+      "done_reason": "evaluation_horizon",
+      "ep": 2,
+      "ep_reward": -229.03,
+      "ep_steps": 414,
+      "headway_cv": 0.1924,
+      "lower_lf_drift_ratio": 0.8436142349703092,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1496,
+      "passengers_unserved": 0,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 7.379,
+      "scenario": "low_noise",
+      "scene_seed": 900010100,
+      "service_cost_restricted": 3.138719,
+      "simulation_end_time_s": 5400,
+      "trip_completion_rate": 0.708333,
+      "trips_completed": 17,
+      "upper_hf_power_ratio": 0.04337624935776341
+    }
+  ],
+  "method": "swapped_common",
+  "native_steps": 16200,
+  "parameter_counts": {
+    "lower": {
+      "policy_net": 6466,
+      "q_net": 106250
+    },
+    "upper": {
+      "policy_net": 5378,
+      "q_net": 95370
+    }
+  },
+  "passed": true,
+  "protocol": "native_transit_routing_stage146_v1",
+  "seed": 101,
+  "training_curve": [
+    {
+      "N_fleet": 9,
+      "avg_wait_observed_min": 10.463,
+      "done_reason": "evaluation_horizon",
+      "ep": 0,
+      "ep_reward": -326.307,
+      "ep_steps": 382,
+      "headway_cv": 0.4295,
+      "lower_lf_drift_ratio": 0.8337566813536857,
+      "passenger_unserved_rate": 0.008197,
+      "passengers_generated": 1586,
+      "passengers_unserved": 13,
+      "peak_fleet": 12,
+      "restricted_wait_horizon_min": 10.657,
+      "service_cost_restricted": 4.619493,
+      "simulation_end_time_s": 5400,
+      "trip_completion_rate": 0.583333,
+      "trips_completed": 14,
+      "upper_hf_power_ratio": 0.0
+    },
+    {
+      "N_fleet": 14,
+      "avg_wait_observed_min": 8.8,
+      "done_reason": "evaluation_horizon",
+      "ep": 1,
+      "ep_reward": -282.701,
+      "ep_steps": 409,
+      "headway_cv": 0.2684,
+      "lower_lf_drift_ratio": 0.8445330645154885,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1773,
+      "passengers_unserved": 0,
+      "peak_fleet": 16,
+      "restricted_wait_horizon_min": 8.8,
+      "service_cost_restricted": 2.892478,
+      "simulation_end_time_s": 5400,
+      "trip_completion_rate": 0.708333,
+      "trips_completed": 17,
+      "upper_hf_power_ratio": 0.7014894958419595
+    }
+  ],
+  "training_demand_counts": [
+    1586,
+    1773
+  ],
+  "updates": {
+    "lower": 4,
+    "upper": 2
+  }
+}
