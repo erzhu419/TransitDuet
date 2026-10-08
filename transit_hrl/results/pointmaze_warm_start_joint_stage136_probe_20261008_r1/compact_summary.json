@@ -1,0 +1,222 @@
+{
+  "cost": {
+    "checkpoint_writes": 0,
+    "collection_episodes": 64,
+    "credit_checks": 64,
+    "evaluation_episodes": 768,
+    "lower_actor_optimizer_steps": 304,
+    "lower_checkpoint_loads": 4,
+    "lower_diagnostic_gradient_batches": 160,
+    "lower_value_optimizer_steps": 304,
+    "native_donor_response_calls": 2304000,
+    "native_episodes": 960,
+    "native_lower_calls": 1152000,
+    "native_steps": 1152000,
+    "native_trace_writes": 0,
+    "native_upper_calls": 11520,
+    "planning_fits": 16320,
+    "planning_reference_calls": 1152000,
+    "planning_renewals": 17280,
+    "ppo_update_calls": 16,
+    "source_cell_loads": 2,
+    "source_clone_loads": 4,
+    "training_comparator_episodes": 128,
+    "upper_actor_optimizer_steps": 16,
+    "upper_checkpoint_loads": 4,
+    "upper_diagnostic_gradient_batches": 16,
+    "upper_value_optimizer_steps": 16
+  },
+  "diagnosis": "Unchanged learned upper retains gain; ordinary upper PPO update is harmful at every root and period; joint interaction partly offsets loss. Attribution is descriptive, not a causal proof that a baseline or trust-region fix succeeds.",
+  "fetched_bytes": 65540,
+  "kind": "two_root_descriptive_first_update_diagnosis_not_confirmation",
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "periods": {
+    "100": {
+      "effects": {
+        "joint_interaction": {
+          "mean": 0.7744515121844913,
+          "root_means": [
+            0.9791307900551658,
+            0.5697722343138167
+          ]
+        },
+        "joint_minus_joint_blinded": {
+          "mean": -1.182133155813883,
+          "root_means": [
+            -1.8615928511355335,
+            -0.5026734604922325
+          ]
+        },
+        "joint_minus_lower_only": {
+          "mean": -2.008211386254864,
+          "root_means": [
+            -2.979412633093773,
+            -1.0370101394159548
+          ]
+        },
+        "joint_minus_source_forecast": {
+          "mean": -1.5604403629406534,
+          "root_means": [
+            -2.0864845841583772,
+            -1.0343961417229295
+          ]
+        },
+        "joint_minus_upper_only": {
+          "mean": 0.400642579259479,
+          "root_means": [
+            0.7135481639493264,
+            0.08773699456963158
+          ]
+        },
+        "joint_minus_warm_start": {
+          "mean": -2.382020319179876,
+          "root_means": [
+            -3.2449952591996123,
+            -1.51904537916014
+          ]
+        },
+        "lower_only_minus_warm_start": {
+          "mean": -0.37380893292501227,
+          "root_means": [
+            -0.2655826261058394,
+            -0.48203523974418516
+          ]
+        },
+        "upper_only_minus_warm_start": {
+          "mean": -2.782662898439355,
+          "root_means": [
+            -3.9585434231489387,
+            -1.6067823737297715
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 0.8215799562392228,
+          "root_means": [
+            1.158510675041235,
+            0.48464923743721045
+          ]
+        }
+      },
+      "sampled_minus_mean": -4.162028338667518,
+      "upper_LOO_score_cosine": [
+        -0.22527857416913913,
+        -0.19717544787812794
+      ],
+      "upper_mean_rms_ratio_after_to_before": [
+        5.851961704212758,
+        6.471143244600262
+      ],
+      "upper_phase_fraction": [
+        0.9531593918800354,
+        0.9228537082672119
+      ],
+      "upper_score_cosine": [
+        -0.0280627274088829,
+        -0.42861305462504623
+      ]
+    },
+    "50": {
+      "effects": {
+        "joint_interaction": {
+          "mean": 0.6015521175048235,
+          "root_means": [
+            0.672451921606509,
+            0.530652313403138
+          ]
+        },
+        "joint_minus_joint_blinded": {
+          "mean": -0.9031307073181516,
+          "root_means": [
+            -1.0981782228956334,
+            -0.7080831917406698
+          ]
+        },
+        "joint_minus_lower_only": {
+          "mean": -2.573535632924081,
+          "root_means": [
+            -3.2163275031257115,
+            -1.9307437627224502
+          ]
+        },
+        "joint_minus_source_forecast": {
+          "mean": -1.0167664823303184,
+          "root_means": [
+            -1.3786385703819448,
+            -0.654894394278692
+          ]
+        },
+        "joint_minus_upper_only": {
+          "mean": 0.5505049202239825,
+          "root_means": [
+            0.49421267158690796,
+            0.606797168861057
+          ]
+        },
+        "joint_minus_warm_start": {
+          "mean": -2.624582830204922,
+          "root_means": [
+            -3.3945667531453125,
+            -1.8545989072645312
+          ]
+        },
+        "lower_only_minus_warm_start": {
+          "mean": -0.05104719728084106,
+          "root_means": [
+            -0.17823925001960106,
+            0.07614485545791894
+          ]
+        },
+        "upper_only_minus_warm_start": {
+          "mean": -3.1750877504289043,
+          "root_means": [
+            -3.8887794247322205,
+            -2.461396076125588
+          ]
+        },
+        "warm_start_minus_source_forecast": {
+          "mean": 1.6078163478746035,
+          "root_means": [
+            2.0159281827633677,
+            1.1997045129858392
+          ]
+        }
+      },
+      "sampled_minus_mean": -2.116522284362034,
+      "upper_LOO_score_cosine": [
+        0.08365507462460828,
+        0.16650202393792202
+      ],
+      "upper_mean_rms_ratio_after_to_before": [
+        6.451412502799194,
+        8.757886090033598
+      ],
+      "upper_phase_fraction": [
+        0.9069918990135193,
+        0.9149149060249329
+      ],
+      "upper_score_cosine": [
+        0.04518161943503068,
+        -0.58781474829557
+      ]
+    }
+  },
+  "protocol": "pointmaze_warm_start_joint_stage136_v1",
+  "scheduler_tasks": [
+    {
+      "id": "t136900",
+      "node": "node001",
+      "root": 410037,
+      "status": "done"
+    },
+    {
+      "id": "t136901",
+      "node": "node005",
+      "root": 410049,
+      "status": "done"
+    }
+  ],
+  "status": "complete"
+}
