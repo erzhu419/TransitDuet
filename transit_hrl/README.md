@@ -7,9 +7,11 @@ references unless a file is intentionally copied into this tree first.
 The active research mainline is **mechanism-preserving native Transit**.
 `native_freqduet` preserves the current FreqDuet simulator, physical actions,
 rewards and RE-SAC backend while using the extracted shared count-harmonic
-encoder. Stage145 qualifies feature and learned-control equivalence before a
-matched native frequency-routing experiment. See
-`md/freq_hrl_stage145_native_preservation_2026-10-09.md`.
+encoder. Stage145 qualified feature and learned-control equivalence on two
+roots with zero action/network differences. Stage146 registers a matched native
+frequency-routing performance experiment. See
+`md/freq_hrl_stage145_native_preservation_2026-10-09.md` and
+`md/freq_hrl_stage146_native_routing_2026-10-09.md`.
 
 PointMaze is frozen at Stage144. Its upper-conditioning gains are not a
 positive frequency-routing or joint-HRL result. The remainder of this README

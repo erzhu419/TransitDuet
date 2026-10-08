@@ -38,13 +38,15 @@ arrays compared. Upper/lower updates were 2/4 per implementation, both actors
 changed, and all comparisons were exact (maximum difference 0). Local focused
 coverage is 15 passing tests, including the extracted negative-binomial path.
 
-Full qualification is running as `t137142` (seed37, node004) and `t137143`
-(seed49, node006), dynamically placed across the six-node pool. Its 136 native
-episodes are still pending evidence; the short preflight is not a substitute.
+Full qualification completed: `t137142` (seed37, node004) and `t137143`
+(seed49, node006) both passed. Across 136 native episodes and 6,829,878 simulator
+steps, each implementation/root performed 20 upper and 960 lower updates. All
+318 episode fields and 131 action/network arrays per root matched exactly;
+maximum difference was zero. Native count-core extraction is qualified.
 
 ## Next
 
-After native extraction qualifies, register a matched-budget native
+Stage146 registers a matched-budget native
 RawHistory/correct-routing/Swapped comparison. Preserve physical actions,
 reward, clocks and learning backend; isolate frequency responsibility before
 returning to promotion, leakage or a second domain. Stage145 itself is an
