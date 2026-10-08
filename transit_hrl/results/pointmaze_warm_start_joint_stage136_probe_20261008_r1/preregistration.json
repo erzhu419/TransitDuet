@@ -1,0 +1,468 @@
+{
+  "analysis": "Retain both roots and periods; descriptive first-update decomposition and exploration cost; no confirmatory CI or automatic extension.",
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "scalar_JSON_only"
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "collection_episodes": 32,
+    "credit_checks": 32,
+    "evaluation_episodes": 384,
+    "lower_actor_optimizer_steps": 152,
+    "lower_checkpoint_loads": 2,
+    "lower_diagnostic_gradient_batches": 80,
+    "lower_value_optimizer_steps": 152,
+    "native_donor_response_calls": 1152000,
+    "native_episodes": 480,
+    "native_lower_calls": 576000,
+    "native_steps": 576000,
+    "native_trace_writes": 0,
+    "native_upper_calls": 5760,
+    "planning_fits": 8160,
+    "planning_reference_calls": 576000,
+    "planning_renewals": 8640,
+    "ppo_update_calls": 8,
+    "source_cell_loads": 1,
+    "source_clone_loads": 2,
+    "training_comparator_episodes": 64,
+    "upper_actor_optimizer_steps": 8,
+    "upper_checkpoint_loads": 2,
+    "upper_diagnostic_gradient_batches": 8,
+    "upper_value_optimizer_steps": 8
+  },
+  "contract": {
+    "artifacts": "scalar_JSON_no_checkpoint_or_trace_writes_inherited_cost_separate",
+    "credit": "unchanged_MC_minus_remaining_time_critic_LOO_only_reported_not_used",
+    "execution": "frozen_Stage112_teacher_mean_plus_bounded_Stage120_donor_reference_response_plus_bounded_learned_residual",
+    "interventions": [
+      "upper_only",
+      "lower_only",
+      "joint"
+    ],
+    "layer_isolation": "per_level_optimizer_seeds_joint_equals_separate_updates_in_parameter_space",
+    "limits": "warm_start_credit_diagnosis_not_joint_HRL_frequency_separation_or_promotion_confirmation",
+    "optimizer": {
+      "clip_ratio": 0.2,
+      "entropy": 0.0,
+      "epochs": 2,
+      "learning_rate": 0.0003,
+      "lower_std": "source_frozen",
+      "minibatch": 1024,
+      "upper_std": 0.15
+    },
+    "periods": [
+      50,
+      100
+    ],
+    "roots": [
+      410037,
+      410049
+    ],
+    "rosters": "fresh_Stage136_scenarios_and_two_noise_folds",
+    "source": "pointmaze_native_selection_replication_stage135_frozen_20261008_r1",
+    "statistics": "two_source_roots_descriptive_effects_no_confirmation_CI_or_automatic_extension",
+    "training": "one_shared_on_policy_batch_per_period_same_initial_actors_and_critics",
+    "warm_start": "Stage135_validation_selected_upper_exact_saved_fit_no_evaluation_selection"
+  },
+  "contrasts": [
+    [
+      "warm_start",
+      "source_forecast"
+    ],
+    [
+      "upper_only",
+      "warm_start"
+    ],
+    [
+      "lower_only",
+      "warm_start"
+    ],
+    [
+      "joint",
+      "warm_start"
+    ],
+    [
+      "joint",
+      "source_forecast"
+    ],
+    [
+      "joint",
+      "lower_only"
+    ],
+    [
+      "joint",
+      "upper_only"
+    ],
+    [
+      "joint",
+      "joint_blinded"
+    ]
+  ],
+  "inherited_budget": {
+    "Stage135_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 128,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15590400,
+      "native_episodes": 6496,
+      "native_policy_selections": 2,
+      "native_return_fits": 12,
+      "native_steps": 7795200,
+      "native_trace_writes": 0,
+      "native_upper_calls": 119808,
+      "optimizer_steps": 0,
+      "selection_episodes": 192,
+      "selection_pair_groups": 64,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    },
+    "earlier_source_chain": "inherited_not_zero_no_equal_total_training_cost_claim",
+    "immediate_Stage131_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15129600,
+      "native_episodes": 6304,
+      "native_return_fits": 12,
+      "native_steps": 7564800,
+      "native_trace_writes": 0,
+      "native_upper_calls": 116352,
+      "optimizer_steps": 0,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    }
+  },
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "protocol": "pointmaze_warm_start_joint_stage136_v1",
+  "run_name": "pointmaze_warm_start_joint_stage136_probe_20261008_r1",
+  "scheduler": {
+    "aggregator_task": false,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 9,
+    "ram_mb_per_task": 8192,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410037": {
+      "evaluation": [
+        136190001,
+        136190002,
+        136190003,
+        136190004,
+        136190005,
+        136190006,
+        136190007,
+        136190008,
+        136190009,
+        136190010,
+        136190011,
+        136190012,
+        136190013,
+        136190014,
+        136190015,
+        136190016,
+        136190017,
+        136190018,
+        136190019,
+        136190020,
+        136190021,
+        136190022,
+        136190023,
+        136190024,
+        136190025,
+        136190026,
+        136190027,
+        136190028,
+        136190029,
+        136190030,
+        136190031,
+        136190032
+      ],
+      "training": [
+        {
+          "noise_seeds": [
+            136110001,
+            136110002
+          ],
+          "scenario_seed": 136100001
+        },
+        {
+          "noise_seeds": [
+            136110003,
+            136110004
+          ],
+          "scenario_seed": 136100002
+        },
+        {
+          "noise_seeds": [
+            136110005,
+            136110006
+          ],
+          "scenario_seed": 136100003
+        },
+        {
+          "noise_seeds": [
+            136110007,
+            136110008
+          ],
+          "scenario_seed": 136100004
+        },
+        {
+          "noise_seeds": [
+            136110009,
+            136110010
+          ],
+          "scenario_seed": 136100005
+        },
+        {
+          "noise_seeds": [
+            136110011,
+            136110012
+          ],
+          "scenario_seed": 136100006
+        },
+        {
+          "noise_seeds": [
+            136110013,
+            136110014
+          ],
+          "scenario_seed": 136100007
+        },
+        {
+          "noise_seeds": [
+            136110015,
+            136110016
+          ],
+          "scenario_seed": 136100008
+        }
+      ]
+    },
+    "410049": {
+      "evaluation": [
+        136290001,
+        136290002,
+        136290003,
+        136290004,
+        136290005,
+        136290006,
+        136290007,
+        136290008,
+        136290009,
+        136290010,
+        136290011,
+        136290012,
+        136290013,
+        136290014,
+        136290015,
+        136290016,
+        136290017,
+        136290018,
+        136290019,
+        136290020,
+        136290021,
+        136290022,
+        136290023,
+        136290024,
+        136290025,
+        136290026,
+        136290027,
+        136290028,
+        136290029,
+        136290030,
+        136290031,
+        136290032
+      ],
+      "training": [
+        {
+          "noise_seeds": [
+            136210001,
+            136210002
+          ],
+          "scenario_seed": 136200001
+        },
+        {
+          "noise_seeds": [
+            136210003,
+            136210004
+          ],
+          "scenario_seed": 136200002
+        },
+        {
+          "noise_seeds": [
+            136210005,
+            136210006
+          ],
+          "scenario_seed": 136200003
+        },
+        {
+          "noise_seeds": [
+            136210007,
+            136210008
+          ],
+          "scenario_seed": 136200004
+        },
+        {
+          "noise_seeds": [
+            136210009,
+            136210010
+          ],
+          "scenario_seed": 136200005
+        },
+        {
+          "noise_seeds": [
+            136210011,
+            136210012
+          ],
+          "scenario_seed": 136200006
+        },
+        {
+          "noise_seeds": [
+            136210013,
+            136210014
+          ],
+          "scenario_seed": 136200007
+        },
+        {
+          "noise_seeds": [
+            136210015,
+            136210016
+          ],
+          "scenario_seed": 136200008
+        }
+      ]
+    }
+  },
+  "source_availability": {
+    "checkpoint_files": 4,
+    "completed_cells": 2,
+    "node": "node004",
+    "selected_methods": {
+      "410037": {
+        "100": "stale",
+        "50": "refresh"
+      },
+      "410049": {
+        "100": "refresh",
+        "50": "refresh"
+      }
+    }
+  },
+  "source_revision": "273f6ba6c5299d6f481d7b57530586b73ac71729",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_warm_start_joint_stage136.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 9,
+      "cpu_training_justification": "One shared on-policy round with separate upper/lower actor-critic interventions; native paired runs; no checkpoint writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage136 warm-start first PPO update root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_warm_start_joint_stage136_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_warm_start_joint_stage136_v1/warm_start_diagnosis",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_warm_start_joint_stage136_v1/pointmaze_warm_start_joint_stage136_probe_20261008_r1/selected_upper_one_round_shared_batch_actor_critic_diagnosis/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_warm_start_joint_stage136.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 9,
+      "cpu_training_justification": "One shared on-policy round with separate upper/lower actor-critic interventions; native paired runs; no checkpoint writes.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage136 warm-start first PPO update root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_warm_start_joint_stage136_v1",
+      "ram_mb": 8192,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_warm_start_joint_stage136_v1/warm_start_diagnosis",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_warm_start_joint_stage136_probe_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_warm_start_joint_stage136_v1/pointmaze_warm_start_joint_stage136_probe_20261008_r1/selected_upper_one_round_shared_batch_actor_critic_diagnosis/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ]
+}
