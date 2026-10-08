@@ -87,7 +87,7 @@ class NativeTransitRoutingTest(unittest.TestCase):
         self.assertEqual(configs[0], configs[1])
         self.assertEqual(configs[0], configs[2])
         self.assertFalse(configs[0]["env"]["allow_early_finish"])
-        self.assertEqual(configs[0]["env"]["evaluation_end_time_s"], 60000)
+        self.assertEqual(configs[0]["env"]["evaluation_end_time_s"], 61380)
         self.assertNotIn("allow_early_finish", base["env"])
 
     def test_evaluation_seeds_are_disjoint_from_training_and_between_roots(self):

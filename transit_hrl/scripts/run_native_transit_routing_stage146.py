@@ -38,8 +38,8 @@ def contract(preflight):
     return {
         "methods": list(METHODS), "train_episodes": 2 if preflight else 300,
         "upper_warmup": 1 if preflight else 30,
-        "training_clock_s": 5400 if preflight else 60000,
-        "demand_end_time_s": 3600 if preflight else 50400,
+        "training_clock_s": 5400 if preflight else 61380,
+        "demand_end_time_s": 3600 if preflight else 46980,
         "preflight": preflight,
         "preflight_overrides": {"effective_trip_num": 24, "service_end_hour": 7,
             "upper_batch_size": 8, "lower_batch_size": 32, "updates_per_episode": 2} if preflight else {},

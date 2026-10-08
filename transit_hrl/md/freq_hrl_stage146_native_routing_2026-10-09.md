@@ -16,8 +16,10 @@ episodes with the original 30-episode warmup, then four paired evaluations
 in each of five regimes: low noise, high noise, hour burst, persistent shift,
 and a two-hour peak shift outside the training shift support. Each evaluation
 reloads the last trained deployment; fleet is fixed at 12. No checkpoint is
-selected using evaluation results. Full episodes use fixed 60,000-second clocks
-and 50,400-second demand windows. Only short software preflight uses 2 training
+selected using evaluation results. The input timetable has 262 trips (the config
+cap is 264), ending at 46,980 seconds. Full episodes preserve that demand window
+and the native four-hour clearance horizon, fixed at 61,380 seconds. Only short
+software preflight uses 2 training
 episodes, smaller replay batches and a 5,400-second clock.
 
 Primary outcome is the equal-regime mean restricted service cost, including
