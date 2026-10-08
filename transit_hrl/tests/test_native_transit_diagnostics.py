@@ -9,6 +9,7 @@ from native_freqduet.upper.resac_upper import BoundedGaussianPolicy
 from freq_hrl.domains.transit.native_diagnostics import NativePolicyProbe, FEATURE_BLOCKS
 from scripts import run_native_transit_diagnostics_stage147 as spec
 from scripts import run_native_transit_routing_stage146 as routing
+from scripts.analyze_native_transit_diagnostics_stage147 import summarize
 
 
 class NativeDiagnosticsTest(unittest.TestCase):
@@ -79,6 +80,55 @@ class NativeDiagnosticsTest(unittest.TestCase):
         spec.check_episode(changed, reference, baseline=False)
         with self.assertRaisesRegex(RuntimeError, "passengers_generated"):
             spec.check_episode(dict(reference, passengers_generated=2), reference, baseline=False)
+
+    def cells(self):
+        cells = {}
+        for method in spec.METHODS:
+            for root in spec.ROOTS:
+                rows = []
+                for condition in spec.conditions(method, preflight=False):
+                    for scenario in spec.contract(False)["scenarios"]:
+                        actors = {}
+                        for level in ("upper", "lower"):
+                            actors[level] = {
+                                "proposal_mean_s": 1, "proposal_std_s": 2,
+                                "proposal_edge_fraction_1pct": .5, "latent_mean_abs_p95": 3,
+                                "input_abs_mean": [1] * (16 if level == "upper" else 33),
+                                "zero_input_effect_s": {"dynamic_band": {"mean_abs": 4}},
+                            }
+                        rows.append({"condition": condition, "scenario": scenario,
+                            "scene_seed": routing.evaluation_seeds(root, scenario, preflight=False)[0],
+                            "actors": actors,
+                            **{metric: root + (0 if condition == "baseline" else 2)
+                               for metric in routing.METRICS}})
+                cells[method, root] = {
+                    "software_qualified": True, "baseline_reproduced": True,
+                    "method": method, "seed": root, "protocol": spec.EXPERIMENT_PROTOCOL,
+                    "contract": spec.contract(False), "training_updates": 0,
+                    "native_steps": len(rows) * 61380, "evaluation": rows,
+                }
+        return cells
+
+    def test_summary_preserves_root_pairing_and_descriptive_boundary(self):
+        result = summarize(self.cells())
+        self.assertIn("descriptive", result["stage"])
+        self.assertEqual(result["native_steps"], 200 * 61380)
+        for intervention in result["physical_interventions"].values():
+            self.assertEqual(len(intervention["root_deltas"]), 8)
+            self.assertEqual(intervention["mean_deltas"]["service_cost_restricted"], 2)
+        self.assertEqual(result["baseline_actor_diagnostics"]["correct"]["lower"][
+            "zero_input_mean_abs_effect_s"]["dynamic_band"], 4)
+
+    def test_missing_or_duplicate_diagnostic_scene_is_rejected(self):
+        for duplicate in (False, True):
+            cells = self.cells()
+            rows = cells["correct", spec.ROOTS[0]]["evaluation"]
+            if duplicate:
+                rows.append(copy.deepcopy(rows[0]))
+            else:
+                rows.pop()
+            with self.assertRaisesRegex(ValueError, "Incomplete"):
+                summarize(cells)
 
 
 if __name__ == "__main__":

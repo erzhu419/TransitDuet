@@ -46,9 +46,11 @@ service cost is +0.009188, adjusted CI [-0.029595, +0.056931];
 correct-minus-swapped is +0.017403, CI [-0.011361, +0.052311]. Both are
 inconclusive, with slightly worse point estimates in all five regimes.
 Restricted wait differences are +0.012456 and +0.002025 minutes respectively.
-The correct upper is smoother, but lower LF power remains 0.985689 and no
-service advantage follows. Training curves improve in all groups; neither
+The correct upper has a smaller uncentered HF-action proxy; cumulative-holding
+LF drift ratio remains 0.985689 and no service advantage follows.
+Training curves improve in all groups; neither
 missing updates nor an untrained actor explains the null result.
+Most of the small cost difference comes from fleet overshoot, not waiting.
 
 Next: frozen-checkpoint input-scale, saturation and frequency-dependence
 diagnostics, plus neutral-upper/zero-holding interventions. Do not expand
@@ -61,3 +63,7 @@ attribution, not a pure all-input Swapped test or proof that learning outperform
 forecasting. The historical control is explicitly history-plus-common-context.
 Eight-root outcomes are development evidence, not independent confirmation or
 domain-general validation. The hour burst is temporal, not station-local.
+The lower LF proxy filters cumulative nonnegative holdings, not raw actions;
+its near-one value does not establish absence of lower HF response. The upper
+proxy is also uncentered, so action saturation must be checked before calling
+its smaller value meaningful frequency responsiveness.
