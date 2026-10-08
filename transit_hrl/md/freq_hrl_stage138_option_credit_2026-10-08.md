@@ -25,6 +25,17 @@ episodes =992episodes/1,190,400steps; total1,984episodes/2,380,800steps. Sixteen
 workers+parent/12GiB, scheduler dynamic node001-node006. Scalar JSON only, no
 checkpoint or native-trace writes. Inherited costs remain separate.
 
+## Run Receipt
+
+Implementation `57d56a9e35`, registration `f4f7301997`, both pushed before submit.
+Sixteen focused tests passed: single-option prefix/noise pairing, identical critic
+updates, exact native budget, unchanged default runner and bounded-PPO regression.
+Selected action means use the same scalar inference as native execution.
+Stage137 cells and four selected Stage135 upper files are available on node004.
+Run `pointmaze_option_credit_stage138_probe_20261008_r1`: `t136931` root410037,
+`t136932` root410049; initial receipt is queued, node unassigned. No waiting
+aggregator, hard node binding, checkpoint pull or local native training.
+
 ## Limitations
 
 Conditional action credit need not reduce variance or improve the deployed mean
