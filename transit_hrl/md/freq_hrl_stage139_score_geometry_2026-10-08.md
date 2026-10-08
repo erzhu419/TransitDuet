@@ -24,6 +24,17 @@ Stage138 query costs and earlier sources stay separate. Sixteen workers+parent,
 12GiB, scheduler dynamic node001-node006. Compact JSON only, no checkpoint/trace
 writes. Sampling without collection prevents unused evaluation training batches.
 
+## Run Receipt
+
+Implementation `fdea4f9d9a`, registration `2d5650041c`, pushed before submission.
+Seventeen related tests passed, including sampling without collection, score
+identity, all three exact KL radii, cached label/update replay, shared-forecast
+accounting, noise pairing and the reduced native runner. The four selected warm
+upper files remain available on node004. Run
+`pointmaze_score_geometry_stage139_probe_20261008_r1`: `t136981` root410037 is
+running on node005; `t136982` root410049 is running on node001. Nodes are dynamic,
+not pinned. No waiting aggregator, checkpoint pull or local native training.
+
 ## Limitations
 
 The score estimates the stochastic-upper objective, not a derivative of mean
