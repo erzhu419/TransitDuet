@@ -25,6 +25,16 @@ two roots3,968episodes/4,761,600steps.256table aliases/root; all full-prefix que
 costs count. Sixteen workers+parent/12GiB, dynamic scheduler node001-node006.
 Compact JSON only; no checkpoint/trace writes or local native training.
 
+## Run Receipt
+
+Implementation/results commit a493a6f381; preregistration commit09825d9c15,
+pushed before submission. Ten related focused tests passed. All four selected
+Stage135 warm upper files remain available on the shared server filesystem.
+Run: pointmaze_exploration_match_stage140_probe_20261008_r1.
+t136990/root410037 and t136991/root410049 were queued at receipt time;
+neither had an assigned node. Dynamic node001-node006, no aggregator.
+Preregistration and compact dispatch receipt are retained in the run directory.
+
 ## Limitations
 
 Mean-output RMS matches on each training-state batch, not decoded physical control
