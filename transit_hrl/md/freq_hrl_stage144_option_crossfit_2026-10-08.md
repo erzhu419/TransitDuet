@@ -40,6 +40,23 @@ assigned node. Both allow all six nodes,17CPUs/12GiB each, no aggregator.
 Twelve server-side source files are available by metadata check only.
 Preregistration and compact dispatch receipts retain the replacement lineage.
 
+## Completed Result
+
+t137097/node004 and t137098/node006 finished. Pulled312,225bytes of compact
+JSON only. Contracts, budgets, scene exclusion, paired means and frozen checks
+pass:576episodes/691,200steps, with withdrawn r1 partial cost kept separate.
+
+| Period | Wide raw - warm | Wide compact - warm | Wide compact - raw | Local compact - raw |
+| --- | ---: | ---: | ---: | ---: |
+| 50 | +0.134074 | +0.390562 | +0.256488 | +0.279176 |
+| 100 | +0.071761 | +0.161441 | +0.089681 | +0.026850 |
+
+Wide compact beats warm and raw at both periods in both roots. At100,23/32
+paired paths improve over raw,20/32 over warm. Local compact-minus-raw at100
+is-0.001137 in root410037 and+0.054836 in root410049; do not call all probes
+uniformly improved. Retain this as positive update-transfer development, not
+frequency ownership or complete HRL evidence. No new task submitted here.
+
 ## Limitations
 
 Folds share seven training scenes and are not independent seed replicates.
