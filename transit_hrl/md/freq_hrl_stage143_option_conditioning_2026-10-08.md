@@ -24,6 +24,16 @@ Per root32replay+1,216evaluation=1,248episodes/1,497,600steps, zero new queries;
 2,995,200steps. Prior query costs stay separate. Sixteen workers+parent/12GiB,
 dynamic node001-node006, compact JSON only, no aggregator or checkpoint writes.
 
+## Run Receipt
+
+Implementation002ef1cdc0; preregistration8f8d92cef8 pushed before submission.
+Fourteen focused tests passed. Eight required source files are available on the
+shared server filesystem, checked by metadata only; no checkpoints downloaded.
+Run: `pointmaze_option_conditioning_stage143_probe_20261008_r1`.
+Scheduler t137086/root410037 and t137087/root410049 were queued at receipt,
+without assigned nodes. Each requests17CPUs/12GiB with all six nodes allowed.
+Compact submission details are retained in the run's `dispatch_receipt.json`.
+
 ## Limitations
 
 The26D projection restricts the update, not the warm actor's original input or
