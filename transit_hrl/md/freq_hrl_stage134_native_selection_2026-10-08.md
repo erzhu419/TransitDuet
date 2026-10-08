@@ -28,6 +28,16 @@ Development requires selected-minus-two_step>0 and selected-minus-forecast>0.5
 at both periods. Selection-minus-refresh/radial is reported separately; if
 selection does not help, retain that outcome rather than claim universal benefit.
 
+## Run Receipt
+
+Implementation `d89c486ad0`, registration `ac91cc4f19`;seven tests passed.
+The two completed Stage130 source cells and four upper files are available on
+node004; the native runner checks checkpoint protocol and source fits on load.
+Run `pointmaze_native_selection_stage134_pilot_20261008_r1`:
+`t136566` root410011 and `t136567` root410023 accepted; initial snapshot queued.
+Exact task specifications, all four seed-role sets, budgets and compact scheduler
+receipt are saved with the run. No Stage134 performance result is available yet.
+
 ## Limitations
 
 This is training-time candidate selection, not an online learned promotion

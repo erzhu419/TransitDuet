@@ -32,7 +32,7 @@ source upper checkpoints were verified on node004 without downloading weights.
 Run `pointmaze_third_update_replication_stage133_frozen_20261008_r1`:
 `t136544-t136549` accepted, ordered by the six roots above; initial snapshot
 queued. Exact task specifications, seed roles and budgets are preregistered;
-compact dispatch receipt saved with the run. No result or CI is available yet.
+compact dispatch receipt saved with the run; no outcomes were available at registration.
 
 ## Completed Result
 
