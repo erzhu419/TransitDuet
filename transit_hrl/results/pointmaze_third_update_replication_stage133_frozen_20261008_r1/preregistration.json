@@ -1,0 +1,1828 @@
+{
+  "artifacts": {
+    "checkpoint_policy": "four_final_upper_candidates_per_root_server_only",
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only",
+    "raw_state_writes": 0
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 896,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 15129600,
+    "native_episodes": 6304,
+    "native_return_fits": 12,
+    "native_steps": 7564800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 116352,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 22,
+    "upper_checkpoint_loads": 2
+  },
+  "calibration": {
+    "baseline": "learned_two_step_not_single_or_forecast",
+    "crossfit": "A_on_B_and_B_on_A_not_used_for_selection",
+    "evaluation_selection": false,
+    "fitted_step_interval": [
+      0,
+      1
+    ],
+    "objective": "paired_native_episode_return_quadratic",
+    "policy_steps": [
+      0,
+      1,
+      -1
+    ]
+  },
+  "code_revision": "506b981ebc2893c249b69ab217521a15b99c1e6c",
+  "contrasts": [
+    [
+      "refresh",
+      "source_forecast"
+    ],
+    [
+      "refresh",
+      "two_step"
+    ],
+    [
+      "refresh",
+      "stale"
+    ],
+    [
+      "refresh",
+      "refresh_descent"
+    ],
+    [
+      "refresh",
+      "refresh_blinded"
+    ],
+    [
+      "stale",
+      "two_step"
+    ]
+  ],
+  "earlier_source_chain_cost": "inherited_separately_not_zero",
+  "evaluation_seeds": {
+    "410037": [
+      133190001,
+      133190002,
+      133190003,
+      133190004,
+      133190005,
+      133190006,
+      133190007,
+      133190008,
+      133190009,
+      133190010,
+      133190011,
+      133190012,
+      133190013,
+      133190014,
+      133190015,
+      133190016,
+      133190017,
+      133190018,
+      133190019,
+      133190020,
+      133190021,
+      133190022,
+      133190023,
+      133190024,
+      133190025,
+      133190026,
+      133190027,
+      133190028,
+      133190029,
+      133190030,
+      133190031,
+      133190032,
+      133190033,
+      133190034,
+      133190035,
+      133190036,
+      133190037,
+      133190038,
+      133190039,
+      133190040,
+      133190041,
+      133190042,
+      133190043,
+      133190044,
+      133190045,
+      133190046,
+      133190047,
+      133190048,
+      133190049,
+      133190050,
+      133190051,
+      133190052,
+      133190053,
+      133190054,
+      133190055,
+      133190056,
+      133190057,
+      133190058,
+      133190059,
+      133190060,
+      133190061,
+      133190062,
+      133190063,
+      133190064
+    ],
+    "410049": [
+      133290001,
+      133290002,
+      133290003,
+      133290004,
+      133290005,
+      133290006,
+      133290007,
+      133290008,
+      133290009,
+      133290010,
+      133290011,
+      133290012,
+      133290013,
+      133290014,
+      133290015,
+      133290016,
+      133290017,
+      133290018,
+      133290019,
+      133290020,
+      133290021,
+      133290022,
+      133290023,
+      133290024,
+      133290025,
+      133290026,
+      133290027,
+      133290028,
+      133290029,
+      133290030,
+      133290031,
+      133290032,
+      133290033,
+      133290034,
+      133290035,
+      133290036,
+      133290037,
+      133290038,
+      133290039,
+      133290040,
+      133290041,
+      133290042,
+      133290043,
+      133290044,
+      133290045,
+      133290046,
+      133290047,
+      133290048,
+      133290049,
+      133290050,
+      133290051,
+      133290052,
+      133290053,
+      133290054,
+      133290055,
+      133290056,
+      133290057,
+      133290058,
+      133290059,
+      133290060,
+      133290061,
+      133290062,
+      133290063,
+      133290064
+    ],
+    "410061": [
+      133390001,
+      133390002,
+      133390003,
+      133390004,
+      133390005,
+      133390006,
+      133390007,
+      133390008,
+      133390009,
+      133390010,
+      133390011,
+      133390012,
+      133390013,
+      133390014,
+      133390015,
+      133390016,
+      133390017,
+      133390018,
+      133390019,
+      133390020,
+      133390021,
+      133390022,
+      133390023,
+      133390024,
+      133390025,
+      133390026,
+      133390027,
+      133390028,
+      133390029,
+      133390030,
+      133390031,
+      133390032,
+      133390033,
+      133390034,
+      133390035,
+      133390036,
+      133390037,
+      133390038,
+      133390039,
+      133390040,
+      133390041,
+      133390042,
+      133390043,
+      133390044,
+      133390045,
+      133390046,
+      133390047,
+      133390048,
+      133390049,
+      133390050,
+      133390051,
+      133390052,
+      133390053,
+      133390054,
+      133390055,
+      133390056,
+      133390057,
+      133390058,
+      133390059,
+      133390060,
+      133390061,
+      133390062,
+      133390063,
+      133390064
+    ],
+    "410073": [
+      133490001,
+      133490002,
+      133490003,
+      133490004,
+      133490005,
+      133490006,
+      133490007,
+      133490008,
+      133490009,
+      133490010,
+      133490011,
+      133490012,
+      133490013,
+      133490014,
+      133490015,
+      133490016,
+      133490017,
+      133490018,
+      133490019,
+      133490020,
+      133490021,
+      133490022,
+      133490023,
+      133490024,
+      133490025,
+      133490026,
+      133490027,
+      133490028,
+      133490029,
+      133490030,
+      133490031,
+      133490032,
+      133490033,
+      133490034,
+      133490035,
+      133490036,
+      133490037,
+      133490038,
+      133490039,
+      133490040,
+      133490041,
+      133490042,
+      133490043,
+      133490044,
+      133490045,
+      133490046,
+      133490047,
+      133490048,
+      133490049,
+      133490050,
+      133490051,
+      133490052,
+      133490053,
+      133490054,
+      133490055,
+      133490056,
+      133490057,
+      133490058,
+      133490059,
+      133490060,
+      133490061,
+      133490062,
+      133490063,
+      133490064
+    ],
+    "410089": [
+      133590001,
+      133590002,
+      133590003,
+      133590004,
+      133590005,
+      133590006,
+      133590007,
+      133590008,
+      133590009,
+      133590010,
+      133590011,
+      133590012,
+      133590013,
+      133590014,
+      133590015,
+      133590016,
+      133590017,
+      133590018,
+      133590019,
+      133590020,
+      133590021,
+      133590022,
+      133590023,
+      133590024,
+      133590025,
+      133590026,
+      133590027,
+      133590028,
+      133590029,
+      133590030,
+      133590031,
+      133590032,
+      133590033,
+      133590034,
+      133590035,
+      133590036,
+      133590037,
+      133590038,
+      133590039,
+      133590040,
+      133590041,
+      133590042,
+      133590043,
+      133590044,
+      133590045,
+      133590046,
+      133590047,
+      133590048,
+      133590049,
+      133590050,
+      133590051,
+      133590052,
+      133590053,
+      133590054,
+      133590055,
+      133590056,
+      133590057,
+      133590058,
+      133590059,
+      133590060,
+      133590061,
+      133590062,
+      133590063,
+      133590064
+    ],
+    "410101": [
+      133690001,
+      133690002,
+      133690003,
+      133690004,
+      133690005,
+      133690006,
+      133690007,
+      133690008,
+      133690009,
+      133690010,
+      133690011,
+      133690012,
+      133690013,
+      133690014,
+      133690015,
+      133690016,
+      133690017,
+      133690018,
+      133690019,
+      133690020,
+      133690021,
+      133690022,
+      133690023,
+      133690024,
+      133690025,
+      133690026,
+      133690027,
+      133690028,
+      133690029,
+      133690030,
+      133690031,
+      133690032,
+      133690033,
+      133690034,
+      133690035,
+      133690036,
+      133690037,
+      133690038,
+      133690039,
+      133690040,
+      133690041,
+      133690042,
+      133690043,
+      133690044,
+      133690045,
+      133690046,
+      133690047,
+      133690048,
+      133690049,
+      133690050,
+      133690051,
+      133690052,
+      133690053,
+      133690054,
+      133690055,
+      133690056,
+      133690057,
+      133690058,
+      133690059,
+      133690060,
+      133690061,
+      133690062,
+      133690063,
+      133690064
+    ]
+  },
+  "evidence_role": "frozen_third_update_internal_replication_not_joint_HRL_confirmation",
+  "fixed_recipe": {
+    "action_dim": 8,
+    "actor_std": 0.15,
+    "added_policy_updates": 1,
+    "calibration_scenarios": 16,
+    "damping": 1.0,
+    "epsilon": 0.005,
+    "evaluation_scenarios": 64,
+    "label_scenarios": 4,
+    "lower_and_critics": "frozen",
+    "lower_residual_limit": 0.05,
+    "noise_panels": [
+      "A",
+      "B"
+    ],
+    "per_update_fisher_radius": 0.0005555555555555556,
+    "reference_limit": 0.05,
+    "state_dim": 392,
+    "summary_dim": 26,
+    "total_policy_updates": 3
+  },
+  "inherited_budget_per_root": {
+    "checkpoint_writes": 4,
+    "crossfit_episodes": 192,
+    "crossfit_pair_groups": 64,
+    "empirical_fisher_solves": 2,
+    "evaluation_episodes": 896,
+    "evaluation_pair_groups": 128,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "label_episodes": 4896,
+    "label_queries": 288,
+    "native_donor_response_calls": 15129600,
+    "native_episodes": 6304,
+    "native_return_fits": 12,
+    "native_steps": 7564800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 116352,
+    "optimizer_steps": 0,
+    "source_cell_loads": 1,
+    "training_episodes": 320,
+    "training_pair_groups": 64,
+    "upper_candidate_weight_steps": 22,
+    "upper_checkpoint_loads": 2
+  },
+  "label_roles": {
+    "410037": [
+      {
+        "noise_seeds": {
+          "A": 133110001,
+          "B": 133120001
+        },
+        "scenario_seed": 133100001
+      },
+      {
+        "noise_seeds": {
+          "A": 133110002,
+          "B": 133120002
+        },
+        "scenario_seed": 133100002
+      },
+      {
+        "noise_seeds": {
+          "A": 133110003,
+          "B": 133120003
+        },
+        "scenario_seed": 133100003
+      },
+      {
+        "noise_seeds": {
+          "A": 133110004,
+          "B": 133120004
+        },
+        "scenario_seed": 133100004
+      }
+    ],
+    "410049": [
+      {
+        "noise_seeds": {
+          "A": 133210001,
+          "B": 133220001
+        },
+        "scenario_seed": 133200001
+      },
+      {
+        "noise_seeds": {
+          "A": 133210002,
+          "B": 133220002
+        },
+        "scenario_seed": 133200002
+      },
+      {
+        "noise_seeds": {
+          "A": 133210003,
+          "B": 133220003
+        },
+        "scenario_seed": 133200003
+      },
+      {
+        "noise_seeds": {
+          "A": 133210004,
+          "B": 133220004
+        },
+        "scenario_seed": 133200004
+      }
+    ],
+    "410061": [
+      {
+        "noise_seeds": {
+          "A": 133310001,
+          "B": 133320001
+        },
+        "scenario_seed": 133300001
+      },
+      {
+        "noise_seeds": {
+          "A": 133310002,
+          "B": 133320002
+        },
+        "scenario_seed": 133300002
+      },
+      {
+        "noise_seeds": {
+          "A": 133310003,
+          "B": 133320003
+        },
+        "scenario_seed": 133300003
+      },
+      {
+        "noise_seeds": {
+          "A": 133310004,
+          "B": 133320004
+        },
+        "scenario_seed": 133300004
+      }
+    ],
+    "410073": [
+      {
+        "noise_seeds": {
+          "A": 133410001,
+          "B": 133420001
+        },
+        "scenario_seed": 133400001
+      },
+      {
+        "noise_seeds": {
+          "A": 133410002,
+          "B": 133420002
+        },
+        "scenario_seed": 133400002
+      },
+      {
+        "noise_seeds": {
+          "A": 133410003,
+          "B": 133420003
+        },
+        "scenario_seed": 133400003
+      },
+      {
+        "noise_seeds": {
+          "A": 133410004,
+          "B": 133420004
+        },
+        "scenario_seed": 133400004
+      }
+    ],
+    "410089": [
+      {
+        "noise_seeds": {
+          "A": 133510001,
+          "B": 133520001
+        },
+        "scenario_seed": 133500001
+      },
+      {
+        "noise_seeds": {
+          "A": 133510002,
+          "B": 133520002
+        },
+        "scenario_seed": 133500002
+      },
+      {
+        "noise_seeds": {
+          "A": 133510003,
+          "B": 133520003
+        },
+        "scenario_seed": 133500003
+      },
+      {
+        "noise_seeds": {
+          "A": 133510004,
+          "B": 133520004
+        },
+        "scenario_seed": 133500004
+      }
+    ],
+    "410101": [
+      {
+        "noise_seeds": {
+          "A": 133610001,
+          "B": 133620001
+        },
+        "scenario_seed": 133600001
+      },
+      {
+        "noise_seeds": {
+          "A": 133610002,
+          "B": 133620002
+        },
+        "scenario_seed": 133600002
+      },
+      {
+        "noise_seeds": {
+          "A": 133610003,
+          "B": 133620003
+        },
+        "scenario_seed": 133600003
+      },
+      {
+        "noise_seeds": {
+          "A": 133610004,
+          "B": 133620004
+        },
+        "scenario_seed": 133600004
+      }
+    ]
+  },
+  "limitations": [
+    "Previously used source roots; internal frozen-method replication, not untouched external confirmation.",
+    "Radial continuation shares the two-step source; not a fully stale three-step training route.",
+    "Matched per-update radius, not cumulative distance from zero.",
+    "Stage131 findings and prior joint-HRL, promotion and frequency-specific gates unchanged."
+  ],
+  "methods": [
+    "refresh",
+    "stale"
+  ],
+  "new_total_budget": {
+    "checkpoint_writes": 24,
+    "crossfit_episodes": 1152,
+    "crossfit_pair_groups": 384,
+    "empirical_fisher_solves": 12,
+    "evaluation_episodes": 5376,
+    "evaluation_pair_groups": 768,
+    "exact_kl_forward_batches": 48,
+    "fisher_jvp_batches": 24,
+    "label_episodes": 29376,
+    "label_queries": 1728,
+    "native_donor_response_calls": 90777600,
+    "native_episodes": 37824,
+    "native_return_fits": 72,
+    "native_steps": 45388800,
+    "native_trace_writes": 0,
+    "native_upper_calls": 698112,
+    "optimizer_steps": 0,
+    "source_cell_loads": 6,
+    "training_episodes": 1920,
+    "training_pair_groups": 384,
+    "upper_candidate_weight_steps": 132,
+    "upper_checkpoint_loads": 12
+  },
+  "optimizer_roots": [
+    410037,
+    410049,
+    410061,
+    410073,
+    410089,
+    410101
+  ],
+  "periods": [
+    50,
+    100
+  ],
+  "primary_endpoints": [
+    "50/refresh_minus_source_forecast",
+    "50/refresh_minus_two_step",
+    "50/refresh_minus_stale",
+    "100/refresh_minus_source_forecast",
+    "100/refresh_minus_two_step",
+    "100/refresh_minus_stale"
+  ],
+  "protocol": "pointmaze_third_update_replication_stage133_v1",
+  "run_name": "pointmaze_third_update_replication_stage133_frozen_20261008_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null,
+    "waiting_aggregation_task": false,
+    "workers_per_task": 16
+  },
+  "shared_kernel": "freq_hrl.experiments.pointmaze_compact_continuation.run",
+  "source_availability": {
+    "checked_on": "node004",
+    "checkpoint_downloads": 0,
+    "ready": [
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410037,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410037,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410049,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410049,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410061,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410061,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410073,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410073,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410089,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410089,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 50,
+        "root": 410101,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      },
+      {
+        "method": "refresh",
+        "period": 100,
+        "root": 410101,
+        "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+        "status": "ready"
+      }
+    ]
+  },
+  "source_baseline": "two_step",
+  "source_method": "refresh",
+  "source_protocol": "pointmaze_continuation_replication_stage131_v1",
+  "source_run": "pointmaze_continuation_replication_stage131_frozen_20261008_r1",
+  "statistics": {
+    "bonferroni_family_size": 6,
+    "bootstrap_draws": 65536,
+    "bootstrap_seed": 133133,
+    "development_roots_merged": false,
+    "evaluation_based_method_switch": false,
+    "family_scope": "six_endpoints_in_this_stage_not_adaptive_research_sequence",
+    "familywise_alpha": 0.05,
+    "independent_unit": "source_policy_optimizer_root",
+    "material_gate": "forecast_CI_lower_gt_0.5_and_incremental_CI_lower_gt_0_both_periods",
+    "n_roots": 6,
+    "root_filtering": false,
+    "universal_relabeling_gate": "radial_control_CI_lower_gt_0_both_periods"
+  },
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410061 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410061/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410061",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410061/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410061/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410061",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410073 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410073/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410073",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410073/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410073/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410073",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410089 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410089/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410089",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410089/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410089/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410089",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_third_update_replication_stage133.py --optimizer-seed 410101 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410101/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "16 native rollout workers plus parent; frozen third compact update, paired radial control, lower and critics frozen.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage133 frozen third local update root410101",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410101/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_third_update_replication_stage133_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/third_update",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_third_update_replication_stage133_frozen_20261008_r1/cells/replicate_410101/completion",
+      "signature": "Freq-HRL/pointmaze_third_update_replication_stage133_v1/pointmaze_third_update_replication_stage133_frozen_20261008_r1/third_update/410101",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "training_roles": {
+    "410037": [
+      {
+        "noise_seeds": {
+          "A": 133140001,
+          "B": 133150001
+        },
+        "scenario_seed": 133130001
+      },
+      {
+        "noise_seeds": {
+          "A": 133140002,
+          "B": 133150002
+        },
+        "scenario_seed": 133130002
+      },
+      {
+        "noise_seeds": {
+          "A": 133140003,
+          "B": 133150003
+        },
+        "scenario_seed": 133130003
+      },
+      {
+        "noise_seeds": {
+          "A": 133140004,
+          "B": 133150004
+        },
+        "scenario_seed": 133130004
+      },
+      {
+        "noise_seeds": {
+          "A": 133140005,
+          "B": 133150005
+        },
+        "scenario_seed": 133130005
+      },
+      {
+        "noise_seeds": {
+          "A": 133140006,
+          "B": 133150006
+        },
+        "scenario_seed": 133130006
+      },
+      {
+        "noise_seeds": {
+          "A": 133140007,
+          "B": 133150007
+        },
+        "scenario_seed": 133130007
+      },
+      {
+        "noise_seeds": {
+          "A": 133140008,
+          "B": 133150008
+        },
+        "scenario_seed": 133130008
+      },
+      {
+        "noise_seeds": {
+          "A": 133140009,
+          "B": 133150009
+        },
+        "scenario_seed": 133130009
+      },
+      {
+        "noise_seeds": {
+          "A": 133140010,
+          "B": 133150010
+        },
+        "scenario_seed": 133130010
+      },
+      {
+        "noise_seeds": {
+          "A": 133140011,
+          "B": 133150011
+        },
+        "scenario_seed": 133130011
+      },
+      {
+        "noise_seeds": {
+          "A": 133140012,
+          "B": 133150012
+        },
+        "scenario_seed": 133130012
+      },
+      {
+        "noise_seeds": {
+          "A": 133140013,
+          "B": 133150013
+        },
+        "scenario_seed": 133130013
+      },
+      {
+        "noise_seeds": {
+          "A": 133140014,
+          "B": 133150014
+        },
+        "scenario_seed": 133130014
+      },
+      {
+        "noise_seeds": {
+          "A": 133140015,
+          "B": 133150015
+        },
+        "scenario_seed": 133130015
+      },
+      {
+        "noise_seeds": {
+          "A": 133140016,
+          "B": 133150016
+        },
+        "scenario_seed": 133130016
+      }
+    ],
+    "410049": [
+      {
+        "noise_seeds": {
+          "A": 133240001,
+          "B": 133250001
+        },
+        "scenario_seed": 133230001
+      },
+      {
+        "noise_seeds": {
+          "A": 133240002,
+          "B": 133250002
+        },
+        "scenario_seed": 133230002
+      },
+      {
+        "noise_seeds": {
+          "A": 133240003,
+          "B": 133250003
+        },
+        "scenario_seed": 133230003
+      },
+      {
+        "noise_seeds": {
+          "A": 133240004,
+          "B": 133250004
+        },
+        "scenario_seed": 133230004
+      },
+      {
+        "noise_seeds": {
+          "A": 133240005,
+          "B": 133250005
+        },
+        "scenario_seed": 133230005
+      },
+      {
+        "noise_seeds": {
+          "A": 133240006,
+          "B": 133250006
+        },
+        "scenario_seed": 133230006
+      },
+      {
+        "noise_seeds": {
+          "A": 133240007,
+          "B": 133250007
+        },
+        "scenario_seed": 133230007
+      },
+      {
+        "noise_seeds": {
+          "A": 133240008,
+          "B": 133250008
+        },
+        "scenario_seed": 133230008
+      },
+      {
+        "noise_seeds": {
+          "A": 133240009,
+          "B": 133250009
+        },
+        "scenario_seed": 133230009
+      },
+      {
+        "noise_seeds": {
+          "A": 133240010,
+          "B": 133250010
+        },
+        "scenario_seed": 133230010
+      },
+      {
+        "noise_seeds": {
+          "A": 133240011,
+          "B": 133250011
+        },
+        "scenario_seed": 133230011
+      },
+      {
+        "noise_seeds": {
+          "A": 133240012,
+          "B": 133250012
+        },
+        "scenario_seed": 133230012
+      },
+      {
+        "noise_seeds": {
+          "A": 133240013,
+          "B": 133250013
+        },
+        "scenario_seed": 133230013
+      },
+      {
+        "noise_seeds": {
+          "A": 133240014,
+          "B": 133250014
+        },
+        "scenario_seed": 133230014
+      },
+      {
+        "noise_seeds": {
+          "A": 133240015,
+          "B": 133250015
+        },
+        "scenario_seed": 133230015
+      },
+      {
+        "noise_seeds": {
+          "A": 133240016,
+          "B": 133250016
+        },
+        "scenario_seed": 133230016
+      }
+    ],
+    "410061": [
+      {
+        "noise_seeds": {
+          "A": 133340001,
+          "B": 133350001
+        },
+        "scenario_seed": 133330001
+      },
+      {
+        "noise_seeds": {
+          "A": 133340002,
+          "B": 133350002
+        },
+        "scenario_seed": 133330002
+      },
+      {
+        "noise_seeds": {
+          "A": 133340003,
+          "B": 133350003
+        },
+        "scenario_seed": 133330003
+      },
+      {
+        "noise_seeds": {
+          "A": 133340004,
+          "B": 133350004
+        },
+        "scenario_seed": 133330004
+      },
+      {
+        "noise_seeds": {
+          "A": 133340005,
+          "B": 133350005
+        },
+        "scenario_seed": 133330005
+      },
+      {
+        "noise_seeds": {
+          "A": 133340006,
+          "B": 133350006
+        },
+        "scenario_seed": 133330006
+      },
+      {
+        "noise_seeds": {
+          "A": 133340007,
+          "B": 133350007
+        },
+        "scenario_seed": 133330007
+      },
+      {
+        "noise_seeds": {
+          "A": 133340008,
+          "B": 133350008
+        },
+        "scenario_seed": 133330008
+      },
+      {
+        "noise_seeds": {
+          "A": 133340009,
+          "B": 133350009
+        },
+        "scenario_seed": 133330009
+      },
+      {
+        "noise_seeds": {
+          "A": 133340010,
+          "B": 133350010
+        },
+        "scenario_seed": 133330010
+      },
+      {
+        "noise_seeds": {
+          "A": 133340011,
+          "B": 133350011
+        },
+        "scenario_seed": 133330011
+      },
+      {
+        "noise_seeds": {
+          "A": 133340012,
+          "B": 133350012
+        },
+        "scenario_seed": 133330012
+      },
+      {
+        "noise_seeds": {
+          "A": 133340013,
+          "B": 133350013
+        },
+        "scenario_seed": 133330013
+      },
+      {
+        "noise_seeds": {
+          "A": 133340014,
+          "B": 133350014
+        },
+        "scenario_seed": 133330014
+      },
+      {
+        "noise_seeds": {
+          "A": 133340015,
+          "B": 133350015
+        },
+        "scenario_seed": 133330015
+      },
+      {
+        "noise_seeds": {
+          "A": 133340016,
+          "B": 133350016
+        },
+        "scenario_seed": 133330016
+      }
+    ],
+    "410073": [
+      {
+        "noise_seeds": {
+          "A": 133440001,
+          "B": 133450001
+        },
+        "scenario_seed": 133430001
+      },
+      {
+        "noise_seeds": {
+          "A": 133440002,
+          "B": 133450002
+        },
+        "scenario_seed": 133430002
+      },
+      {
+        "noise_seeds": {
+          "A": 133440003,
+          "B": 133450003
+        },
+        "scenario_seed": 133430003
+      },
+      {
+        "noise_seeds": {
+          "A": 133440004,
+          "B": 133450004
+        },
+        "scenario_seed": 133430004
+      },
+      {
+        "noise_seeds": {
+          "A": 133440005,
+          "B": 133450005
+        },
+        "scenario_seed": 133430005
+      },
+      {
+        "noise_seeds": {
+          "A": 133440006,
+          "B": 133450006
+        },
+        "scenario_seed": 133430006
+      },
+      {
+        "noise_seeds": {
+          "A": 133440007,
+          "B": 133450007
+        },
+        "scenario_seed": 133430007
+      },
+      {
+        "noise_seeds": {
+          "A": 133440008,
+          "B": 133450008
+        },
+        "scenario_seed": 133430008
+      },
+      {
+        "noise_seeds": {
+          "A": 133440009,
+          "B": 133450009
+        },
+        "scenario_seed": 133430009
+      },
+      {
+        "noise_seeds": {
+          "A": 133440010,
+          "B": 133450010
+        },
+        "scenario_seed": 133430010
+      },
+      {
+        "noise_seeds": {
+          "A": 133440011,
+          "B": 133450011
+        },
+        "scenario_seed": 133430011
+      },
+      {
+        "noise_seeds": {
+          "A": 133440012,
+          "B": 133450012
+        },
+        "scenario_seed": 133430012
+      },
+      {
+        "noise_seeds": {
+          "A": 133440013,
+          "B": 133450013
+        },
+        "scenario_seed": 133430013
+      },
+      {
+        "noise_seeds": {
+          "A": 133440014,
+          "B": 133450014
+        },
+        "scenario_seed": 133430014
+      },
+      {
+        "noise_seeds": {
+          "A": 133440015,
+          "B": 133450015
+        },
+        "scenario_seed": 133430015
+      },
+      {
+        "noise_seeds": {
+          "A": 133440016,
+          "B": 133450016
+        },
+        "scenario_seed": 133430016
+      }
+    ],
+    "410089": [
+      {
+        "noise_seeds": {
+          "A": 133540001,
+          "B": 133550001
+        },
+        "scenario_seed": 133530001
+      },
+      {
+        "noise_seeds": {
+          "A": 133540002,
+          "B": 133550002
+        },
+        "scenario_seed": 133530002
+      },
+      {
+        "noise_seeds": {
+          "A": 133540003,
+          "B": 133550003
+        },
+        "scenario_seed": 133530003
+      },
+      {
+        "noise_seeds": {
+          "A": 133540004,
+          "B": 133550004
+        },
+        "scenario_seed": 133530004
+      },
+      {
+        "noise_seeds": {
+          "A": 133540005,
+          "B": 133550005
+        },
+        "scenario_seed": 133530005
+      },
+      {
+        "noise_seeds": {
+          "A": 133540006,
+          "B": 133550006
+        },
+        "scenario_seed": 133530006
+      },
+      {
+        "noise_seeds": {
+          "A": 133540007,
+          "B": 133550007
+        },
+        "scenario_seed": 133530007
+      },
+      {
+        "noise_seeds": {
+          "A": 133540008,
+          "B": 133550008
+        },
+        "scenario_seed": 133530008
+      },
+      {
+        "noise_seeds": {
+          "A": 133540009,
+          "B": 133550009
+        },
+        "scenario_seed": 133530009
+      },
+      {
+        "noise_seeds": {
+          "A": 133540010,
+          "B": 133550010
+        },
+        "scenario_seed": 133530010
+      },
+      {
+        "noise_seeds": {
+          "A": 133540011,
+          "B": 133550011
+        },
+        "scenario_seed": 133530011
+      },
+      {
+        "noise_seeds": {
+          "A": 133540012,
+          "B": 133550012
+        },
+        "scenario_seed": 133530012
+      },
+      {
+        "noise_seeds": {
+          "A": 133540013,
+          "B": 133550013
+        },
+        "scenario_seed": 133530013
+      },
+      {
+        "noise_seeds": {
+          "A": 133540014,
+          "B": 133550014
+        },
+        "scenario_seed": 133530014
+      },
+      {
+        "noise_seeds": {
+          "A": 133540015,
+          "B": 133550015
+        },
+        "scenario_seed": 133530015
+      },
+      {
+        "noise_seeds": {
+          "A": 133540016,
+          "B": 133550016
+        },
+        "scenario_seed": 133530016
+      }
+    ],
+    "410101": [
+      {
+        "noise_seeds": {
+          "A": 133640001,
+          "B": 133650001
+        },
+        "scenario_seed": 133630001
+      },
+      {
+        "noise_seeds": {
+          "A": 133640002,
+          "B": 133650002
+        },
+        "scenario_seed": 133630002
+      },
+      {
+        "noise_seeds": {
+          "A": 133640003,
+          "B": 133650003
+        },
+        "scenario_seed": 133630003
+      },
+      {
+        "noise_seeds": {
+          "A": 133640004,
+          "B": 133650004
+        },
+        "scenario_seed": 133630004
+      },
+      {
+        "noise_seeds": {
+          "A": 133640005,
+          "B": 133650005
+        },
+        "scenario_seed": 133630005
+      },
+      {
+        "noise_seeds": {
+          "A": 133640006,
+          "B": 133650006
+        },
+        "scenario_seed": 133630006
+      },
+      {
+        "noise_seeds": {
+          "A": 133640007,
+          "B": 133650007
+        },
+        "scenario_seed": 133630007
+      },
+      {
+        "noise_seeds": {
+          "A": 133640008,
+          "B": 133650008
+        },
+        "scenario_seed": 133630008
+      },
+      {
+        "noise_seeds": {
+          "A": 133640009,
+          "B": 133650009
+        },
+        "scenario_seed": 133630009
+      },
+      {
+        "noise_seeds": {
+          "A": 133640010,
+          "B": 133650010
+        },
+        "scenario_seed": 133630010
+      },
+      {
+        "noise_seeds": {
+          "A": 133640011,
+          "B": 133650011
+        },
+        "scenario_seed": 133630011
+      },
+      {
+        "noise_seeds": {
+          "A": 133640012,
+          "B": 133650012
+        },
+        "scenario_seed": 133630012
+      },
+      {
+        "noise_seeds": {
+          "A": 133640013,
+          "B": 133650013
+        },
+        "scenario_seed": 133630013
+      },
+      {
+        "noise_seeds": {
+          "A": 133640014,
+          "B": 133650014
+        },
+        "scenario_seed": 133630014
+      },
+      {
+        "noise_seeds": {
+          "A": 133640015,
+          "B": 133650015
+        },
+        "scenario_seed": 133630015
+      },
+      {
+        "noise_seeds": {
+          "A": 133640016,
+          "B": 133650016
+        },
+        "scenario_seed": 133630016
+      }
+    ]
+  },
+  "variants": [
+    "source_flat",
+    "source_forecast",
+    "two_step",
+    "refresh",
+    "stale",
+    "refresh_descent",
+    "refresh_blinded"
+  ],
+  "verification": {
+    "affected_budget_native_path_retest_cases": 2,
+    "unique_test_cases_passed": 13
+  }
+}
