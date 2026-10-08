@@ -1,0 +1,49 @@
+{
+  "aborted_native_cost": {
+    "measured_episodes": null,
+    "measured_steps": null,
+    "new_queries": 0,
+    "planned_steps_upper_bound": 691200
+  },
+  "aggregator": null,
+  "allowed_nodes": [
+    "node001",
+    "node002",
+    "node003",
+    "node004",
+    "node005",
+    "node006"
+  ],
+  "cancellation": {
+    "kill_failures": 0,
+    "running_tasks_cancelled": 2,
+    "task_ids": [
+      "t137094",
+      "t137095"
+    ]
+  },
+  "cpu_per_task": 17,
+  "disposition": "Withdrawn during execution to batch all held-out folds for worker utilization; no results used.",
+  "focused_tests_passed": 8,
+  "protocol": "pointmaze_option_crossfit_stage144_v1",
+  "ram_mb_per_task": 12288,
+  "registration_revision": "00d87bc1586c5356b134d4bc6655a3f67e6da611",
+  "require_node": null,
+  "run_name": "pointmaze_option_crossfit_stage144_probe_20261008_r1",
+  "source_check": "remote metadata only",
+  "source_files_available": 12,
+  "tasks": [
+    {
+      "id": "t137095",
+      "node": null,
+      "signature": "Freq-HRL/pointmaze_option_crossfit_stage144_v1/pointmaze_option_crossfit_stage144_probe_20261008_r1/leave_one_scene_out_both_noise_panels_cached_option_gradients/410049",
+      "status": "cancelled"
+    },
+    {
+      "id": "t137094",
+      "node": null,
+      "signature": "Freq-HRL/pointmaze_option_crossfit_stage144_v1/pointmaze_option_crossfit_stage144_probe_20261008_r1/leave_one_scene_out_both_noise_panels_cached_option_gradients/410037",
+      "status": "cancelled"
+    }
+  ]
+}

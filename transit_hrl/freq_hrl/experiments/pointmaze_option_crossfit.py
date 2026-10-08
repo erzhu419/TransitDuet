@@ -116,7 +116,7 @@ def run(root, output):
             rows = list(pool.map(previous.worker_replay, jobs))
             for row in rows:
                 warm.count_row(cost, row["row"], "replay"); cost["credit_checks"] += 1
-            folds, evaluation = [], []
+            folds, evaluation_jobs = [], []
             for seed in roles["held_out_scene_order"]:
                 training, held = scene_split(rows, seed)
                 assert len(held) == len(spec.PANELS) and len(training) == len(rows)-len(held)
@@ -125,16 +125,19 @@ def run(root, output):
                 for k, v in work.items(): cost[k] += v
                 geometry, forwards = held_out_geometry(trainer, uppers, held)
                 cost["held_out_geometry_forward_batches"] += forwards
-                outputs = list(pool.map(worker_evaluate, [(source_weights, teacher, initial, uppers,
-                    r["row"], period, predictor, envelope) for r in held]))
-                for output_rows in outputs:
-                    for variant in spec.VARIANTS: warm.count_row(cost, output_rows[variant], "evaluation")
-                evaluation.extend(outputs)
+                evaluation_jobs.extend((source_weights, teacher, initial, uppers,
+                    r["row"], period, predictor, envelope) for r in held)
                 folds.append({"held_out_scenario_seed": seed,
                     "training_scenario_seeds": [s for s in roles["held_out_scene_order"] if s != seed],
                     "excluded_noise_panels": list(spec.PANELS), "learning": learning,
                     "training_raw_to_compact_mean_step_cosine": similarities,
-                    "held_out_geometry": geometry, "native_control": evaluation_summary(outputs)})
+                    "held_out_geometry": geometry})
+            evaluation = list(pool.map(worker_evaluate, evaluation_jobs))
+            for output_rows in evaluation:
+                for variant in spec.VARIANTS: warm.count_row(cost, output_rows[variant], "evaluation")
+            for index, fold in enumerate(folds):
+                start = index*len(spec.PANELS)
+                fold["native_control"] = evaluation_summary(evaluation[start:start+len(spec.PANELS)])
             joint.source.native.curves.support.assert_frozen(model, snapshot)
             groups[str(period)] = {"selected_source": provenance, "folds": folds,
                 "both_probe_label_replays": "passed", "frozen_deployment_and_noise_pairing": "passed",

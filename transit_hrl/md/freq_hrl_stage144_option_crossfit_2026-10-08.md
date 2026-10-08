@@ -21,6 +21,15 @@ signs and warm comparisons retained. No winner, CI or automatic seed expansion.
 Per root32replays+256held-out executions=288episodes/345,600steps, zero new
 queries,32shared factorizations. Two roots576episodes/691,200steps. Sixteen
 workers+parent/12GiB, dynamic node001-node006, no aggregator. Compact JSON only.
+Submit all16held-out paths per period in one pool batch, not two paths per fold.
+
+## Dispatch Revision
+
+r1/t137094-t137095 was cancelled during execution to fix underused workers;
+both terminations succeeded. No intermediate result is used. Exact partial
+native cost is unknown, bounded by the planned691,200steps; retained in the r1
+receipt separately from the replacement run. Algorithm, roster and budget stay
+unchanged. Eight related tests passed; four reran after evaluation batching.
 
 ## Limitations
 

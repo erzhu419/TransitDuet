@@ -67,6 +67,12 @@ def test_full_crossfit_runner_excludes_scenes_and_never_queries(source_data, tmp
     conditioning_path, local_path, wide_path, warm_path = [tmp_path/n/"result.json"
         for n in ("conditioning", "local", "wide", "warm")]
     warm_spec = spec.source.source.source.source.warm_source
+    evaluation_batch_sizes = []
+    class BatchedPool(ImmediatePool):
+        def map(self, function, jobs):
+            jobs = list(jobs)
+            if function is experiment.worker_evaluate: evaluation_batch_sizes.append(len(jobs))
+            return super().map(function, jobs)
     with patch.object(spec, "arguments", return_value=args), \
             patch.object(spec.source.source.source.source, "SCENARIOS", 3), \
             patch.object(spec, "source_result", return_value=conditioning_path), \
@@ -75,7 +81,7 @@ def test_full_crossfit_runner_excludes_scenes_and_never_queries(source_data, tmp
             patch.object(experiment.warm.spec, "source_result", return_value=warm_path), \
             patch.object(experiment.joint.source, "load_source", return_value=(models, predictor, {}, calibrations)), \
             patch.object(experiment.joint.base, "load_lower_state", side_effect=lambda r, p, **kw: teachers[str(p)]), \
-            patch.object(experiment, "ProcessPoolExecutor", ImmediatePool), native_patch(), bounds_patch():
+            patch.object(experiment, "ProcessPoolExecutor", BatchedPool), native_patch(), bounds_patch():
         caches = {name: {"status": "complete", "protocol": s.PROTOCOL, "root": root, "cost": s.budget(),
             "seed_roles": s.seed_roles(root), "contract": s.contract(), "groups": {}}
             for name, s in (("conditioning", spec.source), ("local", spec.source.source), ("wide", spec.source.source.source))}
@@ -112,6 +118,7 @@ def test_full_crossfit_runner_excludes_scenes_and_never_queries(source_data, tmp
     assert result["cost"]["held_out_geometry_forward_batches"] == 108
     assert result["inherited_source_cost"]["inherited_Stage142_cost"] == {"retained": True}
     assert len(fitted_rosters) == 6
+    assert evaluation_batch_sizes == [6, 6]
     for group in result["groups"].values():
         assert group["whole_scene_exclusion"] == group["frozen_deployment_and_noise_pairing"] == "passed"
         assert len(group["folds"]) == 3
