@@ -39,7 +39,35 @@ node004; the native runner checks checkpoint protocol and source fits on load.
 Run `pointmaze_native_selection_replication_stage135_frozen_20261008_r1`:
 `t136631-t136636` accepted, ordered by the six roots above; initial snapshot
 queued. Exact task specifications, seed roles, ten endpoints, budget and compact
-scheduler receipt are saved with the run. No Stage135 performance result yet.
+scheduler receipt are saved with the run. All six tasks are DONE;278,947bytes
+of compact JSON were fetched, without checkpoints or native state arrays.
+
+## Result And Next Step
+
+The material continuation gate is supported at both periods. Equal-source-root
+bootstrap65,536draws with Bonferroni10 gives:
+
+| Period | Selected - forecast | Corrected CI | Selected - two-step | Corrected CI |
+| --- | ---: | --- | ---: | --- |
+| 50 | 1.985835 | [1.490466,2.363561] | 0.507803 | [0.384909,0.646290] |
+| 100 | 1.079190 | [0.679043,1.333611] | 0.336180 | [0.253050,0.401659] |
+
+These are small gains:0.1724%/0.0947% of mean forecast return. The old absolute
+0.5 threshold passes; it does not establish a large relative improvement.
+All12 root-period incremental gains are positive. Root410049/100 still has
+forecast gain0.461219, below0.5; the registered gate is on the equal-root CI.
+
+Fixed-method selection and validation-added-value gates remain not_closed.
+Validation and the cheaper fit-only choice agree in11/12 cases, including all
+six at100. Selected-minus-fit gains are0.007728 CI[0,0.030912] at50 and exactly
+0 at100; this is not superiority or an equivalence test. Selected-minus-radial
+at100 remains negative for roots410073/410089/410101. All controls are retained.
+
+Stage136 now diagnoses the first joint PPO update from this validated upper,
+rather than adding a fourth finite-difference update or more selector seeds.
+Upper-only, lower-only and joint interventions share the same on-policy batch
+and per-level optimizer seeds; source/teacher remain frozen. This isolates
+whether joint adaptation preserves the existing gain before a larger redesign.
 
 ## Limitations
 
