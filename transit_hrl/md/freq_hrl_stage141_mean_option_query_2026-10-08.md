@@ -33,6 +33,26 @@ Run: pointmaze_mean_option_query_stage141_probe_20261008_r1.
 t136997/root410037 and t136998/root410049 were queued at receipt time, with
 no assigned node. Preregistration and compact dispatch receipt are retained.
 
+## Completed Result
+
+t136997 finished on node004; t136998 on node006. Pulled246,409bytes of compact
+JSON only. Exact contract, budgets, seeds, paired means and update RMS pass.
+Total3,840episodes/4,608,000steps; no checkpoint or trace pulled.
+
+| Period | Mean sampled-credit increment | Mean-query increment | Sampled mean-query increment |
+| --- | ---: | ---: | ---: |
+| 50 | +0.144882 | +0.210431 | +0.063844 |
+| 100 | -0.034278 | -0.011610 | +0.038285 |
+
+Mean-query improves on sampled-credit mean deployment at all four root-periods,
+but root410049/period100 still loses0.115264 versus warm. Mean-query noise-fold
+gradient cosines at100 are0.119442/0.036449, versus0.714641/0.306727 at50.
+At100,96.35%/96.875% of paired option queries have negative even response;
+mean even response is-0.248198/-0.258273. Sampled deployment still trails
+forecast by0.431794/2.158360 at50/100. The mean-objective change helps but does
+not close the period100 learning claim. Next: local versus wide query probes,
+with policy std and mean-step RMS unchanged and source costs retained.
+
 ## Limitations
 
 This compares a query-augmented smoothed mean-option gradient with an already

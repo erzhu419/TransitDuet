@@ -23,7 +23,17 @@ def paired_query_gradient(plus, minus, innovations, std):
     return ((np.asarray(plus)-np.asarray(minus))/2)[:, None]*np.asarray(innovations)/std
 
 
-def worker_mean_query(job):
+def query_innovations(actor, states, steps, policy_seed):
+    innovations = []
+    with torch.no_grad():
+        for state, step in zip(states, steps):
+            torch.manual_seed(policy_seed+step)
+            distribution = actor.distribution(torch.as_tensor(state).view(1, -1))
+            innovations.append(((distribution.sample()[0]-distribution.mean[0])/distribution.stddev[0]).numpy())
+    return np.stack(innovations)
+
+
+def worker_mean_query(job, *, probe_scale=1.):
     source_weights, teacher, initial, role, panel, period, predictor, envelope = job
     model, args = joint.source.native._WORKER
     model.load_state_dict(source_weights)
@@ -37,14 +47,11 @@ def worker_mean_query(job):
     policy_seed, _ = joint.source.scenario.spec.noise_seeds(args.optimizer_seed, role["scenario_seed"], role["noise_seeds"][panel])
     counts = dict.fromkeys(spec.budget(), 0)
     warm.count_row(counts, row, "collection")
-    returns, innovations = {"plus": [], "minus": []}, []
-    std = trainer.upper_actor.log_std.detach().exp().numpy()
+    returns = {"plus": [], "minus": []}
+    innovations = query_innovations(trainer.upper_actor, batch.upper.state, row["decision_steps"], policy_seed)
+    std = trainer.upper_actor.log_std.detach().exp().numpy()*probe_scale
     for index, step in enumerate(row["decision_steps"]):
-        with torch.no_grad():
-            torch.manual_seed(policy_seed+step)
-            distribution = trainer.upper_actor.distribution(torch.as_tensor(batch.upper.state[index]).view(1, -1))
-            innovation = ((distribution.sample()[0]-distribution.mean[0])/distribution.stddev[0]).numpy()
-        innovations.append(innovation)
+        innovation = innovations[index]
         for sign, direction in (("plus", 1), ("minus", -1)):
             action = means[index]+direction*std*innovation
             probe, control, control_audit = joint.native_episode(trainer, **call, upper_override={"step": step, "action": action})
@@ -97,7 +104,7 @@ def mean_candidates(trainer, rows):
         "policy_geometry_forward_batches": 3, "upper_candidate_weight_steps": 2}
 
 
-def worker_evaluate(job):
+def worker_evaluate(job, *, variants=spec.VARIANTS):
     source_weights, teacher, initial, uppers, seed, period, predictor, envelope = job
     model, args = joint.source.native._WORKER
     model.load_state_dict(source_weights)
@@ -106,7 +113,7 @@ def worker_evaluate(job):
     output, common, upper_common = {}, None, None
     for mode in spec.MODES:
         rows = {}
-        for variant in spec.VARIANTS:
+        for variant in variants:
             if mode == "sampled" and variant == "source_forecast":
                 rows[variant] = output["mean"][variant]
                 continue
@@ -130,15 +137,15 @@ def worker_evaluate(job):
     return output
 
 
-def evaluation_summary(scenes):
+def evaluation_summary(scenes, *, variants=spec.VARIANTS, contrasts=spec.CONTRASTS):
     modes = {}
     for mode in spec.MODES:
         modes[mode] = {name: {f"{a}_minus_{b}": previous.paired_effect([sign*(r[mode][a][metric]-r[mode][b][metric]) for r in scenes])
-            for a, b in spec.CONTRASTS} for name, metric, sign in (
+            for a, b in contrasts} for name, metric, sign in (
                 ("effects", "episode_return", 1), ("tracking_error_reduction_positive_is_better", "tracking_squared_error_integral", -1))}
-        modes[mode]["mean_metrics"] = {v: {k: float(np.mean([r[mode][v][k] for r in scenes])) for k in spec.METRICS} for v in spec.VARIANTS}
+        modes[mode]["mean_metrics"] = {v: {k: float(np.mean([r[mode][v][k] for r in scenes])) for k in spec.METRICS} for v in variants}
     return {"evaluation": modes, "sampled_minus_mean_return": {v: previous.paired_effect([
-        r["sampled"][v]["episode_return"]-r["mean"][v]["episode_return"] for r in scenes]) for v in spec.VARIANTS}}
+        r["sampled"][v]["episode_return"]-r["mean"][v]["episode_return"] for r in scenes]) for v in variants}}
 
 
 def run(root, output):
