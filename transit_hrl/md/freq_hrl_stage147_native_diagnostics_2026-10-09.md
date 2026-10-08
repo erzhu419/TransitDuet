@@ -21,6 +21,9 @@ V2 stages code only and first recovers checkpoints by exact recipe/seed replay,
 requiring matching recorded demand, training curves, update counts and actor
 changes. Root101 recovery precedes the full matrix; other roots recover in
 their diagnostic jobs. This is restoration work, not independent evidence.
+Eighteen focused tests passed. Recovery preflight `t137332` is submitted as
+`native_transit_diagnostics_stage147_recovery_preflight_20261009_r2`;
+the full diagnostic/recovery matrix remains unsubmitted until it qualifies.
 
 If the lower is saturated and barely reacts to its band, qualify the existing
 dimensionless physical encoder before repeating matched routing training. If

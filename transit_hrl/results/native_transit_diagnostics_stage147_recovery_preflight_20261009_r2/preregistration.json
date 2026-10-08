@@ -1,0 +1,63 @@
+{
+  "cells": [
+    {
+      "method": "correct",
+      "root": 101
+    }
+  ],
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_only_server_checkpoint_reuse",
+    "baseline_gate": "exact_reproduction_of_source_metrics_and_exogenous_demand",
+    "checkpoint_ep": 299,
+    "checkpoint_provenance": "recorded_training_replay_after_staging_loss",
+    "conditions": {
+      "correct": [
+        "baseline"
+      ],
+      "raw_history_common": [
+        "baseline"
+      ],
+      "swapped_common": [
+        "baseline"
+      ]
+    },
+    "neutral_upper": "zero_target_headway_delta_same_fixed_dispatch_schedule",
+    "preflight": true,
+    "purpose": "frozen_mechanism_diagnosis_not_new_performance_claim",
+    "replay_verification": [
+      "training_demand_counts",
+      "recorded_training_curve",
+      "updates",
+      "actor_change_max_abs"
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "scene_seeds": "first_registered_stage146_scene_per_root_and_regime",
+    "source_protocol": "native_transit_routing_stage146_v1",
+    "source_run": "native_transit_routing_stage146_development_20261009_r1",
+    "training_updates": 0,
+    "zero_holding": "zero_learned_holding_native_boarding_dwell_unchanged",
+    "zero_input_probe": "offline_same_state_deterministic_action_sensitivity"
+  },
+  "protocol": "native_transit_diagnostics_stage147_v2",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "bc33f042ac42658fefe409918760048c9f3163f9",
+  "tasks": 1
+}
