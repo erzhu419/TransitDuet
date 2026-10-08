@@ -1,0 +1,44 @@
+_extends: config_v2.yaml
+_name: F_freqduet_harmonic_hiro
+
+upper:
+  # 11 original v2k dims, raw demand replaced by harmonic low demand,
+  # plus low slope, low forecast, HF energy, and two OD-structure features.
+  state_dim: 16
+
+coupling:
+  coupling_mode: hiro
+
+frequency:
+  enable: true
+  method: harmonic
+  upper_features: true
+  lower_features: true
+  upper_mode: low
+  lower_mode: high
+  od_features: true
+  replace_upper_demand_with_low: true
+
+  # Main non-wavelet intensity path. Counts are binned causally to reduce
+  # Poisson noise, then fit with recursive least-squares Fourier bases.
+  bin_sec: 60
+  use_historical_prior: true
+  harmonic_period_s: 50400.0
+  fourier_K: 4
+  harmonic_forgetting: 0.9995
+  harmonic_prior_var: 0.01
+  harmonic_ridge: 0.01
+  energy_period_s: 600.0
+  forecast_horizon_s: 1800.0
+
+  global_demand_norm: 50.0
+  local_demand_norm: 10.0
+  slope_norm: 5.0
+
+leakage:
+  enable: true
+  lower_drift_window: 24
+  lower_drift_budget_s: 180.0
+  lower_drift_penalty: 0.08
+  upper_hf_penalty: 0.04
+  upper_lpf_window: 6
