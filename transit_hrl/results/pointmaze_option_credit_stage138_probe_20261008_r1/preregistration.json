@@ -1,0 +1,461 @@
+{
+  "analysis": "Retain both roots, periods, credit methods and update signs. Credit labels use training queries only; report independent-noise gradient cosine and temporal signal variance. Compare fresh deployment return and signed tracking reduction without an evaluation winner, confirmation CI or automatic seed extension.",
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only"
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "collection_episodes": 32,
+    "counterfactual_episodes": 576,
+    "credit_checks": 608,
+    "evaluation_episodes": 384,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "lower_actor_optimizer_steps": 0,
+    "lower_checkpoint_loads": 2,
+    "lower_value_optimizer_steps": 0,
+    "native_donor_response_calls": 2380800,
+    "native_episodes": 992,
+    "native_lower_calls": 1190400,
+    "native_steps": 1190400,
+    "native_trace_writes": 0,
+    "native_upper_calls": 17856,
+    "planning_fits": 18016,
+    "planning_reference_calls": 1190400,
+    "planning_renewals": 19008,
+    "score_gradient_batches": 8,
+    "source_cell_loads": 2,
+    "upper_actor_optimizer_steps": 8,
+    "upper_checkpoint_loads": 2,
+    "upper_value_optimizer_steps": 8
+  },
+  "contract": {
+    "artifacts": "compact_JSON_no_checkpoints_or_traces_full_prefix_replay_cost_counted",
+    "authority": 0.05,
+    "baseline": "same_pre_action_prefix_and_fixed_future_innovations_independent_of_current_action_draw",
+    "credit": "sampled_full_return_minus_single_option_replaced_by_current_mean_full_return",
+    "evaluation": "fresh_paired_native_scenes_both_signs_no_winner_or_confirmation_CI",
+    "freeze": "all_deployed_lower_critics_teacher_forecaster_and_std",
+    "limits": "simulator_query_credit_diagnosis_not_joint_HRL_or_stochastic_mean_objective_equivalence",
+    "optimizer": "shared_upper_PPO_original_MC_value_targets_same_optimizer_seed_both_credit_methods",
+    "radius": 0.0005555555555555556,
+    "source": "pointmaze_bounded_ppo_stage137_probe_20261008_r1",
+    "training": "fresh_shared_on_policy_paths_only_counterfactual_paths_are_labels_not_PPO_samples",
+    "upper_std": 0.15,
+    "warm_source": "pointmaze_native_selection_replication_stage135_frozen_20261008_r1"
+  },
+  "contrasts": [
+    [
+      "warm_start",
+      "source_forecast"
+    ],
+    [
+      "critic_plus",
+      "warm_start"
+    ],
+    [
+      "critic_minus",
+      "warm_start"
+    ],
+    [
+      "option_credit_plus",
+      "warm_start"
+    ],
+    [
+      "option_credit_minus",
+      "warm_start"
+    ],
+    [
+      "option_credit_plus",
+      "critic_plus"
+    ],
+    [
+      "critic_plus",
+      "critic_minus"
+    ],
+    [
+      "option_credit_plus",
+      "option_credit_minus"
+    ]
+  ],
+  "focused_tests": {
+    "passed": 16,
+    "scope": "new credit/prefix replay, identical critic updates, native runner default, bounded PPO regression and exact reduced-run budget"
+  },
+  "inherited_budget": {
+    "Stage135_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 128,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15590400,
+      "native_episodes": 6496,
+      "native_policy_selections": 2,
+      "native_return_fits": 12,
+      "native_steps": 7795200,
+      "native_trace_writes": 0,
+      "native_upper_calls": 119808,
+      "optimizer_steps": 0,
+      "selection_episodes": 192,
+      "selection_pair_groups": 64,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    },
+    "Stage137_per_root": {
+      "checkpoint_writes": 0,
+      "credit_checks": 32,
+      "evaluation_episodes": 448,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 7488,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "policy_geometry_forward_batches": 14,
+      "replay_episodes": 32,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "earlier_source_chain": "inherited_not_zero"
+  },
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "protocol": "pointmaze_option_credit_stage138_v1",
+  "run_name": "pointmaze_option_credit_stage138_probe_20261008_r1",
+  "scheduler": {
+    "aggregator_task": false,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410037": {
+      "evaluation": [
+        138190001,
+        138190002,
+        138190003,
+        138190004,
+        138190005,
+        138190006,
+        138190007,
+        138190008,
+        138190009,
+        138190010,
+        138190011,
+        138190012,
+        138190013,
+        138190014,
+        138190015,
+        138190016,
+        138190017,
+        138190018,
+        138190019,
+        138190020,
+        138190021,
+        138190022,
+        138190023,
+        138190024,
+        138190025,
+        138190026,
+        138190027,
+        138190028,
+        138190029,
+        138190030,
+        138190031,
+        138190032
+      ],
+      "training": [
+        {
+          "noise_seeds": {
+            "A": 138110001,
+            "B": 138120001
+          },
+          "scenario_seed": 138100001
+        },
+        {
+          "noise_seeds": {
+            "A": 138110002,
+            "B": 138120002
+          },
+          "scenario_seed": 138100002
+        },
+        {
+          "noise_seeds": {
+            "A": 138110003,
+            "B": 138120003
+          },
+          "scenario_seed": 138100003
+        },
+        {
+          "noise_seeds": {
+            "A": 138110004,
+            "B": 138120004
+          },
+          "scenario_seed": 138100004
+        },
+        {
+          "noise_seeds": {
+            "A": 138110005,
+            "B": 138120005
+          },
+          "scenario_seed": 138100005
+        },
+        {
+          "noise_seeds": {
+            "A": 138110006,
+            "B": 138120006
+          },
+          "scenario_seed": 138100006
+        },
+        {
+          "noise_seeds": {
+            "A": 138110007,
+            "B": 138120007
+          },
+          "scenario_seed": 138100007
+        },
+        {
+          "noise_seeds": {
+            "A": 138110008,
+            "B": 138120008
+          },
+          "scenario_seed": 138100008
+        }
+      ]
+    },
+    "410049": {
+      "evaluation": [
+        138290001,
+        138290002,
+        138290003,
+        138290004,
+        138290005,
+        138290006,
+        138290007,
+        138290008,
+        138290009,
+        138290010,
+        138290011,
+        138290012,
+        138290013,
+        138290014,
+        138290015,
+        138290016,
+        138290017,
+        138290018,
+        138290019,
+        138290020,
+        138290021,
+        138290022,
+        138290023,
+        138290024,
+        138290025,
+        138290026,
+        138290027,
+        138290028,
+        138290029,
+        138290030,
+        138290031,
+        138290032
+      ],
+      "training": [
+        {
+          "noise_seeds": {
+            "A": 138210001,
+            "B": 138220001
+          },
+          "scenario_seed": 138200001
+        },
+        {
+          "noise_seeds": {
+            "A": 138210002,
+            "B": 138220002
+          },
+          "scenario_seed": 138200002
+        },
+        {
+          "noise_seeds": {
+            "A": 138210003,
+            "B": 138220003
+          },
+          "scenario_seed": 138200003
+        },
+        {
+          "noise_seeds": {
+            "A": 138210004,
+            "B": 138220004
+          },
+          "scenario_seed": 138200004
+        },
+        {
+          "noise_seeds": {
+            "A": 138210005,
+            "B": 138220005
+          },
+          "scenario_seed": 138200005
+        },
+        {
+          "noise_seeds": {
+            "A": 138210006,
+            "B": 138220006
+          },
+          "scenario_seed": 138200006
+        },
+        {
+          "noise_seeds": {
+            "A": 138210007,
+            "B": 138220007
+          },
+          "scenario_seed": 138200007
+        },
+        {
+          "noise_seeds": {
+            "A": 138210008,
+            "B": 138220008
+          },
+          "scenario_seed": 138200008
+        }
+      ]
+    }
+  },
+  "source_availability": {
+    "Stage135_selected_upper_files": 4,
+    "Stage137_completed_cells": 2,
+    "node": "node004",
+    "selected_methods": {
+      "410037": {
+        "100": "stale",
+        "50": "refresh"
+      },
+      "410049": {
+        "100": "refresh",
+        "50": "refresh"
+      }
+    }
+  },
+  "source_revision": "57d56a9e35a547192844390fa7e874284dbf12c4",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_option_credit_stage138.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Full native prefix/continuation queries for paired single-option actor credit; shared on-policy upper PPO with unchanged MC critic targets; fixed-KL paired deployment; no checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage138 native single-option actor credit root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_option_credit_stage138_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_option_credit_stage138_v1/native_option_credit",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_option_credit_stage138_v1/pointmaze_option_credit_stage138_probe_20261008_r1/paired_single_option_mean_baseline_fixed_KL_PPO_credit/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_option_credit_stage138.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Full native prefix/continuation queries for paired single-option actor credit; shared on-policy upper PPO with unchanged MC critic targets; fixed-KL paired deployment; no checkpoints.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage138 native single-option actor credit root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_option_credit_stage138_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_option_credit_stage138_v1/native_option_credit",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_option_credit_stage138_probe_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_option_credit_stage138_v1/pointmaze_option_credit_stage138_probe_20261008_r1/paired_single_option_mean_baseline_fixed_KL_PPO_credit/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "variants": [
+    "source_forecast",
+    "warm_start",
+    "critic_plus",
+    "critic_minus",
+    "option_credit_plus",
+    "option_credit_minus"
+  ]
+}
