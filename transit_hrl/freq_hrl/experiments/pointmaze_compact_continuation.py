@@ -60,7 +60,8 @@ def worker_label(job):
         "native_upper_calls": len(rows)*(args.horizon//period), "native_donor_response_calls": 2*len(rows)*args.horizon}
 
 
-def learn_continuations(actor, origin, labels):
+def learn_continuations(actor, origin, labels, *, protocol_spec=spec):
+    spec = protocol_spec
     states = np.asarray([r["state"] for r in labels], dtype=np.float32)
     gradients = np.asarray([r["gradient"] for r in labels], dtype=np.float64)
     signals = {panel: gradients * (2*np.asarray([r["query"]["panel"] == panel for r in labels]))[:, None] for panel in spec.PANELS}
@@ -94,7 +95,8 @@ def learn_continuations(actor, origin, labels):
     return candidates, learning, cost
 
 
-def evaluation_summary(rows):
+def evaluation_summary(rows, *, protocol_spec=spec):
+    spec = protocol_spec
     metrics = ("episode_return", "reference_correction_rms", "reference_correction_peak", "plan_delta_rms", "upper_mean_rms")
     means = {v: {k: float(np.mean([r[v][k] for r in rows])) for k in metrics} for v in spec.VARIANTS}
     effects = {}
@@ -104,7 +106,8 @@ def evaluation_summary(rows):
     return {"mean_metrics": means, "effects": effects}
 
 
-def run(root, output):
+def run(root, output, *, protocol_spec=spec):
+    spec = protocol_spec
     output = output.resolve()
     cached = json.loads(spec.source_result(root).read_text())
     if (cached["status"], cached["protocol"], cached["root"], cached["cost"]) != ("complete", spec.source.PROTOCOL, root, spec.source.budget()):
@@ -140,7 +143,7 @@ def run(root, output):
                     cost[k] += row[k]
                 if index % 16 == 0 or index == len(roster):
                     print(f"root={root} period={period}: current-policy labels {index}/{len(roster)}", flush=True)
-            directions, learning, work = learn_continuations(trainer.upper_actor, origin, labels)
+            directions, learning, work = learn_continuations(trainer.upper_actor, origin, labels, protocol_spec=spec)
             for k, v in work.items():
                 cost[k] += v
             variants = [("zero", current, "joint"), *[(m+"_"+sign, directions[m][sign], "joint") for m in spec.METHODS for sign in ("plus", "minus")]]
@@ -188,13 +191,13 @@ def run(root, output):
             joint.source.native.curves.support.assert_frozen(model, before)
             groups[p] = {"learning": learning, "native_labels": [{k:v for k,v in r.items() if k != "state"} for r in labels],
                 "training_roles": roles, "training_native_return_fits": fits, "training_crossfit": crossfit,
-                "evaluation_seeds": seeds, "lower_and_critics_frozen": "passed", **evaluation_summary(evaluation)}
+                "evaluation_seeds": seeds, "lower_and_critics_frozen": "passed", **evaluation_summary(evaluation, protocol_spec=spec)}
             print(f"root={root} period={period}: compact continuation complete", flush=True)
     if cost != spec.budget():
         raise ValueError(f"Stage130 measured budget changed: {cost}")
     result = {"status": "complete", "protocol": spec.PROTOCOL, "root": root, "groups": groups, "cost": cost,
-        "inherited_Stage128_cost": cached["cost"], "minimum_episode_gain": spec.MINIMUM_GAIN,
-        "kind": "two_development_root_current_policy_credit_not_independent_confirmation"}
+        "source_protocol": spec.source.PROTOCOL, "inherited_source_cost": cached["cost"],
+        "minimum_episode_gain": spec.MINIMUM_GAIN, "kind": spec.EVIDENCE_ROLE}
     write_json(output, result)
     write_json(output.parent/"completion"/"ready.json", {"status": "complete", "protocol": spec.PROTOCOL})
     print("Eval complete: compact continuation result written", flush=True)

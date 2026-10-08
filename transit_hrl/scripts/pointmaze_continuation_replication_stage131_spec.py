@@ -1,18 +1,19 @@
-"""Native policy continuation after the frozen compact upper improvement."""
+"""Frozen current-policy continuation on six additional source-policy roots."""
 
-from scripts import pointmaze_credit_transfer_stage128_spec as source
+from scripts import pointmaze_compact_replication_stage129_spec as source
+from scripts import pointmaze_compact_continuation_stage130_spec as recipe
 
 ROOT, ROOTS, PERIODS = source.ROOT, source.ROOTS, source.PERIODS
-PROTOCOL = "pointmaze_compact_continuation_stage130_v1"
-EVIDENCE_ROLE = "two_development_root_current_policy_credit_not_independent_confirmation"
-SOURCE_RUN = "pointmaze_credit_transfer_stage128_pilot_20261007_r1"
-PANELS, METHODS = source.PANELS, ("refresh", "stale")
-WORKERS, LABEL_SCENARIOS, TRAINING_SCENARIOS, EVALUATION_EPISODES = 16, 4, 16, 32
-DAMPING, FISHER_RADIUS, MINIMUM_GAIN = source.DAMPING, source.FISHER_RADIUS, source.MINIMUM_GAIN
-EPSILON, ACTION_DIM = .005, 8
-VARIANTS = ("source_flat", "source_forecast", "single", "refresh", "stale", "refresh_descent", "refresh_blinded")
-CONTRASTS = (("refresh", "source_forecast"), ("refresh", "single"), ("refresh", "stale"),
-    ("refresh", "refresh_descent"), ("refresh", "refresh_blinded"), ("stale", "single"))
+PROTOCOL = "pointmaze_continuation_replication_stage131_v1"
+EVIDENCE_ROLE = "frozen_compact_continuation_replication_not_joint_HRL_confirmation"
+SOURCE_RUN = "pointmaze_compact_replication_stage129_frozen_20261007_r1"
+PANELS, METHODS, VARIANTS, CONTRASTS = recipe.PANELS, recipe.METHODS, recipe.VARIANTS, recipe.CONTRASTS
+WORKERS, LABEL_SCENARIOS, TRAINING_SCENARIOS, EVALUATION_EPISODES = 16, 4, 16, 64
+DAMPING, FISHER_RADIUS, MINIMUM_GAIN = recipe.DAMPING, recipe.FISHER_RADIUS, recipe.MINIMUM_GAIN
+EPSILON, ACTION_DIM = recipe.EPSILON, recipe.ACTION_DIM
+PRIMARY_CONTRASTS = (("refresh", "source_forecast"), ("refresh", "single"), ("refresh", "stale"))
+ENDPOINTS = tuple(f"{p}/{a}_minus_{b}" for p in PERIODS for a, b in PRIMARY_CONTRASTS)
+BOOTSTRAP_DRAWS, BOOTSTRAP_SEED = 65536, 131131
 
 
 def arguments(root):
@@ -24,7 +25,7 @@ def source_result(root):
 
 
 def label_roles(root):
-    base = 130100000 + ROOTS.index(root) * 100000
+    base = 131100000 + ROOTS.index(root) * 100000
     return [{"scenario_seed": base + i + 1,
         "noise_seeds": {"A": base + 10001 + i, "B": base + 20001 + i}} for i in range(LABEL_SCENARIOS)]
 
@@ -35,13 +36,13 @@ def queries(root, period):
 
 
 def training_roles(root):
-    base = 130100000 + ROOTS.index(root) * 100000
+    base = 131100000 + ROOTS.index(root) * 100000
     return [{"scenario_seed": base + 30001 + i,
         "noise_seeds": {"A": base + 40001 + i, "B": base + 50001 + i}} for i in range(TRAINING_SCENARIOS)]
 
 
 def evaluation_seeds(root):
-    base = 130100000 + ROOTS.index(root) * 100000
+    base = 131100000 + ROOTS.index(root) * 100000
     return list(range(base + 90001, base + 90001 + EVALUATION_EPISODES))
 
 

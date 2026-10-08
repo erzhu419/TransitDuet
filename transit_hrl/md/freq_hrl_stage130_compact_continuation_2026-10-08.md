@@ -30,6 +30,23 @@ Run `pointmaze_compact_continuation_stage130_pilot_20261008_r1`:
 `t136504` root410011 and `t136505` root410023 accepted. Full task specifications,
 fresh seed roles, incremental budget and scheduler receipt are saved with the run.
 
+## Completed Result
+
+Both tasks completed;11,712new episodes/14,054,400steps,46,396bytes fetched.
+All four refreshed candidates select scale1 and improve over their single-step
+source on new evaluation scenes. Equal-root effects:
+
+| Period | Refresh minus forecast | Refresh minus single | Refresh minus stale |
+|---|---|---|---|
+|50|+1.395884|+0.478197|-0.004481|
+|100|+0.917537|+0.465657|+0.249798|
+
+The0.5 material target is met at both periods in development. Relabeling is
+not universally better than a stale second step: period50 is mixed, including
+root410011's-0.029643. Period100 is positive in both roots(+0.212895/+0.286701),
+but root410023's calibration favored stale while new evaluation favored refresh.
+Keep this transfer boundary and seek frozen six-root replication before claims.
+
 ## Limitations
 
 This adds a policy-improvement step, not equal total distance from zero. Only
