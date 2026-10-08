@@ -104,14 +104,15 @@ def finish_batch(data, rewards, duration):
 
 
 def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, envelope, collect,
-        upper_override=None):
+        upper_override=None, sample_upper=None):
+    sample_upper = collect if sample_upper is None else sample_upper
     policy_seed, lower_seed = source.scenario.spec.noise_seeds(args.optimizer_seed, seed, noise_seed)
     plan = (wide.WideBernsteinPlan(predictor, period, args.maximum_subgoal_delta, envelope) if arm == "joint"
         else source.baseline.forecast.PlanReference("ridge_velocity", predictor, period) if arm == "forecast" else None)
     task = source.native.joint._make_task(env_id=args.env_id, seed=seed, horizon=args.horizon,
                                         **source.native.joint._task_options(args))
     data = {level: {k: [] for k in ("state", "action", "old_logp", "old_value")} for level in ("upper", "lower")}
-    rewards, distances, innovations, measurements, decisions = [], [], [], [], []
+    rewards, distances, innovations, measurements, decisions, upper_innovations = [], [], [], [], [], []
     reference_square = residual_square = delta_square = upper_mean_square = 0.
     reference_peak = residual_peak = 0.
     try:
@@ -129,11 +130,13 @@ def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, e
                 with torch.inference_mode():
                     torch.manual_seed(policy_seed + step)
                     distribution = trainer.upper_actor.distribution(torch.as_tensor(state).view(1, -1))
-                    raw = distribution.sample()[0] if collect else distribution.mean[0]
+                    raw = distribution.sample()[0] if sample_upper else distribution.mean[0]
                     if upper_override is not None and step == upper_override["step"]:
                         raw = torch.as_tensor(upper_override["action"], dtype=raw.dtype)
                     logp = distribution.log_prob(raw).sum().item()
                     value = trainer.upper_value(torch.as_tensor(state).view(1, -1)).item()
+                    if sample_upper:
+                        upper_innovations.append(((raw-distribution.mean[0])/distribution.stddev[0]).numpy())
                 plan.decode(action=raw.numpy(), observation=obs, history=history, step=step, world_low=low, world_high=high)
                 upper_mean_square += float(distribution.mean.double().square().sum())
                 decisions.append(step)
@@ -193,7 +196,7 @@ def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, e
             "plan_renewals": args.horizon // period if plan is not None else 0,
             "plan_fits": plan.ols_fits if plan is not None else 0,
             "reference_calls": plan.calls if plan is not None else 0,
-            "reference_donor_calls": 2 * args.horizon, "lower_sample": True, "upper_sample": collect and arm == "joint",
+            "reference_donor_calls": 2 * args.horizon, "lower_sample": True, "upper_sample": sample_upper and arm == "joint",
             "reference_correction_rms": float(np.sqrt(reference_square / (2 * args.horizon))),
             "reference_correction_peak": reference_peak,
             "learned_residual_rms": float(np.sqrt(residual_square / (2 * args.horizon))),
@@ -201,7 +204,8 @@ def native_episode(trainer, *, args, seed, noise_seed, arm, period, predictor, e
             "plan_delta_rms": float(np.sqrt(delta_square / (4 * args.horizon))),
             "upper_mean_rms": float(np.sqrt(upper_mean_square / (8 * len(decisions)))) if decisions else 0.,
             "tracking_squared_error_integral": float(np.dot(distances, distances) * scale.dt_seconds)}
-        return batch, row, {"innovations": np.asarray(innovations), "measurements": np.asarray(measurements)}
+        return batch, row, {"innovations": np.asarray(innovations), "measurements": np.asarray(measurements),
+            "upper_innovations": np.asarray(upper_innovations)}
     finally:
         task.environment.close()
 

@@ -33,8 +33,30 @@ updates, exact native budget, unchanged default runner and bounded-PPO regressio
 Selected action means use the same scalar inference as native execution.
 Stage137 cells and four selected Stage135 upper files are available on node004.
 Run `pointmaze_option_credit_stage138_probe_20261008_r1`: `t136931` root410037,
-`t136932` root410049; initial receipt is queued, node unassigned. No waiting
+`t136932` root410049 are DONE on node004/node006. No waiting
 aggregator, hard node binding, checkpoint pull or local native training.
+
+## Result And Next Step
+
+Both cells pass exact accounting:1,984episodes/2,380,800steps;119,704bytes fetched.
+Conditional credit removes much phase variance but does not yield stable gains:
+
+| Period | Critic plus - warm | Option plus - warm | Option plus - critic plus |
+| --- | ---: | ---: | ---: |
+| 50 | -0.063693 | -0.028595 | 0.035098 |
+| 100 | 0.004111 | -0.018286 | -0.022397 |
+
+Phase variance fraction falls from92.5%-94.7% to4.5%-18.6%. Option-credit noise
+fold cosine is0.531/-0.164 at50 and0.045/-0.295 at100; reduced temporal variance
+is not consistent action-gradient agreement. Forward gains are positive in two
+of four root-periods, with mixed tracking effects. Warm-minus-forecast remains
+positive at both periods(+1.683892/+0.961554 equal-root means).
+
+Stage139 replays these same sampled states and cached credits, counting inherited
+label costs separately. Compare Adam, direct score and the existing damped Fisher
+mean geometry at equal KL, both signs. Evaluate stochastic and deployed mean
+upper policies separately on new scenes to distinguish optimizer geometry from
+training/deployment mismatch. No new labels, evaluation winner or confirmation CI.
 
 ## Limitations
 

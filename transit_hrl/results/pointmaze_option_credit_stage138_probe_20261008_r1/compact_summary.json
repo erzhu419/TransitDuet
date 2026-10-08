@@ -1,0 +1,166 @@
+{
+  "fetched_bytes": 119704,
+  "kind": "two_root_descriptive_credit_diagnosis_no_confirmation_CI",
+  "native_episodes": 1984,
+  "native_steps": 2380800,
+  "periods": {
+    "100": {
+      "by_root": {
+        "410037": {
+          "diagnostic": {
+            "critic": {
+              "advantage_std": 17.494138717651367,
+              "max_logp_replay_error": 4.76837158203125e-07,
+              "noise_fold_gradient_cosine": -0.2351531766189935,
+              "phase_mean_variance_fraction": 0.9249293804168701
+            },
+            "option_credit": {
+              "advantage_std": 0.8021572284806123,
+              "max_logp_replay_error": 4.76837158203125e-07,
+              "noise_fold_gradient_cosine": 0.04538057324546752,
+              "phase_mean_variance_fraction": 0.06008264228559416
+            }
+          },
+          "return_effects": {
+            "critic_minus_minus_warm_start": -0.10936776677270643,
+            "critic_plus_minus_critic_minus": 0.1465650333935784,
+            "critic_plus_minus_warm_start": 0.03719726662087197,
+            "option_credit_minus_minus_warm_start": 0.0029291705162464154,
+            "option_credit_plus_minus_critic_plus": -0.0933259903964796,
+            "option_credit_plus_minus_option_credit_minus": -0.05905789429185404,
+            "option_credit_plus_minus_warm_start": -0.056128723775607625,
+            "warm_start_minus_source_forecast": 1.4062336186701927
+          }
+        },
+        "410049": {
+          "diagnostic": {
+            "critic": {
+              "advantage_std": 19.354623794555664,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": -0.25374817208568917,
+              "phase_mean_variance_fraction": 0.9474108219146729
+            },
+            "option_credit": {
+              "advantage_std": 0.8080907062989294,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": -0.2949344769855829,
+              "phase_mean_variance_fraction": 0.04476456485151982
+            }
+          },
+          "return_effects": {
+            "critic_minus_minus_warm_start": 1.0083238635161251e-05,
+            "critic_plus_minus_critic_minus": -0.028985642597994854,
+            "critic_plus_minus_warm_start": -0.028975559359359693,
+            "option_credit_minus_minus_warm_start": -0.03925993087575819,
+            "option_credit_plus_minus_critic_plus": 0.04853257171668446,
+            "option_credit_plus_minus_option_credit_minus": 0.05881694323308295,
+            "option_credit_plus_minus_warm_start": 0.019557012357324766,
+            "warm_start_minus_source_forecast": 0.5168734935529216
+          }
+        }
+      },
+      "equal_root_return_effects": {
+        "critic_minus_minus_warm_start": -0.054678841767035635,
+        "critic_plus_minus_critic_minus": 0.058789695397791775,
+        "critic_plus_minus_warm_start": 0.004110853630756139,
+        "option_credit_minus_minus_warm_start": -0.018165380179755886,
+        "option_credit_plus_minus_critic_plus": -0.02239670933989757,
+        "option_credit_plus_minus_option_credit_minus": -0.00012047552938554418,
+        "option_credit_plus_minus_warm_start": -0.01828585570914143,
+        "warm_start_minus_source_forecast": 0.9615535561115571
+      },
+      "equal_root_tracking_reduction": {
+        "critic_minus_minus_warm_start": -1.3466153687473077e-05,
+        "critic_plus_minus_critic_minus": -3.595913861977642e-05,
+        "critic_plus_minus_warm_start": -4.94252923072495e-05,
+        "option_credit_minus_minus_warm_start": -5.153113300725826e-06,
+        "option_credit_plus_minus_critic_plus": 7.439851689858268e-06,
+        "option_credit_plus_minus_option_credit_minus": -3.6832327316665405e-05,
+        "option_credit_plus_minus_warm_start": -4.198544061739123e-05,
+        "warm_start_minus_source_forecast": 0.0014313396592380637
+      }
+    },
+    "50": {
+      "by_root": {
+        "410037": {
+          "diagnostic": {
+            "critic": {
+              "advantage_std": 12.182658195495605,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": -0.0559682331346059,
+              "phase_mean_variance_fraction": 0.9460279941558838
+            },
+            "option_credit": {
+              "advantage_std": 0.2505485788883248,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": 0.5314520470839716,
+              "phase_mean_variance_fraction": 0.18555363884231238
+            }
+          },
+          "return_effects": {
+            "critic_minus_minus_warm_start": -0.08982695338048075,
+            "critic_plus_minus_critic_minus": 0.019180255222153164,
+            "critic_plus_minus_warm_start": -0.07064669815832758,
+            "option_credit_minus_minus_warm_start": -0.1228404174637987,
+            "option_credit_plus_minus_critic_plus": -0.052147553962683446,
+            "option_credit_plus_minus_option_credit_minus": 4.6165342787674035e-05,
+            "option_credit_plus_minus_warm_start": -0.12279425212101103,
+            "warm_start_minus_source_forecast": 2.0920168226699474
+          }
+        },
+        "410049": {
+          "diagnostic": {
+            "critic": {
+              "advantage_std": 12.778615951538086,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": 0.11944191845194953,
+              "phase_mean_variance_fraction": 0.9414485692977905
+            },
+            "option_credit": {
+              "advantage_std": 0.21422262786047255,
+              "max_logp_replay_error": 9.5367431640625e-07,
+              "noise_fold_gradient_cosine": -0.1639975515531754,
+              "phase_mean_variance_fraction": 0.11486369113899643
+            }
+          },
+          "return_effects": {
+            "critic_minus_minus_warm_start": -0.1976235061252396,
+            "critic_plus_minus_critic_minus": 0.1408832692577846,
+            "critic_plus_minus_warm_start": -0.056740236867454996,
+            "option_credit_minus_minus_warm_start": -0.27514283556377706,
+            "option_credit_plus_minus_critic_plus": 0.12234419597017165,
+            "option_credit_plus_minus_option_credit_minus": 0.3407467946664937,
+            "option_credit_plus_minus_warm_start": 0.06560395910271666,
+            "warm_start_minus_source_forecast": 1.2757676291702182
+          }
+        }
+      },
+      "equal_root_return_effects": {
+        "critic_minus_minus_warm_start": -0.14372522975286017,
+        "critic_plus_minus_critic_minus": 0.08003176223996888,
+        "critic_plus_minus_warm_start": -0.06369346751289129,
+        "option_credit_minus_minus_warm_start": -0.19899162651378788,
+        "option_credit_plus_minus_critic_plus": 0.035098321003744104,
+        "option_credit_plus_minus_option_credit_minus": 0.1703964800046407,
+        "option_credit_plus_minus_warm_start": -0.028595146509147185,
+        "warm_start_minus_source_forecast": 1.6838922259200828
+      },
+      "equal_root_tracking_reduction": {
+        "critic_minus_minus_warm_start": -8.287656349509321e-05,
+        "critic_plus_minus_critic_minus": -8.89240610995565e-06,
+        "critic_plus_minus_warm_start": -9.176896960504886e-05,
+        "option_credit_minus_minus_warm_start": -0.0002319787037165954,
+        "option_credit_plus_minus_critic_plus": 0.0001251602901022991,
+        "option_credit_plus_minus_option_credit_minus": 0.0002653700242138456,
+        "option_credit_plus_minus_warm_start": 3.339132049725023e-05,
+        "warm_start_minus_source_forecast": 0.002051563589951157
+      }
+    }
+  },
+  "protocol": "pointmaze_option_credit_stage138_v1",
+  "roots": [
+    410037,
+    410049
+  ],
+  "run_name": "pointmaze_option_credit_stage138_probe_20261008_r1"
+}
