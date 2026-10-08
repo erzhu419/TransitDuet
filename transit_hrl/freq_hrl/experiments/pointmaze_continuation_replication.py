@@ -6,7 +6,8 @@ from .statistics import bootstrap_mean_ci
 from scripts import pointmaze_continuation_replication_stage131_spec as spec
 
 
-def aggregate(cells):
+def aggregate(cells, *, protocol_spec=spec):
+    spec = protocol_spec
     if len(cells) != len(spec.ROOTS) or {c["root"] for c in cells} != set(spec.ROOTS):
         raise ValueError("Stage131 requires exactly six additional source roots")
     cells = sorted(cells, key=lambda c: c["root"])
@@ -42,7 +43,7 @@ def aggregate(cells):
         endpoints[key] = {"mean": float(np.mean(x)), "ci": list(ci), "root_means": x,
             "threshold": threshold, "positive_gain_supported": ci[0] > 0., "threshold_supported": ci[0] > threshold}
     material = {str(p): endpoints[f"{p}/refresh_minus_source_forecast"]["threshold_supported"] for p in spec.PERIODS}
-    increment = {str(p): endpoints[f"{p}/refresh_minus_single"]["threshold_supported"] for p in spec.PERIODS}
+    increment = {str(p): endpoints[f"{p}/refresh_minus_{spec.SOURCE_BASELINE}"]["threshold_supported"] for p in spec.PERIODS}
     relabel = {str(p): endpoints[f"{p}/refresh_minus_stale"]["threshold_supported"] for p in spec.PERIODS}
     return {"status": "complete", "protocol": spec.PROTOCOL, "root_rows": root_rows, "endpoints": endpoints,
         "period_material_gate": material, "period_increment_gate": increment, "period_relabeling_gate": relabel,

@@ -8,12 +8,13 @@ import torch
 from freq_hrl.experiments import pointmaze_compact_continuation as kernel
 from freq_hrl.experiments import pointmaze_continuation_replication as experiment
 from scripts import pointmaze_third_update_stage132_spec as third_step
+from scripts import pointmaze_third_update_replication_stage133_spec as third_replication
 from test_pointmaze_joint_reference import source_data
 from test_pointmaze_native_upper_step import native_task
 from test_pointmaze_update_isolation import ImmediatePool
 
 
-@pytest.mark.parametrize("spec", (experiment.spec, third_step))
+@pytest.mark.parametrize("spec", (experiment.spec, third_step, third_replication))
 def test_shared_kernel_uses_source_protocol_method_baseline_and_training_roles(source_data, tmp_path, spec):
     models, predictor, cal, original_args, teachers = source_data
     args = copy.copy(original_args)
@@ -62,13 +63,13 @@ def test_shared_kernel_uses_source_protocol_method_baseline_and_training_roles(s
     assert result["cost"]["native_episodes"] == 162 and result["cost"]["native_steps"] == 16200
 
 
-def synthetic_cells(gains, increments=.3, relabel50=-.01, relabel100=.2):
-    spec, cells = experiment.spec, []
+def synthetic_cells(gains, increments=.3, relabel50=-.01, relabel100=.2, *, protocol_spec=experiment.spec):
+    spec, cells = protocol_spec, []
     for root, gain in zip(spec.ROOTS, gains):
         groups = {}
         for p in spec.PERIODS:
             effects = {f"refresh_minus_{b}": {"mean": x, "paired_differences": [x]*spec.EVALUATION_EPISODES}
-                for b, x in (("source_forecast", gain), ("single", increments),
+                for b, x in (("source_forecast", gain), (spec.SOURCE_BASELINE, increments),
                     ("stale", relabel50 if p == 50 else relabel100), ("refresh_blinded", gain))}
             groups[str(p)] = {"effects": effects, "evaluation_seeds": spec.evaluation_seeds(root),
                 "training_roles": spec.training_roles(root), "lower_and_critics_frozen": "passed"}
@@ -77,15 +78,18 @@ def synthetic_cells(gains, increments=.3, relabel50=-.01, relabel100=.2):
     return cells
 
 
-def test_inference_keeps_material_increment_and_relabeling_claims_separate():
-    summary = experiment.aggregate(synthetic_cells([1.]*6))
+@pytest.mark.parametrize("spec", (experiment.spec, third_replication))
+def test_inference_keeps_material_increment_and_relabeling_claims_separate(spec):
+    def summarize(gains, **kwargs):
+        return experiment.aggregate(synthetic_cells(gains, protocol_spec=spec, **kwargs), protocol_spec=spec)
+    summary = summarize([1.]*6)
     assert summary["material_continuation_gate"] == "supported_both_periods"
     assert summary["universal_relabeling_gate"] == "not_closed"
     assert summary["period_relabeling_gate"] == {"50": False, "100": True}
     assert summary["statistics"]["n_independent"] == 6 and summary["statistics"]["bonferroni_family_size"] == 6
-    assert experiment.aggregate(synthetic_cells([.3]*6))["material_continuation_gate"] == "not_closed"
-    assert experiment.aggregate(synthetic_cells([1.]*6, increments=-.1))["material_continuation_gate"] == "not_closed"
-    varied = experiment.aggregate(synthetic_cells([-1.]*3+[1.]*3))
+    assert summarize([.3]*6)["material_continuation_gate"] == "not_closed"
+    assert summarize([1.]*6, increments=-.1)["material_continuation_gate"] == "not_closed"
+    varied = summarize([-1.]*3+[1.]*3)
     assert varied["endpoints"]["50/refresh_minus_source_forecast"]["ci"][1] > .6
 
 
@@ -135,3 +139,26 @@ def test_third_step_retains_geometry_and_names_the_actual_source_and_budget():
         fresh = {s for r in spec.label_roles(root)+spec.training_roles(root)
             for s in (r["scenario_seed"], *r["noise_seeds"].values())} | set(spec.evaluation_seeds(root))
         assert not fresh & old
+
+
+def test_third_replication_keeps_recipe_source_budget_and_fresh_roles():
+    spec = third_replication
+    assert spec.source is experiment.spec and not set(spec.ROOTS) & set(third_step.ROOTS)
+    assert spec.VARIANTS == third_step.VARIANTS and spec.CONTRASTS == third_step.CONTRASTS
+    assert spec.SOURCE_METHOD == "refresh" and spec.SOURCE_BASELINE == "two_step"
+    assert spec.FISHER_RADIUS == third_step.FISHER_RADIUS and spec.EPSILON == third_step.EPSILON
+    assert spec.budget()["native_episodes"] == 6304 and spec.budget()["native_steps"] == 7564800
+    assert spec.budget()["evaluation_episodes"] == 896 and len(spec.ENDPOINTS) == 6
+    seen = set()
+    for root in spec.ROOTS:
+        labels = {s for r in spec.label_roles(root) for s in (r["scenario_seed"], *r["noise_seeds"].values())}
+        train = {s for r in spec.training_roles(root) for s in (r["scenario_seed"], *r["noise_seeds"].values())}
+        evaluation = set(spec.evaluation_seeds(root))
+        old = set()
+        for earlier in (spec.source, spec.source.source):
+            old.update(s for r in earlier.label_roles(root)+earlier.training_roles(root)
+                for s in (r["scenario_seed"], *r["noise_seeds"].values()))
+            old.update(earlier.evaluation_seeds(root))
+        assert not labels & train and not (labels|train) & evaluation
+        assert not (labels|train|evaluation) & (old|seen)
+        seen.update(labels|train|evaluation)

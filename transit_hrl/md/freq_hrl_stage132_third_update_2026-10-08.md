@@ -31,6 +31,24 @@ Run `pointmaze_third_update_stage132_pilot_20261008_r1`:
 `t136539` root410011 and `t136540` root410023 accepted. Task specifications,
 fresh seed roles, new/inherited budgets and scheduler receipt are saved with the run.
 
+## Completed Result
+
+Both tasks completed on node004/node006. New cost:11,712episodes/14,054,400steps;
+46,967bytes fetched, excluding labels and checkpoints. Budget, source, fresh
+paired rosters, frozen lower/critics and blinded forecast identity match.
+
+| Period | Refresh minus forecast | Refresh minus two_step | Refresh minus radial control |
+|---|---|---|---|
+|50|+1.998440|+0.641560|+0.382313|
+|100|+1.159728|+0.373860|+0.136142|
+
+All four root-period incremental gains are positive; all four forecast gains
+exceed0.5. Development gate met; freeze the third update for Stage133. All four
+refresh fits choose scale1. Root410011 period100 calibration slightly favors
+radial continuation (0.386471 vs0.365270), including negative refresh-minus-radial
+A-to-B crossfit; retain this rather than choose an evaluation-winning method.
+These are equal-development-root means, not confirmation confidence intervals.
+
 ## Limitations
 
 This adds a third training step and simulation cost. Radial continuation shares
