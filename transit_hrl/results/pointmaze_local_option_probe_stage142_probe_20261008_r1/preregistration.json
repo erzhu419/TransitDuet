@@ -1,0 +1,638 @@
+{
+  "analysis": {
+    "diagnostics": [
+      "query_even_and_odd_response",
+      "wide_to_local_gradient_cosine",
+      "noise_fold_gradient_cosine",
+      "warm_forecast_and_both_update_signs",
+      "tracking_reduction"
+    ],
+    "independent_unit": "source_policy_optimizer_root",
+    "n_independent": 2,
+    "no_automatic_seed_extension_or_radius_sweep": true,
+    "no_confirmation_CI": true,
+    "no_evaluation_winner_selection": true,
+    "primary_comparison": "local_plus_minus_wide_plus_separate_mean_and_sampled_deployment",
+    "query_cost_boundary": "new_local_queries_and_wide_replay_counted_prior_wide_queries_inherited_not_equal_new_query_budgets"
+  },
+  "artifacts": {
+    "checkpoint_writes": 0,
+    "native_trace_writes": 0,
+    "pull": "compact_JSON_only"
+  },
+  "budget_per_root": {
+    "checkpoint_writes": 0,
+    "collection_episodes": 32,
+    "counterfactual_episodes": 1152,
+    "credit_checks": 1216,
+    "empirical_fisher_solves": 4,
+    "evaluation_alias_assignments": 64,
+    "evaluation_episodes": 704,
+    "exact_kl_forward_batches": 8,
+    "fisher_jvp_batches": 4,
+    "lower_actor_optimizer_steps": 0,
+    "lower_checkpoint_loads": 2,
+    "lower_value_optimizer_steps": 0,
+    "mean_query_label_pairs": 576,
+    "mean_score_forward_batches": 0,
+    "native_donor_response_calls": 4608000,
+    "native_episodes": 1920,
+    "native_lower_calls": 2304000,
+    "native_steps": 2304000,
+    "native_trace_writes": 0,
+    "native_upper_calls": 35712,
+    "planning_fits": 34944,
+    "planning_reference_calls": 2304000,
+    "planning_renewals": 36864,
+    "policy_geometry_forward_batches": 12,
+    "replay_episodes": 32,
+    "score_gradient_batches": 0,
+    "source_cell_loads": 2,
+    "upper_actor_optimizer_steps": 0,
+    "upper_candidate_weight_steps": 8,
+    "upper_checkpoint_loads": 2,
+    "upper_value_optimizer_steps": 0
+  },
+  "contract": {
+    "KL_radius": 0.004999999999999999,
+    "artifacts": "compact_JSON_full_replay_and_new_query_cost_no_checkpoints_or_traces_inherited_cost_separate",
+    "evaluation": "new_paired_mean_and_sampled_scenes_both_signs_no_winner_or_CI",
+    "freeze": "warm_mean_lower_values_teacher_forecaster_policy_std_authority005",
+    "geometry": "same_standardized_damped_mean_geometry_damping1",
+    "limits": "curvature_is_not_proof_of_gradient_bias_query_radius_diagnosis_not_joint_HRL_confirmation",
+    "mean_step_RMS": 0.0017677669529663686,
+    "pairing": "identical_mean_training_paths_and_probe_innovations_new_local_queries_cached_wide_labels",
+    "policy_std": 0.05,
+    "probe_std": {
+      "local": 0.005000000000000001,
+      "wide": 0.05
+    },
+    "source": "pointmaze_mean_option_query_stage141_probe_20261008_r1",
+    "warm_source": "pointmaze_native_selection_replication_stage135_frozen_20261008_r1"
+  },
+  "contrasts": [
+    [
+      "warm_start",
+      "source_forecast"
+    ],
+    [
+      "wide_plus",
+      "warm_start"
+    ],
+    [
+      "wide_minus",
+      "warm_start"
+    ],
+    [
+      "local_plus",
+      "warm_start"
+    ],
+    [
+      "local_minus",
+      "warm_start"
+    ],
+    [
+      "local_plus",
+      "wide_plus"
+    ],
+    [
+      "wide_plus",
+      "wide_minus"
+    ],
+    [
+      "local_plus",
+      "local_minus"
+    ],
+    [
+      "wide_plus",
+      "source_forecast"
+    ],
+    [
+      "local_plus",
+      "source_forecast"
+    ]
+  ],
+  "evaluation_modes": [
+    "mean",
+    "sampled"
+  ],
+  "focused_tests_passed": 15,
+  "inherited_budget": {
+    "Stage135_per_root": {
+      "checkpoint_writes": 4,
+      "crossfit_episodes": 192,
+      "crossfit_pair_groups": 64,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 128,
+      "evaluation_episodes": 896,
+      "evaluation_pair_groups": 128,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "label_episodes": 4896,
+      "label_queries": 288,
+      "native_donor_response_calls": 15590400,
+      "native_episodes": 6496,
+      "native_policy_selections": 2,
+      "native_return_fits": 12,
+      "native_steps": 7795200,
+      "native_trace_writes": 0,
+      "native_upper_calls": 119808,
+      "optimizer_steps": 0,
+      "selection_episodes": 192,
+      "selection_pair_groups": 64,
+      "source_cell_loads": 1,
+      "training_episodes": 320,
+      "training_pair_groups": 64,
+      "upper_candidate_weight_steps": 22,
+      "upper_checkpoint_loads": 2
+    },
+    "Stage136_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "credit_checks": 32,
+      "evaluation_episodes": 384,
+      "lower_actor_optimizer_steps": 152,
+      "lower_checkpoint_loads": 2,
+      "lower_diagnostic_gradient_batches": 80,
+      "lower_value_optimizer_steps": 152,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 5760,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "ppo_update_calls": 8,
+      "source_cell_loads": 1,
+      "source_clone_loads": 2,
+      "training_comparator_episodes": 64,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_diagnostic_gradient_batches": 8,
+      "upper_value_optimizer_steps": 8
+    },
+    "Stage137_per_root": {
+      "checkpoint_writes": 0,
+      "credit_checks": 32,
+      "evaluation_episodes": 448,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 1152000,
+      "native_episodes": 480,
+      "native_lower_calls": 576000,
+      "native_steps": 576000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 7488,
+      "planning_fits": 8160,
+      "planning_reference_calls": 576000,
+      "planning_renewals": 8640,
+      "policy_geometry_forward_batches": 14,
+      "replay_episodes": 32,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "Stage138_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "counterfactual_episodes": 576,
+      "credit_checks": 608,
+      "evaluation_episodes": 384,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "native_donor_response_calls": 2380800,
+      "native_episodes": 992,
+      "native_lower_calls": 1190400,
+      "native_steps": 1190400,
+      "native_trace_writes": 0,
+      "native_upper_calls": 17856,
+      "planning_fits": 18016,
+      "planning_reference_calls": 1190400,
+      "planning_renewals": 19008,
+      "score_gradient_batches": 8,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 8
+    },
+    "Stage139_per_root": {
+      "checkpoint_writes": 0,
+      "counterfactual_episodes": 0,
+      "credit_checks": 32,
+      "empirical_fisher_solves": 2,
+      "evaluation_alias_assignments": 64,
+      "evaluation_episodes": 960,
+      "exact_kl_forward_batches": 12,
+      "fisher_jvp_batches": 6,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "mean_score_forward_batches": 2,
+      "native_donor_response_calls": 2380800,
+      "native_episodes": 992,
+      "native_lower_calls": 1190400,
+      "native_steps": 1190400,
+      "native_trace_writes": 0,
+      "native_upper_calls": 16704,
+      "planning_fits": 16864,
+      "planning_reference_calls": 1190400,
+      "planning_renewals": 17856,
+      "replay_episodes": 32,
+      "score_gradient_batches": 10,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 4,
+      "upper_candidate_weight_steps": 12,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 4
+    },
+    "Stage140_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 64,
+      "counterfactual_episodes": 1152,
+      "credit_checks": 1216,
+      "empirical_fisher_solves": 4,
+      "evaluation_alias_assignments": 256,
+      "evaluation_episodes": 768,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "mean_score_forward_batches": 4,
+      "native_donor_response_calls": 4761600,
+      "native_episodes": 1984,
+      "native_lower_calls": 2380800,
+      "native_steps": 2380800,
+      "native_trace_writes": 0,
+      "native_upper_calls": 36864,
+      "planning_fits": 36032,
+      "planning_reference_calls": 2380800,
+      "planning_renewals": 38016,
+      "policy_geometry_forward_batches": 12,
+      "score_gradient_batches": 20,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 0,
+      "upper_candidate_weight_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 0
+    },
+    "Stage141_per_root": {
+      "checkpoint_writes": 0,
+      "collection_episodes": 32,
+      "counterfactual_episodes": 1152,
+      "credit_checks": 1216,
+      "empirical_fisher_solves": 4,
+      "evaluation_alias_assignments": 64,
+      "evaluation_episodes": 704,
+      "exact_kl_forward_batches": 8,
+      "fisher_jvp_batches": 4,
+      "lower_actor_optimizer_steps": 0,
+      "lower_checkpoint_loads": 2,
+      "lower_value_optimizer_steps": 0,
+      "mean_query_label_pairs": 576,
+      "mean_score_forward_batches": 2,
+      "native_donor_response_calls": 4608000,
+      "native_episodes": 1920,
+      "native_lower_calls": 2304000,
+      "native_steps": 2304000,
+      "native_trace_writes": 0,
+      "native_upper_calls": 35712,
+      "planning_fits": 34944,
+      "planning_reference_calls": 2304000,
+      "planning_renewals": 36864,
+      "policy_geometry_forward_batches": 12,
+      "replay_episodes": 32,
+      "score_gradient_batches": 2,
+      "source_cell_loads": 2,
+      "upper_actor_optimizer_steps": 0,
+      "upper_candidate_weight_steps": 8,
+      "upper_checkpoint_loads": 2,
+      "upper_value_optimizer_steps": 0
+    },
+    "earlier_source_chain": "retained_source_run_JSON_lineage_not_zero_not_a_flattened_total"
+  },
+  "optimizer_roots": [
+    410037,
+    410049
+  ],
+  "protocol": "pointmaze_local_option_probe_stage142_v1",
+  "run_name": "pointmaze_local_option_probe_stage142_probe_20261008_r1",
+  "scheduler": {
+    "aggregator_task": null,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 17,
+    "ram_mb_per_task": 12288,
+    "require_node": null
+  },
+  "seed_roles": {
+    "410037": {
+      "evaluation": [
+        142190001,
+        142190002,
+        142190003,
+        142190004,
+        142190005,
+        142190006,
+        142190007,
+        142190008,
+        142190009,
+        142190010,
+        142190011,
+        142190012,
+        142190013,
+        142190014,
+        142190015,
+        142190016,
+        142190017,
+        142190018,
+        142190019,
+        142190020,
+        142190021,
+        142190022,
+        142190023,
+        142190024,
+        142190025,
+        142190026,
+        142190027,
+        142190028,
+        142190029,
+        142190030,
+        142190031,
+        142190032
+      ],
+      "replayed_training": [
+        {
+          "noise_seeds": {
+            "A": 140110001,
+            "B": 140120001
+          },
+          "scenario_seed": 140100001
+        },
+        {
+          "noise_seeds": {
+            "A": 140110002,
+            "B": 140120002
+          },
+          "scenario_seed": 140100002
+        },
+        {
+          "noise_seeds": {
+            "A": 140110003,
+            "B": 140120003
+          },
+          "scenario_seed": 140100003
+        },
+        {
+          "noise_seeds": {
+            "A": 140110004,
+            "B": 140120004
+          },
+          "scenario_seed": 140100004
+        },
+        {
+          "noise_seeds": {
+            "A": 140110005,
+            "B": 140120005
+          },
+          "scenario_seed": 140100005
+        },
+        {
+          "noise_seeds": {
+            "A": 140110006,
+            "B": 140120006
+          },
+          "scenario_seed": 140100006
+        },
+        {
+          "noise_seeds": {
+            "A": 140110007,
+            "B": 140120007
+          },
+          "scenario_seed": 140100007
+        },
+        {
+          "noise_seeds": {
+            "A": 140110008,
+            "B": 140120008
+          },
+          "scenario_seed": 140100008
+        }
+      ]
+    },
+    "410049": {
+      "evaluation": [
+        142290001,
+        142290002,
+        142290003,
+        142290004,
+        142290005,
+        142290006,
+        142290007,
+        142290008,
+        142290009,
+        142290010,
+        142290011,
+        142290012,
+        142290013,
+        142290014,
+        142290015,
+        142290016,
+        142290017,
+        142290018,
+        142290019,
+        142290020,
+        142290021,
+        142290022,
+        142290023,
+        142290024,
+        142290025,
+        142290026,
+        142290027,
+        142290028,
+        142290029,
+        142290030,
+        142290031,
+        142290032
+      ],
+      "replayed_training": [
+        {
+          "noise_seeds": {
+            "A": 140210001,
+            "B": 140220001
+          },
+          "scenario_seed": 140200001
+        },
+        {
+          "noise_seeds": {
+            "A": 140210002,
+            "B": 140220002
+          },
+          "scenario_seed": 140200002
+        },
+        {
+          "noise_seeds": {
+            "A": 140210003,
+            "B": 140220003
+          },
+          "scenario_seed": 140200003
+        },
+        {
+          "noise_seeds": {
+            "A": 140210004,
+            "B": 140220004
+          },
+          "scenario_seed": 140200004
+        },
+        {
+          "noise_seeds": {
+            "A": 140210005,
+            "B": 140220005
+          },
+          "scenario_seed": 140200005
+        },
+        {
+          "noise_seeds": {
+            "A": 140210006,
+            "B": 140220006
+          },
+          "scenario_seed": 140200006
+        },
+        {
+          "noise_seeds": {
+            "A": 140210007,
+            "B": 140220007
+          },
+          "scenario_seed": 140200007
+        },
+        {
+          "noise_seeds": {
+            "A": 140210008,
+            "B": 140220008
+          },
+          "scenario_seed": 140200008
+        }
+      ]
+    }
+  },
+  "source_availability": {
+    "file_sizes": {
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_mean_option_query_stage141_probe_20261008_r1/cells/replicate_410037/result.json": 209789,
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_mean_option_query_stage141_probe_20261008_r1/cells/replicate_410049/result.json": 209825,
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_native_selection_replication_stage135_frozen_20261008_r1/cells/replicate_410037/final_weights/period_100_stale_upper.pt": 14781,
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_native_selection_replication_stage135_frozen_20261008_r1/cells/replicate_410037/final_weights/period_50_refresh_upper.pt": 14788,
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_native_selection_replication_stage135_frozen_20261008_r1/cells/replicate_410049/final_weights/period_100_refresh_upper.pt": 14795,
+      "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_native_selection_replication_stage135_frozen_20261008_r1/cells/replicate_410049/final_weights/period_50_refresh_upper.pt": 14788
+    },
+    "method": "metadata_only_no_checkpoint_pull",
+    "node": "node004"
+  },
+  "source_revision": "bc877d1a5f99afa6c83be90bb9b00ab27170a466",
+  "task_specifications": [
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_local_option_probe_stage142.py --optimizer-seed 410037 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410037/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Native paired local option queries plus exact wide-label mean-path replay; fixed policy std, mean-step geometry and paired noise; new and inherited query costs kept separate.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage142 native local versus wide option probes root410037",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410037/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_local_option_probe_stage142_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_local_option_probe_stage142_v1/native_local_option_probe",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410037/completion",
+      "signature": "Freq-HRL/pointmaze_local_option_probe_stage142_v1/pointmaze_local_option_probe_stage142_probe_20261008_r1/cached_wide_vs_local_mean_option_probes_fixed_policy_std_and_mean_step/410037",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    },
+    {
+      "allow_cpu_training": true,
+      "allow_duplicate": false,
+      "allow_no_ckpt": true,
+      "allow_no_resume": true,
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= /home/zhengliang01/scheduleurm_work/conda_envs/csbapr-gpu-py310/bin/python -u scripts/run_pointmaze_local_option_probe_stage142.py --optimizer-seed 410049 --output /home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410049/result.json",
+      "cpu": 17,
+      "cpu_training_justification": "Native paired local option queries plus exact wide-label mean-path replay; fixed policy std, mean-step geometry and paired noise; new and inherited query costs kept separate.",
+      "cwd": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl",
+      "description": "Freq-HRL Stage142 native local versus wide option probes root410049",
+      "local_result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410049/completion",
+      "node_down_requeue_s": 300,
+      "priority": "normal",
+      "project": "pointmaze_local_option_probe_stage142_v1",
+      "ram_mb": 12288,
+      "require_node": null,
+      "reroute_on_node_down": true,
+      "resource_family": "Freq-HRL/pointmaze_local_option_probe_stage142_v1/native_local_option_probe",
+      "result_dir": "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/results/pointmaze_local_option_probe_stage142_probe_20261008_r1/cells/replicate_410049/completion",
+      "signature": "Freq-HRL/pointmaze_local_option_probe_stage142_v1/pointmaze_local_option_probe_stage142_probe_20261008_r1/cached_wide_vs_local_mean_option_probes_fixed_policy_std_and_mean_step/410049",
+      "stage_excludes": [
+        "results",
+        "data",
+        "freq_transitduet",
+        "scheduler_results",
+        "**/__pycache__"
+      ],
+      "stage_input_paths": [
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/scripts",
+        "/home/erzhu419/mine_code/TransitDuet_freqhrl_v3/transit_hrl/freq_hrl"
+      ],
+      "vram": 0
+    }
+  ],
+  "variants": [
+    "source_forecast",
+    "warm_start",
+    "wide_plus",
+    "wide_minus",
+    "local_plus",
+    "local_minus"
+  ]
+}
