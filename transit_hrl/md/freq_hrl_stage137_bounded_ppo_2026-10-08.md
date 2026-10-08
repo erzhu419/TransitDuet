@@ -25,6 +25,15 @@ New cost/root480episodes/576,000steps; total960episodes/1,152,000steps. Eight
 workers+parent/8GiB, scheduler dynamic node001-node006. Compact JSON only, no
 checkpoint or trace writes. Inherited Stage136/135/source-chain costs separate.
 
+## Run Receipt
+
+Implementation `54683cd906`, registration `68ee62bb39`; seven related tests
+passed, including exact update replay and reduced runner budget. Both Stage136
+source cells and four Stage135 selected upper files are available on node004.
+Run `pointmaze_bounded_ppo_stage137_probe_20261008_r1`: `t136920` root410037,
+`t136921` root410049 accepted, initial snapshot queued. No waiting aggregator
+or Stage137 performance result yet.
+
 ## Limitations
 
 Small sampled-state KL does not ensure deployment improvement. This does not
