@@ -31,6 +31,15 @@ native cost is unknown, bounded by the planned691,200steps; retained in the r1
 receipt separately from the replacement run. Algorithm, roster and budget stay
 unchanged. Eight related tests passed; four reran after evaluation batching.
 
+## Run Receipt
+
+Implementation31bdccbcf8; preregistration16aa0d5de8 pushed before submission.
+Run: `pointmaze_option_crossfit_stage144_probe_20261008_r2`.
+t137097/root410037 and t137098/root410049 were queued at receipt, with no
+assigned node. Both allow all six nodes,17CPUs/12GiB each, no aggregator.
+Twelve server-side source files are available by metadata check only.
+Preregistration and compact dispatch receipts retain the replacement lineage.
+
 ## Limitations
 
 Folds share seven training scenes and are not independent seed replicates.
