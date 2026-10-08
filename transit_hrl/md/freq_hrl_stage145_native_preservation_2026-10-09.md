@@ -32,6 +32,12 @@ are required. All non-wall episode fields, every action and final network arrays
 must match exactly. Temporary arrays stay on the server and are removed after
 comparison; only compact JSON is pulled. No checkpoint is produced.
 
+Preflight `t137139` completed on node004: six native episodes across the two
+implementations, 32,400 simulator steps, 318 episode fields and 69 action/network
+arrays compared. Upper/lower updates were 2/4 per implementation, both actors
+changed, and all comparisons were exact (maximum difference 0). Local focused
+coverage is 15 passing tests, including the extracted negative-binomial path.
+
 ## Next
 
 After native extraction qualifies, register a matched-budget native

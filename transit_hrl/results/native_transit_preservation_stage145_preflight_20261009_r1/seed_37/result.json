@@ -1,0 +1,79 @@
+{
+  "actor_change_max_abs": {
+    "lower": 0.0012022324372082949,
+    "upper": 0.0006004124879837036
+  },
+  "arrays_compared": 69,
+  "contract": {
+    "artifacts": "compact_JSON_only_temporary_arrays_removed_no_checkpoints",
+    "candidate": "same_runner_using_freq_hrl_count_harmonic",
+    "comparison": "all_non_wall_episode_fields_actions_and_final_network_arrays_exact",
+    "config": "F_freqduet_harmonic_hiro",
+    "eval_episodes": 1,
+    "preflight_overrides": {
+      "demand_end_time_s": 3600,
+      "effective_trip_num": 24,
+      "evaluation_end_time_s": 5400,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "service_start_hour": 6,
+      "updates_per_episode_each_level": 2,
+      "upper_batch_size": 8
+    },
+    "purpose": "native_extraction_equivalence_not_performance_claim",
+    "reference": "preserved_native_original_count_estimator",
+    "require_learning": "both_level_update_calls_and_actor_parameter_changes",
+    "train_episodes": 2,
+    "unchanged": [
+      "physical_actions",
+      "reward",
+      "RE-SAC_backend",
+      "historical_OD_prior",
+      "log_count_RLS",
+      "feature_layout"
+    ],
+    "upper_warmup": 1
+  },
+  "differences": [],
+  "endpoints": [
+    {
+      "avg_wait_min": 5.939,
+      "ep": 0,
+      "ep_reward": -197.42,
+      "headway_cv": 0.2455,
+      "peak_fleet": 13,
+      "stage": "Warmup"
+    },
+    {
+      "avg_wait_min": 7.163,
+      "ep": 1,
+      "ep_reward": -298.338,
+      "headway_cv": 0.4142,
+      "peak_fleet": 14,
+      "stage": "BiLevel"
+    },
+    {
+      "avg_wait_min": 5.275,
+      "ep": 2,
+      "ep_reward": -162.82,
+      "headway_cv": 0.1988,
+      "peak_fleet": 13,
+      "stage": "BiLevel"
+    }
+  ],
+  "episode_fields_compared": 318,
+  "max_action_or_network_abs_difference": 0.0,
+  "native_steps_both_implementations": 32400,
+  "passed": true,
+  "preflight": true,
+  "protocol": "native_transit_preservation_stage145_v1",
+  "seed": 37,
+  "state_dims": {
+    "lower": 33,
+    "upper": 16
+  },
+  "updates_per_implementation": {
+    "lower": 4,
+    "upper": 2
+  }
+}
