@@ -52,6 +52,33 @@ neutral upper has negligible effect, fix goal execution/credit before changing
 the frequency filter. If actors respond but service does not, investigate
 control authority and objective alignment rather than adding seeds.
 
+## Completed Result
+
+All 24 tasks completed. All 24 baseline deployments reproduced Stage146;
+23 full-matrix recovery receipts plus the earlier root101 receipt matched their
+recorded training observables. Restoration consumed 423,522,000 ticks in this
+matrix (441,936,000 including preflight); frozen diagnosis consumed 12,276,000.
+
+Across eight correct-routing roots, zeroing upper commands changed restricted
+wait by -0.000625 minutes and service cost by -0.0000634 on average, with no
+peak-fleet or completion change. Upper commands were not universally zero:
+root means ranged from -12.48 to +7.81 seconds. Nevertheless their physical
+service effect was negligible. Neutralizing upper increased native episode
+reward by 8.73 while leaving service essentially unchanged, consistent with
+target-dependent reward rather than useful physical upper control.
+
+Zero holding increased restricted wait by 0.1298 minutes and headway CV by
+0.12691, and reduced reward by 551.81. It also reduced peak fleet by 0.5 and
+composite service cost by 0.05101: the learned lower has control authority,
+but its wait/headway benefits carry a fleet-cost tradeoff.
+
+No material action-edge saturation appeared. Correct-routing lower band
+zeroing changed its same-state action by only 0.00861 seconds on average;
+raw-history/swapped effects were 0.01422/0.05812 seconds. The scale imbalance
+is a conditioning concern, not proof by itself. Stage148 will cross the
+existing explicit-target physical lower encoder with target-independent
+upper wait/fleet interval credit, holding routing and the native trainer fixed.
+
 ## Limitations
 
 These are post-result development diagnostics on reused scenes, not independent
