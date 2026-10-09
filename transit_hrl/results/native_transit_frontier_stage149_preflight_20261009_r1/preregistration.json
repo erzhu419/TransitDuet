@@ -1,0 +1,63 @@
+{
+  "budget": {
+    "cached_goal_rows": 0,
+    "new_frozen_episodes": 1,
+    "new_native_ticks": 61380,
+    "training_updates": 0
+  },
+  "contract": {
+    "artifacts": "compact_JSON_only_no_checkpoint_download",
+    "baseline_gate": "exact_source_outcome_reproduction",
+    "cached_goal_conditions": {
+      "-60": "upper_minus60",
+      "0": "neutral_upper",
+      "60": "upper_plus60"
+    },
+    "checkpoint_ep": 299,
+    "critic_goals_s": [
+      -60,
+      -30,
+      -15,
+      0,
+      15,
+      30,
+      60
+    ],
+    "methods": [
+      "physical_lower",
+      "physical_lower_service_credit"
+    ],
+    "new_conditions": [
+      "baseline"
+    ],
+    "oracle": "retrospective_grid_minimum_not_a_deployable_policy",
+    "preflight": true,
+    "purpose": "post_result_control_opportunity_and_value_diagnosis_not_independent_confirmation",
+    "roots": [
+      217
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "scene_seeds": "reuse_registered_stage148_scenes",
+    "source_protocol": "native_transit_authority_stage148_v1",
+    "source_run": "native_transit_authority_stage148_development_20261009_r1",
+    "training_updates": 0
+  },
+  "protocol": "native_transit_frontier_stage149_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 2048,
+    "require_node": null
+  },
+  "source_revision": "438976d0c4b797acfe5b1f74200ea2f9cd0f84d6",
+  "tasks": 1
+}

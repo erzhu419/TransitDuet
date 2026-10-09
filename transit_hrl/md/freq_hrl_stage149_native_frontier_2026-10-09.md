@@ -16,6 +16,8 @@ checkpoint selection, new seeds or checkpoint downloads.
 Twenty-two focused frontier/authority/diagnostic tests passed, covering passive
 critic queries, temporal-credit accounting, cached-goal pairing, baseline
 reproduction, incomplete-scene rejection and code-only scheduler staging.
+Preflight `native_transit_frontier_stage149_preflight_20261009_r1` is registered
+as `t138703`, eligible for node001-006 without binding, one CPU and 2 GB.
 
 Next: source-reproducing preflight; then four frozen jobs, 100 new episodes
 (6,138,000 ticks), reusing 60 existing goal rows. Only code is staged and small
