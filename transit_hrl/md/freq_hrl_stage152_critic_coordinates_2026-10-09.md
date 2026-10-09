@@ -23,6 +23,10 @@ Budget: 2,400 train and 480 frozen episodes, 176,774,400 native ticks plus
 compute nodes eligible, no pinning. Only code is staged and small JSON pulled.
 The 47 focused tests pass. Four preserved seconds-coordinate optimizer updates
 match Stage151 bit-exactly; its complete archived summary is unchanged.
+Run `native_transit_critic_units_stage152_development_20261009_r1` is submitted
+as scheduler tasks `t140274-t140281`; performance results are pending.
+All eight are running on node004/005/006. Sampled root293 workers pass the short
+qualification; the seconds-coordinate worker has started fresh full training.
 
 Judge the coordinate contrast and the same-checkpoint upper intervention
 separately. A larger action or a better whole-training cost without useful
