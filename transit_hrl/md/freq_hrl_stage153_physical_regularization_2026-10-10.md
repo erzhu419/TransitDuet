@@ -18,6 +18,11 @@ Scheduler only, one CPU/3 GB, node001-006 eligible without pinning. Stage code
 only; raw data/checkpoints stay server-only. The 56 focused tests pass, including
 physical L1 equivalence and gradient units; archived Stage152 analysis is unchanged.
 
+Run `native_transit_critic_regularization_stage153_development_20261010_r1`:
+tasks t140738-t140745 are running on node001/node005/node006 as of 2026-10-10.
+Sampled physical_sum and mean workers passed qualification and entered fresh
+300-episode training. Performance results are pending.
+
 Judge the regularizer contrast and same-checkpoint upper intervention separately.
 If Q separates actions without useful control, investigate delayed credit/plans
 instead of expanding seeds.
