@@ -292,6 +292,25 @@ class UnitActionEnsembleQNetwork(EnsembleQNetwork):
     def forward(self, state, action):
         return super().forward(state, self.action_coordinates(action))
 
+    def compute_l1_norm(self, mode="sum"):
+        if mode != "physical_sum":
+            return super().compute_l1_norm(mode)
+        total = torch.zeros(self.ensemble_size, device=self.weights[0].device)
+        action_dim = self.action_radius.numel()
+        for index, (weight, bias) in enumerate(zip(self.weights, self.biases)):
+            if index == 0:
+                # Express the first affine layer in the actor/replay's physical units.
+                action_weight = weight[:, -action_dim:] / self.action_radius[None, :, None]
+                physical_bias = bias - (
+                    action_weight * self.action_center[None, :, None]
+                ).sum(dim=1, keepdim=True)
+                total = total + weight[:, :-action_dim].abs().sum(dim=(1, 2))
+                total = total + action_weight.abs().sum(dim=(1, 2))
+                total = total + physical_bias.abs().sum(dim=(1, 2))
+            else:
+                total = total + weight.abs().sum(dim=(1, 2)) + bias.abs().sum(dim=(1, 2))
+        return total
+
 
 class IndexedDiscreteEnsembleQNetwork(nn.Module):
     """Ensemble critic with one exact Q output per categorical action."""
@@ -386,8 +405,8 @@ class RESACUpperTrainer:
         self.beta_ood = beta_ood
         self.weight_reg = weight_reg
         self.weight_reg_mode = str(weight_reg_mode).strip().lower()
-        if self.weight_reg_mode not in {"sum", "mean"}:
-            raise ValueError("weight_reg_mode must be 'sum' or 'mean'")
+        if self.weight_reg_mode not in {"sum", "mean", "physical_sum"}:
+            raise ValueError("weight_reg_mode must be 'sum', 'mean' or 'physical_sum'")
         self.auto_entropy = auto_entropy
         self.critic_action_units = str(critic_action_units)
         if self.critic_action_units not in {'seconds', 'unit'}:

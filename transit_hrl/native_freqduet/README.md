@@ -27,3 +27,8 @@ Stage152 adds unit action coordinates inside the upper critic only. Physical
 actor outputs, replay actions, actuator bounds and rewards are unchanged;
 `upper.critic_action_units: seconds` retains the preserved critic. This is a
 matched representation experiment, not an adopted performance improvement.
+
+Stage153 tests `upper.weight_reg_mode: physical_sum`: the unit critic's first
+action weights and affine bias are expressed in physical coordinates before
+L1 is evaluated. It preserves the seconds-coordinate prior for equivalent
+functions; ordinary `sum` and `mean` remain separate controls.

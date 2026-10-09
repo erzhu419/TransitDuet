@@ -5,7 +5,7 @@ import torch
 
 
 def critic_action_curve(trainer, states, goals):
-    """Query a physical-action grid at identical recorded states, without RNG."""
+    """Query a physical grid containing zero at identical states, without RNG."""
     device = next(trainer.q_net.parameters()).device
     states = torch.as_tensor(np.stack(states), dtype=torch.float32, device=device)
     means, stds = [], []
@@ -20,9 +20,13 @@ def critic_action_curve(trainer, states, goals):
     if not np.isfinite(lcb).all():
         raise RuntimeError("Nonfinite native critic curve")
     best = np.argmax(lcb, axis=0)
+    zero_index = list(goals).index(0)
+    paired_difference = np.abs(means - means[zero_index])
     return {str(goal): {"q_mean": float(np.mean(means[index])),
         "ensemble_std_mean": float(np.mean(stds[index])),
         "lcb_mean": float(np.mean(lcb[index])),
+        "q_difference_to_zero_abs_mean": float(np.mean(paired_difference[index])),
+        "q_difference_to_zero_abs_p95": float(np.quantile(paired_difference[index], .95)),
         "lcb_argmax_state_fraction": float(np.mean(best == index))}
         for index, goal in enumerate(goals)}
 

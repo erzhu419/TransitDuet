@@ -15,8 +15,8 @@ from scripts.analyze_native_transit_dispatch_train_stage151 import matched_means
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
-def summarize(cells):
-    contract, metrics, means, regimes = matched_means(cells, spec)
+def qualified_critic_diagnostics(cells, spec, means):
+    contract = spec.contract(False)
     diagnostic_rows = []
     for (method, root), cell in cells.items():
         units = contract["critic_action_units"][method]
@@ -48,6 +48,12 @@ def summarize(cells):
             "delay_count": sum(r["dispatch"]["delay_count"] for r in rows),
             "command_abs_mean_s": means[method, root, "baseline"]["command_abs_mean_s"],
             "subsecond_command_fraction": means[method, root, "baseline"]["subsecond_command_fraction"]})
+    return diagnostic_rows
+
+
+def summarize(cells):
+    contract, metrics, means, regimes = matched_means(cells, spec)
+    diagnostic_rows = qualified_critic_diagnostics(cells, spec, means)
 
     def difference(a, b, root, condition_a="baseline", condition_b="baseline"):
         return {"root": root, **{key: means[a, root, condition_a][key]

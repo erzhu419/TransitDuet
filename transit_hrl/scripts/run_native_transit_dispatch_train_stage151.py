@@ -99,6 +99,8 @@ def run_cell(method, root, output, *, preflight, experiment=None):
         raise RuntimeError("Changed native geometry or registered control mode")
     if runner.upper_trainer.critic_action_units != cfg["upper"].get("critic_action_units", "seconds"):
         raise RuntimeError("Native runner did not bind the registered critic coordinates")
+    if runner.upper_trainer.weight_reg_mode != cfg["upper"].get("weight_reg_mode", "sum"):
+        raise RuntimeError("Native runner did not bind the registered critic regularization")
     initial = model_arrays(runner)
     parameter_counts = {level: {name: sum(p.numel() for p in
         getattr(getattr(runner, f"{level}_trainer"), name).parameters()) for name in ("policy_net", "q_net")}
@@ -210,6 +212,7 @@ def run_cell(method, root, output, *, preflight, experiment=None):
         "training_demand_counts": demand, "training_fleets": fleets, "training_curve": curve,
         "last_training_credit_ledger": training_credit, "evaluation": evaluations}
     result["critic_action_units"] = cfg["upper"].get("critic_action_units", "seconds")
+    result["weight_reg_mode"] = cfg["upper"].get("weight_reg_mode", "sum")
     result["upper_learning_updates"] = learning_counts["upper"]
     result["upper_learning_mean"] = {key: value / learning_counts["upper"] for key, value in learning_sums.items()}
     write_json(output, result)

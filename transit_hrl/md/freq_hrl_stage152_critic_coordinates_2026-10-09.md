@@ -34,24 +34,20 @@ learned-upper control is not sufficient to expand seeds or claim full HRL.
 
 ## Results
 
-With legacy credit, unit-minus-seconds mean cost is +0.011873 and wait is
-+0.026425 minutes. Commands no longer vanish: root293 advances about104 seconds,
-while root307 delays about99 seconds. Their own learned-minus-zero-upper cost
-changes are -0.048317 / +0.025442, wait +0.036350 / +0.048500 minutes, and reward
--31.577 / -8.076. Large commands have not established useful upper learning.
+Legacy unit-minus-seconds mean cost is +0.011873 and wait +0.026425 minutes.
+Root293 advances about 104 seconds; root307 delays about 99 seconds. Their own
+learned-minus-zero-upper costs are -0.048317 / +0.025442, wait changes
++0.036350 / +0.048500 minutes, and rewards -31.577 / -8.076: no useful upper gain.
 
-With service credit, unit-minus-seconds mean cost is +0.015990. The unit upper's
-own cost changes are +0.000208 / -0.000085, with wait +0.000800 / +0.004400 minutes.
-Its same-state Q-mean action ranges average only0.000494 / 0.001976 across the
-entire +/-120-second grid. The action-column contributions are approximately
-0.000019 / 0.000072 versus state contributions0.044551 / 0.038436. All2,700
-successful upper updates per cell have zero Bellman target clipping.
+Service-credit unit-minus-seconds mean cost is +0.015990. Its own upper costs
+are +0.000208 / -0.000085, with wait +0.000800 / +0.004400 minutes. Episode-mean
+Q curves span only 0.000494 / 0.001976 across +/-120 seconds; action-column
+contributions are 0.000019 / 0.000072 versus state 0.044551 / 0.038436. All
+2,700 successful updates per cell have zero Bellman target clipping.
 
-Normalization removes the raw input-scale dominance but not useful credit.
-The next isolated test examines the L1 coordinate change: for equivalent
-functions, unit action weights are120 times their seconds-coordinate weights.
-Compare physical-coordinate L1 with unchanged unit-network L1 and the existing
-per-parameter mean L1; keep credit and all physical control fixed.
+Next isolate the L1 coordinate change: equivalent unit action weights are
+120 times their seconds weights. Compare physical-coordinate L1, unit-network
+L1 and per-parameter mean L1 with credit and physical control fixed.
 
 ## Limitations
 
