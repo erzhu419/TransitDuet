@@ -1,0 +1,361 @@
+{
+  "contract": {
+    "artifacts": "compact_JSON_no_checkpoint_download",
+    "baseline_gate": "exact_HIRO_source_and_zero_dispatch_neutral_source_reproduction",
+    "checkpoint_ep": 299,
+    "commitment": "current_clock_observation_once_before_earliest_signed_release",
+    "conditions": {
+      "hiro_baseline": {
+        "coupling": "hiro",
+        "fixed_command_s": null,
+        "lookahead_s": 0
+      },
+      "legacy_channels_minus60": {
+        "coupling": "channels",
+        "fixed_command_s": -60,
+        "lookahead_s": 0
+      },
+      "signed_minus60": {
+        "coupling": "channels",
+        "fixed_command_s": -60,
+        "lookahead_s": 120
+      },
+      "signed_plus60": {
+        "coupling": "channels",
+        "fixed_command_s": 60,
+        "lookahead_s": 120
+      },
+      "signed_zero": {
+        "coupling": "channels",
+        "fixed_command_s": 0,
+        "lookahead_s": 120
+      }
+    },
+    "episode_clock_s": 61380,
+    "fleet": 12,
+    "roots": [
+      217,
+      229
+    ],
+    "scenario": "low_noise",
+    "scene_seeds": "reuse_stage148_registered_low_noise_scene",
+    "source_method": "physical_lower",
+    "source_run": "native_transit_authority_stage148_development_20261009_r1",
+    "stage": "execution_qualification_not_channels_trained_policy_evidence",
+    "training_updates": 0,
+    "unchanged": [
+      "networks",
+      "RE_SAC",
+      "frequency",
+      "lower_reward",
+      "fleet_cap"
+    ]
+  },
+  "native_steps": 613800,
+  "panels": [
+    {
+      "condition": "hiro_baseline",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 0.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.0019999999999997797,
+        "ep_reward": 1.324999999999818,
+        "headway_cv": -0.0002999999999999947,
+        "lower_lf_drift_ratio": 2.6356979020203397e-05,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0019999999999997797,
+        "service_cost_restricted": -0.00013499999999999623,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.09916126068000149
+      },
+      "root": 217
+    },
+    {
+      "condition": "legacy_channels_minus60",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 262,
+        "decision_lead_median_s": 0.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 217
+    },
+    {
+      "condition": "signed_minus60",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": -59.770992366412216,
+        "actual_shift_min_s": -60.0,
+        "advance_count": 261,
+        "commitment_clipped_count": 1,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 1,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": -0.1280000000000001,
+        "ep_reward": -2.731999999999971,
+        "headway_cv": -0.0022999999999999965,
+        "lower_lf_drift_ratio": 0.0005978145405771684,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": -0.1280000000000001,
+        "service_cost_restricted": -0.015085000000000015,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 217
+    },
+    {
+      "condition": "signed_zero",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 217
+    },
+    {
+      "condition": "signed_plus60",
+      "dispatch": {
+        "actual_shift_max_s": 60.0,
+        "actual_shift_mean_s": 60.0,
+        "actual_shift_min_s": 60.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 262,
+        "launched": 262,
+        "nominal_count": 0,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.16699999999999982,
+        "ep_reward": 1.227999999999838,
+        "headway_cv": -0.006599999999999995,
+        "lower_lf_drift_ratio": -0.0002600062784653412,
+        "passenger_unserved_rate": -9.8e-05,
+        "peak_fleet": 1,
+        "restricted_wait_horizon_min": 0.14399999999999924,
+        "service_cost_restricted": 0.42396600000000007,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 217
+    },
+    {
+      "condition": "hiro_baseline",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 0.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.008999999999999897,
+        "ep_reward": -1.6949999999999363,
+        "headway_cv": 0.00020000000000000573,
+        "lower_lf_drift_ratio": -1.5613614279152976e-05,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.008999999999999897,
+        "service_cost_restricted": 0.0011439999999998118,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.009119882964683731
+      },
+      "root": 229
+    },
+    {
+      "condition": "legacy_channels_minus60",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 262,
+        "decision_lead_median_s": 0.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 229
+    },
+    {
+      "condition": "signed_minus60",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": -59.770992366412216,
+        "actual_shift_min_s": -60.0,
+        "advance_count": 261,
+        "commitment_clipped_count": 1,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 1,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": -0.0040000000000000036,
+        "ep_reward": -35.23799999999983,
+        "headway_cv": 0.007300000000000001,
+        "lower_lf_drift_ratio": -6.719233070495712e-05,
+        "passenger_unserved_rate": 0.00015000000000000001,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.03200000000000003,
+        "service_cost_restricted": 0.01120499999999991,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 229
+    },
+    {
+      "condition": "signed_zero",
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 262,
+        "nominal_count": 262,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 229
+    },
+    {
+      "condition": "signed_plus60",
+      "dispatch": {
+        "actual_shift_max_s": 60.0,
+        "actual_shift_mean_s": 60.0,
+        "actual_shift_min_s": 60.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 262,
+        "launched": 262,
+        "nominal_count": 0,
+        "queries": 262,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "minus_zero": {
+        "avg_wait_observed_min": 0.10000000000000009,
+        "ep_reward": 11.210000000000036,
+        "headway_cv": -0.0015000000000000013,
+        "lower_lf_drift_ratio": -3.704299708606751e-05,
+        "passenger_unserved_rate": -4.899999999999997e-05,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.08799999999999963,
+        "service_cost_restricted": 0.007058000000000009,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "root": 229
+    }
+  ],
+  "protocol": "native_transit_dispatch_stage150_v1",
+  "software_qualified": true,
+  "stage": "signed_execution_qualification_with_frozen_HIRO_trained_lower",
+  "training_updates": 0
+}
