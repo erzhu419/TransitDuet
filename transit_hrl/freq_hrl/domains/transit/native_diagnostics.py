@@ -19,10 +19,11 @@ class NativePolicyProbe:
     call, but substitutes its actuator command, not its features or weights.
     """
 
-    def __init__(self, policy, level, *, neutral=False):
+    def __init__(self, policy, level, *, neutral=False, fixed_action_s=None):
         self.policy = policy
         self.level = level
         self.neutral = neutral
+        self.fixed_action_s = fixed_action_s
         self.original_get_action = policy.get_action
         self.states = []
 
@@ -30,6 +31,8 @@ class NativePolicyProbe:
         values = state.detach().cpu().numpy() if torch.is_tensor(state) else state
         self.states.append(np.asarray(values, dtype=np.float32).reshape(-1).copy())
         action = self.original_get_action(state, deterministic=deterministic)
+        if self.fixed_action_s is not None:
+            return np.full_like(action, self.fixed_action_s)
         return np.zeros_like(action) if self.neutral else action
 
     def summarize(self):
@@ -68,5 +71,6 @@ class NativePolicyProbe:
                        "p95_abs": float(np.quantile(np.concatenate(values), .95))}
                 for name, values in deviations.items()},
             "neutral_action": self.neutral,
+            "fixed_action_s": self.fixed_action_s,
         }
         return result
