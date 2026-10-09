@@ -24,6 +24,12 @@ actual launch shifts and subsecond commands to distinguish learned authority
 from one-second actuator quantization. Test learned upper against its own zero
 control; a trained actor alone does not establish useful upper control.
 The 37 focused training/dispatch/frontier/authority/diagnostic tests pass.
+Run `native_transit_dispatch_training_stage151_development_20261009_r1` is
+submitted as `t139086-t139101` through scheduler, dynamically eligible for
+node001-006. Only code is staged; checkpoints and native CSV remain server-only.
+All sixteen are running on node001/004/005/006. Sampled root241 logs for all
+four methods show completed qualification and fresh full training at episode0;
+their first full warmup cost is identically 1.333908.
 
 ## Limitations
 

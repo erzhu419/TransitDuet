@@ -1,0 +1,187 @@
+{
+  "budget": {
+    "frozen_episodes": 960,
+    "lower_updates_per_cell": 9000,
+    "native_ticks": 353548800,
+    "training_episodes": 4800,
+    "upper_updates_per_cell": 2700,
+    "worker_preflight_episodes": 80,
+    "worker_preflight_ticks": 432000
+  },
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_last_checkpoints",
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "zero_holding"
+    ],
+    "credit": {
+      "fleet_weight": 1,
+      "headway_weight": 0,
+      "scale": 100,
+      "wait_weight": 1
+    },
+    "decision_clock": {
+      "channels": "max_zero_nominal_minus_120s",
+      "hiro": "nominal_launch"
+    },
+    "demand_end_time_s": 46980,
+    "dispatch_commitment_s": 120,
+    "evaluation_episodes_per_scenario": 4,
+    "frequency_routing": "correct",
+    "initialization": "fresh_native_RE_SAC_same_seed_no_checkpoint_warmstart",
+    "methods": {
+      "dispatch": {
+        "authority_factor": "physical_lower",
+        "coupling": "channels"
+      },
+      "dispatch_service_credit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "hiro": {
+        "authority_factor": "physical_lower",
+        "coupling": "hiro"
+      },
+      "hiro_service_credit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "hiro"
+      }
+    },
+    "preflight": false,
+    "preflight_overrides": {},
+    "primary": "equal_regime_mean_service_cost_restricted",
+    "roots": [
+      241,
+      257,
+      269,
+      281
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "statistics": "four_root_descriptive_factorial_before_independent_confirmation",
+    "train_episodes": 300,
+    "training_clock_s": 61380,
+    "unchanged": [
+      "physical_lower_encoder",
+      "RE_SAC",
+      "networks",
+      "action_bounds",
+      "historical_priors",
+      "frequency_estimator",
+      "lower_reward",
+      "fleet_cap",
+      "leakage_penalties"
+    ],
+    "upper_authority": "baseline_minus_same_checkpoint_zero_upper_physical_outcomes",
+    "upper_warmup": 30,
+    "worker_preflight": "short_two_level_learning_then_fresh_seed_reset_for_full_training"
+  },
+  "protocol": "native_transit_dispatch_training_stage151_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "6e38e2a62b8e62457bd0c53b0b566d6054eda49d",
+  "tasks": 16,
+  "worker_preflight_contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_last_checkpoints",
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "zero_holding"
+    ],
+    "credit": {
+      "fleet_weight": 1,
+      "headway_weight": 0,
+      "scale": 100,
+      "wait_weight": 1
+    },
+    "decision_clock": {
+      "channels": "max_zero_nominal_minus_120s",
+      "hiro": "nominal_launch"
+    },
+    "demand_end_time_s": 3600,
+    "dispatch_commitment_s": 120,
+    "evaluation_episodes_per_scenario": 1,
+    "frequency_routing": "correct",
+    "initialization": "fresh_native_RE_SAC_same_seed_no_checkpoint_warmstart",
+    "methods": {
+      "dispatch": {
+        "authority_factor": "physical_lower",
+        "coupling": "channels"
+      },
+      "dispatch_service_credit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "hiro": {
+        "authority_factor": "physical_lower",
+        "coupling": "hiro"
+      },
+      "hiro_service_credit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "hiro"
+      }
+    },
+    "preflight": true,
+    "preflight_overrides": {
+      "effective_trip_num": 24,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "updates_per_episode": 2,
+      "upper_batch_size": 8
+    },
+    "primary": "equal_regime_mean_service_cost_restricted",
+    "roots": [
+      241,
+      257,
+      269,
+      281
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "statistics": "four_root_descriptive_factorial_before_independent_confirmation",
+    "train_episodes": 2,
+    "training_clock_s": 5400,
+    "unchanged": [
+      "physical_lower_encoder",
+      "RE_SAC",
+      "networks",
+      "action_bounds",
+      "historical_priors",
+      "frequency_estimator",
+      "lower_reward",
+      "fleet_cap",
+      "leakage_penalties"
+    ],
+    "upper_authority": "baseline_minus_same_checkpoint_zero_upper_physical_outcomes",
+    "upper_warmup": 1,
+    "worker_preflight": "short_two_level_learning_then_fresh_seed_reset_for_full_training"
+  }
+}
