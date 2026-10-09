@@ -18,6 +18,8 @@ causal -60/+60 commands. Ten full-clock episodes, 613,800 ticks, no optimization
 no checkpoint download. All jobs are dynamically eligible for node001-006.
 The 31 focused dispatch/frontier/authority/diagnostic tests pass, including
 signed action bounds, one-shot causal queries and fleet-blocked releases.
+Run `native_transit_dispatch_stage150_qualification_20261009_r1` is submitted
+as `t138738/t138739`, one CPU and 3 GB per root, without node binding.
 
 Next: after execution qualifies, train dispatch policies under a matched budget;
 only then compare learned timetable control and frequency-routing ablations.

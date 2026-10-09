@@ -1,0 +1,75 @@
+{
+  "budget": {
+    "episodes": 10,
+    "native_ticks": 613800,
+    "training_updates": 0
+  },
+  "contract": {
+    "artifacts": "compact_JSON_no_checkpoint_download",
+    "baseline_gate": "exact_HIRO_source_and_zero_dispatch_neutral_source_reproduction",
+    "checkpoint_ep": 299,
+    "commitment": "current_clock_observation_once_before_earliest_signed_release",
+    "conditions": {
+      "hiro_baseline": {
+        "coupling": "hiro",
+        "fixed_command_s": null,
+        "lookahead_s": 0
+      },
+      "legacy_channels_minus60": {
+        "coupling": "channels",
+        "fixed_command_s": -60,
+        "lookahead_s": 0
+      },
+      "signed_minus60": {
+        "coupling": "channels",
+        "fixed_command_s": -60,
+        "lookahead_s": 120
+      },
+      "signed_plus60": {
+        "coupling": "channels",
+        "fixed_command_s": 60,
+        "lookahead_s": 120
+      },
+      "signed_zero": {
+        "coupling": "channels",
+        "fixed_command_s": 0,
+        "lookahead_s": 120
+      }
+    },
+    "episode_clock_s": 61380,
+    "fleet": 12,
+    "roots": [
+      217,
+      229
+    ],
+    "scenario": "low_noise",
+    "scene_seeds": "reuse_stage148_registered_low_noise_scene",
+    "source_method": "physical_lower",
+    "source_run": "native_transit_authority_stage148_development_20261009_r1",
+    "stage": "execution_qualification_not_channels_trained_policy_evidence",
+    "training_updates": 0,
+    "unchanged": [
+      "networks",
+      "RE_SAC",
+      "frequency",
+      "lower_reward",
+      "fleet_cap"
+    ]
+  },
+  "protocol": "native_transit_dispatch_stage150_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "0ca948eedc294fabcf74ad9929cd3914539368cb",
+  "tasks": 2
+}
