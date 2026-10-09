@@ -38,8 +38,12 @@ held. Fixed upper +/-60 commands reached the actuator telemetry. Physical
 lower service metrics remained identical across those upper interventions
 after just two training episodes; this is qualification, not an efficacy claim.
 
-Next: 8 development tasks, 2,400 training episodes and 200 frozen episodes.
-Keep checkpoints server-only and synchronize small JSON.
+Development `native_transit_authority_stage148_development_20261009_r1` is
+submitted as `t138167-t138174`: 8 tasks, 2,400 training episodes and 200 frozen
+episodes (159,588,000 ticks), one CPU and 3 GB each, eligible for node001-006
+without binding. Checkpoints stay server-only; only small JSON is synchronized.
+Next: compare the four trained configurations and paired upper interventions,
+then decide whether goal execution or credit still needs repair.
 Two-root results are descriptive mechanism evidence, not statistical
 confirmation or proof that correct frequency routing outperforms controls.
 Interval outcomes include other buses and delayed effects; they are physical
