@@ -27,10 +27,12 @@ that either fixed goal improves physical service. Legacy global transitions
 had median duration 180 seconds and a final 14,400-second clearance interval;
 physical-only has no interval wait credit, so its zero tail share is not a finding.
 
-Next: four frozen jobs, 100 new episodes
-(6,138,000 ticks), reusing 60 existing goal rows. Only code is staged and small
-JSON is synchronized. Inspect the cost frontier, wait/fleet tradeoffs and
-critic preferences before deciding on reward/critic repair or action-space work.
+Full scan `native_transit_frontier_stage149_full_20261009_r1` is submitted as
+`t138705-t138708`: four frozen jobs, 100 new episodes (6,138,000 ticks), reusing
+60 existing goal rows. Each uses one CPU and 3 GB, dynamically eligible for
+node001-006 without binding. Only code is staged and small JSON is synchronized.
+Next: inspect the cost frontier, wait/fleet tradeoffs and critic preferences
+before deciding on reward/critic repair or action-space work.
 
 ## Limitations
 
