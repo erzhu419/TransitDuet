@@ -1,0 +1,3324 @@
+{
+  "contract": {
+    "artifacts": "compact_JSON_only_no_checkpoint_download",
+    "baseline_gate": "exact_source_outcome_reproduction",
+    "cached_goal_conditions": {
+      "-60": "upper_minus60",
+      "0": "neutral_upper",
+      "60": "upper_plus60"
+    },
+    "checkpoint_ep": 299,
+    "critic_goals_s": [
+      -60,
+      -30,
+      -15,
+      0,
+      15,
+      30,
+      60
+    ],
+    "methods": [
+      "physical_lower",
+      "physical_lower_service_credit"
+    ],
+    "new_conditions": [
+      "baseline",
+      -30,
+      -15,
+      15,
+      30
+    ],
+    "oracle": "retrospective_grid_minimum_not_a_deployable_policy",
+    "preflight": false,
+    "purpose": "post_result_control_opportunity_and_value_diagnosis_not_independent_confirmation",
+    "roots": [
+      217,
+      229
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_seeds": "reuse_registered_stage148_scenes",
+    "source_protocol": "native_transit_authority_stage148_v1",
+    "source_run": "native_transit_authority_stage148_development_20261009_r1",
+    "training_updates": 0
+  },
+  "native_steps": 6138000,
+  "panels": [
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -308.13878809442656,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.13288521766662598,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.03765869140625,
+          "q_mean": -17.771888732910156
+        },
+        "-30": {
+          "ensemble_std_mean": 0.16541787981987,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.587488174438477,
+          "q_mean": -18.25665283203125
+        },
+        "-60": {
+          "ensemble_std_mean": 0.4154486060142517,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.287914276123047,
+          "q_mean": -19.457015991210938
+        },
+        "0": {
+          "ensemble_std_mean": 0.07073243707418442,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.670957565307617,
+          "q_mean": -17.529495239257812
+        },
+        "15": {
+          "ensemble_std_mean": 0.14041613042354584,
+          "lcb_argmax_state_fraction": 0.8320610687022901,
+          "lcb_mean": -17.08932876586914,
+          "q_mean": -16.808494567871094
+        },
+        "30": {
+          "ensemble_std_mean": 0.2610619366168976,
+          "lcb_argmax_state_fraction": 0.16793893129770993,
+          "lcb_mean": -17.224445343017578,
+          "q_mean": -16.70232391357422
+        },
+        "60": {
+          "ensemble_std_mean": 0.7948799133300781,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.672311782836914,
+          "q_mean": -18.08255386352539
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": -0.004999999999999893,
+          "ep_reward": -653.5710000000001,
+          "goal_s": -60,
+          "headway_cv": 0.041700000000000015,
+          "lower_action_mean": -3.8599999999999994,
+          "lower_lf_drift_ratio": -0.0003620974101584684,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.005000000000000782,
+          "service_cost_restricted": 0.041198999999999986,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.004999999999999893,
+          "ep_reward": -189.04200000000014,
+          "goal_s": -30,
+          "headway_cv": 0.021100000000000008,
+          "lower_action_mean": -2.34,
+          "lower_lf_drift_ratio": -0.00019123008829502464,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.005000000000000782,
+          "service_cost_restricted": 0.02056900000000006,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.017999999999999794,
+          "ep_reward": -48.0920000000001,
+          "goal_s": -15,
+          "headway_cv": 0.010000000000000009,
+          "lower_action_mean": -1.299999999999999,
+          "lower_lf_drift_ratio": -9.199161562045699e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.017000000000000348,
+          "service_cost_restricted": 0.008311000000000068,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.011999999999999567,
+          "ep_reward": -24.88499999999999,
+          "goal_s": 15,
+          "headway_cv": -0.009999999999999981,
+          "lower_action_mean": 1.5199999999999996,
+          "lower_lf_drift_ratio": 0.00010986167972115712,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.012000000000000455,
+          "service_cost_restricted": 0.405451,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.006000000000000227,
+          "ep_reward": -136.74300000000017,
+          "goal_s": 30,
+          "headway_cv": -0.017199999999999993,
+          "lower_action_mean": 3.34,
+          "lower_lf_drift_ratio": 0.0002498907133940964,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.005999999999999339,
+          "service_cost_restricted": 0.4000300000000001,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.036000000000000476,
+          "ep_reward": -471.52099999999996,
+          "goal_s": 60,
+          "headway_cv": -0.0335,
+          "lower_action_mean": 7.6800000000000015,
+          "lower_lf_drift_ratio": 0.0006119193989100324,
+          "passenger_unserved_rate": -4.9e-05,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.023999999999999133,
+          "service_cost_restricted": 0.38538399999999995,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 15,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.0,
+      "oracle_grid_goal_s": 0,
+      "root": 217,
+      "scenario": "low_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -602.29864408908,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.14025777578353882,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.73817253112793,
+          "q_mean": -17.457656860351562
+        },
+        "-30": {
+          "ensemble_std_mean": 0.17939771711826324,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.305519104003906,
+          "q_mean": -17.94672203063965
+        },
+        "-60": {
+          "ensemble_std_mean": 0.42346879839897156,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.02665138244629,
+          "q_mean": -19.179718017578125
+        },
+        "0": {
+          "ensemble_std_mean": 0.08294262737035751,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.365901947021484,
+          "q_mean": -17.200014114379883
+        },
+        "15": {
+          "ensemble_std_mean": 0.14510391652584076,
+          "lcb_argmax_state_fraction": 0.8664122137404581,
+          "lcb_mean": -16.781715393066406,
+          "q_mean": -16.49150848388672
+        },
+        "30": {
+          "ensemble_std_mean": 0.27233168482780457,
+          "lcb_argmax_state_fraction": 0.13358778625954199,
+          "lcb_mean": -16.947235107421875,
+          "q_mean": -16.402570724487305
+        },
+        "60": {
+          "ensemble_std_mean": 0.8429168462753296,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.524333953857422,
+          "q_mean": -17.8385009765625
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": -0.03300000000000036,
+          "ep_reward": -530.5000000000002,
+          "goal_s": -60,
+          "headway_cv": 0.031200000000000006,
+          "lower_action_mean": -4.279999999999999,
+          "lower_lf_drift_ratio": 4.402334481368175e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.032999999999999474,
+          "service_cost_restricted": 0.027860999999999914,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.02800000000000047,
+          "ep_reward": -125.86400000000003,
+          "goal_s": -30,
+          "headway_cv": 0.015399999999999997,
+          "lower_action_mean": -2.5500000000000007,
+          "lower_lf_drift_ratio": 4.8481400423017185e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02800000000000047,
+          "service_cost_restricted": 0.012515000000000054,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.020999999999999908,
+          "ep_reward": -9.180000000000064,
+          "goal_s": -15,
+          "headway_cv": 0.005899999999999989,
+          "lower_action_mean": -1.4299999999999997,
+          "lower_lf_drift_ratio": 9.96845417067238e-06,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02099999999999902,
+          "service_cost_restricted": 0.003730999999999929,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.043999999999999595,
+          "ep_reward": -27.080000000000155,
+          "goal_s": 15,
+          "headway_cv": -0.005299999999999999,
+          "lower_action_mean": 1.5299999999999994,
+          "lower_lf_drift_ratio": 3.0313070277010468e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.04400000000000048,
+          "service_cost_restricted": -0.0009470000000000312,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.08399999999999963,
+          "ep_reward": -113.6840000000002,
+          "goal_s": 30,
+          "headway_cv": -0.0126,
+          "lower_action_mean": 3.16,
+          "lower_lf_drift_ratio": 6.569762056929385e-06,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08399999999999963,
+          "service_cost_restricted": -0.004269000000000078,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.12700000000000067,
+          "ep_reward": -391.6410000000001,
+          "goal_s": 60,
+          "headway_cv": -0.027200000000000002,
+          "lower_action_mean": 6.75,
+          "lower_lf_drift_ratio": 9.796541762774336e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.12700000000000067,
+          "service_cost_restricted": -0.014482000000000106,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 15,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.014482000000000106,
+      "oracle_grid_goal_s": 60,
+      "root": 217,
+      "scenario": "high_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -825.5928496436903,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.13910013437271118,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.383676528930664,
+          "q_mean": -18.10547637939453
+        },
+        "-30": {
+          "ensemble_std_mean": 0.16514910757541656,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.91683578491211,
+          "q_mean": -18.586538314819336
+        },
+        "-60": {
+          "ensemble_std_mean": 0.4084613621234894,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.581769943237305,
+          "q_mean": -19.764846801757812
+        },
+        "0": {
+          "ensemble_std_mean": 0.08496147394180298,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.052261352539062,
+          "q_mean": -17.88233757019043
+        },
+        "15": {
+          "ensemble_std_mean": 0.1544494926929474,
+          "lcb_argmax_state_fraction": 0.7786259541984732,
+          "lcb_mean": -17.452058792114258,
+          "q_mean": -17.143159866333008
+        },
+        "30": {
+          "ensemble_std_mean": 0.2709662616252899,
+          "lcb_argmax_state_fraction": 0.22137404580152673,
+          "lcb_mean": -17.563169479370117,
+          "q_mean": -17.021236419677734
+        },
+        "60": {
+          "ensemble_std_mean": 0.7547465562820435,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.859691619873047,
+          "q_mean": -18.35019874572754
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.11299999999999955,
+          "ep_reward": -656.184,
+          "goal_s": -60,
+          "headway_cv": 0.03259999999999999,
+          "lower_action_mean": -3.869999999999999,
+          "lower_lf_drift_ratio": -0.00015748014220362538,
+          "passenger_unserved_rate": 0.0004010000000000003,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.2599999999999998,
+          "service_cost_restricted": 0.06062000000000012,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0649999999999995,
+          "ep_reward": -176.5,
+          "goal_s": -30,
+          "headway_cv": 0.016399999999999998,
+          "lower_action_mean": -2.369999999999999,
+          "lower_lf_drift_ratio": -0.0001127167889877212,
+          "passenger_unserved_rate": 0.0002669999999999999,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.16800000000000104,
+          "service_cost_restricted": 0.03454299999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.02400000000000091,
+          "ep_reward": -43.919000000000096,
+          "goal_s": -15,
+          "headway_cv": 0.008200000000000013,
+          "lower_action_mean": -1.299999999999999,
+          "lower_lf_drift_ratio": -2.7857605933823137e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.023999999999999133,
+          "service_cost_restricted": 0.005827000000000027,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.05600000000000094,
+          "ep_reward": -21.952999999999975,
+          "goal_s": 15,
+          "headway_cv": -0.009000000000000008,
+          "lower_action_mean": 1.4700000000000006,
+          "lower_lf_drift_ratio": 0.0001975533021650877,
+          "passenger_unserved_rate": -0.00026799999999999914,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.14999999999999858,
+          "service_cost_restricted": 0.39128699999999994,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.05900000000000105,
+          "ep_reward": -117.981,
+          "goal_s": 30,
+          "headway_cv": -0.017600000000000005,
+          "lower_action_mean": 3.1500000000000004,
+          "lower_lf_drift_ratio": 0.00045800155173270074,
+          "passenger_unserved_rate": -0.0004019999999999996,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.19899999999999984,
+          "service_cost_restricted": 0.377108,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0990000000000002,
+          "ep_reward": -450.05500000000006,
+          "goal_s": 60,
+          "headway_cv": -0.03290000000000001,
+          "lower_action_mean": 7.220000000000001,
+          "lower_lf_drift_ratio": 0.0005780005657234355,
+          "passenger_unserved_rate": -0.0006689999999999995,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.3149999999999995,
+          "service_cost_restricted": 0.34892500000000015,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 15,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.0,
+      "oracle_grid_goal_s": 0,
+      "root": 217,
+      "scenario": "hour_burst"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -2234.7483698713527,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.1500362902879715,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.06509017944336,
+          "q_mean": -18.765018463134766
+        },
+        "-30": {
+          "ensemble_std_mean": 0.17302030324935913,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.587867736816406,
+          "q_mean": -19.24182891845703
+        },
+        "-60": {
+          "ensemble_std_mean": 0.3983999788761139,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -21.18804931640625,
+          "q_mean": -20.391250610351562
+        },
+        "0": {
+          "ensemble_std_mean": 0.11911574751138687,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.81667137145996,
+          "q_mean": -18.57843780517578
+        },
+        "15": {
+          "ensemble_std_mean": 0.18770620226860046,
+          "lcb_argmax_state_fraction": 0.6946564885496184,
+          "lcb_mean": -18.1811466217041,
+          "q_mean": -17.805734634399414
+        },
+        "30": {
+          "ensemble_std_mean": 0.2994689345359802,
+          "lcb_argmax_state_fraction": 0.3053435114503817,
+          "lcb_mean": -18.258506774902344,
+          "q_mean": -17.659568786621094
+        },
+        "60": {
+          "ensemble_std_mean": 0.696245014667511,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.279836654663086,
+          "q_mean": -18.887344360351562
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.019999999999999574,
+          "ep_reward": -662.906,
+          "goal_s": -60,
+          "headway_cv": 0.027400000000000008,
+          "lower_action_mean": -3.9800000000000004,
+          "lower_lf_drift_ratio": -8.028148905092625e-05,
+          "passenger_unserved_rate": 0.00038099999999999246,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.11399999999999721,
+          "service_cost_restricted": 0.04073599999999988,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.013999999999999346,
+          "ep_reward": -185.6980000000001,
+          "goal_s": -30,
+          "headway_cv": 0.014300000000000007,
+          "lower_action_mean": -2.3900000000000006,
+          "lower_lf_drift_ratio": -0.0001821878512542341,
+          "passenger_unserved_rate": 0.00026700000000000335,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08200000000000074,
+          "service_cost_restricted": 0.02385500000000018,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.004999999999999005,
+          "ep_reward": -44.92100000000005,
+          "goal_s": -15,
+          "headway_cv": 0.00739999999999999,
+          "lower_action_mean": -1.3400000000000016,
+          "lower_lf_drift_ratio": -0.00014476352628955969,
+          "passenger_unserved_rate": 7.599999999999274e-05,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.021999999999998465,
+          "service_cost_restricted": 0.009910999999999781,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.028999999999999915,
+          "ep_reward": -41.238000000000056,
+          "goal_s": 15,
+          "headway_cv": -0.0068000000000000005,
+          "lower_action_mean": 1.629999999999999,
+          "lower_lf_drift_ratio": 2.6145761507168075e-05,
+          "passenger_unserved_rate": -0.0004949999999999954,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.10300000000000153,
+          "service_cost_restricted": -0.019555999999999685,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.06099999999999994,
+          "ep_reward": -138.125,
+          "goal_s": 30,
+          "headway_cv": -0.014800000000000008,
+          "lower_action_mean": 3.4099999999999984,
+          "lower_lf_drift_ratio": -5.447441328632063e-05,
+          "passenger_unserved_rate": -0.00038100000000000633,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.05100000000000193,
+          "service_cost_restricted": -0.021743999999999986,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.14100000000000001,
+          "ep_reward": -476.655,
+          "goal_s": 60,
+          "headway_cv": -0.0267,
+          "lower_action_mean": 7.5600000000000005,
+          "lower_lf_drift_ratio": -7.906860240103342e-06,
+          "passenger_unserved_rate": -0.0007989999999999942,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.08400000000000318,
+          "service_cost_restricted": -0.03912199999999988,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 15,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.03912199999999988,
+      "oracle_grid_goal_s": 60,
+      "root": 217,
+      "scenario": "persistent_shift"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -277.18686725447384,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.13914676010608673,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.795818328857422,
+          "q_mean": -17.51752471923828
+        },
+        "-30": {
+          "ensemble_std_mean": 0.16990280151367188,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.34530258178711,
+          "q_mean": -18.005496978759766
+        },
+        "-60": {
+          "ensemble_std_mean": 0.4242733418941498,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.08095359802246,
+          "q_mean": -19.232406616210938
+        },
+        "0": {
+          "ensemble_std_mean": 0.07415822893381119,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.408260345458984,
+          "q_mean": -17.259944915771484
+        },
+        "15": {
+          "ensemble_std_mean": 0.14296241104602814,
+          "lcb_argmax_state_fraction": 0.8587786259541985,
+          "lcb_mean": -16.838714599609375,
+          "q_mean": -16.55278968811035
+        },
+        "30": {
+          "ensemble_std_mean": 0.2661508023738861,
+          "lcb_argmax_state_fraction": 0.14122137404580154,
+          "lcb_mean": -16.991127014160156,
+          "q_mean": -16.45882797241211
+        },
+        "60": {
+          "ensemble_std_mean": 0.8288379311561584,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.54014015197754,
+          "q_mean": -17.882461547851562
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.008999999999999897,
+          "ep_reward": -600.9200000000001,
+          "goal_s": -60,
+          "headway_cv": 0.026900000000000007,
+          "lower_action_mean": -4.409999999999999,
+          "lower_lf_drift_ratio": -0.00038988160106523395,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.008000000000000007,
+          "service_cost_restricted": 0.02769100000000002,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0129999999999999,
+          "ep_reward": -139.567,
+          "goal_s": -30,
+          "headway_cv": 0.013399999999999995,
+          "lower_action_mean": -2.5999999999999996,
+          "lower_lf_drift_ratio": -0.00024305522382372935,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.01200000000000001,
+          "service_cost_restricted": 0.014657000000000031,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.008999999999999897,
+          "ep_reward": -32.21399999999994,
+          "goal_s": -15,
+          "headway_cv": 0.008500000000000008,
+          "lower_action_mean": -1.3499999999999996,
+          "lower_lf_drift_ratio": -0.00010173198598584232,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.008000000000000007,
+          "service_cost_restricted": 0.009356999999999949,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.01200000000000001,
+          "ep_reward": -27.230999999999995,
+          "goal_s": 15,
+          "headway_cv": -0.010200000000000015,
+          "lower_action_mean": 1.5300000000000011,
+          "lower_lf_drift_ratio": 0.00011356493810021906,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.01200000000000001,
+          "service_cost_restricted": -0.009024000000000032,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.020000000000000018,
+          "ep_reward": -127.41499999999996,
+          "goal_s": 30,
+          "headway_cv": -0.018100000000000005,
+          "lower_action_mean": 3.3100000000000005,
+          "lower_lf_drift_ratio": 0.00024710823844598107,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.020999999999999908,
+          "service_cost_restricted": -0.02011099999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.01200000000000001,
+          "ep_reward": -475.7070000000001,
+          "goal_s": 60,
+          "headway_cv": -0.03470000000000001,
+          "lower_action_mean": 7.65,
+          "lower_lf_drift_ratio": 0.00048153471535394843,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.0129999999999999,
+          "service_cost_restricted": 0.3806829999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 15,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.02011099999999999,
+      "oracle_grid_goal_s": 30,
+      "root": 217,
+      "scenario": "ood_period"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -379.4444432866796,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 1.0715357065200806,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.989757537841797,
+          "q_mean": -22.84668731689453
+        },
+        "-30": {
+          "ensemble_std_mean": 2.0894038677215576,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.35747528076172,
+          "q_mean": -28.178667068481445
+        },
+        "-60": {
+          "ensemble_std_mean": 4.393448352813721,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -47.99558639526367,
+          "q_mean": -39.20869445800781
+        },
+        "0": {
+          "ensemble_std_mean": 0.08176442235708237,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -18.81214141845703,
+          "q_mean": -18.64861488342285
+        },
+        "15": {
+          "ensemble_std_mean": 0.905407726764679,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.897743225097656,
+          "q_mean": -23.086925506591797
+        },
+        "30": {
+          "ensemble_std_mean": 2.0607316493988037,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -33.039154052734375,
+          "q_mean": -28.917692184448242
+        },
+        "60": {
+          "ensemble_std_mean": 4.5754618644714355,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -49.765037536621094,
+          "q_mean": -40.614112854003906
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.03600000000000003,
+          "ep_reward": -734.2909999999999,
+          "goal_s": -60,
+          "headway_cv": 0.028599999999999987,
+          "lower_action_mean": -2.0,
+          "lower_lf_drift_ratio": -7.159957964020247e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.03600000000000003,
+          "service_cost_restricted": 0.03218199999999993,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.02499999999999991,
+          "ep_reward": -246.75800000000004,
+          "goal_s": -30,
+          "headway_cv": 0.01469999999999999,
+          "lower_action_mean": -1.21,
+          "lower_lf_drift_ratio": -7.375222767025402e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.02499999999999991,
+          "service_cost_restricted": 0.017236999999999947,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.028000000000000025,
+          "ep_reward": -86.81399999999985,
+          "goal_s": -15,
+          "headway_cv": 0.007699999999999985,
+          "lower_action_mean": -0.6599999999999993,
+          "lower_lf_drift_ratio": -0.00010891674636370752,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.028000000000000025,
+          "service_cost_restricted": 0.01051499999999983,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0040000000000000036,
+          "ep_reward": 32.76200000000017,
+          "goal_s": 15,
+          "headway_cv": -0.008599999999999997,
+          "lower_action_mean": 0.7700000000000005,
+          "lower_lf_drift_ratio": 1.908030066977151e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.0030000000000001137,
+          "service_cost_restricted": -0.008892000000000122,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0040000000000000036,
+          "ep_reward": 0.9500000000000455,
+          "goal_s": 30,
+          "headway_cv": -0.01620000000000002,
+          "lower_action_mean": 1.7400000000000002,
+          "lower_lf_drift_ratio": 0.0001221142459131297,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.0040000000000000036,
+          "service_cost_restricted": -0.016582000000000097,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.020999999999999908,
+          "ep_reward": -196.731,
+          "goal_s": 60,
+          "headway_cv": -0.033299999999999996,
+          "lower_action_mean": 4.190000000000001,
+          "lower_lf_drift_ratio": 0.00044652255780153194,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02100000000000035,
+          "service_cost_restricted": -0.03543600000000002,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.03543600000000002,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "low_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -588.4103721274311,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 1.0758639574050903,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.786792755126953,
+          "q_mean": -22.63506317138672
+        },
+        "-30": {
+          "ensemble_std_mean": 2.101855993270874,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.17631912231445,
+          "q_mean": -27.97260856628418
+        },
+        "-60": {
+          "ensemble_std_mean": 4.4007697105407715,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -47.80550003051758,
+          "q_mean": -39.00395965576172
+        },
+        "0": {
+          "ensemble_std_mean": 0.0993160679936409,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -18.61846923828125,
+          "q_mean": -18.41983985900879
+        },
+        "15": {
+          "ensemble_std_mean": 0.9122229218482971,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.728580474853516,
+          "q_mean": -22.904132843017578
+        },
+        "30": {
+          "ensemble_std_mean": 2.070127010345459,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.87498474121094,
+          "q_mean": -28.73473358154297
+        },
+        "60": {
+          "ensemble_std_mean": 4.583542346954346,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -49.59953308105469,
+          "q_mean": -40.43245315551758
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.08400000000000052,
+          "ep_reward": -599.3530000000001,
+          "goal_s": -60,
+          "headway_cv": 0.035,
+          "lower_action_mean": -2.5700000000000003,
+          "lower_lf_drift_ratio": -0.0004429810971953163,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08399999999999963,
+          "service_cost_restricted": 0.04327499999999995,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.03200000000000003,
+          "ep_reward": -189.3510000000001,
+          "goal_s": -30,
+          "headway_cv": 0.01720000000000002,
+          "lower_action_mean": -1.4700000000000006,
+          "lower_lf_drift_ratio": -0.0003272807046267312,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.03200000000000003,
+          "service_cost_restricted": 0.020376999999999867,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.009999999999999787,
+          "ep_reward": -57.60400000000004,
+          "goal_s": -15,
+          "headway_cv": 0.00849999999999998,
+          "lower_action_mean": -0.8100000000000005,
+          "lower_lf_drift_ratio": -0.0001962135892944472,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.01100000000000012,
+          "service_cost_restricted": 0.00948099999999985,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.056999999999999496,
+          "ep_reward": 17.465999999999894,
+          "goal_s": 15,
+          "headway_cv": -0.008099999999999996,
+          "lower_action_mean": 0.8499999999999996,
+          "lower_lf_drift_ratio": 1.3704135228054248e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.056999999999999496,
+          "service_cost_restricted": -0.013902000000000081,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.08899999999999952,
+          "ep_reward": -14.570000000000164,
+          "goal_s": 30,
+          "headway_cv": -0.01629999999999998,
+          "lower_action_mean": 1.8100000000000005,
+          "lower_lf_drift_ratio": 2.112950117116874e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.08899999999999952,
+          "service_cost_restricted": -0.02524700000000002,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.08499999999999996,
+          "ep_reward": -206.394,
+          "goal_s": 60,
+          "headway_cv": -0.027900000000000008,
+          "lower_action_mean": 4.219999999999999,
+          "lower_lf_drift_ratio": -5.271790985994507e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.08399999999999963,
+          "service_cost_restricted": -0.036389000000000005,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.036389000000000005,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "high_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -598.2862719270697,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 1.0777497291564941,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.921524047851562,
+          "q_mean": -22.766027450561523
+        },
+        "-30": {
+          "ensemble_std_mean": 2.098696231842041,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.29929733276367,
+          "q_mean": -28.10190200805664
+        },
+        "-60": {
+          "ensemble_std_mean": 4.400498867034912,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -47.93165588378906,
+          "q_mean": -39.13065719604492
+        },
+        "0": {
+          "ensemble_std_mean": 0.09930770844221115,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -18.755477905273438,
+          "q_mean": -18.556859970092773
+        },
+        "15": {
+          "ensemble_std_mean": 0.9043800234794617,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.81949806213379,
+          "q_mean": -23.010738372802734
+        },
+        "30": {
+          "ensemble_std_mean": 2.0624237060546875,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.96596145629883,
+          "q_mean": -28.841115951538086
+        },
+        "60": {
+          "ensemble_std_mean": 4.577155113220215,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -49.69231414794922,
+          "q_mean": -40.53800582885742
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.1609999999999996,
+          "ep_reward": -721.5260000000001,
+          "goal_s": -60,
+          "headway_cv": 0.02300000000000002,
+          "lower_action_mean": -2.08,
+          "lower_lf_drift_ratio": 0.00010818589539984824,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.1609999999999996,
+          "service_cost_restricted": 0.03910900000000006,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.08000000000000007,
+          "ep_reward": -231.92600000000016,
+          "goal_s": -30,
+          "headway_cv": 0.011700000000000016,
+          "lower_action_mean": -1.2399999999999993,
+          "lower_lf_drift_ratio": -0.00010307784558438726,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0810000000000013,
+          "service_cost_restricted": 0.01978499999999994,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.06700000000000017,
+          "ep_reward": -79.70299999999997,
+          "goal_s": -15,
+          "headway_cv": 0.005600000000000022,
+          "lower_action_mean": -0.6699999999999999,
+          "lower_lf_drift_ratio": -7.216739955051565e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.06700000000000017,
+          "service_cost_restricted": 0.012353000000000058,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.006000000000000227,
+          "ep_reward": 26.807999999999993,
+          "goal_s": 15,
+          "headway_cv": -0.0069999999999999785,
+          "lower_action_mean": 0.7700000000000005,
+          "lower_lf_drift_ratio": 9.7637839227116e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.006999999999999673,
+          "service_cost_restricted": -0.0062510000000000066,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.006999999999999673,
+          "ep_reward": -3.04300000000012,
+          "goal_s": 30,
+          "headway_cv": -0.01429999999999998,
+          "lower_action_mean": 1.6800000000000006,
+          "lower_lf_drift_ratio": 0.0002783184330521493,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.006000000000000227,
+          "service_cost_restricted": -0.014898000000000078,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.022999999999999687,
+          "ep_reward": -223.942,
+          "goal_s": 60,
+          "headway_cv": -0.02589999999999998,
+          "lower_action_mean": 4.2,
+          "lower_lf_drift_ratio": 0.0007742762246562007,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02200000000000024,
+          "service_cost_restricted": -0.028122999999999898,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.028122999999999898,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "hour_burst"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -1984.1723806088555,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 1.023189902305603,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -25.670400619506836,
+          "q_mean": -23.624019622802734
+        },
+        "-30": {
+          "ensemble_std_mean": 2.0314345359802246,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -33.004600524902344,
+          "q_mean": -28.941730499267578
+        },
+        "-60": {
+          "ensemble_std_mean": 4.315598487854004,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -48.5907096862793,
+          "q_mean": -39.959510803222656
+        },
+        "0": {
+          "ensemble_std_mean": 0.11479175090789795,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -19.78279685974121,
+          "q_mean": -19.553213119506836
+        },
+        "15": {
+          "ensemble_std_mean": 0.9134469032287598,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -25.68250274658203,
+          "q_mean": -23.855609893798828
+        },
+        "30": {
+          "ensemble_std_mean": 2.057483434677124,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -33.78127670288086,
+          "q_mean": -29.666305541992188
+        },
+        "60": {
+          "ensemble_std_mean": 4.557206153869629,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -50.47663497924805,
+          "q_mean": -41.362220764160156
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.10899999999999999,
+          "ep_reward": -751.174,
+          "goal_s": -60,
+          "headway_cv": 0.03240000000000001,
+          "lower_action_mean": -1.96,
+          "lower_lf_drift_ratio": 7.417999162706579e-07,
+          "passenger_unserved_rate": 0.0002390000000000031,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.1599999999999966,
+          "service_cost_restricted": 0.049579999999999735,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.07500000000000107,
+          "ep_reward": -263.9680000000001,
+          "goal_s": -30,
+          "headway_cv": 0.016699999999999993,
+          "lower_action_mean": -1.1400000000000006,
+          "lower_lf_drift_ratio": 1.9117512870425735e-05,
+          "passenger_unserved_rate": 0.00011999999999999511,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08800000000000097,
+          "service_cost_restricted": 0.026070999999999955,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0259999999999998,
+          "ep_reward": -95.87699999999995,
+          "goal_s": -15,
+          "headway_cv": 0.008500000000000008,
+          "lower_action_mean": -0.6200000000000001,
+          "lower_lf_drift_ratio": -6.523998009155818e-06,
+          "passenger_unserved_rate": 3.999999999999837e-05,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.036999999999999034,
+          "service_cost_restricted": 0.012337999999999738,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.015000000000000568,
+          "ep_reward": 38.27300000000014,
+          "goal_s": 15,
+          "headway_cv": -0.008599999999999997,
+          "lower_action_mean": 0.7399999999999993,
+          "lower_lf_drift_ratio": 1.2223263078259272e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.014000000000002899,
+          "service_cost_restricted": -0.007232000000000127,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.02200000000000024,
+          "ep_reward": 4.127999999999929,
+          "goal_s": 30,
+          "headway_cv": -0.01580000000000001,
+          "lower_action_mean": 1.7199999999999989,
+          "lower_lf_drift_ratio": 5.0343104591288323e-05,
+          "passenger_unserved_rate": -7.899999999999574e-05,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.006999999999997897,
+          "service_cost_restricted": 0.3996809999999993,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.018000000000000682,
+          "ep_reward": -173.34300000000007,
+          "goal_s": 60,
+          "headway_cv": -0.031700000000000006,
+          "lower_action_mean": 3.99,
+          "lower_lf_drift_ratio": 0.00014547488730887181,
+          "passenger_unserved_rate": -0.0005160000000000026,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.12100000000000222,
+          "service_cost_restricted": 0.37020799999999987,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.007232000000000127,
+      "oracle_grid_goal_s": 15,
+      "root": 229,
+      "scenario": "persistent_shift"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -280.4288912692464,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 1.0779975652694702,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.92452049255371,
+          "q_mean": -22.76852798461914
+        },
+        "-30": {
+          "ensemble_std_mean": 2.0977766513824463,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.298343658447266,
+          "q_mean": -28.10279083251953
+        },
+        "-60": {
+          "ensemble_std_mean": 4.401369094848633,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -47.93621063232422,
+          "q_mean": -39.13346862792969
+        },
+        "0": {
+          "ensemble_std_mean": 0.08801357448101044,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -18.73248291015625,
+          "q_mean": -18.556453704833984
+        },
+        "15": {
+          "ensemble_std_mean": 0.9027727246284485,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -24.82125473022461,
+          "q_mean": -23.015710830688477
+        },
+        "30": {
+          "ensemble_std_mean": 2.0619301795959473,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -32.97062683105469,
+          "q_mean": -28.846769332885742
+        },
+        "60": {
+          "ensemble_std_mean": 4.577831745147705,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -49.699031829833984,
+          "q_mean": -40.54336929321289
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.016000000000000014,
+          "ep_reward": -764.874,
+          "goal_s": -60,
+          "headway_cv": 0.033399999999999985,
+          "lower_action_mean": -2.0200000000000005,
+          "lower_lf_drift_ratio": 0.0005937439231541441,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.016000000000000014,
+          "service_cost_restricted": 0.03502099999999997,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0030000000000001137,
+          "ep_reward": -254.59400000000005,
+          "goal_s": -30,
+          "headway_cv": 0.017100000000000004,
+          "lower_action_mean": -1.21,
+          "lower_lf_drift_ratio": 0.00026773548890701715,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.0030000000000001137,
+          "service_cost_restricted": 0.01674399999999998,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0009999999999998899,
+          "ep_reward": -90.70100000000002,
+          "goal_s": -15,
+          "headway_cv": 0.00839999999999999,
+          "lower_action_mean": -0.6700000000000008,
+          "lower_lf_drift_ratio": 0.0001083654039204518,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.0009999999999998899,
+          "service_cost_restricted": 0.00827599999999995,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.004999999999999893,
+          "ep_reward": 28.19399999999996,
+          "goal_s": 15,
+          "headway_cv": -0.008000000000000007,
+          "lower_action_mean": 0.8399999999999999,
+          "lower_lf_drift_ratio": -5.477351393745611e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.004999999999999893,
+          "service_cost_restricted": -0.008533000000000013,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.002000000000000224,
+          "ep_reward": -9.054000000000087,
+          "goal_s": 30,
+          "headway_cv": -0.016100000000000003,
+          "lower_action_mean": 1.839999999999999,
+          "lower_lf_drift_ratio": -9.701541454743001e-06,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.002000000000000224,
+          "service_cost_restricted": 0.4003739999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.008000000000000007,
+          "ep_reward": -226.33500000000004,
+          "goal_s": 60,
+          "headway_cv": -0.03230000000000002,
+          "lower_action_mean": 4.38,
+          "lower_lf_drift_ratio": 0.00022672861377692755,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.008999999999999897,
+          "service_cost_restricted": 0.38345299999999993,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower",
+      "oracle_cost_gain_against_zero": 0.008533000000000013,
+      "oracle_grid_goal_s": 15,
+      "root": 229,
+      "scenario": "ood_period"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -43.75475672243813,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.007263408767462221,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.022549666464328766,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9249465465545654,
+          "q_mean": -2.879847288131714
+        },
+        "-30": {
+          "ensemble_std_mean": 0.030120475217700005,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9398961067199707,
+          "q_mean": -2.879655361175537
+        },
+        "-60": {
+          "ensemble_std_mean": 0.0646585077047348,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.0428011417388916,
+          "q_mean": -2.9134843349456787
+        },
+        "0": {
+          "ensemble_std_mean": 0.04547857493162155,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.8642995357513428,
+          "q_mean": -2.7733423709869385
+        },
+        "15": {
+          "ensemble_std_mean": 0.01974928379058838,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9017934799194336,
+          "q_mean": -2.862294912338257
+        },
+        "30": {
+          "ensemble_std_mean": 0.023185957223176956,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9164485931396484,
+          "q_mean": -2.870077133178711
+        },
+        "60": {
+          "ensemble_std_mean": 0.13677294552326202,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.271306276321411,
+          "q_mean": -2.99776029586792
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.016000000000000014,
+          "ep_reward": -640.877,
+          "goal_s": -60,
+          "headway_cv": 0.0421,
+          "lower_action_mean": -4.26,
+          "lower_lf_drift_ratio": -0.0004637184468391231,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.016000000000000014,
+          "service_cost_restricted": 0.04371999999999998,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.007000000000000561,
+          "ep_reward": -181.8699999999999,
+          "goal_s": -30,
+          "headway_cv": 0.021199999999999997,
+          "lower_action_mean": -2.5299999999999994,
+          "lower_lf_drift_ratio": -0.0002636914185145667,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.006999999999999673,
+          "service_cost_restricted": 0.021919000000000022,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.005999999999999339,
+          "ep_reward": -43.424999999999955,
+          "goal_s": -15,
+          "headway_cv": 0.010300000000000004,
+          "lower_action_mean": -1.4000000000000004,
+          "lower_lf_drift_ratio": -0.00012605894191974887,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.006000000000000227,
+          "service_cost_restricted": 0.009794999999999998,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.001000000000000334,
+          "ep_reward": -41.15599999999995,
+          "goal_s": 15,
+          "headway_cv": -0.009399999999999992,
+          "lower_action_mean": 1.6799999999999997,
+          "lower_lf_drift_ratio": 0.00019048493697337854,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.0009999999999994458,
+          "service_cost_restricted": 0.40750300000000006,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.02200000000000024,
+          "ep_reward": -160.42100000000005,
+          "goal_s": 30,
+          "headway_cv": -0.01679999999999998,
+          "lower_action_mean": 3.5999999999999996,
+          "lower_lf_drift_ratio": 0.0003798131894572343,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.022999999999999687,
+          "service_cost_restricted": 0.402211,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.04900000000000038,
+          "ep_reward": -515.596,
+          "goal_s": 60,
+          "headway_cv": -0.032299999999999995,
+          "lower_action_mean": 8.190000000000001,
+          "lower_lf_drift_ratio": 0.0007052139152010639,
+          "passenger_unserved_rate": -4.9e-05,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.03799999999999937,
+          "service_cost_restricted": 0.38798600000000005,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.0,
+      "oracle_grid_goal_s": 0,
+      "root": 217,
+      "scenario": "low_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -83.46385134830538,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.012012719097575248,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.025307245552539825,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9223475456237793,
+          "q_mean": -2.871732711791992
+        },
+        "-30": {
+          "ensemble_std_mean": 0.032630596309900284,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9368364810943604,
+          "q_mean": -2.8715755939483643
+        },
+        "-60": {
+          "ensemble_std_mean": 0.06760681420564651,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.0410003662109375,
+          "q_mean": -2.9057869911193848
+        },
+        "0": {
+          "ensemble_std_mean": 0.047677069902420044,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.8607842922210693,
+          "q_mean": -2.765430212020874
+        },
+        "15": {
+          "ensemble_std_mean": 0.021872418001294136,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.898092746734619,
+          "q_mean": -2.8543477058410645
+        },
+        "30": {
+          "ensemble_std_mean": 0.026635460555553436,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9154980182647705,
+          "q_mean": -2.862227201461792
+        },
+        "60": {
+          "ensemble_std_mean": 0.1399233490228653,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.270284652709961,
+          "q_mean": -2.9904379844665527
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": -0.04300000000000015,
+          "ep_reward": -515.3110000000001,
+          "goal_s": -60,
+          "headway_cv": 0.031399999999999983,
+          "lower_action_mean": -4.550000000000001,
+          "lower_lf_drift_ratio": -3.4080477334663684e-06,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.041999999999999815,
+          "service_cost_restricted": 0.02709000000000006,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.023000000000000576,
+          "ep_reward": -116.01199999999994,
+          "goal_s": -30,
+          "headway_cv": 0.014899999999999997,
+          "lower_action_mean": -2.67,
+          "lower_lf_drift_ratio": -3.157186239088894e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02200000000000024,
+          "service_cost_restricted": 0.012557000000000151,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.025000000000000355,
+          "ep_reward": -12.105999999999995,
+          "goal_s": -15,
+          "headway_cv": 0.005699999999999983,
+          "lower_action_mean": -1.4400000000000013,
+          "lower_lf_drift_ratio": -1.867304353131427e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.025000000000000355,
+          "service_cost_restricted": 0.0031689999999999774,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.04299999999999926,
+          "ep_reward": -35.825000000000045,
+          "goal_s": 15,
+          "headway_cv": -0.005500000000000005,
+          "lower_action_mean": 1.6199999999999992,
+          "lower_lf_drift_ratio": -3.323489919093703e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.04400000000000048,
+          "service_cost_restricted": -0.0011470000000000091,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.08000000000000007,
+          "ep_reward": -136.75299999999993,
+          "goal_s": 30,
+          "headway_cv": -0.012800000000000006,
+          "lower_action_mean": 3.349999999999998,
+          "lower_lf_drift_ratio": 1.706928537781316e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08099999999999952,
+          "service_cost_restricted": -0.0047559999999999825,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.10699999999999932,
+          "ep_reward": -416.50199999999995,
+          "goal_s": 60,
+          "headway_cv": -0.024400000000000005,
+          "lower_action_mean": 6.989999999999998,
+          "lower_lf_drift_ratio": 0.00016476961339229046,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.10699999999999932,
+          "service_cost_restricted": -0.013708999999999971,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.013708999999999971,
+      "oracle_grid_goal_s": 60,
+      "root": 217,
+      "scenario": "high_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -135.37788303998326,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.16323257203404562,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.025271670892834663,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.942117214202881,
+          "q_mean": -2.891573667526245
+        },
+        "-30": {
+          "ensemble_std_mean": 0.03104252927005291,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9534459114074707,
+          "q_mean": -2.8913609981536865
+        },
+        "-60": {
+          "ensemble_std_mean": 0.06224387511610985,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.04917311668396,
+          "q_mean": -2.924685478210449
+        },
+        "0": {
+          "ensemble_std_mean": 0.0448513887822628,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.8744888305664062,
+          "q_mean": -2.784785747528076
+        },
+        "15": {
+          "ensemble_std_mean": 0.023791974410414696,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9213736057281494,
+          "q_mean": -2.8737895488739014
+        },
+        "30": {
+          "ensemble_std_mean": 0.02337871864438057,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.928253412246704,
+          "q_mean": -2.881495952606201
+        },
+        "60": {
+          "ensemble_std_mean": 0.1330702155828476,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.2745180130004883,
+          "q_mean": -3.0083775520324707
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.15600000000000058,
+          "ep_reward": -649.127,
+          "goal_s": -60,
+          "headway_cv": 0.034,
+          "lower_action_mean": -4.22,
+          "lower_lf_drift_ratio": -0.0003165830273866854,
+          "passenger_unserved_rate": 0.0005789999999999997,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.36600000000000144,
+          "service_cost_restricted": 0.07344700000000004,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.11400000000000077,
+          "ep_reward": -169.4369999999999,
+          "goal_s": -30,
+          "headway_cv": 0.017100000000000004,
+          "lower_action_mean": -2.5599999999999996,
+          "lower_lf_drift_ratio": -0.00016890500555843957,
+          "passenger_unserved_rate": 0.0004010000000000003,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.266,
+          "service_cost_restricted": 0.04574400000000001,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.049000000000001265,
+          "ep_reward": -41.45499999999993,
+          "goal_s": -15,
+          "headway_cv": 0.008200000000000013,
+          "lower_action_mean": -1.3899999999999988,
+          "lower_lf_drift_ratio": -8.347032621791595e-05,
+          "passenger_unserved_rate": 0.00022299999999999924,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.1280000000000001,
+          "service_cost_restricted": 0.02207200000000009,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0010000000000012221,
+          "ep_reward": -29.570999999999913,
+          "goal_s": 15,
+          "headway_cv": -0.010000000000000009,
+          "lower_action_mean": 1.5600000000000005,
+          "lower_lf_drift_ratio": 0.0002887032138233492,
+          "passenger_unserved_rate": -8.99999999999998e-05,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.030999999999998806,
+          "service_cost_restricted": 0.4030429999999998,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.021000000000000796,
+          "ep_reward": -137.702,
+          "goal_s": 30,
+          "headway_cv": -0.018199999999999994,
+          "lower_action_mean": 3.370000000000001,
+          "lower_lf_drift_ratio": 0.0004636217659301778,
+          "passenger_unserved_rate": -0.00017900000000000034,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.04099999999999859,
+          "service_cost_restricted": 0.39349599999999985,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.07199999999999918,
+          "ep_reward": -487.18000000000006,
+          "goal_s": 60,
+          "headway_cv": -0.03359999999999999,
+          "lower_action_mean": 7.73,
+          "lower_lf_drift_ratio": 0.0005814629031600793,
+          "passenger_unserved_rate": -0.000536,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.24099999999999966,
+          "service_cost_restricted": 0.3562479999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.0,
+      "oracle_grid_goal_s": 0,
+      "root": 217,
+      "scenario": "hour_burst"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -371.249010306111,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.5395088508367107,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.03631243854761124,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.988992929458618,
+          "q_mean": -2.916368246078491
+        },
+        "-30": {
+          "ensemble_std_mean": 0.04022977128624916,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9965732097625732,
+          "q_mean": -2.91611385345459
+        },
+        "-60": {
+          "ensemble_std_mean": 0.06385908275842667,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.0761001110076904,
+          "q_mean": -2.9483823776245117
+        },
+        "0": {
+          "ensemble_std_mean": 0.04982561618089676,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.9085896015167236,
+          "q_mean": -2.8089382648468018
+        },
+        "15": {
+          "ensemble_std_mean": 0.03552776202559471,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9691162109375,
+          "q_mean": -2.8980607986450195
+        },
+        "30": {
+          "ensemble_std_mean": 0.03155459091067314,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9688050746917725,
+          "q_mean": -2.905695676803589
+        },
+        "60": {
+          "ensemble_std_mean": 0.1275961548089981,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.28598690032959,
+          "q_mean": -3.030794620513916
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.028999999999999915,
+          "ep_reward": -652.9490000000001,
+          "goal_s": -60,
+          "headway_cv": 0.02890000000000001,
+          "lower_action_mean": -4.37,
+          "lower_lf_drift_ratio": -0.00017431394501565833,
+          "passenger_unserved_rate": 0.0005329999999999918,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.17199999999999704,
+          "service_cost_restricted": 0.04863100000000031,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.017999999999998906,
+          "ep_reward": -167.64200000000005,
+          "goal_s": -30,
+          "headway_cv": 0.014400000000000024,
+          "lower_action_mean": -2.63,
+          "lower_lf_drift_ratio": -0.00024407086647626475,
+          "passenger_unserved_rate": 0.0003049999999999997,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.10000000000000142,
+          "service_cost_restricted": 0.02586200000000005,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.008000000000000895,
+          "ep_reward": -36.02299999999991,
+          "goal_s": -15,
+          "headway_cv": 0.007300000000000001,
+          "lower_action_mean": -1.459999999999999,
+          "lower_lf_drift_ratio": -7.228712478690724e-05,
+          "passenger_unserved_rate": 0.0002279999999999921,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.054999999999999716,
+          "service_cost_restricted": 0.013895000000000657,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.030999999999998806,
+          "ep_reward": -44.847999999999956,
+          "goal_s": 15,
+          "headway_cv": -0.00799999999999998,
+          "lower_action_mean": 1.7300000000000004,
+          "lower_lf_drift_ratio": -3.2673314015574384e-05,
+          "passenger_unserved_rate": -0.0003429999999999961,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.05799999999999983,
+          "service_cost_restricted": -0.015568000000000026,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.06700000000000017,
+          "ep_reward": -155.18599999999992,
+          "goal_s": 30,
+          "headway_cv": -0.01629999999999998,
+          "lower_action_mean": 3.6099999999999994,
+          "lower_lf_drift_ratio": -5.0143873039809606e-05,
+          "passenger_unserved_rate": -0.0003429999999999961,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.02499999999999858,
+          "service_cost_restricted": -0.02057299999999973,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.15399999999999991,
+          "ep_reward": -505.44900000000007,
+          "goal_s": 60,
+          "headway_cv": -0.02739999999999998,
+          "lower_action_mean": 7.950000000000001,
+          "lower_lf_drift_ratio": -1.8154557593241805e-05,
+          "passenger_unserved_rate": -0.0010280000000000011,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.12199999999999989,
+          "service_cost_restricted": -0.04483699999999935,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.04483699999999935,
+      "oracle_grid_goal_s": 60,
+      "root": 217,
+      "scenario": "persistent_shift"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -38.23806617987767,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.007951216138041596,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.023931436240673065,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9185118675231934,
+          "q_mean": -2.8706490993499756
+        },
+        "-30": {
+          "ensemble_std_mean": 0.032283470034599304,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9350576400756836,
+          "q_mean": -2.870490550994873
+        },
+        "-60": {
+          "ensemble_std_mean": 0.06783996522426605,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.0403926372528076,
+          "q_mean": -2.9047129154205322
+        },
+        "0": {
+          "ensemble_std_mean": 0.04754133149981499,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.8594539165496826,
+          "q_mean": -2.764371156692505
+        },
+        "15": {
+          "ensemble_std_mean": 0.020536357536911964,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.894353151321411,
+          "q_mean": -2.853280782699585
+        },
+        "30": {
+          "ensemble_std_mean": 0.026097998023033142,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9133269786834717,
+          "q_mean": -2.861130952835083
+        },
+        "60": {
+          "ensemble_std_mean": 0.14027895033359528,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.269948720932007,
+          "q_mean": -2.9893908500671387
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.018000000000000238,
+          "ep_reward": -587.9119999999998,
+          "goal_s": -60,
+          "headway_cv": 0.028799999999999992,
+          "lower_action_mean": -4.77,
+          "lower_lf_drift_ratio": -0.000495496272710727,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.018000000000000238,
+          "service_cost_restricted": 0.030683000000000016,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.007000000000000117,
+          "ep_reward": -135.00699999999983,
+          "goal_s": -30,
+          "headway_cv": 0.015500000000000014,
+          "lower_action_mean": -2.7300000000000004,
+          "lower_lf_drift_ratio": -0.00021627192272366536,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.007000000000000117,
+          "service_cost_restricted": 0.016216000000000008,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.004999999999999893,
+          "ep_reward": -38.07999999999993,
+          "goal_s": -15,
+          "headway_cv": 0.010399999999999993,
+          "lower_action_mean": -1.4100000000000001,
+          "lower_lf_drift_ratio": -0.00012376369206901217,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0050000000000003375,
+          "service_cost_restricted": 0.010940999999999979,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.01100000000000012,
+          "ep_reward": -31.148999999999887,
+          "goal_s": 15,
+          "headway_cv": -0.010800000000000004,
+          "lower_action_mean": 1.5999999999999996,
+          "lower_lf_drift_ratio": 0.00013588877360215523,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.01100000000000012,
+          "service_cost_restricted": -0.009732999999999992,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.017999999999999794,
+          "ep_reward": -152.82999999999993,
+          "goal_s": 30,
+          "headway_cv": -0.01830000000000001,
+          "lower_action_mean": 3.5999999999999996,
+          "lower_lf_drift_ratio": 0.00030297912318988374,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.017999999999999794,
+          "service_cost_restricted": 0.39656199999999997,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.021999999999999797,
+          "ep_reward": -507.66899999999987,
+          "goal_s": 60,
+          "headway_cv": -0.03509999999999999,
+          "lower_action_mean": 8.030000000000001,
+          "lower_lf_drift_ratio": 0.0005185240809059133,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.021999999999999797,
+          "service_cost_restricted": 0.379379,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.009732999999999992,
+      "oracle_grid_goal_s": 15,
+      "root": 217,
+      "scenario": "ood_period"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -37.80263544710639,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.018420955062834976,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.02165590599179268,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.265479326248169,
+          "q_mean": -2.222167730331421
+        },
+        "-30": {
+          "ensemble_std_mean": 0.07282135635614395,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.4706437587738037,
+          "q_mean": -2.3250010013580322
+        },
+        "-60": {
+          "ensemble_std_mean": 0.20719318091869354,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9680840969085693,
+          "q_mean": -2.5536978244781494
+        },
+        "0": {
+          "ensemble_std_mean": 0.04287866875529289,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.07167649269104,
+          "q_mean": -1.9859189987182617
+        },
+        "15": {
+          "ensemble_std_mean": 0.02430754154920578,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2953450679779053,
+          "q_mean": -2.246730089187622
+        },
+        "30": {
+          "ensemble_std_mean": 0.08198338747024536,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.554426670074463,
+          "q_mean": -2.3904597759246826
+        },
+        "60": {
+          "ensemble_std_mean": 0.21020656824111938,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.118044376373291,
+          "q_mean": -2.6976311206817627
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.03299999999999992,
+          "ep_reward": -723.393,
+          "goal_s": -60,
+          "headway_cv": 0.025900000000000006,
+          "lower_action_mean": -1.8500000000000005,
+          "lower_lf_drift_ratio": -9.303660009185588e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.03299999999999992,
+          "service_cost_restricted": 0.029233999999999982,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.01599999999999957,
+          "ep_reward": -241.961,
+          "goal_s": -30,
+          "headway_cv": 0.0131,
+          "lower_action_mean": -1.1100000000000003,
+          "lower_lf_drift_ratio": -7.012717886178965e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.016999999999999904,
+          "service_cost_restricted": 0.0147759999999999,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.01599999999999957,
+          "ep_reward": -86.60300000000007,
+          "goal_s": -15,
+          "headway_cv": 0.007000000000000006,
+          "lower_action_mean": -0.5899999999999999,
+          "lower_lf_drift_ratio": -7.65380864824472e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.016000000000000014,
+          "service_cost_restricted": 0.008618999999999932,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.010000000000000231,
+          "ep_reward": 28.97699999999986,
+          "goal_s": 15,
+          "headway_cv": -0.00789999999999999,
+          "lower_action_mean": 0.6899999999999995,
+          "lower_lf_drift_ratio": 9.116130650810295e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.009999999999999787,
+          "service_cost_restricted": -0.00886600000000004,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.009000000000000341,
+          "ep_reward": 2.0449999999998454,
+          "goal_s": 30,
+          "headway_cv": -0.015499999999999986,
+          "lower_action_mean": 1.5300000000000002,
+          "lower_lf_drift_ratio": 0.00017252414953505824,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.008999999999999897,
+          "service_cost_restricted": -0.016377000000000086,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.020000000000000018,
+          "ep_reward": -180.558,
+          "goal_s": 60,
+          "headway_cv": -0.031,
+          "lower_action_mean": 3.63,
+          "lower_lf_drift_ratio": 0.0004408040791852308,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.020000000000000018,
+          "service_cost_restricted": -0.03291099999999991,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.03291099999999991,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "low_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -79.95327517199458,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.00209991839732807,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.023491080850362778,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2692031860351562,
+          "q_mean": -2.2222211360931396
+        },
+        "-30": {
+          "ensemble_std_mean": 0.0732157826423645,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.4714858531951904,
+          "q_mean": -2.325054168701172
+        },
+        "-60": {
+          "ensemble_std_mean": 0.20720797777175903,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9681665897369385,
+          "q_mean": -2.553751230239868
+        },
+        "0": {
+          "ensemble_std_mean": 0.043911296874284744,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.0737686157226562,
+          "q_mean": -1.9859460592269897
+        },
+        "15": {
+          "ensemble_std_mean": 0.02611478790640831,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2990026473999023,
+          "q_mean": -2.2467730045318604
+        },
+        "30": {
+          "ensemble_std_mean": 0.08269716054201126,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.5558993816375732,
+          "q_mean": -2.390505075454712
+        },
+        "60": {
+          "ensemble_std_mean": 0.21040381491184235,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.1184840202331543,
+          "q_mean": -2.697676181793213
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.08499999999999996,
+          "ep_reward": -590.1210000000001,
+          "goal_s": -60,
+          "headway_cv": 0.03199999999999997,
+          "lower_action_mean": -2.3900000000000006,
+          "lower_lf_drift_ratio": -0.0003724553196200464,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08499999999999996,
+          "service_cost_restricted": 0.040537000000000045,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.036000000000000476,
+          "ep_reward": -184.961,
+          "goal_s": -30,
+          "headway_cv": 0.01579999999999998,
+          "lower_action_mean": -1.3400000000000007,
+          "lower_lf_drift_ratio": -0.0003057802098023199,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.03599999999999959,
+          "service_cost_restricted": 0.01934199999999997,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.012000000000000455,
+          "ep_reward": -58.37699999999995,
+          "goal_s": -15,
+          "headway_cv": 0.006500000000000006,
+          "lower_action_mean": -0.75,
+          "lower_lf_drift_ratio": -0.00018800354735559743,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.011999999999999567,
+          "service_cost_restricted": 0.007684999999999942,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.06099999999999994,
+          "ep_reward": 22.547000000000025,
+          "goal_s": 15,
+          "headway_cv": -0.007000000000000006,
+          "lower_action_mean": 0.7599999999999998,
+          "lower_lf_drift_ratio": 1.6094472570227225e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.06099999999999994,
+          "service_cost_restricted": -0.013119000000000103,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.08000000000000007,
+          "ep_reward": -9.438000000000102,
+          "goal_s": 30,
+          "headway_cv": -0.014000000000000012,
+          "lower_action_mean": 1.58,
+          "lower_lf_drift_ratio": 5.3017208682448747e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.08000000000000007,
+          "service_cost_restricted": -0.022024000000000044,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.08999999999999986,
+          "ep_reward": -174.60500000000002,
+          "goal_s": 60,
+          "headway_cv": -0.025499999999999995,
+          "lower_action_mean": 3.6099999999999994,
+          "lower_lf_drift_ratio": 4.1329988321958666e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.08999999999999986,
+          "service_cost_restricted": -0.034553000000000056,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.034553000000000056,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "high_noise"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -101.80360422615759,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.001637341435324396,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.022773129865527153,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.267411708831787,
+          "q_mean": -2.221865653991699
+        },
+        "-30": {
+          "ensemble_std_mean": 0.07366972416639328,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.4720382690429688,
+          "q_mean": -2.3246991634368896
+        },
+        "-60": {
+          "ensemble_std_mean": 0.2079828828573227,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.969364643096924,
+          "q_mean": -2.553398609161377
+        },
+        "0": {
+          "ensemble_std_mean": 0.04347097873687744,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.072568416595459,
+          "q_mean": -1.985626459121704
+        },
+        "15": {
+          "ensemble_std_mean": 0.025532720610499382,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2975034713745117,
+          "q_mean": -2.2464380264282227
+        },
+        "30": {
+          "ensemble_std_mean": 0.08271990716457367,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.555602550506592,
+          "q_mean": -2.390162944793701
+        },
+        "60": {
+          "ensemble_std_mean": 0.21081438660621643,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.1189630031585693,
+          "q_mean": -2.6973342895507812
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.13900000000000112,
+          "ep_reward": -710.8829999999998,
+          "goal_s": -60,
+          "headway_cv": 0.02049999999999999,
+          "lower_action_mean": -1.92,
+          "lower_lf_drift_ratio": -1.0510301227228958e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.1379999999999999,
+          "service_cost_restricted": 0.0343239999999998,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.07000000000000028,
+          "ep_reward": -229.12999999999988,
+          "goal_s": -30,
+          "headway_cv": 0.010299999999999976,
+          "lower_action_mean": -1.1199999999999992,
+          "lower_lf_drift_ratio": -0.00012091546165204914,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.07000000000000028,
+          "service_cost_restricted": 0.01736699999999991,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.06099999999999994,
+          "ep_reward": -77.78999999999996,
+          "goal_s": -15,
+          "headway_cv": 0.004299999999999998,
+          "lower_action_mean": -0.6099999999999994,
+          "lower_lf_drift_ratio": -9.927927872532827e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.06099999999999994,
+          "service_cost_restricted": 0.010476999999999848,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.007999999999999119,
+          "ep_reward": 24.138000000000147,
+          "goal_s": 15,
+          "headway_cv": -0.006400000000000017,
+          "lower_action_mean": 0.6900000000000004,
+          "lower_lf_drift_ratio": 9.369858959196176e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.009000000000000341,
+          "service_cost_restricted": -0.0072870000000000434,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.01699999999999946,
+          "ep_reward": -6.703999999999951,
+          "goal_s": 30,
+          "headway_cv": -0.012800000000000006,
+          "lower_action_mean": 1.4700000000000006,
+          "lower_lf_drift_ratio": 0.00029627619097027935,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.017999999999998906,
+          "service_cost_restricted": -0.01447300000000018,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.027999999999998693,
+          "ep_reward": -210.5229999999999,
+          "goal_s": 60,
+          "headway_cv": -0.024400000000000005,
+          "lower_action_mean": 3.630000000000001,
+          "lower_lf_drift_ratio": 0.0007364460085499402,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.028999999999999915,
+          "service_cost_restricted": -0.027213000000000154,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.027213000000000154,
+      "oracle_grid_goal_s": 60,
+      "root": 229,
+      "scenario": "hour_burst"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -377.61971441249364,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.5291504443431079,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.02869606763124466,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2834267616271973,
+          "q_mean": -2.226034641265869
+        },
+        "-30": {
+          "ensemble_std_mean": 0.06770463287830353,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.4642763137817383,
+          "q_mean": -2.328867197036743
+        },
+        "-60": {
+          "ensemble_std_mean": 0.19897782802581787,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9554696083068848,
+          "q_mean": -2.55751371383667
+        },
+        "0": {
+          "ensemble_std_mean": 0.04680049046874046,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.083101987838745,
+          "q_mean": -1.9895007610321045
+        },
+        "15": {
+          "ensemble_std_mean": 0.031002845615148544,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.3122096061706543,
+          "q_mean": -2.250204086303711
+        },
+        "30": {
+          "ensemble_std_mean": 0.08120711147785187,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.5564277172088623,
+          "q_mean": -2.3940136432647705
+        },
+        "60": {
+          "ensemble_std_mean": 0.20578967034816742,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.1127636432647705,
+          "q_mean": -2.7011842727661133
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.1120000000000001,
+          "ep_reward": -736.4650000000001,
+          "goal_s": -60,
+          "headway_cv": 0.030099999999999988,
+          "lower_action_mean": -1.8399999999999999,
+          "lower_lf_drift_ratio": -7.794825300444508e-06,
+          "passenger_unserved_rate": 0.00019900000000000473,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.15200000000000102,
+          "service_cost_restricted": 0.04631500000000077,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.07500000000000107,
+          "ep_reward": -256.1980000000001,
+          "goal_s": -30,
+          "headway_cv": 0.01529999999999998,
+          "lower_action_mean": -1.0499999999999998,
+          "lower_lf_drift_ratio": 8.941691669317464e-07,
+          "passenger_unserved_rate": 0.00011999999999999511,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.08800000000000097,
+          "service_cost_restricted": 0.02475300000000047,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.03200000000000003,
+          "ep_reward": -93.52600000000007,
+          "goal_s": -15,
+          "headway_cv": 0.00849999999999998,
+          "lower_action_mean": -0.5600000000000005,
+          "lower_lf_drift_ratio": 1.3069237093654706e-06,
+          "passenger_unserved_rate": 3.999999999999837e-05,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.04299999999999926,
+          "service_cost_restricted": 0.012984000000000329,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.014000000000001123,
+          "ep_reward": 32.28399999999988,
+          "goal_s": 15,
+          "headway_cv": -0.0066000000000000225,
+          "lower_action_mean": 0.7200000000000006,
+          "lower_lf_drift_ratio": 3.998862351772825e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.012999999999998124,
+          "service_cost_restricted": -0.005239999999999689,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.011000000000001009,
+          "ep_reward": 8.830999999999904,
+          "goal_s": 30,
+          "headway_cv": -0.014600000000000002,
+          "lower_action_mean": 1.5,
+          "lower_lf_drift_ratio": 9.534775906228088e-05,
+          "passenger_unserved_rate": -7.899999999999574e-05,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.018000000000000682,
+          "service_cost_restricted": -0.016755999999999993,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.019000000000000128,
+          "ep_reward": -155.69299999999998,
+          "goal_s": 60,
+          "headway_cv": -0.029200000000000004,
+          "lower_action_mean": 3.4499999999999993,
+          "lower_lf_drift_ratio": 0.00020800083192074048,
+          "passenger_unserved_rate": -0.0005160000000000026,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.12100000000000222,
+          "service_cost_restricted": 0.3727500000000008,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.016755999999999993,
+      "oracle_grid_goal_s": 30,
+      "root": 229,
+      "scenario": "persistent_shift"
+    },
+    {
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -38.615152240802374,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.014214181840438088,
+        "system_reward_sum": 0.0,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.021427050232887268,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.264774799346924,
+          "q_mean": -2.2219202518463135
+        },
+        "-30": {
+          "ensemble_std_mean": 0.07336375117301941,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.4714813232421875,
+          "q_mean": -2.324753999710083
+        },
+        "-60": {
+          "ensemble_std_mean": 0.207818865776062,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.9690937995910645,
+          "q_mean": -2.5534560680389404
+        },
+        "0": {
+          "ensemble_std_mean": 0.04261603578925133,
+          "lcb_argmax_state_fraction": 1.0,
+          "lcb_mean": -2.0709168910980225,
+          "q_mean": -1.9856847524642944
+        },
+        "15": {
+          "ensemble_std_mean": 0.023984534665942192,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.2944531440734863,
+          "q_mean": -2.24648380279541
+        },
+        "30": {
+          "ensemble_std_mean": 0.0821603536605835,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -2.554527997970581,
+          "q_mean": -2.390207052230835
+        },
+        "60": {
+          "ensemble_std_mean": 0.2105676531791687,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -3.118513822555542,
+          "q_mean": -2.697378396987915
+        }
+      },
+      "goals": [
+        {
+          "avg_wait_observed_min": 0.009999999999999787,
+          "ep_reward": -749.81,
+          "goal_s": -60,
+          "headway_cv": 0.03140000000000001,
+          "lower_action_mean": -1.9100000000000001,
+          "lower_lf_drift_ratio": 0.00040524096743188576,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.010999999999999677,
+          "service_cost_restricted": 0.03239700000000001,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0030000000000001137,
+          "ep_reward": -244.91100000000006,
+          "goal_s": -30,
+          "headway_cv": 0.015500000000000014,
+          "lower_action_mean": -1.1400000000000006,
+          "lower_lf_drift_ratio": 0.00015234512196216077,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": -0.002000000000000224,
+          "service_cost_restricted": 0.015268999999999977,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.0009999999999998899,
+          "ep_reward": -87.55899999999997,
+          "goal_s": -15,
+          "headway_cv": 0.007599999999999996,
+          "lower_action_mean": -0.6299999999999999,
+          "lower_lf_drift_ratio": 7.547313531430788e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.007484000000000046,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0,
+          "ep_reward": 0.0,
+          "goal_s": 0,
+          "headway_cv": 0.0,
+          "lower_action_mean": 0.0,
+          "lower_lf_drift_ratio": 0.0,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 0,
+          "restricted_wait_horizon_min": 0.0,
+          "service_cost_restricted": 0.0,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.004999999999999893,
+          "ep_reward": 26.654999999999973,
+          "goal_s": 15,
+          "headway_cv": -0.007800000000000001,
+          "lower_action_mean": 0.75,
+          "lower_lf_drift_ratio": -1.9979985996232408e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.0040000000000000036,
+          "service_cost_restricted": 0.4084460000000001,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": 0.0009999999999998899,
+          "ep_reward": -7.79099999999994,
+          "goal_s": 30,
+          "headway_cv": -0.015000000000000013,
+          "lower_action_mean": 1.6099999999999994,
+          "lower_lf_drift_ratio": 2.6890250862332543e-05,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": 0.0019999999999997797,
+          "service_cost_restricted": 0.40179600000000004,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        },
+        {
+          "avg_wait_observed_min": -0.018000000000000238,
+          "ep_reward": -206.48199999999997,
+          "goal_s": 60,
+          "headway_cv": -0.02990000000000001,
+          "lower_action_mean": 3.76,
+          "lower_lf_drift_ratio": 0.00021159210753762814,
+          "passenger_unserved_rate": 0.0,
+          "peak_fleet": 1,
+          "restricted_wait_horizon_min": -0.018000000000000238,
+          "service_cost_restricted": 0.38501399999999997,
+          "trip_completion_rate": 0.0,
+          "upper_hf_power_ratio": 0.0
+        }
+      ],
+      "mean_state_critic_lcb_goal_s": 0,
+      "method": "physical_lower_service_credit",
+      "oracle_cost_gain_against_zero": 0.0,
+      "oracle_grid_goal_s": 0,
+      "root": 229,
+      "scenario": "ood_period"
+    }
+  ],
+  "preflight": false,
+  "protocol": "native_transit_frontier_stage149_v1",
+  "root_opportunity": [
+    {
+      "best_fixed_grid_goal_s": 0,
+      "mean_oracle_cost_gain_against_zero": 0.014742999999999996,
+      "method": "physical_lower",
+      "root": 217
+    },
+    {
+      "best_fixed_grid_goal_s": 15,
+      "mean_oracle_cost_gain_against_zero": 0.023142600000000013,
+      "method": "physical_lower",
+      "root": 229
+    },
+    {
+      "best_fixed_grid_goal_s": 0,
+      "mean_oracle_cost_gain_against_zero": 0.013655799999999862,
+      "method": "physical_lower_service_credit",
+      "root": 217
+    },
+    {
+      "best_fixed_grid_goal_s": 0,
+      "mean_oracle_cost_gain_against_zero": 0.022286600000000024,
+      "method": "physical_lower_service_credit",
+      "root": 229
+    }
+  ],
+  "software_qualified": true,
+  "stage": "post_result_opportunity_diagnosis",
+  "training_updates": 0
+}

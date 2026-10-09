@@ -27,12 +27,30 @@ that either fixed goal improves physical service. Legacy global transitions
 had median duration 180 seconds and a final 14,400-second clearance interval;
 physical-only has no interval wait credit, so its zero tail share is not a finding.
 
-Full scan `native_transit_frontier_stage149_full_20261009_r1` is submitted as
-`t138705-t138708`: four frozen jobs, 100 new episodes (6,138,000 ticks), reusing
-60 existing goal rows. Each uses one CPU and 3 GB, dynamically eligible for
-node001-006 without binding. Only code is staged and small JSON is synchronized.
-Next: inspect the cost frontier, wait/fleet tradeoffs and critic preferences
-before deciding on reward/critic repair or action-space work.
+Full scan `native_transit_frontier_stage149_full_20261009_r1` completed as
+`t138705-t138708`. All 20 source baselines reproduced exactly; the 100 new
+episodes used 6,138,000 ticks and zero optimizer updates, reusing 60 goal rows.
+Only code was staged and small JSON was synchronized.
+
+The retrospective per-scene grid gain against zero averages 0.014743/0.023143
+for physical-only roots217/229 and 0.013656/0.022287 with service credit.
+Three of four deployments have zero as their best fixed grid goal; only
+physical-only/root229 prefers +15 (cost gain 0.008962). Physical-only/root217
+critic LCB prefers +15 in every regime, but that fixed goal raises average
+cost by 0.153442: an extra peak vehicle in low-noise and burst scenes erases
+the headway/wait gains. Static critic ranking is therefore not a justified
+deployment rule. Near-zero learned goals are not, by themselves, actor failure.
+
+With interval credit, the persistent-shift final 14,400-second clearance
+transition carries 52.9-54.0% of wait credit, versus typical 180-second intervals.
+These are frozen stress episodes, not proof of Bellman-target clipping during
+training. Do not change the RE-SAC critic on that untested explanation.
+
+Next: qualify an actual signed departure-action channel rather than add more
+HIRO goal seeds. Inspection found that ordinary native channels query upper
+only at nominal launch, so negative offsets cannot advance departures. Stage150
+will repair this execution timing in the isolated native copy, reproduce the
+unchanged HIRO baseline, and verify advance/zero/delay with frozen lower weights.
 
 ## Limitations
 
