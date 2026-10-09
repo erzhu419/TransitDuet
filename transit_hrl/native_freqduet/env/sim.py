@@ -146,6 +146,7 @@ class env_bus(object):
 
         # TransitDuet: upper policy callback, cost tracking
         self._upper_policy_callback = None  # Set by runner
+        self._upper_dispatch_lookahead_s = 0.0
         self._upper_interval_outcome_tracker = None
         self._peak_concurrent = 0
         self.protocol = None
@@ -477,14 +478,16 @@ class env_bus(object):
         self._ensure_agent_slot(bus.bus_id)
         bus._freqduet_dispatch_target_headway = dispatch_target_headway
 
-    def step(self, action, debug=False, render=False, episode = 0):
-        # Enumerate trips in timetables, if current_time<=launch_time of the trip, then launch it.
-        # E.X. timetables = [6:00/launched, 6:05, 6:10], current time is 6:05, then iteration will judge from first trip [6:00]
-        # But [6:00] is launched, so next is [6:05]
+    def _dispatch_due_trips(self):
         for i, trip in enumerate(self.timetables):
             eligible_launch = getattr(
                 trip, '_freqduet_scheduled_launch', trip.launch_time)
-            if eligible_launch <= self.current_time and not trip.launched:
+            # Commit signed launch commands before their earliest executable time,
+            # using only the state observed at the current simulator clock.
+            decision_due = eligible_launch - (
+                self._upper_dispatch_lookahead_s
+                if self._upper_policy_callback is not None else 0.0)
+            if decision_due <= self.current_time and not trip.launched:
                 if self._upper_policy_callback is not None:
                     # Call upper policy ONCE per trip (when it first becomes eligible)
                     if not hasattr(trip, '_upper_queried') or not trip._upper_queried:
@@ -515,6 +518,8 @@ class env_bus(object):
                             continue  # not yet time to launch (δ_t delay)
                     else:
                         # v1 mode: headway enforcement
+                        if self.current_time < eligible_launch:
+                            continue
                         actual_gap = self.current_time - self._last_dispatch_time[trip.direction]
                         if actual_gap < trip.target_headway:
                             continue
@@ -532,6 +537,9 @@ class env_bus(object):
                 trip._actual_launch_time = self.current_time  # v2g: record real launch
                 self.launch_bus(trip)
                 self._last_dispatch_time[trip.direction] = self.current_time
+
+    def step(self, action, debug=False, render=False, episode = 0):
+        self._dispatch_due_trips()
         # route
         route_state = []
         # update route speed limit by freq

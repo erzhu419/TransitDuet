@@ -2264,6 +2264,7 @@ class TransitDuetV2Runner:
         # 'hiro'     (HIRO/SHIRO style: δ_t reinterpreted as target-headway shift, lower's
         #             Lagrangian cost becomes goal-conditioned; no upper advantage flow)
         self.coupling_mode = coupling_cfg.get('coupling_mode', 'channels')
+        self.dispatch_lookahead_s = float(self.delta_max)
         haar_cfg = coupling_cfg.get('haar', {})
         self.haar_beta = float(haar_cfg.get('beta', 0.5))
         self.haar_clip = float(haar_cfg.get('clip', 0.5))
@@ -7236,6 +7237,10 @@ class TransitDuetV2Runner:
         else:
             self.env._upper_policy_callback = (
                 self._upper_callback_v2 if upper_active else None)
+        self.env._upper_dispatch_lookahead_s = (
+            self.dispatch_lookahead_s
+            if upper_active and not self._fixed_expert_active
+            and self.coupling_mode in {'channels', 'haar'} else 0.0)
 
         state_dict, reward_dict, _ = self.env.initialize_state()
         action_dict = {k: None for k in range(self.env.max_agent_num)}
