@@ -14,7 +14,8 @@ from scripts import run_native_transit_dispatch_train_stage151 as spec
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
-def summarize(cells):
+def matched_means(cells, experiment=spec):
+    spec = experiment
     contract = spec.contract(False)
     if set(cells) != {(method, root) for method in spec.METHODS for root in spec.ROOTS}:
         raise ValueError("Incomplete native dispatch training matrix")
@@ -24,7 +25,7 @@ def summarize(cells):
     for root in spec.ROOTS:
         required = {(condition, scenario, scene) for condition in spec.CONDITIONS
             for scenario in contract["scenarios"] for scene in spec.scene_seeds(root, scenario, preflight=False)}
-        reference = cells["hiro", root]
+        reference = cells[next(iter(spec.METHODS)), root]
         reference_rows = {(r["condition"], r["scenario"], r["scene_seed"]): r for r in reference["evaluation"]}
         for method in spec.METHODS:
             cell = cells[method, root]
@@ -63,6 +64,12 @@ def summarize(cells):
                 means[method, root, condition] = {metric: float(np.mean([
                     regime_means[method, root, condition, scenario][metric] for scenario in contract["scenarios"]]))
                     for metric in metrics}
+
+    return contract, metrics, means, regime_means
+
+
+def summarize(cells):
+    contract, metrics, means, regime_means = matched_means(cells)
 
     def delta(a, b, root, condition="baseline"):
         return {metric: means[a, root, condition][metric] - means[b, root, condition][metric] for metric in metrics}

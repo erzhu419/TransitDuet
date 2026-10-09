@@ -22,3 +22,8 @@ nominal launch minus the maximum advance, observing the current clock rather
 than future demand. HIRO, warmup, fixed experts, fleet limits and RE-SAC remain
 unchanged. Previously a negative command was queried only at nominal launch
 and could not advance a departure. The original FreqDuet source is untouched.
+
+Stage152 adds unit action coordinates inside the upper critic only. Physical
+actor outputs, replay actions, actuator bounds and rewards are unchanged;
+`upper.critic_action_units: seconds` retains the preserved critic. This is a
+matched representation experiment, not an adopted performance improvement.

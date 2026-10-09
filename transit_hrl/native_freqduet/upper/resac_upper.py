@@ -273,6 +273,26 @@ class EnsembleQNetwork(nn.Module):
         return total
 
 
+class UnitActionEnsembleQNetwork(EnsembleQNetwork):
+    """Keep physical actor/replay actions; scale only the critic's coordinates."""
+
+    def __init__(self, num_inputs, num_actions, action_low, action_high,
+                 hidden_dim=64, ensemble_size=10, n_layers=3):
+        super().__init__(num_inputs, num_actions, hidden_dim, ensemble_size, n_layers)
+        low = torch.as_tensor(action_low, dtype=torch.float32).reshape(-1)
+        high = torch.as_tensor(action_high, dtype=torch.float32).reshape(-1)
+        if low.numel() != num_actions or high.shape != low.shape or torch.any(high <= low):
+            raise ValueError("unit critic requires increasing bounds for each action")
+        self.register_buffer("action_center", (high + low) / 2)
+        self.register_buffer("action_radius", (high - low) / 2)
+
+    def action_coordinates(self, action):
+        return (action - self.action_center) / self.action_radius
+
+    def forward(self, state, action):
+        return super().forward(state, self.action_coordinates(action))
+
+
 class IndexedDiscreteEnsembleQNetwork(nn.Module):
     """Ensemble critic with one exact Q output per categorical action."""
 
@@ -356,7 +376,8 @@ class RESACUpperTrainer:
                  weight_reg_mode="sum",
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3,
-                 replay_capacity=50000, device='cpu'):
+                 replay_capacity=50000, device='cpu',
+                 critic_action_units='seconds'):
         self.device = device
         self.gamma = gamma
         self.soft_tau = soft_tau
@@ -368,6 +389,9 @@ class RESACUpperTrainer:
         if self.weight_reg_mode not in {"sum", "mean"}:
             raise ValueError("weight_reg_mode must be 'sum' or 'mean'")
         self.auto_entropy = auto_entropy
+        self.critic_action_units = str(critic_action_units)
+        if self.critic_action_units not in {'seconds', 'unit'}:
+            raise ValueError("critic_action_units must be 'seconds' or 'unit'")
         self.discrete_critic = str(discrete_critic).lower()
         if self.discrete_critic not in {"continuous_action", "indexed"}:
             raise ValueError(
@@ -408,6 +432,13 @@ class RESACUpperTrainer:
             self.target_q_net = IndexedDiscreteEnsembleQNetwork(
                 state_dim, self.discrete_actions, hidden_dim,
                 ensemble_size).to(device)
+        elif self.critic_action_units == 'unit':
+            self.q_net = UnitActionEnsembleQNetwork(
+                state_dim, action_dim, action_low, action_high,
+                hidden_dim, ensemble_size).to(device)
+            self.target_q_net = UnitActionEnsembleQNetwork(
+                state_dim, action_dim, action_low, action_high,
+                hidden_dim, ensemble_size).to(device)
         else:
             self.q_net = EnsembleQNetwork(
                 state_dim, action_dim, hidden_dim, ensemble_size).to(device)
@@ -496,6 +527,7 @@ class RESACUpperTrainer:
                 duration_steps.squeeze(-1),
             )
             shared_target = r + (1.0 - d) * discount * target_q_mean
+            target_clip_fraction = (shared_target.abs() > 50.0).float().mean()
             shared_target = shared_target.clamp(-50.0, 50.0)
 
         predicted_q = self.q_net(state, action)
@@ -569,6 +601,7 @@ class RESACUpperTrainer:
             'upper_action_batch_mean': action.mean().item(),
             'upper_action_batch_std': action.std().item(),
             'upper_duration_steps_mean': duration_steps.mean().item(),
+            'upper_target_clip_fraction': target_clip_fraction.item(),
         }
 
     def save(self, path):
@@ -577,10 +610,13 @@ class RESACUpperTrainer:
             'q_net': self.q_net.state_dict(),
             'log_alpha': self.log_alpha.data if self.auto_entropy else None,
             'discrete_critic': self.discrete_critic,
+            'critic_action_units': self.critic_action_units,
         }, path)
 
     def load(self, path):
         ckpt = torch.load(path, weights_only=True)
+        if ckpt.get('critic_action_units', 'seconds') != self.critic_action_units:
+            raise ValueError("checkpoint critic action units differ from configuration")
         saved_critic = str(
             ckpt.get('discrete_critic', 'continuous_action')).lower()
         if saved_critic != self.discrete_critic:

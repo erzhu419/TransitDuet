@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from freq_hrl.domains.transit.native_diagnostics import NativePolicyProbe
 from freq_hrl.domains.transit.native_routing import NativeRoutingTracker
-from freq_hrl.domains.transit.native_value_diagnostics import credit_ledger
+from freq_hrl.domains.transit.native_value_diagnostics import credit_ledger, critic_action_curve, critic_input_scale
 from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_json
 from scripts import run_native_transit_authority_stage148 as authority
 from scripts.run_native_transit_dispatch_stage150 import dispatch_ledger
@@ -70,7 +70,8 @@ def expected_updates(preflight):
             "lower": spec["train_episodes"] * (2 if preflight else 30)}
 
 
-def run_cell(method, root, output, *, preflight):
+def run_cell(method, root, output, *, preflight, experiment=None):
+    experiment = experiment or sys.modules[__name__]
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
     os.environ.setdefault("MPLBACKEND", "Agg")
     sys.path.insert(0, str(NATIVE))
@@ -86,9 +87,9 @@ def run_cell(method, root, output, *, preflight):
         random.seed(root)
 
     seed_runtime()
-    spec = contract(preflight)
-    mode, factor = METHODS[method]
-    cfg = configure(load_config(str(NATIVE / "configs_freqduet/F_freqduet_harmonic_hiro.yaml")),
+    spec = experiment.contract(preflight)
+    mode, factor = experiment.METHODS[method]
+    cfg = experiment.configure(load_config(str(NATIVE / "configs_freqduet/F_freqduet_harmonic_hiro.yaml")),
                     method, root, preflight=preflight)
     raw = raw_directory(output) / ("qualification" if preflight else "full")
     cfg["logging"] = {"logs_dir": str(raw / "training")}
@@ -96,17 +97,26 @@ def run_cell(method, root, output, *, preflight):
     dims = {"upper": runner.upper_state_dim, "lower": runner.lower_state_dim}
     if dims != spec["actor_dims"] or runner.env.frequency_tracker.routing != "correct" or runner.coupling_mode != mode:
         raise RuntimeError("Changed native geometry or registered control mode")
+    if runner.upper_trainer.critic_action_units != cfg["upper"].get("critic_action_units", "seconds"):
+        raise RuntimeError("Native runner did not bind the registered critic coordinates")
     initial = model_arrays(runner)
     parameter_counts = {level: {name: sum(p.numel() for p in
         getattr(getattr(runner, f"{level}_trainer"), name).parameters()) for name in ("policy_net", "q_net")}
         for level in ("upper", "lower")}
-    updates = {"upper": 0, "lower": 0}
+    updates, learning_stats, learning_sums = {"upper": 0, "lower": 0}, {}, {}
+    learning_counts = {"upper": 0}
     for level in updates:
         trainer = getattr(runner, f"{level}_trainer")
         update = trainer.update
         def counted(*pos, _level=level, _update=update, **kw):
             updates[_level] += 1
-            return _update(*pos, **kw)
+            result = _update(*pos, **kw)
+            if _level == "upper" and result:
+                learning_stats.update(result)
+                learning_counts["upper"] += 1
+                for key, value in result.items():
+                    learning_sums[key] = learning_sums.get(key, 0.0) + value
+            return result
         trainer.update = counted
     curve, demand, fleets = [], [], []
     for ep in range(spec["train_episodes"]):
@@ -119,13 +129,14 @@ def run_cell(method, root, output, *, preflight):
         demand.append(row["passengers_generated"])
         fleets.append(row["N_fleet"])
         if ep % 10 == 0 or ep in (spec["upper_warmup"] - 1, spec["train_episodes"] - 1):
-            curve.append({**authority.routing.compact_row(row), **credit})
+            curve.append({**authority.routing.compact_row(row), **credit,
+                          "upper_learning": dict(learning_stats)})
             print(f"{method} root={root} preflight={preflight} train={ep+1}/{spec['train_episodes']} "
                   f"cost={row['service_cost_restricted']} updates={updates}", flush=True)
     final = model_arrays(runner)
     actor_change = {level: max(float(np.max(np.abs(final[key] - initial[key])))
         for key in final if key.startswith(f"{level}/policy_net/")) for level in updates}
-    if updates != expected_updates(preflight) or not all(value > 0 for value in actor_change.values()):
+    if updates != experiment.expected_updates(preflight) or not all(value > 0 for value in actor_change.values()):
         raise RuntimeError(f"Incomplete two-level learning: {updates}, {actor_change}")
     training_credit = credit_ledger(runner._episode_upper_transitions)
     runner._save_checkpoint(spec["train_episodes"] - 1)
@@ -134,7 +145,7 @@ def run_cell(method, root, output, *, preflight):
 
     evaluations = []
     for scenario in spec["scenarios"]:
-        for scene_seed in scene_seeds(root, scenario, preflight=preflight):
+        for scene_seed in experiment.scene_seeds(root, scenario, preflight=preflight):
             reference = None
             for condition in CONDITIONS:
                 seed_runtime()
@@ -166,6 +177,12 @@ def run_cell(method, root, output, *, preflight):
                 if not all(np.isfinite(row[key]) for key in authority.routing.METRICS):
                     raise RuntimeError("Nonfinite frozen outcome")
                 diagnostics = {level: probe.summarize() for level, probe in probes.items()}
+                critic = {}
+                if condition == "baseline":
+                    states = probes["upper"].states
+                    critic = {"input_scale": critic_input_scale(evaluator.upper_trainer, states),
+                        "action_curve": critic_action_curve(evaluator.upper_trainer, states,
+                            (-120, -60, -30, -15, 0, 15, 30, 60, 120))}
                 ledger = dispatch_ledger(evaluator.env, queries)
                 if ledger["advance_count"] and (mode == "hiro" or condition == "neutral_upper"):
                     raise RuntimeError("Unexpected advance without a signed dispatch command")
@@ -175,7 +192,7 @@ def run_cell(method, root, output, *, preflight):
                     raise RuntimeError("Frozen evaluation changed a network")
                 evaluations.append({"condition": condition, "scenario": scenario, "scene_seed": scene_seed,
                     **authority.routing.compact_row(row), **authority.credit_row(row, factor),
-                    "actors": diagnostics, "dispatch": ledger,
+                    "actors": diagnostics, "dispatch": ledger, "critic": critic,
                     "command_abs_mean_s": float(np.mean(np.abs(commands))),
                     "subsecond_command_fraction": float(np.mean(np.abs(commands) < 1)),
                     "credit_ledger": credit_ledger(evaluator._episode_upper_transitions),
@@ -186,12 +203,15 @@ def run_cell(method, root, output, *, preflight):
                 for probe in probes.values():
                     probe.policy.get_action = probe.original_get_action
                 del evaluator, probes, before, after
-    result = {"protocol": EXPERIMENT_PROTOCOL, "contract": spec, "method": method, "seed": root,
+    result = {"protocol": experiment.EXPERIMENT_PROTOCOL, "contract": spec, "method": method, "seed": root,
         "software_qualified": True, "actor_dims": dims, "parameter_counts": parameter_counts,
         "updates": updates, "actor_change_max_abs": actor_change,
         "native_steps": (spec["train_episodes"] + len(evaluations)) * spec["training_clock_s"],
         "training_demand_counts": demand, "training_fleets": fleets, "training_curve": curve,
         "last_training_credit_ledger": training_credit, "evaluation": evaluations}
+    result["critic_action_units"] = cfg["upper"].get("critic_action_units", "seconds")
+    result["upper_learning_updates"] = learning_counts["upper"]
+    result["upper_learning_mean"] = {key: value / learning_counts["upper"] for key, value in learning_sums.items()}
     write_json(output, result)
     return result
 

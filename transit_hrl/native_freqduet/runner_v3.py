@@ -1721,6 +1721,7 @@ class TransitDuetV2Runner:
             beta_ood=upper_cfg.get('beta_ood', 0.01),
             weight_reg=upper_cfg.get('weight_reg', 0.01),
             weight_reg_mode=upper_cfg.get('weight_reg_mode', 'sum'),
+            critic_action_units=upper_cfg.get('critic_action_units', 'seconds'),
             lr=upper_cfg.get('lr', 3e-4),
             gamma=upper_cfg.get('gamma', 0.95),
             maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
