@@ -61,10 +61,20 @@ def main():
     pairs = [("correct", spec.ROOTS[0])] if args.preflight else [
         (method, root) for method in spec.METHODS for root in spec.ROOTS]
     tasks = [task_specification(args.run_name, method, root, preflight=args.preflight) for method, root in pairs]
+    recovery_cells = sum(args.preflight or (method, root) != ("correct", spec.ROOTS[0])
+                         for method, root in pairs)
+    diagnostic_episodes = sum(len(spec.conditions(method, preflight=args.preflight))
+                              * len(spec.contract(args.preflight)["scenarios"])
+                              for method, _ in pairs)
     write_json(ROOT / "results" / args.run_name / "preregistration.json", {
         "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(args.preflight),
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "cells": [{"method": method, "root": root} for method, root in pairs],
+        "budget": {"checkpoint_replay_cells": recovery_cells,
+            "checkpoint_replay_training_episodes": recovery_cells * 300,
+            "checkpoint_replay_native_ticks": recovery_cells * 300 * 61380,
+            "frozen_diagnostic_episodes": diagnostic_episodes,
+            "frozen_diagnostic_native_ticks": diagnostic_episodes * 61380},
         "tasks": len(tasks), "scheduler": {"allowed_nodes": tasks[0]["allowed_nodes"],
             "require_node": None, "cpu_per_task": 1, "ram_mb_per_task": 3072},
     })

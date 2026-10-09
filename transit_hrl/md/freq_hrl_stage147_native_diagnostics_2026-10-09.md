@@ -21,9 +21,27 @@ V2 stages code only and first recovers checkpoints by exact recipe/seed replay,
 requiring matching recorded demand, training curves, update counts and actor
 changes. Root101 recovery precedes the full matrix; other roots recover in
 their diagnostic jobs. This is restoration work, not independent evidence.
-Eighteen focused tests passed. Recovery preflight `t137332` is submitted as
-`native_transit_diagnostics_stage147_recovery_preflight_20261009_r2`;
-the full diagnostic/recovery matrix remains unsubmitted until it qualifies.
+Recovery preflight `t137332` completed on node005. All 300 episode demand counts,
+32 recorded training rows, 2,700/9,000 upper/lower updates and actor-change
+maxima matched. Its 61,380-tick baseline exactly reproduced Stage146.
+
+Root101/low-noise had no 1%-edge action saturation. Lower holding was
+4.36 +/- 5.18 seconds, but zeroing its band changed the same-state action by
+only 0.00593 seconds on average. Raw headway inputs averaged 354-360 seconds
+against 0.011-0.037 for the frequency tail. Upper target delta was
+0.290 +/- 0.148 seconds; zeroing dynamic/all frequency slots changed it by
+0.208/0.981 seconds. These are single-root diagnostics, not performance claims.
+
+The native HIRO upper changes target headway, not launch time, whereas its
+default hindsight gap credit uses actual launches. Any effect is indirect
+through the lower and fleet loop; neutral-upper interventions will measure
+whether that path has meaningful control authority. Preserve the registered
+recipe until the cross-root diagnosis is complete.
+
+Eighteen focused tests passed. Full diagnosis uses 24 tasks: 23 additional
+checkpoint replays (6,900 training episodes), then 200 frozen episodes. Root101
+reuses its recovered checkpoint. Replay work and diagnostic ticks are reported
+separately; there is no new optimizer root or independent performance result.
 
 If the lower is saturated and barely reacts to its band, qualify the existing
 dimensionless physical encoder before repeating matched routing training. If

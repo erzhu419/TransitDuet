@@ -1,0 +1,218 @@
+{
+  "baseline_reproduced": true,
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_only_server_checkpoint_reuse",
+    "baseline_gate": "exact_reproduction_of_source_metrics_and_exogenous_demand",
+    "checkpoint_ep": 299,
+    "checkpoint_provenance": "recorded_training_replay_after_staging_loss",
+    "conditions": {
+      "correct": [
+        "baseline"
+      ],
+      "raw_history_common": [
+        "baseline"
+      ],
+      "swapped_common": [
+        "baseline"
+      ]
+    },
+    "neutral_upper": "zero_target_headway_delta_same_fixed_dispatch_schedule",
+    "preflight": true,
+    "purpose": "frozen_mechanism_diagnosis_not_new_performance_claim",
+    "replay_verification": [
+      "training_demand_counts",
+      "recorded_training_curve",
+      "updates",
+      "actor_change_max_abs"
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "scene_seeds": "first_registered_stage146_scene_per_root_and_regime",
+    "source_protocol": "native_transit_routing_stage146_v1",
+    "source_run": "native_transit_routing_stage146_development_20261009_r1",
+    "training_updates": 0,
+    "zero_holding": "zero_learned_holding_native_boarding_dwell_unchanged",
+    "zero_input_probe": "offline_same_state_deterministic_action_sensitivity"
+  },
+  "evaluation": [
+    {
+      "N_fleet": 12,
+      "actors": {
+        "lower": {
+          "actor_calls": 5233,
+          "input_abs_max": [
+            14.0,
+            20.0,
+            13.0,
+            1.0,
+            704.0,
+            700.0,
+            263.5,
+            0.9533017873764038,
+            15.0,
+            15.0,
+            15.0,
+            15.0,
+            14.0,
+            15.0,
+            15.0,
+            15.0,
+            14.0,
+            15.0,
+            15.0,
+            15.0,
+            14.0,
+            15.0,
+            15.0,
+            13.0,
+            15.0,
+            14.0,
+            15.0,
+            15.0,
+            15.0,
+            0.20170244574546814,
+            0.1262683868408203,
+            0.10127026587724686,
+            0.09409463405609131
+          ],
+          "input_abs_mean": [
+            6.653353691101074,
+            10.501241683959961,
+            6.312822341918945,
+            0.49990445375442505,
+            360.1000061035156,
+            353.6972961425781,
+            79.51429748535156,
+            0.16281482577323914,
+            7.4469709396362305,
+            7.7368621826171875,
+            7.957003593444824,
+            8.116567611694336,
+            8.458627700805664,
+            8.165297508239746,
+            7.354863166809082,
+            8.001338005065918,
+            7.691381454467773,
+            7.193770408630371,
+            7.920695781707764,
+            7.4223198890686035,
+            8.493216514587402,
+            7.33881139755249,
+            7.78731107711792,
+            7.712593078613281,
+            7.44658899307251,
+            7.862602710723877,
+            7.606344223022461,
+            7.496464729309082,
+            7.984330177307129,
+            0.019793247804045677,
+            0.010861266404390335,
+            0.02412179671227932,
+            0.03709690272808075
+          ],
+          "latent_mean_abs_p95": 1.9627015590667725,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": 4.358319282531738,
+          "proposal_std_s": 5.183403015136719,
+          "zero_input_effect_s": {
+            "dynamic_band": {
+              "mean_abs": 0.005928327329456806,
+              "p95_abs": 0.014369439333677292
+            }
+          }
+        },
+        "upper": {
+          "actor_calls": 262,
+          "input_abs_max": [
+            0.7916666865348816,
+            0.5862523913383484,
+            0.049618322402238846,
+            0.6000000238418579,
+            0.5,
+            0.17512251436710358,
+            0.09533966332674026,
+            0.2086258828639984,
+            0.6000000238418579,
+            1.0,
+            0.6000000238418579,
+            0.06302665919065475,
+            0.5816856026649475,
+            0.09409463405609131,
+            0.9792652130126953,
+            0.0893792062997818
+          ],
+          "input_abs_mean": [
+            0.5022265911102295,
+            0.5083499550819397,
+            0.03933332860469818,
+            0.600000262260437,
+            0.13005977869033813,
+            0.06762710213661194,
+            0.024267597123980522,
+            0.06509605795145035,
+            0.600000262260437,
+            0.5,
+            0.600000262260437,
+            0.019755691289901733,
+            0.511299192905426,
+            0.03887347877025604,
+            0.9659419059753418,
+            0.03540545329451561
+          ],
+          "latent_mean_abs_p95": 0.00852272566407919,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": 0.2897840738296509,
+          "proposal_std_s": 0.1479795277118683,
+          "zero_input_effect_s": {
+            "all_frequency": {
+              "mean_abs": 0.9808086156845093,
+              "p95_abs": 1.4410560131072998
+            },
+            "dynamic_band": {
+              "mean_abs": 0.20784634351730347,
+              "p95_abs": 0.32288283109664917
+            }
+          }
+        }
+      },
+      "avg_wait_observed_min": 3.606,
+      "condition": "baseline",
+      "done_reason": "evaluation_horizon",
+      "ep": 300,
+      "ep_reward": -1256.565,
+      "ep_steps": 4971,
+      "headway_cv": 0.2161,
+      "lower_action_mean": 4.3,
+      "lower_action_std": 5.08,
+      "lower_lf_drift_ratio": 0.9855806954729287,
+      "passenger_unserved_rate": 4.9e-05,
+      "passengers_generated": 20212,
+      "passengers_unserved": 1,
+      "peak_fleet": 14,
+      "restricted_wait_horizon_min": 3.618,
+      "scenario": "low_noise",
+      "scene_seed": 900010100,
+      "service_cost_restricted": 0.911446,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_delta_mean": 0.29,
+      "upper_delta_std": 0.15,
+      "upper_hf_power_ratio": 0.014157648266465723
+    }
+  ],
+  "method": "correct",
+  "native_steps": 61380,
+  "protocol": "native_transit_diagnostics_stage147_v2",
+  "seed": 101,
+  "software_qualified": true,
+  "source_run": "native_transit_routing_stage146_development_20261009_r1",
+  "training_updates": 0
+}
