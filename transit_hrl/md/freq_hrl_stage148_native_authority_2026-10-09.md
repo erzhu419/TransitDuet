@@ -25,6 +25,9 @@ decide whether the upper path has gained useful authority.
 Twenty-five focused authority/routing/diagnostic tests passed, including
 unchanged legacy configuration, separated factors, explicit target encoding,
 target-independent credit, intervention RNG, paired budgets and code-only staging.
+Preflight `native_transit_authority_stage148_preflight_20261009_r1` is registered
+as `t138138-t138141`, eligible for node001-006 without binding, one CPU and
+2 GB each. Only code directories are staged; results/checkpoints are not inputs.
 
 Next: collect preflight; then 8 development tasks, 2,400 training episodes and
 200 frozen episodes. Keep checkpoints server-only and synchronize small JSON.
