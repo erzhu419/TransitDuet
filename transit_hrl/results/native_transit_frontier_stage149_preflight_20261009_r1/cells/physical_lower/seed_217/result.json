@@ -1,0 +1,129 @@
+{
+  "baseline_reproduced": true,
+  "contract": {
+    "artifacts": "compact_JSON_only_no_checkpoint_download",
+    "baseline_gate": "exact_source_outcome_reproduction",
+    "cached_goal_conditions": {
+      "-60": "upper_minus60",
+      "0": "neutral_upper",
+      "60": "upper_plus60"
+    },
+    "checkpoint_ep": 299,
+    "critic_goals_s": [
+      -60,
+      -30,
+      -15,
+      0,
+      15,
+      30,
+      60
+    ],
+    "methods": [
+      "physical_lower",
+      "physical_lower_service_credit"
+    ],
+    "new_conditions": [
+      "baseline"
+    ],
+    "oracle": "retrospective_grid_minimum_not_a_deployable_policy",
+    "preflight": true,
+    "purpose": "post_result_control_opportunity_and_value_diagnosis_not_independent_confirmation",
+    "roots": [
+      217
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "scene_seeds": "reuse_registered_stage148_scenes",
+    "source_protocol": "native_transit_authority_stage148_v1",
+    "source_run": "native_transit_authority_stage148_development_20261009_r1",
+    "training_updates": 0
+  },
+  "evaluation": [
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 4.217,
+      "condition": "baseline",
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": 0.0,
+        "last_duration_s": 14400.0,
+        "last_wait_credit_fraction": 0.0,
+        "system_reward_sum": -308.13878809442656,
+        "transitions": 262
+      },
+      "critic_curve": {
+        "-15": {
+          "ensemble_std_mean": 0.13288521766662598,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.03765869140625,
+          "q_mean": -17.771888732910156
+        },
+        "-30": {
+          "ensemble_std_mean": 0.16541787981987,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -18.587488174438477,
+          "q_mean": -18.25665283203125
+        },
+        "-60": {
+          "ensemble_std_mean": 0.4154486060142517,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -20.287914276123047,
+          "q_mean": -19.457015991210938
+        },
+        "0": {
+          "ensemble_std_mean": 0.07073243707418442,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -17.670957565307617,
+          "q_mean": -17.529495239257812
+        },
+        "15": {
+          "ensemble_std_mean": 0.14041613042354584,
+          "lcb_argmax_state_fraction": 0.8320610687022901,
+          "lcb_mean": -17.08932876586914,
+          "q_mean": -16.808494567871094
+        },
+        "30": {
+          "ensemble_std_mean": 0.2610619366168976,
+          "lcb_argmax_state_fraction": 0.16793893129770993,
+          "lcb_mean": -17.224445343017578,
+          "q_mean": -16.70232391357422
+        },
+        "60": {
+          "ensemble_std_mean": 0.7948799133300781,
+          "lcb_argmax_state_fraction": 0.0,
+          "lcb_mean": -19.672311782836914,
+          "q_mean": -18.08255386352539
+        }
+      },
+      "done_reason": "evaluation_horizon",
+      "ep": 300,
+      "ep_reward": -1214.351,
+      "ep_steps": 4970,
+      "headway_cv": 0.1865,
+      "lower_action_mean": 10.29,
+      "lower_lf_drift_ratio": 0.984768815057773,
+      "passenger_unserved_rate": 9.8e-05,
+      "passengers_generated": 20385,
+      "passengers_unserved": 2,
+      "peak_fleet": 14,
+      "restricted_wait_horizon_min": 4.24,
+      "scenario": "low_noise",
+      "scene_seed": 900021700,
+      "service_cost_restricted": 0.944283,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_delta_mean": 0.38,
+      "upper_hf_power_ratio": 0.09916126068000149
+    }
+  ],
+  "method": "physical_lower",
+  "native_steps": 61380,
+  "protocol": "native_transit_frontier_stage149_v1",
+  "seed": 217,
+  "software_qualified": true,
+  "training_updates": 0
+}

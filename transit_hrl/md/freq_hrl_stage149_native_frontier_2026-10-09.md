@@ -19,7 +19,15 @@ reproduction, incomplete-scene rejection and code-only scheduler staging.
 Preflight `native_transit_frontier_stage149_preflight_20261009_r1` is registered
 as `t138703`, eligible for node001-006 without binding, one CPU and 2 GB.
 
-Next: source-reproducing preflight; then four frozen jobs, 100 new episodes
+Preflight completed on node004 with exact source baseline reproduction,
+unchanged networks and 61,380 ticks. Root217/low-noise critic LCB preferred
++15 seconds at 83.2% of recorded states and +30 at 16.8%, while learned mean
+was +0.38 seconds. This is a value/actor discrepancy to investigate, not proof
+that either fixed goal improves physical service. Legacy global transitions
+had median duration 180 seconds and a final 14,400-second clearance interval;
+physical-only has no interval wait credit, so its zero tail share is not a finding.
+
+Next: four frozen jobs, 100 new episodes
 (6,138,000 ticks), reusing 60 existing goal rows. Only code is staged and small
 JSON is synchronized. Inspect the cost frontier, wait/fleet tradeoffs and
 critic preferences before deciding on reward/critic repair or action-space work.
