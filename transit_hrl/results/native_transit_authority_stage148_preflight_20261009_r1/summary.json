@@ -1,0 +1,73 @@
+{
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_final_checkpoint",
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "upper_minus60",
+      "upper_plus60",
+      "zero_holding"
+    ],
+    "coupling": "hiro",
+    "credit_factor": {
+      "assignment": "additive_global_intervals",
+      "fleet_weight": 1.0,
+      "gap_credit_mode": "none",
+      "headway_weight": 0.0,
+      "reward_scale": 100.0,
+      "system_reward_mode": "none",
+      "wait_weight": 1.0
+    },
+    "decision": "physical_upper_authority_and_service_tradeoff_before_frequency_sweep",
+    "demand_end_time_s": 3600,
+    "lower_factor": "physical_dimensionless_v1_explicit_target_v2_not_scale_only",
+    "methods": [
+      "legacy",
+      "physical_lower",
+      "service_credit",
+      "physical_lower_service_credit"
+    ],
+    "preflight": true,
+    "preflight_overrides": {
+      "effective_trip_num": 24,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "updates_per_episode": 2,
+      "upper_batch_size": 8
+    },
+    "roots": [
+      217
+    ],
+    "routing": "correct",
+    "scenarios": [
+      "low_noise"
+    ],
+    "scene_seeds": "stage148_disjoint_roots_one_paired_scene_per_regime",
+    "statistics": "two_root_descriptive_factorial_no_supported_performance_claim",
+    "train_episodes": 2,
+    "training_clock_s": 5400,
+    "unchanged": [
+      "RE_SAC",
+      "action_bounds",
+      "networks",
+      "frequency_estimator",
+      "HF_and_drift_penalties",
+      "lower_reward",
+      "fixed_dispatch_schedule"
+    ],
+    "upper_warmup": 1
+  },
+  "native_steps": 151200,
+  "optimizer_roots": [
+    217
+  ],
+  "preflight": true,
+  "protocol": "native_transit_authority_stage148_v1",
+  "software_qualified": true,
+  "stage": "software_preflight"
+}

@@ -29,8 +29,17 @@ Preflight `native_transit_authority_stage148_preflight_20261009_r1` is registere
 as `t138138-t138141`, eligible for node001-006 without binding, one CPU and
 2 GB each. Only code directories are staged; results/checkpoints are not inputs.
 
-Next: collect preflight; then 8 development tasks, 2,400 training episodes and
-200 frozen episodes. Keep checkpoints server-only and synchronize small JSON.
+All four preflight cells passed: upper/lower updates were 2/4 per cell, both
+actors changed, all 20 frozen episodes kept matched demand/fleet/clock, and
+checkpoint reload plus network immutability qualified. Total: 151,200 ticks.
+Physical encoding reduced mean forward-headway input from 368.72 to 1.00;
+active training-interval coverage was 1.00 and the wait/fleet reward identity
+held. Fixed upper +/-60 commands reached the actuator telemetry. Physical
+lower service metrics remained identical across those upper interventions
+after just two training episodes; this is qualification, not an efficacy claim.
+
+Next: 8 development tasks, 2,400 training episodes and 200 frozen episodes.
+Keep checkpoints server-only and synchronize small JSON.
 Two-root results are descriptive mechanism evidence, not statistical
 confirmation or proof that correct frequency routing outperforms controls.
 Interval outcomes include other buses and delayed effects; they are physical
