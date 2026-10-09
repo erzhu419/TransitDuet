@@ -42,6 +42,9 @@ Eighteen focused tests passed. Full diagnosis uses 24 tasks: 23 additional
 checkpoint replays (6,900 training episodes), then 200 frozen episodes. Root101
 reuses its recovered checkpoint. Replay work and diagnostic ticks are reported
 separately; there is no new optimizer root or independent performance result.
+Full matrix `native_transit_diagnostics_stage147_full_20261009_r1` is submitted
+as `t137622` through `t137645`, dynamically eligible for node001-006, one CPU
+and 3 GB per task, without node binding. Only compact JSON is synchronized.
 
 If the lower is saturated and barely reacts to its band, qualify the existing
 dimensionless physical encoder before repeating matched routing training. If

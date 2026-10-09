@@ -1,0 +1,168 @@
+{
+  "budget": {
+    "checkpoint_replay_cells": 23,
+    "checkpoint_replay_native_ticks": 423522000,
+    "checkpoint_replay_training_episodes": 6900,
+    "frozen_diagnostic_episodes": 200,
+    "frozen_diagnostic_native_ticks": 12276000
+  },
+  "cells": [
+    {
+      "method": "correct",
+      "root": 101
+    },
+    {
+      "method": "correct",
+      "root": 113
+    },
+    {
+      "method": "correct",
+      "root": 127
+    },
+    {
+      "method": "correct",
+      "root": 139
+    },
+    {
+      "method": "correct",
+      "root": 151
+    },
+    {
+      "method": "correct",
+      "root": 163
+    },
+    {
+      "method": "correct",
+      "root": 179
+    },
+    {
+      "method": "correct",
+      "root": 191
+    },
+    {
+      "method": "raw_history_common",
+      "root": 101
+    },
+    {
+      "method": "raw_history_common",
+      "root": 113
+    },
+    {
+      "method": "raw_history_common",
+      "root": 127
+    },
+    {
+      "method": "raw_history_common",
+      "root": 139
+    },
+    {
+      "method": "raw_history_common",
+      "root": 151
+    },
+    {
+      "method": "raw_history_common",
+      "root": 163
+    },
+    {
+      "method": "raw_history_common",
+      "root": 179
+    },
+    {
+      "method": "raw_history_common",
+      "root": 191
+    },
+    {
+      "method": "swapped_common",
+      "root": 101
+    },
+    {
+      "method": "swapped_common",
+      "root": 113
+    },
+    {
+      "method": "swapped_common",
+      "root": 127
+    },
+    {
+      "method": "swapped_common",
+      "root": 139
+    },
+    {
+      "method": "swapped_common",
+      "root": 151
+    },
+    {
+      "method": "swapped_common",
+      "root": 163
+    },
+    {
+      "method": "swapped_common",
+      "root": 179
+    },
+    {
+      "method": "swapped_common",
+      "root": 191
+    }
+  ],
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_only_server_checkpoint_reuse",
+    "baseline_gate": "exact_reproduction_of_source_metrics_and_exogenous_demand",
+    "checkpoint_ep": 299,
+    "checkpoint_provenance": "recorded_training_replay_after_staging_loss",
+    "conditions": {
+      "correct": [
+        "baseline",
+        "neutral_upper",
+        "zero_holding"
+      ],
+      "raw_history_common": [
+        "baseline"
+      ],
+      "swapped_common": [
+        "baseline"
+      ]
+    },
+    "neutral_upper": "zero_target_headway_delta_same_fixed_dispatch_schedule",
+    "preflight": false,
+    "purpose": "frozen_mechanism_diagnosis_not_new_performance_claim",
+    "replay_verification": [
+      "training_demand_counts",
+      "recorded_training_curve",
+      "updates",
+      "actor_change_max_abs"
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_seeds": "first_registered_stage146_scene_per_root_and_regime",
+    "source_protocol": "native_transit_routing_stage146_v1",
+    "source_run": "native_transit_routing_stage146_development_20261009_r1",
+    "training_updates": 0,
+    "zero_holding": "zero_learned_holding_native_boarding_dwell_unchanged",
+    "zero_input_probe": "offline_same_state_deterministic_action_sensitivity"
+  },
+  "protocol": "native_transit_diagnostics_stage147_v2",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "28a275aa95970ada4429dd6cf9dd194f1f806d71",
+  "tasks": 24
+}
