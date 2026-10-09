@@ -1,0 +1,882 @@
+{
+  "actor_change_max_abs": {
+    "lower": 0.0012033209204673767,
+    "upper": 0.0006004124879837036
+  },
+  "actor_dims": {
+    "lower": 33,
+    "upper": 16
+  },
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_last_checkpoints",
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "zero_holding"
+    ],
+    "credit": {
+      "fleet_weight": 1,
+      "headway_weight": 0,
+      "scale": 100,
+      "wait_weight": 1
+    },
+    "critic_action_units": {
+      "dispatch": "seconds",
+      "dispatch_service_credit": "seconds",
+      "dispatch_service_credit_unit": "unit",
+      "dispatch_unit": "unit"
+    },
+    "decision": "no_seed_expansion_without_useful_learned_upper_authority",
+    "decision_clock": {
+      "channels": "max_zero_nominal_minus_120s"
+    },
+    "demand_end_time_s": 3600,
+    "dispatch_commitment_s": 120,
+    "evaluation_episodes_per_scenario": 1,
+    "frequency_routing": "correct",
+    "initialization": "fresh_native_RE_SAC_same_seed_no_checkpoint_warmstart",
+    "methods": {
+      "dispatch": {
+        "authority_factor": "physical_lower",
+        "coupling": "channels"
+      },
+      "dispatch_service_credit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "dispatch_service_credit_unit": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "dispatch_unit": {
+        "authority_factor": "physical_lower",
+        "coupling": "channels"
+      }
+    },
+    "preflight": true,
+    "preflight_overrides": {
+      "effective_trip_num": 24,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "updates_per_episode": 2,
+      "upper_batch_size": 8
+    },
+    "primary": "unit_minus_seconds_cost_and_same_checkpoint_learned_minus_neutral_upper",
+    "roots": [
+      293,
+      307
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "statistics": "two_root_descriptive_action_coordinates_by_credit_factorial",
+    "train_episodes": 2,
+    "training_clock_s": 5400,
+    "unchanged": [
+      "physical_lower_encoder",
+      "RE_SAC",
+      "networks",
+      "action_bounds",
+      "historical_priors",
+      "frequency_estimator",
+      "lower_reward",
+      "fleet_cap",
+      "leakage_penalties"
+    ],
+    "upper_authority": "baseline_minus_same_checkpoint_zero_upper_physical_outcomes",
+    "upper_warmup": 1,
+    "worker_preflight": "short_two_level_learning_then_fresh_seed_reset_for_full_training"
+  },
+  "critic_action_units": "seconds",
+  "evaluation": [
+    {
+      "N_fleet": 12,
+      "actors": {
+        "lower": {
+          "actor_calls": 447,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.6000000238418579,
+            0.9523809552192688,
+            0.5,
+            1.0,
+            1.6333333253860474,
+            1.6333333253860474,
+            0.9283333420753479,
+            0.6333333253860474,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.6666666865348816,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.7333333492279053,
+            0.9333333373069763,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.0944070965051651,
+            0.050327543169260025,
+            0.06670458614826202,
+            0.05526401102542877
+          ],
+          "input_abs_mean": [
+            0.6000027060508728,
+            0.48812171816825867,
+            0.1923937350511551,
+            1.0,
+            1.0194506645202637,
+            1.0055432319641113,
+            0.2442382425069809,
+            0.13732285797595978,
+            0.6004480123519897,
+            0.593886137008667,
+            0.46845707297325134,
+            0.5950795412063599,
+            0.6876967549324036,
+            0.5734534859657288,
+            0.6332593560218811,
+            0.5920950770378113,
+            0.542282223701477,
+            0.49336084723472595,
+            0.5803148746490479,
+            0.5340800881385803,
+            0.5973145365715027,
+            0.5503355860710144,
+            0.5577930808067322,
+            0.5601781606674194,
+            0.3949281573295593,
+            0.490084171295166,
+            0.6572715640068054,
+            0.4219229817390442,
+            0.5712155103683472,
+            0.016167838126420975,
+            0.009594830684363842,
+            0.020872101187705994,
+            0.0218843724578619
+          ],
+          "latent_mean_abs_p95": 0.0053350250236690044,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": 29.862092971801758,
+          "proposal_std_s": 0.012731802649796009,
+          "zero_input_effect_s": {
+            "dynamic_band": {
+              "mean_abs": 0.0006080218008719385,
+              "p95_abs": 0.001828002859838307
+            }
+          }
+        },
+        "upper": {
+          "actor_calls": 24,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.2916666567325592,
+            0.4855581223964691,
+            0.46666666865348816,
+            0.6000000238418579,
+            0.6666666865348816,
+            0.4979828894138336,
+            0.0,
+            0.4976191818714142,
+            0.6000000238418579,
+            1.0,
+            0.6000000238418579,
+            0.08747556805610657,
+            0.5126216411590576,
+            0.05870216339826584,
+            0.9816263318061829,
+            0.08721231669187546
+          ],
+          "input_abs_mean": [
+            0.2552083134651184,
+            0.469112753868103,
+            0.30694445967674255,
+            0.4171527624130249,
+            0.10011240094900131,
+            0.16591216623783112,
+            0.0,
+            0.020734133198857307,
+            0.6000001430511475,
+            0.5,
+            0.6000001430511475,
+            0.02334696240723133,
+            0.4946618974208832,
+            0.026943033561110497,
+            0.9375401139259338,
+            0.058995891362428665
+          ],
+          "latent_mean_abs_p95": 0.02521396614611149,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": -0.3060127794742584,
+          "proposal_std_s": 0.8305476903915405,
+          "zero_input_effect_s": {
+            "all_frequency": {
+              "mean_abs": 1.217018485069275,
+              "p95_abs": 1.8657395839691162
+            },
+            "dynamic_band": {
+              "mean_abs": 0.273846298456192,
+              "p95_abs": 0.5701057314872742
+            }
+          }
+        }
+      },
+      "avg_wait_observed_min": 7.083,
+      "command_abs_mean_s": 0.749055544535319,
+      "condition": "baseline",
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -73.41388201045523,
+        "last_duration_s": 1380.0,
+        "last_wait_credit_fraction": 0.019669241413844088,
+        "system_reward_sum": 0.0,
+        "transitions": 24
+      },
+      "critic": {
+        "action_curve": {
+          "-120": {
+            "ensemble_std_mean": 12.555984497070312,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -32.393245697021484,
+            "q_mean": -7.28127908706665
+          },
+          "-15": {
+            "ensemble_std_mean": 1.6100096702575684,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -4.210249423980713,
+            "q_mean": -0.9902303814888
+          },
+          "-30": {
+            "ensemble_std_mean": 3.1715362071990967,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -8.226932525634766,
+            "q_mean": -1.88386070728302
+          },
+          "-60": {
+            "ensemble_std_mean": 6.299617767333984,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -16.27827262878418,
+            "q_mean": -3.6790363788604736
+          },
+          "0": {
+            "ensemble_std_mean": 0.12822110950946808,
+            "lcb_argmax_state_fraction": 1.0,
+            "lcb_mean": -0.36913084983825684,
+            "q_mean": -0.11268868297338486
+          },
+          "120": {
+            "ensemble_std_mean": 16.635234832763672,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -43.24116897583008,
+            "q_mean": -9.97070026397705
+          },
+          "15": {
+            "ensemble_std_mean": 1.957834243774414,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -5.178006172180176,
+            "q_mean": -1.2623378038406372
+          },
+          "30": {
+            "ensemble_std_mean": 4.044471263885498,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -10.587654113769531,
+            "q_mean": -2.498710870742798
+          },
+          "60": {
+            "ensemble_std_mean": 8.239886283874512,
+            "lcb_argmax_state_fraction": 0.0,
+            "lcb_mean": -21.4650936126709,
+            "q_mean": -4.98532247543335
+          }
+        },
+        "input_scale": {
+          "action_contribution_abs_mean": 11.251906394958496,
+          "critic_action_units": "seconds",
+          "physical_action_s": 60.0,
+          "state_contribution_abs_mean": 0.32331180572509766
+        }
+      },
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": -0.2916666666666667,
+        "actual_shift_min_s": -1.0,
+        "advance_count": 7,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 24,
+        "nominal_count": 17,
+        "queries": 24,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "done_reason": "evaluation_horizon",
+      "ep": 2,
+      "ep_reward": -189.679,
+      "ep_steps": 423,
+      "headway_cv": 0.1919,
+      "lower_action_mean": 29.86,
+      "lower_lf_drift_ratio": 0.8461832115980288,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1391,
+      "passengers_unserved": 0,
+      "peak_fleet": 14,
+      "restricted_wait_horizon_min": 7.083,
+      "scenario": "low_noise",
+      "scene_seed": 900030700,
+      "service_cost_restricted": 2.691817,
+      "simulation_end_time_s": 5400,
+      "subsecond_command_fraction": 0.7083333333333334,
+      "trip_completion_rate": 0.708333,
+      "trips_completed": 17,
+      "upper_delta_mean": -0.31,
+      "upper_hf_power_ratio": 0.12693716053458912,
+      "upper_interval_coverage_mean": 1.0,
+      "upper_interval_fleet_cost_sum": 0.025864,
+      "upper_interval_reward_sum": -73.413882,
+      "upper_interval_wait_cost_sum": 0.708275
+    },
+    {
+      "N_fleet": 12,
+      "actors": {
+        "lower": {
+          "actor_calls": 447,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.6000000238418579,
+            0.9523809552192688,
+            0.5,
+            1.0,
+            1.6333333253860474,
+            1.6333333253860474,
+            0.9283333420753479,
+            0.6333333253860474,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.6666666865348816,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.7333333492279053,
+            0.9333333373069763,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.0944070965051651,
+            0.050327543169260025,
+            0.06670458614826202,
+            0.05526401102542877
+          ],
+          "input_abs_mean": [
+            0.6000027060508728,
+            0.48812171816825867,
+            0.1923937350511551,
+            1.0,
+            1.019295334815979,
+            1.0057482719421387,
+            0.2442382425069809,
+            0.13684439659118652,
+            0.6004480123519897,
+            0.593886137008667,
+            0.46845707297325134,
+            0.5950795412063599,
+            0.6876967549324036,
+            0.5734534859657288,
+            0.6332593560218811,
+            0.5920950770378113,
+            0.542282223701477,
+            0.49336084723472595,
+            0.5803148746490479,
+            0.5340800881385803,
+            0.5973145365715027,
+            0.5503355860710144,
+            0.5577930808067322,
+            0.5601781606674194,
+            0.3949281573295593,
+            0.490084171295166,
+            0.6572715640068054,
+            0.4219229817390442,
+            0.5712155103683472,
+            0.01613938994705677,
+            0.009557820856571198,
+            0.02087065950036049,
+            0.021881891414523125
+          ],
+          "latent_mean_abs_p95": 0.005339051131159067,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": 29.862085342407227,
+          "proposal_std_s": 0.012717694975435734,
+          "zero_input_effect_s": {
+            "dynamic_band": {
+              "mean_abs": 0.0006092250696383417,
+              "p95_abs": 0.0018360135145485401
+            }
+          }
+        },
+        "upper": {
+          "actor_calls": 24,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.2916666567325592,
+            0.4855581223964691,
+            0.46666666865348816,
+            0.6000000238418579,
+            0.6666666865348816,
+            0.49798139929771423,
+            0.0,
+            0.4976206421852112,
+            0.6000000238418579,
+            1.0,
+            0.6000000238418579,
+            0.08747556805610657,
+            0.5126216411590576,
+            0.05870216339826584,
+            0.9816263318061829,
+            0.08721231669187546
+          ],
+          "input_abs_mean": [
+            0.2552083134651184,
+            0.469112753868103,
+            0.30694445967674255,
+            0.4166666269302368,
+            0.09416002035140991,
+            0.16591189801692963,
+            0.0,
+            0.020734192803502083,
+            0.6000001430511475,
+            0.5,
+            0.6000001430511475,
+            0.02334696240723133,
+            0.4946618974208832,
+            0.026943033561110497,
+            0.9375401139259338,
+            0.058995891362428665
+          ],
+          "latent_mean_abs_p95": 0.02521396614611149,
+          "neutral_action": true,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": -0.3219200670719147,
+          "proposal_std_s": 0.8433485627174377,
+          "zero_input_effect_s": {
+            "all_frequency": {
+              "mean_abs": 1.213995337486267,
+              "p95_abs": 1.8656353950500488
+            },
+            "dynamic_band": {
+              "mean_abs": 0.2810026705265045,
+              "p95_abs": 0.5701057314872742
+            }
+          }
+        }
+      },
+      "avg_wait_observed_min": 7.09,
+      "command_abs_mean_s": 0.0,
+      "condition": "neutral_upper",
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -73.48208722741434,
+        "last_duration_s": 1380.0,
+        "last_wait_credit_fraction": 0.019737342429962768,
+        "system_reward_sum": 0.0,
+        "transitions": 24
+      },
+      "critic": {},
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": 0.0,
+        "actual_shift_min_s": 0.0,
+        "advance_count": 0,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 24,
+        "nominal_count": 24,
+        "queries": 24,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "done_reason": "evaluation_horizon",
+      "ep": 2,
+      "ep_reward": -189.603,
+      "ep_steps": 423,
+      "headway_cv": 0.1915,
+      "lower_action_mean": 29.86,
+      "lower_lf_drift_ratio": 0.8461831425120919,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1391,
+      "passengers_unserved": 0,
+      "peak_fleet": 14,
+      "restricted_wait_horizon_min": 7.09,
+      "scenario": "low_noise",
+      "scene_seed": 900030700,
+      "service_cost_restricted": 2.692187,
+      "simulation_end_time_s": 5400,
+      "subsecond_command_fraction": 1.0,
+      "trip_completion_rate": 0.708333,
+      "trips_completed": 17,
+      "upper_delta_mean": 0.0,
+      "upper_hf_power_ratio": 0.0,
+      "upper_interval_coverage_mean": 1.0,
+      "upper_interval_fleet_cost_sum": 0.025833,
+      "upper_interval_reward_sum": -73.482087,
+      "upper_interval_wait_cost_sum": 0.708988
+    },
+    {
+      "N_fleet": 12,
+      "actors": {
+        "lower": {
+          "actor_calls": 466,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.6000000238418579,
+            0.9523809552192688,
+            0.5,
+            1.0,
+            1.524999976158142,
+            1.480555534362793,
+            0.8983333110809326,
+            0.6833333373069763,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.6666666865348816,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.8666666746139526,
+            0.9333333373069763,
+            0.8666666746139526,
+            0.800000011920929,
+            0.9333333373069763,
+            0.800000011920929,
+            0.7333333492279053,
+            0.9333333373069763,
+            0.7333333492279053,
+            0.8666666746139526,
+            0.11809591203927994,
+            0.06906601041555405,
+            0.06670458614826202,
+            0.05526401102542877
+          ],
+          "input_abs_mean": [
+            0.6000028252601624,
+            0.5016348361968994,
+            0.17167381942272186,
+            1.0,
+            1.004333734512329,
+            0.9955173134803772,
+            0.23861880600452423,
+            0.14315085113048553,
+            0.598856508731842,
+            0.5977112650871277,
+            0.46423524618148804,
+            0.5957090854644775,
+            0.683262288570404,
+            0.5781129002571106,
+            0.6300435662269592,
+            0.6022891402244568,
+            0.54606693983078,
+            0.4977089464664459,
+            0.575680673122406,
+            0.5333344340324402,
+            0.6090133190155029,
+            0.5469239354133606,
+            0.55422043800354,
+            0.576823890209198,
+            0.39842480421066284,
+            0.4852670729160309,
+            0.6483556032180786,
+            0.42002734541893005,
+            0.5783975124359131,
+            0.016628319397568703,
+            0.009755519218742847,
+            0.020933935418725014,
+            0.022518472746014595
+          ],
+          "latent_mean_abs_p95": 0.005503517575562,
+          "neutral_action": true,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": 29.86119842529297,
+          "proposal_std_s": 0.014008868485689163,
+          "zero_input_effect_s": {
+            "dynamic_band": {
+              "mean_abs": 0.0006331292097456753,
+              "p95_abs": 0.0021228790283203125
+            }
+          }
+        },
+        "upper": {
+          "actor_calls": 24,
+          "fixed_action_s": null,
+          "input_abs_max": [
+            0.2916666567325592,
+            0.4855581223964691,
+            0.3333333432674408,
+            0.6000000238418579,
+            0.6666666865348816,
+            0.0,
+            0.0,
+            0.0,
+            0.6000000238418579,
+            1.0,
+            0.6000000238418579,
+            0.08747556805610657,
+            0.5126216411590576,
+            0.05870216339826584,
+            0.9816263318061829,
+            0.08721231669187546
+          ],
+          "input_abs_mean": [
+            0.2552083134651184,
+            0.469112753868103,
+            0.2527778148651123,
+            0.4171527624130249,
+            0.1465112268924713,
+            0.0,
+            0.0,
+            0.0,
+            0.6000001430511475,
+            0.5,
+            0.6000001430511475,
+            0.02334696240723133,
+            0.4946618974208832,
+            0.026943033561110497,
+            0.9375401139259338,
+            0.058995891362428665
+          ],
+          "latent_mean_abs_p95": 0.025431504473090172,
+          "neutral_action": false,
+          "proposal_edge_fraction_1pct": 0.0,
+          "proposal_mean_s": -0.19935066998004913,
+          "proposal_std_s": 0.9846178889274597,
+          "zero_input_effect_s": {
+            "all_frequency": {
+              "mean_abs": 1.2229989767074585,
+              "p95_abs": 1.6160591840744019
+            },
+            "dynamic_band": {
+              "mean_abs": 0.1973613053560257,
+              "p95_abs": 0.4758225381374359
+            }
+          }
+        }
+      },
+      "avg_wait_observed_min": 5.497,
+      "command_abs_mean_s": 0.9278573989868164,
+      "condition": "zero_holding",
+      "credit_ledger": {
+        "duration_median_s": 180.0,
+        "duration_p95_s": 180.0,
+        "gap_credit_sum": 0.0,
+        "interval_reward_sum": -54.969086987778574,
+        "last_duration_s": 1380.0,
+        "last_wait_credit_fraction": 0.005277131123956997,
+        "system_reward_sum": 0.0,
+        "transitions": 24
+      },
+      "critic": {},
+      "dispatch": {
+        "actual_shift_max_s": 0.0,
+        "actual_shift_mean_s": -0.3333333333333333,
+        "actual_shift_min_s": -1.0,
+        "advance_count": 8,
+        "commitment_clipped_count": 0,
+        "decision_lead_median_s": 120.0,
+        "delay_count": 0,
+        "launched": 24,
+        "nominal_count": 16,
+        "queries": 24,
+        "release_lateness_mean_s": 0.0,
+        "release_lateness_p95_s": 0.0
+      },
+      "done_reason": "evaluation_horizon",
+      "ep": 2,
+      "ep_reward": -97.22,
+      "ep_steps": 442,
+      "headway_cv": 0.2082,
+      "lower_action_mean": 0.0,
+      "lower_lf_drift_ratio": 0.0,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1391,
+      "passengers_unserved": 0,
+      "peak_fleet": 11,
+      "restricted_wait_horizon_min": 5.497,
+      "scenario": "low_noise",
+      "scene_seed": 900030700,
+      "service_cost_restricted": 1.382918,
+      "simulation_end_time_s": 5400,
+      "subsecond_command_fraction": 0.6666666666666666,
+      "trip_completion_rate": 0.875,
+      "trips_completed": 21,
+      "upper_delta_mean": -0.2,
+      "upper_hf_power_ratio": 0.06830216043356217,
+      "upper_interval_coverage_mean": 1.0,
+      "upper_interval_fleet_cost_sum": 0.0,
+      "upper_interval_reward_sum": -54.969087,
+      "upper_interval_wait_cost_sum": 0.549691
+    }
+  ],
+  "last_training_credit_ledger": {
+    "duration_median_s": 180.0,
+    "duration_p95_s": 180.0,
+    "gap_credit_sum": 0.0,
+    "interval_reward_sum": -81.20116911944035,
+    "last_duration_s": 1380.0,
+    "last_wait_credit_fraction": 0.002348545503069122,
+    "system_reward_sum": 0.0,
+    "transitions": 24
+  },
+  "method": "dispatch_service_credit",
+  "native_steps": 27000,
+  "parameter_counts": {
+    "lower": {
+      "policy_net": 6466,
+      "q_net": 106250
+    },
+    "upper": {
+      "policy_net": 5378,
+      "q_net": 95370
+    }
+  },
+  "protocol": "native_transit_critic_units_stage152_v1",
+  "seed": 307,
+  "software_qualified": true,
+  "training_curve": [
+    {
+      "N_fleet": 13,
+      "avg_wait_observed_min": 5.99,
+      "done_reason": "evaluation_horizon",
+      "ep": 0,
+      "ep_reward": -241.469,
+      "ep_steps": 425,
+      "headway_cv": 0.2988,
+      "lower_lf_drift_ratio": 0.8505675802252382,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1259,
+      "passengers_unserved": 0,
+      "peak_fleet": 14,
+      "restricted_wait_horizon_min": 5.99,
+      "service_cost_restricted": 2.224669,
+      "simulation_end_time_s": 5400,
+      "trip_completion_rate": 0.75,
+      "trips_completed": 18,
+      "upper_hf_power_ratio": 0.0,
+      "upper_interval_coverage_mean": 0.0,
+      "upper_interval_fleet_cost_sum": 0.0,
+      "upper_interval_reward_sum": 0.0,
+      "upper_interval_wait_cost_sum": 0.0,
+      "upper_learning": {}
+    },
+    {
+      "N_fleet": 9,
+      "avg_wait_observed_min": 6.325,
+      "done_reason": "evaluation_horizon",
+      "ep": 1,
+      "ep_reward": -278.858,
+      "ep_steps": 403,
+      "headway_cv": 0.3807,
+      "lower_lf_drift_ratio": 0.8342552255570354,
+      "passenger_unserved_rate": 0.0,
+      "passengers_generated": 1333,
+      "passengers_unserved": 0,
+      "peak_fleet": 12,
+      "restricted_wait_horizon_min": 6.325,
+      "service_cost_restricted": 3.471455,
+      "simulation_end_time_s": 5400,
+      "trip_completion_rate": 0.708333,
+      "trips_completed": 17,
+      "upper_hf_power_ratio": 0.7398991031118993,
+      "upper_interval_coverage_mean": 1.0,
+      "upper_interval_fleet_cost_sum": 0.179547,
+      "upper_interval_reward_sum": -81.201169,
+      "upper_interval_wait_cost_sum": 0.632464,
+      "upper_learning": {
+        "upper_action_batch_mean": -21.79694175720215,
+        "upper_action_batch_std": 34.31062316894531,
+        "upper_alpha": 0.05,
+        "upper_duration_steps_mean": 1.0,
+        "upper_ood_loss": 3.3731894493103027,
+        "upper_pi_grad_norm": 19.28832244873047,
+        "upper_policy_loss": 18.81623077392578,
+        "upper_q_grad_norm": 142.10008239746094,
+        "upper_q_l1": 1035.744384765625,
+        "upper_q_l1_penalty": 10.357443809509277,
+        "upper_q_loss": 50.777008056640625,
+        "upper_q_mean": -4.2917680740356445,
+        "upper_q_mse": 40.38582992553711,
+        "upper_q_std": 7.263167858123779,
+        "upper_reward_batch_mean": -3.702796220779419,
+        "upper_reward_batch_std": 0.6526197791099548,
+        "upper_target_clip_fraction": 0.0
+      }
+    }
+  ],
+  "training_demand_counts": [
+    1259,
+    1333
+  ],
+  "training_fleets": [
+    13,
+    9
+  ],
+  "updates": {
+    "lower": 4,
+    "upper": 2
+  },
+  "upper_learning_mean": {
+    "upper_action_batch_mean": -13.238072395324707,
+    "upper_action_batch_std": 31.64884376525879,
+    "upper_alpha": 0.05,
+    "upper_duration_steps_mean": 1.0,
+    "upper_ood_loss": 3.2073559761047363,
+    "upper_pi_grad_norm": 15.066034317016602,
+    "upper_policy_loss": 15.521682739257812,
+    "upper_q_grad_norm": 114.65254974365234,
+    "upper_q_l1": 1036.4031982421875,
+    "upper_q_l1_penalty": 10.364031791687012,
+    "upper_q_loss": 46.81661033630371,
+    "upper_q_mean": -3.430346727371216,
+    "upper_q_mse": 36.42050361633301,
+    "upper_q_std": 6.038381576538086,
+    "upper_reward_batch_mean": -3.578405022621155,
+    "upper_reward_batch_std": 0.714476078748703,
+    "upper_target_clip_fraction": 0.0
+  },
+  "upper_learning_updates": 2
+}
