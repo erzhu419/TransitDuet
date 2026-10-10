@@ -101,6 +101,8 @@ def run_cell(method, root, output, *, preflight, experiment=None):
         raise RuntimeError("Native runner did not bind the registered critic coordinates")
     if runner.upper_trainer.weight_reg_mode != cfg["upper"].get("weight_reg_mode", "sum"):
         raise RuntimeError("Native runner did not bind the registered critic regularization")
+    if runner.upper_trainer.backup_horizon != cfg["upper"].get("backup_horizon", 1):
+        raise RuntimeError("Native runner did not bind the registered backup horizon")
     initial = model_arrays(runner)
     parameter_counts = {level: {name: sum(p.numel() for p in
         getattr(getattr(runner, f"{level}_trainer"), name).parameters()) for name in ("policy_net", "q_net")}
@@ -149,7 +151,7 @@ def run_cell(method, root, output, *, preflight, experiment=None):
     for scenario in spec["scenarios"]:
         for scene_seed in experiment.scene_seeds(root, scenario, preflight=preflight):
             reference = None
-            for condition in CONDITIONS:
+            for condition in experiment.CONDITIONS:
                 seed_runtime()
                 eval_cfg = copy.deepcopy(cfg)
                 eval_cfg["env"].update(copy.deepcopy(authority.routing.SCENARIOS[scenario]))
@@ -159,7 +161,9 @@ def run_cell(method, root, output, *, preflight, experiment=None):
                 before = model_arrays(evaluator)
                 probes = {level: NativePolicyProbe(getattr(evaluator, f"{level}_trainer").policy_net, level,
                     neutral=(condition == "neutral_upper" and level == "upper")
-                        or (condition == "zero_holding" and level == "lower")) for level in ("upper", "lower")}
+                        or (condition == "zero_holding" and level == "lower"),
+                    fixed_action_s=7.0 if condition == "fixed7" and level == "upper" else None)
+                    for level in ("upper", "lower")}
                 for probe in probes.values():
                     probe.policy.get_action = probe.get_action
                 callback, queries = evaluator._upper_callback_v2, []
@@ -213,6 +217,9 @@ def run_cell(method, root, output, *, preflight, experiment=None):
         "last_training_credit_ledger": training_credit, "evaluation": evaluations}
     result["critic_action_units"] = cfg["upper"].get("critic_action_units", "seconds")
     result["weight_reg_mode"] = cfg["upper"].get("weight_reg_mode", "sum")
+    if "backup_horizon" in cfg["upper"]:
+        result["backup_horizon"] = cfg["upper"]["backup_horizon"]
+        result["trace_lambda"] = cfg["upper"]["trace_lambda"]
     result["upper_learning_updates"] = learning_counts["upper"]
     result["upper_learning_mean"] = {key: value / learning_counts["upper"] for key, value in learning_sums.items()}
     write_json(output, result)

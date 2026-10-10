@@ -1726,6 +1726,8 @@ class TransitDuetV2Runner:
             gamma=upper_cfg.get('gamma', 0.95),
             maximum_alpha=upper_cfg.get('maximum_alpha', 0.05),
             replay_capacity=upper_cfg.get('replay_capacity', 50000),
+            backup_horizon=upper_cfg.get('backup_horizon', 1),
+            trace_lambda=upper_cfg.get('trace_lambda', 0.9),
             device=device)
 
         # ── Lower policy ──
@@ -2282,6 +2284,11 @@ class TransitDuetV2Runner:
         # to the Fixed baseline. Enabled via coupling.tpc_enable in config.
         tpc = coupling_cfg.get('tpc', {})
         self.tpc_enable = bool(tpc.get('enable', False))
+        if self.upper_trainer.backup_horizon > 1 and (
+                self.upper_transition_stream_mode != 'legacy_global'
+                or self.tpc_enable or self.timetable_planner is not None
+                or self.upper_action_override_enable):
+            raise ValueError("Native trace backup requires a global, unmodified upper-policy trajectory")
         if self.tpc_enable and self.upper_action_candidates is not None:
             raise ValueError(
                 "TPC Gaussian behavior mixing is incompatible with a categorical "
@@ -2731,6 +2738,8 @@ class TransitDuetV2Runner:
             'headway_value_planner_x': prev['headway_value_planner_x'],
             'transition_stream_key': stream_key,
             'interval_outcome': interval_outcome,
+            **({'behavior_log_prob': prev['behavior_log_prob']}
+               if self.upper_trainer.backup_horizon > 1 else {}),
         })
         if done:
             del self._prev_upper_states[stream_key]
@@ -6643,6 +6652,8 @@ class TransitDuetV2Runner:
         if upper_decision_taken:
             policy_command_vec = np.asarray(
                 action_vec, dtype=np.float32).reshape(-1).copy()
+            if self.upper_trainer.backup_horizon > 1 and self._episode_training:
+                log_mu = float(self.upper_trainer.policy_net.log_prob(s_upper, policy_command_vec))
 
         if (upper_decision_taken and self.timetable_planner is not None
                 and self.coupling_mode == 'hiro'):
@@ -6913,6 +6924,8 @@ class TransitDuetV2Runner:
                 'terminal_value_selector_x': terminal_selector_x,
                 'headway_value_planner_x': headway_selector_x,
                 'decision_time_s': decision_time_s,
+                **({'behavior_log_prob': log_mu if log_mu is not None else 0.0}
+                   if self.upper_trainer.backup_horizon > 1 else {}),
             }
             self.upper_interval_credit.begin(
                 stream_key, start_time_s=decision_time_s)
@@ -7545,6 +7558,8 @@ class TransitDuetV2Runner:
                 'interval_headway_cost': interval_headway_cost,
                 'interval_fleet_cost': interval_fleet_cost,
                 'interval_coverage': interval_coverage,
+                **({'behavior_log_prob': trans['behavior_log_prob']}
+                   if self.upper_trainer.backup_horizon > 1 else {}),
             })
             self._ep_upper_rewards.append(r)
             self._ep_upper_system_rewards.append(float(system_reward))
@@ -7668,7 +7683,9 @@ class TransitDuetV2Runner:
                 self.upper_trainer.replay_buffer.push(
                     trans['s'], trans['a'], trans['r'], trans['ns'],
                     trans['done'],
-                    duration_steps=trans.get('duration_steps', 1.0))
+                    duration_steps=trans.get('duration_steps', 1.0),
+                    **({'behavior_log_prob': trans['behavior_log_prob']}
+                       if self.upper_trainer.backup_horizon > 1 else {}))
             if (not upper_policy_frozen
                     and len(self.upper_trainer.replay_buffer)
                     > self.upper_batch_size):

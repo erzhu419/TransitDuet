@@ -17,6 +17,9 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 def matched_means(cells, experiment=spec):
     spec = experiment
     contract = spec.contract(False)
+    preflight = spec.contract(True)
+    preflight_steps = (preflight["train_episodes"] + len(spec.CONDITIONS) * len(preflight["scenarios"])
+                      * preflight["evaluation_episodes_per_scenario"]) * preflight["training_clock_s"]
     if set(cells) != {(method, root) for method in spec.METHODS for root in spec.ROOTS}:
         raise ValueError("Incomplete native dispatch training matrix")
     means, regime_means = {}, {}
@@ -30,7 +33,7 @@ def matched_means(cells, experiment=spec):
         for method in spec.METHODS:
             cell = cells[method, root]
             if not (cell["software_qualified"] and cell["worker_preflight_passed"]
-                    and cell["worker_preflight_native_steps"] == 5 * 5400
+                    and cell["worker_preflight_native_steps"] == preflight_steps
                     and cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == contract
                     and cell["method"] == method and cell["seed"] == root
                     and cell["updates"] == spec.expected_updates(False)

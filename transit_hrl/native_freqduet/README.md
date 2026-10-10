@@ -32,3 +32,9 @@ Stage153 tests `upper.weight_reg_mode: physical_sum`: the unit critic's first
 action weights and affine bias are expressed in physical coordinates before
 L1 is evaluated. It preserves the seconds-coordinate prior for equivalent
 functions; ordinary `sum` and `mean` remain separate controls.
+
+Stage155 tests an eight-decision soft Retrace upper backup, storing collection
+densities and terminating sequences at episode boundaries. `backup_horizon: 1`
+retains the preserved one-step update bit-for-bit. Only the global unmodified
+policy trajectory is supported by the native trace path; fixed7 is a frozen
+evaluation intervention. This does not adopt a performance improvement.

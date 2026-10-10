@@ -23,6 +23,8 @@ import numpy as np
 from collections import deque
 import random
 
+from freq_hrl.core.retrace import SequenceReplayBuffer, retrace_targets
+
 
 # ──────────────────── Upper Replay Buffer ────────────────────
 
@@ -396,7 +398,7 @@ class RESACUpperTrainer:
                  lr=3e-4, gamma=0.99, soft_tau=5e-3,
                  auto_entropy=True, maximum_alpha=0.3,
                  replay_capacity=50000, device='cpu',
-                 critic_action_units='seconds'):
+                 critic_action_units='seconds', backup_horizon=1, trace_lambda=0.9):
         self.device = device
         self.gamma = gamma
         self.soft_tau = soft_tau
@@ -408,6 +410,10 @@ class RESACUpperTrainer:
         if self.weight_reg_mode not in {"sum", "mean", "physical_sum"}:
             raise ValueError("weight_reg_mode must be 'sum', 'mean' or 'physical_sum'")
         self.auto_entropy = auto_entropy
+        self.backup_horizon = int(backup_horizon)
+        self.trace_lambda = float(trace_lambda)
+        if self.backup_horizon < 1 or not 0 <= self.trace_lambda <= 1:
+            raise ValueError("Backup horizon must be positive and trace_lambda in [0, 1]")
         self.critic_action_units = str(critic_action_units)
         if self.critic_action_units not in {'seconds', 'unit'}:
             raise ValueError("critic_action_units must be 'seconds' or 'unit'")
@@ -417,7 +423,8 @@ class RESACUpperTrainer:
                 "discrete_critic must be 'continuous_action' or 'indexed'")
 
         # Replay buffer for dispatch transitions
-        self.replay_buffer = UpperReplayBuffer(replay_capacity)
+        self.replay_buffer = (UpperReplayBuffer(replay_capacity) if self.backup_horizon == 1
+                              else SequenceReplayBuffer(replay_capacity))
 
         self.discrete_actions = None
         if action_candidates is not None:
@@ -503,13 +510,49 @@ class RESACUpperTrainer:
         q_flat = q_net(state_rep, action_rep)
         return q_flat.view(q_flat.shape[0], batch, n_actions)
 
+    def _trace_target(self, sequence):
+        batch, horizon = sequence['reward'].shape
+        state = sequence['state'].reshape(batch * horizon, -1)
+        action = sequence['action'].reshape(batch * horizon, -1)
+        next_state = sequence['next_state'].reshape(batch * horizon, -1)
+        with torch.no_grad():
+            next_action, next_log_prob, _, _, _ = self.policy_net.evaluate(next_state)
+            next_value = (self.target_q_net(next_state, next_action).mean(dim=0)
+                - self.alpha * next_log_prob.reshape(-1)).reshape(batch, horizon)
+            action_value = self.target_q_net(state, action).mean(dim=0).reshape(batch, horizon)
+            log_pi = torch.as_tensor(self.policy_net.log_prob(state, action), device=self.device).reshape(batch, horizon)
+            discount = (1.0 - sequence['done']) * self.gamma ** sequence['duration']
+            targets, coefficients = retrace_targets(sequence['reward'], discount, next_value, action_value,
+                log_pi, sequence['behavior_log_prob'], sequence['valid'], self.trace_lambda)
+            one_step = sequence['reward'][:, 0] + discount[:, 0] * next_value[:, 0]
+            # Actual trace mass, unlike configured horizon, reveals policy mismatch.
+            mass, continuation = torch.ones(batch, device=self.device), torch.ones(batch, device=self.device)
+            for step in range(1, horizon):
+                continuation = continuation * discount[:, step - 1] * coefficients[:, step] * sequence['valid'][:, step]
+                mass = mass + continuation
+        return targets[:, 0], {
+            'upper_trace_valid_steps_mean': sequence['valid'].sum(dim=1).mean().item(),
+            'upper_trace_mass_mean': mass.mean().item(),
+            'upper_trace_correction_abs_mean': (targets[:, 0] - one_step).abs().mean().item(),
+            'upper_trace_coefficient_mean': ((coefficients * sequence['valid']).sum() / sequence['valid'].sum()).item(),
+        }
+
     def update(self, batch_size=64):
         """One gradient step from replay buffer."""
         if len(self.replay_buffer) < batch_size:
             return {}
 
-        state, action, reward, next_state, done, duration_steps = \
-            self.replay_buffer.sample(batch_size)
+        sequence, trace_stats = None, {}
+        if self.backup_horizon > 1:
+            sequence = {key: torch.as_tensor(value, device=self.device) for key, value in
+                self.replay_buffer.sample_sequences(batch_size, self.backup_horizon).items()}
+            state, action, reward, next_state, done, duration_steps = (
+                sequence[key][:, 0].cpu().numpy() for key in
+                ('state', 'action', 'reward', 'next_state', 'done', 'duration'))
+            reward, done, duration_steps = (value.reshape(-1, 1) for value in (reward, done, duration_steps))
+        else:
+            state, action, reward, next_state, done, duration_steps = \
+                self.replay_buffer.sample(batch_size)
         state = torch.FloatTensor(state).to(self.device)
         action = torch.FloatTensor(action).to(self.device)
         reward = torch.FloatTensor(reward).to(self.device)
@@ -521,31 +564,34 @@ class RESACUpperTrainer:
 
         # ── Critic update ──
         with torch.no_grad():
-            if discrete_policy:
-                next_probs, next_log_probs, _ = self.policy_net.dist_info(
-                    next_state)
-                target_q_all = self._discrete_q_values(
-                    self.target_q_net, next_state)
-                target_q_mean = target_q_all.mean(dim=0)
-                target_q_mean = (next_probs * (
-                    target_q_mean
-                    - self.alpha * next_log_probs)).sum(dim=-1)
+            if sequence is not None:
+                shared_target, trace_stats = self._trace_target(sequence)
             else:
-                next_action, next_log_prob, _, _, _ = (
-                    self.policy_net.evaluate(next_state))
-                target_q_all = self.target_q_net(
-                    next_state, next_action)
-                target_q_mean = target_q_all.mean(dim=0)
-                target_q_mean = (
-                    target_q_mean - self.alpha
-                    * next_log_prob.squeeze(-1))
-            r = reward.squeeze(-1)
-            d = done.squeeze(-1)
-            discount = torch.pow(
-                torch.full_like(duration_steps.squeeze(-1), self.gamma),
-                duration_steps.squeeze(-1),
-            )
-            shared_target = r + (1.0 - d) * discount * target_q_mean
+                if discrete_policy:
+                    next_probs, next_log_probs, _ = self.policy_net.dist_info(
+                        next_state)
+                    target_q_all = self._discrete_q_values(
+                        self.target_q_net, next_state)
+                    target_q_mean = target_q_all.mean(dim=0)
+                    target_q_mean = (next_probs * (
+                        target_q_mean
+                        - self.alpha * next_log_probs)).sum(dim=-1)
+                else:
+                    next_action, next_log_prob, _, _, _ = (
+                        self.policy_net.evaluate(next_state))
+                    target_q_all = self.target_q_net(
+                        next_state, next_action)
+                    target_q_mean = target_q_all.mean(dim=0)
+                    target_q_mean = (
+                        target_q_mean - self.alpha
+                        * next_log_prob.squeeze(-1))
+                r = reward.squeeze(-1)
+                d = done.squeeze(-1)
+                discount = torch.pow(
+                    torch.full_like(duration_steps.squeeze(-1), self.gamma),
+                    duration_steps.squeeze(-1),
+                )
+                shared_target = r + (1.0 - d) * discount * target_q_mean
             target_clip_fraction = (shared_target.abs() > 50.0).float().mean()
             shared_target = shared_target.clamp(-50.0, 50.0)
 
@@ -621,6 +667,7 @@ class RESACUpperTrainer:
             'upper_action_batch_std': action.std().item(),
             'upper_duration_steps_mean': duration_steps.mean().item(),
             'upper_target_clip_fraction': target_clip_fraction.item(),
+            **trace_stats,
         }
 
     def save(self, path):
