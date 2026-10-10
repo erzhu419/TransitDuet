@@ -26,8 +26,29 @@ bounded/communicated lower goals, fixed commitment, tail windows, paired analysi
 code-only scheduler placement and preserved one-step optimizer behavior.
 
 Run `native_transit_service_allocation_stage156_frozen_20261010_r1`:
-t141325/root347 RUNNING on node006; t141326/root359 RUNNING on node005.
-Server reproduction and alternative-plan performance are pending.
+t141325/root347 and t141326/root359 are DONE. All 240 episodes qualify;
+40 original learned and 40 nominal/zero-upper episodes reproduce exactly.
+
+Roots347/359 versus nominal allocation:
+
+| Plan | Restricted cost delta | Restricted wait delta (min) |
+| --- | --- | --- |
+| frontload | +0.180186 / +0.107543 | +0.18190 / +0.43135 |
+| backload | +0.300927 / +0.240062 | +0.66970 / +0.53245 |
+| causal forecast | -0.000767 / -0.002681 | -0.00720 / -0.02870 |
+| reversed forecast | +0.022797 / -0.018933 | +0.01480 / +0.01880 |
+
+Plans are executable, not merely requested: fixed shapes change mean absolute
+headway by 60.15 s; causal forecast changes it by 2.105/2.024 s. Its average
+actual-versus-target error is 0.022/0 s. Forecast-minus-reversed waiting improves
+both roots (-0.0220/-0.0475 min), but total cost remains fleet-step sensitive.
+Forecast gains vary by regime and are small, not confirmation evidence.
+
+Decision: proceed to a bounded learned residual-plan test with frozen lower,
+explicit causal plan context, and the SAME final physical service-cost objective.
+Use undiscounted finite-episode prefix-cost differences rather than the old
+linear fleet-exposure surrogate. Compare own learned/zero/constant residuals
+against pure causal forecast; no full joint-HRL or promotion claim yet.
 
 ## Limitations
 
