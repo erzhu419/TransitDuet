@@ -25,14 +25,20 @@ All forty forecast/nominal controls per root must reproduce Stage156 exactly.
 Qualification: three full source reproductions plus independent short learning,
 then reset the upper model/RNG for full training. 24,552,000 main native ticks
 plus 389,880 qualification ticks; code-only scheduler node001-006.
-86 focused tests pass, including exact zero-residual forecast execution,
+87 focused tests pass, including exact zero-residual forecast execution,
 current-clock censoring, terminal-tail credit, SAC learning, actor-noise RNG
-preservation and rejection of unpaired controls or changed credit budgets.
+preservation, terminal passenger cleanup, and rejection of unpaired controls
+or changed credit budgets.
 
 Run `native_transit_learned_residual_plan_stage157_development_20261010_r1`:
-t141463/root397 RUNNING on node005; t141464/root401 RUNNING on node006.
-Both reproduced the original learned-dispatch source episode. Remaining worker
-qualification and final learned-plan performance are pending.
+t141463/root397 and t141464/root401 failed in qualification, before full
+training. Original learned dispatch and nominal controls reproduced, but
+zero-residual terminal credit read passenger lists AFTER native cleanup.
+Terminal credit now uses the native cached terminal measurements; active-prefix
+credit still uses current-clock live state. No objective or tolerance changed.
+Automatic retries t141469/t141470 failed; t141471/t141472 were cancelled.
+The failed attempt is retained separately. A corrected r2 will rerun qualification
+and start fresh learning; final learned-plan performance remains pending.
 
 ## Limitations
 

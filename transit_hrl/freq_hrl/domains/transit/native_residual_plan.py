@@ -71,7 +71,11 @@ class NativeResidualPlan(NativeServicePlan):
         return preference + RESIDUAL_SCALE_S * residual_basis(len(preference)) @ action, rates
 
     def finish(self, row):
-        cost = prefix_service_cost(self.env)
+        # Native step clears passenger lists after caching terminal measurements.
+        outcome = self.env.measurement_details
+        cost = composite_service_cost(outcome["restricted_wait_horizon_min"], outcome["peak_fleet"],
+            outcome["headway_cv"], self.env._n_fleet_target, outcome["passenger_unserved_rate"],
+            outcome["trip_completion_rate"])[0]
         if abs(cost - row["service_cost_restricted"]) > 1e-6:
             raise RuntimeError("Training terminal objective differs from reported physical service cost")
         return self.credit.finish(cost, self.env.current_time)

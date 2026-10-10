@@ -57,7 +57,9 @@ class NativeResidualPlanTest(unittest.TestCase):
         self.assertEqual(len(plan.decisions), 2)
         self.assertEqual(len(plan.queries), 12)
         self.assertTrue(all(d["state"].shape == (34,) for d in plan.decisions))
-        summary = plan.finish({"service_cost_restricted": prefix_service_cost(env)})
+        env._measurement_details = {"restricted_wait_horizon_min": 0, "peak_fleet": 0,
+            "headway_cv": 0, "passenger_unserved_rate": 0, "trip_completion_rate": 0}
+        summary = plan.finish({"service_cost_restricted": 5})
         self.assertEqual(summary["decisions"], 2)
         self.assertEqual(summary["reward_sum"], 0)
         self.assertEqual(summary["duration_s"], 2699 - 180)
@@ -86,6 +88,18 @@ class NativeResidualPlanTest(unittest.TestCase):
         self.assertAlmostEqual(prefix_service_cost(env), 10.1)
         env.protocol.evaluation_end_time_s = 1000000
         self.assertAlmostEqual(prefix_service_cost(env), 10.1)
+
+    def test_terminal_credit_uses_cached_measurements_after_native_passenger_cleanup(self):
+        env, plan = self.environment([0, 0])
+        env.current_time = 2700
+        env._measurement_details = {"restricted_wait_horizon_min": 10, "peak_fleet": 14,
+            "headway_cv": .2, "passenger_unserved_rate": .1, "trip_completion_rate": 1}
+        plan.credit.begin(np.zeros(34), [0, 0], 5, 0)
+        expected = 1 + 4 / 12 + .2 + .5
+        self.assertNotAlmostEqual(prefix_service_cost(env), expected)
+        summary = plan.finish({"service_cost_restricted": round(expected, 6)})
+        self.assertAlmostEqual(summary["final_cost"], expected)
+        self.assertAlmostEqual(summary["reward_sum"], 100 * (5 - expected))
 
     def test_native_constructor_does_not_reset_upper_exploration_rng(self):
         def constructor(*args, **kwargs):

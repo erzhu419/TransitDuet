@@ -1,20 +1,49 @@
 {
+  "failure": "terminal credit recomputed passenger cost after native cleanup; no full training",
   "protocol": "native_transit_learned_residual_plan_stage157_v1",
   "run_name": "native_transit_learned_residual_plan_stage157_development_20261010_r1",
   "tasks": [
     {
-      "error": null,
+      "error": "terminal_cost_mismatch_in_qualification",
       "id": "t141463",
       "node": "node005",
       "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/397",
-      "status": "running"
+      "status": "failed"
     },
     {
-      "error": null,
+      "error": "terminal_cost_mismatch_in_qualification",
       "id": "t141464",
       "node": "node006",
       "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/401",
-      "status": "running"
+      "status": "failed"
+    },
+    {
+      "error": "terminal_cost_mismatch_in_qualification",
+      "id": "t141469",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/397",
+      "status": "failed"
+    },
+    {
+      "error": "terminal_cost_mismatch_in_qualification",
+      "id": "t141470",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/401",
+      "status": "failed"
+    },
+    {
+      "error": "stopped_old_code_retry",
+      "id": "t141471",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/397",
+      "status": "cancelled"
+    },
+    {
+      "error": "stopped_old_code_retry",
+      "id": "t141472",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r1/residual_sac/401",
+      "status": "cancelled"
     }
   ]
 }
