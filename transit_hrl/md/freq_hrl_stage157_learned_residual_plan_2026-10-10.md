@@ -40,11 +40,28 @@ Automatic retries t141469/t141470 failed; t141471/t141472 were cancelled.
 The failed attempt is retained separately.
 
 Corrected run `native_transit_learned_residual_plan_stage157_development_20261010_r2`:
-t141478/root397 RUNNING on node005; t141479/root401 RUNNING on node006.
+t141478/root397 and t141479/root401 are DONE (node005/node006).
 Both passed all three exact source reproductions and independent two-episode
 short learning (two SAC updates and nonzero actor change), then reset for full
 training with revision a780929ea5.
-Final learned-plan performance remains pending.
+All 240 training and 160 frozen evaluation episodes qualify, with 5,500 upper
+updates/root and 5,280 macro transitions/root; all forecast/nominal controls
+reproduce Stage156. Total main budget: 24,552,000 native ticks.
+
+| Learned minus control | Cost delta (397 / 401) | Wait delta, min (397 / 401) |
+| --- | --- | --- |
+| forecast | +0.022663 / -0.009668 | -0.02610 / +0.05955 |
+| nominal | +0.021896 / -0.012349 | -0.03330 / +0.03085 |
+| constant residual | -0.019579 / -0.011374 | +0.00380 / +0.04480 |
+
+Learned plans execute exactly, but do not establish a consistent improvement.
+Both cost gains over constant residual are dominated by one scene with one
+fewer peak bus (fleet-cost delta -0.020833/root); wait and headway CV worsen.
+Against forecast, root397 adds one peak bus in one burst scene; root401 removes
+one in one OOD scene. Residuals often approach action bounds. Mean critic MSE
+is 4,329/3,990, but its scale alone does not identify a learning bug.
+Next: frozen, prefix-matched single-decision interventions and credit-scale
+diagnostics before changing the learner or expanding seeds.
 
 ## Limitations
 
