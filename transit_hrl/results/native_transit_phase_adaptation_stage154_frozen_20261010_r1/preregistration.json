@@ -1,0 +1,82 @@
+{
+  "budget": {
+    "frozen_episodes": 200,
+    "native_ticks": 12276000,
+    "training_updates": 0
+  },
+  "constant_actions_s": {
+    "313": {
+      "constant_mean": 7.646124100685119,
+      "fixed5": 5.0,
+      "fixed7": 7.0,
+      "fixed9": 9.0
+    },
+    "331": {
+      "constant_mean": 6.601833009719849,
+      "fixed5": 5.0,
+      "fixed7": 7.0,
+      "fixed9": 9.0
+    }
+  },
+  "contract": {
+    "artifacts": "compact_JSON_only_server_checkpoint_reuse",
+    "baseline_gate": "all_source_baselines_reproduced_before_interventions",
+    "checkpoint_ep": 299,
+    "conditions": [
+      "baseline",
+      "constant_mean",
+      "fixed5",
+      "fixed7",
+      "fixed9"
+    ],
+    "constant_mean": "source_baseline_actor_call_weighted_mean_once_per_root",
+    "episodes_per_root": 100,
+    "fixed_commands_s": [
+      5,
+      7,
+      9
+    ],
+    "purpose": "post_result_phase_vs_adaptation_diagnosis_not_independent_confirmation",
+    "roots": [
+      313,
+      331
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_seeds": "all_twenty_registered_stage153_scenes_per_root",
+    "source_method": "unit_physical",
+    "source_protocol": "native_transit_critic_regularization_stage153_v1",
+    "source_run": "native_transit_critic_regularization_stage153_development_20261010_r1",
+    "training_clock_s": 61380,
+    "training_updates": 0,
+    "unchanged": [
+      "checkpoint",
+      "lower_policy",
+      "reward",
+      "critic",
+      "bounds",
+      "dispatch_execution"
+    ]
+  },
+  "protocol": "native_transit_phase_adaptation_stage154_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "28a8a8c951d64f57a7b8f80e31305cc1def5a345",
+  "tasks": 2
+}
