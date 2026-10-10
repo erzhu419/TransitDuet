@@ -1,0 +1,75 @@
+{
+  "budget": {
+    "frozen_episodes": 160,
+    "native_ticks": 24552000,
+    "native_upper_lower_updates": 0,
+    "training_episodes": 240,
+    "upper_updates_per_cell": 5500,
+    "worker_preflight_ticks": 389880
+  },
+  "contract": {
+    "action_dim": 2,
+    "batch_size": 64,
+    "conditions": [
+      "learned",
+      "forecast",
+      "nominal",
+      "constant_residual"
+    ],
+    "constant_control": "last_actor_mean_on_training_states_only_before_evaluation",
+    "credit": "causal_prefix_physical_cost_differences_telescope_to_same_terminal_cost",
+    "evaluation_scenes": "twenty_registered_source_scenes_per_lower_root",
+    "fleet": 12,
+    "gamma": 1.0,
+    "learner": "shared_FlatOffPolicyActorCritic_SAC_default_64x64_init_alpha_0.05",
+    "lower": "source_native_weights_deployment_state_and_deterministic_actions_frozen",
+    "lower_roots": {
+      "397": 347,
+      "401": 359
+    },
+    "plan": "forecast_plus_centered_linear_and_curvature_residual_committed_six_trips",
+    "preflight": false,
+    "primary": "own_learned_minus_forecast_and_constant_physical_cost",
+    "qualification": "three_full_source_reproductions_then_independent_two_short_learning_episodes",
+    "residual_scale_s": 20.0,
+    "reward_scale": 100.0,
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "selection": "last_episode_only",
+    "source_checkpoint": "stage155_one_step_299_no_selection",
+    "source_protocol": "native_transit_service_allocation_stage156_v1",
+    "source_run": "native_transit_service_allocation_stage156_frozen_20261010_r1",
+    "state_dim": 34,
+    "statistics": "two_root_development_not_confirmation_or_joint_HRL",
+    "train_episodes": 120,
+    "training_clock_s": 61380,
+    "training_scenes": "700000000_plus_upper_root_times1000_plus_episode_disjoint_from_eval",
+    "updates_per_episode": 50,
+    "warmup": 10
+  },
+  "protocol": "native_transit_learned_residual_plan_stage157_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "233a790a8c6ee0fb8d7e36fbf63326cf4d539e78",
+  "tasks": 2
+}

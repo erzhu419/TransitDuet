@@ -29,6 +29,11 @@ plus 389,880 qualification ticks; code-only scheduler node001-006.
 current-clock censoring, terminal-tail credit, SAC learning, actor-noise RNG
 preservation and rejection of unpaired controls or changed credit budgets.
 
+Run `native_transit_learned_residual_plan_stage157_development_20261010_r1`:
+t141463/root397 RUNNING on node005; t141464/root401 RUNNING on node006.
+Both reproduced the original learned-dispatch source episode. Remaining worker
+qualification and final learned-plan performance are pending.
+
 ## Limitations
 
 Two-root learned-upper development, not joint two-level training or confirmation.
@@ -38,3 +43,5 @@ separate state adaptation from a fixed bias. Goal-dependent lower reward stays
 diagnostic. No convergence guarantee is asserted for gamma=1 neural soft SAC.
 SAC retains entropy regularization; the telescoping equality concerns physical
 reward, not the entropy-augmented optimization objective.
+Fixed window endpoints prevent reallocating service between windows, not just
+changing total daily frequency; this experiment tests within-window planning.
