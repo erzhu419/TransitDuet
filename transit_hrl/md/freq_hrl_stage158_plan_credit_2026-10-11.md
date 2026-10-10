@@ -30,9 +30,20 @@ paired terminal credit, unrounded physical effects, analyzer rejection of change
 interventions/budgets and code-only unpinned scheduler placement.
 
 Run `native_transit_plan_credit_stage158_frozen_20261011_r1`: t141555-t141564
-launched on node004-006 (4/3/3 tasks), with no hard node pins. Both low-noise
-cells reproduced all three controls and completed the first prefix-matched
-zero-action intervention (decision8). Full intervention outcomes are pending.
+DONE on node004-006. All 90 episodes qualify, all 30 controls reproduce and
+all 60 single-decision interventions preserve their causal prefixes.
+
+35/60 alternatives reduce physical cost; the frozen critic assigns ALL 60 a
+negative action margin (rank agreement 25/60). State absolute maxima are only
+1.10-1.41. Root397's first action exceeds magnitude .95 at 90.5% of decisions.
+Raw prefix reward SD is 89.39-98.83; paired SD is 1.08-5.36, a 17.6-88.0-fold
+reduction on these paths. This supports testing reference-paired learning, not
+claiming that state normalization or more seeds will fix the problem.
+
+Next: keep the same 34 inputs, two actions, shared SAC, physical objective and
+frozen lower. Subtract action-independent same-scene forecast credit in replay.
+First reproduce Stage157 short RAW learning with the extra reference rollouts
+discarded, to detect RNG or protocol interference; then test paired learning.
 
 ## Limitations
 
