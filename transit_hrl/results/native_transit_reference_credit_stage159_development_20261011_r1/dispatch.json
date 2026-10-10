@@ -1,6 +1,16 @@
 {
   "protocol": "native_transit_reference_credit_stage159_v1",
   "run_name": "native_transit_reference_credit_stage159_development_20261011_r1",
+  "worker_qualification": {
+    "task_ids": ["t141573", "t141574"],
+    "full_forecast_source_reproduced": true,
+    "raw_short_with_discarded_references_reproduced": true,
+    "paired_short_episodes_per_root": 2,
+    "paired_short_sac_updates_per_root": 2,
+    "paired_short_actor_changed": true,
+    "marker": "REFERENCE_CREDIT_RAW_REPRODUCTION_AND_PAIRED_LEARNING_QUALIFIED",
+    "formal_training_uses_fresh_model_and_rng": true
+  },
   "tasks": [
     {
       "error": null,
