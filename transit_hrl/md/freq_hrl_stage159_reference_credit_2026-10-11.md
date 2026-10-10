@@ -31,11 +31,36 @@ reference rollouts in the controlled test, paired SAC updates, analysis budget
 rejection and code-only scheduler placement.
 
 Run `native_transit_reference_credit_stage159_development_20261011_r1`:
-t141573/root397 RUNNING on node004; t141574/root401 RUNNING on node006.
+t141573/root397 DONE on node004; t141574/root401 DONE on node006.
 Both workers passed full forecast reproduction, raw short-training reproduction
 with discarded reference rollouts, and paired short training with two SAC updates
 and actor parameter changes. Each resets the model/RNG for formal paired training.
-Final paired-policy performance is pending.
+All 240 factual training, 240 reference and 160 frozen evaluation episodes
+qualify; both roots completed 5,500 SAC updates and all 80 forecast/nominal
+evaluation controls reproduce Stage157. Main budget: 39,283,200 native ticks.
+
+| Learned minus control | Cost delta (397 / 401) | Wait delta, min (397 / 401) |
+| --- | --- | --- |
+| forecast | +0.021110 / +0.005702 | -0.01280 / +0.02130 |
+| constant residual | +0.000582 / +0.025582 | -0.01185 / +0.01275 |
+| registered raw SAC | -0.001553 / +0.015370 | +0.01330 / -0.03825 |
+
+Mean reward SD falls from 93.62/92.74 to 2.59/2.49; critic MSE falls from
+4,329/3,990 to 22.63/15.98. This does not establish better value ranking:
+the learning targets have changed scale, and physical performance is mixed.
+Against forecast the learned actor wins 9/20 and 4/20 scenes. Root397's mean
+fleet component increases by 0.020833 from one extra peak bus in one burst
+scene. Root401 has no fleet difference: waiting, headway and unserved costs
+all worsen. Against constant residual both roots worsen headway; sparse fleet
+changes dominate the largest regime differences. Near-zero constant controls
+do not explain away the learned actor's state-dependent variation, but that
+variation has not earned a reliable advantage.
+
+Next: same-scene reference credit with existing shared PPO, gamma=lambda=1
+and complete episodes (Monte Carlo targets), no entropy bonus or Q bootstrap.
+Keep native lower, 34 actor inputs, residual authority, scenes and terminal
+cost fixed. This is a bounded trainer-replacement test, not proof that Q
+bootstrapping alone caused failure; compare forecast AND training-only constant.
 
 ## Limitations
 

@@ -13,6 +13,31 @@ sys.path.insert(0, str(ROOT))
 from scripts import run_native_transit_reference_credit_stage159 as spec
 from scripts.analyze_native_transit_residual_plan_stage157 import validate_credit
 from freq_hrl.experiments.pointmaze_root_response import write_json
+from native_freqduet.env.evaluation import composite_service_cost
+
+
+def control_diagnostics(rows, root, condition):
+    differences, fleet_changes, wins = [], [], 0
+    for row in rows:
+        if row["condition"] != "learned":
+            continue
+        ref = next(r for r in rows if r["condition"] == condition
+                   and r["scenario"] == row["scenario"] and r["scene_seed"] == row["scene_seed"])
+        components = []
+        for r in (row, ref):
+            _, terms = composite_service_cost(r["restricted_wait_horizon_min"], r["peak_fleet"],
+                r["headway_cv"], r["N_fleet"], r["passenger_unserved_rate"], r["trip_completion_rate"])
+            components.append({k: v * (5 if k in {"unserved", "incomplete_service"} else 1)
+                               for k, v in terms.items()})
+        differences.append({k: components[0][k] - components[1][k] for k in components[0]})
+        wins += row["service_cost_restricted"] < ref["service_cost_restricted"]
+        if row["peak_fleet"] != ref["peak_fleet"]:
+            fleet_changes.append({"scenario": row["scenario"], "scene_seed": row["scene_seed"],
+                "learned_peak": row["peak_fleet"], "control_peak": ref["peak_fleet"]})
+    return {"root": root, "control": condition, "cost_wins": wins, "scenes": len(differences),
+        "weighted_component_delta_from_rounded_metrics": {
+            k: float(np.mean([d[k] for d in differences])) for k in differences[0]},
+        "fleet_changed_scenes": fleet_changes}
 
 
 def validate_training(run, root, *, mode, short):
@@ -42,7 +67,7 @@ def summarize(cells, raw_cells):
     if set(cells) != set(spec.ROOTS) or set(raw_cells) != set(spec.ROOTS):
         raise ValueError("Incomplete paired/raw roots")
     metrics = spec.source.source.source_spec.authority.routing.METRICS
-    means, panels, diagnostics, raw_deltas = {}, [], [], []
+    means, panels, diagnostics, raw_deltas, components = {}, [], [], [], []
     for root, cell in cells.items():
         raw = raw_cells[root]
         if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
@@ -86,6 +111,8 @@ def summarize(cells, raw_cells):
         raw_deltas.append({"root": root, **{k: means[root, "learned"][k] - float(np.mean([
             r[k] for r in raw["evaluation"] if r["condition"] == "learned"])) for k in metrics}})
         pairs = cell["training"]["credit_pairs"]
+        components.extend(control_diagnostics(cell["evaluation"], root, c)
+                          for c in ("forecast", "constant_residual"))
         diagnostics.append({"root": root, "paired_critic_loss": cell["training"]["learning_mean"]["critic_loss"],
             "raw_critic_loss": raw["training"]["learning_mean"]["critic_loss"],
             "mean_raw_reward_std": float(np.mean([p["raw_reward_std"] for p in pairs])),
@@ -95,7 +122,8 @@ def summarize(cells, raw_cells):
         "stage": "same_two_roots_scene_reuse_development_not_confirmation",
         "learned_minus_control": {c: [{"root": r, **{k: means[r, "learned"][k] - means[r, c][k] for k in metrics}}
             for r in spec.ROOTS] for c in spec.CONDITIONS if c != "learned"},
-        "paired_minus_registered_raw": raw_deltas, "learning_diagnostics": diagnostics, "regime_root_means": panels}
+        "paired_minus_registered_raw": raw_deltas, "learning_diagnostics": diagnostics,
+        "control_diagnostics": components, "regime_root_means": panels}
 
 
 def main():
