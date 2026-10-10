@@ -1,0 +1,69 @@
+{
+  "budget": {
+    "frozen_episodes": 240,
+    "native_ticks": 14731200,
+    "training_updates": 0
+  },
+  "contract": {
+    "artifacts": "compact_JSON_server_only_checkpoint_reuse",
+    "baseline_gate": "all_twenty_source_baselines_then_all_twenty_source_neutral_episodes_exact",
+    "block": {
+      "commitment": "each_block_once_before_first_departure_no_future_rewrite",
+      "departures_per_direction": 6,
+      "endpoints": "fixed_nominal",
+      "fixed_linear_interval_amplitude_s": 120,
+      "forecast": "current_causal_harmonic_inverse_sqrt_rate",
+      "interval_bounds_s": [
+        240,
+        480
+      ],
+      "lower_goal": "committed_service_interval",
+      "trip_count": "unchanged"
+    },
+    "checkpoint_choice": "one_step_both_registered_roots_no_performance_selection",
+    "checkpoint_ep": 299,
+    "conditions": [
+      "source_baseline",
+      "nominal_plan",
+      "frontload",
+      "backload",
+      "causal_forecast",
+      "forecast_reversed"
+    ],
+    "episodes_per_root": 120,
+    "roots": [
+      347,
+      359
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes_per_regime": 4,
+    "source_method": "one_step",
+    "source_protocol": "native_transit_trace_credit_stage155_v1",
+    "source_run": "native_transit_trace_credit_stage155_development_20261010_r1",
+    "stage": "frozen_representation_authority_not_learned_policy_validation",
+    "training_clock_s": 61380,
+    "training_updates": 0
+  },
+  "protocol": "native_transit_service_allocation_stage156_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "bbfe71c82110d950a2e11ef5c97f76f6e286429a",
+  "tasks": 2
+}

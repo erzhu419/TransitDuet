@@ -25,6 +25,10 @@ record actual-versus-planned intervals and fleet-cap release delays.
 bounded/communicated lower goals, fixed commitment, tail windows, paired analysis,
 code-only scheduler placement and preserved one-step optimizer behavior.
 
+Run `native_transit_service_allocation_stage156_frozen_20261010_r1`:
+t141325/root347 RUNNING on node006; t141326/root359 RUNNING on node005.
+Server reproduction and alternative-plan performance are pending.
+
 ## Limitations
 
 This qualifies an upper action representation, not learned upper superiority.
