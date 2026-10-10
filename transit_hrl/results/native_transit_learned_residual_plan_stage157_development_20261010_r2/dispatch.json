@@ -16,5 +16,19 @@
       "signature": "Freq-HRL/native_transit_learned_residual_plan_stage157_v1/native_transit_learned_residual_plan_stage157_development_20261010_r2/residual_sac/401",
       "status": "running"
     }
-  ]
+  ],
+  "worker_qualification": {
+    "actor_changed": true,
+    "causal_forecast": "exact",
+    "nominal_plan": "exact",
+    "observed_log_marker": "RESIDUAL_PLAN_SOURCE_AND_SHORT_LEARNING_QUALIFIED",
+    "short_learning_episodes": 2,
+    "short_learning_sac_updates": 2,
+    "source_baseline": "exact",
+    "task_ids": [
+      "t141478",
+      "t141479"
+    ],
+    "training_restart": "fresh_model_after_qualification"
+  }
 }

@@ -41,7 +41,9 @@ The failed attempt is retained separately.
 
 Corrected run `native_transit_learned_residual_plan_stage157_development_20261010_r2`:
 t141478/root397 RUNNING on node005; t141479/root401 RUNNING on node006.
-Both rerun qualification and start fresh learning with revision a780929ea5.
+Both passed all three exact source reproductions and independent two-episode
+short learning (two SAC updates and nonzero actor change), then reset for full
+training with revision a780929ea5.
 Final learned-plan performance remains pending.
 
 ## Limitations
