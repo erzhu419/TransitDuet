@@ -18,6 +18,22 @@ class NativeServicePlan:
         self.blocks, self.queries = [], {}
         self._targets = {}
 
+    def preferred_intervals(self, nominal, trip, now):
+        base, rates = np.diff(nominal), []
+        preference = base.copy()
+        if self.condition in {"frontload", "backload"}:
+            sign = 1 if self.condition == "frontload" else -1
+            preference += sign * 120 * np.linspace(-1, 1, len(base))
+        elif self.condition in {"causal_forecast", "forecast_reversed"}:
+            tracker = self.env.frequency_tracker
+            offsets = ((nominal[:-1] + nominal[1:]) / 2 - now) / tracker.bin_interval_s
+            rates = [max(float(tracker.global_state.forecast(float(t))), 1.0) for t in offsets]
+            inverse_sqrt = 1 / np.sqrt(rates)
+            forecast_intervals = inverse_sqrt / inverse_sqrt.sum() * base.sum()
+            preference = (forecast_intervals if self.condition == "causal_forecast"
+                          else 2 * base - forecast_intervals)
+        return preference, rates
+
     def __call__(self, state, trip):
         now, tid = float(self.env.current_time), int(trip.launch_turn)
         self.queries[tid] = now
@@ -32,19 +48,7 @@ class NativeServicePlan:
             if len(trips) < 3:
                 planned = nominal.astype(np.int64)
             else:
-                base = np.diff(nominal)
-                preference = base.copy()
-                if self.condition in {"frontload", "backload"}:
-                    sign = 1 if self.condition == "frontload" else -1
-                    preference += sign * 120 * np.linspace(-1, 1, len(base))
-                elif self.condition in {"causal_forecast", "forecast_reversed"}:
-                    tracker = self.env.frequency_tracker
-                    offsets = ((nominal[:-1] + nominal[1:]) / 2 - now) / tracker.bin_interval_s
-                    rates = [max(float(tracker.global_state.forecast(float(t))), 1.0) for t in offsets]
-                    inverse_sqrt = 1 / np.sqrt(rates)
-                    forecast_intervals = inverse_sqrt / inverse_sqrt.sum() * base.sum()
-                    preference = (forecast_intervals if self.condition == "causal_forecast"
-                                  else 2 * base - forecast_intervals)
+                preference, rates = self.preferred_intervals(nominal, trip, now)
                 planned = budgeted_time_points(nominal, preference, minimum=240, maximum=480)
             targets = np.r_[float(trips[0].target_headway), np.diff(planned)]
             if planned[0] < now:
