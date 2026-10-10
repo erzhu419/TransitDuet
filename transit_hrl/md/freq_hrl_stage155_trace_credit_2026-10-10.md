@@ -20,6 +20,10 @@ paired scenes, last checkpoint only. Scheduler node001-006, no local native run.
 delayed-credit propagation and bit-exact preserved one-step optimization.
 Stage153's archived summary is unchanged after the shared worker extension.
 
+Run `native_transit_trace_credit_stage155_development_20261010_r1`: t141036-t141039
+are running on node004/node005/node006. Both Retrace workers completed short
+two-level training and four frozen qualification conditions; full outcomes pending.
+
 Judge both whole-training contrasts and own learned-minus-fixed7/zero-upper;
 record effective trace mass and actual target correction, not just horizon=8.
 If credit propagates without useful adaptation, redesign upper plan variables.

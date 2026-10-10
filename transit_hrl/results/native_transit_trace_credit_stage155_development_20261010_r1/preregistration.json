@@ -1,0 +1,202 @@
+{
+  "budget": {
+    "critic_target_horizon": {
+      "one_step": 1,
+      "retrace8": 8
+    },
+    "frozen_episodes": 320,
+    "lower_updates_per_cell": 9000,
+    "native_ticks": 93297600,
+    "training_episodes": 1200,
+    "upper_updates_per_cell": 2700,
+    "worker_preflight_ticks": 129600
+  },
+  "contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_last_checkpoints",
+    "backup_horizon": {
+      "one_step": 1,
+      "retrace8": 8
+    },
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "fixed7",
+      "zero_holding"
+    ],
+    "credit": {
+      "fleet_weight": 1,
+      "headway_weight": 0,
+      "scale": 100,
+      "wait_weight": 1
+    },
+    "critic_action_units": {
+      "one_step": "unit",
+      "retrace8": "unit"
+    },
+    "decision": "no_expansion_without_state_adaptation_beyond_constant_phase",
+    "decision_clock": {
+      "channels": "max_zero_nominal_minus_120s"
+    },
+    "demand_end_time_s": 46980,
+    "dispatch_commitment_s": 120,
+    "evaluation_episodes_per_scenario": 4,
+    "frequency_routing": "correct",
+    "initialization": "fresh_native_RE_SAC_same_seed_no_checkpoint_warmstart",
+    "methods": {
+      "one_step": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "retrace8": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      }
+    },
+    "preflight": false,
+    "preflight_overrides": {},
+    "primary": "retrace_minus_one_step_and_own_learned_minus_fixed7_or_neutral",
+    "regularization": "fixed_physical_sum_no_further_tuning",
+    "roots": [
+      347,
+      359
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "statistics": "two_root_descriptive_delayed_credit_not_confirmation",
+    "trace": "stored_collection_density_clipped_pi_over_mu_soft_Bellman_residuals_terminal_masks",
+    "trace_lambda": 0.9,
+    "train_episodes": 300,
+    "training_clock_s": 61380,
+    "unchanged": [
+      "physical_lower_encoder",
+      "RE_SAC",
+      "networks",
+      "action_bounds",
+      "historical_priors",
+      "frequency_estimator",
+      "lower_reward",
+      "fleet_cap",
+      "leakage_penalties"
+    ],
+    "upper_authority": "baseline_minus_same_checkpoint_zero_upper_physical_outcomes",
+    "upper_warmup": 30,
+    "weight_reg_mode": {
+      "one_step": "physical_sum",
+      "retrace8": "physical_sum"
+    },
+    "worker_preflight": "short_two_level_learning_then_fresh_seed_reset_for_full_training"
+  },
+  "protocol": "native_transit_trace_credit_stage155_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "c20f16eda5134ffb8c08b28f8df8dc2eb6ebf4c8",
+  "tasks": 4,
+  "worker_preflight_contract": {
+    "actor_dims": {
+      "lower": 33,
+      "upper": 16
+    },
+    "artifacts": "compact_JSON_server_only_last_checkpoints",
+    "backup_horizon": {
+      "one_step": 1,
+      "retrace8": 8
+    },
+    "checkpoint": "last_training_episode_no_selection",
+    "conditions": [
+      "baseline",
+      "neutral_upper",
+      "fixed7",
+      "zero_holding"
+    ],
+    "credit": {
+      "fleet_weight": 1,
+      "headway_weight": 0,
+      "scale": 100,
+      "wait_weight": 1
+    },
+    "critic_action_units": {
+      "one_step": "unit",
+      "retrace8": "unit"
+    },
+    "decision": "no_expansion_without_state_adaptation_beyond_constant_phase",
+    "decision_clock": {
+      "channels": "max_zero_nominal_minus_120s"
+    },
+    "demand_end_time_s": 3600,
+    "dispatch_commitment_s": 120,
+    "evaluation_episodes_per_scenario": 1,
+    "frequency_routing": "correct",
+    "initialization": "fresh_native_RE_SAC_same_seed_no_checkpoint_warmstart",
+    "methods": {
+      "one_step": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      },
+      "retrace8": {
+        "authority_factor": "physical_lower_service_credit",
+        "coupling": "channels"
+      }
+    },
+    "preflight": true,
+    "preflight_overrides": {
+      "effective_trip_num": 24,
+      "lower_batch_size": 32,
+      "service_end_hour": 7,
+      "updates_per_episode": 2,
+      "upper_batch_size": 8
+    },
+    "primary": "retrace_minus_one_step_and_own_learned_minus_fixed7_or_neutral",
+    "regularization": "fixed_physical_sum_no_further_tuning",
+    "roots": [
+      347,
+      359
+    ],
+    "scenarios": [
+      "low_noise"
+    ],
+    "statistics": "two_root_descriptive_delayed_credit_not_confirmation",
+    "trace": "stored_collection_density_clipped_pi_over_mu_soft_Bellman_residuals_terminal_masks",
+    "trace_lambda": 0.9,
+    "train_episodes": 2,
+    "training_clock_s": 5400,
+    "unchanged": [
+      "physical_lower_encoder",
+      "RE_SAC",
+      "networks",
+      "action_bounds",
+      "historical_priors",
+      "frequency_estimator",
+      "lower_reward",
+      "fleet_cap",
+      "leakage_penalties"
+    ],
+    "upper_authority": "baseline_minus_same_checkpoint_zero_upper_physical_outcomes",
+    "upper_warmup": 1,
+    "weight_reg_mode": {
+      "one_step": "physical_sum",
+      "retrace8": "physical_sum"
+    },
+    "worker_preflight": "short_two_level_learning_then_fresh_seed_reset_for_full_training"
+  }
+}
