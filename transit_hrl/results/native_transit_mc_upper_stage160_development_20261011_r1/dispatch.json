@@ -16,5 +16,14 @@
       "status": "running"
     }
   ],
-  "worker_qualification": "pending"
+  "worker_qualification": {
+    "complete_episode_mc_targets_qualified": true,
+    "formal_training_uses_fresh_model_and_rng": true,
+    "full_forecast_source_reproduced": true,
+    "marker": "MC_UPPER_FORECAST_AND_COMPLETE_EPISODE_LEARNING_QUALIFIED",
+    "short_actor_changed": true,
+    "short_factual_episodes_per_root": 2,
+    "short_ppo_actor_updates_per_root": 2,
+    "short_reference_episodes_per_root": 2
+  }
 }

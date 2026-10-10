@@ -31,8 +31,10 @@ macro action likelihoods, the 768-step budget, paired physical controls and
 code-only scheduler output placement. Local learning tests use a fake simulator.
 
 Run `native_transit_mc_upper_stage160_development_20261011_r1`:
-t141677/root397 launched on node006; t141678/root401 launched on node001.
-Worker qualification and physical performance are pending.
+t141677/root397 RUNNING on node006; t141678/root401 RUNNING on node001.
+Both passed full forecast reproduction and complete-episode short training
+with two PPO updates and nonzero actor change, then reset for formal training.
+Physical performance is pending.
 
 ## Limitations
 
