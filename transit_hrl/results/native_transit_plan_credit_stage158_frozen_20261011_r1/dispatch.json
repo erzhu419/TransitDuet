@@ -1,4 +1,36 @@
 {
+  "initial_worker_checks": [
+    {
+      "first_prefix_matched_intervention": {
+        "alternative": "zero",
+        "decision_index": 8,
+        "physical_cost_delta": -0.0002247792100071866
+      },
+      "root": 397,
+      "scenario": "low_noise",
+      "source_controls_reproduced": [
+        "learned",
+        "forecast",
+        "constant_residual"
+      ],
+      "task_id": "t141555"
+    },
+    {
+      "first_prefix_matched_intervention": {
+        "alternative": "zero",
+        "decision_index": 8,
+        "physical_cost_delta": -0.0018522465864567739
+      },
+      "root": 401,
+      "scenario": "low_noise",
+      "source_controls_reproduced": [
+        "learned",
+        "forecast",
+        "constant_residual"
+      ],
+      "task_id": "t141560"
+    }
+  ],
   "protocol": "native_transit_plan_credit_stage158_v1",
   "run_name": "native_transit_plan_credit_stage158_frozen_20261011_r1",
   "tasks": [
