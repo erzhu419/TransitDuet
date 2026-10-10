@@ -30,6 +30,10 @@ float32 replay accounting, exact raw-SAC parameter reproduction with extra
 reference rollouts in the controlled test, paired SAC updates, analysis budget
 rejection and code-only scheduler placement.
 
+Run `native_transit_reference_credit_stage159_development_20261011_r1`:
+t141573/root397 RUNNING on node004; t141574/root401 RUNNING on node006.
+Worker qualification and final paired-policy performance are pending.
+
 ## Limitations
 
 This is a two-root development ablation reusing evaluation scenes, not fresh
