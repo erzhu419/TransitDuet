@@ -30,6 +30,10 @@ Only small result JSONs sync locally; checkpoints and native CSVs stay remote.
 macro action likelihoods, the 768-step budget, paired physical controls and
 code-only scheduler output placement. Local learning tests use a fake simulator.
 
+Run `native_transit_mc_upper_stage160_development_20261011_r1`:
+t141677/root397 launched on node006; t141678/root401 launched on node001.
+Worker qualification and physical performance are pending.
+
 ## Limitations
 
 Development scene/root reuse, not independent confirmation or joint HRL.

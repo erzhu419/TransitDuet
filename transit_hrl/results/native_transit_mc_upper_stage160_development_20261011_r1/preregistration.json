@@ -1,0 +1,110 @@
+{
+  "budget": {
+    "frozen_evaluation_episodes": 160,
+    "native_ticks": 39283200,
+    "native_updates": 0,
+    "reference_episodes": 240,
+    "training_episodes": 240,
+    "upper_actor_optimizer_steps_per_cell": 768,
+    "upper_value_optimizer_steps_per_cell": 768,
+    "worker_preflight_ticks": 165960
+  },
+  "contract": {
+    "actor": "existing_GaussianActor_two_tanh_layers_state_independent_log_std_init_minus1",
+    "batch_episodes": 5,
+    "boundary": "two_root_development_trainer_replacement_not_single_factor_Q_causality_or_confirmation",
+    "clip_ratio": 0.2,
+    "clock_s": 61380,
+    "collection": "all_on_policy_no_uniform_warmup_one_transition_per_macro_no_replay",
+    "credit": "same_scene_reference_paired_prefix_return_to_go_no_bootstrapped_Q_or_entropy_bonus",
+    "entropy_coef": 0.0,
+    "epochs": 8,
+    "evaluation_episodes": 80,
+    "execution": "tanh_latent_action_two_unchanged_20_second_residual_coefficients",
+    "gae_lambda": 1.0,
+    "gamma": 1.0,
+    "hidden_dim": 64,
+    "learner": "existing_FrequencySeparatedActorCriticPPO_upper_only_complete_episode_MC",
+    "method": "mc_ppo",
+    "minibatch_size": 64,
+    "native_updates": 0,
+    "preflight": false,
+    "reference_episodes": 120,
+    "roots": [
+      397,
+      401
+    ],
+    "selection": "last_actor_only_constant_from_training_states_before_evaluation",
+    "source_physical_contract": {
+      "action_dim": 2,
+      "batch_size": 64,
+      "conditions": [
+        "learned",
+        "forecast",
+        "nominal",
+        "constant_residual"
+      ],
+      "constant_control": "last_actor_mean_on_training_states_only_before_evaluation",
+      "credit": "causal_prefix_physical_cost_differences_telescope_to_same_terminal_cost",
+      "evaluation_scenes": "twenty_registered_source_scenes_per_lower_root",
+      "fleet": 12,
+      "gamma": 1.0,
+      "learner": "shared_FlatOffPolicyActorCritic_SAC_default_64x64_init_alpha_0.05",
+      "lower": "source_native_weights_deployment_state_and_deterministic_actions_frozen",
+      "lower_roots": {
+        "397": 347,
+        "401": 359
+      },
+      "plan": "forecast_plus_centered_linear_and_curvature_residual_committed_six_trips",
+      "preflight": false,
+      "primary": "own_learned_minus_forecast_and_constant_physical_cost",
+      "qualification": "three_full_source_reproductions_then_independent_two_short_learning_episodes",
+      "residual_scale_s": 20.0,
+      "reward_scale": 100.0,
+      "roots": [
+        397,
+        401
+      ],
+      "scenarios": [
+        "low_noise",
+        "high_noise",
+        "hour_burst",
+        "persistent_shift",
+        "ood_period"
+      ],
+      "selection": "last_episode_only",
+      "source_checkpoint": "stage155_one_step_299_no_selection",
+      "source_protocol": "native_transit_service_allocation_stage156_v1",
+      "source_run": "native_transit_service_allocation_stage156_frozen_20261010_r1",
+      "state_dim": 34,
+      "statistics": "two_root_development_not_confirmation_or_joint_HRL",
+      "train_episodes": 120,
+      "training_clock_s": 61380,
+      "training_scenes": "700000000_plus_upper_root_times1000_plus_episode_disjoint_from_eval",
+      "updates_per_episode": 50,
+      "warmup": 10
+    },
+    "source_protocol": "native_transit_reference_credit_stage159_v1",
+    "source_run": "native_transit_reference_credit_stage159_development_20261011_r1",
+    "training_episodes": 120,
+    "upper_actor_optimizer_steps": 768,
+    "upper_learning_rate": 0.0003,
+    "value": "MC_regression_only_previous_frozen_value_as_action_independent_baseline"
+  },
+  "protocol": "native_transit_mc_upper_stage160_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "884d11c995380e1af3f14bb08692d3a4c693865c",
+  "tasks": 2
+}
