@@ -29,6 +29,10 @@ Only compact JSON is returned; existing server checkpoints stay on servers.
 paired terminal credit, unrounded physical effects, analyzer rejection of changed
 interventions/budgets and code-only unpinned scheduler placement.
 
+Run `native_transit_plan_credit_stage158_frozen_20261011_r1`: t141555-t141564
+launched on node004-006 (4/3/3 tasks), with no hard node pins. Source-control
+reproduction and intervention outcomes are pending.
+
 ## Limitations
 
 One diagnostic scene/root/regime, not a new performance or statistical claim.

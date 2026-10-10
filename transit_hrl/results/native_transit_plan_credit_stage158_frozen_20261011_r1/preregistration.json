@@ -1,0 +1,61 @@
+{
+  "budget": {
+    "frozen_episodes": 90,
+    "native_ticks": 5524200,
+    "training_episodes": 0
+  },
+  "contract": {
+    "alternatives": [
+      "zero",
+      "opposite"
+    ],
+    "boundary": "soft_stochastic_Q_vs_deterministic_deployment_rank_diagnostic_not_Bellman_calibration",
+    "clock_s": 61380,
+    "controls": [
+      "learned",
+      "forecast",
+      "constant_residual"
+    ],
+    "credit": "raw_and_forecast_paired_prefix_differences_same_terminal_physical_cost",
+    "critic": "min_twin_Q_action_margin_at_same_preintervention_state",
+    "episodes_per_cell": 9,
+    "intervention": "one_macro_action_only_then_same_frozen_deterministic_actor",
+    "prefix": "identical_causal_states_actions_cost_and_exogenous_seed_before_intervention",
+    "probe_decision_indices": [
+      8,
+      22,
+      36
+    ],
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene": "first_registered_stage157_scene_per_root_and_regime_no_selection",
+    "source_protocol": "native_transit_learned_residual_plan_stage157_v1",
+    "source_run": "native_transit_learned_residual_plan_stage157_development_20261010_r2",
+    "training_updates": 0
+  },
+  "protocol": "native_transit_plan_credit_stage158_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "9491be03597d832161861bc040ace501468920da",
+  "tasks": 10
+}
