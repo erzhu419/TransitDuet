@@ -37,8 +37,12 @@ zero-residual terminal credit read passenger lists AFTER native cleanup.
 Terminal credit now uses the native cached terminal measurements; active-prefix
 credit still uses current-clock live state. No objective or tolerance changed.
 Automatic retries t141469/t141470 failed; t141471/t141472 were cancelled.
-The failed attempt is retained separately. A corrected r2 will rerun qualification
-and start fresh learning; final learned-plan performance remains pending.
+The failed attempt is retained separately.
+
+Corrected run `native_transit_learned_residual_plan_stage157_development_20261010_r2`:
+t141478/root397 RUNNING on node005; t141479/root401 RUNNING on node006.
+Both rerun qualification and start fresh learning with revision a780929ea5.
+Final learned-plan performance remains pending.
 
 ## Limitations
 
