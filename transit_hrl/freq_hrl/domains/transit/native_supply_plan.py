@@ -69,6 +69,9 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
             ends.append(start + self.trip_duration(bool(tt.direction)))
         return max(self.env._peak_concurrent, occupancy_peak(starts, ends))
 
+    def candidate_fleet_cost(self, peak, planned_by_id, now):
+        return max(peak - self.env._n_fleet_target, 0) ** 2 / self.env._n_fleet_target, {}
+
     def preferred_intervals(self, nominal, trip, now):
         self.observe_completions(now)
         forecast, rates = super().preferred_intervals(nominal, trip, now)
@@ -87,11 +90,12 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
             # Uniform arrivals within each predicted interval: mean wait h/2.
             wait_cost = float(np.sum(demand * intervals**2) / (2 * np.sum(demand * intervals)) / 600)
             regularity = float(intervals.std() / intervals.mean())
-            peak = self.predicted_peak({int(t.launch_turn): float(p) for t, p in zip(remaining, planned)}, now)
-            fleet_cost = max(peak - self.env._n_fleet_target, 0) ** 2 / self.env._n_fleet_target
+            planned_by_id = {int(t.launch_turn): float(p) for t, p in zip(remaining, planned)}
+            peak = self.predicted_peak(planned_by_id, now)
+            fleet_cost, diagnostics = self.candidate_fleet_cost(peak, planned_by_id, now)
             score = wait_cost + (fleet_cost if self.selection == "supply_aware" else 0.)
             candidates.append({"strength": strength, "wait_cost": wait_cost, "headway_cost": regularity,
-                "predicted_peak": peak, "fleet_cost": float(fleet_cost), "score": float(score)})
+                "predicted_peak": peak, "fleet_cost": float(fleet_cost), "score": float(score), **diagnostics})
             preferences.append(preference)
         selected = min(range(len(candidates)), key=lambda i: candidates[i]["score"])
         self.decisions.append({"time_s": now, "direction": bool(trip.direction),

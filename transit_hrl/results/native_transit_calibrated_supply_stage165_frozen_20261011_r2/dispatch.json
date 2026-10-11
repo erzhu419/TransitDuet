@@ -1,25 +1,26 @@
 {
   "protocol": "native_transit_calibrated_supply_stage165_v1",
   "run_name": "native_transit_calibrated_supply_stage165_frozen_20261011_r2",
-  "performance": "pending_full_matrix",
+  "performance": "completed_zero_physical_effect_vs_legacy_supply_negative_cost_vs_window",
   "calibration_input": "inputs/calibration_summary.json",
   "input_staging": "new_run_inputs_only_no_historical_result_sync_target",
   "worker_source_qualification": {
-    "t142211": ["first_scene_window_forecast"],
-    "t142216": ["first_scene_window_forecast", "first_scene_legacy_supply"],
-    "full_matrix": "pending"
+    "full_matrix": "qualified",
+    "source_control_reproductions": 120,
+    "frozen_episodes": 160,
+    "native_ticks": 9820800
   },
   "scheduler": {"allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"], "require_node": null},
   "tasks": [
-    {"id": "t142211", "seed": 397, "scenario": "low_noise", "node": "node001", "status": "running"},
-    {"id": "t142212", "seed": 397, "scenario": "high_noise", "node": "node001", "status": "running"},
-    {"id": "t142213", "seed": 397, "scenario": "hour_burst", "node": "node001", "status": "running"},
-    {"id": "t142214", "seed": 397, "scenario": "persistent_shift", "node": "node001", "status": "running"},
-    {"id": "t142215", "seed": 397, "scenario": "ood_period", "node": "node001", "status": "running"},
-    {"id": "t142216", "seed": 401, "scenario": "low_noise", "node": "node001", "status": "running"},
-    {"id": "t142217", "seed": 401, "scenario": "high_noise", "node": "node001", "status": "running"},
-    {"id": "t142218", "seed": 401, "scenario": "hour_burst", "node": "node001", "status": "running"},
-    {"id": "t142219", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "running"},
-    {"id": "t142220", "seed": 401, "scenario": "ood_period", "node": "node006", "status": "running"}
+    {"id": "t142211", "seed": 397, "scenario": "low_noise", "node": "node001", "status": "done"},
+    {"id": "t142212", "seed": 397, "scenario": "high_noise", "node": "node001", "status": "done"},
+    {"id": "t142213", "seed": 397, "scenario": "hour_burst", "node": "node001", "status": "done"},
+    {"id": "t142214", "seed": 397, "scenario": "persistent_shift", "node": "node001", "status": "done"},
+    {"id": "t142215", "seed": 397, "scenario": "ood_period", "node": "node001", "status": "done"},
+    {"id": "t142216", "seed": 401, "scenario": "low_noise", "node": "node001", "status": "done"},
+    {"id": "t142217", "seed": 401, "scenario": "high_noise", "node": "node001", "status": "done"},
+    {"id": "t142218", "seed": 401, "scenario": "hour_burst", "node": "node001", "status": "done"},
+    {"id": "t142219", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "done"},
+    {"id": "t142220", "seed": 401, "scenario": "ood_period", "node": "node006", "status": "done"}
   ]
 }
