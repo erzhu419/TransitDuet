@@ -1,0 +1,70 @@
+{
+  "budget": {
+    "new_counterfactual_episodes": 0,
+    "new_native_episodes": 20,
+    "new_native_steps": 1227600,
+    "paired_labels_reused": 720,
+    "policy_updates": 0
+  },
+  "contract": {
+    "boundary": "passive_causal_representation_data_not_new_policy_performance_or_independent_confirmation",
+    "clock_s": 61380,
+    "context": "all_six_full_candidate_time_curves_and_ordered_pending_trips_in_both_directions_with_commitment_and_goals",
+    "episodes_per_cell": 1,
+    "event_features": [
+      "nominal_offset",
+      "scheduled_offset",
+      "candidate_offset",
+      "same_direction",
+      "committed",
+      "current_headway_goal"
+    ],
+    "fleet": 12,
+    "labels": "unchanged_720_counterfactual_labels_on_120_states_in_20_development_scenes",
+    "policy": "unchanged_original_greedy_selector_and_frozen_native_lower",
+    "probes": [
+      8,
+      9,
+      22,
+      23,
+      36,
+      37
+    ],
+    "qualification": "exact_source_physics_schedule_supply_windows_six_labelled_states_and_existing_occupancy_context",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_indices": [
+      0,
+      1
+    ],
+    "source_protocol": "native_transit_tail_value_stage184_v1",
+    "source_run": "native_transit_tail_value_stage184_fit_20261012_r1",
+    "storage": "full_observer_and_raw_server_only_compact_context_JSON_only_for_sync",
+    "training_updates": 0
+  },
+  "protocol": "native_transit_timetable_context_stage185_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "8a982306f976c78203a1cbb2967fe153a6b33862",
+  "tasks": 20
+}

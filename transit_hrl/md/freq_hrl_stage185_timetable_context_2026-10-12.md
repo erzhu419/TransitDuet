@@ -19,6 +19,17 @@ labels/groups before expanding independent development-scene coverage.
 Fifteen focused tests pass: six new capture/sequence/join/scheduler tests
 and nine existing passive-context/commitment regressions.
 
+## Result and Next Step
+
+t143310-t143329 all completed exit0 on node001/004/005/006. The merge
+qualified all twenty original controls, 120 states and unchanged 720 labels.
+Event sequences contain 45-215 pending departures. Only 6,705,434 bytes
+of context JSON were synced; no full observer, raw data or checkpoint pulls.
+The known candidate3/4 alias differs at 55 tentative departures by up to
+66 seconds in the recovered full representation, despite equal prefixes.
+Next: matched full-sequence value training, then independent development
+scenes for wait-value generalization.
+
 ## Limitations
 
 This step repairs missing causal input data, not policy performance.
