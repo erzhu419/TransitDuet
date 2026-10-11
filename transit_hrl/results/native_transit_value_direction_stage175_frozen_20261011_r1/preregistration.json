@@ -1,0 +1,71 @@
+{
+  "budget": {
+    "cumulative_frozen_episodes": 420,
+    "cumulative_training_states": 60,
+    "new_frozen_episodes": 210,
+    "new_native_ticks": 12889800,
+    "new_paired_interventions": 180,
+    "new_source_control_reproductions": 60,
+    "training_updates": 0
+  },
+  "contract": {
+    "boundary": "60_correlated_bidirectional_training_states_360_labels_after_merge_not_policy_performance_validation",
+    "clock_s": 61380,
+    "coverage": "adjacent_opposite_direction_decisions_same_ten_training_scenes_no_outcome_selection",
+    "episodes_per_cell": 7,
+    "fleet": 12,
+    "intervention": "one_original_selector_candidate_then_resume_original_greedy_selector",
+    "labels": "postepisode_actual_terminal_cost_minus_original_same_state_continuation_fleet_nonfleet_wait_and_reward",
+    "model": "unchanged_Stage169_fit_only_duration_prior_64_draws_and_original_greedy_continuation",
+    "paired_probes": [
+      8,
+      22,
+      36
+    ],
+    "paired_source_protocol": "native_transit_value_data_stage174_v1",
+    "paired_source_run": "native_transit_value_data_stage174_frozen_20261011_r1",
+    "pairing": "exact_prior_scores_actions_native_states_prefix_cost_and_python_numpy_torch_scenario_RNG",
+    "probes": [
+      9,
+      23,
+      37
+    ],
+    "qualification": "30_exact_observers_30_exact_identity_controls_180_paired_interventions_210_window_ledgers",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene": "first_registered_Stage169_scene_per_regime_training_only_disjoint_from_811_Stage173_checks",
+    "source_protocol": "native_transit_incumbent_window_stage169_v1",
+    "source_run": "native_transit_incumbent_window_stage169_frozen_20261011_r1",
+    "state": "causal_native_v2_frequency_state16_plus_preaction_queue_onboard_active_speed_and_prefix_cost",
+    "training_updates": 0
+  },
+  "model_inputs": [
+    "inputs/models.json",
+    "inputs/paired_source.json"
+  ],
+  "protocol": "native_transit_value_direction_stage175_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "7c4835ae5016b47bb695a1e432eca2c93f2fa9d7",
+  "tasks": 30
+}

@@ -19,6 +19,12 @@ fleet/nonfleet action-value differences, then evaluate native closed-loop cost.
 70 focused tests pass, including unchanged Stage174 collection, opposite
 direction/scene/index qualification, cumulative budgets and unique task paths.
 
+Run `native_transit_value_direction_stage175_frozen_20261011_r1`, revision
+`7c4835ae50`, tasks `t142960-t142989`: all launched, node004/005/006 ten each,
+with node001-006 allowed and no binding. All 30 observers and 30 identity
+branches reproduce exact native sources. Some complete markers are present;
+final data qualification/merge is pending. Only small startup logs were read.
+
 ## Limitations
 
 Only ten development scenes and two frozen lower roots; adjacent states share
