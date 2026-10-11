@@ -1,0 +1,40 @@
+{
+  "aggregation": {
+    "exit_code": 0,
+    "id": "t143124",
+    "node": "node004",
+    "status": "done"
+  },
+  "exit_codes": {
+    "0": 60
+  },
+  "node_counts": {
+    "node004": 20,
+    "node005": 20,
+    "node006": 20
+  },
+  "observed_at_utc": "2026-10-11T13:59:31.790423+00:00",
+  "protocol": "native_transit_value_transfer_stage179_v1",
+  "pulled_files": [
+    {
+      "bytes": 1240288,
+      "path": "summary.json"
+    }
+  ],
+  "qualification": {
+    "actor_updates": 0,
+    "critic_updates": 0,
+    "evaluation_states": 60,
+    "frozen_transfer_improves_both_roots": false,
+    "native_steps": 25779600,
+    "paired_interventions": 360,
+    "software_qualified": true,
+    "source_control_reproductions": 120,
+    "window_ledger_qualified_episodes": 420
+  },
+  "run_name": "native_transit_value_transfer_stage179_frozen_20261011_r1",
+  "source_revision": "ec8dbf44f68f2fa7cb6b3683441b7631db09d480",
+  "status_counts": {
+    "done": 60
+  }
+}

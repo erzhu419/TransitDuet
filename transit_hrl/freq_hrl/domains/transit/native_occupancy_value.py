@@ -68,15 +68,26 @@ def expected_regret(predicted, actual_cost):
     return (probabilities*regret).sum(dim=-1).mean()
 
 
-def fit_value(rows, method, *, steps=STEPS):
+def training_cost_scales(targets, normalization):
+    native_scale = max(float(np.sqrt(np.mean(targets.sum(axis=-1)**2))), 1e-6)
+    if normalization == "joint_native":
+        return native_scale, native_scale
+    if normalization == "paired_heads":
+        a, b = np.triu_indices(6, 1)
+        return np.maximum(np.sqrt(np.mean((targets[:, a]-targets[:, b])**2, axis=(0, 1))), 1e-6), native_scale
+    raise ValueError("Unknown native value cost normalization")
+
+
+def fit_value(rows, method, *, steps=STEPS, normalization="joint_native"):
     raw = np.stack([features(row, method) for row in rows])
     labels = [{l["candidate"]: l for l in row["labels"]} for row in rows]
     targets = np.asarray([[[l[i][h] for h in paired.HEADS] for i in range(6)] for l in labels])
     center, scale = raw.mean(axis=(0, 1)), raw.std(axis=(0, 1))
     scale[scale < 1e-8] = 1.
-    cost_scale = max(float(np.sqrt(np.mean(targets.sum(axis=-1)**2))), 1e-6)
+    cost_scale, native_scale = training_cost_scales(targets, normalization)
     x = torch.as_tensor((raw-center)/scale, dtype=torch.float32)
     y = torch.as_tensor(targets/cost_scale, dtype=torch.float32)
+    native_units = torch.as_tensor(np.asarray(cost_scale)/native_scale, dtype=torch.float32)
     a, b = (torch.as_tensor(v, dtype=torch.long) for v in np.triu_indices(6, 1))
     ledger = []
     with torch.random.fork_rng(devices=[]):
@@ -87,7 +98,7 @@ def fit_value(rows, method, *, steps=STEPS):
         for step in range(steps):
             predicted = network(x)
             mse = ((predicted[:, a]-predicted[:, b]-(y[:, a]-y[:, b]))**2).mean()
-            regret = expected_regret(predicted, y.sum(dim=-1))
+            regret = expected_regret(predicted*native_units, (y*native_units).sum(dim=-1))
             loss = mse+regret if METHODS[method][1] else mse
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -97,7 +108,8 @@ def fit_value(rows, method, *, steps=STEPS):
         weights = {k: v.detach().numpy().tolist() for k, v in network.state_dict().items()}
         update_l2 = float(torch.sqrt(sum(((p.detach()-old)**2).sum() for p, old in zip(network.parameters(), initial))))
     return {"method": method, "heads": list(paired.HEADS), "center": center.tolist(), "scale": scale.tolist(),
-        "cost_scale": cost_scale, "weights": weights, "steps": steps, "initialization_seed": SEED,
+        "cost_scale": np.asarray(cost_scale).tolist(), "regret_cost_scale": native_scale,
+        "normalization": normalization, "weights": weights, "steps": steps, "initialization_seed": SEED,
         "parameter_count": sum(p.numel() for p in network.parameters()), "loss_ledger": ledger,
         "parameter_update_l2": update_l2,
         "training_states": len(rows), "pairwise_examples": len(rows)*15,

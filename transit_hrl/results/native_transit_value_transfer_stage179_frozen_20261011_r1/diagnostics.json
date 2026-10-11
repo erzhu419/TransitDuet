@@ -1,0 +1,128 @@
+{
+  "bank_fleet_label_coverage": {
+    "first": {
+      "397": {
+        "negative": 0,
+        "positive": 23
+      },
+      "401": {
+        "negative": 1,
+        "positive": 0
+      }
+    },
+    "second": {
+      "397": {
+        "negative": 15,
+        "positive": 1
+      },
+      "401": {
+        "negative": 12,
+        "positive": 4
+      }
+    }
+  },
+  "boundary": "descriptive_development_diagnosis_not_significance_or_policy_confirmation",
+  "paired_first_bank_head_RMS": {
+    "fleet_cost_delta": 0.12422599874998823,
+    "nonfleet_cost_delta": 0.01451327723156445
+  },
+  "paired_variance_ratio": 73.26457113141983,
+  "selected_mean_predicted_heads": {
+    "fleet_cost_delta": -0.11738690182914975,
+    "nonfleet_cost_delta": -0.012282713683156869
+  },
+  "selected_predicted_fleet_savings_states": 45,
+  "selected_realized_fleet_changes": [
+    {
+      "actual_cost_delta": -0.41430999999999996,
+      "best_realized_cost_delta": -0.41430999999999996,
+      "concordant_pairs": 7,
+      "direction": true,
+      "episode_reward_delta": -0.3250000000000455,
+      "fleet_cost_delta": -0.4166666666666667,
+      "nonfleet_cost_delta": 0.002356666666666729,
+      "original_choice": 5,
+      "predicted_heads": [
+        [
+          0.30065954631060626,
+          -0.019333027249104587
+        ],
+        [
+          -0.0723294418393709,
+          -0.004136667307013675
+        ],
+        [
+          -0.36229794553924805,
+          -0.048015442057474864
+        ],
+        [
+          -0.09757125430471697,
+          -0.06222408194902144
+        ],
+        [
+          0.1497716873231113,
+          -0.05473354137077916
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "probe_index": 8,
+      "regret": 0.0,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 900035911,
+      "selected": 2,
+      "strict_pairs": 15,
+      "tied_predicted_pairs": 0,
+      "wait_delta_min": 0.028999999999999915
+    },
+    {
+      "actual_cost_delta": -0.415378,
+      "best_realized_cost_delta": -0.415378,
+      "concordant_pairs": 12,
+      "direction": true,
+      "episode_reward_delta": 7.386999999999944,
+      "fleet_cost_delta": -0.4166666666666667,
+      "nonfleet_cost_delta": 0.0012886666666666602,
+      "original_choice": 5,
+      "predicted_heads": [
+        [
+          0.16654787433882198,
+          -0.017744825016955686
+        ],
+        [
+          0.015845198816321238,
+          -0.009202043122458634
+        ],
+        [
+          -0.05936344068289623,
+          -0.0011062326344311105
+        ],
+        [
+          -0.0861713103232642,
+          -0.012183370486628223
+        ],
+        [
+          -0.11509310212229762,
+          -0.024788490324643458
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "probe_index": 36,
+      "regret": 0.0,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 900035921,
+      "selected": 4,
+      "strict_pairs": 15,
+      "tied_predicted_pairs": 0,
+      "wait_delta_min": 0.028999999999999915
+    }
+  ],
+  "selected_realized_fleet_savings_states": 2
+}
