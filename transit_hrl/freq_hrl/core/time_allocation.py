@@ -27,3 +27,22 @@ def budgeted_time_points(nominal, preferred_intervals, *, minimum, maximum):
     points = np.r_[nominal[0], nominal[0] + np.cumsum(base + scale * delta)]
     points[-1] = nominal[-1]
     return np.rint(points).astype(np.int64)
+
+
+def projected_time_points(nominal, preferred_intervals, *, minimum, maximum):
+    """Project all remaining intervals onto box bounds and an exact time budget."""
+    from scipy.optimize import brentq
+
+    nominal = np.asarray(nominal, dtype=np.float64)
+    base, preferred = np.diff(nominal), np.asarray(preferred_intervals, dtype=np.float64)
+    if (nominal.ndim != 1 or len(nominal) < 2 or preferred.shape != base.shape
+            or not np.all(np.isfinite(nominal)) or not np.all(np.isfinite(preferred))
+            or not 0 < minimum <= maximum or np.any(base < minimum) or np.any(base > maximum)):
+        raise ValueError("Expected feasible event endpoints and one finite preference per interval")
+    budget = nominal[-1] - nominal[0]
+    offset = brentq(lambda x: np.clip(preferred - x, minimum, maximum).sum() - budget,
+                   float(preferred.min() - maximum), float(preferred.max() - minimum))
+    intervals = np.clip(preferred - offset, minimum, maximum)
+    points = np.r_[nominal[0], nominal[0] + np.cumsum(intervals)]
+    points[-1] = nominal[-1]
+    return np.rint(points).astype(np.int64)
