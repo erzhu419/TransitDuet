@@ -32,6 +32,9 @@ Run `native_transit_rolling_authority_stage161_frozen_20261011_r1`:
 t141969-t141978 launched on node001/004/005/006. First-scene qualification
 requires window forecast, window nominal and rolling nominal to reproduce
 Stage160 before extended authority runs. Final physical performance is pending.
+The low-noise workers t141969/t141974 passed this first-scene qualification.
+Their rolling forecasts move window endpoints, but first-scene cost contrasts
+have opposite signs; this establishes execution, not a performance advantage.
 
 ## Limitations
 
