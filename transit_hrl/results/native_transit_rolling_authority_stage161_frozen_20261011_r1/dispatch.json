@@ -1,5 +1,5 @@
 {
-  "performance": "pending",
+  "performance": "wait_improves_but_fleet_cost_worsens_on_both_roots",
   "protocol": "native_transit_rolling_authority_stage161_v1",
   "run_name": "native_transit_rolling_authority_stage161_frozen_20261011_r1",
   "tasks": [
@@ -7,93 +7,67 @@
       "id": "t141978",
       "node": "node004",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/ood_period/401",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141977",
       "node": "node006",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/persistent_shift/401",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141976",
       "node": "node001",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/hour_burst/401",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141975",
       "node": "node005",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/high_noise/401",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141974",
       "node": "node004",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/low_noise/401",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141973",
       "node": "node004",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/ood_period/397",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141972",
       "node": "node001",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/persistent_shift/397",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141971",
       "node": "node005",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/hour_burst/397",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141970",
       "node": "node006",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/high_noise/397",
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t141969",
       "node": "node006",
       "signature": "Freq-HRL/native_transit_rolling_authority_stage161_v1/native_transit_rolling_authority_stage161_frozen_20261011_r1/low_noise/397",
-      "status": "running"
+      "status": "done"
     }
   ],
   "worker_qualification": {
-    "t141969": {
-      "first_scene_source_marker_observed": true
-    },
-    "t141970": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141971": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141972": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141973": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141974": {
-      "first_scene_source_marker_observed": true
-    },
-    "t141975": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141976": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141977": {
-      "first_scene_source_marker_observed": false
-    },
-    "t141978": {
-      "first_scene_source_marker_observed": false
-    }
+    "completed_cells": 10,
+    "source_control_reproductions": 120,
+    "native_steps": 12276000,
+    "software_qualified": true
   }
 }

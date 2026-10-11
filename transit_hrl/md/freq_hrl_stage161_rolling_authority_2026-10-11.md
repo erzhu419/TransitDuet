@@ -29,12 +29,25 @@ real native-dispatch timing/goals, irrevocable commitments, tail windows, source
 reproduction, worker control qualification and analyzer/scheduler budget checks.
 
 Run `native_transit_rolling_authority_stage161_frozen_20261011_r1`:
-t141969-t141978 launched on node001/004/005/006. First-scene qualification
-requires window forecast, window nominal and rolling nominal to reproduce
-Stage160 before extended authority runs. Final physical performance is pending.
-The low-noise workers t141969/t141974 passed this first-scene qualification.
-Their rolling forecasts move window endpoints, but first-scene cost contrasts
-have opposite signs; this establishes execution, not a performance advantage.
+t141969-t141978 DONE on node001/004/005/006. All 200 episodes and 120 source
+control reproductions qualify; all 12,276,000 native ticks completed.
+
+| Rolling forecast minus window forecast | Root397 | Root401 |
+| --- | --- | --- |
+| Cost | +0.179531 | +0.107845 |
+| Restricted wait, min | -0.82495 | -0.68220 |
+| Fleet cost component | +0.250000 | +0.166667 |
+| Nonfleet cost component | -0.070469 | -0.058822 |
+| Mean peak fleet | +0.60 | +0.40 |
+| Cost wins / 20 scenes | 4 | 9 |
+
+Unlike Stage160, waiting changes are material, especially high-noise/burst
+regimes. The full reallocation nevertheless worsens cost and native intrinsic
+reward on both roots; headway CV and unserved rate also rise. Reversing the
+forecast is much worse (cost +1.431080/+1.269520; wait +8.77805/+7.83795 min).
+Wider authority has a real service/resource tradeoff, not a net success.
+Next: a preregistered allocation-strength frontier (0, .25, .5, .75, 1), before
+training an adaptive strength policy or changing the physical objective.
 
 ## Limitations
 
