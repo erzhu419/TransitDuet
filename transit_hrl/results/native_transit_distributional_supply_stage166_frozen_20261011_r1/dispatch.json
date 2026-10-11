@@ -1,0 +1,24 @@
+{
+  "protocol": "native_transit_distributional_supply_stage166_v1",
+  "run_name": "native_transit_distributional_supply_stage166_frozen_20261011_r1",
+  "source_revision": "47581e6da10441a3cbab43b5a5476b37e9215c45",
+  "performance": "pending_full_matrix",
+  "input_staging": "code_and_new_run_inputs_only_no_historical_raw_sync_targets",
+  "worker_source_qualification": {
+    "t142266": ["first_scene_window_forecast", "first_scene_calibrated_supply"],
+    "full_matrix": "pending_80_source_controls"
+  },
+  "scheduler": {"allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"], "require_node": null},
+  "tasks": [
+    {"id": "t142266", "seed": 397, "scenario": "low_noise", "node": "node001", "status": "running"},
+    {"id": "t142267", "seed": 397, "scenario": "high_noise", "node": "node004", "status": "running"},
+    {"id": "t142268", "seed": 397, "scenario": "hour_burst", "node": "node006", "status": "running"},
+    {"id": "t142269", "seed": 397, "scenario": "persistent_shift", "node": "node001", "status": "running"},
+    {"id": "t142270", "seed": 397, "scenario": "ood_period", "node": "node005", "status": "running"},
+    {"id": "t142271", "seed": 401, "scenario": "low_noise", "node": "node004", "status": "running"},
+    {"id": "t142272", "seed": 401, "scenario": "high_noise", "node": "node006", "status": "running"},
+    {"id": "t142273", "seed": 401, "scenario": "hour_burst", "node": "node001", "status": "running"},
+    {"id": "t142274", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "running"},
+    {"id": "t142275", "seed": 401, "scenario": "ood_period", "node": "node004", "status": "running"}
+  ]
+}

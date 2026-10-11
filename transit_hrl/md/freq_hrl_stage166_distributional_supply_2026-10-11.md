@@ -36,6 +36,12 @@ the new run's frozen model inputs; historical result/raw directories are never
 input sync targets. Only compact result JSON is pulled; CSV/checkpoints remain
 remote. Learned allocation remains contingent on physical value on both roots.
 
+Run `native_transit_distributional_supply_stage166_frozen_20261011_r1`, revision
+`47581e6da1`: t142266-t142275 are running on node001/004/005/006. The initial
+input-staging queue cleared through scheduler dispatch. Root397's first window
+and calibrated-supply controls reproduce exactly. Full qualification/performance
+remains pending; the input directory is approximately 80 KB.
+
 ## Limitations
 
 Independent residual sampling omits correlated disruptions and action-dependent
