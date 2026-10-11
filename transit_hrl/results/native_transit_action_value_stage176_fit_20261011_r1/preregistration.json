@@ -1,0 +1,37 @@
+{
+  "contract": {
+    "boundary": "cross_fitted_single_intervention_value_screen_not_closed_loop_or_end_to_end_HRL_proof",
+    "features": "9_causal_LF_physical_context_by_8_committed_geometry_cost_features_no_scene_or_root_ID",
+    "fit": "pooled_72_parameter_per_head_linear_pairwise_ridge_RMS_training_only",
+    "grouping": "all_6_callbacks_and_6_candidates_of_a_scene_remain_together",
+    "hyperparameter_search": false,
+    "native_episodes": 0,
+    "native_screen_gate": "mean_cost_delta_negative_for_both_roots_in_all_three_splits",
+    "policy_updates": 0,
+    "ridge": 0.1,
+    "source_protocol": "native_transit_value_direction_stage175_v1",
+    "source_run": "native_transit_value_direction_stage175_frozen_20261011_r1",
+    "target": "paired_actual_terminal_fleet_and_nonfleet_cost_not_forecast_or_episode_reward",
+    "validation": [
+      "10_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "protocol": "native_transit_action_value_stage176_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "ebc850f0ace145533df41d1c5b22c412019cdbba",
+  "tasks": 1
+}
