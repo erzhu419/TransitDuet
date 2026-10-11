@@ -21,6 +21,11 @@ zero actor/lower updates. Pull logs and compact JSON only.
 identity, unchanged ridge controls, grouped fitting, serialized inference,
 matched parameter counts, primary gate and unique unbound scheduler tasks.
 
+Run `native_transit_occupancy_value_stage178_fit_20261011_r1`, revision
+`a905d01779`, tasks t143026-t143029: all launched on node004/005/006 with
+node001-006 allowed and no binding. Startup logs show actual parameter
+updates and completed held-out fits; final validation results are pending.
+
 ## Limitations
 
 Development screen: ten correlated scenes, two frozen lower roots and one

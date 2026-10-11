@@ -1,0 +1,57 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "critic_updates": 108000,
+    "fitted_models": 72,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "development_one_action_value_screen_under_original_greedy_continuation_not_HRL_or_policy_confirmation",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates_per_method": 27000,
+      "fits_per_method": 18,
+      "new_native_episodes": 0
+    },
+    "control": "extra24_zero_mask_same_96_16_2_tanh_architecture_initialization_and_training_budget",
+    "grouping": "all_six_callbacks_and_candidates_of_each_scene_remain_together",
+    "initialization_seed": 178,
+    "learning_rate": 0.003,
+    "loss": "paired_fleet_nonfleet_MSE_with_or_without_unit_weight_soft_expected_native_cost_regret",
+    "methods": [
+      "base_mse",
+      "occupancy_mse",
+      "base_regret",
+      "occupancy_regret"
+    ],
+    "native_screen_gate": "registered_primary_negative_mean_cost_for_both_roots_in_all_three_splits",
+    "normalization": "feature_mean_std_and_shared_native_cost_RMS_training_scenes_only",
+    "primary": "occupancy_regret",
+    "representation": "old72_plus24_causal_floor_active_trip_and_committed_departure_overlap_features",
+    "source_protocol": "native_transit_value_context_stage177_v1",
+    "source_run": "native_transit_value_context_stage177_frozen_20261011_r1",
+    "steps": 1500,
+    "validation": [
+      "10_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ],
+    "weight_decay": 0.01
+  },
+  "protocol": "native_transit_occupancy_value_stage178_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "a905d01779272a8e2d826d32a546c0155b7db394",
+  "tasks": 4
+}
