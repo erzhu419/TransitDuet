@@ -19,7 +19,7 @@ Sixty unbound scheduler CPU tasks on node001-006: 420 native episodes,
 25,779,600 ticks, 120 observer/identity controls and 360 action labels.
 Zero critic/actor/lower updates. Pull logs and compact JSON only, not native
 raw CSV or checkpoints. Run native_transit_value_transfer_stage179_frozen_20261011_r1,
-revision ec8dbf44f6, tasks t143047-t143106: all 60 running on node004/005/006
+revision ec8dbf44f6, tasks t143047-t143106: all 60 ran on node004/005/006
 (20 each), node001-006 allowed and no binding. All 60 finish exit0; t143124
 aggregates on node004. All 120 exact controls, 360 labels and 420 window
 ledgers qualify, with unchanged frozen preaction predictions. Only the

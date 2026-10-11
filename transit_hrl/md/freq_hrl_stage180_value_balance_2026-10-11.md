@@ -19,6 +19,8 @@ per normalization: two unbound scheduler CPU tasks on node001-006,
 56 fits/84,000 updates and zero new native episodes. Primary must improve
 cost and not worsen wait for both roots in all three splits before a
 separate third-scene frozen transfer screen. Results pending.
+Run native_transit_value_balance_stage180_fit_20261011_r1, revision
+e9eecde210, tasks t143135/t143136; node001-006 allowed, no node binding.
 Eighteen focused tests pass: training-only head scales, native regret units,
 serialized inference, all-label/group retention, held-out separation, matched
 budgets and unchanged previous value-model tests. Local runs are unit tests;
