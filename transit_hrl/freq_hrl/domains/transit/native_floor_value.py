@@ -11,13 +11,14 @@ from freq_hrl.domains.transit import native_occupancy_value as occupancy
 METHODS = ("raw_absolute", "floor_absolute")
 POLICIES = ("cost_only", "wait_feasible")
 HEADS = (*paired.HEADS, "wait_delta_min")
+CHECKPOINT_STEPS = (100, 300, 600, 900, 1200, 1500)
 
 
 def floor_cost(row):
     return max(row["occupancy_context"]["historical_peak"]-12, 0)**2/12.
 
 
-def fit_value(rows, method, *, steps=occupancy.STEPS):
+def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None):
     if method not in METHODS:
         raise ValueError("Unknown anchored fleet value method")
     raw = np.stack([occupancy.features(r, "occupancy_regret") for r in rows])
@@ -38,7 +39,16 @@ def fit_value(rows, method, *, steps=occupancy.STEPS):
     units = torch.as_tensor(target_scale[:2]/native_scale, dtype=torch.float32)
     actual = torch.as_tensor(actual_cost/native_scale, dtype=torch.float32)
     a, b = (torch.as_tensor(v, dtype=torch.long) for v in (a, b))
-    ledger = []
+    ledger, checkpoints = [], []
+    if validation_rows is not None:
+        if {paired.scene_group(r) for r in rows} & {paired.scene_group(r) for r in validation_rows}:
+            raise ValueError("Checkpoint validation must hold out complete training scenes")
+        vraw = np.stack([occupancy.features(r, "occupancy_regret") for r in validation_rows])
+        vl = [{l["candidate"]: l for l in r["labels"]} for r in validation_rows]
+        vt = np.asarray([[[l[i][h] for h in ("future_fleet_cost", *HEADS[1:])]
+            for i in range(6)] for l in vl])
+        vx = torch.as_tensor((vraw-center)/scale, dtype=torch.float32)
+        vy = torch.as_tensor(vt/target_scale, dtype=torch.float32)
     with torch.random.fork_rng(devices=[]):
         torch.manual_seed(occupancy.SEED)
         network = nn.Sequential(nn.Linear(occupancy.INPUT_DIM, occupancy.WIDTH), nn.Tanh(),
@@ -60,15 +70,28 @@ def fit_value(rows, method, *, steps=occupancy.STEPS):
             if step == 0 or (step+1) % 300 == 0 or step+1 == steps:
                 ledger.append({"step": step+1, "absolute_fleet_mse": float(anchor.detach()),
                     "paired_mse": float(pair_mse.detach()), "native_regret": float(regret.detach())})
+            if validation_rows is not None and (step+1 in CHECKPOINT_STEPS or step+1 == steps):
+                with torch.no_grad():
+                    voutput = network(vx)
+                    vp = (torch.cat((softplus(voutput[..., :1]), voutput[..., 1:]), dim=-1)
+                        if method == "floor_absolute" else voutput)
+                    va = ((vp[..., 0]-vy[..., 0])**2).mean()
+                    vm = ((vp[:, a]-vp[:, b]-(vy[:, a]-vy[:, b]))**2).mean()
+                    checkpoints.append({"step": step+1, "validation_loss": float(va+vm),
+                        "absolute_fleet_mse": float(va), "paired_mse": float(vm)})
         weights = {k: v.detach().numpy().tolist() for k, v in network.state_dict().items()}
         update_l2 = float(torch.sqrt(sum(((p.detach()-old)**2).sum() for p, old in zip(network.parameters(), initial))))
-    return {"method": method, "heads": list(HEADS), "center": center.tolist(), "scale": scale.tolist(),
+    model = {"method": method, "heads": list(HEADS), "center": center.tolist(), "scale": scale.tolist(),
         "target_scale": target_scale.tolist(), "regret_cost_scale": native_scale, "weights": weights,
         "steps": steps, "initialization_seed": occupancy.SEED,
         "parameter_count": sum(p.numel() for p in network.parameters()), "loss_ledger": ledger,
         "parameter_update_l2": update_l2, "training_states": len(rows), "pairwise_examples": len(rows)*15,
         "training_groups": [list(g) for g in sorted({paired.scene_group(r) for r in rows})],
         "target": "absolute_future_fleet_above_causal_peak_and_paired_nonfleet_wait_under_original_continuation"}
+    if validation_rows is not None:
+        model.update(checkpoint_ledger=checkpoints, validation_states=len(validation_rows),
+            validation_groups=[list(g) for g in sorted({paired.scene_group(r) for r in validation_rows})])
+    return model
 
 
 def predict(row, model):

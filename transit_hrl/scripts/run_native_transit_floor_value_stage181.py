@@ -84,10 +84,10 @@ def summary(rows):
         "selected_positive_predicted_wait": sum(r["predicted_wait_delta_min"][r["selected"]] > 0 for r in rows)}
 
 
-def fit_and_validate(first, labels, second, baselines, method):
+def fit_and_validate(first, labels, second, baselines, method, *, fitter=None):
     rows, ledger = training_rows(first, labels, second, baselines), []
     def fit(train):
-        model = value.fit_value(train, method)
+        model = (value.fit_value if fitter is None else fitter)(train, method)
         ledger.append({k: model[k] for k in ("training_groups", "training_states", "steps", "parameter_count",
             "target_scale", "regret_cost_scale", "parameter_update_l2", "loss_ledger")})
         print(f"FLOOR_VALUE_FIT method={method} fit={len(ledger)} states={len(train)} updates={model['steps']}", flush=True)
