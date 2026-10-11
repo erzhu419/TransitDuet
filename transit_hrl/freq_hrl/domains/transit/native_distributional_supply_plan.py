@@ -48,7 +48,7 @@ class NativeDistributionalSupplyPlan(NativeCalibratedSupplyPlan):
         self.model = model
         self.residuals = residual_draws(model, [(int(t.launch_turn), bool(t.direction)) for t in env.timetables])
 
-    def candidate_fleet_cost(self, peak, planned_by_id, now):
+    def sampled_intervals(self, planned_by_id, now):
         starts, durations = [], []
         for bus in self.env.bus_all:
             if not bus.on_route:
@@ -66,6 +66,10 @@ class NativeDistributionalSupplyPlan(NativeCalibratedSupplyPlan):
             durations.append(np.maximum(self.trip_duration(bool(trip.direction))
                 + self.residuals[int(trip.launch_turn)], 1.))
         matrix = np.stack(durations, axis=1) if durations else np.empty((MEMBERS, 0))
+        return np.asarray(starts), matrix
+
+    def candidate_fleet_cost(self, peak, planned_by_id, now):
+        starts, matrix = self.sampled_intervals(planned_by_id, now)
         peaks = ensemble_peaks(starts, matrix, self.env._peak_concurrent)
         values, counts = np.unique(peaks, return_counts=True)
         cost = np.mean(np.maximum(peaks - self.env._n_fleet_target, 0)**2 / self.env._n_fleet_target)

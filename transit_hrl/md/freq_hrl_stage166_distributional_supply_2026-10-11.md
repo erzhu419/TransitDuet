@@ -37,10 +37,19 @@ input sync targets. Only compact result JSON is pulled; CSV/checkpoints remain
 remote. Learned allocation remains contingent on physical value on both roots.
 
 Run `native_transit_distributional_supply_stage166_frozen_20261011_r1`, revision
-`47581e6da1`: t142266-t142275 are running on node001/004/005/006. The initial
-input-staging queue cleared through scheduler dispatch. Root397's first window
-and calibrated-supply controls reproduce exactly. Full qualification/performance
-remains pending; the input directory is approximately 80 KB.
+`47581e6da1`: t142266-t142275 completed on node001/004/005/006. All 120 episodes
+and 80 exact source controls qualify. Relative to window forecast, cost still
+increases by +0.0483505 / +0.08850775 (roots397/401), while wait falls by
+0.18605 / 0.21690 min. Relative to mean supply, cost changes by -0.131149 /
++0.0049383; wait increases by 0.62860 / 0.49145 min. No two-root net improvement.
+
+The fleet term distinguishes 574/880 and 461/880 decisions and changes the
+wait-only argmin at 547/880 and 449/880. This fixes responsiveness, not objective
+alignment. Fleet-cost deltas against window are +0.0625 / +0.1041667, dominating
+nonfleet improvements of -0.0141495 / -0.0156589. Persistent-shift cost improves
+on both roots, but stationary and root401 OOD results remain unfavorable.
+Next passively audit full-tail scores versus the next same-direction replan,
+with 40 exact policy replays, before another policy or training change.
 
 ## Limitations
 
