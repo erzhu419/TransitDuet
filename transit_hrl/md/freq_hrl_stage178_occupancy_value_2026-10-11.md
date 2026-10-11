@@ -22,9 +22,16 @@ identity, unchanged ridge controls, grouped fitting, serialized inference,
 matched parameter counts, primary gate and unique unbound scheduler tasks.
 
 Run `native_transit_occupancy_value_stage178_fit_20261011_r1`, revision
-`a905d01779`, tasks t143026-t143029: all launched on node004/005/006 with
-node001-006 allowed and no binding. Startup logs show actual parameter
-updates and completed held-out fits; final validation results are pending.
+`a905d01779`, tasks t143026-t143029: all completed on node004/005/006 with
+node001-006 allowed and no binding. All 72 fits/108,000 critic updates qualify;
+only 1.37 MB compact JSON pulled. Primary apparent-training cost is -0.011134
+(Stage176 +0.000137), but held-out scene/regime/lower-root costs are +0.021259,
++0.013935/+0.030739. All four models fail the original-control improvement
+gate. Fleet contributes +0.020833 to the primary's +0.021259 scene cost.
+Matched occupancy/objective effects change sign across splits; no stable
+transfer advantage and no native deployment. Next freeze the fitted primary,
+collect fixed second registered scenes' action values before refitting, and
+test independent-scene prediction against the original greedy continuation.
 
 ## Limitations
 

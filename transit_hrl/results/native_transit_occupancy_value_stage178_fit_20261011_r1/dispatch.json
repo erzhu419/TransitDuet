@@ -1,31 +1,37 @@
 {
+  "native_screen_eligible": false,
   "new_native_steps": 0,
-  "observed_at_utc": "2026-10-11T12:56:35.631402+00:00",
-  "performance": "pending_not_a_native_or_end_to_end_HRL_result",
+  "observed_at_utc": "2026-10-11T13:04:39.306538+00:00",
+  "performance": "primary_training_fit_improves_but_all_three_transfer_splits_fail_no_native_deployment",
   "protocol": "native_transit_occupancy_value_stage178_v1",
-  "qualification": "launch_observed_fixed_training_inputs_and_architecture_final_72_fit_qualification_pending",
-  "result_sync": "small_startup_logs_only_then_compact_per_method_JSON",
+  "qualification": "all_four_complete_markers_72_matched_fits_108000_critic_updates_and_compact_results_qualified",
+  "result_json_bytes": 1368638,
+  "result_sync": "compact_per_method_JSON_only_no_raw_or_checkpoints",
   "source_revision": "a905d01779272a8e2d826d32a546c0155b7db394",
   "tasks": [
     {
+      "exit_code": 0,
       "id": "t143026",
       "node": "node005",
-      "status": "running"
+      "status": "done"
     },
     {
+      "exit_code": 0,
       "id": "t143027",
       "node": "node004",
-      "status": "running"
+      "status": "done"
     },
     {
+      "exit_code": 0,
       "id": "t143028",
       "node": "node006",
-      "status": "running"
+      "status": "done"
     },
     {
+      "exit_code": 0,
       "id": "t143029",
       "node": "node005",
-      "status": "running"
+      "status": "done"
     }
   ]
 }
