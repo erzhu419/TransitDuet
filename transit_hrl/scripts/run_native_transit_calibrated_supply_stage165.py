@@ -45,8 +45,8 @@ def contract():
         "boundary": "frozen_cold_start_mechanism_development_not_learned_upper_or_confirmation"}
 
 
-def duration_prior(root):
-    result = json.loads((ROOT/"results"/CALIBRATION_RUN/"summary.json").read_text())
+def duration_prior(root, summary_path):
+    result = json.loads(summary_path.read_text())
     if not (result["protocol"] == calibration.EXPERIMENT_PROTOCOL and result["contract"] == calibration.contract()
             and result["software_qualified"] and result["fit_episodes"] == result["check_episodes"] == 10
             and result["training_updates"] == 0 and result["native_steps"] == 20*61380):
@@ -84,6 +84,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, choices=ROOTS, required=True)
     parser.add_argument("--scenario", choices=SCENARIOS, required=True)
+    parser.add_argument("--calibration-summary", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -92,7 +93,7 @@ def main():
     import frequency
     frequency.DemandFrequencyTracker = native.NativeRoutingTracker
     torch.set_num_threads(1)
-    registered, prior = source_cell(args.seed, args.scenario), duration_prior(args.seed)
+    registered, prior = source_cell(args.seed, args.scenario), duration_prior(args.seed, args.calibration_summary)
     _, checkpoint = native.load_source(args.seed)
     raw, rows = raw_directory(args.output), []
     scenes = native.source.source_spec.scene_seeds(native.LOWER_ROOT[args.seed], args.scenario, preflight=False)

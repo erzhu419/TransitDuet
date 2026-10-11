@@ -115,14 +115,16 @@ class CalibratedSupplyTest(unittest.TestCase):
             else: cell["native_steps"] += 1
             with self.subTest(failure=failure), self.assertRaises((ValueError, RuntimeError)): summarize(broken, sources, priors)
 
-    def test_scheduler_stages_small_calibration_directory_unpinned(self):
+    def test_scheduler_stages_only_run_specific_inputs_unpinned(self):
         task = task_specification("test_calibrated_supply", 397, "low_noise")
         self.assertIsNone(task["require_node"])
         self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
         self.assertEqual(task["cpu"], 1)
         self.assertEqual(task["ram_mb"], 3072)
         self.assertEqual(task["result_dir"], task["local_result_dir"])
-        self.assertEqual([Path(p).name for p in task["stage_input_paths"]], ["scripts", "freq_hrl", "native_freqduet", spec.CALIBRATION_RUN])
+        self.assertEqual([Path(p).name for p in task["stage_input_paths"]], ["scripts", "freq_hrl", "native_freqduet", "inputs"])
+        self.assertEqual(Path(task["stage_input_paths"][-1]), spec.ROOT/"results/test_calibrated_supply/inputs")
+        self.assertIn("--calibration-summary", task["cmd"])
 
     def test_worker_runs_three_source_controls_before_new_supply(self):
         cells, sources, priors = self.cells()
@@ -141,7 +143,8 @@ class CalibratedSupplyTest(unittest.TestCase):
                 patch.object(spec, "raw_directory", return_value=Path("unused")), \
                 patch.object(spec, "write_json") as write, \
                 patch.dict(sys.modules, {"frequency": SimpleNamespace(DemandFrequencyTracker=None)}), \
-                patch.object(sys, "argv", ["worker", "--seed", "397", "--scenario", "low_noise", "--output", "unused/result.json"]), \
+                patch.object(sys, "argv", ["worker", "--seed", "397", "--scenario", "low_noise",
+                    "--calibration-summary", "unused/input.json", "--output", "unused/result.json"]), \
                 contextlib.redirect_stdout(io.StringIO()) as output:
             spec.main()
         self.assertEqual(calls, list(spec.CONDITIONS)*4)

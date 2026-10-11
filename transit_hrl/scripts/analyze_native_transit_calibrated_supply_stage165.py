@@ -107,7 +107,8 @@ def main():
     args = parser.parse_args()
     directory = ROOT/"results"/args.run_name
     cells = {(r, s): json.loads((directory/"cells"/s/f"seed_{r}/result.json").read_text()) for r in spec.ROOTS for s in spec.SCENARIOS}
-    result = summarize(cells, {(r, s): spec.source_cell(r, s) for r, s in cells}, {r: spec.duration_prior(r) for r in spec.ROOTS})
+    result = summarize(cells, {(r, s): spec.source_cell(r, s) for r, s in cells},
+        {r: spec.duration_prior(r, directory/"inputs/calibration_summary.json") for r in spec.ROOTS})
     write_json(directory/"summary.json", result)
     print(json.dumps({k: v for k, v in result.items() if k not in {"contract", "regime_root_contrasts"}}, indent=2))
 

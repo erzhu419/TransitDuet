@@ -19,15 +19,17 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 
 def task_specification(run_name, root, scenario):
     task = native_task(run_name, root, scenario)
+    inputs = ROOT/"results"/run_name/"inputs"
     command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/run_native_transit_calibrated_supply_stage165.py",
-        "--seed", str(root), "--scenario", scenario, "--output", str(Path(task["result_dir"])/"result.json")]
+        "--seed", str(root), "--scenario", scenario, "--calibration-summary", str(inputs/"calibration_summary.json"),
+        "--output", str(Path(task["result_dir"])/"result.json")]
     task.update(project=spec.EXPERIMENT_PROTOCOL,
         description=f"Freq-HRL fitted cold-start supply {scenario} seed{root}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{scenario}/{root}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/frozen",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
             "MKL_NUM_THREADS=1 FREQDUET_TORCH_THREADS=1 CUDA_VISIBLE_DEVICES= " + shlex.join(command),
-        stage_input_paths=[*task["stage_input_paths"], str(ROOT/"results"/spec.CALIBRATION_RUN)],
+        stage_input_paths=[*task["stage_input_paths"], str(inputs)],
         cpu_training_justification="Frozen matched cold-start supply calibration comparison; no native or actor training.")
     return task
 
@@ -40,15 +42,18 @@ def main():
     if not (completed["software_qualified"] and completed["protocol"] == spec.source.EXPERIMENT_PROTOCOL
             and completed["contract"] == spec.source.contract() and completed["source_control_reproductions"] == 120):
         raise SystemExit("Calibrated supply requires completed Stage163 physical evidence")
-    priors = {str(r): {str(d): v for d, v in spec.duration_prior(r).items()} for r in spec.ROOTS}
+    calibration_summary = ROOT/"results"/spec.CALIBRATION_RUN/"summary.json"
+    priors = {str(r): {str(d): v for d, v in spec.duration_prior(r, calibration_summary).items()} for r in spec.ROOTS}
     for root in spec.ROOTS:
         for scenario in spec.SCENARIOS:
             spec.source_cell(root, scenario)
     if inventory(args.run_name, protocol_spec=spec):
         raise SystemExit("Calibrated supply run is already registered")
+    write_json(ROOT/"results"/args.run_name/"inputs/calibration_summary.json", json.loads(calibration_summary.read_text()))
     tasks = [task_specification(args.run_name, r, s) for r in spec.ROOTS for s in spec.SCENARIOS]
     write_json(ROOT/"results"/args.run_name/"preregistration.json", {
         "protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "duration_prior_s": priors,
+        "calibration_input": "inputs/calibration_summary.json",
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "budget": {"training_episodes": 0, "frozen_episodes": 160, "native_ticks": 160*61380,
             "source_control_reproductions": 120}, "tasks": len(tasks),

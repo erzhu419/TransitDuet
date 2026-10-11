@@ -22,12 +22,13 @@ Record initial predicted peaks, fleet-term decision differences, prior use and
 historical-peak plateaus. A better duration estimate must earn physical value.
 
 Ten unpinned scheduler cells, node001-006, 1 CPU/3 GB each. Stage only code plus
-the compact Stage164 calibration directory; raw CSV/checkpoints remain remote.
+the new run's `inputs` directory containing the frozen calibration summary.
+Historical result/raw directories are not sync targets; CSV/checkpoints remain remote.
 Results pending. Net value on both roots is the prerequisite for learning the
 allocation action; otherwise diagnose remaining candidate/occupancy authority.
 42 focused tests pass, including first-completion replacement, unchanged EWMA,
 demand-only dispatch neutrality, native commitments/goals, prior/control/score
-qualification and small-directory unpinned staging. Tests use stub environments;
+qualification and run-specific input staging. Tests use stub environments;
 all full native episodes run remotely.
 
 ## Limitations
