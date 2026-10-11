@@ -28,11 +28,16 @@ fixed probe paths and scheduler inputs. Recomputing Stage173 after extracting
 its continuation validator reproduces the archived summary exactly.
 
 Run `native_transit_value_data_stage174_frozen_20261011_r1`, revision
-`b88ca47df7`, tasks `t142895-t142924`: all 30 RUNNING on node004/005/006
-(11/10/9 cells), with node001-006 allowed and no binding. Logs confirm all
-30 exact observers and all 30 exact identity branches; other candidate
-continuations are in progress. The final 210-episode ledger/data qualification
-and value-model training remain pending. Only small log excerpts were read.
+`b88ca47df7`, tasks `t142895-t142924`: all 30 DONE on node004/005/006.
+All 60 exact controls, 180 common-state interventions and 210 window ledgers
+qualify. Compact JSON totals 23.26 MB; raw traces/checkpoints stayed remote.
+Root397/root401 have better realized actions in 11/15 and 13/15 states, mean
+best cost deltas -0.0057336/-0.0338793, with fleet discrimination in 5/1 states.
+Root401's one low-noise fleet saving contributes 81.1% of its total best delta.
+All probes8/22/36 are direction True: do not train a bidirectional upper from
+this one-direction sample. Next collect the adjacent opposite-direction
+probes9/23/37 on the same registered training scenes, then fit scene-grouped
+action-value models on both directions. Value-model training remains pending.
 
 ## Limitations
 
