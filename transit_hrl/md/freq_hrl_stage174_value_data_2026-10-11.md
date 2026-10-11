@@ -27,6 +27,13 @@ single-action continuations, identity controls, cost/fleet label decomposition,
 fixed probe paths and scheduler inputs. Recomputing Stage173 after extracting
 its continuation validator reproduces the archived summary exactly.
 
+Run `native_transit_value_data_stage174_frozen_20261011_r1`, revision
+`b88ca47df7`, tasks `t142895-t142924`: all 30 RUNNING on node004/005/006
+(11/10/9 cells), with node001-006 allowed and no binding. Logs confirm all
+30 exact observers and all 30 exact identity branches; other candidate
+continuations are in progress. The final 210-episode ledger/data qualification
+and value-model training remain pending. Only small log excerpts were read.
+
 ## Limitations
 
 Thirty states share ten training scenes and two frozen lower roots; these are
