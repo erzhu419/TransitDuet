@@ -1,0 +1,57 @@
+{
+  "budget": {
+    "frozen_episodes": 200,
+    "native_ticks": 12276000,
+    "source_control_reproductions": 120,
+    "training_episodes": 0
+  },
+  "contract": {
+    "boundary": "frozen_planning_authority_not_learned_policy_or_confirmation",
+    "clock_s": 61380,
+    "commitment": "six_trips_once_same_44_upper_decisions_and_daily_trip_count",
+    "conditions": [
+      "window_forecast",
+      "window_nominal",
+      "rolling_nominal",
+      "rolling_forecast",
+      "rolling_reversed"
+    ],
+    "constraints": "daily_first_last_fixed_all_adjacent_intervals_240_to_480_including_cross_window",
+    "episodes_per_cell": 20,
+    "fleet": 12,
+    "qualification": "all_window_forecast_nominal_and_rolling_nominal_exact_source_reproduction",
+    "rolling": "reallocate_uncommitted_remaining_direction_horizon_current_causal_forecast_only",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes": "all_four_registered_scenes_per_regime_no_outcome_selection",
+    "source_protocol": "native_transit_mc_upper_stage160_v1",
+    "source_run": "native_transit_mc_upper_stage160_development_20261011_r1",
+    "tentative": "future_uncommitted_launch_times_revisable_committed_times_and_goals_never_rewritten",
+    "training_updates": 0
+  },
+  "protocol": "native_transit_rolling_authority_stage161_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "661b060df16ecb30dfdce8c138ff12c25d6e8410",
+  "tasks": 10
+}

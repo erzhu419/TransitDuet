@@ -28,6 +28,11 @@ checkpoints remain remote. No new native training in this stage.
 real native-dispatch timing/goals, irrevocable commitments, tail windows, source
 reproduction, worker control qualification and analyzer/scheduler budget checks.
 
+Run `native_transit_rolling_authority_stage161_frozen_20261011_r1`:
+t141969-t141978 launched on node001/004/005/006. First-scene qualification
+requires window forecast, window nominal and rolling nominal to reproduce
+Stage160 before extended authority runs. Final physical performance is pending.
+
 ## Limitations
 
 This tests an executable causal forecasting plan, not a learned upper or complete
