@@ -35,10 +35,27 @@ Local execution tests use the native dispatcher with a stub environment, not
 full native simulation or training.
 
 Run `native_transit_allocation_frontier_stage162_frozen_20261011_r1`:
-t142039-t142048 RUNNING on node004/005/006. The initial staging wait cleared;
-no hard node pins, local native training or checkpoint downloads were used.
-First window controls have begun reproducing; complete endpoint qualification
-and final performance remain pending.
+t142039-t142048 DONE on node004/005/006. All 240 frozen episodes qualify,
+including 120 exact physical AND schedule reproductions of the source controls.
+All 14,731,200 native ticks completed, zero training updates.
+
+| Strength | Cost delta 397 / 401 | Wait delta, min 397 / 401 |
+| --- | --- | --- |
+| 0 | +0.000767 / +0.002681 | +0.00720 / +0.02870 |
+| .25 | +0.246695 / +0.185123 | -0.31450 / -0.09305 |
+| .5 | +0.221667 / +0.165346 | -0.56805 / -0.31125 |
+| .75 | +0.213043 / +0.127256 | -0.68525 / -0.49170 |
+| 1 | +0.179531 / +0.107845 | -0.82495 / -0.68220 |
+
+No positive-strength candidate improves mean cost on either root. Alpha .25/.5/
+.75 raise peak fleet on 13/20 scenes for root397 and 9/20 for root401; alpha1
+does so on 12/20 and 9/20. Fleet costs are discontinuous, not proportional to
+alpha. Small per-update strengths also accumulate through tentative schedules;
+they are not equally small episode-level interventions. Root401 high-noise
+alpha .75/1 is the sole regime/root panel with mean cost improvement, not a
+global success. Do not train an alpha policy from this frontier or change cost
+weights to declare success. Next isolate explicit causal supply/occupancy costs
+against the same candidate selector without its supply term.
 
 ## Limitations
 

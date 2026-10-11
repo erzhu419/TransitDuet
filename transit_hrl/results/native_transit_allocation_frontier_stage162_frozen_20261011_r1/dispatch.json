@@ -1,18 +1,18 @@
 {
   "protocol": "native_transit_allocation_frontier_stage162_v1",
   "run_name": "native_transit_allocation_frontier_stage162_frozen_20261011_r1",
-  "performance": "pending",
-  "worker_source_qualification": "pending",
+  "performance": "all_positive_strengths_worsen_mean_cost_both_roots_despite_wait_gains",
+  "worker_source_qualification": "120_exact_physical_and_schedule_reproductions_passed",
   "tasks": [
-    {"id": "t142039", "seed": 397, "scenario": "low_noise", "node": "node004", "status": "running"},
-    {"id": "t142040", "seed": 397, "scenario": "high_noise", "node": "node006", "status": "running"},
-    {"id": "t142041", "seed": 397, "scenario": "hour_burst", "node": "node005", "status": "running"},
-    {"id": "t142042", "seed": 397, "scenario": "persistent_shift", "node": "node004", "status": "running"},
-    {"id": "t142043", "seed": 397, "scenario": "ood_period", "node": "node006", "status": "running"},
-    {"id": "t142044", "seed": 401, "scenario": "low_noise", "node": "node005", "status": "running"},
-    {"id": "t142045", "seed": 401, "scenario": "high_noise", "node": "node004", "status": "running"},
-    {"id": "t142046", "seed": 401, "scenario": "hour_burst", "node": "node006", "status": "running"},
-    {"id": "t142047", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "running"},
-    {"id": "t142048", "seed": 401, "scenario": "ood_period", "node": "node004", "status": "running"}
+    {"id": "t142039", "seed": 397, "scenario": "low_noise", "node": "node004", "status": "done"},
+    {"id": "t142040", "seed": 397, "scenario": "high_noise", "node": "node006", "status": "done"},
+    {"id": "t142041", "seed": 397, "scenario": "hour_burst", "node": "node005", "status": "done"},
+    {"id": "t142042", "seed": 397, "scenario": "persistent_shift", "node": "node004", "status": "done"},
+    {"id": "t142043", "seed": 397, "scenario": "ood_period", "node": "node006", "status": "done"},
+    {"id": "t142044", "seed": 401, "scenario": "low_noise", "node": "node005", "status": "done"},
+    {"id": "t142045", "seed": 401, "scenario": "high_noise", "node": "node004", "status": "done"},
+    {"id": "t142046", "seed": 401, "scenario": "hour_burst", "node": "node006", "status": "done"},
+    {"id": "t142047", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "done"},
+    {"id": "t142048", "seed": 401, "scenario": "ood_period", "node": "node004", "status": "done"}
   ]
 }
