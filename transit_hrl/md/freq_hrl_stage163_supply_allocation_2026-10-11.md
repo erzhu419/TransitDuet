@@ -40,6 +40,11 @@ completion EWMA, supply-term selection, reversible tentative spacing, native
 commitment/tail execution, matched analysis and scheduler/worker budgets.
 Local tests use stub native environments, not full native training or episodes.
 
+Run `native_transit_supply_allocation_stage163_frozen_20261011_r1`:
+t142104-t142113 launched on node001/004/005/006. Source reproduction and final
+physical performance remain pending; no local native episodes or checkpoint
+downloads were used.
+
 ## Limitations
 
 Frozen development mechanism, not learned authority or independent confirmation.
