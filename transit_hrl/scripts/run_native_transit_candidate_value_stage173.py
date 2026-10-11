@@ -58,10 +58,11 @@ def policy_trace(supply):
         "greedy": min(CANDIDATES, key=lambda i: d["candidates"][i]["score"])} for d in supply["decisions"]]
 
 
-def episode(root, scenario, scene, raw, checkpoint, model, index, *, candidate=None, reference=None):
+def episode(root, scenario, scene, raw, checkpoint, model, index, *, candidate=None, reference=None,
+        plan_class=NativeCandidateValuePlan):
     runner = native.make_runner(root, scenario, raw, checkpoint)
     before = native.model_arrays(runner)
-    plan = NativeCandidateValuePlan(runner.env, model, index, forced_candidate=candidate, reference=reference)
+    plan = plan_class(runner.env, model, index, forced_candidate=candidate, reference=reference)
     runner._upper_callback_v2 = plan
     row = runner.run_episode(300, training=False, N_fleet_override=12, scenario_seed=scene, record_diagnostics=False)
     after = native.model_arrays(runner)
