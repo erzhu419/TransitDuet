@@ -1,0 +1,60 @@
+{
+  "budget": {
+    "fit_replay_episodes": 10,
+    "fresh_check_controls": 10,
+    "fresh_check_episodes": 10,
+    "native_episodes": 30,
+    "native_ticks": 1841400,
+    "training_episodes": 0
+  },
+  "contract": {
+    "boundary": "passive_remaining_time_accuracy_not_native_allocation_value_or_learned_upper",
+    "check_scenes": "811000000+root*1000+regime_index*10_fresh_disjoint_from_Stage164_and_rolling_evaluation",
+    "clock_s": 61380,
+    "conditions": [
+      "fit_audit",
+      "check_control",
+      "check_audit"
+    ],
+    "episodes_per_cell": 3,
+    "fit_scenes": "exact_Stage164_fit_replays_only_no_check_labels_in_fitting",
+    "fleet": 12,
+    "labels": "join_actual_completion_ledger_only_after_native_episode_finishes",
+    "model": "one_fixed_ridge0.001_additive_correction_per_root_all_five_fit_regimes_no_tuning",
+    "observations": "44_callbacks_active_bus_progress_age_load_speed_holding_dwelling_and_causal_EWMA",
+    "policy": "unchanged_window_forecast_frozen_native_lower_no_supply_candidate_selection",
+    "primary": "fresh_check_remaining_time_MAE_bias_underprediction_and_q95_error_by_root_and_regime",
+    "qualification": "10_exact_source_fit_physics_schedules_plus_10_fresh_check_control_audit_pairs",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_duration_calibration_stage164_v1",
+    "source_run": "native_transit_duration_calibration_stage164_frozen_20261011_r1",
+    "training_updates": 0
+  },
+  "duration_model_input": "inputs/duration_models.json",
+  "protocol": "native_transit_remaining_time_stage171_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "c3f6d9ab9379a0b32aa99a8839d33c258d89b02e",
+  "tasks": 10
+}

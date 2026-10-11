@@ -19,8 +19,8 @@ actual full-episode peaks on all ten independent Stage164 check episodes, using
 their actual launches as a shared conditional input. Zero additional native
 episodes or training. All 524 native trip marginals reproduce exactly.
 Cost MAE worsens from 0.113281 to 0.170833 (root397) and 0.109635 to 0.120313
-(root401), with zero improvements in ten check episodes. Correlation alone is
-not the fix; do not dispatch this variant into native control. Next, collect
+(root401), with zero improvements in ten check episodes. This fit-only copula
+does not improve calibration; do not dispatch it into native control. Next, collect
 passive in-flight remaining-time errors, separating distance-progress bias from
 duration sampling. Two coupling/source tests and 20 joint/incumbent/duration
 focused tests pass. No native policy/training budget was spent on this negative

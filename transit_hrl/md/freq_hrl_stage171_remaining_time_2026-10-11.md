@@ -23,6 +23,19 @@ snapshots, same-tick completion labels, exact paired truth, fit/check separation
 physical/source accounting and scheduler staging. No full native simulation ran
 locally.
 
+Run `native_transit_remaining_time_stage171_frozen_20261011_r1`, revision
+`c3f6d9ab93`: t142748-t142757 are DONE; all 20 exact controls qualify.
+Fresh-check MAE is 96.683 -> 85.956 seconds (root397, 2405 observations) and
+99.324 -> 91.214 seconds (root401, 2397 observations). All ten root/regime
+panels improve. Q95 absolute error is 275.148 -> 241.543 and 285.601 -> 245.987
+seconds. Bias is -6.298 -> -3.892 and -9.626 -> +0.111 seconds. No forecast
+correction was applied to control during these episodes.
+
+Next: replace only the active-vehicle expected remaining-time term in the
+six-candidate occupancy ensemble. Retain future-trip draws, candidate geometry,
+scores, weights, physical cost and frozen lower. Require exact source controls
+and compare actual cost/wait/fleet against both window and uncorrected selector.
+
 ## Limitations
 
 Passive window-policy accuracy does not prove prospective occupancy accuracy,

@@ -1,0 +1,301 @@
+{
+  "contract": {
+    "boundary": "passive_remaining_time_accuracy_not_native_allocation_value_or_learned_upper",
+    "check_scenes": "811000000+root*1000+regime_index*10_fresh_disjoint_from_Stage164_and_rolling_evaluation",
+    "clock_s": 61380,
+    "conditions": [
+      "fit_audit",
+      "check_control",
+      "check_audit"
+    ],
+    "episodes_per_cell": 3,
+    "fit_scenes": "exact_Stage164_fit_replays_only_no_check_labels_in_fitting",
+    "fleet": 12,
+    "labels": "join_actual_completion_ledger_only_after_native_episode_finishes",
+    "model": "one_fixed_ridge0.001_additive_correction_per_root_all_five_fit_regimes_no_tuning",
+    "observations": "44_callbacks_active_bus_progress_age_load_speed_holding_dwelling_and_causal_EWMA",
+    "policy": "unchanged_window_forecast_frozen_native_lower_no_supply_candidate_selection",
+    "primary": "fresh_check_remaining_time_MAE_bias_underprediction_and_q95_error_by_root_and_regime",
+    "qualification": "10_exact_source_fit_physics_schedules_plus_10_fresh_check_control_audit_pairs",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_duration_calibration_stage164_v1",
+    "source_run": "native_transit_duration_calibration_stage164_frozen_20261011_r1",
+    "training_updates": 0
+  },
+  "fit_episodes": 10,
+  "fresh_check_episodes": 10,
+  "models": {
+    "397": {
+      "coefficients": [
+        0.12603893397688642,
+        -0.06990811903453528,
+        0.517658878924632,
+        -0.12166645399982934,
+        0.4755941724901327,
+        -0.5497902522844303,
+        0.00530287127547871,
+        -0.04118755658904649,
+        -0.050289862079522456,
+        -0.1707999331007107,
+        0.009386514811294688
+      ],
+      "fit_samples": 2381,
+      "fit_scene_seeds": [
+        810397000,
+        810397010,
+        810397020,
+        810397030,
+        810397040
+      ],
+      "ridge": 0.001,
+      "target": "additive_remaining_seconds_correction_not_policy_value"
+    },
+    "401": {
+      "coefficients": [
+        0.120163787434935,
+        -0.13043951702957532,
+        0.5741486327644459,
+        -0.11365583886137477,
+        0.5688246283647052,
+        -0.5330984508927838,
+        -0.009753790359840564,
+        -0.030923031122552926,
+        -0.028847308787096418,
+        -0.05086018579999025,
+        0.0014836022591330883
+      ],
+      "fit_samples": 2392,
+      "fit_scene_seeds": [
+        810401000,
+        810401010,
+        810401020,
+        810401030,
+        810401040
+      ],
+      "ridge": 0.001,
+      "target": "additive_remaining_seconds_correction_not_policy_value"
+    }
+  },
+  "native_steps": 1841400,
+  "protocol": "native_transit_remaining_time_stage171_v1",
+  "regime_panels": [
+    {
+      "corrected": {
+        "bias_s": 9.2364015994238,
+        "mae_s": 79.36129179794148,
+        "q95_abs_error_s": 208.30403862855005,
+        "underprediction_rate": 0.41139240506329117
+      },
+      "progress": {
+        "bias_s": -1.2089223333173802,
+        "mae_s": 87.34262679297342,
+        "q95_abs_error_s": 243.0633864260228,
+        "underprediction_rate": 0.4430379746835443
+      },
+      "root": 397,
+      "samples": 474,
+      "scenario": "low_noise"
+    },
+    {
+      "corrected": {
+        "bias_s": -22.1325171120238,
+        "mae_s": 98.25932309053032,
+        "q95_abs_error_s": 284.4548685337764,
+        "underprediction_rate": 0.5103305785123967
+      },
+      "progress": {
+        "bias_s": -14.797568835410729,
+        "mae_s": 114.48887717065419,
+        "q95_abs_error_s": 319.3286567144282,
+        "underprediction_rate": 0.45867768595041325
+      },
+      "root": 397,
+      "samples": 484,
+      "scenario": "high_noise"
+    },
+    {
+      "corrected": {
+        "bias_s": -0.7228075668923685,
+        "mae_s": 81.6674613401985,
+        "q95_abs_error_s": 215.0493612920579,
+        "underprediction_rate": 0.46234309623430964
+      },
+      "progress": {
+        "bias_s": -3.5989588968572783,
+        "mae_s": 92.42832151024177,
+        "q95_abs_error_s": 238.53106755380722,
+        "underprediction_rate": 0.47280334728033474
+      },
+      "root": 397,
+      "samples": 478,
+      "scenario": "hour_burst"
+    },
+    {
+      "corrected": {
+        "bias_s": -6.618470035375166,
+        "mae_s": 88.80965807223289,
+        "q95_abs_error_s": 270.09750533111514,
+        "underprediction_rate": 0.4378818737270876
+      },
+      "progress": {
+        "bias_s": -6.381029637850596,
+        "mae_s": 98.00614013991564,
+        "q95_abs_error_s": 279.2965989264303,
+        "underprediction_rate": 0.45621181262729127
+      },
+      "root": 397,
+      "samples": 491,
+      "scenario": "persistent_shift"
+    },
+    {
+      "corrected": {
+        "bias_s": 1.1919185523746925,
+        "mae_s": 81.39516331371037,
+        "q95_abs_error_s": 239.03616307526326,
+        "underprediction_rate": 0.4393305439330544
+      },
+      "progress": {
+        "bias_s": -5.352134258522188,
+        "mae_s": 90.81251821568813,
+        "q95_abs_error_s": 277.71455630117265,
+        "underprediction_rate": 0.4330543933054393
+      },
+      "root": 397,
+      "samples": 478,
+      "scenario": "ood_period"
+    },
+    {
+      "corrected": {
+        "bias_s": 1.644877569350876,
+        "mae_s": 95.72685384130263,
+        "q95_abs_error_s": 274.06796184023506,
+        "underprediction_rate": 0.4029535864978903
+      },
+      "progress": {
+        "bias_s": -11.898957732881087,
+        "mae_s": 103.36402020282911,
+        "q95_abs_error_s": 307.97626678595196,
+        "underprediction_rate": 0.45147679324894513
+      },
+      "root": 401,
+      "samples": 474,
+      "scenario": "low_noise"
+    },
+    {
+      "corrected": {
+        "bias_s": -14.117010098570525,
+        "mae_s": 97.4156836040451,
+        "q95_abs_error_s": 245.7943413712536,
+        "underprediction_rate": 0.5072463768115942
+      },
+      "progress": {
+        "bias_s": -15.487859079039364,
+        "mae_s": 104.40409228126735,
+        "q95_abs_error_s": 271.1027099589019,
+        "underprediction_rate": 0.4968944099378882
+      },
+      "root": 401,
+      "samples": 483,
+      "scenario": "high_noise"
+    },
+    {
+      "corrected": {
+        "bias_s": 5.909390099964262,
+        "mae_s": 86.26690687912675,
+        "q95_abs_error_s": 231.35074557434038,
+        "underprediction_rate": 0.43186582809224316
+      },
+      "progress": {
+        "bias_s": -8.679897891444233,
+        "mae_s": 96.5122023177874,
+        "q95_abs_error_s": 265.2432898364781,
+        "underprediction_rate": 0.4570230607966457
+      },
+      "root": 401,
+      "samples": 477,
+      "scenario": "hour_burst"
+    },
+    {
+      "corrected": {
+        "bias_s": -3.490660084801068,
+        "mae_s": 87.36566250007107,
+        "q95_abs_error_s": 261.4259417097252,
+        "underprediction_rate": 0.44421487603305787
+      },
+      "progress": {
+        "bias_s": -10.528519323766725,
+        "mae_s": 93.96178774882797,
+        "q95_abs_error_s": 285.41781226601705,
+        "underprediction_rate": 0.44214876033057854
+      },
+      "root": 401,
+      "samples": 484,
+      "scenario": "persistent_shift"
+    },
+    {
+      "corrected": {
+        "bias_s": 10.806171154090013,
+        "mae_s": 89.30794086553145,
+        "q95_abs_error_s": 233.79812972274001,
+        "underprediction_rate": 0.3883089770354906
+      },
+      "progress": {
+        "bias_s": -1.4960527937755022,
+        "mae_s": 98.42002235473856,
+        "q95_abs_error_s": 271.97302205453326,
+        "underprediction_rate": 0.42588726513569936
+      },
+      "root": 401,
+      "samples": 479,
+      "scenario": "ood_period"
+    }
+  ],
+  "root_summary": [
+    {
+      "corrected": {
+        "bias_s": -3.8916913348861923,
+        "mae_s": 85.95602552435581,
+        "q95_abs_error_s": 241.54338313577335,
+        "underprediction_rate": 0.4523908523908524
+      },
+      "progress": {
+        "bias_s": -6.29802934835229,
+        "mae_s": 96.68322571649027,
+        "q95_abs_error_s": 275.14823697989027,
+        "underprediction_rate": 0.45280665280665283
+      },
+      "root": 397,
+      "samples": 2405
+    },
+    {
+      "corrected": {
+        "bias_s": 0.11122722975014722,
+        "mae_s": 91.21364322382088,
+        "q95_abs_error_s": 245.98680844922671,
+        "underprediction_rate": 0.4351272423863162
+      },
+      "progress": {
+        "bias_s": -9.625976568920361,
+        "mae_s": 99.32362896617866,
+        "q95_abs_error_s": 285.60113365103314,
+        "underprediction_rate": 0.4547350855235711
+      },
+      "root": 401,
+      "samples": 2397
+    }
+  ],
+  "software_qualified": true,
+  "source_control_reproductions": 20,
+  "stage": "passive_remaining_time_accuracy_not_native_allocation_value_or_learned_upper",
+  "training_updates": 0
+}

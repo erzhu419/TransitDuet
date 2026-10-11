@@ -35,7 +35,8 @@ reward by -2.56690/-1.38135, fleet cost by +0.06250/+0.041667 and nonfleet cost
 by -0.028519/-0.013248. Cost wins are only 10/20 and 11/20 versus window.
 The incumbent is selected 406/880 and 384/880 times: coverage is now real,
 but does not close the fleet tradeoff. Seven of 40 augmented episodes add a
-peak bus versus window; root401 also removes one in low-noise.
+peak bus versus window; two root401 episodes remove a peak bus, in low-noise
+and persistent-shift.
 
 For non-incumbent choices, fleet predictions are exactly flat versus incumbent
 329/474 and 339/496 times. Current independent-duration sampling is a separate
