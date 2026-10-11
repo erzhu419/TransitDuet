@@ -24,9 +24,28 @@ native action-value results, not global remaining-time prediction accuracy.
 prefix/state/RNG mismatches, identity outcomes, continuations and accounting.
 
 Run `native_transit_candidate_value_stage173_frozen_20261011_r1`, source revision
-`ce47839ad6`, tasks `t142824-t142833`: all launched on node004/005/006.
-All ten observer and ten identity controls qualify in native logs. Remaining
-candidate continuations and complete local analysis are pending.
+`ce47839ad6`, tasks `t142824-t142833`: DONE on node004/005/006. All 20 exact
+controls, 60 paired interventions, 70 window ledgers and 4,296,600 ticks qualify.
+Compact result JSON totals 7.75 MB; raw trajectories/checkpoints remain remote.
+
+## Result and Next Step
+
+Original score ranks disagree with 75/150 realized cost comparisons; corrected
+ranks disagree with 83/150. Correction improves two states, worsens five, leaves
+three unchanged. Original/updated mean realized regret is 0.004811/0.0239328
+(root397) and 0.0093078/0.009732 (root401). Corrected-choice minus original cost
+is +0.0191218/+0.0004242; wait is +0.1802/+0.0042 min.
+
+The pool has a strictly better realized action in eight states. Nine states have
+no realized peak discrimination; root401 OOD has peak14 for candidates0/1/2/5
+and peak15 for candidates3/4. Fleet risk cannot simply be discarded. Root397
+burst's one corrected action raises cost +0.073554 and wait +0.738 min, with
+unchanged peak14. The failure persists with original continuation, isolating
+a wrong initial ranking rather than requiring a corrected-policy cascade.
+
+Next: collect native counterfactual cost labels at fixed indices8/22/36 on
+separate training scenes. Learn action-value differences, not remaining-time
+MAE or proxy-score imitation; retain fleet/nonfleet labels separately.
 
 ## Limitations
 

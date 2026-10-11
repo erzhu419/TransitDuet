@@ -1,0 +1,830 @@
+{
+  "contract": {
+    "boundary": "retrospective_reused_scene_single_action_value_diagnostic_not_deployable_oracle_or_learned_HRL",
+    "candidates": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "clock_s": 61380,
+    "episodes_per_cell": 7,
+    "fleet": 12,
+    "intervention": "one_original_selector_candidate_then_resume_original_greedy_selector",
+    "models": "registered_Stage172_duration_draws_and_corrected_probe_scores_no_new_fit_or_uncertainty_change",
+    "pairing": "exact_prior_scores_actions_native_states_prefix_cost_and_python_numpy_torch_scenario_RNG",
+    "primary": "six_actual_terminal_costs_waits_peaks_and_ranking_regret_at_each_common_state",
+    "probe": "first_original_corrected_choice_divergence_else_fixed_index22_zero_based_no_reward_selection",
+    "qualification": "10_observer_source_reproductions_plus_10_original_selected_candidate_reproductions_70_window_ledgers",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_remaining_supply_stage172_v1",
+    "source_run": "native_transit_remaining_supply_stage172_frozen_20261011_r1",
+    "training_updates": 0
+  },
+  "native_steps": 4296600,
+  "paired_interventions": 60,
+  "protocol": "native_transit_candidate_value_stage173_v1",
+  "root_diagnostics": [
+    {
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.17379999999999995,
+        "ep_reward": -8.292199999999957,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0012999999999999956,
+        "lower_lf_drift_ratio": -1.1080837620736083e-05,
+        "nonfleet_cost_delta": 0.019121799999999876,
+        "passenger_unserved_rate": -4.599999999999882e-05,
+        "peak_fleet": 0.0,
+        "restricted_wait_horizon_min": 0.18019999999999925,
+        "service_cost_restricted": 0.019121799999999876,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_realized_regret_mean": 0.023932799999999865,
+      "original_realized_regret_mean": 0.004810999999999987,
+      "root": 397,
+      "states": 5,
+      "states_with_peak_discrimination": 0
+    },
+    {
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.07100000000000026,
+        "ep_reward": -10.312799999999925,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0013799999999999923,
+        "lower_lf_drift_ratio": -7.393433219604617e-06,
+        "nonfleet_cost_delta": 0.0004242000000000079,
+        "passenger_unserved_rate": -0.00028140000000000006,
+        "peak_fleet": 0.0,
+        "restricted_wait_horizon_min": 0.004200000000000159,
+        "service_cost_restricted": 0.0004242000000000079,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_realized_regret_mean": 0.00973199999999994,
+      "original_realized_regret_mean": 0.009307799999999932,
+      "root": 401,
+      "states": 5,
+      "states_with_peak_discrimination": 1
+    }
+  ],
+  "software_qualified": true,
+  "source_control_reproductions": 20,
+  "stage": "retrospective_reused_scene_single_action_value_diagnostic_not_deployable_oracle_or_learned_HRL",
+  "state_panels": [
+    {
+      "actual_costs": [
+        1.737009,
+        1.722931,
+        1.714032,
+        1.715705,
+        1.715111,
+        1.716318
+      ],
+      "actual_peaks": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "actual_waits_min": [
+        6.221,
+        6.2,
+        6.194,
+        6.206,
+        6.205,
+        6.205
+      ],
+      "corrected_choice": 4,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "nonfleet_cost_delta": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.0010790000000000521,
+      "corrected_score_ranks": {
+        "concordant": 11,
+        "discordant": 4,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 4,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.0010790000000000521,
+      "original_score_ranks": {
+        "concordant": 11,
+        "discordant": 4,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 22,
+      "realized_best_candidate": 2,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 811397010,
+      "time_s": 23367.0
+    },
+    {
+      "actual_costs": [
+        2.313757,
+        2.293078,
+        2.264251,
+        2.240096,
+        2.221603,
+        2.31365
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "actual_waits_min": [
+        17.184,
+        16.97,
+        16.677,
+        16.441,
+        16.217,
+        17.179
+      ],
+      "corrected_choice": 5,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.7400000000000002,
+        "ep_reward": -2.1579999999999018,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": -0.0002999999999999947,
+        "lower_lf_drift_ratio": 2.0432907193779215e-05,
+        "nonfleet_cost_delta": 0.07355400000000012,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.7379999999999995,
+        "service_cost_restricted": 0.07355400000000012,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.09204699999999999,
+      "corrected_score_ranks": {
+        "concordant": 3,
+        "discordant": 12,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 3,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.01849299999999987,
+      "original_score_ranks": {
+        "concordant": 10,
+        "discordant": 5,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 17,
+      "realized_best_candidate": 4,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 811397020,
+      "time_s": 17340.0
+    },
+    {
+      "actual_costs": [
+        0.934164,
+        0.933927,
+        0.934041,
+        0.933744,
+        0.933697,
+        0.933701
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "actual_waits_min": [
+        3.565,
+        3.565,
+        3.567,
+        3.566,
+        3.565,
+        3.566
+      ],
+      "corrected_choice": 4,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 3.002999999999929,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": -0.00030000000000002247,
+        "lower_lf_drift_ratio": 1.4109520413363441e-05,
+        "nonfleet_cost_delta": -0.00022999999999995246,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": -0.00022999999999995246,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.0,
+      "corrected_score_ranks": {
+        "concordant": 14,
+        "discordant": 1,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 1,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.00022999999999995246,
+      "original_score_ranks": {
+        "concordant": 8,
+        "discordant": 7,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 40,
+      "realized_best_candidate": 4,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 811397000,
+      "time_s": 43057.0
+    },
+    {
+      "actual_costs": [
+        1.055494,
+        1.055532,
+        1.056487,
+        1.057567,
+        1.059747,
+        1.055527
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "actual_waits_min": [
+        4.641,
+        4.642,
+        4.643,
+        4.645,
+        4.655,
+        4.642
+      ],
+      "corrected_choice": 4,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "nonfleet_cost_delta": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.004253000000000062,
+      "corrected_score_ranks": {
+        "concordant": 1,
+        "discordant": 14,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 4,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.004253000000000062,
+      "original_score_ranks": {
+        "concordant": 1,
+        "discordant": 14,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 22,
+      "realized_best_candidate": 0,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 811397040,
+      "time_s": 23637.0
+    },
+    {
+      "actual_costs": [
+        5.32852,
+        5.32574,
+        5.310376,
+        5.300558,
+        5.278273,
+        5.316743
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "actual_waits_min": [
+        43.127,
+        43.084,
+        42.93,
+        42.833,
+        42.67,
+        42.98
+      ],
+      "corrected_choice": 3,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.12899999999999956,
+        "ep_reward": -42.30599999999981,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.007099999999999995,
+        "lower_lf_drift_ratio": -8.994661571082307e-05,
+        "nonfleet_cost_delta": 0.022284999999999222,
+        "passenger_unserved_rate": -0.0002299999999999941,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.1629999999999967,
+        "service_cost_restricted": 0.022284999999999222,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.022284999999999222,
+      "corrected_score_ranks": {
+        "concordant": 11,
+        "discordant": 4,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 4,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.0,
+      "original_score_ranks": {
+        "concordant": 15,
+        "discordant": 0,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 21,
+      "realized_best_candidate": 4,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 811397030,
+      "time_s": 21589.0
+    },
+    {
+      "actual_costs": [
+        2.6495,
+        2.65157,
+        2.644725,
+        2.63655,
+        2.642789,
+        2.655113
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ],
+      "actual_waits_min": [
+        19.308,
+        19.271,
+        19.176,
+        19.152,
+        19.244,
+        19.368
+      ],
+      "corrected_choice": 0,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.23900000000000077,
+        "ep_reward": -43.08499999999981,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.006699999999999984,
+        "lower_lf_drift_ratio": -3.543851261988973e-05,
+        "nonfleet_cost_delta": -0.005612999999999868,
+        "passenger_unserved_rate": -0.0012700000000000003,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": -0.05999999999999872,
+        "service_cost_restricted": -0.005612999999999868,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.012950000000000017,
+      "corrected_score_ranks": {
+        "concordant": 2,
+        "discordant": 13,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 5,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.018562999999999885,
+      "original_score_ranks": {
+        "concordant": 2,
+        "discordant": 13,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 4,
+      "realized_best_candidate": 3,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 811401010,
+      "time_s": 4235.0
+    },
+    {
+      "actual_costs": [
+        1.660558,
+        1.66854,
+        1.664778,
+        1.668012,
+        1.66753,
+        1.672739
+      ],
+      "actual_peaks": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "actual_waits_min": [
+        6.28,
+        6.338,
+        6.31,
+        6.352,
+        6.331,
+        6.382
+      ],
+      "corrected_choice": 5,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.04400000000000048,
+        "ep_reward": -3.7889999999999873,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": -0.00019999999999997797,
+        "lower_lf_drift_ratio": 4.252091247658463e-06,
+        "nonfleet_cost_delta": 0.004199000000000064,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.043999999999999595,
+        "service_cost_restricted": 0.004199000000000064,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.012180999999999997,
+      "corrected_score_ranks": {
+        "concordant": 4,
+        "discordant": 11,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 1,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.007981999999999934,
+      "original_score_ranks": {
+        "concordant": 5,
+        "discordant": 10,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 7,
+      "realized_best_candidate": 0,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 811401020,
+      "time_s": 6558.0
+    },
+    {
+      "actual_costs": [
+        1.409631,
+        1.412013,
+        1.416177,
+        1.413851,
+        1.413606,
+        1.41162
+      ],
+      "actual_peaks": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "actual_waits_min": [
+        3.854,
+        3.87,
+        3.874,
+        3.866,
+        3.865,
+        3.87
+      ],
+      "corrected_choice": 1,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.016000000000000014,
+        "ep_reward": -7.511999999999944,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0006999999999999784,
+        "lower_lf_drift_ratio": 4.503751107165499e-06,
+        "nonfleet_cost_delta": 0.002381999999999884,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.016000000000000014,
+        "service_cost_restricted": 0.002381999999999884,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.002381999999999884,
+      "corrected_score_ranks": {
+        "concordant": 10,
+        "discordant": 5,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 0,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.0,
+      "original_score_ranks": {
+        "concordant": 11,
+        "discordant": 4,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 9,
+      "realized_best_candidate": 0,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 811401000,
+      "time_s": 8669.0
+    },
+    {
+      "actual_costs": [
+        1.235276,
+        1.23889,
+        1.245057,
+        1.662595,
+        1.664981,
+        1.240043
+      ],
+      "actual_peaks": [
+        14,
+        14,
+        14,
+        15,
+        15,
+        14
+      ],
+      "actual_waits_min": [
+        6.325,
+        6.344,
+        6.316,
+        6.267,
+        6.377,
+        6.365
+      ],
+      "corrected_choice": 5,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.05600000000000005,
+        "ep_reward": 2.8220000000001164,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": -0.00030000000000002247,
+        "lower_lf_drift_ratio": -1.0284495832957319e-05,
+        "nonfleet_cost_delta": 0.0011529999999999596,
+        "passenger_unserved_rate": -0.00013699999999999997,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.020999999999999908,
+        "service_cost_restricted": 0.0011529999999999596,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 8,
+        "discordant": 0,
+        "outcome_ties": 7,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.004766999999999966,
+      "corrected_score_ranks": {
+        "concordant": 10,
+        "discordant": 5,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 1,
+      "original_fleet_ranks": {
+        "concordant": 8,
+        "discordant": 0,
+        "outcome_ties": 7,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.003614000000000006,
+      "original_score_ranks": {
+        "concordant": 11,
+        "discordant": 4,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 8,
+      "realized_best_candidate": 0,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 811401040,
+      "time_s": 8505.0
+    },
+    {
+      "actual_costs": [
+        5.015853,
+        5.017178,
+        5.022631,
+        5.030757,
+        5.032087,
+        5.015707
+      ],
+      "actual_peaks": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "actual_waits_min": [
+        36.386,
+        36.382,
+        36.416,
+        36.472,
+        36.473,
+        36.385
+      ],
+      "corrected_choice": 4,
+      "corrected_choice_minus_original": {
+        "avg_wait_observed_min": 0.0,
+        "ep_reward": 0.0,
+        "fleet_cost_delta": 0.0,
+        "headway_cv": 0.0,
+        "lower_lf_drift_ratio": 0.0,
+        "nonfleet_cost_delta": 0.0,
+        "passenger_unserved_rate": 0.0,
+        "peak_fleet": 0,
+        "restricted_wait_horizon_min": 0.0,
+        "service_cost_restricted": 0.0,
+        "trip_completion_rate": 0.0,
+        "upper_hf_power_ratio": 0.0
+      },
+      "corrected_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "corrected_realized_regret": 0.01637999999999984,
+      "corrected_score_ranks": {
+        "concordant": 1,
+        "discordant": 14,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "original_choice": 4,
+      "original_fleet_ranks": {
+        "concordant": 0,
+        "discordant": 0,
+        "outcome_ties": 15,
+        "prediction_ties": 0
+      },
+      "original_realized_regret": 0.01637999999999984,
+      "original_score_ranks": {
+        "concordant": 1,
+        "discordant": 14,
+        "outcome_ties": 0,
+        "prediction_ties": 0
+      },
+      "probe_index": 22,
+      "realized_best_candidate": 5,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 811401030,
+      "time_s": 23354.0
+    }
+  ],
+  "training_updates": 0,
+  "window_ledger_qualified_episodes": 70
+}
