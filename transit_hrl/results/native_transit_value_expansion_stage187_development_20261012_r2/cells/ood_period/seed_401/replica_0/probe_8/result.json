@@ -1,0 +1,3838 @@
+{
+  "branches": [
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 3.93,
+      "candidate": 0,
+      "ep_reward": -1433.241,
+      "ep_steps": 4971,
+      "headway_cv": 0.2475,
+      "identity_control_reproduced": false,
+      "lower_lf_drift_ratio": 0.9861335584546049,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 3.942,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.391973,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    },
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 3.936,
+      "candidate": 1,
+      "ep_reward": -1447.002,
+      "ep_steps": 4971,
+      "headway_cv": 0.2489,
+      "identity_control_reproduced": false,
+      "lower_lf_drift_ratio": 0.9861522912298762,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 3.948,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.393965,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    },
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 3.999,
+      "candidate": 2,
+      "ep_reward": -1483.547,
+      "ep_steps": 4971,
+      "headway_cv": 0.2548,
+      "identity_control_reproduced": false,
+      "lower_lf_drift_ratio": 0.986145004130432,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 4.011,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.406141,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    },
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 4.0,
+      "candidate": 3,
+      "ep_reward": -1492.563,
+      "ep_steps": 4971,
+      "headway_cv": 0.2556,
+      "identity_control_reproduced": false,
+      "lower_lf_drift_ratio": 0.9861525862809701,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 4.012,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.407039,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    },
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 3.945,
+      "candidate": 4,
+      "ep_reward": -1437.792,
+      "ep_steps": 4971,
+      "headway_cv": 0.2509,
+      "identity_control_reproduced": false,
+      "lower_lf_drift_ratio": 0.986162874042625,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 3.957,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.39685,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    },
+    {
+      "N_fleet": 12,
+      "avg_wait_observed_min": 3.929,
+      "candidate": 5,
+      "ep_reward": -1433.012,
+      "ep_steps": 4971,
+      "headway_cv": 0.2475,
+      "identity_control_reproduced": true,
+      "lower_lf_drift_ratio": 0.9861336598787133,
+      "passenger_unserved_rate": 5e-05,
+      "passengers_generated": 19973,
+      "passengers_unserved": 1,
+      "peak_fleet": 15,
+      "restricted_wait_horizon_min": 3.941,
+      "scenario": "ood_period",
+      "scene_seed": 914010400,
+      "service_cost_restricted": 1.391857,
+      "simulation_end_time_s": 61380,
+      "trip_completion_rate": 1.0,
+      "trips_completed": 262,
+      "upper_hf_power_ratio": 0.0,
+      "window_ledger_qualified": true
+    }
+  ],
+  "continuation_qualified": true,
+  "contract": {
+    "boundary": "development_value_data_not_confirmation_or_repeated_learned_upper_actions",
+    "clock_s": 61380,
+    "context": "preaction_native_state_occupancy_and_all_six_full_timetable_curves_in_both_directions",
+    "correlated_preaction_states": 480,
+    "duration_model": "native_transit_value_context_stage177_frozen_20261011_r1/inputs/models.json_unchanged_64_draws",
+    "episodes_per_cell": 7,
+    "fleet": 12,
+    "independent_scene_groups": 80,
+    "intervention": "one_original_selector_candidate_then_resume_original_greedy_selector",
+    "paired_candidate_labels": 2880,
+    "pairing": "exact_prior_scores_actions_native_states_prefix_cost_and_python_numpy_torch_scenario_RNG",
+    "policy": "frozen_original_native_lower_and_unchanged_original_greedy_continuation",
+    "preflight": "ten_replica0_probe8_cells_cover_both_roots_all_regimes_before_remaining470",
+    "probes": [
+      8,
+      9,
+      22,
+      23,
+      36,
+      37
+    ],
+    "qualification": "frozen_weights_valid_scoring_window_ledgers_exact_identity_and_matched_prefix_state_RNG",
+    "replicas": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "role": "fresh_development_only_no_outcome_selection_no_Stage169_third_or_fourth_action_labels",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_seeds": "910000000+root*10000+regime_index*100+replica",
+    "source_protocol": "native_transit_sequence_value_stage186_v1",
+    "source_run": "native_transit_sequence_value_stage186_fit_20261012_r1",
+    "storage": "full_observer_branches_and_raw_server_only_compact_training_JSON_for_sync",
+    "targets": "physical_terminal_fleet_nonfleet_wait_reward_differences_after_one_forced_action",
+    "training_updates": 0
+  },
+  "exact_identity_reproductions": 1,
+  "frozen_weights_qualified_episodes": 7,
+  "full_rollouts_path": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/native_transit_value_expansion_stage187_development_20261012_r2/cells/ood_period/seed_401/replica_0/probe_8_raw/paired_rollouts.json",
+  "matched_prefix_state_rng_branches": 6,
+  "native_steps": 429660,
+  "observer": {
+    "N_fleet": 12,
+    "avg_wait_observed_min": 3.929,
+    "ep_reward": -1433.012,
+    "ep_steps": 4971,
+    "headway_cv": 0.2475,
+    "lower_lf_drift_ratio": 0.9861336598787133,
+    "passenger_unserved_rate": 5e-05,
+    "passengers_generated": 19973,
+    "passengers_unserved": 1,
+    "peak_fleet": 15,
+    "restricted_wait_horizon_min": 3.941,
+    "scenario": "ood_period",
+    "scene_seed": 914010400,
+    "service_cost_restricted": 1.391857,
+    "simulation_end_time_s": 61380,
+    "trip_completion_rate": 1.0,
+    "trips_completed": 262,
+    "upper_hf_power_ratio": 0.0,
+    "window_ledger_qualified": true
+  },
+  "observer_origin": "fresh_development_forward_control_not_prior_source_reproduction",
+  "policy_trace": [
+    {
+      "direction": true,
+      "greedy": 1,
+      "selected": 1,
+      "time_s": 0.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 60.0
+    },
+    {
+      "direction": true,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 2063.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 2220.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 4222.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 4380.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 6381.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 6540.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 8540.0
+    },
+    {
+      "direction": false,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 8700.0
+    },
+    {
+      "direction": true,
+      "greedy": 3,
+      "selected": 3,
+      "time_s": 10699.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 10860.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 12784.0
+    },
+    {
+      "direction": false,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 12937.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 14896.0
+    },
+    {
+      "direction": false,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 15102.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 17032.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 17267.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 19178.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 19418.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 21276.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 21502.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 23415.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 23637.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 25557.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 25769.0
+    },
+    {
+      "direction": true,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 27732.0
+    },
+    {
+      "direction": false,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 27951.0
+    },
+    {
+      "direction": true,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 29918.0
+    },
+    {
+      "direction": false,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 30133.0
+    },
+    {
+      "direction": true,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 32104.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 32315.0
+    },
+    {
+      "direction": true,
+      "greedy": 0,
+      "selected": 0,
+      "time_s": 34290.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 34497.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 36476.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 36678.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 38663.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 38860.0
+    },
+    {
+      "direction": true,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 40849.0
+    },
+    {
+      "direction": false,
+      "greedy": 5,
+      "selected": 5,
+      "time_s": 41042.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 43036.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 43224.0
+    },
+    {
+      "direction": true,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 45205.0
+    },
+    {
+      "direction": false,
+      "greedy": 4,
+      "selected": 4,
+      "time_s": 45386.0
+    }
+  ],
+  "probe_index": 8,
+  "protocol": "native_transit_value_expansion_stage187_v1",
+  "replica": 0,
+  "scenario": "ood_period",
+  "scene_seed": 914010400,
+  "seed": 401,
+  "software_qualified": true,
+  "training_record": {
+    "candidates": [
+      {
+        "commitment": {
+          "full_fleet_cost": 0.16927083333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.09114583333333334,
+          "prefix_peak_counts": {
+            "13": 62,
+            "14": 2
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9020.0,
+            9380.0,
+            9739.0,
+            10099.0,
+            10459.0,
+            10819.0
+          ],
+          "prefix_score": 0.39100707633369325,
+          "prefix_wait_cost": 0.29986124300035993,
+          "window_end_s": 10699.0
+        },
+        "ensemble_peak_counts": {
+          "13": 42,
+          "14": 22
+        },
+        "fleet_cost": 0.16927083333333331,
+        "headway_cost": 0.0010873854930953184,
+        "predicted_peak": 13,
+        "score": 0.46913207633369325,
+        "strength": 0.0,
+        "wait_cost": 0.2998430973829654
+      },
+      {
+        "commitment": {
+          "full_fleet_cost": 0.18489583333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.09114583333333334,
+          "prefix_peak_counts": {
+            "13": 62,
+            "14": 2
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9015.0,
+            9370.0,
+            9725.0,
+            10079.0,
+            10434.0,
+            10789.0
+          ],
+          "prefix_score": 0.3868402881948506,
+          "prefix_wait_cost": 0.29569445486151724,
+          "window_end_s": 10669.0
+        },
+        "ensemble_peak_counts": {
+          "13": 38,
+          "14": 26
+        },
+        "fleet_cost": 0.18489583333333331,
+        "headway_cost": 0.008144172453104758,
+        "predicted_peak": 13,
+        "score": 0.48059028819485056,
+        "strength": 0.25,
+        "wait_cost": 0.2997043959254236
+      },
+      {
+        "commitment": {
+          "full_fleet_cost": 0.21223958333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.10286458333333334,
+          "prefix_peak_counts": {
+            "13": 59,
+            "14": 5
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9010.0,
+            9360.0,
+            9710.0,
+            10060.0,
+            10409.0,
+            10759.0
+          ],
+          "prefix_score": 0.39439242221867654,
+          "prefix_wait_cost": 0.2915278388853432,
+          "window_end_s": 10639.0
+        },
+        "ensemble_peak_counts": {
+          "13": 31,
+          "14": 33
+        },
+        "fleet_cost": 0.21223958333333331,
+        "headway_cost": 0.016165572753922462,
+        "predicted_peak": 13,
+        "score": 0.5037674222186765,
+        "strength": 0.5,
+        "wait_cost": 0.29960512341162726
+      },
+      {
+        "commitment": {
+          "full_fleet_cost": 0.23567708333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.10677083333333333,
+          "prefix_peak_counts": {
+            "13": 58,
+            "14": 6
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9006.0,
+            9351.0,
+            9695.0,
+            10040.0,
+            10385.0,
+            10730.0
+          ],
+          "prefix_score": 0.39427082048458967,
+          "prefix_wait_cost": 0.28749998715125635,
+          "window_end_s": 10610.0
+        },
+        "ensemble_peak_counts": {
+          "13": 25,
+          "14": 39
+        },
+        "fleet_cost": 0.23567708333333331,
+        "headway_cost": 0.02421711124156381,
+        "predicted_peak": 13,
+        "score": 0.5231770704845897,
+        "strength": 0.75,
+        "wait_cost": 0.2995450221613885
+      },
+      {
+        "commitment": {
+          "full_fleet_cost": 0.23958333333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.12239583333333334,
+          "prefix_peak_counts": {
+            "13": 54,
+            "14": 10
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9001.0,
+            9341.0,
+            9681.0,
+            10020.0,
+            10360.0,
+            10700.0
+          ],
+          "prefix_score": 0.40572900779928056,
+          "prefix_wait_cost": 0.2833331744659472,
+          "window_end_s": 10580.0
+        },
+        "ensemble_peak_counts": {
+          "13": 24,
+          "14": 40
+        },
+        "fleet_cost": 0.23958333333333331,
+        "headway_cost": 0.03228075626970334,
+        "predicted_peak": 13,
+        "score": 0.5229165077992806,
+        "strength": 1.0,
+        "wait_cost": 0.29952461362543803
+      },
+      {
+        "commitment": {
+          "full_fleet_cost": 0.16927083333333331,
+          "next_trip_id": 60,
+          "prefix_fleet_cost": 0.09114583333333334,
+          "prefix_peak_counts": {
+            "13": 62,
+            "14": 2
+          },
+          "prefix_planned_s": [
+            8660.0,
+            9021.0,
+            9381.0,
+            9740.0,
+            10100.0,
+            10459.0,
+            10819.0
+          ],
+          "prefix_score": 0.3910069210168521,
+          "prefix_wait_cost": 0.29986108768351877,
+          "window_end_s": 10699.0
+        },
+        "ensemble_peak_counts": {
+          "13": 42,
+          "14": 22
+        },
+        "fleet_cost": 0.16927083333333331,
+        "headway_cost": 0.0011524520700490776,
+        "predicted_peak": 13,
+        "score": 0.4691319210168521,
+        "strength": null,
+        "wait_cost": 0.2998427466574474
+      }
+    ],
+    "context": {
+      "active": {
+        "False": 6,
+        "True": 6
+      },
+      "cost_before": 5.077978926165857,
+      "onboard": {
+        "False": 186,
+        "True": 149
+      },
+      "queues": {
+        "False": 78,
+        "True": 41
+      },
+      "route_speed_mean_mps": 6.714285714285714
+    },
+    "direction": true,
+    "labels": [
+      {
+        "actual_cost_delta": 0.00011600000000000499,
+        "candidate": 0,
+        "episode_reward_delta": -0.22900000000004184,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.00011600000000000499,
+        "physical_return_delta": -0.011600000000000499,
+        "wait_delta_min": 0.001000000000000334
+      },
+      {
+        "actual_cost_delta": 0.0021079999999999988,
+        "candidate": 1,
+        "episode_reward_delta": -13.990000000000009,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.0021079999999999988,
+        "physical_return_delta": -0.21079999999999988,
+        "wait_delta_min": 0.007000000000000117
+      },
+      {
+        "actual_cost_delta": 0.014284000000000185,
+        "candidate": 2,
+        "episode_reward_delta": -50.53500000000008,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.014284000000000185,
+        "physical_return_delta": -1.4284000000000185,
+        "wait_delta_min": 0.07000000000000028
+      },
+      {
+        "actual_cost_delta": 0.015182000000000029,
+        "candidate": 3,
+        "episode_reward_delta": -59.55100000000016,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.015182000000000029,
+        "physical_return_delta": -1.5182000000000029,
+        "wait_delta_min": 0.07099999999999973
+      },
+      {
+        "actual_cost_delta": 0.004993000000000025,
+        "candidate": 4,
+        "episode_reward_delta": -4.779999999999973,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.004993000000000025,
+        "physical_return_delta": -0.4993000000000025,
+        "wait_delta_min": 0.016000000000000014
+      },
+      {
+        "actual_cost_delta": 0.0,
+        "candidate": 5,
+        "episode_reward_delta": 0.0,
+        "fleet_cost_delta": 0.0,
+        "future_fleet_cost": 0.75,
+        "nonfleet_cost_delta": 0.0,
+        "physical_return_delta": -0.0,
+        "wait_delta_min": 0.0
+      }
+    ],
+    "native_state_v2": [
+      0.3333333432674408,
+      0.5710245370864868,
+      0.04580152779817581,
+      0.4000000059604645,
+      0.3333333432674408,
+      0.1492460072040558,
+      0.0,
+      0.0,
+      0.6000000238418579,
+      1.0,
+      0.6000000238418579,
+      0.007649239152669907,
+      0.5772761702537537,
+      0.04796374589204788,
+      0.9794520139694214,
+      0.03715294227004051
+    ],
+    "nominal_s": [
+      8660.0,
+      9019.0,
+      9379.0,
+      9739.0,
+      10099.0,
+      10459.0,
+      10819.0,
+      11178.0,
+      11538.0,
+      11898.0,
+      12258.0,
+      12618.0,
+      12977.0,
+      13337.0,
+      13697.0,
+      14057.0,
+      14417.0,
+      14777.0,
+      15136.0,
+      15496.0,
+      15856.0,
+      16216.0,
+      16576.0,
+      16935.0,
+      17295.0,
+      17655.0,
+      18015.0,
+      18375.0,
+      18734.0,
+      19094.0,
+      19454.0,
+      19814.0,
+      20174.0,
+      20534.0,
+      20893.0,
+      21253.0,
+      21613.0,
+      21973.0,
+      22333.0,
+      22692.0,
+      23052.0,
+      23412.0,
+      23772.0,
+      24132.0,
+      24492.0,
+      24851.0,
+      25211.0,
+      25571.0,
+      25931.0,
+      26291.0,
+      26650.0,
+      27010.0,
+      27370.0,
+      27730.0,
+      28090.0,
+      28449.0,
+      28809.0,
+      29169.0,
+      29529.0,
+      29889.0,
+      30249.0,
+      30608.0,
+      30968.0,
+      31328.0,
+      31688.0,
+      32048.0,
+      32407.0,
+      32767.0,
+      33127.0,
+      33487.0,
+      33847.0,
+      34206.0,
+      34566.0,
+      34926.0,
+      35286.0,
+      35646.0,
+      36006.0,
+      36365.0,
+      36725.0,
+      37085.0,
+      37445.0,
+      37805.0,
+      38164.0,
+      38524.0,
+      38884.0,
+      39244.0,
+      39604.0,
+      39964.0,
+      40323.0,
+      40683.0,
+      41043.0,
+      41403.0,
+      41763.0,
+      42122.0,
+      42482.0,
+      42842.0,
+      43202.0,
+      43562.0,
+      43921.0,
+      44281.0,
+      44641.0,
+      45001.0,
+      45361.0,
+      45721.0,
+      46080.0,
+      46440.0,
+      46800.0
+    ],
+    "occupancy_context": {
+      "active_buses": [
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 0.0,
+          "elapsed_s": 1676.0,
+          "holding_s": 2.0,
+          "launch_time_s": 6864.0,
+          "load_fraction": 0.38,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 19,
+          "predicted_remaining_s": 353.8728757288445,
+          "remaining_fraction": 0.19047619047619047,
+          "speed_mps": 0.0,
+          "trip_id": 38
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 1517.0,
+          "holding_s": 0.0,
+          "launch_time_s": 7023.0,
+          "load_fraction": 0.72,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 36,
+          "predicted_remaining_s": 609.9787577555906,
+          "remaining_fraction": 0.2928571428571428,
+          "speed_mps": 4.0,
+          "trip_id": 39
+        },
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 0.0,
+          "elapsed_s": 1314.0,
+          "holding_s": 15.0,
+          "launch_time_s": 7226.0,
+          "load_fraction": 0.8,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 40,
+          "predicted_remaining_s": 619.277532525478,
+          "remaining_fraction": 0.33333333333333337,
+          "speed_mps": 0.0,
+          "trip_id": 40
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 1155.0,
+          "holding_s": 0.0,
+          "launch_time_s": 7385.0,
+          "load_fraction": 1.0,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 50,
+          "predicted_remaining_s": 1070.4879239765999,
+          "remaining_fraction": 0.5139523809523809,
+          "speed_mps": 7.0,
+          "trip_id": 41
+        },
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 0.0,
+          "elapsed_s": 955.0,
+          "holding_s": 0.0,
+          "launch_time_s": 7585.0,
+          "load_fraction": 0.98,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 49,
+          "predicted_remaining_s": 1075.5966057778228,
+          "remaining_fraction": 0.5789523809523809,
+          "speed_mps": 4.0,
+          "trip_id": 42
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 796.0,
+          "holding_s": 2.0,
+          "launch_time_s": 7744.0,
+          "load_fraction": 0.96,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 48,
+          "predicted_remaining_s": 1388.5695298501253,
+          "remaining_fraction": 0.6666666666666667,
+          "speed_mps": 0.0,
+          "trip_id": 43
+        },
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 5.978536605834961,
+          "elapsed_s": 597.0,
+          "holding_s": 0.0,
+          "launch_time_s": 7943.0,
+          "load_fraction": 0.64,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 32,
+          "predicted_remaining_s": 1327.023283983167,
+          "remaining_fraction": 0.7142857142857143,
+          "speed_mps": 0.0,
+          "trip_id": 44
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 437.0,
+          "holding_s": 0.0,
+          "launch_time_s": 8103.0,
+          "load_fraction": 0.54,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 27,
+          "predicted_remaining_s": 1643.570405653316,
+          "remaining_fraction": 0.7890952380952381,
+          "speed_mps": 3.0,
+          "trip_id": 45
+        },
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 0.0,
+          "elapsed_s": 240.0,
+          "holding_s": 0.0,
+          "launch_time_s": 8300.0,
+          "load_fraction": 0.18,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 9,
+          "predicted_remaining_s": 1710.9753541489633,
+          "remaining_fraction": 0.920952380952381,
+          "speed_mps": 2.0,
+          "trip_id": 46
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 80.0,
+          "holding_s": 0.0,
+          "launch_time_s": 8460.0,
+          "load_fraction": 0.0,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 0,
+          "predicted_remaining_s": 2004.4001163386556,
+          "remaining_fraction": 0.9623333333333334,
+          "speed_mps": 5.0,
+          "trip_id": 47
+        },
+        {
+          "capacity": 50,
+          "direction": true,
+          "dwelling_s": 0.0,
+          "elapsed_s": 2039.0,
+          "holding_s": 0.0,
+          "launch_time_s": 6501.0,
+          "load_fraction": 0.0,
+          "mean_total_s": 1857.8325975764337,
+          "onboard_count": 0,
+          "predicted_remaining_s": 71.39385267829448,
+          "remaining_fraction": 0.03842857142857148,
+          "speed_mps": 7.0,
+          "trip_id": 36
+        },
+        {
+          "capacity": 50,
+          "direction": false,
+          "dwelling_s": 0.0,
+          "elapsed_s": 1880.0,
+          "holding_s": 9.0,
+          "launch_time_s": 6660.0,
+          "load_fraction": 0.5,
+          "mean_total_s": 2082.8542947751876,
+          "onboard_count": 25,
+          "predicted_remaining_s": 396.73415138575,
+          "remaining_fraction": 0.19047619047619047,
+          "speed_mps": 0.0,
+          "trip_id": 37
+        }
+      ],
+      "historical_peak": 12,
+      "queue_by_station": [
+        [
+          0,
+          true,
+          0
+        ],
+        [
+          1,
+          true,
+          4
+        ],
+        [
+          2,
+          true,
+          5
+        ],
+        [
+          3,
+          true,
+          8
+        ],
+        [
+          4,
+          true,
+          5
+        ],
+        [
+          5,
+          true,
+          1
+        ],
+        [
+          6,
+          true,
+          0
+        ],
+        [
+          7,
+          true,
+          1
+        ],
+        [
+          8,
+          true,
+          2
+        ],
+        [
+          9,
+          true,
+          4
+        ],
+        [
+          10,
+          true,
+          1
+        ],
+        [
+          11,
+          true,
+          1
+        ],
+        [
+          12,
+          true,
+          4
+        ],
+        [
+          13,
+          true,
+          1
+        ],
+        [
+          14,
+          true,
+          0
+        ],
+        [
+          15,
+          true,
+          3
+        ],
+        [
+          16,
+          true,
+          0
+        ],
+        [
+          17,
+          true,
+          0
+        ],
+        [
+          18,
+          true,
+          0
+        ],
+        [
+          19,
+          true,
+          1
+        ],
+        [
+          20,
+          true,
+          0
+        ],
+        [
+          21,
+          true,
+          0
+        ],
+        [
+          20,
+          false,
+          16
+        ],
+        [
+          19,
+          false,
+          8
+        ],
+        [
+          18,
+          false,
+          3
+        ],
+        [
+          17,
+          false,
+          6
+        ],
+        [
+          16,
+          false,
+          3
+        ],
+        [
+          15,
+          false,
+          0
+        ],
+        [
+          14,
+          false,
+          0
+        ],
+        [
+          13,
+          false,
+          6
+        ],
+        [
+          12,
+          false,
+          9
+        ],
+        [
+          11,
+          false,
+          7
+        ],
+        [
+          10,
+          false,
+          4
+        ],
+        [
+          9,
+          false,
+          7
+        ],
+        [
+          8,
+          false,
+          3
+        ],
+        [
+          7,
+          false,
+          2
+        ],
+        [
+          6,
+          false,
+          3
+        ],
+        [
+          5,
+          false,
+          0
+        ],
+        [
+          4,
+          false,
+          0
+        ],
+        [
+          3,
+          false,
+          1
+        ],
+        [
+          2,
+          false,
+          0
+        ],
+        [
+          1,
+          false,
+          0
+        ],
+        [
+          0,
+          false,
+          0
+        ]
+      ],
+      "route_speed_mps": [
+        11.0,
+        2.0,
+        7.0,
+        10.0,
+        4.0,
+        10.0,
+        7.0,
+        10.0,
+        4.0,
+        7.0,
+        9.0,
+        8.0,
+        5.0,
+        10.0,
+        8.0,
+        5.0,
+        4.0,
+        7.0,
+        7.0,
+        6.0,
+        7.0,
+        5.0,
+        4.0,
+        9.0,
+        11.0,
+        3.0,
+        8.0,
+        7.0,
+        5.0,
+        7.0,
+        8.0,
+        7.0,
+        2.0,
+        9.0,
+        7.0,
+        4.0,
+        9.0,
+        6.0,
+        7.0,
+        3.0,
+        9.0,
+        4.0
+      ]
+    },
+    "original_choice": 5,
+    "probe_index": 8,
+    "root": 401,
+    "scenario": "ood_period",
+    "scene_seed": 914010400,
+    "time_s": 8540.0,
+    "timetable_context": {
+      "candidate_planned_s": [
+        [
+          8660.0,
+          9020.0,
+          9380.0,
+          9739.0,
+          10099.0,
+          10459.0,
+          10819.0,
+          11179.0,
+          11538.0,
+          11898.0,
+          12258.0,
+          12618.0,
+          12978.0,
+          13338.0,
+          13697.0,
+          14057.0,
+          14417.0,
+          14777.0,
+          15137.0,
+          15496.0,
+          15856.0,
+          16216.0,
+          16576.0,
+          16936.0,
+          17295.0,
+          17655.0,
+          18015.0,
+          18375.0,
+          18735.0,
+          19095.0,
+          19454.0,
+          19814.0,
+          20174.0,
+          20534.0,
+          20894.0,
+          21253.0,
+          21613.0,
+          21973.0,
+          22333.0,
+          22693.0,
+          23052.0,
+          23412.0,
+          23772.0,
+          24132.0,
+          24492.0,
+          24852.0,
+          25211.0,
+          25571.0,
+          25931.0,
+          26291.0,
+          26651.0,
+          27010.0,
+          27370.0,
+          27730.0,
+          28090.0,
+          28450.0,
+          28809.0,
+          29169.0,
+          29529.0,
+          29889.0,
+          30249.0,
+          30608.0,
+          30968.0,
+          31328.0,
+          31688.0,
+          32048.0,
+          32408.0,
+          32767.0,
+          33127.0,
+          33487.0,
+          33847.0,
+          34207.0,
+          34566.0,
+          34926.0,
+          35286.0,
+          35646.0,
+          36006.0,
+          36365.0,
+          36725.0,
+          37085.0,
+          37445.0,
+          37805.0,
+          38165.0,
+          38524.0,
+          38884.0,
+          39244.0,
+          39604.0,
+          39964.0,
+          40323.0,
+          40683.0,
+          41043.0,
+          41403.0,
+          41763.0,
+          42122.0,
+          42482.0,
+          42842.0,
+          43202.0,
+          43562.0,
+          43922.0,
+          44281.0,
+          44641.0,
+          45001.0,
+          45361.0,
+          45721.0,
+          46080.0,
+          46440.0,
+          46800.0
+        ],
+        [
+          8660.0,
+          9015.0,
+          9370.0,
+          9725.0,
+          10079.0,
+          10434.0,
+          10789.0,
+          11144.0,
+          11499.0,
+          11854.0,
+          12210.0,
+          12566.0,
+          12922.0,
+          13278.0,
+          13635.0,
+          13991.0,
+          14349.0,
+          14706.0,
+          15064.0,
+          15422.0,
+          15780.0,
+          16139.0,
+          16497.0,
+          16856.0,
+          17216.0,
+          17575.0,
+          17935.0,
+          18295.0,
+          18656.0,
+          19016.0,
+          19377.0,
+          19738.0,
+          20099.0,
+          20460.0,
+          20822.0,
+          21184.0,
+          21545.0,
+          21907.0,
+          22269.0,
+          22631.0,
+          22993.0,
+          23355.0,
+          23717.0,
+          24079.0,
+          24441.0,
+          24803.0,
+          25165.0,
+          25527.0,
+          25888.0,
+          26250.0,
+          26611.0,
+          26972.0,
+          27334.0,
+          27695.0,
+          28056.0,
+          28417.0,
+          28779.0,
+          29140.0,
+          29501.0,
+          29863.0,
+          30225.0,
+          30587.0,
+          30949.0,
+          31311.0,
+          31674.0,
+          32037.0,
+          32400.0,
+          32764.0,
+          33127.0,
+          33491.0,
+          33855.0,
+          34219.0,
+          34584.0,
+          34948.0,
+          35312.0,
+          35677.0,
+          36041.0,
+          36404.0,
+          36768.0,
+          37131.0,
+          37493.0,
+          37856.0,
+          38217.0,
+          38578.0,
+          38938.0,
+          39298.0,
+          39657.0,
+          40015.0,
+          40373.0,
+          40731.0,
+          41087.0,
+          41444.0,
+          41800.0,
+          42156.0,
+          42511.0,
+          42867.0,
+          43222.0,
+          43578.0,
+          43934.0,
+          44290.0,
+          44647.0,
+          45004.0,
+          45362.0,
+          45720.0,
+          46079.0,
+          46439.0,
+          46800.0
+        ],
+        [
+          8660.0,
+          9010.0,
+          9360.0,
+          9710.0,
+          10060.0,
+          10409.0,
+          10759.0,
+          11109.0,
+          11460.0,
+          11811.0,
+          12162.0,
+          12513.0,
+          12866.0,
+          13218.0,
+          13572.0,
+          13926.0,
+          14280.0,
+          14635.0,
+          14991.0,
+          15347.0,
+          15704.0,
+          16061.0,
+          16419.0,
+          16777.0,
+          17136.0,
+          17496.0,
+          17855.0,
+          18216.0,
+          18577.0,
+          18938.0,
+          19300.0,
+          19662.0,
+          20024.0,
+          20387.0,
+          20750.0,
+          21114.0,
+          21477.0,
+          21841.0,
+          22205.0,
+          22569.0,
+          22934.0,
+          23298.0,
+          23662.0,
+          24026.0,
+          24391.0,
+          24754.0,
+          25118.0,
+          25482.0,
+          25845.0,
+          26209.0,
+          26572.0,
+          26935.0,
+          27297.0,
+          27660.0,
+          28023.0,
+          28385.0,
+          28748.0,
+          29111.0,
+          29474.0,
+          29837.0,
+          30201.0,
+          30565.0,
+          30930.0,
+          31295.0,
+          31660.0,
+          32026.0,
+          32393.0,
+          32760.0,
+          33127.0,
+          33495.0,
+          33864.0,
+          34232.0,
+          34601.0,
+          34970.0,
+          35339.0,
+          35707.0,
+          36076.0,
+          36443.0,
+          36810.0,
+          37177.0,
+          37542.0,
+          37906.0,
+          38270.0,
+          38632.0,
+          38992.0,
+          39352.0,
+          39710.0,
+          40067.0,
+          40423.0,
+          40778.0,
+          41132.0,
+          41485.0,
+          41837.0,
+          42189.0,
+          42540.0,
+          42892.0,
+          43243.0,
+          43594.0,
+          43946.0,
+          44299.0,
+          44652.0,
+          45007.0,
+          45363.0,
+          45720.0,
+          46078.0,
+          46438.0,
+          46800.0
+        ],
+        [
+          8660.0,
+          9006.0,
+          9351.0,
+          9695.0,
+          10040.0,
+          10385.0,
+          10730.0,
+          11075.0,
+          11420.0,
+          11767.0,
+          12114.0,
+          12461.0,
+          12810.0,
+          13159.0,
+          13509.0,
+          13860.0,
+          14212.0,
+          14564.0,
+          14918.0,
+          15272.0,
+          15627.0,
+          15983.0,
+          16340.0,
+          16698.0,
+          17056.0,
+          17416.0,
+          17776.0,
+          18136.0,
+          18498.0,
+          18860.0,
+          19222.0,
+          19585.0,
+          19949.0,
+          20314.0,
+          20678.0,
+          21044.0,
+          21409.0,
+          21775.0,
+          22142.0,
+          22508.0,
+          22874.0,
+          23241.0,
+          23607.0,
+          23974.0,
+          24340.0,
+          24706.0,
+          25072.0,
+          25437.0,
+          25802.0,
+          26167.0,
+          26532.0,
+          26897.0,
+          27261.0,
+          27625.0,
+          27989.0,
+          28353.0,
+          28717.0,
+          29082.0,
+          29446.0,
+          29811.0,
+          30177.0,
+          30543.0,
+          30910.0,
+          31278.0,
+          31646.0,
+          32015.0,
+          32385.0,
+          32756.0,
+          33127.0,
+          33500.0,
+          33872.0,
+          34245.0,
+          34619.0,
+          34992.0,
+          35365.0,
+          35738.0,
+          36111.0,
+          36482.0,
+          36853.0,
+          37222.0,
+          37591.0,
+          37957.0,
+          38322.0,
+          38685.0,
+          39047.0,
+          39406.0,
+          39763.0,
+          40119.0,
+          40473.0,
+          40825.0,
+          41176.0,
+          41526.0,
+          41874.0,
+          42222.0,
+          42569.0,
+          42916.0,
+          43263.0,
+          43611.0,
+          43959.0,
+          44308.0,
+          44658.0,
+          45010.0,
+          45364.0,
+          45719.0,
+          46077.0,
+          46437.0,
+          46800.0
+        ],
+        [
+          8660.0,
+          9001.0,
+          9341.0,
+          9681.0,
+          10020.0,
+          10360.0,
+          10700.0,
+          11040.0,
+          11381.0,
+          11723.0,
+          12065.0,
+          12409.0,
+          12754.0,
+          13099.0,
+          13446.0,
+          13794.0,
+          14143.0,
+          14493.0,
+          14845.0,
+          15197.0,
+          15551.0,
+          15906.0,
+          16262.0,
+          16619.0,
+          16977.0,
+          17336.0,
+          17696.0,
+          18057.0,
+          18419.0,
+          18781.0,
+          19145.0,
+          19509.0,
+          19874.0,
+          20240.0,
+          20607.0,
+          20974.0,
+          21341.0,
+          21709.0,
+          22078.0,
+          22446.0,
+          22815.0,
+          23184.0,
+          23552.0,
+          23921.0,
+          24289.0,
+          24657.0,
+          25025.0,
+          25393.0,
+          25760.0,
+          26126.0,
+          26493.0,
+          26859.0,
+          27224.0,
+          27590.0,
+          27955.0,
+          28321.0,
+          28687.0,
+          29052.0,
+          29419.0,
+          29786.0,
+          30153.0,
+          30522.0,
+          30891.0,
+          31261.0,
+          31632.0,
+          32004.0,
+          32378.0,
+          32752.0,
+          33127.0,
+          33504.0,
+          33881.0,
+          34258.0,
+          34636.0,
+          35014.0,
+          35392.0,
+          35769.0,
+          36146.0,
+          36521.0,
+          36896.0,
+          37268.0,
+          37639.0,
+          38008.0,
+          38375.0,
+          38739.0,
+          39101.0,
+          39460.0,
+          39817.0,
+          40171.0,
+          40523.0,
+          40873.0,
+          41221.0,
+          41567.0,
+          41912.0,
+          42255.0,
+          42598.0,
+          42941.0,
+          43284.0,
+          43627.0,
+          43971.0,
+          44317.0,
+          44664.0,
+          45013.0,
+          45365.0,
+          45719.0,
+          46076.0,
+          46436.0,
+          46800.0
+        ],
+        [
+          8660.0,
+          9021.0,
+          9381.0,
+          9740.0,
+          10100.0,
+          10459.0,
+          10819.0,
+          11178.0,
+          11538.0,
+          11898.0,
+          12258.0,
+          12618.0,
+          12977.0,
+          13337.0,
+          13697.0,
+          14057.0,
+          14417.0,
+          14777.0,
+          15136.0,
+          15496.0,
+          15856.0,
+          16216.0,
+          16576.0,
+          16935.0,
+          17295.0,
+          17655.0,
+          18015.0,
+          18375.0,
+          18734.0,
+          19094.0,
+          19454.0,
+          19814.0,
+          20174.0,
+          20534.0,
+          20893.0,
+          21253.0,
+          21613.0,
+          21973.0,
+          22333.0,
+          22692.0,
+          23052.0,
+          23412.0,
+          23772.0,
+          24132.0,
+          24492.0,
+          24851.0,
+          25211.0,
+          25571.0,
+          25931.0,
+          26291.0,
+          26650.0,
+          27010.0,
+          27370.0,
+          27730.0,
+          28090.0,
+          28449.0,
+          28809.0,
+          29169.0,
+          29529.0,
+          29889.0,
+          30249.0,
+          30608.0,
+          30968.0,
+          31328.0,
+          31688.0,
+          32048.0,
+          32407.0,
+          32767.0,
+          33127.0,
+          33487.0,
+          33847.0,
+          34206.0,
+          34566.0,
+          34926.0,
+          35286.0,
+          35646.0,
+          36006.0,
+          36365.0,
+          36725.0,
+          37085.0,
+          37445.0,
+          37805.0,
+          38164.0,
+          38524.0,
+          38884.0,
+          39244.0,
+          39604.0,
+          39964.0,
+          40323.0,
+          40683.0,
+          41043.0,
+          41403.0,
+          41763.0,
+          42122.0,
+          42482.0,
+          42842.0,
+          43202.0,
+          43562.0,
+          43921.0,
+          44281.0,
+          44641.0,
+          45001.0,
+          45361.0,
+          45721.0,
+          46080.0,
+          46440.0,
+          46800.0
+        ]
+      ],
+      "candidate_trip_ids": [
+        48,
+        50,
+        52,
+        54,
+        56,
+        58,
+        60,
+        62,
+        64,
+        66,
+        68,
+        70,
+        72,
+        74,
+        76,
+        78,
+        80,
+        82,
+        84,
+        86,
+        88,
+        90,
+        92,
+        94,
+        96,
+        98,
+        100,
+        102,
+        104,
+        106,
+        108,
+        110,
+        112,
+        114,
+        116,
+        118,
+        120,
+        122,
+        124,
+        126,
+        128,
+        130,
+        132,
+        134,
+        136,
+        138,
+        140,
+        142,
+        144,
+        146,
+        148,
+        150,
+        152,
+        154,
+        156,
+        158,
+        160,
+        162,
+        164,
+        166,
+        168,
+        170,
+        172,
+        174,
+        176,
+        178,
+        180,
+        182,
+        184,
+        186,
+        188,
+        190,
+        192,
+        194,
+        196,
+        198,
+        200,
+        202,
+        204,
+        206,
+        208,
+        210,
+        212,
+        214,
+        216,
+        218,
+        220,
+        222,
+        224,
+        226,
+        228,
+        230,
+        232,
+        234,
+        236,
+        238,
+        240,
+        242,
+        244,
+        246,
+        248,
+        250,
+        252,
+        254,
+        256,
+        258,
+        260
+      ],
+      "pending_trips": [
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 8640.0,
+          "scheduled_s": 8660.0,
+          "target_headway_s": 360.0,
+          "trip_id": 48
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 8820.0,
+          "scheduled_s": 8820.0,
+          "target_headway_s": 360.0,
+          "trip_id": 49
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 9000.0,
+          "scheduled_s": 9019.0,
+          "target_headway_s": 360.0,
+          "trip_id": 50
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 9180.0,
+          "scheduled_s": 9180.0,
+          "target_headway_s": 360.0,
+          "trip_id": 51
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 9360.0,
+          "scheduled_s": 9379.0,
+          "target_headway_s": 360.0,
+          "trip_id": 52
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 9540.0,
+          "scheduled_s": 9540.0,
+          "target_headway_s": 360.0,
+          "trip_id": 53
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 9720.0,
+          "scheduled_s": 9739.0,
+          "target_headway_s": 360.0,
+          "trip_id": 54
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 9900.0,
+          "scheduled_s": 9900.0,
+          "target_headway_s": 360.0,
+          "trip_id": 55
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 10080.0,
+          "scheduled_s": 10099.0,
+          "target_headway_s": 360.0,
+          "trip_id": 56
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 10260.0,
+          "scheduled_s": 10260.0,
+          "target_headway_s": 360.0,
+          "trip_id": 57
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 10440.0,
+          "scheduled_s": 10459.0,
+          "target_headway_s": 360.0,
+          "trip_id": 58
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 10620.0,
+          "scheduled_s": 10620.0,
+          "target_headway_s": 360.0,
+          "trip_id": 59
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 10800.0,
+          "scheduled_s": 10819.0,
+          "target_headway_s": 360.0,
+          "trip_id": 60
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 10980.0,
+          "scheduled_s": 10980.0,
+          "target_headway_s": 360.0,
+          "trip_id": 61
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 11160.0,
+          "scheduled_s": 11178.0,
+          "target_headway_s": 360.0,
+          "trip_id": 62
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 11340.0,
+          "scheduled_s": 11340.0,
+          "target_headway_s": 360.0,
+          "trip_id": 63
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 11520.0,
+          "scheduled_s": 11538.0,
+          "target_headway_s": 360.0,
+          "trip_id": 64
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 11700.0,
+          "scheduled_s": 11700.0,
+          "target_headway_s": 360.0,
+          "trip_id": 65
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 11880.0,
+          "scheduled_s": 11898.0,
+          "target_headway_s": 360.0,
+          "trip_id": 66
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 12060.0,
+          "scheduled_s": 12060.0,
+          "target_headway_s": 360.0,
+          "trip_id": 67
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 12240.0,
+          "scheduled_s": 12258.0,
+          "target_headway_s": 360.0,
+          "trip_id": 68
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 12420.0,
+          "scheduled_s": 12420.0,
+          "target_headway_s": 360.0,
+          "trip_id": 69
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 12600.0,
+          "scheduled_s": 12618.0,
+          "target_headway_s": 360.0,
+          "trip_id": 70
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 12780.0,
+          "scheduled_s": 12780.0,
+          "target_headway_s": 360.0,
+          "trip_id": 71
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 12960.0,
+          "scheduled_s": 12977.0,
+          "target_headway_s": 360.0,
+          "trip_id": 72
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 13140.0,
+          "scheduled_s": 13140.0,
+          "target_headway_s": 360.0,
+          "trip_id": 73
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 13320.0,
+          "scheduled_s": 13337.0,
+          "target_headway_s": 360.0,
+          "trip_id": 74
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 13500.0,
+          "scheduled_s": 13500.0,
+          "target_headway_s": 360.0,
+          "trip_id": 75
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 13680.0,
+          "scheduled_s": 13697.0,
+          "target_headway_s": 360.0,
+          "trip_id": 76
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 13860.0,
+          "scheduled_s": 13860.0,
+          "target_headway_s": 360.0,
+          "trip_id": 77
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 14040.0,
+          "scheduled_s": 14057.0,
+          "target_headway_s": 360.0,
+          "trip_id": 78
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 14220.0,
+          "scheduled_s": 14220.0,
+          "target_headway_s": 360.0,
+          "trip_id": 79
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 14400.0,
+          "scheduled_s": 14417.0,
+          "target_headway_s": 360.0,
+          "trip_id": 80
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 14580.0,
+          "scheduled_s": 14580.0,
+          "target_headway_s": 360.0,
+          "trip_id": 81
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 14760.0,
+          "scheduled_s": 14777.0,
+          "target_headway_s": 360.0,
+          "trip_id": 82
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 14940.0,
+          "scheduled_s": 14940.0,
+          "target_headway_s": 360.0,
+          "trip_id": 83
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 15120.0,
+          "scheduled_s": 15136.0,
+          "target_headway_s": 360.0,
+          "trip_id": 84
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 15300.0,
+          "scheduled_s": 15300.0,
+          "target_headway_s": 360.0,
+          "trip_id": 85
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 15480.0,
+          "scheduled_s": 15496.0,
+          "target_headway_s": 360.0,
+          "trip_id": 86
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 15660.0,
+          "scheduled_s": 15660.0,
+          "target_headway_s": 360.0,
+          "trip_id": 87
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 15840.0,
+          "scheduled_s": 15856.0,
+          "target_headway_s": 360.0,
+          "trip_id": 88
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 16020.0,
+          "scheduled_s": 16020.0,
+          "target_headway_s": 360.0,
+          "trip_id": 89
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 16200.0,
+          "scheduled_s": 16216.0,
+          "target_headway_s": 360.0,
+          "trip_id": 90
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 16380.0,
+          "scheduled_s": 16380.0,
+          "target_headway_s": 360.0,
+          "trip_id": 91
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 16560.0,
+          "scheduled_s": 16576.0,
+          "target_headway_s": 360.0,
+          "trip_id": 92
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 16740.0,
+          "scheduled_s": 16740.0,
+          "target_headway_s": 360.0,
+          "trip_id": 93
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 16920.0,
+          "scheduled_s": 16935.0,
+          "target_headway_s": 360.0,
+          "trip_id": 94
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 17100.0,
+          "scheduled_s": 17100.0,
+          "target_headway_s": 360.0,
+          "trip_id": 95
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 17280.0,
+          "scheduled_s": 17295.0,
+          "target_headway_s": 360.0,
+          "trip_id": 96
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 17460.0,
+          "scheduled_s": 17460.0,
+          "target_headway_s": 360.0,
+          "trip_id": 97
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 17640.0,
+          "scheduled_s": 17655.0,
+          "target_headway_s": 360.0,
+          "trip_id": 98
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 17820.0,
+          "scheduled_s": 17820.0,
+          "target_headway_s": 360.0,
+          "trip_id": 99
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 18000.0,
+          "scheduled_s": 18015.0,
+          "target_headway_s": 360.0,
+          "trip_id": 100
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 18180.0,
+          "scheduled_s": 18180.0,
+          "target_headway_s": 360.0,
+          "trip_id": 101
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 18360.0,
+          "scheduled_s": 18375.0,
+          "target_headway_s": 360.0,
+          "trip_id": 102
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 18540.0,
+          "scheduled_s": 18540.0,
+          "target_headway_s": 360.0,
+          "trip_id": 103
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 18720.0,
+          "scheduled_s": 18734.0,
+          "target_headway_s": 360.0,
+          "trip_id": 104
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 18900.0,
+          "scheduled_s": 18900.0,
+          "target_headway_s": 360.0,
+          "trip_id": 105
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 19080.0,
+          "scheduled_s": 19094.0,
+          "target_headway_s": 360.0,
+          "trip_id": 106
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 19260.0,
+          "scheduled_s": 19260.0,
+          "target_headway_s": 360.0,
+          "trip_id": 107
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 19440.0,
+          "scheduled_s": 19454.0,
+          "target_headway_s": 360.0,
+          "trip_id": 108
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 19620.0,
+          "scheduled_s": 19620.0,
+          "target_headway_s": 360.0,
+          "trip_id": 109
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 19800.0,
+          "scheduled_s": 19814.0,
+          "target_headway_s": 360.0,
+          "trip_id": 110
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 19980.0,
+          "scheduled_s": 19980.0,
+          "target_headway_s": 360.0,
+          "trip_id": 111
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 20160.0,
+          "scheduled_s": 20174.0,
+          "target_headway_s": 360.0,
+          "trip_id": 112
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 20340.0,
+          "scheduled_s": 20340.0,
+          "target_headway_s": 360.0,
+          "trip_id": 113
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 20520.0,
+          "scheduled_s": 20534.0,
+          "target_headway_s": 360.0,
+          "trip_id": 114
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 20700.0,
+          "scheduled_s": 20700.0,
+          "target_headway_s": 360.0,
+          "trip_id": 115
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 20880.0,
+          "scheduled_s": 20893.0,
+          "target_headway_s": 360.0,
+          "trip_id": 116
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 21060.0,
+          "scheduled_s": 21060.0,
+          "target_headway_s": 360.0,
+          "trip_id": 117
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 21240.0,
+          "scheduled_s": 21253.0,
+          "target_headway_s": 360.0,
+          "trip_id": 118
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 21420.0,
+          "scheduled_s": 21420.0,
+          "target_headway_s": 360.0,
+          "trip_id": 119
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 21600.0,
+          "scheduled_s": 21613.0,
+          "target_headway_s": 360.0,
+          "trip_id": 120
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 21780.0,
+          "scheduled_s": 21780.0,
+          "target_headway_s": 360.0,
+          "trip_id": 121
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 21960.0,
+          "scheduled_s": 21973.0,
+          "target_headway_s": 360.0,
+          "trip_id": 122
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 22140.0,
+          "scheduled_s": 22140.0,
+          "target_headway_s": 360.0,
+          "trip_id": 123
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 22320.0,
+          "scheduled_s": 22333.0,
+          "target_headway_s": 360.0,
+          "trip_id": 124
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 22500.0,
+          "scheduled_s": 22500.0,
+          "target_headway_s": 360.0,
+          "trip_id": 125
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 22680.0,
+          "scheduled_s": 22692.0,
+          "target_headway_s": 360.0,
+          "trip_id": 126
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 22860.0,
+          "scheduled_s": 22860.0,
+          "target_headway_s": 360.0,
+          "trip_id": 127
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 23040.0,
+          "scheduled_s": 23052.0,
+          "target_headway_s": 360.0,
+          "trip_id": 128
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 23220.0,
+          "scheduled_s": 23220.0,
+          "target_headway_s": 360.0,
+          "trip_id": 129
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 23400.0,
+          "scheduled_s": 23412.0,
+          "target_headway_s": 360.0,
+          "trip_id": 130
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 23580.0,
+          "scheduled_s": 23580.0,
+          "target_headway_s": 360.0,
+          "trip_id": 131
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 23760.0,
+          "scheduled_s": 23772.0,
+          "target_headway_s": 360.0,
+          "trip_id": 132
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 23940.0,
+          "scheduled_s": 23940.0,
+          "target_headway_s": 360.0,
+          "trip_id": 133
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 24120.0,
+          "scheduled_s": 24132.0,
+          "target_headway_s": 360.0,
+          "trip_id": 134
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 24300.0,
+          "scheduled_s": 24300.0,
+          "target_headway_s": 360.0,
+          "trip_id": 135
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 24480.0,
+          "scheduled_s": 24492.0,
+          "target_headway_s": 360.0,
+          "trip_id": 136
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 24660.0,
+          "scheduled_s": 24660.0,
+          "target_headway_s": 360.0,
+          "trip_id": 137
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 24840.0,
+          "scheduled_s": 24851.0,
+          "target_headway_s": 360.0,
+          "trip_id": 138
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 25020.0,
+          "scheduled_s": 25020.0,
+          "target_headway_s": 360.0,
+          "trip_id": 139
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 25200.0,
+          "scheduled_s": 25211.0,
+          "target_headway_s": 360.0,
+          "trip_id": 140
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 25380.0,
+          "scheduled_s": 25380.0,
+          "target_headway_s": 360.0,
+          "trip_id": 141
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 25560.0,
+          "scheduled_s": 25571.0,
+          "target_headway_s": 360.0,
+          "trip_id": 142
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 25740.0,
+          "scheduled_s": 25740.0,
+          "target_headway_s": 360.0,
+          "trip_id": 143
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 25920.0,
+          "scheduled_s": 25931.0,
+          "target_headway_s": 360.0,
+          "trip_id": 144
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 26100.0,
+          "scheduled_s": 26100.0,
+          "target_headway_s": 360.0,
+          "trip_id": 145
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 26280.0,
+          "scheduled_s": 26291.0,
+          "target_headway_s": 360.0,
+          "trip_id": 146
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 26460.0,
+          "scheduled_s": 26460.0,
+          "target_headway_s": 360.0,
+          "trip_id": 147
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 26640.0,
+          "scheduled_s": 26650.0,
+          "target_headway_s": 360.0,
+          "trip_id": 148
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 26820.0,
+          "scheduled_s": 26820.0,
+          "target_headway_s": 360.0,
+          "trip_id": 149
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 27000.0,
+          "scheduled_s": 27010.0,
+          "target_headway_s": 360.0,
+          "trip_id": 150
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 27180.0,
+          "scheduled_s": 27180.0,
+          "target_headway_s": 360.0,
+          "trip_id": 151
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 27360.0,
+          "scheduled_s": 27370.0,
+          "target_headway_s": 360.0,
+          "trip_id": 152
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 27540.0,
+          "scheduled_s": 27540.0,
+          "target_headway_s": 360.0,
+          "trip_id": 153
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 27720.0,
+          "scheduled_s": 27730.0,
+          "target_headway_s": 360.0,
+          "trip_id": 154
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 27900.0,
+          "scheduled_s": 27900.0,
+          "target_headway_s": 360.0,
+          "trip_id": 155
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 28080.0,
+          "scheduled_s": 28090.0,
+          "target_headway_s": 360.0,
+          "trip_id": 156
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 28260.0,
+          "scheduled_s": 28260.0,
+          "target_headway_s": 360.0,
+          "trip_id": 157
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 28440.0,
+          "scheduled_s": 28449.0,
+          "target_headway_s": 360.0,
+          "trip_id": 158
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 28620.0,
+          "scheduled_s": 28620.0,
+          "target_headway_s": 360.0,
+          "trip_id": 159
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 28800.0,
+          "scheduled_s": 28809.0,
+          "target_headway_s": 360.0,
+          "trip_id": 160
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 28980.0,
+          "scheduled_s": 28980.0,
+          "target_headway_s": 360.0,
+          "trip_id": 161
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 29160.0,
+          "scheduled_s": 29169.0,
+          "target_headway_s": 360.0,
+          "trip_id": 162
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 29340.0,
+          "scheduled_s": 29340.0,
+          "target_headway_s": 360.0,
+          "trip_id": 163
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 29520.0,
+          "scheduled_s": 29529.0,
+          "target_headway_s": 360.0,
+          "trip_id": 164
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 29700.0,
+          "scheduled_s": 29700.0,
+          "target_headway_s": 360.0,
+          "trip_id": 165
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 29880.0,
+          "scheduled_s": 29889.0,
+          "target_headway_s": 360.0,
+          "trip_id": 166
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 30060.0,
+          "scheduled_s": 30060.0,
+          "target_headway_s": 360.0,
+          "trip_id": 167
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 30240.0,
+          "scheduled_s": 30249.0,
+          "target_headway_s": 360.0,
+          "trip_id": 168
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 30420.0,
+          "scheduled_s": 30420.0,
+          "target_headway_s": 360.0,
+          "trip_id": 169
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 30600.0,
+          "scheduled_s": 30608.0,
+          "target_headway_s": 360.0,
+          "trip_id": 170
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 30780.0,
+          "scheduled_s": 30780.0,
+          "target_headway_s": 360.0,
+          "trip_id": 171
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 30960.0,
+          "scheduled_s": 30968.0,
+          "target_headway_s": 360.0,
+          "trip_id": 172
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 31140.0,
+          "scheduled_s": 31140.0,
+          "target_headway_s": 360.0,
+          "trip_id": 173
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 31320.0,
+          "scheduled_s": 31328.0,
+          "target_headway_s": 360.0,
+          "trip_id": 174
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 31500.0,
+          "scheduled_s": 31500.0,
+          "target_headway_s": 360.0,
+          "trip_id": 175
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 31680.0,
+          "scheduled_s": 31688.0,
+          "target_headway_s": 360.0,
+          "trip_id": 176
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 31860.0,
+          "scheduled_s": 31860.0,
+          "target_headway_s": 360.0,
+          "trip_id": 177
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 32040.0,
+          "scheduled_s": 32048.0,
+          "target_headway_s": 360.0,
+          "trip_id": 178
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 32220.0,
+          "scheduled_s": 32220.0,
+          "target_headway_s": 360.0,
+          "trip_id": 179
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 32400.0,
+          "scheduled_s": 32407.0,
+          "target_headway_s": 360.0,
+          "trip_id": 180
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 32580.0,
+          "scheduled_s": 32580.0,
+          "target_headway_s": 360.0,
+          "trip_id": 181
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 32760.0,
+          "scheduled_s": 32767.0,
+          "target_headway_s": 360.0,
+          "trip_id": 182
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 32940.0,
+          "scheduled_s": 32940.0,
+          "target_headway_s": 360.0,
+          "trip_id": 183
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 33120.0,
+          "scheduled_s": 33127.0,
+          "target_headway_s": 360.0,
+          "trip_id": 184
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 33300.0,
+          "scheduled_s": 33300.0,
+          "target_headway_s": 360.0,
+          "trip_id": 185
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 33480.0,
+          "scheduled_s": 33487.0,
+          "target_headway_s": 360.0,
+          "trip_id": 186
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 33660.0,
+          "scheduled_s": 33660.0,
+          "target_headway_s": 360.0,
+          "trip_id": 187
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 33840.0,
+          "scheduled_s": 33847.0,
+          "target_headway_s": 360.0,
+          "trip_id": 188
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 34020.0,
+          "scheduled_s": 34020.0,
+          "target_headway_s": 360.0,
+          "trip_id": 189
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 34200.0,
+          "scheduled_s": 34206.0,
+          "target_headway_s": 360.0,
+          "trip_id": 190
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 34380.0,
+          "scheduled_s": 34380.0,
+          "target_headway_s": 360.0,
+          "trip_id": 191
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 34560.0,
+          "scheduled_s": 34566.0,
+          "target_headway_s": 360.0,
+          "trip_id": 192
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 34740.0,
+          "scheduled_s": 34740.0,
+          "target_headway_s": 360.0,
+          "trip_id": 193
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 34920.0,
+          "scheduled_s": 34926.0,
+          "target_headway_s": 360.0,
+          "trip_id": 194
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 35100.0,
+          "scheduled_s": 35100.0,
+          "target_headway_s": 360.0,
+          "trip_id": 195
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 35280.0,
+          "scheduled_s": 35286.0,
+          "target_headway_s": 360.0,
+          "trip_id": 196
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 35460.0,
+          "scheduled_s": 35460.0,
+          "target_headway_s": 360.0,
+          "trip_id": 197
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 35640.0,
+          "scheduled_s": 35646.0,
+          "target_headway_s": 360.0,
+          "trip_id": 198
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 35820.0,
+          "scheduled_s": 35820.0,
+          "target_headway_s": 360.0,
+          "trip_id": 199
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 36000.0,
+          "scheduled_s": 36006.0,
+          "target_headway_s": 360.0,
+          "trip_id": 200
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 36180.0,
+          "scheduled_s": 36180.0,
+          "target_headway_s": 360.0,
+          "trip_id": 201
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 36360.0,
+          "scheduled_s": 36365.0,
+          "target_headway_s": 360.0,
+          "trip_id": 202
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 36540.0,
+          "scheduled_s": 36540.0,
+          "target_headway_s": 360.0,
+          "trip_id": 203
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 36720.0,
+          "scheduled_s": 36725.0,
+          "target_headway_s": 360.0,
+          "trip_id": 204
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 36900.0,
+          "scheduled_s": 36900.0,
+          "target_headway_s": 360.0,
+          "trip_id": 205
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 37080.0,
+          "scheduled_s": 37085.0,
+          "target_headway_s": 360.0,
+          "trip_id": 206
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 37260.0,
+          "scheduled_s": 37260.0,
+          "target_headway_s": 360.0,
+          "trip_id": 207
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 37440.0,
+          "scheduled_s": 37445.0,
+          "target_headway_s": 360.0,
+          "trip_id": 208
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 37620.0,
+          "scheduled_s": 37620.0,
+          "target_headway_s": 360.0,
+          "trip_id": 209
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 37800.0,
+          "scheduled_s": 37805.0,
+          "target_headway_s": 360.0,
+          "trip_id": 210
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 37980.0,
+          "scheduled_s": 37980.0,
+          "target_headway_s": 360.0,
+          "trip_id": 211
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 38160.0,
+          "scheduled_s": 38164.0,
+          "target_headway_s": 360.0,
+          "trip_id": 212
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 38340.0,
+          "scheduled_s": 38340.0,
+          "target_headway_s": 360.0,
+          "trip_id": 213
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 38520.0,
+          "scheduled_s": 38524.0,
+          "target_headway_s": 360.0,
+          "trip_id": 214
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 38700.0,
+          "scheduled_s": 38700.0,
+          "target_headway_s": 360.0,
+          "trip_id": 215
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 38880.0,
+          "scheduled_s": 38884.0,
+          "target_headway_s": 360.0,
+          "trip_id": 216
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 39060.0,
+          "scheduled_s": 39060.0,
+          "target_headway_s": 360.0,
+          "trip_id": 217
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 39240.0,
+          "scheduled_s": 39244.0,
+          "target_headway_s": 360.0,
+          "trip_id": 218
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 39420.0,
+          "scheduled_s": 39420.0,
+          "target_headway_s": 360.0,
+          "trip_id": 219
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 39600.0,
+          "scheduled_s": 39604.0,
+          "target_headway_s": 360.0,
+          "trip_id": 220
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 39780.0,
+          "scheduled_s": 39780.0,
+          "target_headway_s": 360.0,
+          "trip_id": 221
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 39960.0,
+          "scheduled_s": 39964.0,
+          "target_headway_s": 360.0,
+          "trip_id": 222
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 40140.0,
+          "scheduled_s": 40140.0,
+          "target_headway_s": 360.0,
+          "trip_id": 223
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 40320.0,
+          "scheduled_s": 40323.0,
+          "target_headway_s": 360.0,
+          "trip_id": 224
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 40500.0,
+          "scheduled_s": 40500.0,
+          "target_headway_s": 360.0,
+          "trip_id": 225
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 40680.0,
+          "scheduled_s": 40683.0,
+          "target_headway_s": 360.0,
+          "trip_id": 226
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 40860.0,
+          "scheduled_s": 40860.0,
+          "target_headway_s": 360.0,
+          "trip_id": 227
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 41040.0,
+          "scheduled_s": 41043.0,
+          "target_headway_s": 360.0,
+          "trip_id": 228
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 41220.0,
+          "scheduled_s": 41220.0,
+          "target_headway_s": 360.0,
+          "trip_id": 229
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 41400.0,
+          "scheduled_s": 41403.0,
+          "target_headway_s": 360.0,
+          "trip_id": 230
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 41580.0,
+          "scheduled_s": 41580.0,
+          "target_headway_s": 360.0,
+          "trip_id": 231
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 41760.0,
+          "scheduled_s": 41763.0,
+          "target_headway_s": 360.0,
+          "trip_id": 232
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 41940.0,
+          "scheduled_s": 41940.0,
+          "target_headway_s": 360.0,
+          "trip_id": 233
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 42120.0,
+          "scheduled_s": 42122.0,
+          "target_headway_s": 360.0,
+          "trip_id": 234
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 42300.0,
+          "scheduled_s": 42300.0,
+          "target_headway_s": 360.0,
+          "trip_id": 235
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 42480.0,
+          "scheduled_s": 42482.0,
+          "target_headway_s": 360.0,
+          "trip_id": 236
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 42660.0,
+          "scheduled_s": 42660.0,
+          "target_headway_s": 360.0,
+          "trip_id": 237
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 42840.0,
+          "scheduled_s": 42842.0,
+          "target_headway_s": 360.0,
+          "trip_id": 238
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 43020.0,
+          "scheduled_s": 43020.0,
+          "target_headway_s": 360.0,
+          "trip_id": 239
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 43200.0,
+          "scheduled_s": 43202.0,
+          "target_headway_s": 360.0,
+          "trip_id": 240
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 43380.0,
+          "scheduled_s": 43380.0,
+          "target_headway_s": 360.0,
+          "trip_id": 241
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 43560.0,
+          "scheduled_s": 43562.0,
+          "target_headway_s": 360.0,
+          "trip_id": 242
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 43740.0,
+          "scheduled_s": 43740.0,
+          "target_headway_s": 360.0,
+          "trip_id": 243
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 43920.0,
+          "scheduled_s": 43921.0,
+          "target_headway_s": 360.0,
+          "trip_id": 244
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 44100.0,
+          "scheduled_s": 44100.0,
+          "target_headway_s": 360.0,
+          "trip_id": 245
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 44280.0,
+          "scheduled_s": 44281.0,
+          "target_headway_s": 360.0,
+          "trip_id": 246
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 44460.0,
+          "scheduled_s": 44460.0,
+          "target_headway_s": 360.0,
+          "trip_id": 247
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 44640.0,
+          "scheduled_s": 44641.0,
+          "target_headway_s": 360.0,
+          "trip_id": 248
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 44820.0,
+          "scheduled_s": 44820.0,
+          "target_headway_s": 360.0,
+          "trip_id": 249
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 45000.0,
+          "scheduled_s": 45001.0,
+          "target_headway_s": 360.0,
+          "trip_id": 250
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 45180.0,
+          "scheduled_s": 45180.0,
+          "target_headway_s": 360.0,
+          "trip_id": 251
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 45360.0,
+          "scheduled_s": 45361.0,
+          "target_headway_s": 360.0,
+          "trip_id": 252
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 45540.0,
+          "scheduled_s": 45540.0,
+          "target_headway_s": 360.0,
+          "trip_id": 253
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 45720.0,
+          "scheduled_s": 45721.0,
+          "target_headway_s": 360.0,
+          "trip_id": 254
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 45900.0,
+          "scheduled_s": 45900.0,
+          "target_headway_s": 360.0,
+          "trip_id": 255
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 46080.0,
+          "scheduled_s": 46080.0,
+          "target_headway_s": 360.0,
+          "trip_id": 256
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 46260.0,
+          "scheduled_s": 46260.0,
+          "target_headway_s": 360.0,
+          "trip_id": 257
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 46440.0,
+          "scheduled_s": 46440.0,
+          "target_headway_s": 360.0,
+          "trip_id": 258
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 46620.0,
+          "scheduled_s": 46620.0,
+          "target_headway_s": 360.0,
+          "trip_id": 259
+        },
+        {
+          "committed": false,
+          "direction": true,
+          "nominal_s": 46800.0,
+          "scheduled_s": 46800.0,
+          "target_headway_s": 360.0,
+          "trip_id": 260
+        },
+        {
+          "committed": false,
+          "direction": false,
+          "nominal_s": 46980.0,
+          "scheduled_s": 46980.0,
+          "target_headway_s": 360.0,
+          "trip_id": 261
+        }
+      ]
+    }
+  },
+  "training_updates": 0,
+  "window_ledger_qualified_episodes": 7
+}

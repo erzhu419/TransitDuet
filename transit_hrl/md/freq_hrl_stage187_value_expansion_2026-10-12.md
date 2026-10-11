@@ -1,34 +1,29 @@
 # Stage187: Fresh Development Scene Coverage
 
-Stage186's active full-timetable encoder still failed the grouped cost/wait
-gate. Test the coverage hypothesis with a fixed fresh development cohort,
-not further tuning against the same twenty scenes.
+Stage186 failed the grouped cost/wait gate despite active encoder gradients.
+Test scene coverage with eight new seeds per lower root/regime: 80 groups,
+480 correlated states, 2,880 labels. Scene seed is
+910000000 + root*10000 + regime_index*100 + replica. Exclude all four Stage169
+scenes and Stage173 checks; no outcome-based scene selection.
 
-Register eight scenes for each of two frozen lower roots and five regimes:
-80 scene groups, six probes per scene, 480 states and 2,880 candidate labels.
-Scene seed is 910000000 + root*10000 + regime_index*100 + replica.
-Reserve all four Stage169 scenes and Stage173 check scenes outside this cohort.
+Preserve frozen lower, original greedy continuation, 64 duration draws,
+full preaction timetable inputs and physical cost/wait/fleet targets.
+Planned budget: 480 tasks, 3,360 episodes, 206,236,800 ticks, zero updates.
+One CPU/3GB per task, node001-006 unbound; raw rollouts/checkpoints stay remote.
 
-Keep the original greedy selector, frozen lower, 64-draw duration priors,
-full timestep inputs, seven paired episodes per probe and physical targets.
-Budget: 480 scheduler tasks, 3,360 episodes, 206,236,800 ticks, zero policy
-updates. Ten replica0/probe8 tasks cover both roots and all five regimes;
-qualify those before submitting the other470. No outcome-based selection.
+Run: native_transit_value_expansion_stage187_development_20261012_r2,
+code d21b0a715e. Preflight t143421-t143430 completed exit0: 70 episodes,
+10 exact identities and60 labels qualified across both roots/five regimes.
+Ten compact JSONs total898,030 bytes; eight manual compact-directory syncs.
+Remaining470 tasks registered as t143440-t143909 and dispatched.
+Eight focused tests pass, including native clock and scheduler retry semantics.
 
-One CPU/3GB per task, node001-006 unbound. Sync compact result JSON only;
-full observations, branch rollouts and native checkpoints remain on servers.
-Eight focused tests pass. Next: finish paired collection, then compare matched
-value fits on expanded scene groups before opening confirmation action labels.
+The aborted r1 checked `ep_steps` as seconds, but it counts lower transitions.
+Remove that incorrect check, retain actual clock/trips/schedule/windows;
+archive20 failed attempts and10 stopped retries separately, use none as labels.
 
-The initial r1 preflight failed an incorrect new check equating lower
-transition count (`ep_steps`) with simulation seconds. Remove that check;
-retain the actual61380-second clock, trips, schedule and window qualification.
-Stop automatic retries and rerun the same fixed cohort as r2. No labels from
-the failed attempt enter training. The remaining470 tasks require ten valid
-paired cells before submission.
-
-Corrected run: native_transit_value_expansion_stage187_development_20261012_r2,
-code d21b0a715e, preflight t143421-t143430 on node001/004/005/006.
+Next: finish the480-cell bank; combine with120 existing states for100 scene
+groups/600 states/3,600 labels, then matched scalar/sequence grouped value fits.
 
 ## Limitations
 
