@@ -32,9 +32,21 @@ with compact trip times are pulled, never raw CSV/checkpoints.
 scores/actions/dispatch, next-anchor persistence, trip accounting and scheduling.
 
 Run `native_transit_commitment_audit_stage167_frozen_20261011_r1`, revision
-`1f6864c035`: t142372-t142381 are running on node001/004/005/006 after scheduler
-staging/dispatch. Full 40-trajectory and window accounting qualification remains
-pending; no new performance claim is registered.
+`1f6864c035`: t142372-t142381 are DONE. All 40 physical trajectories, complete
+schedules and original selector traces reproduce exactly; next-callback anchor,
+completed-trip ledger and irreversible window-peak accounting also pass.
+
+| Root | Decisions | Full-only fleet discrimination | Prefix argmin disagreement | Rewritten tail proposals | Prefix cost MAE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 397 | 880 | 371 | 546 (62.05%) | 49,824/53,760 (92.68%) | 0.019664 |
+| 401 | 880 | 294 | 564 (64.09%) | 51,381/53,760 (95.57%) | 0.023930 |
+
+Disagreements occur in every regime (100-123 out of 176 decisions per panel).
+Full-tail fleet scores differ from realized window costs by 0.064382/0.055590
+on average. This is a horizon discrepancy, not a same-target calibration
+comparison. The large rewritten tail and ranking mismatch justify Stage168:
+separately change waiting horizon, fleet horizon and both, preserving all other
+control variables. No new performance improvement follows from this passive audit.
 
 ## Limitations
 

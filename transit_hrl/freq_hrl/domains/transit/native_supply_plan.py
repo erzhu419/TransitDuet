@@ -72,6 +72,9 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
     def candidate_fleet_cost(self, peak, planned_by_id, now):
         return max(peak - self.env._n_fleet_target, 0) ** 2 / self.env._n_fleet_target, {}
 
+    def candidate_score(self, wait_cost, fleet_cost, diagnostics):
+        return wait_cost + (fleet_cost if self.selection == "supply_aware" else 0.)
+
     def preferred_intervals(self, nominal, trip, now):
         self.observe_completions(now)
         forecast, rates = super().preferred_intervals(nominal, trip, now)
@@ -93,7 +96,7 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
             planned_by_id = {int(t.launch_turn): float(p) for t, p in zip(remaining, planned)}
             peak = self.predicted_peak(planned_by_id, now)
             fleet_cost, diagnostics = self.candidate_fleet_cost(peak, planned_by_id, now)
-            score = wait_cost + (fleet_cost if self.selection == "supply_aware" else 0.)
+            score = self.candidate_score(wait_cost, fleet_cost, diagnostics)
             candidates.append({"strength": strength, "wait_cost": wait_cost, "headway_cost": regularity,
                 "predicted_peak": peak, "fleet_cost": float(fleet_cost), "score": float(score), **diagnostics})
             preferences.append(preference)
