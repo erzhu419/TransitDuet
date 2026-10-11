@@ -16,11 +16,11 @@ from tests import test_native_transit_incumbent_window as incumbent_tests
 
 
 class ValueDataTest(unittest.TestCase):
-    def cells(self):
+    def cells(self, probes=spec.PROBES):
         previous, _, pack = candidate_tests.CandidateValueTest().cells()
         cells, sources = {}, {}
         for (root, scenario), old in previous.items():
-            for index in spec.PROBES:
+            for index in probes:
                 cell = copy.deepcopy(old)
                 baseline = cell["observer"]
                 baseline["scene_seed"] = 900000000+root*1000+spec.SCENARIOS.index(scenario)*10

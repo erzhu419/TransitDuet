@@ -74,6 +74,42 @@ def records(cell):
             "episode_reward_delta": r["ep_reward"]-baseline["ep_reward"]} for r in cell["branches"]]}
 
 
+def collect(root, scenario, index, model, output):
+    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    sys.path.insert(0, str(native.NATIVE))
+    import frequency
+    frequency.DemandFrequencyTracker = native.NativeRoutingTracker
+    torch.set_num_threads(1)
+    shared.source.incumbent.source.distributional.validate_model(model)
+    registered = source_record(root, scenario)
+    scene = registered["scene_seed"]
+    _, checkpoint = native.load_source(root)
+    raw = raw_directory(output)
+    baseline, plan = shared.episode(root, scenario, scene, raw/"observer", checkpoint, model, index)
+    shared.qualify(baseline, {**registered, "probe": baseline["probe"]})
+    context = training_context(plan.snapshot)
+    print("VALUE_DATA_OBSERVER_SOURCE_QUALIFIED", flush=True)
+    order = [baseline["probe"]["greedy"], *[i for i in shared.CANDIDATES if i != baseline["probe"]["greedy"]]]
+    branches = []
+    for candidate in order:
+        row, _ = shared.episode(root, scenario, scene, raw/f"candidate_{candidate}", checkpoint,
+            model, index, candidate=candidate, reference=plan)
+        shared.qualify(row, baseline, candidate=candidate)
+        row["policy_trace"] = shared.policy_trace(row.pop("supply"))
+        branches.append(row)
+        print(f"value_data root={root} {scenario}/{index}/{candidate} "
+            f"cost={row['service_cost_restricted']} peak={row['peak_fleet']} identity={row['source_control_reproduced']}", flush=True)
+        if candidate == baseline["probe"]["greedy"]:
+            print("VALUE_DATA_IDENTITY_SOURCE_QUALIFIED", flush=True)
+    baseline["policy_trace"] = shared.policy_trace(baseline["supply"])
+    branches.sort(key=lambda r: r["probe"]["selected"])
+    validate_continuations(baseline, branches)
+    return {"seed": root, "scenario": scenario, "probe_index": index, "software_qualified": True,
+        "training_updates": 0, "native_steps": 7*61380, "observer": baseline,
+        "branches": branches, "training_context": context}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, choices=ROOTS, required=True)
@@ -82,41 +118,9 @@ def main():
     parser.add_argument("--models", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
-    os.environ.setdefault("MPLBACKEND", "Agg")
-    sys.path.insert(0, str(native.NATIVE))
-    import frequency
-    frequency.DemandFrequencyTracker = native.NativeRoutingTracker
-    torch.set_num_threads(1)
     model = json.loads(args.models.read_text())[str(args.seed)]
-    shared.source.incumbent.source.distributional.validate_model(model)
-    registered = source_record(args.seed, args.scenario)
-    scene = registered["scene_seed"]
-    _, checkpoint = native.load_source(args.seed)
-    raw = raw_directory(args.output)
-    baseline, plan = shared.episode(args.seed, args.scenario, scene, raw/"observer", checkpoint, model, args.probe)
-    shared.qualify(baseline, {**registered, "probe": baseline["probe"]})
-    context = training_context(plan.snapshot)
-    print("VALUE_DATA_OBSERVER_SOURCE_QUALIFIED", flush=True)
-    order = [baseline["probe"]["greedy"], *[i for i in shared.CANDIDATES if i != baseline["probe"]["greedy"]]]
-    branches = []
-    for candidate in order:
-        row, _ = shared.episode(args.seed, args.scenario, scene, raw/f"candidate_{candidate}", checkpoint,
-            model, args.probe, candidate=candidate, reference=plan)
-        shared.qualify(row, baseline, candidate=candidate)
-        row["policy_trace"] = shared.policy_trace(row.pop("supply"))
-        branches.append(row)
-        print(f"value_data root={args.seed} {args.scenario}/{args.probe}/{candidate} "
-            f"cost={row['service_cost_restricted']} peak={row['peak_fleet']} identity={row['source_control_reproduced']}", flush=True)
-        if candidate == baseline["probe"]["greedy"]:
-            print("VALUE_DATA_IDENTITY_SOURCE_QUALIFIED", flush=True)
-    baseline["policy_trace"] = shared.policy_trace(baseline["supply"])
-    branches.sort(key=lambda r: r["probe"]["selected"])
-    validate_continuations(baseline, branches)
-    write_json(args.output, {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "seed": args.seed,
-        "scenario": args.scenario, "probe_index": args.probe, "software_qualified": True,
-        "training_updates": 0, "native_steps": 7*61380, "observer": baseline,
-        "branches": branches, "training_context": context})
+    result = collect(args.seed, args.scenario, args.probe, model, args.output)
+    write_json(args.output, {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), **result})
     print("NATIVE_VALUE_TRAINING_DATA_COMPLETE", flush=True)
 
 

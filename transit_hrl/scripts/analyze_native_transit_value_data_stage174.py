@@ -14,7 +14,8 @@ from scripts import run_native_transit_value_data_stage174 as spec
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
-def summarize(cells, sources, models, source_models):
+def summarize(cells, sources, models, source_models, *, protocol_spec=spec):
+    spec = protocol_spec
     required = {(r, s, i) for r in spec.ROOTS for s in spec.SCENARIOS for i in spec.PROBES}
     if set(cells) != required or set(sources) != {(r, s) for r, s, _ in required} or models != source_models:
         raise ValueError("Incomplete value training data or changed fitted duration inputs")
