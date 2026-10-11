@@ -1,0 +1,91 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "new_control_updates": 0,
+    "new_critic_updates": 2800,
+    "new_fits": 28,
+    "new_inner_updates": 0,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "added_features": [
+      "full_tail_wait_proxy",
+      "full_tail_headway_irregularity"
+    ],
+    "boundary": "learned_full_sequence_value_screen_not_repeated_upper_actions_or_end_to_end_HRL_confirmation",
+    "budget": "28_fits_sum_of_frozen_control_refit_steps_no_new_inner_control_actor_or_native_updates",
+    "control": "reuse_qualified_Stage184_tail_summary_values_and_all_28_frozen_step_counts",
+    "critic": "98_base_features_plus_16_learned_event_features_114_16_3_2147_parameters",
+    "data": "unchanged_120_states_720_labels_20_first_second_scene_groups_and_absolute_fleet_supervision",
+    "decision": "restore_physical_units_cost_is_fleet_plus_nonfleet_wait_is_a_separate_nonpositive_delta_constraint",
+    "encoder": "all_real_events_shared_6_8_tanh_8_8_kernel3_tanh_masked_mean_max_no_truncation",
+    "event_scaling": "all_real_training_events_only_per_channel_mean_std_no_padding_in_normalization",
+    "initialization": "same_seed178_control_core_weights_biases_and_heads_zero_sequence_projection",
+    "loss": "absolute_fleet_MSE_plus_three_head_paired_MSE_only_no_expected_regret_gradients",
+    "matching": "same_groups_states_labels_loss_base_target_scales_optimizer_steps_and_initial_predictor",
+    "next": "separately_register_third_scene_frozen_transfer_before_repeated_learned_actions",
+    "optimizer": {
+      "learning_rate": 0.003,
+      "weight_decay": 0.01
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "timetable_sequence:wait_feasible",
+    "screen": "fixed_primary_negative_mean_cost_and_nonpositive_wait_for_both_roots_in_all_three_splits",
+    "source_protocol": "native_transit_timetable_context_stage185_v1",
+    "source_run": "native_transit_timetable_context_stage185_frozen_20261012_r1",
+    "validation": [
+      "20_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "frozen_selected_steps": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100
+  ],
+  "protocol": "native_transit_sequence_value_stage186_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "83cb2927d2f1dcf7a3169c39b03e82e4398131ea",
+  "tasks": 1
+}
