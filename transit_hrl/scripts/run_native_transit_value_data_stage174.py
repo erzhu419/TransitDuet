@@ -36,14 +36,15 @@ def contract():
         "boundary": "30_correlated_training_states_180_counterfactual_labels_not_policy_training_or_performance_confirmation"}
 
 
-def source_record(root, scenario):
+def source_record(root, scenario, *, scene_index=0):
     cell = json.loads((ROOT/"results"/SOURCE_RUN/"cells"/scenario/f"seed_{root}/result.json").read_text())
     if not (cell["protocol"] == source.EXPERIMENT_PROTOCOL and cell["contract"] == source.contract()
             and cell["software_qualified"] and cell["seed"] == root and cell["scenario"] == scenario
             and cell["training_updates"] == 0 and cell["native_steps"] == 16*61380):
         raise ValueError("Value training labels require completed Stage169 controls")
-    rows = [r for r in cell["evaluation"] if r["condition"] == "rolling_plus_incumbent"]
-    row = min(rows, key=lambda r: r["scene_seed"])
+    rows = sorted((r for r in cell["evaluation"] if r["condition"] == "rolling_plus_incumbent"),
+        key=lambda r: r["scene_seed"])
+    row = rows[scene_index]
     if row["scene_seed"] == shared.source.source.check_scene(root, scenario):
         raise ValueError("Value training scene overlaps diagnosed Stage173 checks")
     return row

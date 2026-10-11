@@ -50,10 +50,11 @@ def summarize(cells, sources, models, source_models, *, protocol_spec=spec):
             "states_with_better_realized_action": sum(min(l["actual_cost_delta"] for l in d["labels"]) < 0 for d in group),
             "mean_best_realized_cost_delta": float(np.mean([min(l["actual_cost_delta"] for l in d["labels"]) for d in group])),
             "states_with_fleet_discrimination": sum(len({l["fleet_cost_delta"] for l in d["labels"]}) > 1 for d in group)})
+    states = len(required)
     return {"protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "software_qualified": True,
-        "training_updates": 0, "native_steps": 210*61380, "source_control_reproductions": 60,
-        "window_ledger_qualified_episodes": 210, "paired_interventions": 180,
-        "training_states": 30, "root_diagnostics": diagnostics, "training_data": data,
+        "training_updates": 0, "native_steps": 7*states*61380, "source_control_reproductions": 2*states,
+        "window_ledger_qualified_episodes": 7*states, "paired_interventions": 6*states,
+        "training_states": states, "root_diagnostics": diagnostics, "training_data": data,
         "stage": spec.contract()["boundary"]}
 
 

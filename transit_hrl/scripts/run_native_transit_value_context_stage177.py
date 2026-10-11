@@ -35,7 +35,8 @@ def contract():
 
 def qualify_contexts(contexts, rows, registered):
     expected = {r["probe_index"]: r for r in rows}
-    if not (len(contexts) == len(expected) == 6 and sorted(c["index"] for c in contexts) == list(PROBES)):
+    if not (len(contexts) == len(expected) == len(rows)
+            and sorted(c["index"] for c in contexts) == sorted(expected)):
         raise ValueError("Missing or duplicate passive value contexts")
     for c in contexts:
         r = expected[c["index"]]
