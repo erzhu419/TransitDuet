@@ -18,7 +18,11 @@ cost, wait, episode reward and ranking regret by root, regime and direction.
 Sixty unbound scheduler CPU tasks on node001-006: 420 native episodes,
 25,779,600 ticks, 120 observer/identity controls and 360 action labels.
 Zero critic/actor/lower updates. Pull logs and compact JSON only, not native
-raw CSV or checkpoints. Results pending. Next use this fixed-model result
+raw CSV or checkpoints. Run native_transit_value_transfer_stage179_frozen_20261011_r1,
+revision ec8dbf44f6, tasks t143047-t143106: all 60 running on node004/005/006
+(20 each), node001-006 allowed and no binding. Startup logs for t143047/48/49
+qualify preaction predictions and exact observer reproduction. Full results pending.
+Next use this fixed-model result
 to decide whether more training scenes are justified; do not deploy the
 Stage178 failed model as a learned controller.
 Seventeen focused tests pass, covering scene registration, causal predictions,

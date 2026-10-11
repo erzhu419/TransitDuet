@@ -1,0 +1,1177 @@
+{
+  "node_counts": {
+    "node004": 20,
+    "node005": 20,
+    "node006": 20
+  },
+  "observed_at_utc": "2026-10-11T13:23:05.781440+00:00",
+  "protocol": "native_transit_value_transfer_stage179_v1",
+  "qualification": "pending_all_native_identity_and_counterfactual_branch_results",
+  "run_name": "native_transit_value_transfer_stage179_frozen_20261011_r1",
+  "source_revision": "ec8dbf44f68f2fa7cb6b3683441b7631db09d480",
+  "startup_log_checks": [
+    {
+      "id": "t143047",
+      "node": "node006",
+      "observer_source_qualified": true,
+      "prediction_sealed_in_native_callback": true
+    },
+    {
+      "id": "t143048",
+      "node": "node005",
+      "observer_source_qualified": true,
+      "prediction_sealed_in_native_callback": true
+    },
+    {
+      "id": "t143049",
+      "node": "node004",
+      "observer_source_qualified": true,
+      "prediction_sealed_in_native_callback": true
+    }
+  ],
+  "status_counts": {
+    "running": 60
+  },
+  "tasks": [
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143047",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143048",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143049",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143050",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143051",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143052",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/397/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143053",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143054",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143055",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143056",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143057",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143058",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/397/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143059",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143060",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143061",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143062",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143063",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143064",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/397/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143065",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143066",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143067",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143068",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143069",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143070",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/397/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143071",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143072",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143073",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143074",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143075",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143076",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/397/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143077",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143078",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143079",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143080",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143081",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143082",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/low_noise/401/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143083",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143084",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143085",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143086",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143087",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143088",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/high_noise/401/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143089",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143090",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143091",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143092",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143093",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143094",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/hour_burst/401/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143095",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143096",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143097",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143098",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143099",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143100",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/persistent_shift/401/37",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143101",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/8",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143102",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/9",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143103",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/22",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143104",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/23",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143105",
+      "last_block_reason": null,
+      "node": "node005",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/36",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143106",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_value_transfer_stage179_v1/native_transit_value_transfer_stage179_frozen_20261011_r1/ood_period/401/37",
+      "status": "running"
+    }
+  ]
+}
