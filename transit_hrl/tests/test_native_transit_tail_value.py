@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 from scripts import run_native_transit_tail_value_stage184 as spec
-from scripts.analyze_native_transit_tail_value_stage184 import summarize
+from scripts.analyze_native_transit_tail_value_stage184 import candidate_ceiling, selected_wait_errors, summarize
 from scripts.submit_native_transit_tail_value_stage184_scheduleurm import task_specification
 from tests.test_native_transit_floor_value import fixture as old_fixture
 
@@ -112,6 +112,21 @@ class TailValueTest(unittest.TestCase):
         self.assertEqual((task["cpu"], task["ram_mb"]), (1, 3072))
         self.assertEqual(len(task["stage_input_paths"]), 4)
         self.assertIn("run_native_transit_tail_value_stage184.py", task["cmd"])
+
+    def test_outcome_oracle_and_wait_error_diagnostics_are_not_predicted_gains(self):
+        labels = [{"candidate": i, "actual_cost_delta": 0., "wait_delta_min": 0.} for i in range(6)]
+        labels[0].update(actual_cost_delta=-1., wait_delta_min=1.)
+        labels[1].update(actual_cost_delta=-.2, wait_delta_min=-.1)
+        result = candidate_ceiling([{"root": root, "original_choice": 2, "labels": labels} for root in (397, 401)])
+        for root in result["by_root"].values():
+            self.assertEqual(root["joint_improvable_states"], 1)
+            self.assertEqual(root["oracle_mean_cost_delta"], -.2)
+            self.assertEqual(root["oracle_mean_wait_delta_min"], -.1)
+        result = selected_wait_errors({"scene": {"predictions": [{"selected": 0, "original_choice": 1,
+            "predicted_wait_delta_min": [-.1, 0.], "wait_delta_min": .2}]}, "regime": {"predictions": []}})
+        self.assertEqual(result["scene"]["false_feasible_choices"], 1)
+        self.assertAlmostEqual(result["scene"]["mean_selected_wait_residual_min"], .3)
+        self.assertEqual(result["regime"]["changed_choices"], 0)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,113 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "new_control_updates": 0,
+    "new_critic_updates": 2800,
+    "new_fits": 28,
+    "new_inner_updates": 0,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "added_features": [
+      "full_tail_wait_proxy",
+      "full_tail_headway_irregularity"
+    ],
+    "boundary": "tail_summary_representation_ablation_not_complete_timetable_encoding_or_learned_HRL_confirmation",
+    "budget": "28_fits_sum_of_frozen_control_refit_steps_no_new_inner_control_actor_or_native_updates",
+    "control": "reuse_qualified_Stage183_proper_values_and_all_28_frozen_step_counts",
+    "critic": "98_16_3_tanh_1635_parameters_two_added_causal_full_tail_summaries",
+    "data": "unchanged_120_states_720_labels_20_first_second_scene_groups_and_absolute_fleet_supervision",
+    "decision": "restore_physical_units_cost_is_fleet_plus_nonfleet_wait_is_a_separate_nonpositive_delta_constraint",
+    "initialization": "same_seed178_control_weights_biases_and_heads_zero_added_columns",
+    "loss": "absolute_fleet_MSE_plus_three_head_paired_MSE_only_no_expected_regret_gradients",
+    "matching": "same_groups_states_loss_target_scales_optimizer_steps_and_initial_control_predictor",
+    "next": "separately_register_third_scene_frozen_transfer_before_repeated_learned_actions",
+    "optimizer": {
+      "learning_rate": 0.003,
+      "weight_decay": 0.01
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "tail_summary:wait_feasible",
+    "screen": "fixed_primary_negative_mean_cost_and_nonpositive_wait_for_both_roots_in_all_three_splits",
+    "source_protocol": "native_transit_proper_value_stage183_v1",
+    "source_run": "native_transit_proper_value_stage183_fit_20261012_r1",
+    "validation": [
+      "20_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "frozen_selected_steps": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100
+  ],
+  "protocol": "native_transit_tail_value_stage184_v1",
+  "representation_diagnostics": {
+    "old_distinct_outcome_aliases": [
+      {
+        "candidates": [
+          3,
+          4
+        ],
+        "probe_index": 23,
+        "root": 401,
+        "scene_seed": 900035901,
+        "tail_features": [
+          [
+            0.30090945882613707,
+            0.02295145763233575
+          ],
+          [
+            0.3008926870563994,
+            0.030588462198637856
+          ]
+        ]
+      }
+    ],
+    "remaining_distinct_outcome_aliases": []
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "f3a0a764bf75659177d98e5ccca0b20bf0872816",
+  "tasks": 1
+}

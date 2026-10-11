@@ -12,6 +12,35 @@ from scripts import run_native_transit_tail_value_stage184 as spec
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
+def candidate_ceiling(rows):
+    result = {"role": "posthoc_outcome_oracle_diagnostic_not_available_to_controller", "by_root": {}}
+    for root in (397, 401):
+        group = [r for r in rows if r["root"] == root]
+        selected = []
+        for row in group:
+            labels = {l["candidate"]: l for l in row["labels"]}
+            costs = [labels[i]["actual_cost_delta"] if labels[i]["wait_delta_min"] <= 0 else float("inf")
+                for i in range(6)]
+            selected.append(labels[spec.paired.choice_from_cost(costs, row["original_choice"])])
+        result["by_root"][str(root)] = {"states": len(group),
+            "joint_improvable_states": sum(l["actual_cost_delta"] < 0 for l in selected),
+            "oracle_mean_cost_delta": sum(l["actual_cost_delta"] for l in selected)/len(group),
+            "oracle_mean_wait_delta_min": sum(l["wait_delta_min"] for l in selected)/len(group)}
+    return result
+
+
+def selected_wait_errors(validation):
+    result = {}
+    for split, data in validation.items():
+        changed = [r for r in data["predictions"] if r["selected"] != r["original_choice"]]
+        result[split] = {"changed_choices": len(changed),
+            "false_feasible_choices": sum(r["predicted_wait_delta_min"][r["selected"]] <= 0
+                and r["wait_delta_min"] > 0 for r in changed),
+            "mean_selected_wait_residual_min": sum(r["wait_delta_min"]-r["predicted_wait_delta_min"][r["selected"]]
+                for r in changed)/max(len(changed), 1)}
+    return result
+
+
 def summarize(cell, control):
     if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
             and cell["software_qualified"] and cell["training_mode"] == cell["model"]["representation"] == "tail_summary"
@@ -46,6 +75,7 @@ def summarize(cell, control):
         "critic_updates": cell["critic_updates"], "new_control_updates": 0, "new_native_steps": 0,
         "third_scene_screen_eligible": eligible, "native_deployment_eligible": False,
         "representation_diagnostics": cell["representation_diagnostics"],
+        "selected_wait_errors": selected_wait_errors(cell["validation"]["wait_feasible"]),
         "variants": {f"{mode}:{p}": {"validation": c["validation"][p], "gates": c["gates"][p],
             "apparent_training": c["apparent_training"][p]}
             for mode, c in (("occupancy", control), ("tail_summary", cell)) for p in spec.value.POLICIES},
@@ -59,6 +89,9 @@ def main():
     args = parser.parse_args()
     directory = ROOT/"results"/args.run_name
     result = summarize(json.loads((directory/"fit/result.json").read_text()), json.loads((directory/"inputs/control.json").read_text()))
+    rows = spec.source.source.source.training_rows(*(json.loads((directory/"inputs"/f"{n}.json").read_text())
+        for n in ("first", "labels", "second", "baselines")))
+    result["candidate_ceiling"] = candidate_ceiling(rows)
     write_json(directory/"summary.json", result)
     print(json.dumps({k: v for k, v in result.items() if k not in ("contract", "variants")}, indent=2))
 
