@@ -18,6 +18,15 @@ Next fit occupancy-conditioned values; keep scene grouping and original cost.
 18 focused tests pass, covering unchanged candidate/data qualification,
 passive reads/RNG, common-state counts/floor, label reuse and scheduler paths.
 
+Run `native_transit_value_context_stage177_frozen_20261011_r1`, revision
+`4f2a2c613c`, tasks t143009-t143018: all DONE, node004/005/006 4/3/3,
+node001-006 allowed with no binding. All ten source replays, window ledgers
+and 60 labelled contexts qualify. The joined bank retains all 360 labels and
+adds 681 preaction active-bus samples. Historical floors range 12-15; root401
+already has floor15 in four states, so reducing that past peak is impossible.
+Only 4.59 MB of per-cell JSON was pulled. Ready for a separately registered
+occupancy-conditioned value fit; no learned selector was deployed.
+
 ## Limitations
 
 These are development representation data, not fresh performance confirmation.
