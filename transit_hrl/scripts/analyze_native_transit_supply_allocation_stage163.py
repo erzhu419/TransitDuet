@@ -107,8 +107,19 @@ def summarize(cells, sources):
             counts = np.sum([r["supply"]["choice_counts"] for r in chosen], axis=0)
             errors = [r["peak_fleet"] - max(d["candidates"][d["selected"]]["predicted_peak"]
                 for d in r["supply"]["decisions"]) for r in chosen]
+            decisions = [d for r in chosen for d in r["supply"]["decisions"]]
             diagnostics.append({"root": root, "condition": condition, "choice_counts": counts.tolist(),
                 "selected_mean_strength": float(counts@np.asarray(spec.STRENGTHS)/counts.sum()),
+                "decisions": len(decisions),
+                "candidate_peak_distinguishes": int(sum(np.ptp([c["predicted_peak"] for c in d["candidates"]]) > 0
+                    for d in decisions)),
+                "candidate_fleet_cost_distinguishes": int(sum(np.ptp([c["fleet_cost"] for c in d["candidates"]]) > 0
+                    for d in decisions)),
+                "fleet_term_changes_wait_only_argmin": sum(d["selected"] != min(range(5),
+                    key=lambda i: d["candidates"][i]["wait_cost"]) for d in decisions),
+                "first_decision_candidate_peak_range": [min(c["predicted_peak"]
+                    for r in chosen for c in r["supply"]["decisions"][0]["candidates"]),
+                    max(c["predicted_peak"] for r in chosen for c in r["supply"]["decisions"][0]["candidates"])],
                 "actual_minus_max_predicted_peak_mean": float(np.mean(errors)),
                 "actual_minus_max_predicted_peak_abs_mean": float(np.mean(np.abs(errors)))})
     return {"protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "software_qualified": True,

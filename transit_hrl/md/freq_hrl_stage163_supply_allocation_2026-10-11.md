@@ -32,21 +32,38 @@ minus window forecast, actual fleet/nonfleet costs, wait and selection/predictio
 diagnostics. Do not substitute predicted improvement for physical improvement.
 
 Ten unpinned scheduler cells on node001-006, 1 CPU/3 GB each. Only compact result
-JSON sync; raw CSV and checkpoints remain remote. Performance pending. If supply
-coupling earns net value, next learn the allocation action with its own constant
-control; otherwise diagnose duration/capacity prediction before any seed expansion.
+JSON sync; raw CSV and checkpoints remain remote. All ten tasks are complete;
+200 episodes and all 120 physical AND schedule controls qualify. Supply coupling
+has not earned a net benefit against window forecast on either root.
 123 focused tests pass, including joint occupancy ties/active buses, causal
 completion EWMA, supply-term selection, reversible tentative spacing, native
 commitment/tail execution, matched analysis and scheduler/worker budgets.
 Local tests use stub native environments, not full native training or episodes.
 
 Run `native_transit_supply_allocation_stage163_frozen_20261011_r1`:
-t142104-t142113 launched on node001/004/005/006. Low-noise workers t142104/t142109
-passed first-scene exact reproduction of all three source controls and executed
-both new selectors. Root397 chose alpha1 for all 44 decisions with/without supply;
-root401 changed only a few choices. Neither first scene establishes a net gain.
-Full-matrix qualification/performance remain pending; no local native episodes
-or checkpoint downloads were used.
+t142104-t142113 completed on node001/004/005/006. Relative to window forecast:
+
+| Root | Supply cost delta | Wait delta (min) | Fleet cost delta | Cost wins/20 |
+| --- | ---: | ---: | ---: | ---: |
+| 397 | +0.1794995 | -0.81465 | +0.2500000 | 4 |
+| 401 | +0.0835695 | -0.70835 | +0.1458333 | 10 |
+
+Supply minus demand cost is -0.00003255 / -0.02427585. Root401's benefit is
+concentrated in persistent shift; other regime means are unchanged or worse.
+The fleet-cost term distinguishes candidates at only 10/880 and 21/880 decisions,
+and changes the wait-only argmin at 8/880 and 17/880. Alpha1 still accounts for
+865/880 and 859/880 choices. At the first decision all candidate peaks are 5-6,
+so every fleet penalty is zero despite eventual actual episode peaks of 14-15.
+Later maximum-prediction agreement is not a predictive calibration result: the
+predictor includes the already realized historical peak. Initial duration is a
+free-flow prior; actual completed-trip EWMA at the last decision averages about
+2,100-2,255 s. This motivates an independent training-only duration calibration,
+not another strength sweep or learned-alpha training on this negative frontier.
+
+Next: Stage164 collects real single-trip times on separate fitting/check scenes,
+pools a direction prior across all five training regimes per root, and checks
+it before a new closed-loop comparison. No local native episodes or checkpoint
+downloads were used.
 
 ## Limitations
 

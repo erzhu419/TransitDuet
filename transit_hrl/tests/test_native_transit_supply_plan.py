@@ -127,6 +127,9 @@ class NativeSupplyPlanTest(unittest.TestCase):
         self.assertEqual(result["native_steps"], 200*61380)
         self.assertEqual(result["source_control_reproductions"], 120)
         self.assertEqual(len(result["paired_contrasts"]), 6)
+        json_diagnostics = result["supply_diagnostics"]
+        self.assertTrue(all(d["decisions"] == 880 and d["candidate_fleet_cost_distinguishes"] == 0
+            and d["fleet_term_changes_wait_only_argmin"] == 0 for d in json_diagnostics))
         for failure in ("score", "selection", "candidate", "count", "clock", "control", "schedule", "duplicate", "budget"):
             broken = copy.deepcopy(cells)
             cell = broken[397, "low_noise"]
