@@ -1,0 +1,414 @@
+{
+  "check_episodes": 10,
+  "check_panels": [
+    {
+      "actual_mean_s": 2031.2671755725191,
+      "actual_q05_q50_q95_s": [
+        1809.0,
+        1997.0,
+        2317.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 14.983206106870284,
+      "fitted_prior_s": 2046.2503816793894,
+      "freeflow_episode_mean_abs_error_s": 1247.267175572519,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "low_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2103.3053435114502,
+      "actual_q05_q50_q95_s": [
+        1769.5,
+        2087.0,
+        2533.5
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 57.054961832060826,
+      "fitted_prior_s": 2046.2503816793894,
+      "freeflow_episode_mean_abs_error_s": 1319.30534351145,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "high_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2038.030534351145,
+      "actual_q05_q50_q95_s": [
+        1810.5,
+        2009.0,
+        2324.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 8.219847328244441,
+      "fitted_prior_s": 2046.2503816793894,
+      "freeflow_episode_mean_abs_error_s": 1254.0305343511448,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "hour_burst",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2062.664122137405,
+      "actual_q05_q50_q95_s": [
+        1789.5,
+        2039.0,
+        2401.5
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 16.413740458015354,
+      "fitted_prior_s": 2046.2503816793894,
+      "freeflow_episode_mean_abs_error_s": 1278.6641221374045,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2058.0,
+      "actual_q05_q50_q95_s": [
+        1816.5,
+        2016.0,
+        2400.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 11.74961832061058,
+      "fitted_prior_s": 2046.2503816793894,
+      "freeflow_episode_mean_abs_error_s": 1273.9999999999998,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "ood_period",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 1998.9541984732825,
+      "actual_q05_q50_q95_s": [
+        1748.5,
+        1969.0,
+        2362.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 1.8916030534351194,
+      "fitted_prior_s": 2000.8458015267177,
+      "freeflow_episode_mean_abs_error_s": 1214.9541984732823,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "low_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2048.4503816793895,
+      "actual_q05_q50_q95_s": [
+        1759.0,
+        2038.0,
+        2391.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 47.604580152671815,
+      "fitted_prior_s": 2000.8458015267177,
+      "freeflow_episode_mean_abs_error_s": 1264.4503816793892,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "high_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 1992.1603053435115,
+      "actual_q05_q50_q95_s": [
+        1724.0,
+        1991.0,
+        2278.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 8.685496183206169,
+      "fitted_prior_s": 2000.8458015267177,
+      "freeflow_episode_mean_abs_error_s": 1208.1603053435113,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "hour_burst",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2023.442748091603,
+      "actual_q05_q50_q95_s": [
+        1766.5,
+        2009.0,
+        2309.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 22.596946564885457,
+      "fitted_prior_s": 2000.8458015267177,
+      "freeflow_episode_mean_abs_error_s": 1239.4427480916029,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2007.8625954198474,
+      "actual_q05_q50_q95_s": [
+        1801.5,
+        1983.0,
+        2317.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 7.016793893129716,
+      "fitted_prior_s": 2000.8458015267177,
+      "freeflow_episode_mean_abs_error_s": 1223.8625954198471,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 397,
+      "scenario": "ood_period",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2020.6335877862596,
+      "actual_q05_q50_q95_s": [
+        1756.0,
+        2003.0,
+        2339.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 28.993893129770868,
+      "fitted_prior_s": 2049.6274809160304,
+      "freeflow_episode_mean_abs_error_s": 1236.6335877862593,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "low_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2098.1450381679388,
+      "actual_q05_q50_q95_s": [
+        1809.0,
+        2075.0,
+        2466.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 48.51755725190833,
+      "fitted_prior_s": 2049.6274809160304,
+      "freeflow_episode_mean_abs_error_s": 1314.1450381679385,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "high_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2062.7251908396947,
+      "actual_q05_q50_q95_s": [
+        1791.5,
+        2034.0,
+        2408.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 13.097709923664297,
+      "fitted_prior_s": 2049.6274809160304,
+      "freeflow_episode_mean_abs_error_s": 1278.7251908396945,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "hour_burst",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2067.312977099237,
+      "actual_q05_q50_q95_s": [
+        1821.0,
+        2032.0,
+        2379.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 17.685496183206396,
+      "fitted_prior_s": 2049.6274809160304,
+      "freeflow_episode_mean_abs_error_s": 1283.3129770992366,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2027.7862595419847,
+      "actual_q05_q50_q95_s": [
+        1806.5,
+        2000.0,
+        2308.0
+      ],
+      "direction": "False",
+      "fitted_episode_mean_abs_error_s": 21.841221374045745,
+      "fitted_prior_s": 2049.6274809160304,
+      "freeflow_episode_mean_abs_error_s": 1243.7862595419845,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "ood_period",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 1978.5725190839694,
+      "actual_q05_q50_q95_s": [
+        1711.5,
+        1954.0,
+        2261.5
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 11.67022900763368,
+      "fitted_prior_s": 1990.242748091603,
+      "freeflow_episode_mean_abs_error_s": 1194.5725190839692,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "low_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2017.6870229007634,
+      "actual_q05_q50_q95_s": [
+        1731.0,
+        1973.0,
+        2398.5
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 27.444274809160333,
+      "fitted_prior_s": 1990.242748091603,
+      "freeflow_episode_mean_abs_error_s": 1233.6870229007632,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "high_noise",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2002.4045801526718,
+      "actual_q05_q50_q95_s": [
+        1701.5,
+        2011.0,
+        2305.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 12.161832061068708,
+      "fitted_prior_s": 1990.242748091603,
+      "freeflow_episode_mean_abs_error_s": 1218.4045801526715,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "hour_burst",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 2008.1297709923665,
+      "actual_q05_q50_q95_s": [
+        1722.5,
+        1972.0,
+        2337.5
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 17.88702290076344,
+      "fitted_prior_s": 1990.242748091603,
+      "freeflow_episode_mean_abs_error_s": 1224.1297709923663,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "trips": 131
+    },
+    {
+      "actual_mean_s": 1957.9770992366412,
+      "actual_q05_q50_q95_s": [
+        1738.0,
+        1935.0,
+        2256.0
+      ],
+      "direction": "True",
+      "fitted_episode_mean_abs_error_s": 32.26564885496191,
+      "fitted_prior_s": 1990.242748091603,
+      "freeflow_episode_mean_abs_error_s": 1173.977099236641,
+      "initial_freeflow_s": 784.0000000000002,
+      "root": 401,
+      "scenario": "ood_period",
+      "trips": 131
+    }
+  ],
+  "contract": {
+    "boundary": "duration_calibration_not_allocation_performance_or_learned_upper_authority",
+    "check": "five_independent_check_scenes_per_root_never_included_in_fit",
+    "clock_s": 61380,
+    "episodes_per_cell": 2,
+    "fit": "one_trip_weighted_direction_mean_per_root_all_five_fit_regimes_only",
+    "fleet": 12,
+    "initial_prior": "same_current_route_freeflow_plus_4s_per_segment_at_first_callback",
+    "observations": "actual_completed_trip_launch_and_completion_times_passive_native_ledger",
+    "policy": "unchanged_window_forecast_zero_residual_frozen_native_lower",
+    "primary": "held_out_episode_mean_duration_error_freeflow_vs_fitted_prior_all_regimes",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scene_seeds": "810000000+root*1000+regime_index*10+split_index_disjoint_from_previous_evaluation",
+    "source_protocol": "native_transit_supply_allocation_stage163_v1",
+    "source_run": "native_transit_supply_allocation_stage163_frozen_20261011_r1",
+    "splits": [
+      "fit",
+      "check"
+    ],
+    "training_updates": 0
+  },
+  "duration_diagnostics": [
+    {
+      "check_scenes": 5,
+      "direction": "False",
+      "fit_mean_s": 2046.2503816793894,
+      "fit_std_s": 178.86021211257008,
+      "fit_trips": 655,
+      "fitted_episode_mean_abs_error_s": 21.684274809160296,
+      "freeflow_episode_mean_abs_error_s": 1274.6534351145037,
+      "root": 397
+    },
+    {
+      "check_scenes": 5,
+      "direction": "True",
+      "fit_mean_s": 2000.8458015267177,
+      "fit_std_s": 183.75777046852647,
+      "fit_trips": 655,
+      "fitted_episode_mean_abs_error_s": 17.559083969465654,
+      "freeflow_episode_mean_abs_error_s": 1230.1740458015265,
+      "root": 397
+    },
+    {
+      "check_scenes": 5,
+      "direction": "False",
+      "fit_mean_s": 2049.6274809160304,
+      "fit_std_s": 192.99183665583274,
+      "fit_trips": 655,
+      "fitted_episode_mean_abs_error_s": 26.027175572519127,
+      "freeflow_episode_mean_abs_error_s": 1271.3206106870227,
+      "root": 401
+    },
+    {
+      "check_scenes": 5,
+      "direction": "True",
+      "fit_mean_s": 1990.242748091603,
+      "fit_std_s": 174.8358462513701,
+      "fit_trips": 655,
+      "fitted_episode_mean_abs_error_s": 20.285801526717613,
+      "freeflow_episode_mean_abs_error_s": 1208.9541984732823,
+      "root": 401
+    }
+  ],
+  "duration_prior_s": {
+    "397": {
+      "False": 2046.2503816793894,
+      "True": 2000.8458015267177
+    },
+    "401": {
+      "False": 2049.6274809160304,
+      "True": 1990.242748091603
+    }
+  },
+  "fit_episodes": 10,
+  "native_steps": 1227600,
+  "performance": "not_tested_prior_accuracy_is_not_closed_loop_allocation_value",
+  "protocol": "native_transit_duration_calibration_stage164_v1",
+  "software_qualified": true,
+  "training_updates": 0
+}

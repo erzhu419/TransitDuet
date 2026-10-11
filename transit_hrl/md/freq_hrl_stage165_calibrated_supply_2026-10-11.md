@@ -31,6 +31,15 @@ demand-only dispatch neutrality, native commitments/goals, prior/control/score
 qualification and run-specific input staging. Tests use stub environments;
 all full native episodes run remotely.
 
+Run `native_transit_calibrated_supply_stage165_frozen_20261011_r2`, revision
+`f8059d2ab6`: t142211-t142220 are running on node001/node005/node006. First window
+controls reproduce on both roots; root401's first legacy supply control also
+reproduces. Full qualification and physical performance remain pending.
+
+The r1 batch t142199-t142208 was cancelled while all ten were queued, to replace
+historical calibration-directory staging with a new-run input directory. Its
+workers never launched; all ten remote Stage164 raw directories remain present.
+
 ## Limitations
 
 Frozen two-root development on reused control scenes, not learned upper authority
