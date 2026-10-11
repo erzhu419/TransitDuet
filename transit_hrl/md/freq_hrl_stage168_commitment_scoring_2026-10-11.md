@@ -24,8 +24,26 @@ remote; export schedules, candidate scores and compact window panels in JSON.
 old selector reproduction, physical contrast/interaction arithmetic, worker
 ordering and scheduler staging. Run
 `native_transit_commitment_scoring_stage168_frozen_20261011_r1`, revision
-`c219151ef6`: t142385-t142394 are RUNNING on node001/004/005/006. Full 80-control
-reproduction, 160 window-ledger qualifications and performance results are pending.
+`c219151ef6`: t142385-t142394 are DONE. All 200 episodes, 80 exact source
+reproductions and 160 window-ledger qualifications pass.
+
+| Scoring | Cost vs window, root 397/401 | Cost vs full/full, root 397/401 |
+| --- | --- | --- |
+| Full wait / prefix fleet | +0.127522 / +0.069565 | +0.079172 / -0.018943 |
+| Prefix wait / full fleet | +0.037369 / +0.048339 | -0.010981 / -0.040169 |
+| Prefix wait / prefix fleet | +0.159113 / +0.063731 | +0.110762 / -0.024777 |
+
+Lower cost is better. Prefix-wait/full-fleet also improves reward over full/full
+by +9.033/+11.559, but loses to window forecast by -4.022/-1.741. Its wait
+delta versus window is -0.3167/-0.2027 min; extra fleet cost +0.0625/+0.0625
+exceeds nonfleet savings -0.025131/-0.014161. Both roots improve cost in
+hour-burst, but persistent shift worsens relative to full/full: +0.167476/+0.185953.
+
+Post-hoc coverage diagnosis: at all 40 initial direction decisions per root,
+none of the five rolling candidates has the window forecast's first-six
+planned departures. Stage169 adds that fixed-window primitive, preserves the
+hybrid score, and requires a forced-incumbent native reproduction before testing
+the augmented pool. No training expansion follows from this negative frontier.
 
 ## Limitations
 

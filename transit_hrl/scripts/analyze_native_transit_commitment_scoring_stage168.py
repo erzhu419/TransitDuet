@@ -22,7 +22,7 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 CONTRASTS = [(c, ref) for c in spec.HORIZONS for ref in spec.CONTROLS]
 
 
-def validate_scoring(row, model):
+def validate_scoring(row, model, *, strengths=spec.distributional.STRENGTHS):
     supply = row["supply"]
     if row["condition"] == "full_wait_full_fleet":
         validate_distributional(supply, model)
@@ -33,9 +33,9 @@ def validate_scoring(row, model):
                 and supply["fit_scene_seeds"] == model["fit_scene_seeds"] and len(supply["decisions"]) == 44):
             raise ValueError("Changed commitment scoring model or decision budget")
         prefix_wait, prefix_fleet = spec.HORIZONS[row["condition"]]
-        choices, times, completions = [0]*5, [], []
+        choices, times, completions = [0]*len(strengths), [], []
         for d in supply["decisions"]:
-            if [c["strength"] for c in d["candidates"]] != list(spec.distributional.STRENGTHS):
+            if [c["strength"] for c in d["candidates"]] != list(strengths):
                 raise ValueError("Changed commitment scoring candidates")
             for c in d["candidates"]:
                 p = c["commitment"]
@@ -53,7 +53,7 @@ def validate_scoring(row, model):
                         and np.isclose(p["prefix_score"], p["prefix_wait_cost"]+p["prefix_fleet_cost"], rtol=0, atol=1e-10)
                         and np.isclose(c["score"], score, rtol=0, atol=1e-10)):
                     raise ValueError("Changed full/prefix score terms or horizon")
-            if d["selected"] != min(range(5), key=lambda i: d["candidates"][i]["score"]):
+            if d["selected"] != min(range(len(strengths)), key=lambda i: d["candidates"][i]["score"]):
                 raise ValueError("Commitment selector did not execute its score minimum")
             choices[d["selected"]] += 1
             times.append(d["time_s"])
@@ -87,6 +87,24 @@ def factorial_effects(rows, metrics):
         for name, coefficients in zip(effects, ((-.5, -.5, .5, .5), (-.5, .5, -.5, .5), (1, -1, -1, 1))):
             effects[name].append({m: float(sum(w*r[m] for w, r in zip(coefficients, (a, b, c, d)))) for m in metrics})
     return {name: {m: float(np.mean([r[m] for r in records])) for m in metrics} for name, records in effects.items()}
+
+
+def initial_window_candidate_coverage(cells):
+    coverage = []
+    for root in spec.ROOTS:
+        available, total = 0, 0
+        for (r, _), cell in cells.items():
+            if r != root:
+                continue
+            for row in (v for v in cell["evaluation"] if v["condition"] == "prefix_wait_full_fleet"):
+                ref = next(v for v in cell["evaluation"] if v["condition"] == "window_forecast" and v["scene_seed"] == row["scene_seed"])
+                for direction in (False, True):
+                    first = next(d for d in row["supply"]["decisions"] if d["direction"] == direction)
+                    baseline = next(v for v in ref["schedule"]["schedules"] if v["direction"] == direction)["planned_s"][:6]
+                    available += any(c["commitment"]["prefix_planned_s"][:6] == baseline for c in first["candidates"])
+                    total += 1
+        coverage.append({"root": root, "initial_direction_decisions": total, "window_prefix_available": available})
+    return coverage
 
 
 def summarize(cells, sources, window_sources, models):
@@ -136,6 +154,7 @@ def summarize(cells, sources, window_sources, models):
         "paired_contrasts": [{"root": r, **contrast(rows, c, ref, metrics)} for r, rows in all_rows.items() for c, ref in CONTRASTS],
         "regime_root_contrasts": panels,
         "factorial_effects": [{"root": r, **factorial_effects(rows, metrics)} for r, rows in all_rows.items()],
+        "posthoc_initial_window_candidate_coverage": initial_window_candidate_coverage(cells),
         "stage": spec.contract()["boundary"]}
 
 

@@ -75,17 +75,19 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
     def candidate_score(self, wait_cost, fleet_cost, diagnostics):
         return wait_cost + (fleet_cost if self.selection == "supply_aware" else 0.)
 
+    def candidate_preferences(self, nominal, trip, now, remaining, forecast):
+        # Nominal spacing lets low strengths undo earlier tentative compression.
+        base = np.diff([t.launch_time for t in remaining])
+        return [(s, (1-s)*base+s*forecast) for s in STRENGTHS]
+
     def preferred_intervals(self, nominal, trip, now):
         self.observe_completions(now)
         forecast, rates = super().preferred_intervals(nominal, trip, now)
         remaining = sorted((t for t in self.env.timetables if bool(t.direction) == bool(trip.direction)
             and not t.launched and t.launch_turn not in self._targets), key=lambda t: t.launch_time)
         tracker = self.env.frequency_tracker
-        base = np.diff([t.launch_time for t in remaining])
         candidates, preferences = [], []
-        for strength in STRENGTHS:
-            # A low strength must be able to undo earlier tentative compression.
-            preference = (1 - strength) * base + strength * forecast
+        for strength, preference in self.candidate_preferences(nominal, trip, now, remaining, forecast):
             planned = projected_time_points(nominal, preference, minimum=240, maximum=480)
             intervals = np.diff(planned)
             offsets = ((planned[:-1] + planned[1:]) / 2 - now) / tracker.bin_interval_s
@@ -106,9 +108,9 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
         return preferences[selected], rates
 
     def supply_summary(self):
-        choices = [STRENGTHS[d["selected"]] for d in self.decisions]
+        width = len(self.decisions[0]["candidates"]) if self.decisions else len(STRENGTHS)
         return {"condition": self.selection, "decisions": self.decisions,
-            "choice_counts": [choices.count(s) for s in STRENGTHS],
+            "choice_counts": [sum(d["selected"] == i for d in self.decisions) for i in range(width)],
             "completed_trip_count": len(self.seen_completions),
             "trip_duration_mean_s": {str(k): v for k, v in self.duration_mean.items()},
             "boundary": "point_estimate_occupancy_and_wait_proxy_not_a_fleet_guarantee"}

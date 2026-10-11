@@ -67,6 +67,7 @@ class CommitmentScoringTest(unittest.TestCase):
                                 for c in d["candidates"]:
                                     c["commitment"] = {"prefix_peak_counts": {"12": 64}, "prefix_fleet_cost": 0.,
                                         "prefix_wait_cost": c["wait_cost"], "prefix_score": c["wait_cost"],
+                                        "prefix_planned_s": next(s for s in row["schedule"]["schedules"] if s["direction"] == d["direction"])["planned_s"][:7],
                                         "full_fleet_cost": c["fleet_cost"], "window_end_s": end}
                         row["service_cost_restricted"] += changes.get(condition, 0.)
                     rows.append(row)
@@ -91,6 +92,8 @@ class CommitmentScoringTest(unittest.TestCase):
         self.assertEqual(result["native_steps"], 200*61380)
         self.assertEqual(len(result["paired_contrasts"]), 12)
         self.assertEqual(len(result["regime_root_contrasts"]), 60)
+        self.assertTrue(all(r["window_prefix_available"] == r["initial_direction_decisions"] == 40
+            for r in result["posthoc_initial_window_candidate_coverage"]))
         effect = result["factorial_effects"][0]
         self.assertAlmostEqual(effect["prefix_wait_main_effect"]["service_cost_restricted"], -.035)
         self.assertAlmostEqual(effect["prefix_fleet_main_effect"]["service_cost_restricted"], .025)

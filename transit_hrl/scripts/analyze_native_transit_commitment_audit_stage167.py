@@ -33,7 +33,7 @@ def validate_audits(row):
         raise ValueError("Audit ledger does not reproduce full native trip/peak accounting")
     panels = []
     for i, (audit, d) in enumerate(zip(audits, decisions)):
-        if any(audit[k] != d[k] for k in ("time_s", "direction", "historical_peak", "selected")) or len(audit["candidates"]) != 5:
+        if any(audit[k] != d[k] for k in ("time_s", "direction", "historical_peak", "selected")) or len(audit["candidates"]) != len(d["candidates"]):
             raise ValueError("Passive audit differs from the executed original decision")
         ids, proposal = audit["proposed_trip_ids"], audit["selected_full_planned_s"]
         if len(ids) != len(proposal) or any(scheduled[t] != p for t, p in zip(ids[:7], proposal[:7])):
@@ -60,7 +60,7 @@ def validate_audits(row):
         actual = max(observed-12, 0)**2/12
         tail = [abs(scheduled[t]-p) for t, p in zip(ids[7:], proposal[7:])]
         panels.append({"time_s": d["time_s"], "direction": d["direction"], "window_end_s": end_s,
-            "selected": d["selected"], "prefix_proxy_argmin": min(range(5), key=lambda k: audit["candidates"][k]["prefix_score"]),
+            "selected": d["selected"], "prefix_proxy_argmin": min(range(len(audit["candidates"])), key=lambda k: audit["candidates"][k]["prefix_score"]),
             "full_fleet_distinguishes": bool(np.ptp([c["fleet_cost"] for c in d["candidates"]]) > 0),
             "prefix_fleet_distinguishes": bool(np.ptp([c["prefix_fleet_cost"] for c in audit["candidates"]]) > 0),
             "actual_window_peak": observed, "actual_window_fleet_cost": actual,
