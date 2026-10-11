@@ -1,0 +1,152 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "historical_control_updates": 42000,
+    "max_new_critic_updates": 84000,
+    "new_fits": 56,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "nested_development_checkpoint_screen_extra_inner_fitting_compute_not_matched_compute_or_HRL_confirmation",
+    "budget": {
+      "actor_updates": 0,
+      "inner_fits": 28,
+      "inner_updates": 42000,
+      "max_refit_updates": 42000,
+      "new_native_episodes": 0,
+      "refits": 28
+    },
+    "checkpoint_steps": [
+      100,
+      300,
+      600,
+      900,
+      1200,
+      1500
+    ],
+    "control": "reuse_qualified_Stage181_floor_absolute_fixed1500_predictions_no_retraining",
+    "critic": "unchanged_floor_absolute_96_16_3_tanh_1603_parameters_and_training_loss",
+    "data": "unchanged_120_states_720_labels_20_first_second_scene_groups_and_absolute_fleet_supervision",
+    "decision": "restore_physical_units_cost_is_fleet_plus_nonfleet_wait_is_a_separate_nonpositive_delta_constraint",
+    "inner_split": "sort_outer_training_groups_by_scenario_root_scene_seed_hold_every_fifth_starting_at_zero",
+    "next": "separately_register_third_scene_frozen_transfer_before_repeated_learned_actions",
+    "normalization": "inner_training_only_for_selection_full_outer_training_only_for_refit_no_outer_test_labels",
+    "optimizer": {
+      "learning_rate": 0.003,
+      "weight_decay": 0.01
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "scene_stop:wait_feasible",
+    "refit": "fresh_same_seed178_on_all_outer_training_scenes_for_selected_step_count",
+    "screen": "fixed_primary_negative_mean_cost_and_nonpositive_wait_for_both_roots_in_all_three_splits",
+    "selection": "minimum_inner_scene_absolute_fleet_MSE_plus_three_head_paired_MSE_earlier_on_exact_ties",
+    "source_protocol": "native_transit_floor_value_stage181_v1",
+    "source_run": "native_transit_floor_value_stage181_fit_20261011_r1",
+    "validation": [
+      "20_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "protocol": "native_transit_scene_stop_stage182_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "4953d1ea99f492b1e4a54b495b274c2cb0d7be16",
+  "tasks": 1,
+  "training_groups": [
+    [
+      397,
+      900034700
+    ],
+    [
+      397,
+      900034701
+    ],
+    [
+      397,
+      900034710
+    ],
+    [
+      397,
+      900034711
+    ],
+    [
+      397,
+      900034720
+    ],
+    [
+      397,
+      900034721
+    ],
+    [
+      397,
+      900034730
+    ],
+    [
+      397,
+      900034731
+    ],
+    [
+      397,
+      900034740
+    ],
+    [
+      397,
+      900034741
+    ],
+    [
+      401,
+      900035900
+    ],
+    [
+      401,
+      900035901
+    ],
+    [
+      401,
+      900035910
+    ],
+    [
+      401,
+      900035911
+    ],
+    [
+      401,
+      900035920
+    ],
+    [
+      401,
+      900035921
+    ],
+    [
+      401,
+      900035930
+    ],
+    [
+      401,
+      900035931
+    ],
+    [
+      401,
+      900035940
+    ],
+    [
+      401,
+      900035941
+    ]
+  ]
+}
