@@ -1,0 +1,84 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "new_control_updates": 0,
+    "new_critic_updates": 2800,
+    "new_fits": 28,
+    "new_inner_updates": 0,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "objective_ablation_at_frozen_development_stopping_schedule_not_independent_confirmation_or_HRL",
+    "budget": "28_fits_sum_of_frozen_control_refit_steps_no_new_inner_control_actor_or_native_updates",
+    "control": "reuse_qualified_Stage182_scene_stop_values_and_all_28_inner_selected_step_counts",
+    "critic": "unchanged_floor_absolute_96_16_3_tanh_1603_parameters",
+    "data": "unchanged_120_states_720_labels_20_first_second_scene_groups_and_absolute_fleet_supervision",
+    "decision": "restore_physical_units_cost_is_fleet_plus_nonfleet_wait_is_a_separate_nonpositive_delta_constraint",
+    "loss": "absolute_fleet_MSE_plus_three_head_paired_MSE_only_no_expected_regret_gradients",
+    "matching": "same_outer_training_groups_states_seed178_scales_optimizer_parameters_and_optimizer_steps",
+    "next": "separately_register_third_scene_frozen_transfer_before_repeated_learned_actions",
+    "optimizer": {
+      "learning_rate": 0.003,
+      "weight_decay": 0.01
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "proper_mse:wait_feasible",
+    "screen": "fixed_primary_negative_mean_cost_and_nonpositive_wait_for_both_roots_in_all_three_splits",
+    "source_protocol": "native_transit_scene_stop_stage182_v1",
+    "source_run": "native_transit_scene_stop_stage182_fit_20261012_r1",
+    "validation": [
+      "20_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "frozen_selected_steps": [
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100,
+    100
+  ],
+  "protocol": "native_transit_proper_value_stage183_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "fa949d1903e8dddb58ed50afe9eecd422574aa6e",
+  "tasks": 1
+}
