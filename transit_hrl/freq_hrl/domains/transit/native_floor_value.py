@@ -12,18 +12,29 @@ METHODS = ("raw_absolute", "floor_absolute")
 POLICIES = ("cost_only", "wait_feasible")
 HEADS = (*paired.HEADS, "wait_delta_min")
 CHECKPOINT_STEPS = (100, 300, 600, 900, 1200, 1500)
+TAIL_NAMES = ("full_tail_wait_proxy", "full_tail_headway_irregularity")
+
+
+def features(row, representation="occupancy"):
+    base = occupancy.features(row, "occupancy_regret")
+    if representation == "occupancy":
+        return base
+    if representation == "tail_summary":
+        return np.c_[base, [[c["wait_cost"], c["headway_cost"]] for c in row["candidates"]]]
+    raise ValueError("Unknown anchored fleet action representation")
 
 
 def floor_cost(row):
     return max(row["occupancy_context"]["historical_peak"]-12, 0)**2/12.
 
 
-def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, objective="decision_regret"):
+def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, objective="decision_regret",
+        representation="occupancy"):
     if method not in METHODS:
         raise ValueError("Unknown anchored fleet value method")
     if objective not in ("decision_regret", "proper_mse"):
         raise ValueError("Unknown anchored fleet learning objective")
-    raw = np.stack([occupancy.features(r, "occupancy_regret") for r in rows])
+    raw = np.stack([features(r, representation) for r in rows])
     labels = [{l["candidate"]: l for l in r["labels"]} for r in rows]
     # The absolute target fixes the offset that pair differences cannot identify.
     targets = np.asarray([[[l[i][h] for h in ("future_fleet_cost", *HEADS[1:])]
@@ -45,7 +56,7 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
     if validation_rows is not None:
         if {paired.scene_group(r) for r in rows} & {paired.scene_group(r) for r in validation_rows}:
             raise ValueError("Checkpoint validation must hold out complete training scenes")
-        vraw = np.stack([occupancy.features(r, "occupancy_regret") for r in validation_rows])
+        vraw = np.stack([features(r, representation) for r in validation_rows])
         vl = [{l["candidate"]: l for l in r["labels"]} for r in validation_rows]
         vt = np.asarray([[[l[i][h] for h in ("future_fleet_cost", *HEADS[1:])]
             for i in range(6)] for l in vl])
@@ -55,6 +66,14 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
         torch.manual_seed(occupancy.SEED)
         network = nn.Sequential(nn.Linear(occupancy.INPUT_DIM, occupancy.WIDTH), nn.Tanh(),
             nn.Linear(occupancy.WIDTH, 3))
+        if representation == "tail_summary":
+            # Start from the same control predictor; only the new columns start at zero.
+            expanded = nn.Linear(raw.shape[-1], occupancy.WIDTH)
+            with torch.no_grad():
+                expanded.weight.zero_()
+                expanded.weight[:, :occupancy.INPUT_DIM].copy_(network[0].weight)
+                expanded.bias.copy_(network[0].bias)
+            network[0] = expanded
         initial = [p.detach().clone() for p in network.parameters()]
         optimizer = torch.optim.AdamW(network.parameters(), lr=occupancy.LEARNING_RATE,
             weight_decay=occupancy.WEIGHT_DECAY)
@@ -95,11 +114,14 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
             validation_groups=[list(g) for g in sorted({paired.scene_group(r) for r in validation_rows})])
     if objective == "proper_mse":
         model["objective"] = objective
+    if representation == "tail_summary":
+        model.update(representation=representation, added_features=list(TAIL_NAMES),
+            initialization="unchanged_control_weights_and_biases_zero_added_columns")
     return model
 
 
 def predict(row, model):
-    x = (occupancy.features(row, "occupancy_regret")-model["center"])/model["scale"]
+    x = (features(row, model.get("representation", "occupancy"))-model["center"])/model["scale"]
     w = {k: np.asarray(v) for k, v in model["weights"].items()}
     heads = np.tanh(x@w["0.weight"].T+w["0.bias"])@w["2.weight"].T+w["2.bias"]
     if model["method"] == "floor_absolute":
