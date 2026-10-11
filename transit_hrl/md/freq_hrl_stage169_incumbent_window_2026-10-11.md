@@ -26,8 +26,22 @@ model inputs only. Raw records/checkpoints remain remote. 61 focused tests pass:
 scores, fixed-window geometry, candidate selection, control/ledger accounting
 and scheduler staging. Run
 `native_transit_incumbent_window_stage169_frozen_20261011_r1`, revision
-`eac46428b2`: t142440-t142449 are RUNNING on node001/004/005/006. All 80 source
-and 40 forced-incumbent native reproductions and performance results are pending.
+`eac46428b2`: t142440-t142449 are DONE. All 80 source controls, 40 forced-incumbent
+physics/schedule reproductions and 120 selected-window ledgers qualify.
+
+Augmented minus five-candidate cost is -0.003388/-0.019920 (roots397/401), but
+minus window is still +0.033981/+0.028419. Wait changes by -0.36545/-0.20330 min,
+reward by -2.56690/-1.38135, fleet cost by +0.06250/+0.041667 and nonfleet cost
+by -0.028519/-0.013248. Cost wins are only 10/20 and 11/20 versus window.
+The incumbent is selected 406/880 and 384/880 times: coverage is now real,
+but does not close the fleet tradeoff. Seven of 40 augmented episodes add a
+peak bus versus window; root401 also removes one in low-noise.
+
+For non-incumbent choices, fleet predictions are exactly flat versus incumbent
+329/474 and 339/496 times. Current independent-duration sampling is a separate
+modeling limitation: adjacent fit/check duration errors remain strongly serially
+correlated after causal EWMA. Stage170 first checks a fit-only joint predictor
+with each trip's 64 marginal samples unchanged, before any native policy test.
 
 ## Limitations
 

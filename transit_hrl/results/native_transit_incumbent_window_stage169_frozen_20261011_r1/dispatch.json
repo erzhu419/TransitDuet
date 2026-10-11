@@ -1,6 +1,7 @@
 {
   "input_staging": "code_and_fresh_model_inputs_only",
-  "performance": "pending_augmented_pool_physical_cost_vs_window_and_five_candidates",
+  "native_steps": 9820800,
+  "performance": "augmented_pool_improves_five_candidate_cost_both_roots_but_loses_window_cost_both_roots",
   "protocol": "native_transit_incumbent_window_stage169_v1",
   "run_name": "native_transit_incumbent_window_stage169_frozen_20261011_r1",
   "scheduler": {
@@ -16,79 +17,80 @@
     "ram_mb_per_task": 3072,
     "require_node": null
   },
-  "source_qualification": "pending_80_source_and_40_forced_incumbent_native_reproductions",
+  "source_qualification": "80_exact_source_and_40_forced_incumbent_native_reproductions_qualified",
   "source_revision": "eac46428b2dc91357c8601232377fbbf5be8a9f1",
+  "summary": "summary.json",
   "tasks": [
     {
       "id": "t142440",
       "node": "node004",
       "scenario": "low_noise",
       "seed": 397,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142441",
       "node": "node006",
       "scenario": "high_noise",
       "seed": 397,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142442",
       "node": "node005",
       "scenario": "hour_burst",
       "seed": 397,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142443",
       "node": "node001",
       "scenario": "persistent_shift",
       "seed": 397,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142444",
       "node": "node004",
       "scenario": "ood_period",
       "seed": 397,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142445",
       "node": "node006",
       "scenario": "low_noise",
       "seed": 401,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142446",
       "node": "node005",
       "scenario": "high_noise",
       "seed": 401,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142447",
       "node": "node001",
       "scenario": "hour_burst",
       "seed": 401,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142448",
       "node": "node004",
       "scenario": "persistent_shift",
       "seed": 401,
-      "status": "running"
+      "status": "done"
     },
     {
       "id": "t142449",
       "node": "node006",
       "scenario": "ood_period",
       "seed": 401,
-      "status": "running"
+      "status": "done"
     }
   ],
-  "window_accounting": "pending_120_selected_window_ledgers"
+  "window_accounting": "120_selected_window_ledgers_qualified"
 }
