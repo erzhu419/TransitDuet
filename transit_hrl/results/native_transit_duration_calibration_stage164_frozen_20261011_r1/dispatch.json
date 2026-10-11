@@ -1,20 +1,20 @@
 {
   "protocol": "native_transit_duration_calibration_stage164_v1",
   "run_name": "native_transit_duration_calibration_stage164_frozen_20261011_r1",
-  "calibration": "pending_full_fit_and_check_episodes",
+  "calibration": "complete_20_qualified_episodes_fit_only_prior_improves_all_check_episode_means",
   "allocation_performance": "not_tested",
   "scheduler": {"allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"], "require_node": null},
-  "startup": "all_ten_running_first_root397_log_has_no_exception_full_episode_qualification_pending",
+  "qualification": "all_clock_fleet_schedule_completed_trip_and_fit_check_separation_checks_pass",
   "tasks": [
-    {"id": "t142154", "seed": 397, "scenario": "low_noise", "node": "node005", "status": "running"},
-    {"id": "t142155", "seed": 397, "scenario": "high_noise", "node": "node006", "status": "running"},
-    {"id": "t142156", "seed": 397, "scenario": "hour_burst", "node": "node005", "status": "running"},
-    {"id": "t142157", "seed": 397, "scenario": "persistent_shift", "node": "node006", "status": "running"},
-    {"id": "t142158", "seed": 397, "scenario": "ood_period", "node": "node005", "status": "running"},
-    {"id": "t142159", "seed": 401, "scenario": "low_noise", "node": "node006", "status": "running"},
-    {"id": "t142160", "seed": 401, "scenario": "high_noise", "node": "node005", "status": "running"},
-    {"id": "t142161", "seed": 401, "scenario": "hour_burst", "node": "node006", "status": "running"},
-    {"id": "t142162", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "running"},
-    {"id": "t142163", "seed": 401, "scenario": "ood_period", "node": "node006", "status": "running"}
+    {"id": "t142154", "seed": 397, "scenario": "low_noise", "node": "node005", "status": "done"},
+    {"id": "t142155", "seed": 397, "scenario": "high_noise", "node": "node006", "status": "done"},
+    {"id": "t142156", "seed": 397, "scenario": "hour_burst", "node": "node005", "status": "done"},
+    {"id": "t142157", "seed": 397, "scenario": "persistent_shift", "node": "node006", "status": "done"},
+    {"id": "t142158", "seed": 397, "scenario": "ood_period", "node": "node005", "status": "done"},
+    {"id": "t142159", "seed": 401, "scenario": "low_noise", "node": "node006", "status": "done"},
+    {"id": "t142160", "seed": 401, "scenario": "high_noise", "node": "node005", "status": "done"},
+    {"id": "t142161", "seed": 401, "scenario": "hour_burst", "node": "node006", "status": "done"},
+    {"id": "t142162", "seed": 401, "scenario": "persistent_shift", "node": "node005", "status": "done"},
+    {"id": "t142163", "seed": 401, "scenario": "ood_period", "node": "node006", "status": "done"}
   ]
 }
