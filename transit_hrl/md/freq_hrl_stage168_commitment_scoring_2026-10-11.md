@@ -22,7 +22,10 @@ Only code and fresh run inputs are staged. Keep raw native records/checkpoints
 remote; export schedules, candidate scores and compact window panels in JSON.
 56 focused tests pass, including executed factorial scores, irreversible anchors,
 old selector reproduction, physical contrast/interaction arithmetic, worker
-ordering and scheduler staging. Scheduler registration is the next action.
+ordering and scheduler staging. Run
+`native_transit_commitment_scoring_stage168_frozen_20261011_r1`, revision
+`c219151ef6`: t142385-t142394 are RUNNING on node001/004/005/006. Full 80-control
+reproduction, 160 window-ledger qualifications and performance results are pending.
 
 ## Limitations
 

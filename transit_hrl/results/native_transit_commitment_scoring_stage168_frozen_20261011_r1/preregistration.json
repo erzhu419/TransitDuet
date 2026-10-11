@@ -1,0 +1,70 @@
+{
+  "budget": {
+    "frozen_episodes": 200,
+    "native_ticks": 12276000,
+    "source_control_reproductions": 80,
+    "training_episodes": 0,
+    "window_ledger_qualified_episodes": 160
+  },
+  "contract": {
+    "boundary": "frozen_score_horizon_mechanism_development_not_learned_authority_or_independent_confirmation",
+    "change": "two_by_two_full_tail_or_next_same_direction_commitment_window_wait_and_fleet_scores",
+    "clock_s": 61380,
+    "conditions": [
+      "window_forecast",
+      "full_wait_full_fleet",
+      "full_wait_prefix_fleet",
+      "prefix_wait_full_fleet",
+      "prefix_wait_prefix_fleet"
+    ],
+    "episodes_per_cell": 20,
+    "factorial": "prefix_wait_main_effect_prefix_fleet_main_effect_and_interaction_in_actual_cost",
+    "fleet": 12,
+    "fleet_score": "same_64_member_expected_native_quadratic_penalty_with_historical_floor",
+    "primary": "actual_restricted_service_cost_vs_full_and_window_with_wait_reward_fleet_nonfleet_components",
+    "qualification": "40_exact_window_and_40_exact_full_physics_schedule_selector_replays_plus_all_window_ledger_checks",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes": "all_four_registered_scenes_per_regime_no_selection",
+    "source_protocol": "native_transit_commitment_audit_stage167_v1",
+    "source_run": "native_transit_commitment_audit_stage167_frozen_20261011_r1",
+    "strengths": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "training_updates": 0,
+    "unchanged": "fit_model_native_RNG_mean_EWMA_candidates_lower_weights_cost_cap_endpoints_and_44_commitments",
+    "wait": "diagnostic_first_six_intervals_including_next_anchor_not_cumulative_native_wait",
+    "window": "current_decision_to_selected_seventh_departure_minus_native_lookahead_or_simulation_end",
+    "window_source_run": "native_transit_distributional_supply_stage166_frozen_20261011_r1"
+  },
+  "duration_model_input": "inputs/duration_models.json",
+  "protocol": "native_transit_commitment_scoring_stage168_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "c219151ef627140152023604100e9e0f3b910e4b",
+  "tasks": 10
+}

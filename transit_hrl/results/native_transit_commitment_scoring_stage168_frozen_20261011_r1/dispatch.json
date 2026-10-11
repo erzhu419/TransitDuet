@@ -1,0 +1,93 @@
+{
+  "input_staging": "code_and_fresh_model_inputs_only",
+  "performance": "pending_full_factorial_physical_outcomes",
+  "protocol": "native_transit_commitment_scoring_stage168_v1",
+  "run_name": "native_transit_commitment_scoring_stage168_frozen_20261011_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_qualification": "pending_80_exact_controls_and_160_window_ledgers",
+  "source_revision": "c219151ef627140152023604100e9e0f3b910e4b",
+  "tasks": [
+    {
+      "id": "t142385",
+      "node": "node006",
+      "scenario": "low_noise",
+      "seed": 397,
+      "status": "running"
+    },
+    {
+      "id": "t142386",
+      "node": "node004",
+      "scenario": "high_noise",
+      "seed": 397,
+      "status": "running"
+    },
+    {
+      "id": "t142387",
+      "node": "node004",
+      "scenario": "hour_burst",
+      "seed": 397,
+      "status": "running"
+    },
+    {
+      "id": "t142388",
+      "node": "node006",
+      "scenario": "persistent_shift",
+      "seed": 397,
+      "status": "running"
+    },
+    {
+      "id": "t142389",
+      "node": "node001",
+      "scenario": "ood_period",
+      "seed": 397,
+      "status": "running"
+    },
+    {
+      "id": "t142390",
+      "node": "node005",
+      "scenario": "low_noise",
+      "seed": 401,
+      "status": "running"
+    },
+    {
+      "id": "t142391",
+      "node": "node006",
+      "scenario": "high_noise",
+      "seed": 401,
+      "status": "running"
+    },
+    {
+      "id": "t142392",
+      "node": "node001",
+      "scenario": "hour_burst",
+      "seed": 401,
+      "status": "running"
+    },
+    {
+      "id": "t142393",
+      "node": "node005",
+      "scenario": "persistent_shift",
+      "seed": 401,
+      "status": "running"
+    },
+    {
+      "id": "t142394",
+      "node": "node004",
+      "scenario": "ood_period",
+      "seed": 401,
+      "status": "running"
+    }
+  ]
+}
