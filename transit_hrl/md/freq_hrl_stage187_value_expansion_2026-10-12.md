@@ -17,7 +17,7 @@ qualify those before submitting the other470. No outcome-based selection.
 
 One CPU/3GB per task, node001-006 unbound. Sync compact result JSON only;
 full observations, branch rollouts and native checkpoints remain on servers.
-Seven focused tests pass. Next: finish paired collection, then compare matched
+Eight focused tests pass. Next: finish paired collection, then compare matched
 value fits on expanded scene groups before opening confirmation action labels.
 
 The initial r1 preflight failed an incorrect new check equating lower
@@ -26,6 +26,9 @@ retain the actual61380-second clock, trips, schedule and window qualification.
 Stop automatic retries and rerun the same fixed cohort as r2. No labels from
 the failed attempt enter training. The remaining470 tasks require ten valid
 paired cells before submission.
+
+Corrected run: native_transit_value_expansion_stage187_development_20261012_r2,
+code d21b0a715e, preflight t143421-t143430 on node001/004/005/006.
 
 ## Limitations
 

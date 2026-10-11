@@ -1,6 +1,7 @@
 import contextlib
 import copy
 import io
+import json
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -10,6 +11,7 @@ from unittest.mock import patch
 from scripts import run_native_transit_value_expansion_stage187 as spec
 from scripts.analyze_native_transit_value_expansion_stage187 import summarize
 from scripts.submit_native_transit_value_expansion_stage187_scheduleurm import task_specification
+from scripts import submit_native_transit_value_expansion_stage187_scheduleurm as submit
 from tests.test_native_transit_timetable_context import fixture as context_fixture
 
 
@@ -124,6 +126,18 @@ class ValueExpansionTest(unittest.TestCase):
             self.assertEqual((t["cpu"], t["ram_mb"]), (1, 3072))
             self.assertEqual([Path(p).name for p in t["stage_input_paths"]], ["scripts", "freq_hrl", "native_freqduet", "inputs"])
             self.assertNotIn("_raw", t["result_dir"])
+
+    def test_remaining_release_counts_logical_signatures_not_failed_retries(self):
+        tasks = [task_specification("unit_release", *k) for k in spec.cells(preflight=True)]
+        registered = {"protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract()}
+        with patch.object(submit, "inventory", return_value=tasks+copy.deepcopy(tasks)), \
+                patch.object(Path, "read_text", return_value=json.dumps(registered)), \
+                patch.object(submit, "load_summary", return_value={"software_qualified": True}) as load, \
+                patch.object(submit, "write_json"), patch.object(submit, "execute_bulk") as execute, \
+                patch.object(sys, "argv", ["submit", "--run-name", "unit_release", "--phase", "remaining"]):
+            submit.main()
+        self.assertEqual(len(execute.call_args.args[0]), 470)
+        self.assertTrue(load.call_args.kwargs["preflight"])
 
     def test_worker_runs_identity_first_and_keeps_full_rollouts_on_server(self):
         cells, old = fixture()
