@@ -64,16 +64,20 @@ def predict_action_value(row, model):
 
 def choose_action(row, model):
     cost = predict_action_value(row, model).sum(axis=1)
+    return choice_from_cost(cost, row["original_choice"])
+
+
+def choice_from_cost(cost, original):
     # An exactly tied value retains the source action (including a zero model).
-    order = [row["original_choice"], *[i for i in range(len(cost)) if i != row["original_choice"]]]
+    order = [original, *[i for i in range(len(cost)) if i != original]]
     return min(order, key=lambda i: cost[i])
 
 
-def evaluate_action_value(rows, model):
+def evaluate_action_value(rows, model, *, predictor=predict_action_value):
     evaluated = []
     for row in rows:
-        predicted = predict_action_value(row, model)
-        selected = choose_action(row, model)
+        predicted = predictor(row, model)
+        selected = choice_from_cost(predicted.sum(axis=1), row["original_choice"])
         labels = {l["candidate"]: l for l in row["labels"]}
         observed = np.asarray([labels[i]["actual_cost_delta"] for i in range(len(predicted))])
         costs = predicted.sum(axis=1)
@@ -102,14 +106,14 @@ def summarize_choices(rows):
         "tied_predicted_pairs": sum(r["tied_predicted_pairs"] for r in rows)}
 
 
-def grouped_validation(rows, split):
+def grouped_validation(rows, split, *, fit_model=fit_action_value, predictor=predict_action_value):
     key = {"scene": scene_group, "regime": lambda r: r["scenario"], "lower_root": lambda r: r["root"]}[split]
     folds, predictions = [], []
     for group in sorted({key(r) for r in rows}):
         train = [r for r in rows if key(r) != group]
         test = [r for r in rows if key(r) == group]
-        model = fit_action_value(train)
-        evaluated = evaluate_action_value(test, model)
+        model = fit_model(train)
+        evaluated = evaluate_action_value(test, model, predictor=predictor)
         folds.append({"held_out": group, "training_groups": model["training_groups"],
             "training_states": len(train), **summarize_choices(evaluated)})
         predictions.extend(evaluated)
