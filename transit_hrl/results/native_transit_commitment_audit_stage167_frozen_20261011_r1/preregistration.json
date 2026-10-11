@@ -1,0 +1,53 @@
+{
+  "budget": {
+    "frozen_episodes": 40,
+    "native_ticks": 2455200,
+    "source_control_reproductions": 40,
+    "training_episodes": 0
+  },
+  "contract": {
+    "actual": "joint_direction_half_open_completed_trip_occupancy_in_selected_window_with_historical_floor",
+    "boundary": "passive_credit_horizon_diagnosis_not_counterfactual_policy_value_or_new_performance",
+    "change": "passive_scores_and_completed_trip_ledger_only_no_policy_or_RNG_change",
+    "clock_s": 61380,
+    "episodes_per_cell": 4,
+    "fleet": 12,
+    "forecast": "same_64_member_draws_full_tail_vs_clipped_next_same_direction_replan",
+    "policy": "exact_Stage166_distributional_supply_all_four_registered_scenes_no_selection",
+    "primary": "tail_only_discrimination_prefix_rank_disagreement_and_selected_prefix_peak_cost_error",
+    "qualification": "40_exact_physics_schedule_and_original_selector_reproductions_plus_window_ledger_accounting",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_distributional_supply_stage166_v1",
+    "source_run": "native_transit_distributional_supply_stage166_frozen_20261011_r1",
+    "training_updates": 0,
+    "wait": "diagnostic_first_six_intervals_including_next_anchor_not_cumulative_native_wait",
+    "window": "current_decision_to_selected_seventh_departure_minus_native_lookahead_or_simulation_end"
+  },
+  "duration_model_input": "inputs/duration_models.json",
+  "protocol": "native_transit_commitment_audit_stage167_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "1f6864c0359b0351d4d17851cb433ce91658164b",
+  "tasks": 10
+}

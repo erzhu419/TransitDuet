@@ -31,6 +31,11 @@ with compact trip times are pulled, never raw CSV/checkpoints.
 44 focused tests pass, including scalar/window occupancy, unchanged original
 scores/actions/dispatch, next-anchor persistence, trip accounting and scheduling.
 
+Run `native_transit_commitment_audit_stage167_frozen_20261011_r1`, revision
+`1f6864c035`: t142372-t142381 are running on node001/004/005/006 after scheduler
+staging/dispatch. Full 40-trajectory and window accounting qualification remains
+pending; no new performance claim is registered.
+
 ## Limitations
 
 This audit measures the executed policy, not counterfactual outcomes for the

@@ -1,0 +1,22 @@
+{
+  "protocol": "native_transit_commitment_audit_stage167_v1",
+  "run_name": "native_transit_commitment_audit_stage167_frozen_20261011_r1",
+  "source_revision": "1f6864c035",
+  "audit": "pending_full_matrix",
+  "performance": "unchanged_policy_no_new_performance_claim",
+  "worker_source_qualification": "pending_40_exact_trajectories_and_window_accounting",
+  "input_staging": "code_and_new_run_models_only_no_historical_raw_sync_targets",
+  "scheduler": {"allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"], "require_node": null},
+  "tasks": [
+    {"id": "t142372", "seed": 397, "scenario": "low_noise", "node": "node006", "status": "running"},
+    {"id": "t142373", "seed": 397, "scenario": "high_noise", "node": "node001", "status": "running"},
+    {"id": "t142374", "seed": 397, "scenario": "hour_burst", "node": "node001", "status": "running"},
+    {"id": "t142375", "seed": 397, "scenario": "persistent_shift", "node": "node004", "status": "running"},
+    {"id": "t142376", "seed": 397, "scenario": "ood_period", "node": "node006", "status": "running"},
+    {"id": "t142377", "seed": 401, "scenario": "low_noise", "node": "node005", "status": "running"},
+    {"id": "t142378", "seed": 401, "scenario": "high_noise", "node": "node005", "status": "running"},
+    {"id": "t142379", "seed": 401, "scenario": "hour_burst", "node": "node004", "status": "running"},
+    {"id": "t142380", "seed": 401, "scenario": "persistent_shift", "node": "node006", "status": "running"},
+    {"id": "t142381", "seed": 401, "scenario": "ood_period", "node": "node001", "status": "running"}
+  ]
+}
