@@ -7,6 +7,7 @@ from torch.nn.functional import softplus
 
 from freq_hrl.domains.transit import native_action_value as paired
 from freq_hrl.domains.transit import native_occupancy_value as occupancy
+from freq_hrl.domains.transit import native_timetable_encoder as sequence
 
 METHODS = ("raw_absolute", "floor_absolute")
 POLICIES = ("cost_only", "wait_feasible")
@@ -19,7 +20,7 @@ def features(row, representation="occupancy"):
     base = occupancy.features(row, "occupancy_regret")
     if representation == "occupancy":
         return base
-    if representation == "tail_summary":
+    if representation in ("tail_summary", "timetable_sequence"):
         return np.c_[base, [[c["wait_cost"], c["headway_cost"]] for c in row["candidates"]]]
     raise ValueError("Unknown anchored fleet action representation")
 
@@ -53,6 +54,9 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
     actual = torch.as_tensor(actual_cost/native_scale, dtype=torch.float32)
     a, b = (torch.as_tensor(v, dtype=torch.long) for v in (a, b))
     ledger, checkpoints = [], []
+    if representation == "timetable_sequence":
+        event_center, event_scale = sequence.training_scales(rows)
+        event_batch = sequence.batch_events(rows, event_center, event_scale)
     if validation_rows is not None:
         if {paired.scene_group(r) for r in rows} & {paired.scene_group(r) for r in validation_rows}:
             raise ValueError("Checkpoint validation must hold out complete training scenes")
@@ -62,23 +66,33 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
             for i in range(6)] for l in vl])
         vx = torch.as_tensor((vraw-center)/scale, dtype=torch.float32)
         vy = torch.as_tensor(vt/target_scale, dtype=torch.float32)
+        if representation == "timetable_sequence":
+            validation_events = sequence.batch_events(validation_rows, event_center, event_scale)
     with torch.random.fork_rng(devices=[]):
         torch.manual_seed(occupancy.SEED)
         network = nn.Sequential(nn.Linear(occupancy.INPUT_DIM, occupancy.WIDTH), nn.Tanh(),
             nn.Linear(occupancy.WIDTH, 3))
-        if representation == "tail_summary":
+        if representation in ("tail_summary", "timetable_sequence"):
             # Start from the same control predictor; only the new columns start at zero.
-            expanded = nn.Linear(raw.shape[-1], occupancy.WIDTH)
+            expanded = nn.Linear(raw.shape[-1]+(sequence.OUTPUT_DIM if representation == "timetable_sequence" else 0), occupancy.WIDTH)
             with torch.no_grad():
                 expanded.weight.zero_()
                 expanded.weight[:, :occupancy.INPUT_DIM].copy_(network[0].weight)
                 expanded.bias.copy_(network[0].bias)
             network[0] = expanded
-        initial = [p.detach().clone() for p in network.parameters()]
-        optimizer = torch.optim.AdamW(network.parameters(), lr=occupancy.LEARNING_RATE,
+        encoder = sequence.TimetableEncoder() if representation == "timetable_sequence" else None
+        parameters = list(network.parameters())+([] if encoder is None else list(encoder.parameters()))
+        initial = [p.detach().clone() for p in parameters]
+        def forward(inputs, events=None):
+            if encoder is not None:
+                code = encoder(*events).reshape(*inputs.shape[:-1], sequence.OUTPUT_DIM)
+                inputs = torch.cat((inputs, code), dim=-1)
+            return network(inputs)
+        optimizer = torch.optim.AdamW(parameters, lr=occupancy.LEARNING_RATE,
             weight_decay=occupancy.WEIGHT_DECAY)
+        encoder_gradient_max = 0.
         for step in range(steps):
-            output = network(x)
+            output = forward(x, event_batch if encoder is not None else None)
             predicted = (torch.cat((softplus(output[..., :1]), output[..., 1:]), dim=-1)
                 if method == "floor_absolute" else output)
             anchor = ((predicted[..., 0]-y[..., 0])**2).mean()
@@ -87,13 +101,16 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
             loss = anchor+pair_mse+(regret if objective == "decision_regret" else 0.)
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
+            if encoder is not None:
+                encoder_gradient_max = max(encoder_gradient_max,
+                    float(torch.sqrt(sum(p.grad.square().sum() for p in encoder.parameters()))))
             optimizer.step()
             if step == 0 or (step+1) % 300 == 0 or step+1 == steps:
                 ledger.append({"step": step+1, "absolute_fleet_mse": float(anchor.detach()),
                     "paired_mse": float(pair_mse.detach()), "native_regret": float(regret.detach())})
             if validation_rows is not None and (step+1 in CHECKPOINT_STEPS or step+1 == steps):
                 with torch.no_grad():
-                    voutput = network(vx)
+                    voutput = forward(vx, validation_events if encoder is not None else None)
                     vp = (torch.cat((softplus(voutput[..., :1]), voutput[..., 1:]), dim=-1)
                         if method == "floor_absolute" else voutput)
                     va = ((vp[..., 0]-vy[..., 0])**2).mean()
@@ -101,11 +118,16 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
                     checkpoints.append({"step": step+1, "validation_loss": float(va+vm),
                         "absolute_fleet_mse": float(va), "paired_mse": float(vm)})
         weights = {k: v.detach().numpy().tolist() for k, v in network.state_dict().items()}
-        update_l2 = float(torch.sqrt(sum(((p.detach()-old)**2).sum() for p, old in zip(network.parameters(), initial))))
+        update_l2 = float(torch.sqrt(sum(((p.detach()-old)**2).sum() for p, old in zip(parameters, initial))))
+        if encoder is not None:
+            encoder_weights = {k: v.detach().numpy().tolist() for k, v in encoder.state_dict().items()}
+            encoder_update = float(torch.sqrt(sum(((p.detach()-old)**2).sum()
+                for p, old in zip(parameters[4:], initial[4:]))))
+            projection_update = float(torch.linalg.vector_norm(network[0].weight[:, raw.shape[-1]:]).detach())
     model = {"method": method, "heads": list(HEADS), "center": center.tolist(), "scale": scale.tolist(),
         "target_scale": target_scale.tolist(), "regret_cost_scale": native_scale, "weights": weights,
         "steps": steps, "initialization_seed": occupancy.SEED,
-        "parameter_count": sum(p.numel() for p in network.parameters()), "loss_ledger": ledger,
+        "parameter_count": sum(p.numel() for p in parameters), "loss_ledger": ledger,
         "parameter_update_l2": update_l2, "training_states": len(rows), "pairwise_examples": len(rows)*15,
         "training_groups": [list(g) for g in sorted({paired.scene_group(r) for r in rows})],
         "target": "absolute_future_fleet_above_causal_peak_and_paired_nonfleet_wait_under_original_continuation"}
@@ -117,11 +139,19 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
     if representation == "tail_summary":
         model.update(representation=representation, added_features=list(TAIL_NAMES),
             initialization="unchanged_control_weights_and_biases_zero_added_columns")
+    if encoder is not None:
+        model.update(representation=representation, initialization="unchanged_control_predictor_zero_sequence_projection",
+            event_encoder={"center": event_center.tolist(), "scale": event_scale.tolist(), "weights": encoder_weights,
+                "width": sequence.WIDTH, "kernel": sequence.KERNEL, "pooling": "masked_mean_and_max"},
+            encoder_parameter_update_l2=encoder_update, sequence_projection_update_l2=projection_update)
+        model["encoder_gradient_l2_max"] = encoder_gradient_max
     return model
 
 
 def predict(row, model):
     x = (features(row, model.get("representation", "occupancy"))-model["center"])/model["scale"]
+    if model.get("representation") == "timetable_sequence":
+        x = np.c_[x, sequence.encode_numpy(row, model["event_encoder"])]
     w = {k: np.asarray(v) for k, v in model["weights"].items()}
     heads = np.tanh(x@w["0.weight"].T+w["0.bias"])@w["2.weight"].T+w["2.bias"]
     if model["method"] == "floor_absolute":

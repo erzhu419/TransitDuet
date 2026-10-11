@@ -85,11 +85,17 @@ def summary(rows):
 
 
 def fit_and_validate(first, labels, second, baselines, method, *, fitter=None):
-    rows, ledger = training_rows(first, labels, second, baselines), []
+    return fit_rows_and_validate(training_rows(first, labels, second, baselines), method, fitter=fitter)
+
+
+def fit_rows_and_validate(rows, method, *, fitter=None):
+    ledger = []
     def fit(train):
         model = (value.fit_value if fitter is None else fitter)(train, method)
         ledger.append({k: model[k] for k in ("training_groups", "training_states", "steps", "parameter_count",
             "target_scale", "regret_cost_scale", "parameter_update_l2", "loss_ledger")})
+        if model.get("representation") == "timetable_sequence":
+            ledger[-1].update({k: model[k] for k in ("encoder_parameter_update_l2", "sequence_projection_update_l2", "encoder_gradient_l2_max")})
         print(f"FLOOR_VALUE_FIT method={method} fit={len(ledger)} states={len(train)} updates={model['steps']}", flush=True)
         return model
     validation = {p: {} for p in value.POLICIES}
