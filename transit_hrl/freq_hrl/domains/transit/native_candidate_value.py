@@ -53,6 +53,7 @@ class NativeCandidateValuePlan(NativeIncumbentWindowPlan):
     def preferred_intervals(self, nominal, trip, now):
         self._incoming = {"time_s": float(now), "direction": bool(trip.direction),
             "trip_id": int(trip.launch_turn), "upper_state": self._incoming_state,
+            "native_state_v2": self.env._build_upper_state_v2(trip).tolist(),
             "nominal_s": nominal.tolist()}
         return super().preferred_intervals(nominal, trip, now)
 

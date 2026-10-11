@@ -22,6 +22,7 @@ class CandidateValueTest(unittest.TestCase):
     def test_single_override_preserves_scores_and_prefix_and_resumes_greedy(self):
         env, model, _ = distributional_tests.DistributionalSupplyTest().environment()
         env.protocol = SimpleNamespace(evaluation_end_time_s=8000)
+        env._build_upper_state_v2 = lambda trip: np.zeros(16, dtype=np.float32)
         baseline = NativeCandidateValuePlan(env, model.model, 0)
         nominal = np.asarray([t.launch_time for t in env.timetables if not t.direction])
         snapshot = {"cost_before": .4, "rng": {"scenario_seed": 11}}
@@ -36,9 +37,11 @@ class CandidateValueTest(unittest.TestCase):
             self.assertEqual(plan.probe["candidates"], baseline.probe["candidates"])
             self.assertTrue(plan.probe["physical_state_matched"] and plan.probe["rng_matched"])
             self.assertEqual(plan.select_candidate([{"score": 2.}, {"score": 1.}]), 1)
-            for failure in ("prefix", "rng", "cost"):
+            self.assertEqual(baseline.probe["native_state_v2"], [0.]*16)
+            for failure in ("prefix", "native_state", "rng", "cost"):
                 reference = copy.deepcopy(baseline)
                 if failure == "prefix": reference.prefix[0]["upper_state"][0] = 1.
+                elif failure == "native_state": reference.prefix[0]["native_state_v2"][0] = 1.
                 elif failure == "rng": reference.snapshot["rng"]["scenario_seed"] = 12
                 else: reference.snapshot["cost_before"] += .1
                 plan = NativeCandidateValuePlan(env, model.model, 0, forced_candidate=forced, reference=reference)

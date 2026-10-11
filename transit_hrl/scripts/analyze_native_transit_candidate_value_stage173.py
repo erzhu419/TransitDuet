@@ -28,26 +28,9 @@ def ranking_pairs(predicted, actual):
     return counts
 
 
-def panel(cell, registered, model):
-    index, baseline = spec.probe_index(registered), cell["observer"]
-    original, corrected = registered["evaluation"][1], registered["evaluation"][3]
-    if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
-            and cell["software_qualified"] and cell["training_updates"] == 0 and cell["native_steps"] == 7*61380
-            and cell["seed"] == registered["seed"] and cell["scenario"] == registered["scenario"]
-            and cell["probe_index"] == index and cell["corrected_probe"] == corrected["supply"]["decisions"][index]):
-        raise ValueError("Changed candidate-value contract, source probe or budget")
-    spec.qualify(baseline, {**original, "probe": baseline["probe"]})
-    spec.validate_scoring({**baseline, "condition": "prefix_wait_full_fleet"}, model,
-        strengths=spec.source.incumbent.CANDIDATES["rolling_plus_incumbent"])
+def validate_continuations(baseline, branches):
     base = baseline["probe"]
-    expected = original["supply"]["decisions"][index]
-    if not (base["index"] == index and base["candidates"] == expected["candidates"]
-            and base["time_s"] == expected["time_s"] and base["direction"] == expected["direction"]
-            and base["selected"] == base["greedy"] == expected["selected"]
-            and base["prefix_decisions_qualified"] == index+1 and np.isfinite(base["cost_before"])
-            and baseline["policy_trace"] == spec.policy_trace(baseline["supply"])):
-        raise ValueError("Changed candidate-value source state or selector")
-    branches = cell["branches"]
+    index = base["index"]
     if [r["probe"]["selected"] for r in branches] != list(spec.CANDIDATES):
         raise ValueError("Incomplete or duplicate native candidate continuations")
     for candidate, row in enumerate(branches):
@@ -58,7 +41,7 @@ def panel(cell, registered, model):
         spec.source.incumbent.source.distributional.source.check_episode(row, baseline, baseline=reproduced)
         spec.validate_schedule(row["schedule"], baseline["schedule"])
         trace, windows = row["policy_trace"], row["window_panels"]
-        if not (row["condition"] == f"candidate_{candidate}" and row["scenario"] == cell["scenario"]
+        if not (row["condition"] == f"candidate_{candidate}" and row["scenario"] == baseline["scenario"]
                 and row["scene_seed"] == baseline["scene_seed"] and same == ref
                 and probe["physical_state_matched"] and probe["rng_matched"]
                 and row["source_control_reproduced"] == reproduced and row["window_ledger_qualified"]
@@ -81,6 +64,29 @@ def panel(cell, registered, model):
             raise ValueError("Native candidate probe differs from the executed action")
         if reproduced and any(row[k] != baseline[k] for k in ("schedule", "policy_trace", "window_panels")):
             raise ValueError("Unchanged native action failed exact identity reproduction")
+
+
+def panel(cell, registered, model):
+    index, baseline = spec.probe_index(registered), cell["observer"]
+    original, corrected = registered["evaluation"][1], registered["evaluation"][3]
+    if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
+            and cell["software_qualified"] and cell["training_updates"] == 0 and cell["native_steps"] == 7*61380
+            and cell["seed"] == registered["seed"] and cell["scenario"] == registered["scenario"]
+            and cell["probe_index"] == index and cell["corrected_probe"] == corrected["supply"]["decisions"][index]):
+        raise ValueError("Changed candidate-value contract, source probe or budget")
+    spec.qualify(baseline, {**original, "probe": baseline["probe"]})
+    spec.validate_scoring({**baseline, "condition": "prefix_wait_full_fleet"}, model,
+        strengths=spec.source.incumbent.CANDIDATES["rolling_plus_incumbent"])
+    base = baseline["probe"]
+    expected = original["supply"]["decisions"][index]
+    if not (base["index"] == index and base["candidates"] == expected["candidates"]
+            and base["time_s"] == expected["time_s"] and base["direction"] == expected["direction"]
+            and base["selected"] == base["greedy"] == expected["selected"]
+            and base["prefix_decisions_qualified"] == index+1 and np.isfinite(base["cost_before"])
+            and baseline["policy_trace"] == spec.policy_trace(baseline["supply"])):
+        raise ValueError("Changed candidate-value source state or selector")
+    branches = cell["branches"]
+    validate_continuations(baseline, branches)
     costs = [r["service_cost_restricted"] for r in branches]
     fleets = [max(r["peak_fleet"]-12, 0)**2/12 for r in branches]
     old, new = base["greedy"], cell["corrected_probe"]["selected"]
