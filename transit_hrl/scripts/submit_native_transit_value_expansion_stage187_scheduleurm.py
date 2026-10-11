@@ -70,7 +70,8 @@ def main():
     else:
         registered = json.loads((directory/"preregistration.json").read_text())
         if not (registered["protocol"] == spec.EXPERIMENT_PROTOCOL and registered["contract"] == spec.contract()
-                and len(existing) == len(first)):
+                and {t["signature"] for t in existing} ==
+                {task_specification(args.run_name, *k)["signature"] for k in first}):
             raise SystemExit("Remaining cohort requires exactly the ten preregistered preflight tasks")
         summary = load_summary(directory, preflight=True)
         write_json(directory/"preflight_summary.json", summary)

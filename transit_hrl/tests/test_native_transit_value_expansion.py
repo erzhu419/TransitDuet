@@ -54,6 +54,15 @@ def fixture(*, preflight=True):
 
 
 class ValueExpansionTest(unittest.TestCase):
+    def test_native_clock_is_not_the_lower_transition_count(self):
+        baseline = {k: 0. for k in spec.shared.METRICS}
+        baseline.update(N_fleet=12, simulation_end_time_s=61380, trips_completed=262, ep_steps=4970,
+            window_ledger_qualified=True, schedule={"upper_decisions": 44, "scheduled_trips": 262})
+        with patch.object(spec.shared, "validate_schedule"):
+            spec.qualify_observer(baseline)
+            baseline["simulation_end_time_s"] -= 1
+            with self.assertRaises(ValueError): spec.qualify_observer(baseline)
+
     def test_fixed_seeds_and_budget_leave_reserved_confirmation_unopened(self):
         reserved = {900000000+r*3000+j*10+i for r in spec.ROOTS for j in range(5) for i in range(4)}
         spec.validate_scene_roles(reserved)

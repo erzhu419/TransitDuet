@@ -65,7 +65,7 @@ def qualify_observer(row):
     # A fresh observer has no earlier outcome to reproduce; only identity is an exact replay.
     shared.validate_schedule(row["schedule"], row["schedule"])
     if not (row["N_fleet"] == 12 and row["simulation_end_time_s"] == 61380
-            and row["trips_completed"] == 262 and row["ep_steps"] == 61380
+            and row["trips_completed"] == 262
             and row["schedule"]["upper_decisions"] == 44 and row["schedule"]["scheduled_trips"] == 262
             and row["window_ledger_qualified"] and np.all(np.isfinite([row[k] for k in shared.METRICS]))):
         raise ValueError("Fresh observer changed the native physical or decision budget")

@@ -1,0 +1,315 @@
+{
+  "cause": "incorrect_new_observer_check_equated_lower_transition_count_ep_steps_with_simulation_seconds",
+  "code_revision": "82d83465816464a911a0b3b806c1d7045636d068",
+  "correction": "remove_ep_steps_equals61380_keep_actual_simulation_clock_trip_schedule_and_window_checks",
+  "logical_preflight_cells": 10,
+  "outcome": "aborted_before_any_paired_label_export",
+  "paired_labels_used": 0,
+  "physical_attempts": 30,
+  "protocol": "native_transit_value_expansion_stage187_v1",
+  "recorded_at_unix_s": 1791759587.8040953,
+  "remaining_tasks_submitted": 0,
+  "run_name": "native_transit_value_expansion_stage187_development_20261012_r1",
+  "tasks": [
+    {
+      "exit_code": 1,
+      "finished_at": 1791759413.8295429,
+      "id": "t143391",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.5444257,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759414.6469831,
+      "id": "t143392",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759364.054247,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759415.4936907,
+      "id": "t143393",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.5847666,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759416.3878648,
+      "id": "t143394",
+      "node": "node001",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759364.873386,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759417.2185304,
+      "id": "t143395",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759364.3569586,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759418.0435653,
+      "id": "t143396",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.5424995,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759418.929392,
+      "id": "t143397",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759364.1286356,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759419.752475,
+      "id": "t143398",
+      "node": "node001",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.575308,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759420.5998251,
+      "id": "t143399",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.5385816,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759421.4256074,
+      "id": "t143400",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "started_at": 1791759362.5422213,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759476.6756365,
+      "id": "t143401",
+      "node": "node004",
+      "parent_id": "t143391",
+      "retry_count": 1,
+      "started_at": 1791759427.111056,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759477.4914377,
+      "id": "t143402",
+      "node": "node006",
+      "parent_id": "t143392",
+      "retry_count": 1,
+      "started_at": 1791759426.2210765,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759478.4018703,
+      "id": "t143403",
+      "node": "node005",
+      "parent_id": "t143393",
+      "retry_count": 1,
+      "started_at": 1791759427.022636,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759479.2636726,
+      "id": "t143404",
+      "node": "node001",
+      "parent_id": "t143394",
+      "retry_count": 1,
+      "started_at": 1791759426.2691073,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759480.0703743,
+      "id": "t143405",
+      "node": "node004",
+      "parent_id": "t143395",
+      "retry_count": 1,
+      "started_at": 1791759427.0990813,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759480.888374,
+      "id": "t143406",
+      "node": "node006",
+      "parent_id": "t143396",
+      "retry_count": 1,
+      "started_at": 1791759426.2434967,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759481.7291121,
+      "id": "t143407",
+      "node": "node005",
+      "parent_id": "t143397",
+      "retry_count": 1,
+      "started_at": 1791759427.0742602,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759482.5890076,
+      "id": "t143408",
+      "node": "node001",
+      "parent_id": "t143398",
+      "retry_count": 1,
+      "started_at": 1791759426.2689173,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759483.436931,
+      "id": "t143409",
+      "node": "node004",
+      "parent_id": "t143399",
+      "retry_count": 1,
+      "started_at": 1791759427.0824633,
+      "status": "failed"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1791759484.3131993,
+      "id": "t143410",
+      "node": "node006",
+      "parent_id": "t143400",
+      "retry_count": 1,
+      "started_at": 1791759426.2436533,
+      "status": "failed"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0674155,
+      "id": "t143411",
+      "node": "node004",
+      "parent_id": "t143401",
+      "retry_count": 2,
+      "started_at": 1791759489.9389672,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0682473,
+      "id": "t143412",
+      "node": "node006",
+      "parent_id": "t143402",
+      "retry_count": 2,
+      "started_at": 1791759489.162684,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0687299,
+      "id": "t143413",
+      "node": "node005",
+      "parent_id": "t143403",
+      "retry_count": 2,
+      "started_at": 1791759489.196363,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0691702,
+      "id": "t143414",
+      "node": "node001",
+      "parent_id": "t143404",
+      "retry_count": 2,
+      "started_at": 1791759489.865937,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0696034,
+      "id": "t143415",
+      "node": "node004",
+      "parent_id": "t143405",
+      "retry_count": 2,
+      "started_at": 1791759489.9292104,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.070049,
+      "id": "t143416",
+      "node": "node006",
+      "parent_id": "t143406",
+      "retry_count": 2,
+      "started_at": 1791759489.157707,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0704894,
+      "id": "t143417",
+      "node": "node005",
+      "parent_id": "t143407",
+      "retry_count": 2,
+      "started_at": 1791759489.1961358,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.070934,
+      "id": "t143418",
+      "node": "node001",
+      "parent_id": "t143408",
+      "retry_count": 2,
+      "started_at": 1791759489.960906,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0713742,
+      "id": "t143419",
+      "node": "node004",
+      "parent_id": "t143409",
+      "retry_count": 2,
+      "started_at": 1791759489.9292784,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1791759511.0718162,
+      "id": "t143420",
+      "node": "node006",
+      "parent_id": "t143410",
+      "retry_count": 2,
+      "started_at": 1791759489.150459,
+      "status": "cancelled"
+    }
+  ]
+}
