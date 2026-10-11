@@ -23,6 +23,11 @@ native action-value results, not global remaining-time prediction accuracy.
 62 focused tests pass, including exact default selection, single overrides,
 prefix/state/RNG mismatches, identity outcomes, continuations and accounting.
 
+Run `native_transit_candidate_value_stage173_frozen_20261011_r1`, source revision
+`ce47839ad6`, tasks `t142824-t142833`: all launched on node004/005/006.
+All ten observer and ten identity controls qualify in native logs. Remaining
+candidate continuations and complete local analysis are pending.
+
 ## Limitations
 
 These reused check scenes and selected diagnostic times are development data.

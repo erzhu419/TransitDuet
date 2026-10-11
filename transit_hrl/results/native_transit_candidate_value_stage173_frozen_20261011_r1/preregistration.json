@@ -1,0 +1,113 @@
+{
+  "budget": {
+    "frozen_episodes": 70,
+    "native_ticks": 4296600,
+    "paired_interventions": 60,
+    "source_control_reproductions": 20,
+    "training_episodes": 0,
+    "window_ledger_qualified_episodes": 70
+  },
+  "contract": {
+    "boundary": "retrospective_reused_scene_single_action_value_diagnostic_not_deployable_oracle_or_learned_HRL",
+    "candidates": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "clock_s": 61380,
+    "episodes_per_cell": 7,
+    "fleet": 12,
+    "intervention": "one_original_selector_candidate_then_resume_original_greedy_selector",
+    "models": "registered_Stage172_duration_draws_and_corrected_probe_scores_no_new_fit_or_uncertainty_change",
+    "pairing": "exact_prior_scores_actions_native_states_prefix_cost_and_python_numpy_torch_scenario_RNG",
+    "primary": "six_actual_terminal_costs_waits_peaks_and_ranking_regret_at_each_common_state",
+    "probe": "first_original_corrected_choice_divergence_else_fixed_index22_zero_based_no_reward_selection",
+    "qualification": "10_observer_source_reproductions_plus_10_original_selected_candidate_reproductions_70_window_ledgers",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_remaining_supply_stage172_v1",
+    "source_run": "native_transit_remaining_supply_stage172_frozen_20261011_r1",
+    "training_updates": 0
+  },
+  "model_input": "inputs/models.json",
+  "probes": [
+    {
+      "index": 40,
+      "root": 397,
+      "scenario": "low_noise"
+    },
+    {
+      "index": 22,
+      "root": 397,
+      "scenario": "high_noise"
+    },
+    {
+      "index": 17,
+      "root": 397,
+      "scenario": "hour_burst"
+    },
+    {
+      "index": 21,
+      "root": 397,
+      "scenario": "persistent_shift"
+    },
+    {
+      "index": 22,
+      "root": 397,
+      "scenario": "ood_period"
+    },
+    {
+      "index": 9,
+      "root": 401,
+      "scenario": "low_noise"
+    },
+    {
+      "index": 4,
+      "root": 401,
+      "scenario": "high_noise"
+    },
+    {
+      "index": 7,
+      "root": 401,
+      "scenario": "hour_burst"
+    },
+    {
+      "index": 22,
+      "root": 401,
+      "scenario": "persistent_shift"
+    },
+    {
+      "index": 8,
+      "root": 401,
+      "scenario": "ood_period"
+    }
+  ],
+  "protocol": "native_transit_candidate_value_stage173_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "ce47839ad6ac182e96fea90ac2d9e0db7a07135f",
+  "tasks": 10
+}
