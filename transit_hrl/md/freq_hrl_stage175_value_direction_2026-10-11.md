@@ -21,9 +21,14 @@ direction/scene/index qualification, cumulative budgets and unique task paths.
 
 Run `native_transit_value_direction_stage175_frozen_20261011_r1`, revision
 `7c4835ae50`, tasks `t142960-t142989`: all launched, node004/005/006 ten each,
-with node001-006 allowed and no binding. All 30 observers and 30 identity
-branches reproduce exact native sources. Some complete markers are present;
-final data qualification/merge is pending. Only small startup logs were read.
+with node001-006 allowed and no binding. All tasks DONE; all 210 new episodes,
+60 exact controls, 180 interventions and 210 selected-window ledgers qualify.
+Only compact per-probe JSON was pulled; raw output/checkpoints stay remote.
+Merged data has 60 states, 360 labels, 420 episodes and 25,779,600 ticks.
+Each root has 15 states per direction. Better realized candidates exist in
+21/30 root397 states and 27/30 root401 states; fleet discrimination occurs
+in 11/30 and 1/30 respectively. Next: fixed paired fleet/nonfleet value fit,
+holding all six callbacks of each scene together during validation.
 
 ## Limitations
 
