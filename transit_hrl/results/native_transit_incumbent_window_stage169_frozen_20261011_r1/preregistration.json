@@ -1,0 +1,82 @@
+{
+  "budget": {
+    "frozen_episodes": 160,
+    "incumbent_control_reproductions": 40,
+    "native_ticks": 9820800,
+    "source_control_reproductions": 80,
+    "training_episodes": 0,
+    "window_ledger_qualified_episodes": 120
+  },
+  "contract": {
+    "boundary": "frozen_action_pool_development_not_learned_upper_or_independent_confirmation",
+    "candidates": {
+      "incumbent_only": [
+        null
+      ],
+      "prefix_wait_full_fleet": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "rolling_plus_incumbent": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0,
+        null
+      ]
+    },
+    "change": "append_fixed_current_six_trip_window_forecast_to_same_five_rolling_candidates",
+    "clock_s": 61380,
+    "conditions": [
+      "window_forecast",
+      "prefix_wait_full_fleet",
+      "incumbent_only",
+      "rolling_plus_incumbent"
+    ],
+    "episodes_per_cell": 16,
+    "fleet": 12,
+    "incumbent": "budgeted_window_internal_times_only_first_last_next_anchor_and_tentative_tail_unchanged",
+    "primary": "augmented_minus_five_and_window_actual_cost_wait_reward_fleet_nonfleet",
+    "qualification": "80_exact_source_trajectories_and_selectors_plus_40_forced_incumbent_window_physics_and_schedules",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes": "all_four_registered_stage168_scenes_per_regime_no_selection",
+    "score": "same_prefix_wait_plus_full_tail_expected_native_fleet_penalty_no_new_weights",
+    "source_protocol": "native_transit_commitment_scoring_stage168_v1",
+    "source_run": "native_transit_commitment_scoring_stage168_frozen_20261011_r1",
+    "tie": "same_first_minimum_existing_candidates_before_appended_incumbent",
+    "training_updates": 0,
+    "unchanged": "fit_model_64_draws_historical_floor_EWMA_native_RNG_lower_cost_cap_clock_and_44_commitments",
+    "window_accounting": "120_selected_window_trip_ledger_qualifications"
+  },
+  "duration_model_input": "inputs/duration_models.json",
+  "protocol": "native_transit_incumbent_window_stage169_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "eac46428b2dc91357c8601232377fbbf5be8a9f1",
+  "tasks": 10
+}

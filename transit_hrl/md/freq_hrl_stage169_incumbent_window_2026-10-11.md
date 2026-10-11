@@ -22,9 +22,12 @@ also report wait/reward, fleet/nonfleet components, choices and proxy margins.
 
 Ten unpinned scheduler tasks on node001-006, 1 CPU/3 GB each. Stage code and fresh
 model inputs only. Raw records/checkpoints remain remote. 61 focused tests pass:
-forced full-day 262-trip dispatch/goal reproduction, unchanged original five
+262-trip dispatcher fixture/goal reproduction, unchanged original five
 scores, fixed-window geometry, candidate selection, control/ledger accounting
-and scheduler staging. Remote dispatch is the next action.
+and scheduler staging. Run
+`native_transit_incumbent_window_stage169_frozen_20261011_r1`, revision
+`eac46428b2`: t142440-t142449 are RUNNING on node001/004/005/006. All 80 source
+and 40 forced-incumbent native reproductions and performance results are pending.
 
 ## Limitations
 
