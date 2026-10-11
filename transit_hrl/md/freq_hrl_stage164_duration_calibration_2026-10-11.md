@@ -24,6 +24,12 @@ Ten unpinned scheduler cells on node001-006, 1 CPU/3 GB each. Results pending.
 dispatch/goal equivalence and invalid timing/split/budget rejection. Tests use
 stub environments; full native calibration runs only through the scheduler.
 
+Run `native_transit_duration_calibration_stage164_frozen_20261011_r1`, source
+revision `d0000c25e9`: t142154-t142163 are all running on node005/node006 after
+input staging. Placement is unpinned; the allowed pool remains node001-006.
+First root397 startup log has no exception; full episode qualification and
+fitted/check duration results remain pending.
+
 ## Limitations
 
 This is training-scenario duration calibration, not independent confirmation of
