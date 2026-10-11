@@ -18,9 +18,11 @@ def floor_cost(row):
     return max(row["occupancy_context"]["historical_peak"]-12, 0)**2/12.
 
 
-def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None):
+def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, objective="decision_regret"):
     if method not in METHODS:
         raise ValueError("Unknown anchored fleet value method")
+    if objective not in ("decision_regret", "proper_mse"):
+        raise ValueError("Unknown anchored fleet learning objective")
     raw = np.stack([occupancy.features(r, "occupancy_regret") for r in rows])
     labels = [{l["candidate"]: l for l in r["labels"]} for r in rows]
     # The absolute target fixes the offset that pair differences cannot identify.
@@ -63,7 +65,7 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None):
             anchor = ((predicted[..., 0]-y[..., 0])**2).mean()
             pair_mse = ((predicted[:, a]-predicted[:, b]-(y[:, a]-y[:, b]))**2).mean()
             regret = occupancy.expected_regret(predicted[..., :2]*units, actual)
-            loss = anchor+pair_mse+regret
+            loss = anchor+pair_mse+(regret if objective == "decision_regret" else 0.)
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
@@ -91,6 +93,8 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None):
     if validation_rows is not None:
         model.update(checkpoint_ledger=checkpoints, validation_states=len(validation_rows),
             validation_groups=[list(g) for g in sorted({paired.scene_group(r) for r in validation_rows})])
+    if objective == "proper_mse":
+        model["objective"] = objective
     return model
 
 
