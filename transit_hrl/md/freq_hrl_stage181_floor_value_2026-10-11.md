@@ -37,6 +37,11 @@ focused tests pass, including absolute-label construction, physical units,
 floor/identity, wait selection, held-out target isolation, shared fit budgets
 and previous value-model behavior. Actual fits run only on the scheduler.
 
+Run native_transit_floor_value_stage181_fit_20261011_r1, source eecc5aa084.
+t143187 raw_absolute runs on node006; t143188 floor_absolute on node004.
+Both are unbound and startup logs confirm seven completed fits per task.
+Completion, comparison and the fixed primary gate remain pending.
+
 ## Limitations
 
 A valid absolute floor is not a guarantee that relative savings or wait

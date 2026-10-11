@@ -1,0 +1,146 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "critic_updates": 84000,
+    "fitted_models": 56,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "development_cost_wait_value_screen_not_independent_confirmation_or_native_learned_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates_per_method": 42000,
+      "fits_per_method": 28,
+      "new_native_episodes": 0,
+      "selectors_share_each_fitted_model": true
+    },
+    "data": "unchanged_120_states_720_labels_20_first_second_scene_groups_plus_registered_baseline_terminal_peak_labels",
+    "decision": "restore_physical_units_cost_is_fleet_plus_nonfleet_wait_is_a_separate_nonpositive_delta_constraint",
+    "floor": "raw_absolute_control_or_softplus_future_cost_plus_observed_peak_cost",
+    "grouping": "all_six_callbacks_and_six_candidates_per_scene_together_no_outcome_selection",
+    "initialization_seed": 178,
+    "learning_rate": 0.003,
+    "loss": "unit_absolute_fleet_MSE_plus_three_head_paired_MSE_plus_native_total_cost_expected_regret",
+    "methods": [
+      "raw_absolute",
+      "floor_absolute"
+    ],
+    "next": "separately_register_third_scene_frozen_transfer_before_repeated_learned_actions",
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "floor_absolute:wait_feasible",
+    "representation": "unchanged_causal_96_features_96_16_3_tanh_1603_parameters",
+    "scales": "training_only_future_fleet_RMS_and_paired_nonfleet_wait_RMS_floor_1e-6",
+    "screen": "fixed_primary_negative_mean_cost_and_nonpositive_wait_for_both_roots_in_all_three_splits",
+    "source_protocol": "native_transit_value_balance_stage180_v1",
+    "steps": 1500,
+    "supervision": "future_fleet_cost_equals_original_terminal_fleet_plus_delta_minus_irreversible_causal_floor",
+    "validation": [
+      "20_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ],
+    "weight_decay": 0.01
+  },
+  "decision_variants": 4,
+  "protocol": "native_transit_floor_value_stage181_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "eecc5aa084e9f0f1fbc83a84f642d952a6a8f172",
+  "tasks": 2,
+  "training_groups": [
+    [
+      397,
+      900034700
+    ],
+    [
+      397,
+      900034701
+    ],
+    [
+      397,
+      900034710
+    ],
+    [
+      397,
+      900034711
+    ],
+    [
+      397,
+      900034720
+    ],
+    [
+      397,
+      900034721
+    ],
+    [
+      397,
+      900034730
+    ],
+    [
+      397,
+      900034731
+    ],
+    [
+      397,
+      900034740
+    ],
+    [
+      397,
+      900034741
+    ],
+    [
+      401,
+      900035900
+    ],
+    [
+      401,
+      900035901
+    ],
+    [
+      401,
+      900035910
+    ],
+    [
+      401,
+      900035911
+    ],
+    [
+      401,
+      900035920
+    ],
+    [
+      401,
+      900035921
+    ],
+    [
+      401,
+      900035930
+    ],
+    [
+      401,
+      900035931
+    ],
+    [
+      401,
+      900035940
+    ],
+    [
+      401,
+      900035941
+    ]
+  ]
+}

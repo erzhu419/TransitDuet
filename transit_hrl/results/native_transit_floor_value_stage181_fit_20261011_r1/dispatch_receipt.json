@@ -1,0 +1,54 @@
+{
+  "observed_at_utc": "2026-10-11T14:41:19.946558+00:00",
+  "protocol": "native_transit_floor_value_stage181_v1",
+  "qualification": "pending_complete_fits_and_fixed_primary_grouped_cost_wait_gate",
+  "run_name": "native_transit_floor_value_stage181_fit_20261011_r1",
+  "source_revision": "eecc5aa084e9f0f1fbc83a84f642d952a6a8f172",
+  "startup_fit_progress": {
+    "t143187": 7,
+    "t143188": 7
+  },
+  "status_counts": {
+    "running": 2
+  },
+  "tasks": [
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143187",
+      "last_block_reason": null,
+      "node": "node006",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_floor_value_stage181_v1/native_transit_floor_value_stage181_fit_20261011_r1/raw_absolute",
+      "status": "running"
+    },
+    {
+      "allowed_nodes": [
+        "node001",
+        "node002",
+        "node003",
+        "node004",
+        "node005",
+        "node006"
+      ],
+      "cpu_cores": 1,
+      "exit_code": null,
+      "id": "t143188",
+      "last_block_reason": null,
+      "node": "node004",
+      "ram_mb": 3072,
+      "require_node": null,
+      "signature": "Freq-HRL/native_transit_floor_value_stage181_v1/native_transit_floor_value_stage181_fit_20261011_r1/floor_absolute",
+      "status": "running"
+    }
+  ]
+}
