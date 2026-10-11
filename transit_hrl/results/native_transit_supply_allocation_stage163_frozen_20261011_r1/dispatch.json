@@ -2,7 +2,10 @@
   "protocol": "native_transit_supply_allocation_stage163_v1",
   "run_name": "native_transit_supply_allocation_stage163_frozen_20261011_r1",
   "performance": "pending",
-  "worker_source_qualification": "pending",
+  "worker_source_qualification": {
+    "first_scene_verified": ["t142104", "t142109"],
+    "full_matrix": "pending"
+  },
   "tasks": [
     {"id": "t142104", "seed": 397, "scenario": "low_noise", "node": "node005", "status": "running"},
     {"id": "t142105", "seed": 397, "scenario": "high_noise", "node": "node005", "status": "running"},
