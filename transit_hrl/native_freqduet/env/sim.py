@@ -149,6 +149,7 @@ class env_bus(object):
         self._upper_dispatch_lookahead_s = 0.0
         self._upper_interval_outcome_tracker = None
         self._peak_concurrent = 0
+        self.completed_trip_observations = {}
         self.protocol = None
         self.scenario_tape = None
         self.headway_events = HeadwayEventRecorder()
@@ -385,6 +386,7 @@ class env_bus(object):
         self.cost = {key: 0.0 for key in range(self.max_agent_num)}
         self.done = False
         self._peak_concurrent = 0
+        self.completed_trip_observations = {}
         self._cached_measurement = None
         self._dispatch_rewards = {}
         self._last_dispatch_trip = {}
@@ -639,6 +641,11 @@ class env_bus(object):
                               self.lower_state_input_schema))
                 if was_on_route and not bus.on_route:
                     self._completed_trip_ids.add(arrival_trip_id)
+                    self.completed_trip_observations[arrival_trip_id] = {
+                        'direction': arrival_direction,
+                        'launch_time_s': float(bus.launch_time),
+                        'completion_time_s': float(self.current_time),
+                    }
                 if (bus.last_board_time == self.current_time
                         and previous_board_time != bus.last_board_time
                         and (self.include_terminal_headways
