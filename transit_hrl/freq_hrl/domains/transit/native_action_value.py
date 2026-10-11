@@ -73,11 +73,12 @@ def choice_from_cost(cost, original):
     return min(order, key=lambda i: cost[i])
 
 
-def evaluate_action_value(rows, model, *, predictor=predict_action_value):
+def evaluate_action_value(rows, model, *, predictor=predict_action_value, selector=None):
     evaluated = []
     for row in rows:
         predicted = predictor(row, model)
-        selected = choice_from_cost(predicted.sum(axis=1), row["original_choice"])
+        selected = (choice_from_cost(predicted.sum(axis=1), row["original_choice"])
+            if selector is None else selector(row, model))
         labels = {l["candidate"]: l for l in row["labels"]}
         observed = np.asarray([labels[i]["actual_cost_delta"] for i in range(len(predicted))])
         costs = predicted.sum(axis=1)
