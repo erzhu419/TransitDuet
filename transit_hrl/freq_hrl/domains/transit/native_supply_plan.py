@@ -75,6 +75,9 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
     def candidate_score(self, wait_cost, fleet_cost, diagnostics):
         return wait_cost + (fleet_cost if self.selection == "supply_aware" else 0.)
 
+    def select_candidate(self, candidates):
+        return min(range(len(candidates)), key=lambda i: candidates[i]["score"])
+
     def candidate_preferences(self, nominal, trip, now, remaining, forecast):
         # Nominal spacing lets low strengths undo earlier tentative compression.
         base = np.diff([t.launch_time for t in remaining])
@@ -102,7 +105,7 @@ class NativeSupplyRollingPlan(NativeRollingServicePlan):
             candidates.append({"strength": strength, "wait_cost": wait_cost, "headway_cost": regularity,
                 "predicted_peak": peak, "fleet_cost": float(fleet_cost), "score": float(score), **diagnostics})
             preferences.append(preference)
-        selected = min(range(len(candidates)), key=lambda i: candidates[i]["score"])
+        selected = self.select_candidate(candidates)
         self.decisions.append({"time_s": now, "direction": bool(trip.direction),
             "selected": selected, "observed_completions": len(self.seen_completions), "candidates": candidates})
         return preferences[selected], rates

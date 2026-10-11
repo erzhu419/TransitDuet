@@ -22,7 +22,7 @@ from freq_hrl.experiments.pointmaze_root_response import write_json
 CONTRASTS = [(c, ref) for c in spec.HORIZONS for ref in spec.CONTROLS]
 
 
-def validate_scoring(row, model, *, strengths=spec.distributional.STRENGTHS):
+def validate_scoring(row, model, *, strengths=spec.distributional.STRENGTHS, choice_overrides=None):
     supply = row["supply"]
     if row["condition"] == "full_wait_full_fleet":
         validate_distributional(supply, model)
@@ -34,7 +34,7 @@ def validate_scoring(row, model, *, strengths=spec.distributional.STRENGTHS):
             raise ValueError("Changed commitment scoring model or decision budget")
         prefix_wait, prefix_fleet = spec.HORIZONS[row["condition"]]
         choices, times, completions = [0]*len(strengths), [], []
-        for d in supply["decisions"]:
+        for index, d in enumerate(supply["decisions"]):
             if [c["strength"] for c in d["candidates"]] != list(strengths):
                 raise ValueError("Changed commitment scoring candidates")
             for c in d["candidates"]:
@@ -53,8 +53,10 @@ def validate_scoring(row, model, *, strengths=spec.distributional.STRENGTHS):
                         and np.isclose(p["prefix_score"], p["prefix_wait_cost"]+p["prefix_fleet_cost"], rtol=0, atol=1e-10)
                         and np.isclose(c["score"], score, rtol=0, atol=1e-10)):
                     raise ValueError("Changed full/prefix score terms or horizon")
-            if d["selected"] != min(range(len(strengths)), key=lambda i: d["candidates"][i]["score"]):
-                raise ValueError("Commitment selector did not execute its score minimum")
+            greedy = min(range(len(strengths)), key=lambda i: d["candidates"][i]["score"])
+            expected = (choice_overrides or {}).get(index, greedy)
+            if d["selected"] != expected:
+                raise ValueError("Commitment selector changed its score minimum or registered intervention")
             choices[d["selected"]] += 1
             times.append(d["time_s"])
             completions.append(d["observed_completions"])
