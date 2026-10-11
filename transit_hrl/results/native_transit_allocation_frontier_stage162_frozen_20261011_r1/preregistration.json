@@ -1,0 +1,66 @@
+{
+  "budget": {
+    "frozen_episodes": 240,
+    "native_ticks": 14731200,
+    "source_control_reproductions": 120,
+    "training_episodes": 0
+  },
+  "contract": {
+    "allocation": "(1-alpha)*current_tentative_intervals+alpha*causal_forecast_intervals_before_projection",
+    "boundary": "frozen_development_frontier_not_learned_adaptation_or_confirmation",
+    "bounds": "all_adjacent_intervals_240_to_480_including_cross_window",
+    "clock_s": 61380,
+    "conditions": [
+      "window_forecast",
+      "rolling_0",
+      "rolling_1",
+      "rolling_025",
+      "rolling_05",
+      "rolling_075"
+    ],
+    "episodes_per_cell": 24,
+    "execution": "same_remaining_horizon_projection_six_trip_commitment_44_decisions_daily_endpoints",
+    "fleet": 12,
+    "primary": "paired_cost_wait_fleet_nonfleet_vs_window_forecast_all_strengths_no_winner_selection",
+    "qualification": "window_forecast_and_alpha0_alpha1_exact_stage161_physical_and_schedule_reproduction",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes": "all_four_registered_scenes_per_regime_no_outcome_selection",
+    "selection": "none_no_strength_fitted_or_selected_as_deployed_policy",
+    "source_protocol": "native_transit_rolling_authority_stage161_v1",
+    "source_run": "native_transit_rolling_authority_stage161_frozen_20261011_r1",
+    "strengths": {
+      "rolling_0": 0.0,
+      "rolling_025": 0.25,
+      "rolling_05": 0.5,
+      "rolling_075": 0.75,
+      "rolling_1": 1.0
+    },
+    "training_updates": 0
+  },
+  "protocol": "native_transit_allocation_frontier_stage162_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "dd276040775c80f509ddc1d7215defbb51dc9688",
+  "tasks": 10
+}

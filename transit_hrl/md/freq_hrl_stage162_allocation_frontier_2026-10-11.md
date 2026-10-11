@@ -34,6 +34,12 @@ source schedule checks, component attribution and unpinned scheduler placement.
 Local execution tests use the native dispatcher with a stub environment, not
 full native simulation or training.
 
+Run `native_transit_allocation_frontier_stage162_frozen_20261011_r1`:
+t142039-t142048 RUNNING on node004/005/006. The initial staging wait cleared;
+no hard node pins, local native training or checkpoint downloads were used.
+First window controls have begun reproducing; complete endpoint qualification
+and final performance remain pending.
+
 ## Limitations
 
 This is a frozen development frontier, not learned adaptation, independent
