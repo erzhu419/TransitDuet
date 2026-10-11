@@ -92,3 +92,17 @@ class NativeRollingServicePlan(NativeServicePlan):
 
     def summarize(self):
         return schedule_summary(self)
+
+
+class NativeTemperedRollingPlan(NativeRollingServicePlan):
+    """Scale forecast interval preferences before the unchanged budget projection."""
+
+    def __init__(self, env, strength):
+        if not np.isfinite(strength) or not 0 <= strength <= 1:
+            raise ValueError("Allocation strength must be in [0, 1]")
+        super().__init__(env, "causal_forecast")
+        self.strength = float(strength)
+
+    def preferred_intervals(self, nominal, trip, now):
+        preferred, rates = super().preferred_intervals(nominal, trip, now)
+        return (1 - self.strength) * np.diff(nominal) + self.strength * preferred, rates
