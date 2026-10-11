@@ -1,0 +1,59 @@
+{
+  "budget": {
+    "frozen_episodes": 40,
+    "native_ticks": 2455200,
+    "source_control_reproductions": 20,
+    "training_episodes": 0,
+    "window_ledger_qualified_episodes": 30
+  },
+  "contract": {
+    "boundary": "frozen_remaining_prediction_control_development_not_learned_upper_or_independent_confirmation",
+    "change": "same_fit_only_remaining_correction_added_to_active_member_seconds_then_floor1",
+    "clock_s": 61380,
+    "conditions": [
+      "window_forecast",
+      "rolling_plus_incumbent",
+      "zero_remaining_correction",
+      "corrected_remaining"
+    ],
+    "episodes_per_cell": 4,
+    "fit": "exact_Stage171_coefficients_fit_scenes_only_no_refitting_tuning_or_joint_copula",
+    "fleet": 12,
+    "primary": "corrected_minus_window_and_original_actual_cost_wait_reward_fleet_nonfleet_all_root_regimes",
+    "qualification": "10_exact_window_source_reproductions_and_10_zero_correction_physics_schedules_and_selector_reproductions",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "scenes": "all_ten_Stage171_check_scenes_reused_for_bounded_control_development_not_confirmation",
+    "source_protocol": "native_transit_remaining_time_stage171_v1",
+    "source_run": "native_transit_remaining_time_stage171_frozen_20261011_r1",
+    "training_updates": 0,
+    "unchanged": "64_duration_draws_future_trip_columns_EWMA_historical_floor_six_candidates_prefix_wait_full_fleet_score_and_weights_native_cost_lower_cap_and_44_commitments",
+    "window_accounting": "30_selected_window_native_trip_ledger_qualifications"
+  },
+  "model_input": "inputs/models.json",
+  "protocol": "native_transit_remaining_supply_stage172_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "bf68f2f4631d7f541d909bd1dc787cad8afc0409",
+  "tasks": 10
+}

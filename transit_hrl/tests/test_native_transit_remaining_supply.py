@@ -13,7 +13,7 @@ import numpy as np
 from freq_hrl.domains.transit.native_remaining_time import NativeRemainingSupplyPlan, active_sample
 from freq_hrl.domains.transit.native_incumbent_window_plan import NativeIncumbentWindowPlan
 from scripts import run_native_transit_remaining_supply_stage172 as spec
-from scripts.analyze_native_transit_remaining_supply_stage172 import summarize
+from scripts.analyze_native_transit_remaining_supply_stage172 import ranking_diagnostic, summarize
 from scripts.submit_native_transit_remaining_supply_stage172_scheduleurm import task_specification
 from tests import test_native_transit_distributional_supply as distributional_tests
 from tests import test_native_transit_incumbent_window as incumbent_tests
@@ -87,6 +87,30 @@ class RemainingSupplyTest(unittest.TestCase):
     def analyze(self, cells, sources, pack):
         return summarize(cells, sources, pack, {"models": pack["remaining_models"]}, pack["duration_models"])
 
+    def test_first_ranking_divergence_is_not_a_peak_improvement_or_local_accuracy_claim(self):
+        cells, _, _ = self.cells()
+        original, corrected = copy.deepcopy(cells[397, "hour_burst"]["evaluation"])[1::2]
+        self.assertIsNone(ranking_diagnostic(original, corrected)["first_choice_divergence"])
+        a, b = original["supply"]["decisions"][1], corrected["supply"]["decisions"][1]
+        a["selected"], b["selected"] = 3, 5
+        for c in a["candidates"]:
+            c.update(score=.7, fleet_cost=.4)
+        a["candidates"][3].update(score=.6, fleet_cost=.3)
+        a["candidates"][5].update(score=.62, fleet_cost=.32)
+        b["candidates"] = copy.deepcopy(a["candidates"])
+        b["candidates"][3].update(score=.64, fleet_cost=.34)
+        sample = corrected["remaining_corrections"][1]["active"][0]
+        sample.update(original_sample_mean_s=50., corrected_sample_mean_s=100., actual_remaining_s=60.)
+        result = ranking_diagnostic(original, corrected)
+        first = result["first_choice_divergence"]
+        self.assertEqual(result["choice_changes"], 1)
+        self.assertEqual(result["actual_peak_delta"], 0)
+        self.assertEqual((first["index"], first["original_choice"], first["corrected_choice"]), (1, 3, 5))
+        self.assertTrue(first["same_candidate_prefixes"] and first["same_candidate_wait_costs"])
+        self.assertAlmostEqual(first["original_choice_score_advantage"], .02)
+        self.assertAlmostEqual(first["relative_fleet_shift_against_original_choice"], .04)
+        self.assertEqual((first["original_active_sample_mean_mae_s"], first["corrected_active_sample_mean_mae_s"]), (10., 40.))
+
     def test_analyzer_separates_prediction_accuracy_from_native_outcomes_and_checks_controls(self):
         cells, sources, pack = self.cells()
         result = self.analyze(cells, sources, pack)
@@ -94,6 +118,7 @@ class RemainingSupplyTest(unittest.TestCase):
         self.assertEqual(result["window_ledger_qualified_episodes"], 30)
         self.assertEqual(result["native_steps"], 40*61380)
         self.assertEqual(len(result["regime_root_contrasts"]), 20)
+        self.assertEqual(len(result["ranking_diagnostics"]), 10)
         self.assertTrue(all(d["corrected_sample_mean_mae_s"] == 0 for d in result["active_diagnostics"]))
         json.dumps(result)
         for failure in ("control", "zero_scores", "zero_schedule", "model", "correction", "samples", "choice", "scene", "budget"):

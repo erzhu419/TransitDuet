@@ -16,6 +16,37 @@ from scripts.analyze_native_transit_supply_allocation_stage163 import contrast
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
+def ranking_diagnostic(original, corrected):
+    pairs = list(zip(original["supply"]["decisions"], corrected["supply"]["decisions"]))
+    changed = [i for i, (a, b) in enumerate(pairs) if a["selected"] != b["selected"]]
+    first = None
+    if changed:
+        i = changed[0]
+        a, b = pairs[i]
+        old, new = a["selected"], b["selected"]
+        ac, bc = a["candidates"], b["candidates"]
+        samples = corrected["remaining_corrections"][i]["active"]
+        first = {"index": i, "time_s": a["time_s"], "direction": a["direction"],
+            "original_choice": old, "corrected_choice": new,
+            "same_candidate_prefixes": [c["commitment"]["prefix_planned_s"] for c in ac]
+                == [c["commitment"]["prefix_planned_s"] for c in bc],
+            "same_candidate_wait_costs": [c["commitment"]["prefix_wait_cost"] for c in ac]
+                == [c["commitment"]["prefix_wait_cost"] for c in bc],
+            "original_choice_score_advantage": ac[new]["score"]-ac[old]["score"],
+            "corrected_choice_score_advantage": bc[old]["score"]-bc[new]["score"],
+            "relative_fleet_shift_against_original_choice":
+                (bc[old]["fleet_cost"]-ac[old]["fleet_cost"])-(bc[new]["fleet_cost"]-ac[new]["fleet_cost"]),
+            "active_samples": len(samples),
+            **{kind+"_active_sample_mean_mae_s": float(np.mean([
+                abs(s[kind+"_sample_mean_s"]-s["actual_remaining_s"]) for s in samples]))
+                if samples else None for kind in ("original", "corrected")}}
+    return {"scene_seed": corrected["scene_seed"], "choice_changes": len(changed),
+        "actual_peak_delta": corrected["peak_fleet"]-original["peak_fleet"],
+        "actual_cost_delta": corrected["service_cost_restricted"]-original["service_cost_restricted"],
+        "actual_wait_delta_min": corrected["restricted_wait_horizon_min"]-original["restricted_wait_horizon_min"],
+        "first_choice_divergence": first}
+
+
 def summarize(cells, sources, pack, source_summary, source_duration_models):
     required = {(r, s) for r in spec.ROOTS for s in spec.SCENARIOS}
     if set(cells) != required or set(sources) != required:
@@ -23,7 +54,7 @@ def summarize(cells, sources, pack, source_summary, source_duration_models):
     if pack != {"duration_models": source_duration_models, "remaining_models": source_summary["models"]}:
         raise ValueError("Changed registered fit-only duration or correction models")
     metrics = spec.native.source.source_spec.authority.routing.METRICS
-    all_rows, panels, diagnostics = {r: [] for r in spec.ROOTS}, [], []
+    all_rows, panels, diagnostics, rankings = {r: [] for r in spec.ROOTS}, [], [], []
     for (root, scenario), cell in cells.items():
         if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
                 and cell["seed"] == root and cell["scenario"] == scenario and cell["software_qualified"]
@@ -55,6 +86,7 @@ def summarize(cells, sources, pack, source_summary, source_duration_models):
         all_rows[root].extend(rows)
         panels.extend({"root": root, "scenario": scenario, **contrast(rows, "corrected_remaining", ref, metrics)}
             for ref in spec.CONDITIONS[:2])
+        rankings.append({"root": root, "scenario": scenario, **ranking_diagnostic(rows[1], rows[3])})
     for root, rows in all_rows.items():
         changed = [r for r in rows if r["condition"] == "corrected_remaining"]
         samples = [s for r in changed for p in r["remaining_corrections"] for s in p["active"]]
@@ -68,7 +100,8 @@ def summarize(cells, sources, pack, source_summary, source_duration_models):
         "window_ledger_qualified_episodes": 30,
         "paired_contrasts": [{"root": r, **contrast(rows, "corrected_remaining", ref, metrics)}
             for r, rows in all_rows.items() for ref in spec.CONDITIONS[:2]],
-        "regime_root_contrasts": panels, "active_diagnostics": diagnostics, "stage": spec.contract()["boundary"]}
+        "regime_root_contrasts": panels, "active_diagnostics": diagnostics,
+        "ranking_diagnostics": rankings, "stage": spec.contract()["boundary"]}
 
 
 def main():
@@ -81,7 +114,7 @@ def main():
         json.loads((directory/"inputs/models.json").read_text()), json.loads((source/"summary.json").read_text()),
         json.loads((source/"inputs/duration_models.json").read_text()))
     write_json(directory/"summary.json", result)
-    print(json.dumps({k: v for k, v in result.items() if k not in {"contract", "regime_root_contrasts"}}, indent=2))
+    print(json.dumps({k: v for k, v in result.items() if k not in {"contract", "regime_root_contrasts", "ranking_diagnostics"}}, indent=2))
 
 
 if __name__ == "__main__":
