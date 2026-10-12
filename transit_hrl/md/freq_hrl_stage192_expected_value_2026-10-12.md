@@ -28,10 +28,26 @@ updates. This changes targets and their training-only normalization, not inputs.
 Only5% of training states receive mean targets; these eight-draw estimates still
 have sampling noise. The30 expected test states cover ten development prefixes,
 not all600 states or new scene confirmation. No reserved-label/deployment gate
-opens even if this small expected-value screen improves. Results pending.
+opens even if this small expected-value screen improves.
 
 Run `native_transit_expected_value_stage192_fit_20261012_r1`, source `e737a0d540`.
 Prepare `t145141` and fits `t145157-t145190` all completed exit0. Six focused
 tests pass. Preparation decomposes cost-gap variance as fleet0.006122,
 nonfleet0.000222, twice covariance-0.000333, total0.006011. Thus fleet-peak
 variation, rather than only wait/nonfleet noise, dominates this diagnostic.
+
+## Result and Next Step
+Report `t145226` qualified34 new and34 reused fits,3,400 new updates, zero
+native episodes/actor updates. All expected cost/wait joint gates still fail.
+Scalar scene/root401 wait changes from +0.017925 to +0.001000 and cost from
+-0.004492 to -0.005901, but regime/root401 still worsens both metrics.
+Sequence scene/root401 instead changes cost from -0.001712 to +0.002731 and
+wait from +0.013825 to +0.018350. Summed fit time is34s scalar versus699s
+sequence. Do not select the favorable scalar cell as general superiority.
+
+The experiment only denoises5% of training targets; it does not reject full
+expected-value training. Next prioritize a physics-prior residual/explicit
+fleet-risk critic and adequate conditional target coverage, rather than
+additional encoder capacity, gate weakening or another global seed sweep.
+One3,648-byte prepare receipt and one159,912-byte report were manually pulled.
+All full labels, features, models and prediction arrays remain server-only.
