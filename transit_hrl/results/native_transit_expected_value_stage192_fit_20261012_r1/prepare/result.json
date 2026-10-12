@@ -1,0 +1,94 @@
+{
+  "changed_target_states": 30,
+  "contract": {
+    "boundary": "ten_scene_development_target_screen_not600_state_confirmation_or_end_to_end_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "new_critic_updates": 3400,
+      "new_fits": 34,
+      "new_native_episodes": 0,
+      "reused_fits": 34
+    },
+    "data": "600_unchanged_input_states_30_existing_targets_replaced_by8_independent_future_means",
+    "evaluation": "same30_heldout_states_on_original_labels_and8_mean_labels_shared_models_selectors",
+    "folds": "10_leave_target_scene_out_5_leave_regime_out_2_leave_lower_root_out_all_scene_callbacks_grouped",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_expected_label_splits",
+    "label_mean": "average_physical_costs_not_cost_of_average_peak_identity_deltas_exact_zero",
+    "method": "floor_absolute_proper_mse_100steps_seed178_unchanged_AdamW_lr0.003_wd0.01",
+    "modes": [
+      "tail_summary",
+      "timetable_sequence"
+    ],
+    "noise_protocol": "native_transit_continuation_noise_stage191_v1",
+    "noise_run": "native_transit_continuation_noise_stage191_development_20261012_r1",
+    "normalization": "input_scales_unchanged_target_scales_recomputed_training_only_after_target_replacement",
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "timetable_sequence:mean8_overlay:wait_feasible",
+    "reference": "reuse34_qualified_Stage188_models_identical_groups_inputs_architecture_optimizer_and_steps",
+    "source_protocol": "native_transit_coverage_value_stage188_v1",
+    "source_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "storage": "feature_bank_mean_label_map_models_predictions_server_only_compact_receipts_report_sync",
+    "variants": [
+      "cached_original",
+      "mean8_overlay"
+    ]
+  },
+  "independent_prefix_groups": 10,
+  "input_states": 600,
+  "new_native_steps": 0,
+  "protocol": "native_transit_expected_value_stage192_v1",
+  "server_targets_bytes": 74765,
+  "software_qualified": true,
+  "training_updates": 0,
+  "variance_decomposition": {
+    "by_probe": {
+      "22": {
+        "fleet_gap_variance": 0.0,
+        "nonfleet_gap_variance": 2.393998737773808e-05,
+        "states": 10,
+        "total_gap_variance": 2.393998737773808e-05,
+        "twice_gap_covariance": 0.0
+      },
+      "36": {
+        "fleet_gap_variance": 0.0027075066137566143,
+        "nonfleet_gap_variance": 5.67603794074063e-06,
+        "states": 10,
+        "total_gap_variance": 0.0026522620829142855,
+        "twice_gap_covariance": -6.0920568783069003e-05
+      },
+      "8": {
+        "fleet_gap_variance": 0.015658068783068788,
+        "nonfleet_gap_variance": 0.0006364879002352908,
+        "states": 10,
+        "total_gap_variance": 0.015356420942563337,
+        "twice_gap_covariance": -0.0009381357407407386
+      }
+    },
+    "by_root": {
+      "397": {
+        "fleet_gap_variance": 0.00486386684303351,
+        "nonfleet_gap_variance": 0.00019018167199496495,
+        "states": 15,
+        "total_gap_variance": 0.004914144127903256,
+        "twice_gap_covariance": -0.00013990438712522044
+      },
+      "401": {
+        "fleet_gap_variance": 0.007379850088183423,
+        "nonfleet_gap_variance": 0.00025388761170754795,
+        "states": 15,
+        "total_gap_variance": 0.007107604547333652,
+        "twice_gap_covariance": -0.0005261331525573179
+      }
+    },
+    "overall": {
+      "fleet_gap_variance": 0.006121858465608466,
+      "nonfleet_gap_variance": 0.00022203464185125647,
+      "states": 30,
+      "total_gap_variance": 0.006010874337618454,
+      "twice_gap_covariance": -0.00033301876984126916
+    }
+  }
+}

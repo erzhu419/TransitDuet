@@ -29,3 +29,9 @@ Only5% of training states receive mean targets; these eight-draw estimates still
 have sampling noise. The30 expected test states cover ten development prefixes,
 not all600 states or new scene confirmation. No reserved-label/deployment gate
 opens even if this small expected-value screen improves. Results pending.
+
+Run `native_transit_expected_value_stage192_fit_20261012_r1`, source `e737a0d540`.
+Prepare `t145141` and fits `t145157-t145190` all completed exit0. Six focused
+tests pass. Preparation decomposes cost-gap variance as fleet0.006122,
+nonfleet0.000222, twice covariance-0.000333, total0.006011. Thus fleet-peak
+variation, rather than only wait/nonfleet noise, dominates this diagnostic.

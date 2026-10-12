@@ -1,0 +1,940 @@
+{
+  "contract": {
+    "boundary": "ten_scene_development_target_screen_not600_state_confirmation_or_end_to_end_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "new_critic_updates": 3400,
+      "new_fits": 34,
+      "new_native_episodes": 0,
+      "reused_fits": 34
+    },
+    "data": "600_unchanged_input_states_30_existing_targets_replaced_by8_independent_future_means",
+    "evaluation": "same30_heldout_states_on_original_labels_and8_mean_labels_shared_models_selectors",
+    "folds": "10_leave_target_scene_out_5_leave_regime_out_2_leave_lower_root_out_all_scene_callbacks_grouped",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_expected_label_splits",
+    "label_mean": "average_physical_costs_not_cost_of_average_peak_identity_deltas_exact_zero",
+    "method": "floor_absolute_proper_mse_100steps_seed178_unchanged_AdamW_lr0.003_wd0.01",
+    "modes": [
+      "tail_summary",
+      "timetable_sequence"
+    ],
+    "noise_protocol": "native_transit_continuation_noise_stage191_v1",
+    "noise_run": "native_transit_continuation_noise_stage191_development_20261012_r1",
+    "normalization": "input_scales_unchanged_target_scales_recomputed_training_only_after_target_replacement",
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "timetable_sequence:mean8_overlay:wait_feasible",
+    "reference": "reuse34_qualified_Stage188_models_identical_groups_inputs_architecture_optimizer_and_steps",
+    "source_protocol": "native_transit_coverage_value_stage188_v1",
+    "source_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "storage": "feature_bank_mean_label_map_models_predictions_server_only_compact_receipts_report_sync",
+    "variants": [
+      "cached_original",
+      "mean8_overlay"
+    ]
+  },
+  "folds": [
+    {
+      "held_out": [
+        397,
+        913970000
+      ],
+      "index": 10,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        397,
+        913970100
+      ],
+      "index": 18,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        397,
+        913970200
+      ],
+      "index": 26,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        397,
+        913970300
+      ],
+      "index": 34,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        397,
+        913970400
+      ],
+      "index": 42,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        401,
+        914010000
+      ],
+      "index": 60,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        401,
+        914010100
+      ],
+      "index": 68,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        401,
+        914010200
+      ],
+      "index": 76,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        401,
+        914010300
+      ],
+      "index": 84,
+      "split": "scene"
+    },
+    {
+      "held_out": [
+        401,
+        914010400
+      ],
+      "index": 92,
+      "split": "scene"
+    },
+    {
+      "held_out": "high_noise",
+      "index": 0,
+      "split": "regime"
+    },
+    {
+      "held_out": "hour_burst",
+      "index": 1,
+      "split": "regime"
+    },
+    {
+      "held_out": "low_noise",
+      "index": 2,
+      "split": "regime"
+    },
+    {
+      "held_out": "ood_period",
+      "index": 3,
+      "split": "regime"
+    },
+    {
+      "held_out": "persistent_shift",
+      "index": 4,
+      "split": "regime"
+    },
+    {
+      "held_out": 397,
+      "index": 0,
+      "split": "lower_root"
+    },
+    {
+      "held_out": 401,
+      "index": 1,
+      "split": "lower_root"
+    }
+  ],
+  "groups": [
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 900034700
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 900034701
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 900034710
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 900034711
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 900034720
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 900034721
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 900034730
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 900034731
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 900034740
+    },
+    {
+      "origin": "existing",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 900034741
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970004
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970005
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970006
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970007
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970104
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970105
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970106
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970107
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970204
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970205
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970206
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970207
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970304
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970305
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970306
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970307
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970404
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970405
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970406
+    },
+    {
+      "origin": "fresh",
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970407
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 900035900
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 900035901
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 900035910
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 900035911
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 900035920
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 900035921
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 900035930
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 900035931
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 900035940
+    },
+    {
+      "origin": "existing",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 900035941
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010004
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010005
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010006
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010007
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010104
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010105
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010106
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010107
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010204
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010205
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010206
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010207
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010304
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010305
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010306
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010307
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010404
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010405
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010406
+    },
+    {
+      "origin": "fresh",
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010407
+    }
+  ],
+  "mean_states": [
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    }
+  ],
+  "protocol": "native_transit_expected_value_stage192_v1"
+}
