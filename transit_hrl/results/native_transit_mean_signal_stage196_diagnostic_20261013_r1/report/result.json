@@ -1,0 +1,4035 @@
+{
+  "contract": {
+    "boundary": "development_noise_and_model_error_diagnostic_not_CI_or_new_policy_performance",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 0,
+      "new_fits": 0,
+      "new_native_episodes": 0
+    },
+    "data": "same240_states_40_prefix_groups_eight_draws_and47_completed_grouped_fits",
+    "feasibility": "selected_mean_wait_harm_split_into_both_halves_harm_and_half_disagreement",
+    "halves": "odd_even_four_draw_oracle_choice_cross_evaluated_on_other_half_wait_feasible_identity_ties",
+    "pair_error": "mean_squared_prediction_error_minus_sample_pair_variance_over8_no_clipping",
+    "predictions": "frozen_Stage195_single_and_mean_target_models_both_selectors_all_three_splits",
+    "source_protocol": "native_transit_mean_coverage_stage195_v1",
+    "source_run": "native_transit_mean_coverage_stage195_development_20261012_r1",
+    "storage": "draw_labels_and_frozen_predictions_server_only_small_diagnostic_summary",
+    "zero_reference": "zero_action_difference_pair_MSE_minus_same_noise_estimate"
+  },
+  "native_deployment_eligible": false,
+  "oracle": {
+    "by_regime": {
+      "high_noise": {
+        "half_choice_agreement": 19,
+        "mean_cross_half_cost": 0.003066174479166675,
+        "mean_cross_half_wait_min": -0.022919270833333335,
+        "mean_mean8_hindsight_cost": -0.008145565104166662,
+        "mean_mean8_hindsight_wait_min": -0.02549739583333334,
+        "mean_same_half_cost": -0.011612520833333332,
+        "prefix_groups": 8,
+        "states": 48
+      },
+      "hour_burst": {
+        "half_choice_agreement": 27,
+        "mean_cross_half_cost": -0.006894986979166653,
+        "mean_cross_half_wait_min": -0.03138802083333342,
+        "mean_mean8_hindsight_cost": -0.012272236979166655,
+        "mean_mean8_hindsight_wait_min": -0.051195312500000055,
+        "mean_same_half_cost": -0.012830398437499993,
+        "prefix_groups": 8,
+        "states": 48
+      },
+      "low_noise": {
+        "half_choice_agreement": 13,
+        "mean_cross_half_cost": 0.0037451770833333343,
+        "mean_cross_half_wait_min": -1.3020833333321491e-05,
+        "mean_mean8_hindsight_cost": -0.004340976562499999,
+        "mean_mean8_hindsight_wait_min": -0.0017395833333333315,
+        "mean_same_half_cost": -0.00567589583333333,
+        "prefix_groups": 8,
+        "states": 48
+      },
+      "ood_period": {
+        "half_choice_agreement": 16,
+        "mean_cross_half_cost": -0.001257221354166671,
+        "mean_cross_half_wait_min": -0.0050182291666666596,
+        "mean_mean8_hindsight_cost": -0.0035877994791666695,
+        "mean_mean8_hindsight_wait_min": -0.008473958333333326,
+        "mean_same_half_cost": -0.006081046875000003,
+        "prefix_groups": 8,
+        "states": 48
+      },
+      "persistent_shift": {
+        "half_choice_agreement": 23,
+        "mean_cross_half_cost": -0.004406953125000009,
+        "mean_cross_half_wait_min": -0.019307291666666764,
+        "mean_mean8_hindsight_cost": -0.012573197916666673,
+        "mean_mean8_hindsight_wait_min": -0.03613020833333327,
+        "mean_same_half_cost": -0.013299835937500013,
+        "prefix_groups": 8,
+        "states": 48
+      }
+    },
+    "by_root": {
+      "397": {
+        "half_choice_agreement": 50,
+        "mean_cross_half_cost": -0.0008353249999999997,
+        "mean_cross_half_wait_min": -0.007596875000000029,
+        "mean_mean8_hindsight_cost": -0.008586719791666666,
+        "mean_mean8_hindsight_wait_min": -0.02013020833333334,
+        "mean_same_half_cost": -0.009890209374999999,
+        "prefix_groups": 20,
+        "states": 120
+      },
+      "401": {
+        "half_choice_agreement": 48,
+        "mean_cross_half_cost": -0.0014637989583333297,
+        "mean_cross_half_wait_min": -0.023861458333333366,
+        "mean_mean8_hindsight_cost": -0.007781190624999996,
+        "mean_mean8_hindsight_wait_min": -0.029084374999999992,
+        "mean_same_half_cost": -0.009909669791666667,
+        "prefix_groups": 20,
+        "states": 120
+      }
+    },
+    "overall": {
+      "half_choice_agreement": 98,
+      "mean_cross_half_cost": -0.0011495619791666647,
+      "mean_cross_half_wait_min": -0.015729166666666697,
+      "mean_mean8_hindsight_cost": -0.008183955208333331,
+      "mean_mean8_hindsight_wait_min": -0.024607291666666663,
+      "mean_same_half_cost": -0.009899939583333333,
+      "prefix_groups": 40,
+      "states": 240
+    }
+  },
+  "prefix_groups": 40,
+  "protocol": "native_transit_mean_signal_stage196_v1",
+  "reused_fits": 47,
+  "software_qualified": true,
+  "states": 240,
+  "third_scene_screen_eligible": false,
+  "variants": {
+    "cached_original:cost_only": {
+      "lower_root": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 33,
+            "false_feasible": 9,
+            "false_feasible_both_halves_harm": 5,
+            "mean_selected_mean_cost": 0.005270557291666672,
+            "mean_selected_mean_wait_min": -0.0008177083333333427,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0010363326965897573,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0011582476471734876,
+                "observed_pair_mse": 0.0022483897133455948,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010415380369822684,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.001265441255677154,
+                "observed_pair_mse": 0.0023262904000223923,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5768854302999482e-05,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 7.835982037394294e-05,
+                "observed_pair_mse": 0.00010531181338136792,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00033811563413594915,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.006429596784929604,
+                "observed_pair_mse": 0.008620672600281784,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 9,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 36,
+            "false_feasible": 9,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": 0.0013562447916666727,
+            "mean_selected_mean_wait_min": 0.003953124999999956,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0008655638023924161,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0009574043107791226,
+                "observed_pair_mse": 0.0017991238369926552,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000800141437550353,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0008483667461923284,
+                "observed_pair_mse": 0.0017119011790626987,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0445765059276152e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.243470543451857e-05,
+                "observed_pair_mse": 9.981049921584193e-05,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -1.5662006626963718e-05,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.003970102923928585,
+                "observed_pair_mse": 0.009738276752053587,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 38,
+            "false_feasible": 11,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": 0.0003558072916666659,
+            "mean_selected_mean_wait_min": 0.0022291666666666883,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -7.147740779055541e-05,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.0005772976382776984,
+                "observed_pair_mse": 0.0013324645700926478,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00010765383456680815,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0005537218268088533,
+                "observed_pair_mse": 0.0012949491264671426,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.057479747378133e-05,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.1440650420342176e-05,
+                "observed_pair_mse": 1.3014289342323958e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006772777241424592,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0006998709781107134,
+                "observed_pair_mse": 0.0007240478847327371,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 15,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 43,
+            "false_feasible": 13,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.001252588541666674,
+            "mean_selected_mean_wait_min": 0.008768229166666664,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -4.013049445151617e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00047789100352442623,
+                "observed_pair_mse": 0.0011032721288769126,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 1.5933611133333902e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0004647734479940042,
+                "observed_pair_mse": 0.0010782467380623464,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0764839134158564e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.8577798474739464e-05,
+                "observed_pair_mse": 2.2495827383497866e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001035619878347371,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0015604358505695928,
+                "observed_pair_mse": 0.0017420902993543154,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 36,
+            "false_feasible": 9,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": 0.004549781250000006,
+            "mean_selected_mean_wait_min": 0.012289062499999984,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00027555618738480547,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0011555898692391705,
+                "observed_pair_mse": 0.002366183654124172,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005098335337162539,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.001043756593680981,
+                "observed_pair_mse": 0.00211031096427181,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.694463841865866e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.775486960413663e-05,
+                "observed_pair_mse": 0.00011582104446654091,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0014990716001960578,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005588972348216652,
+                "observed_pair_mse": 0.008465647214908124,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 4,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 96,
+            "false_feasible": 22,
+            "false_feasible_both_halves_harm": 17,
+            "mean_selected_mean_cost": -0.0016798770833333268,
+            "mean_selected_mean_wait_min": 0.004642708333333353,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006087665231744263,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.0009960575159176205,
+                "observed_pair_mse": 0.0019964728374377164,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006259928141539951,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0010480331580693392,
+                "observed_pair_mse": 0.0020039707269626375,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3461728956921549e-05,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 4.03740857874175e-05,
+                "observed_pair_mse": 6.381501274181635e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004112497961827104,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.003152162435071602,
+                "observed_pair_mse": 0.005166308858682713,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 24,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 90,
+            "false_feasible": 29,
+            "false_feasible_both_halves_harm": 19,
+            "mean_selected_mean_cost": 0.005791797916666663,
+            "mean_selected_mean_wait_min": 0.00592604166666663,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0002175713904755367,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0007345146716799414,
+                "observed_pair_mse": 0.0015433007239350764,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0002779242997721653,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.000622390790071989,
+                "observed_pair_mse": 0.0014047086361919185,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.2178819362987995e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 5.1053051935654406e-05,
+                "observed_pair_mse": 7.87663767740127e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00019673794426160703,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.004147429119230457,
+                "observed_pair_mse": 0.006549985041849506,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 28,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 186,
+          "false_feasible": 51,
+          "false_feasible_both_halves_harm": 36,
+          "mean_selected_mean_cost": 0.002055960416666668,
+          "mean_selected_mean_wait_min": 0.005284374999999991,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0004131689568249815,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0008652860937987811,
+              "observed_pair_mse": 0.0017698867806863962,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00045195855696308023,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000835211974070664,
+              "observed_pair_mse": 0.001704339681577278,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 6.121923510311374e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.5713568861535955e-05,
+              "observed_pair_mse": 7.129069475791452e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.00010725592596055167,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0036497957771510297,
+              "observed_pair_mse": 0.0058581469502661096,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 52,
+          "states": 240
+        }
+      },
+      "regime": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 39,
+            "false_feasible": 11,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": 0.006608312500000006,
+            "mean_selected_mean_wait_min": 0.0020364583333333706,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0014257890750807398,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0015477040256644701,
+                "observed_pair_mse": 0.0026378460918365775,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0012564466718420844,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0014803498905369696,
+                "observed_pair_mse": 0.002541199034882208,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.3080856016034992e-05,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 8.567182208697846e-05,
+                "observed_pair_mse": 0.00011262381509440345,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0014551343249622048,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.0075466154757558605,
+                "observed_pair_mse": 0.00973769129110804,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 39,
+            "false_feasible": 14,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": -0.000533658854166654,
+            "mean_selected_mean_wait_min": 0.017809895833333263,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0004575233788955021,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0005493638872822085,
+                "observed_pair_mse": 0.001391083413495741,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000219026583747799,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0002672518923897743,
+                "observed_pair_mse": 0.0011307863252601445,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 4.108663591185411e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 7.307557628709651e-05,
+                "observed_pair_mse": 0.0001304513700684199,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.002774947594573702,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.00676071252512925,
+                "observed_pair_mse": 0.012528886353254253,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 14,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 40,
+            "false_feasible": 15,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": -0.0020799062499999993,
+            "mean_selected_mean_wait_min": 0.002002604166666675,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0002481885606749692,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00040058648539328473,
+                "observed_pair_mse": 0.001155753417208234,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00026192055256344044,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.00039945510881222117,
+                "observed_pair_mse": 0.0011406824084705103,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3202132886084921e-05,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.4067985832645768e-05,
+                "observed_pair_mse": 1.5641624754627553e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007819345928309788,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0008045278467992328,
+                "observed_pair_mse": 0.0008287047534212565,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 16,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 41,
+            "false_feasible": 13,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": 0.0019367473958333235,
+            "mean_selected_mean_wait_min": 0.009614583333333348,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00010068857088493687,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0006187100688608791,
+                "observed_pair_mse": 0.0012440911942133656,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011117686409825253,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0005600167009589227,
+                "observed_pair_mse": 0.001173489991027265,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0629857165977963e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.8442816506558865e-05,
+                "observed_pair_mse": 2.2360845415317267e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007258583274831401,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.001250674299705362,
+                "observed_pair_mse": 0.0014323287484900842,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 33,
+            "false_feasible": 4,
+            "false_feasible_both_halves_harm": 3,
+            "mean_selected_mean_cost": 0.00037202864583333814,
+            "mean_selected_mean_wait_min": -0.005778645833333346,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00017904534884975558,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0007009883330046095,
+                "observed_pair_mse": 0.0019115821178896108,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 8.193384569293893e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0006158569056576655,
+                "observed_pair_mse": 0.0016824112762484945,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.7617173290886436e-06,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 9.293779069370664e-05,
+                "observed_pair_mse": 0.00013100396555611093,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006008843327873919,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.0076889282812001025,
+                "observed_pair_mse": 0.010565603147891572,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 8,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 100,
+            "false_feasible": 31,
+            "false_feasible_both_halves_harm": 20,
+            "mean_selected_mean_cost": 0.00054648333333334,
+            "mean_selected_mean_wait_min": 0.009413541666666681,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0005713155325308835,
+                "mean_label_noise": 0.0010004153215200954,
+                "noise_corrected_pair_mse": 0.000958606525274078,
+                "observed_pair_mse": 0.0019590218467941734,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005000696238547439,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0009221099677700878,
+                "observed_pair_mse": 0.0018780475366633861,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.2664857587769406e-05,
+                "mean_label_noise": 2.3440926954398845e-05,
+                "noise_corrected_pair_mse": 4.957721441826536e-05,
+                "observed_pair_mse": 7.30181413726642e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0016054091814103595,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0043463218202992515,
+                "observed_pair_mse": 0.006360468243910363,
+                "zero_difference_pair_mse": 0.0027409126388888917
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 28,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 92,
+            "false_feasible": 26,
+            "false_feasible_both_halves_harm": 16,
+            "mean_selected_mean_cost": 0.0019749260416666668,
+            "mean_selected_mean_wait_min": 0.0008604166666666436,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 5.139131360369814e-05,
+                "mean_label_noise": 0.0008087860522551351,
+                "noise_corrected_pair_mse": 0.0005683345948081028,
+                "observed_pair_mse": 0.001377120647063238,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 6.259574127230978e-05,
+                "mean_label_noise": 0.0007823178461199294,
+                "noise_corrected_pair_mse": 0.00040706223157213346,
+                "observed_pair_mse": 0.001189380077692063,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.1830248272575928e-05,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 6.410118214452913e-05,
+                "observed_pair_mse": 9.181450698288743e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0009300944876446075,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.005274261551136672,
+                "observed_pair_mse": 0.00767681747375572,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 32,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 192,
+          "false_feasible": 57,
+          "false_feasible_both_halves_harm": 36,
+          "mean_selected_mean_cost": 0.0012607046875000032,
+          "mean_selected_mean_wait_min": 0.005136979166666662,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0003113534230672908,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007634705600410904,
+              "observed_pair_mse": 0.001668071246928706,
+              "zero_difference_pair_mse": 0.00045211713697379963
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0002813326825635269,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0006645860996711107,
+              "observed_pair_mse": 0.0015337138071777245,
+              "zero_difference_pair_mse": 0.0003832534171075839
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.7247552930172666e-05,
+              "mean_label_noise": 2.5577125896378567e-05,
+              "noise_corrected_pair_mse": 5.683919828139725e-05,
+              "observed_pair_mse": 8.241632417777583e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0012677518345274835,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.004810291685717962,
+              "observed_pair_mse": 0.007018642858833041,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 60,
+          "states": 240
+        }
+      },
+      "scene": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 38,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": 0.006568065104166676,
+            "mean_selected_mean_wait_min": 0.0021015624999999975,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0011011379033641431,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0012230528539478732,
+                "observed_pair_mse": 0.002313194920119981,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010393722214180456,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0012632754401129308,
+                "observed_pair_mse": 0.0023241245844581693,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.8560505726283138e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 6.073491549831516e-05,
+                "observed_pair_mse": 8.768690850574012e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0004417304876100168,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.005649750663183638,
+                "observed_pair_mse": 0.007840826478535819,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 13,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 30,
+            "false_feasible": 15,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": -0.0007834609374999992,
+            "mean_selected_mean_wait_min": 0.014523437499999958,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00025002380747663394,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0003418643158633403,
+                "observed_pair_mse": 0.0011835838420768726,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 7.189108656268055e-05,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0001201163952046559,
+                "observed_pair_mse": 0.0009836508280750263,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.351512493759136e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.550406531283376e-05,
+                "observed_pair_mse": 0.00010287985909415714,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00040358308304927064,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.00438934801360482,
+                "observed_pair_mse": 0.01015752184172982,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 38,
+            "false_feasible": 15,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.00204646875,
+            "mean_selected_mean_wait_min": 0.0022708333333333434,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00024168346258664325,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00040709158348161073,
+                "observed_pair_mse": 0.0011622585152965598,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0002641021643297007,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003972734970459607,
+                "observed_pair_mse": 0.00113850079670425,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.344074326850352e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 9.209927273411197e-06,
+                "observed_pair_mse": 1.078356619539298e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004635651744978066,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0004861584284660606,
+                "observed_pair_mse": 0.0005103353350880843,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 15,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 40,
+            "false_feasible": 15,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.002821989583333337,
+            "mean_selected_mean_wait_min": 0.007679687500000026,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.180577214997018e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00042621572582597216,
+                "observed_pair_mse": 0.0010515968511784586,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -6.278446946670454e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.00038605536739396573,
+                "observed_pair_mse": 0.0009995286574623079,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 3.3859060495145326e-06,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.1198865390095428e-05,
+                "observed_pair_mse": 1.511689429885383e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00025133248811425897,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.000776148460336481,
+                "observed_pair_mse": 0.0009578029091212031,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 10,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 35,
+            "false_feasible": 6,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": -0.0027752682291666774,
+            "mean_selected_mean_wait_min": -0.0031197916666668066,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.120327248634971e-05,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0007888304093680154,
+                "observed_pair_mse": 0.0019994241942530165,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011875877411422857,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0006526818340789552,
+                "observed_pair_mse": 0.0017192362046697842,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.7579410542580467e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.712009748021483e-05,
+                "observed_pair_mse": 0.0001151862723426191,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0015281214315512172,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005559922516861493,
+                "observed_pair_mse": 0.008436597383552964,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 9,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 88,
+            "false_feasible": 29,
+            "false_feasible_both_halves_harm": 20,
+            "mean_selected_mean_cost": -0.0013172072916666677,
+            "mean_selected_mean_wait_min": 0.008328124999999987,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0003586371814085212,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.0007459281741517156,
+                "observed_pair_mse": 0.001746343495671811,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0003294428516703882,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0007514831955857321,
+                "observed_pair_mse": 0.0017074207644790303,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 5.198570206489206e-06,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.211092703698516e-05,
+                "observed_pair_mse": 5.555185399138401e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.900611090789373e-05,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.002829918749796786,
+                "observed_pair_mse": 0.004844065173407896,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 26,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 93,
+            "false_feasible": 30,
+            "false_feasible_both_halves_harm": 20,
+            "mean_selected_mean_cost": 0.0005735583333333314,
+            "mean_selected_mean_wait_min": 0.0010541666666666223,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 1.195050003860437e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0005288937812430091,
+                "observed_pair_mse": 0.0013376798334981442,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 3.1811327649031635e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.00037627781794885535,
+                "observed_pair_mse": 0.0011585956640687849,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -2.874712526990222e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 4.939622134496298e-05,
+                "observed_pair_mse": 7.710954618332128e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0004295545803078527,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.003914612483184211,
+                "observed_pair_mse": 0.0063171684058032605,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 33,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 181,
+          "false_feasible": 59,
+          "false_feasible_both_halves_harm": 40,
+          "mean_selected_mean_cost": -0.0003718244791666682,
+          "mean_selected_mean_wait_min": 0.004691145833333304,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0001852938407235628,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0006374109776973623,
+              "observed_pair_mse": 0.0015420116645849776,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0001806270896597099,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0005638805067672937,
+              "observed_pair_mse": 0.0014330082142739076,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.1619288397494922e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.075357419097407e-05,
+              "observed_pair_mse": 6.633070008735263e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": -0.00017027423469997947,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0033722656164904986,
+              "observed_pair_mse": 0.005580616789605578,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 59,
+          "states": 240
+        }
+      }
+    },
+    "cached_original:wait_feasible": {
+      "lower_root": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 21,
+            "false_feasible": 10,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": -0.000608109375,
+            "mean_selected_mean_wait_min": -0.0051901041666666285,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0010363326965897573,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0011582476471734876,
+                "observed_pair_mse": 0.0022483897133455948,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010415380369822684,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.001265441255677154,
+                "observed_pair_mse": 0.0023262904000223923,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5768854302999482e-05,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 7.835982037394294e-05,
+                "observed_pair_mse": 0.00010531181338136792,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00033811563413594915,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.006429596784929604,
+                "observed_pair_mse": 0.008620672600281784,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 16,
+            "false_feasible": 10,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.0005469036458333314,
+            "mean_selected_mean_wait_min": 0.005473958333333373,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0008655638023924161,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0009574043107791226,
+                "observed_pair_mse": 0.0017991238369926552,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000800141437550353,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0008483667461923284,
+                "observed_pair_mse": 0.0017119011790626987,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0445765059276152e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.243470543451857e-05,
+                "observed_pair_mse": 9.981049921584193e-05,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -1.5662006626963718e-05,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.003970102923928585,
+                "observed_pair_mse": 0.009738276752053587,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 4,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 21,
+            "false_feasible": 14,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": -0.0019599895833333327,
+            "mean_selected_mean_wait_min": 0.0007838541666666763,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -7.147740779055541e-05,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.0005772976382776984,
+                "observed_pair_mse": 0.0013324645700926478,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00010765383456680815,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0005537218268088533,
+                "observed_pair_mse": 0.0012949491264671426,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.057479747378133e-05,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.1440650420342176e-05,
+                "observed_pair_mse": 1.3014289342323958e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006772777241424592,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0006998709781107134,
+                "observed_pair_mse": 0.0007240478847327371,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 32,
+            "false_feasible": 21,
+            "false_feasible_both_halves_harm": 13,
+            "mean_selected_mean_cost": -0.0008053671875000015,
+            "mean_selected_mean_wait_min": 0.004526041666666668,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -4.013049445151617e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00047789100352442623,
+                "observed_pair_mse": 0.0011032721288769126,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 1.5933611133333902e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0004647734479940042,
+                "observed_pair_mse": 0.0010782467380623464,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0764839134158564e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.8577798474739464e-05,
+                "observed_pair_mse": 2.2495827383497866e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001035619878347371,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0015604358505695928,
+                "observed_pair_mse": 0.0017420902993543154,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 13,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 22,
+            "false_feasible": 12,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": -0.002059291666666664,
+            "mean_selected_mean_wait_min": -0.00897395833333331,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00027555618738480547,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0011555898692391705,
+                "observed_pair_mse": 0.002366183654124172,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005098335337162539,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.001043756593680981,
+                "observed_pair_mse": 0.00211031096427181,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.694463841865866e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.775486960413663e-05,
+                "observed_pair_mse": 0.00011582104446654091,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0014990716001960578,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005588972348216652,
+                "observed_pair_mse": 0.008465647214908124,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 5,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 54,
+            "false_feasible": 30,
+            "false_feasible_both_halves_harm": 22,
+            "mean_selected_mean_cost": -0.0006738927083333294,
+            "mean_selected_mean_wait_min": 0.00030625000000005095,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006087665231744263,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.0009960575159176205,
+                "observed_pair_mse": 0.0019964728374377164,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006259928141539951,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0010480331580693392,
+                "observed_pair_mse": 0.0020039707269626375,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3461728956921549e-05,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 4.03740857874175e-05,
+                "observed_pair_mse": 6.381501274181635e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004112497961827104,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.003152162435071602,
+                "observed_pair_mse": 0.005166308858682713,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 18,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 58,
+            "false_feasible": 37,
+            "false_feasible_both_halves_harm": 27,
+            "mean_selected_mean_cost": -0.0017179718750000021,
+            "mean_selected_mean_wait_min": -0.001658333333333339,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0002175713904755367,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0007345146716799414,
+                "observed_pair_mse": 0.0015433007239350764,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0002779242997721653,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.000622390790071989,
+                "observed_pair_mse": 0.0014047086361919185,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.2178819362987995e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 5.1053051935654406e-05,
+                "observed_pair_mse": 7.87663767740127e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00019673794426160703,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.004147429119230457,
+                "observed_pair_mse": 0.006549985041849506,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 17,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 112,
+          "false_feasible": 67,
+          "false_feasible_both_halves_harm": 49,
+          "mean_selected_mean_cost": -0.0011959322916666659,
+          "mean_selected_mean_wait_min": -0.000676041666666644,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0004131689568249815,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0008652860937987811,
+              "observed_pair_mse": 0.0017698867806863962,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00045195855696308023,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000835211974070664,
+              "observed_pair_mse": 0.001704339681577278,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 6.121923510311374e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.5713568861535955e-05,
+              "observed_pair_mse": 7.129069475791452e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.00010725592596055167,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0036497957771510297,
+              "observed_pair_mse": 0.0058581469502661096,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 35,
+          "states": 240
+        }
+      },
+      "regime": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 27,
+            "false_feasible": 14,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": 0.0038161770833333385,
+            "mean_selected_mean_wait_min": -0.004294270833333321,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0014257890750807398,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0015477040256644701,
+                "observed_pair_mse": 0.0026378460918365775,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0012564466718420844,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0014803498905369696,
+                "observed_pair_mse": 0.002541199034882208,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.3080856016034992e-05,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 8.567182208697846e-05,
+                "observed_pair_mse": 0.00011262381509440345,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0014551343249622048,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.0075466154757558605,
+                "observed_pair_mse": 0.00973769129110804,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 8,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 27,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.0009215963541666603,
+            "mean_selected_mean_wait_min": 0.012664062499999953,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0004575233788955021,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0005493638872822085,
+                "observed_pair_mse": 0.001391083413495741,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000219026583747799,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0002672518923897743,
+                "observed_pair_mse": 0.0011307863252601445,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 4.108663591185411e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 7.307557628709651e-05,
+                "observed_pair_mse": 0.0001304513700684199,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.002774947594573702,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.00676071252512925,
+                "observed_pair_mse": 0.012528886353254253,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 13,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 23,
+            "false_feasible": 17,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": -0.00500418489583333,
+            "mean_selected_mean_wait_min": 0.0012630208333333389,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0002481885606749692,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00040058648539328473,
+                "observed_pair_mse": 0.001155753417208234,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00026192055256344044,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.00039945510881222117,
+                "observed_pair_mse": 0.0011406824084705103,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3202132886084921e-05,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.4067985832645768e-05,
+                "observed_pair_mse": 1.5641624754627553e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007819345928309788,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0008045278467992328,
+                "observed_pair_mse": 0.0008287047534212565,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 23,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": 0.000640119791666666,
+            "mean_selected_mean_wait_min": 0.0039713541666666794,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00010068857088493687,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0006187100688608791,
+                "observed_pair_mse": 0.0012440911942133656,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011117686409825253,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0005600167009589227,
+                "observed_pair_mse": 0.001173489991027265,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.0629857165977963e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.8442816506558865e-05,
+                "observed_pair_mse": 2.2360845415317267e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007258583274831401,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.001250674299705362,
+                "observed_pair_mse": 0.0014323287484900842,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 13,
+            "false_feasible": 7,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": 0.0038484427083333252,
+            "mean_selected_mean_wait_min": -0.007036458333333347,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00017904534884975558,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0007009883330046095,
+                "observed_pair_mse": 0.0019115821178896108,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 8.193384569293893e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0006158569056576655,
+                "observed_pair_mse": 0.0016824112762484945,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.7617173290886436e-06,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 9.293779069370664e-05,
+                "observed_pair_mse": 0.00013100396555611093,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006008843327873919,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.0076889282812001025,
+                "observed_pair_mse": 0.010565603147891572,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 2,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 60,
+            "false_feasible": 40,
+            "false_feasible_both_halves_harm": 28,
+            "mean_selected_mean_cost": -0.0014800093749999979,
+            "mean_selected_mean_wait_min": 0.002665624999999999,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0005713155325308835,
+                "mean_label_noise": 0.0010004153215200954,
+                "noise_corrected_pair_mse": 0.000958606525274078,
+                "observed_pair_mse": 0.0019590218467941734,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005000696238547439,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0009221099677700878,
+                "observed_pair_mse": 0.0018780475366633861,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.2664857587769406e-05,
+                "mean_label_noise": 2.3440926954398845e-05,
+                "noise_corrected_pair_mse": 4.957721441826536e-05,
+                "observed_pair_mse": 7.30181413726642e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0016054091814103595,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0043463218202992515,
+                "observed_pair_mse": 0.006360468243910363,
+                "zero_difference_pair_mse": 0.0027409126388888917
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 15,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 53,
+            "false_feasible": 30,
+            "false_feasible_both_halves_harm": 19,
+            "mean_selected_mean_cost": 0.002431592708333334,
+            "mean_selected_mean_wait_min": -3.854166666667815e-05,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 5.139131360369814e-05,
+                "mean_label_noise": 0.0008087860522551351,
+                "noise_corrected_pair_mse": 0.0005683345948081028,
+                "observed_pair_mse": 0.001377120647063238,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 6.259574127230978e-05,
+                "mean_label_noise": 0.0007823178461199294,
+                "noise_corrected_pair_mse": 0.00040706223157213346,
+                "observed_pair_mse": 0.001189380077692063,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.1830248272575928e-05,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 6.410118214452913e-05,
+                "observed_pair_mse": 9.181450698288743e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0009300944876446075,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.005274261551136672,
+                "observed_pair_mse": 0.00767681747375572,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 21,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 113,
+          "false_feasible": 70,
+          "false_feasible_both_halves_harm": 47,
+          "mean_selected_mean_cost": 0.000475791666666668,
+          "mean_selected_mean_wait_min": 0.0013135416666666606,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0003113534230672908,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007634705600410904,
+              "observed_pair_mse": 0.001668071246928706,
+              "zero_difference_pair_mse": 0.00045211713697379963
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0002813326825635269,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0006645860996711107,
+              "observed_pair_mse": 0.0015337138071777245,
+              "zero_difference_pair_mse": 0.0003832534171075839
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.7247552930172666e-05,
+              "mean_label_noise": 2.5577125896378567e-05,
+              "noise_corrected_pair_mse": 5.683919828139725e-05,
+              "observed_pair_mse": 8.241632417777583e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0012677518345274835,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.004810291685717962,
+              "observed_pair_mse": 0.007018642858833041,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 36,
+          "states": 240
+        }
+      },
+      "scene": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 23,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": 0.0010456276041666656,
+            "mean_selected_mean_wait_min": -0.009752604166666666,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0011011379033641431,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0012230528539478732,
+                "observed_pair_mse": 0.002313194920119981,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010393722214180456,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0012632754401129308,
+                "observed_pair_mse": 0.0023241245844581693,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.8560505726283138e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 6.073491549831516e-05,
+                "observed_pair_mse": 8.768690850574012e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0004417304876100168,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.005649750663183638,
+                "observed_pair_mse": 0.007840826478535819,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 9,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 24,
+            "false_feasible": 17,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": -0.0019821901041666644,
+            "mean_selected_mean_wait_min": 0.012838541666666639,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00025002380747663394,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0003418643158633403,
+                "observed_pair_mse": 0.0011835838420768726,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 7.189108656268055e-05,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0001201163952046559,
+                "observed_pair_mse": 0.0009836508280750263,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.351512493759136e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.550406531283376e-05,
+                "observed_pair_mse": 0.00010287985909415714,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00040358308304927064,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.00438934801360482,
+                "observed_pair_mse": 0.01015752184172982,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 23,
+            "false_feasible": 18,
+            "false_feasible_both_halves_harm": 12,
+            "mean_selected_mean_cost": -0.003251903645833333,
+            "mean_selected_mean_wait_min": 0.0014296875000000067,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00024168346258664325,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00040709158348161073,
+                "observed_pair_mse": 0.0011622585152965598,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0002641021643297007,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003972734970459607,
+                "observed_pair_mse": 0.00113850079670425,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.344074326850352e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 9.209927273411197e-06,
+                "observed_pair_mse": 1.078356619539298e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004635651744978066,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0004861584284660606,
+                "observed_pair_mse": 0.0005103353350880843,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 26,
+            "false_feasible": 17,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": 0.0008507656249999995,
+            "mean_selected_mean_wait_min": 0.001492187500000022,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.180577214997018e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00042621572582597216,
+                "observed_pair_mse": 0.0010515968511784586,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -6.278446946670454e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.00038605536739396573,
+                "observed_pair_mse": 0.0009995286574623079,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 3.3859060495145326e-06,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.1198865390095428e-05,
+                "observed_pair_mse": 1.511689429885383e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00025133248811425897,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.000776148460336481,
+                "observed_pair_mse": 0.0009578029091212031,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 8,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 18,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": -0.003655796875000015,
+            "mean_selected_mean_wait_min": -0.013809895833333483,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.120327248634971e-05,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0007888304093680154,
+                "observed_pair_mse": 0.0019994241942530165,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011875877411422857,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0006526818340789552,
+                "observed_pair_mse": 0.0017192362046697842,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.7579410542580467e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.712009748021483e-05,
+                "observed_pair_mse": 0.0001151862723426191,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0015281214315512172,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005559922516861493,
+                "observed_pair_mse": 0.008436597383552964,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 4,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 53,
+            "false_feasible": 32,
+            "false_feasible_both_halves_harm": 21,
+            "mean_selected_mean_cost": -0.0016543937500000017,
+            "mean_selected_mean_wait_min": -3.5416666666664616e-05,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0003586371814085212,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.0007459281741517156,
+                "observed_pair_mse": 0.001746343495671811,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0003294428516703882,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0007514831955857321,
+                "observed_pair_mse": 0.0017074207644790303,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 5.198570206489206e-06,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.211092703698516e-05,
+                "observed_pair_mse": 5.555185399138401e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.900611090789373e-05,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.002829918749796786,
+                "observed_pair_mse": 0.004844065173407896,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 19,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 61,
+            "false_feasible": 36,
+            "false_feasible_both_halves_harm": 25,
+            "mean_selected_mean_cost": -0.0011430052083333368,
+            "mean_selected_mean_wait_min": -0.0030854166666667284,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 1.195050003860437e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0005288937812430091,
+                "observed_pair_mse": 0.0013376798334981442,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 3.1811327649031635e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.00037627781794885535,
+                "observed_pair_mse": 0.0011585956640687849,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -2.874712526990222e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 4.939622134496298e-05,
+                "observed_pair_mse": 7.710954618332128e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0004295545803078527,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.003914612483184211,
+                "observed_pair_mse": 0.0063171684058032605,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 20,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 114,
+          "false_feasible": 68,
+          "false_feasible_both_halves_harm": 46,
+          "mean_selected_mean_cost": -0.0013986994791666692,
+          "mean_selected_mean_wait_min": -0.0015604166666666965,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0001852938407235628,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0006374109776973623,
+              "observed_pair_mse": 0.0015420116645849776,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0001806270896597099,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0005638805067672937,
+              "observed_pair_mse": 0.0014330082142739076,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.1619288397494922e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.075357419097407e-05,
+              "observed_pair_mse": 6.633070008735263e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": -0.00017027423469997947,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0033722656164904986,
+              "observed_pair_mse": 0.005580616789605578,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 39,
+          "states": 240
+        }
+      }
+    },
+    "mean8_overlay:cost_only": {
+      "lower_root": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 34,
+            "false_feasible": 11,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": 0.004438174479166681,
+            "mean_selected_mean_wait_min": 0.0030312500000000014,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0008205333697377627,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.000942448320321493,
+                "observed_pair_mse": 0.0020325903864936005,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000850430955156681,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0010743341738515665,
+                "observed_pair_mse": 0.002135183318196805,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 4.439390040762173e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 6.703035611170565e-05,
+                "observed_pair_mse": 9.398234911913061e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.920006539423835e-05,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.0061806812161878935,
+                "observed_pair_mse": 0.008371757031540073,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 38,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 4,
+            "mean_selected_mean_cost": 0.0005045729166666714,
+            "mean_selected_mean_wait_min": 0.017109374999999927,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0007833281394196175,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0008751686478063238,
+                "observed_pair_mse": 0.0017168881740198562,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006513037533374481,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0006995290619794233,
+                "observed_pair_mse": 0.0015630634948497937,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.087175819194701e-06,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.10761161944371e-05,
+                "observed_pair_mse": 9.845190997576048e-05,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.640302365737881e-05,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004072167954212928,
+                "observed_pair_mse": 0.00984034178233793,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 10,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 39,
+            "false_feasible": 14,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": -0.003139200520833338,
+            "mean_selected_mean_wait_min": 0.0018385416666666942,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003386026674271518,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.0003101723786411021,
+                "observed_pair_mse": 0.001065339310456051,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0003594919387711639,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003018837226044974,
+                "observed_pair_mse": 0.0010431110222627867,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.664539143112965e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 7.53039208967381e-06,
+                "observed_pair_mse": 9.104031011655593e-06,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005040334512726725,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0005266267052409265,
+                "observed_pair_mse": 0.0005508036118629503,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 18,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 42,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.0029640416666666704,
+            "mean_selected_mean_wait_min": 0.0061484374999999855,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 7.747522439992188e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0005954967223758641,
+                "observed_pair_mse": 0.0012208778477283506,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 9.374126645330306e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0005425811033139734,
+                "observed_pair_mse": 0.0011560543933823155,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.233481014636972e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 2.0147769486950614e-05,
+                "observed_pair_mse": 2.4065798395709023e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0009562397137640268,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.001481055685986249,
+                "observed_pair_mse": 0.001662710134770971,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 38,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 5,
+            "mean_selected_mean_cost": 0.0019976276041666664,
+            "mean_selected_mean_wait_min": 0.002481770833333332,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00029269478862631906,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.001172728470480684,
+                "observed_pair_mse": 0.0023833222553656854,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005200972912374192,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0010540203512021458,
+                "observed_pair_mse": 0.002120574721792975,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.1144442104118775e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 8.35550659186765e-05,
+                "observed_pair_mse": 0.0001216212407810808,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0010226942189057056,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.006065349729507004,
+                "observed_pair_mse": 0.008942024596198474,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 100,
+            "false_feasible": 31,
+            "false_feasible_both_halves_harm": 19,
+            "mean_selected_mean_cost": -0.0019082031249999945,
+            "mean_selected_mean_wait_min": 0.01133541666666669,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0007450265470745715,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.001132317539817766,
+                "observed_pair_mse": 0.0021327328613378613,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0007463608975280623,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0011684012414434062,
+                "observed_pair_mse": 0.0021243388103367043,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.024367844601685e-05,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.71560352765128e-05,
+                "observed_pair_mse": 6.059696223091164e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00043256878154973827,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0031734814204386302,
+                "observed_pair_mse": 0.005187627844049742,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 27,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 91,
+            "false_feasible": 26,
+            "false_feasible_both_halves_harm": 17,
+            "mean_selected_mean_cost": 0.0022430562499999975,
+            "mean_selected_mean_wait_min": 0.0009083333333332851,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.08550051719839e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.00042608827603242086,
+                "observed_pair_mse": 0.0012348743282875562,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -4.392836656258737e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.0003005381237372364,
+                "observed_pair_mse": 0.001082855969857166,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.6910892278885388e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 5.057984464406467e-05,
+                "observed_pair_mse": 7.829316948242296e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00018729596747669406,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.00415687109601537,
+                "observed_pair_mse": 0.00655942701863442,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 25,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 191,
+          "false_feasible": 57,
+          "false_feasible_both_halves_harm": 36,
+          "mean_selected_mean_cost": 0.00016742656250000136,
+          "mean_selected_mean_wait_min": 0.006121874999999988,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0003270857709512938,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007792029079250935,
+              "observed_pair_mse": 0.0016838035948127086,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0003512162654827375,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0007344696825903213,
+              "observed_pair_mse": 0.001603597390096935,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 4.276294609064155e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.3867939960288734e-05,
+              "observed_pair_mse": 6.94450658566673e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0001226364070365221,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.003665176258227,
+              "observed_pair_mse": 0.005873527431342081,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 52,
+          "states": 240
+        }
+      },
+      "regime": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 41,
+            "false_feasible": 11,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": 0.00758298177083334,
+            "mean_selected_mean_wait_min": -0.001976562499999996,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0015245056074409751,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0016464205580247054,
+                "observed_pair_mse": 0.0027365626241968133,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.001491178651656171,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0017150818703510564,
+                "observed_pair_mse": 0.0027759310146962947,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.181933143565657e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 7.177289921450912e-05,
+                "observed_pair_mse": 9.872489222193411e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006132181148597618,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.006704699265653417,
+                "observed_pair_mse": 0.008895775081005598,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 40,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": 0.0013477630208333393,
+            "mean_selected_mean_wait_min": 0.0140520833333333,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0005192069933152422,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0006110475017019485,
+                "observed_pair_mse": 0.0014527670279154807,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00026249411347621757,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.00031071942211819293,
+                "observed_pair_mse": 0.0011742538549885633,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.6299609570257996e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.828854994550041e-05,
+                "observed_pair_mse": 0.0001056643437268238,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0008792427815545002,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004865007712110049,
+                "observed_pair_mse": 0.01063318154023505,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 15,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 39,
+            "false_feasible": 18,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.003189898437499998,
+            "mean_selected_mean_wait_min": 0.0017187500000000143,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003056053115670047,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00034316973450124926,
+                "observed_pair_mse": 0.0010983366663161985,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0003195126295023531,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003418630318733084,
+                "observed_pair_mse": 0.0010830903315315976,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.641418000185209e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.0507270946746055e-05,
+                "observed_pair_mse": 1.2080909868727837e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005757678490135801,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0005983611029818343,
+                "observed_pair_mse": 0.0006225380096038579,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 17,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 40,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 13,
+            "mean_selected_mean_cost": 0.002140864583333324,
+            "mean_selected_mean_wait_min": 0.009458333333333338,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 8.230766170443191e-06,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0005262522641463854,
+                "observed_pair_mse": 0.0011516333894988717,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -3.7264010685641785e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.00041157582617502847,
+                "observed_pair_mse": 0.0010250491162433707,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.233218242571407e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 2.0145141766294966e-05,
+                "observed_pair_mse": 2.4063170675053368e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007774731373955361,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0013022891096177583,
+                "observed_pair_mse": 0.0014839435584024802,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 9,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 40,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": -0.0014810130208333442,
+            "mean_selected_mean_wait_min": -0.0031901041666667815,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00033663015869333965,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0005434035231610254,
+                "observed_pair_mse": 0.0017539973080460264,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -2.0177677563852918e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0005137453824008738,
+                "observed_pair_mse": 0.001580299752991703,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.6072677724403583e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 0.00011077218574719889,
+                "observed_pair_mse": 0.00014883836060960315,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0014246154430827991,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.00851265939149551,
+                "observed_pair_mse": 0.01138933425818698,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 104,
+            "false_feasible": 38,
+            "false_feasible_both_halves_harm": 24,
+            "mean_selected_mean_cost": 0.0006333927083333334,
+            "mean_selected_mean_wait_min": 0.007998958333333337,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0004606432323950333,
+                "mean_label_noise": 0.0010004153215200954,
+                "noise_corrected_pair_mse": 0.0008479342251382277,
+                "observed_pair_mse": 0.0018483495466583232,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00045139139093219036,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0008734317348475344,
+                "observed_pair_mse": 0.0018293693037408326,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5889339895028806e-05,
+                "mean_label_noise": 2.3440926954398845e-05,
+                "noise_corrected_pair_mse": 4.2801696725524766e-05,
+                "observed_pair_mse": 6.624262367992362e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0010309987095031385,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0037719113483920307,
+                "observed_pair_mse": 0.005786057772003141,
+                "zero_difference_pair_mse": 0.0027409126388888917
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 29,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 96,
+            "false_feasible": 31,
+            "false_feasible_both_halves_harm": 19,
+            "mean_selected_mean_cost": 0.0019268864583333314,
+            "mean_selected_mean_wait_min": 2.604166666661245e-05,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00010323992627149315,
+                "mean_label_noise": 0.0008087860522551351,
+                "noise_corrected_pair_mse": 0.0006201832074758979,
+                "observed_pair_mse": 0.001428969259731033,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 9.92959880200258e-05,
+                "mean_label_noise": 0.0007823178461199294,
+                "noise_corrected_pair_mse": 0.0004437624783198495,
+                "observed_pair_mse": 0.001226080324439779,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.521788450621799e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 6.179272232257501e-05,
+                "observed_pair_mse": 8.950604716093329e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006771282208593322,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.005021295284351397,
+                "observed_pair_mse": 0.0074238512069704455,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 35,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 200,
+          "false_feasible": 69,
+          "false_feasible_both_halves_harm": 43,
+          "mean_selected_mean_cost": 0.0012801395833333322,
+          "mean_selected_mean_wait_min": 0.004012499999999974,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.00028194157933326313,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007340587163070628,
+              "observed_pair_mse": 0.0016386594031946784,
+              "zero_difference_pair_mse": 0.00045211713697379963
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00027534368947610815,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000658597106583692,
+              "observed_pair_mse": 0.0015277248140903059,
+              "zero_difference_pair_mse": 0.0003832534171075839
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.2705564172825301e-05,
+              "mean_label_noise": 2.5577125896378567e-05,
+              "noise_corrected_pair_mse": 5.229720952404989e-05,
+              "observed_pair_mse": 7.787433542042846e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0008540634651812354,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.004396603316371714,
+              "observed_pair_mse": 0.006604954489486794,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 64,
+          "states": 240
+        }
+      },
+      "scene": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 38,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": 0.006024356770833333,
+            "mean_selected_mean_wait_min": -0.0032552083333333196,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0010359356590172151,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0011578506096009454,
+                "observed_pair_mse": 0.0022479926757730533,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010066937468397672,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0012305969655346525,
+                "observed_pair_mse": 0.002291446109879891,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -4.618394935427897e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 5.797257113551558e-05,
+                "observed_pair_mse": 8.492456414294055e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0005947709006906362,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.005496710250103019,
+                "observed_pair_mse": 0.007687786065455199,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 13,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 38,
+            "false_feasible": 15,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.0018411276041666626,
+            "mean_selected_mean_wait_min": 0.01598958333333327,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00030902358837180273,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0004008640967585091,
+                "observed_pair_mse": 0.0012425836229720416,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011750862525291044,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.00016573393389488582,
+                "observed_pair_mse": 0.0010292683667652563,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.1346518202229426e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.333545857747184e-05,
+                "observed_pair_mse": 0.00010071125235879522,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004303457667590731,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004416110697314622,
+                "observed_pair_mse": 0.010184284525439622,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 41,
+            "false_feasible": 13,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": -0.0032062630208333338,
+            "mean_selected_mean_wait_min": 0.0016458333333333418,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0002261905120997821,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00042258453396847186,
+                "observed_pair_mse": 0.001177751465783421,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00024537725396009635,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.00041599840741556515,
+                "observed_pair_mse": 0.0011572257070738546,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 7.27712675278232e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 8.142979699343167e-06,
+                "observed_pair_mse": 9.716618621324954e-06,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004055589060640583,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0004281521600323123,
+                "observed_pair_mse": 0.0004523290666543361,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 16,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 40,
+            "false_feasible": 13,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.00283030989583334,
+            "mean_selected_mean_wait_min": 0.006851562500000012,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0001712540324671078,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00034676746550883444,
+                "observed_pair_mse": 0.0009721485908613211,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0001863827862597088,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0002624570506009614,
+                "observed_pair_mse": 0.0008759303406693037,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.873616134570128e-06,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.6686575475151025e-05,
+                "observed_pair_mse": 2.0604604383909427e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005197211302859757,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0010445371025081978,
+                "observed_pair_mse": 0.0012261915512929201,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 9,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 36,
+            "false_feasible": 10,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.0028703619791666745,
+            "mean_selected_mean_wait_min": -0.0040442708333334005,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003427916560660928,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0005372420257882722,
+                "observed_pair_mse": 0.0017478358106732732,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -7.145083665233697e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0004624722233123897,
+                "observed_pair_mse": 0.0015290265939032187,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.6272578035081605e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.842692998771367e-05,
+                "observed_pair_mse": 0.00011649310485011798,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0013177056115810928,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005770338336831617,
+                "observed_pair_mse": 0.00864701320352309,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 10,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 98,
+            "false_feasible": 35,
+            "false_feasible_both_halves_harm": 23,
+            "mean_selected_mean_cost": -0.002652729166666664,
+            "mean_selected_mean_wait_min": 0.008135416666666666,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0002721856175274585,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.000659476610270653,
+                "observed_pair_mse": 0.0016598919317907484,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00026378032627189814,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0006858206701872423,
+                "observed_pair_mse": 0.0016417582390805404,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.653748658845531e-06,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.356610548934149e-05,
+                "observed_pair_mse": 5.700703244374033e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00010849840881087521,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0028494110476997665,
+                "observed_pair_mse": 0.004863557471310878,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 28,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 95,
+            "false_feasible": 32,
+            "false_feasible_both_halves_harm": 21,
+            "mean_selected_mean_cost": 0.0007632468749999928,
+            "mean_selected_mean_wait_min": -0.0012604166666667037,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -3.0296398825044363e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0004866468823793603,
+                "observed_pair_mse": 0.0012954329346344959,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -1.5383728183683882e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.0003290827621161398,
+                "observed_pair_mse": 0.0011114006082360692,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -4.011233411216581e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 4.825970046073663e-05,
+                "observed_pair_mse": 7.597302529909492e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00033123869247592407,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.0040129283710161395,
+                "observed_pair_mse": 0.006415484293635189,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 32,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 193,
+          "false_feasible": 67,
+          "false_feasible_both_halves_harm": 44,
+          "mean_selected_mean_cost": -0.0009447411458333356,
+          "mean_selected_mean_wait_min": 0.003437499999999981,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.00012094460935120708,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0005730617463250067,
+              "observed_pair_mse": 0.0014776624332126223,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00012419829904410714,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000507451716151691,
+              "observed_pair_mse": 0.0013765794236583048,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.3212576238144748e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.091290297503906e-05,
+              "observed_pair_mse": 6.649002887141762e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": -0.00011137014183252443,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0034311697093579534,
+              "observed_pair_mse": 0.005639520882473033,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 60,
+          "states": 240
+        }
+      }
+    },
+    "mean8_overlay:wait_feasible": {
+      "lower_root": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 25,
+            "false_feasible": 13,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": 0.00038138020833333963,
+            "mean_selected_mean_wait_min": -0.0049192708333333154,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0008205333697377627,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.000942448320321493,
+                "observed_pair_mse": 0.0020325903864936005,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.000850430955156681,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0010743341738515665,
+                "observed_pair_mse": 0.002135183318196805,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 4.439390040762173e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 6.703035611170565e-05,
+                "observed_pair_mse": 9.398234911913061e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.920006539423835e-05,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.0061806812161878935,
+                "observed_pair_mse": 0.008371757031540073,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 19,
+            "false_feasible": 11,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": -0.00042903385416666735,
+            "mean_selected_mean_wait_min": -0.004031250000000018,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0007833281394196175,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0008751686478063238,
+                "observed_pair_mse": 0.0017168881740198562,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006513037533374481,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.0006995290619794233,
+                "observed_pair_mse": 0.0015630634948497937,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.087175819194701e-06,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.10761161944371e-05,
+                "observed_pair_mse": 9.845190997576048e-05,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 8.640302365737881e-05,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004072167954212928,
+                "observed_pair_mse": 0.00984034178233793,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 28,
+            "false_feasible": 17,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": -0.005465539062500004,
+            "mean_selected_mean_wait_min": 0.0008645833333333479,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003386026674271518,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.0003101723786411021,
+                "observed_pair_mse": 0.001065339310456051,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0003594919387711639,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003018837226044974,
+                "observed_pair_mse": 0.0010431110222627867,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.664539143112965e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 7.53039208967381e-06,
+                "observed_pair_mse": 9.104031011655593e-06,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005040334512726725,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0005266267052409265,
+                "observed_pair_mse": 0.0005508036118629503,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 31,
+            "false_feasible": 17,
+            "false_feasible_both_halves_harm": 11,
+            "mean_selected_mean_cost": -0.005506635416666667,
+            "mean_selected_mean_wait_min": 0.002692708333333341,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 7.747522439992188e-05,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0005954967223758641,
+                "observed_pair_mse": 0.0012208778477283506,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 9.374126645330306e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0005425811033139734,
+                "observed_pair_mse": 0.0011560543933823155,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.233481014636972e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 2.0147769486950614e-05,
+                "observed_pair_mse": 2.4065798395709023e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0009562397137640268,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.001481055685986249,
+                "observed_pair_mse": 0.001662710134770971,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 10,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 22,
+            "false_feasible": 9,
+            "false_feasible_both_halves_harm": 6,
+            "mean_selected_mean_cost": -0.0012766744791666712,
+            "mean_selected_mean_wait_min": -0.019432291666666712,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00029269478862631906,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.001172728470480684,
+                "observed_pair_mse": 0.0023833222553656854,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0005200972912374192,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0010540203512021458,
+                "observed_pair_mse": 0.002120574721792975,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.1144442104118775e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 8.35550659186765e-05,
+                "observed_pair_mse": 0.0001216212407810808,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0010226942189057056,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.006065349729507004,
+                "observed_pair_mse": 0.008942024596198474,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 5,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 64,
+            "false_feasible": 37,
+            "false_feasible_both_halves_harm": 24,
+            "mean_selected_mean_cost": -0.0019851635416666693,
+            "mean_selected_mean_wait_min": -0.003451041666666635,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0007450265470745715,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.001132317539817766,
+                "observed_pair_mse": 0.0021327328613378613,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0007463608975280623,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0011684012414434062,
+                "observed_pair_mse": 0.0021243388103367043,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.024367844601685e-05,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.71560352765128e-05,
+                "observed_pair_mse": 6.059696223091164e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00043256878154973827,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0031734814204386302,
+                "observed_pair_mse": 0.005187627844049742,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 21,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 61,
+            "false_feasible": 30,
+            "false_feasible_both_halves_harm": 20,
+            "mean_selected_mean_cost": -0.002933437499999999,
+            "mean_selected_mean_wait_min": -0.006479166666666708,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -9.08550051719839e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.00042608827603242086,
+                "observed_pair_mse": 0.0012348743282875562,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -4.392836656258737e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.0003005381237372364,
+                "observed_pair_mse": 0.001082855969857166,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.6910892278885388e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 5.057984464406467e-05,
+                "observed_pair_mse": 7.829316948242296e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00018729596747669406,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.00415687109601537,
+                "observed_pair_mse": 0.00655942701863442,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 19,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 125,
+          "false_feasible": 67,
+          "false_feasible_both_halves_harm": 44,
+          "mean_selected_mean_cost": -0.002459300520833334,
+          "mean_selected_mean_wait_min": -0.004965104166666671,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.0003270857709512938,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007792029079250935,
+              "observed_pair_mse": 0.0016838035948127086,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.0003512162654827375,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.0007344696825903213,
+              "observed_pair_mse": 0.001603597390096935,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 4.276294609064155e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.3867939960288734e-05,
+              "observed_pair_mse": 6.94450658566673e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0001226364070365221,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.003665176258227,
+              "observed_pair_mse": 0.005873527431342081,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 40,
+          "states": 240
+        }
+      },
+      "regime": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 25,
+            "false_feasible": 14,
+            "false_feasible_both_halves_harm": 12,
+            "mean_selected_mean_cost": 0.0010743619791666662,
+            "mean_selected_mean_wait_min": -0.0008515624999999699,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0015245056074409751,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0016464205580247054,
+                "observed_pair_mse": 0.0027365626241968133,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.001491178651656171,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0017150818703510564,
+                "observed_pair_mse": 0.0027759310146962947,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.181933143565657e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 7.177289921450912e-05,
+                "observed_pair_mse": 9.872489222193411e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006132181148597618,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.006704699265653417,
+                "observed_pair_mse": 0.008895775081005598,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 24,
+            "false_feasible": 18,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": 0.0018369843750000003,
+            "mean_selected_mean_wait_min": 0.007528645833333331,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0005192069933152422,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0006110475017019485,
+                "observed_pair_mse": 0.0014527670279154807,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00026249411347621757,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.00031071942211819293,
+                "observed_pair_mse": 0.0011742538549885633,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.6299609570257996e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.828854994550041e-05,
+                "observed_pair_mse": 0.0001056643437268238,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0008792427815545002,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004865007712110049,
+                "observed_pair_mse": 0.01063318154023505,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 27,
+            "false_feasible": 19,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": -0.005439513020833332,
+            "mean_selected_mean_wait_min": 0.001049479166666676,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003056053115670047,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00034316973450124926,
+                "observed_pair_mse": 0.0010983366663161985,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0003195126295023531,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.0003418630318733084,
+                "observed_pair_mse": 0.0010830903315315976,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.641418000185209e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 1.0507270946746055e-05,
+                "observed_pair_mse": 1.2080909868727837e-05,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005757678490135801,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0005983611029818343,
+                "observed_pair_mse": 0.0006225380096038579,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 26,
+            "false_feasible": 19,
+            "false_feasible_both_halves_harm": 15,
+            "mean_selected_mean_cost": 0.0071023046874999956,
+            "mean_selected_mean_wait_min": 0.004335937499999994,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 8.230766170443191e-06,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.0005262522641463854,
+                "observed_pair_mse": 0.0011516333894988717,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -3.7264010685641785e-05,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.00041157582617502847,
+                "observed_pair_mse": 0.0010250491162433707,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.233218242571407e-05,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 2.0145141766294966e-05,
+                "observed_pair_mse": 2.4063170675053368e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007774731373955361,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0013022891096177583,
+                "observed_pair_mse": 0.0014839435584024802,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 19,
+            "false_feasible": 8,
+            "false_feasible_both_halves_harm": 7,
+            "mean_selected_mean_cost": 0.002207898437499979,
+            "mean_selected_mean_wait_min": -0.00912239583333338,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00033663015869333965,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0005434035231610254,
+                "observed_pair_mse": 0.0017539973080460264,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -2.0177677563852918e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0005137453824008738,
+                "observed_pair_mse": 0.001580299752991703,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.6072677724403583e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 0.00011077218574719889,
+                "observed_pair_mse": 0.00014883836060960315,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0014246154430827991,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.00851265939149551,
+                "observed_pair_mse": 0.01138933425818698,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 6,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 66,
+            "false_feasible": 44,
+            "false_feasible_both_halves_harm": 29,
+            "mean_selected_mean_cost": 0.0015204635416666583,
+            "mean_selected_mean_wait_min": 0.0035427083333333417,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0004606432323950333,
+                "mean_label_noise": 0.0010004153215200954,
+                "noise_corrected_pair_mse": 0.0008479342251382277,
+                "observed_pair_mse": 0.0018483495466583232,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00045139139093219036,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0008734317348475344,
+                "observed_pair_mse": 0.0018293693037408326,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5889339895028806e-05,
+                "mean_label_noise": 2.3440926954398845e-05,
+                "noise_corrected_pair_mse": 4.2801696725524766e-05,
+                "observed_pair_mse": 6.624262367992362e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0010309987095031385,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0037719113483920307,
+                "observed_pair_mse": 0.005786057772003141,
+                "zero_difference_pair_mse": 0.0027409126388888917
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 22,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 55,
+            "false_feasible": 34,
+            "false_feasible_both_halves_harm": 22,
+            "mean_selected_mean_cost": 0.0011923510416666663,
+            "mean_selected_mean_wait_min": -0.0023666666666666814,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00010323992627149315,
+                "mean_label_noise": 0.0008087860522551351,
+                "noise_corrected_pair_mse": 0.0006201832074758979,
+                "observed_pair_mse": 0.001428969259731033,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 9.92959880200258e-05,
+                "mean_label_noise": 0.0007823178461199294,
+                "noise_corrected_pair_mse": 0.0004437624783198495,
+                "observed_pair_mse": 0.001226080324439779,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 9.521788450621799e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 6.179272232257501e-05,
+                "observed_pair_mse": 8.950604716093329e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0006771282208593322,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.005021295284351397,
+                "observed_pair_mse": 0.0074238512069704455,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 21,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 121,
+          "false_feasible": 78,
+          "false_feasible_both_halves_harm": 51,
+          "mean_selected_mean_cost": 0.0013564072916666622,
+          "mean_selected_mean_wait_min": 0.0005880208333333304,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.00028194157933326313,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0007340587163070628,
+              "observed_pair_mse": 0.0016386594031946784,
+              "zero_difference_pair_mse": 0.00045211713697379963
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00027534368947610815,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000658597106583692,
+              "observed_pair_mse": 0.0015277248140903059,
+              "zero_difference_pair_mse": 0.0003832534171075839
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.2705564172825301e-05,
+              "mean_label_noise": 2.5577125896378567e-05,
+              "noise_corrected_pair_mse": 5.229720952404989e-05,
+              "observed_pair_mse": 7.787433542042846e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": 0.0008540634651812354,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.004396603316371714,
+              "observed_pair_mse": 0.006604954489486794,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 43,
+          "states": 240
+        }
+      },
+      "scene": {
+        "by_regime": {
+          "high_noise": {
+            "changed_choice": 28,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 9,
+            "mean_selected_mean_cost": 0.002067471354166663,
+            "mean_selected_mean_wait_min": -0.01080468749999997,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0010359356590172151,
+                "mean_label_noise": 0.0010901420661721076,
+                "noise_corrected_pair_mse": 0.0011578506096009454,
+                "observed_pair_mse": 0.0022479926757730533,
+                "zero_difference_pair_mse": 0.00012191495058373025
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0010066937468397672,
+                "mean_label_noise": 0.001060849144345238,
+                "noise_corrected_pair_mse": 0.0012305969655346525,
+                "observed_pair_mse": 0.002291446109879891,
+                "zero_difference_pair_mse": 0.00022390321869488548
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -4.618394935427897e-06,
+                "mean_label_noise": 2.695199300742498e-05,
+                "noise_corrected_pair_mse": 5.797257113551558e-05,
+                "observed_pair_mse": 8.492456414294055e-05,
+                "zero_difference_pair_mse": 6.259096607094347e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0005947709006906362,
+                "mean_label_noise": 0.00219107581535218,
+                "noise_corrected_pair_mse": 0.005496710250103019,
+                "observed_pair_mse": 0.007687786065455199,
+                "zero_difference_pair_mse": 0.0060914811507936555
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "hour_burst": {
+            "changed_choice": 26,
+            "false_feasible": 18,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.00307653385416666,
+            "mean_selected_mean_wait_min": 0.013510416666666608,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00030902358837180273,
+                "mean_label_noise": 0.0008417195262135326,
+                "noise_corrected_pair_mse": 0.0004008640967585091,
+                "observed_pair_mse": 0.0012425836229720416,
+                "zero_difference_pair_mse": 9.184050838670636e-05
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00011750862525291044,
+                "mean_label_noise": 0.0008635344328703703,
+                "noise_corrected_pair_mse": 0.00016573393389488582,
+                "observed_pair_mse": 0.0010292683667652563,
+                "zero_difference_pair_mse": 4.822530864197537e-05
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.1346518202229426e-05,
+                "mean_label_noise": 5.737579378132338e-05,
+                "noise_corrected_pair_mse": 4.333545857747184e-05,
+                "observed_pair_mse": 0.00010071125235879522,
+                "zero_difference_pair_mse": 3.19889403752424e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004303457667590731,
+                "mean_label_noise": 0.0057681738281250014,
+                "noise_corrected_pair_mse": 0.004416110697314622,
+                "observed_pair_mse": 0.010184284525439622,
+                "zero_difference_pair_mse": 0.003985764930555549
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 11,
+            "states": 48
+          },
+          "low_noise": {
+            "changed_choice": 27,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 10,
+            "mean_selected_mean_cost": -0.003258651041666668,
+            "mean_selected_mean_wait_min": 0.0009817708333333304,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0002261905120997821,
+                "mean_label_noise": 0.0007551669318149492,
+                "noise_corrected_pair_mse": 0.00042258453396847186,
+                "observed_pair_mse": 0.001177751465783421,
+                "zero_difference_pair_mse": 0.0006487750460682539
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00024537725396009635,
+                "mean_label_noise": 0.0007412272996582893,
+                "noise_corrected_pair_mse": 0.00041599840741556515,
+                "observed_pair_mse": 0.0011572257070738546,
+                "zero_difference_pair_mse": 0.0006613756613756614
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 7.27712675278232e-06,
+                "mean_label_noise": 1.5736389219817844e-06,
+                "noise_corrected_pair_mse": 8.142979699343167e-06,
+                "observed_pair_mse": 9.716618621324954e-06,
+                "zero_difference_pair_mse": 8.658529465608456e-07
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0004055589060640583,
+                "mean_label_noise": 2.417690662202383e-05,
+                "noise_corrected_pair_mse": 0.0004281521600323123,
+                "observed_pair_mse": 0.0004523290666543361,
+                "zero_difference_pair_mse": 2.2593253968253968e-05
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 12,
+            "states": 48
+          },
+          "ood_period": {
+            "changed_choice": 25,
+            "false_feasible": 16,
+            "false_feasible_both_halves_harm": 12,
+            "mean_selected_mean_cost": -0.00113466666666667,
+            "mean_selected_mean_wait_min": 0.002989583333333335,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0001712540324671078,
+                "mean_label_noise": 0.0006253811253524864,
+                "noise_corrected_pair_mse": 0.00034676746550883444,
+                "observed_pair_mse": 0.0009721485908613211,
+                "zero_difference_pair_mse": 0.0005180214979759423
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.0001863827862597088,
+                "mean_label_noise": 0.0006134732900683423,
+                "noise_corrected_pair_mse": 0.0002624570506009614,
+                "observed_pair_mse": 0.0008759303406693037,
+                "zero_difference_pair_mse": 0.00044883983686067026
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.873616134570128e-06,
+                "mean_label_noise": 3.918028908758403e-06,
+                "noise_corrected_pair_mse": 1.6686575475151025e-05,
+                "observed_pair_mse": 2.0604604383909427e-05,
+                "zero_difference_pair_mse": 7.812959340580898e-06
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005197211302859757,
+                "mean_label_noise": 0.00018165444878472225,
+                "noise_corrected_pair_mse": 0.0010445371025081978,
+                "observed_pair_mse": 0.0012261915512929201,
+                "zero_difference_pair_mse": 0.000524815972222222
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          },
+          "persistent_shift": {
+            "changed_choice": 22,
+            "false_feasible": 10,
+            "false_feasible_both_halves_harm": 8,
+            "mean_selected_mean_cost": -0.0014612161458333502,
+            "mean_selected_mean_wait_min": -0.01353385416666672,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.0003427916560660928,
+                "mean_label_noise": 0.001210593784885001,
+                "noise_corrected_pair_mse": 0.0005372420257882722,
+                "observed_pair_mse": 0.0017478358106732732,
+                "zero_difference_pair_mse": 0.0008800336818543651
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -7.145083665233697e-05,
+                "mean_label_noise": 0.001066554370590829,
+                "noise_corrected_pair_mse": 0.0004624722233123897,
+                "observed_pair_mse": 0.0015290265939032187,
+                "zero_difference_pair_mse": 0.0005339230599647267
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -1.6272578035081605e-05,
+                "mean_label_noise": 3.806617486240429e-05,
+                "noise_corrected_pair_mse": 7.842692998771367e-05,
+                "observed_pair_mse": 0.00011649310485011798,
+                "zero_difference_pair_mse": 9.469950802279527e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0013177056115810928,
+                "mean_label_noise": 0.0028766748666914713,
+                "noise_corrected_pair_mse": 0.005770338336831617,
+                "observed_pair_mse": 0.00864701320352309,
+                "zero_difference_pair_mse": 0.007088043948412709
+              }
+            },
+            "prefix_groups": 8,
+            "selected_wait_half_disagreement": 7,
+            "states": 48
+          }
+        },
+        "by_root": {
+          "397": {
+            "changed_choice": 64,
+            "false_feasible": 41,
+            "false_feasible_both_halves_harm": 26,
+            "mean_selected_mean_cost": -0.0027901531250000048,
+            "mean_selected_mean_wait_min": 0.0017052083333333333,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0002721856175274585,
+                "mean_label_noise": 0.0010004153215200956,
+                "noise_corrected_pair_mse": 0.000659476610270653,
+                "observed_pair_mse": 0.0016598919317907484,
+                "zero_difference_pair_mse": 0.0003872909927431944
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00026378032627189814,
+                "mean_label_noise": 0.0009559375688932982,
+                "noise_corrected_pair_mse": 0.0006858206701872423,
+                "observed_pair_mse": 0.0016417582390805404,
+                "zero_difference_pair_mse": 0.00042204034391534406
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.653748658845531e-06,
+                "mean_label_noise": 2.344092695439884e-05,
+                "noise_corrected_pair_mse": 3.356610548934149e-05,
+                "observed_pair_mse": 5.700703244374033e-05,
+                "zero_difference_pair_mse": 2.691235683049595e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.00010849840881087521,
+                "mean_label_noise": 0.0020141464236111107,
+                "noise_corrected_pair_mse": 0.0028494110476997665,
+                "observed_pair_mse": 0.004863557471310878,
+                "zero_difference_pair_mse": 0.002740912638888892
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 23,
+            "states": 120
+          },
+          "401": {
+            "changed_choice": 64,
+            "false_feasible": 35,
+            "false_feasible_both_halves_harm": 23,
+            "mean_selected_mean_cost": 4.471458333333104e-05,
+            "mean_selected_mean_wait_min": -0.0044479166666667,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -3.0296398825044363e-05,
+                "mean_label_noise": 0.000808786052255135,
+                "noise_corrected_pair_mse": 0.0004866468823793603,
+                "observed_pair_mse": 0.0012954329346344959,
+                "zero_difference_pair_mse": 0.0005169432812044048
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -1.5383728183683882e-05,
+                "mean_label_noise": 0.0007823178461199295,
+                "noise_corrected_pair_mse": 0.0003290827621161398,
+                "observed_pair_mse": 0.0011114006082360692,
+                "zero_difference_pair_mse": 0.0003444664902998237
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -4.011233411216581e-06,
+                "mean_label_noise": 2.7713324838358286e-05,
+                "noise_corrected_pair_mse": 4.825970046073663e-05,
+                "observed_pair_mse": 7.597302529909492e-05,
+                "zero_difference_pair_mse": 5.2270933871953204e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00033123869247592407,
+                "mean_label_noise": 0.002402555922619049,
+                "noise_corrected_pair_mse": 0.0040129283710161395,
+                "observed_pair_mse": 0.006415484293635189,
+                "zero_difference_pair_mse": 0.004344167063492064
+              }
+            },
+            "prefix_groups": 20,
+            "selected_wait_half_disagreement": 25,
+            "states": 120
+          }
+        },
+        "overall": {
+          "changed_choice": 128,
+          "false_feasible": 76,
+          "false_feasible_both_halves_harm": 49,
+          "mean_selected_mean_cost": -0.0013727192708333368,
+          "mean_selected_mean_wait_min": -0.001371354166666683,
+          "pair_metrics": {
+            "actual_cost_delta": {
+              "error_change_vs_zero": 0.00012094460935120708,
+              "mean_label_noise": 0.0009046006868876153,
+              "noise_corrected_pair_mse": 0.0005730617463250067,
+              "observed_pair_mse": 0.0014776624332126223,
+              "zero_difference_pair_mse": 0.0004521171369737996
+            },
+            "fleet_cost_delta": {
+              "error_change_vs_zero": 0.00012419829904410714,
+              "mean_label_noise": 0.0008691277075066138,
+              "noise_corrected_pair_mse": 0.000507451716151691,
+              "observed_pair_mse": 0.0013765794236583048,
+              "zero_difference_pair_mse": 0.00038325341710758384
+            },
+            "nonfleet_cost_delta": {
+              "error_change_vs_zero": 1.3212576238144748e-06,
+              "mean_label_noise": 2.5577125896378564e-05,
+              "noise_corrected_pair_mse": 4.091290297503906e-05,
+              "observed_pair_mse": 6.649002887141762e-05,
+              "zero_difference_pair_mse": 3.9591645351224575e-05
+            },
+            "wait_delta_min": {
+              "error_change_vs_zero": -0.00011137014183252443,
+              "mean_label_noise": 0.00220835117311508,
+              "noise_corrected_pair_mse": 0.0034311697093579534,
+              "observed_pair_mse": 0.005639520882473033,
+              "zero_difference_pair_mse": 0.0035425398511904783
+            }
+          },
+          "prefix_groups": 40,
+          "selected_wait_half_disagreement": 48,
+          "states": 240
+        }
+      }
+    }
+  }
+}
