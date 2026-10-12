@@ -29,6 +29,25 @@ one CPU and 3GB per task. Only compact receipts/report sync locally.
 
 Run: `native_transit_calibrated_value_stage190_fit_20261012_r1`, fit-source
 revision `4213e1d860`, scheduler tasks `t144436` through `t144649` (214 tasks).
+Report task `t144650` qualified all 856 fits and 85,600 updates. One manual
+pull fetched only the 56,023-byte report; bank/models/detailed predictions stay
+remote. Eight focused synthetic/mock tests pass.
+
+## Result and Next Step
+Both calibrated representations fall back on all 600 states in each of three
+splits: cost and wait are exactly zero, so strict cost improvement fails. Do
+not count zero selected bias or zero bound violations as learned control gains.
+Ensemble point selection improves some cells but still fails the joint gate:
+scalar regime/root397 cost is +0.000599; sequence regime/root397 is +0.002527.
+Both retain positive wait in several root401 splits. Sequence fitting takes
+11,134 seconds summed across tasks versus 379 for scalar, about 29 times more.
+
+This rules out this conservative selector as the current improvement route,
+not all causal plan learning: a scene-wide worst-action margin is substantially
+stricter than the original mean cost/wait gate. Do not retune its quantile on
+these test outcomes. Next investigate whether single-continuation labels expose
+predictable action differences, then joint active-bus/plan representation and
+expected continuation-value targets rather than another gate/seed sweep.
 
 ## Limitations
 This remains a development single-action value screen with greedy continuation,
@@ -36,4 +55,4 @@ not repeated learned-upper deployment or end-to-end HRL. Empirical margins do
 not guarantee coverage under regime/lower-policy shift. The four critics use
 less fitting data and more optimizer work than Stage188; this is not a
 matched-compute architectural superiority experiment. Third/fourth reserved
-scene action labels remain closed. Results are pending.
+scene action labels remain closed. No reserved-screen/deployment gate passes.
