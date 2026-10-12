@@ -183,11 +183,30 @@ def predict(row, model):
     x = (features(row, model.get("representation", "occupancy"))-model["center"])/model["scale"]
     if model.get("representation") == "timetable_sequence":
         x = np.c_[x, sequence.encode_numpy(row, model["event_encoder"])]
+    return _prediction(row, _physical_heads(x, model), model)
+
+
+def predict_many(rows, model, *, features_batch=None):
+    """Reuse causal features across frozen models during offline diagnostics."""
+    raw = (np.stack([features(r, model.get("representation", "occupancy")) for r in rows])
+        if features_batch is None else features_batch)
+    x = (raw-model["center"])/model["scale"]
+    if model.get("representation") == "timetable_sequence":
+        x = np.concatenate((x, np.stack([sequence.encode_numpy(r, model["event_encoder"]) for r in rows])), axis=-1)
+    heads = _physical_heads(x, model)
+    return [_prediction(row, head, model) for row, head in zip(rows, heads)]
+
+
+def _physical_heads(x, model):
     w = {k: np.asarray(v) for k, v in model["weights"].items()}
     heads = np.tanh(x@w["0.weight"].T+w["0.bias"])@w["2.weight"].T+w["2.bias"]
     if model["method"] == "floor_absolute":
-        heads[:, 0] = np.logaddexp(0., heads[:, 0])
+        heads[..., 0] = np.logaddexp(0., heads[..., 0])
     heads *= model["target_scale"]
+    return heads
+
+
+def _prediction(row, heads, model):
     delta = heads-heads[row["original_choice"]].copy()
     result = {"predicted_heads": delta[:, :2].tolist(), "predicted_wait_delta_min": delta[:, 2].tolist()}
     if model["method"] != "paired_advantage":
