@@ -18,6 +18,10 @@ Ten compact JSONs total898,030 bytes; eight manual compact-directory syncs.
 Remaining470 tasks registered as t143440-t143909 and dispatched.
 Eight focused tests pass, including native clock and scheduler retry semantics.
 
+Full r2 completed480 tasks, all exit0. Node-side t144065 qualified all80
+fresh groups,480 identities,2,880 labels and3,360 window-ledger episodes.
+The merged100-group bank remains server-only for Stage188 matched fits.
+
 The aborted r1 checked `ep_steps` as seconds, but it counts lower transitions.
 Remove that incorrect check, retain actual clock/trips/schedule/windows;
 archive20 failed attempts and10 stopped retries separately, use none as labels.

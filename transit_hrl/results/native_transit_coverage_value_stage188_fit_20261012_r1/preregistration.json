@@ -1,0 +1,68 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "critic_updates": 21600,
+    "fits": 216,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "development_grouped_single_action_value_screen_not_repeated_learned_upper_or_end_to_end_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 21600,
+      "fits": 216,
+      "new_native_episodes": 0
+    },
+    "collection_protocol": "native_transit_value_expansion_stage187_v1",
+    "collection_run": "native_transit_value_expansion_stage187_development_20261012_r2",
+    "coverage_comparison": "same_old120_heldout_states_against_Stage184_186_not_new600_vs_old120",
+    "data": "120_unchanged_existing_states_plus480_fresh_development_states_100_scenes_3600_labels",
+    "gate": "negative_mean_cost_and_nonpositive_wait_both_roots_all_three_splits",
+    "grouping": "six_callbacks_and_all_candidates_of_each_scene_kept_together",
+    "initialization_seed": 178,
+    "matching": "same_training_groups_targets_base_target_scales_steps_and_initial_predictor",
+    "method": "floor_absolute",
+    "modes": [
+      "tail_summary",
+      "timetable_sequence"
+    ],
+    "objective": "proper_mse",
+    "old_protocol": "native_transit_sequence_value_stage186_v1",
+    "old_run": "native_transit_sequence_value_stage186_fit_20261012_r1",
+    "optimizer": "unchanged_AdamW_lr0.003_weight_decay0.01_full_batch",
+    "parameters": {
+      "tail_summary": 1635,
+      "timetable_sequence": 2147
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "timetable_sequence:wait_feasible",
+    "selectors_share_fit": true,
+    "steps": 100,
+    "storage": "merged_timetable_bank_full_models_and_detailed_aggregate_server_only_compact_receipts_for_sync",
+    "validation": [
+      "100_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "folds_per_mode": 108,
+  "protocol": "native_transit_coverage_value_stage188_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "251473b2db388738272c2121ce2bb25b0065d8e3",
+  "tasks": 217
+}

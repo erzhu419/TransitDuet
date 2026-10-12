@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from scripts import run_native_transit_coverage_value_stage188 as spec
 from scripts.analyze_native_transit_coverage_value_stage188 import qualify_fold, summarize
-from scripts.submit_native_transit_coverage_value_stage188_scheduleurm import task_specification
+from scripts.submit_native_transit_coverage_value_stage188_scheduleurm import task_specification, report_task_specification
 from tests.test_native_transit_value_expansion import fixture as fresh_fixture
 from tests.test_native_transit_timetable_context import fixture as old_fixture
 from scripts.analyze_native_transit_value_expansion_stage187 import summarize as summarize_fresh
@@ -143,6 +143,14 @@ class CoverageValueTest(unittest.TestCase):
             self.assertNotIn("bank.json", task["cmd"])
             self.assertNotIn("_raw", task["result_dir"])
             self.assertEqual([Path(p).name for p in task["stage_input_paths"]], ["scripts", "freq_hrl", "native_freqduet", "inputs"])
+
+    def test_report_sync_scope_excludes_bank_models_and_fold_predictions(self):
+        task = report_task_specification("unit_report")
+        self.assertEqual(Path(task["result_dir"]).name, "report")
+        self.assertIn("--output", task["cmd"])
+        self.assertIn("analyze_native_transit_coverage_value_stage188.py", task["cmd"])
+        self.assertNotIn("_raw", task["result_dir"])
+        self.assertIsNone(task["require_node"])
 
 
 if __name__ == "__main__":

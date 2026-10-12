@@ -127,6 +127,7 @@ def summarize(cells, registered, old_cells):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     directory = ROOT/"results"/args.run_name
     registered = json.loads((directory/"inputs/manifest.json").read_text())
@@ -136,7 +137,7 @@ def main():
     old_cells = {"tail_summary": json.loads((old/"inputs/control.json").read_text()),
         "timetable_sequence": json.loads((old/"fit/result.json").read_text())}
     summary = summarize(cells, registered, old_cells)
-    write_json(directory/"summary.json", summary)
+    write_json(args.output or directory/"summary.json", summary)
     print(json.dumps({"fits": summary["fits"], "critic_updates": summary["critic_updates"],
         "gates": {k: v["gates"] for k, v in summary["variants"].items()},
         "third_scene_screen_eligible": summary["third_scene_screen_eligible"]}, indent=2))

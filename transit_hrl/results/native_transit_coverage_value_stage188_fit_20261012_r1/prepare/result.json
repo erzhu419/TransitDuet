@@ -1,0 +1,132 @@
+{
+  "actor_updates": 0,
+  "candidate_ceiling": {
+    "combined": {
+      "by_root": {
+        "397": {
+          "joint_improvable_states": 201,
+          "oracle_mean_cost_delta": -0.016487643333333322,
+          "oracle_mean_wait_delta_min": -0.04312666666666674,
+          "states": 300
+        },
+        "401": {
+          "joint_improvable_states": 191,
+          "oracle_mean_cost_delta": -0.019290910000000005,
+          "oracle_mean_wait_delta_min": -0.04498666666666656,
+          "states": 300
+        }
+      },
+      "role": "posthoc_outcome_oracle_diagnostic_not_available_to_controller"
+    },
+    "existing": {
+      "by_root": {
+        "397": {
+          "joint_improvable_states": 31,
+          "oracle_mean_cost_delta": -0.013219933333333342,
+          "oracle_mean_wait_delta_min": -0.04541666666666668,
+          "states": 60
+        },
+        "401": {
+          "joint_improvable_states": 42,
+          "oracle_mean_cost_delta": -0.01884940000000002,
+          "oracle_mean_wait_delta_min": -0.037950000000000074,
+          "states": 60
+        }
+      },
+      "role": "posthoc_outcome_oracle_diagnostic_not_available_to_controller"
+    },
+    "fresh": {
+      "by_root": {
+        "397": {
+          "joint_improvable_states": 170,
+          "oracle_mean_cost_delta": -0.017304570833333335,
+          "oracle_mean_wait_delta_min": -0.04255416666666675,
+          "states": 240
+        },
+        "401": {
+          "joint_improvable_states": 149,
+          "oracle_mean_cost_delta": -0.019401287499999996,
+          "oracle_mean_wait_delta_min": -0.04674583333333319,
+          "states": 240
+        }
+      },
+      "role": "posthoc_outcome_oracle_diagnostic_not_available_to_controller"
+    }
+  },
+  "collection": {
+    "exact_identity_reproductions": 480,
+    "independent_scene_groups": 80,
+    "native_deployment_eligible": false,
+    "new_native_episodes": 3360,
+    "new_native_steps": 206236800,
+    "paired_labels": 2880,
+    "phase": "complete",
+    "protocol": "native_transit_value_expansion_stage187_v1",
+    "software_qualified": true,
+    "stage": "development_value_data_not_confirmation_or_repeated_learned_upper_actions",
+    "third_scene_screen_eligible": false,
+    "training_states": 480,
+    "training_updates": 0,
+    "window_ledger_qualified_episodes": 3360
+  },
+  "contract": {
+    "boundary": "development_grouped_single_action_value_screen_not_repeated_learned_upper_or_end_to_end_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 21600,
+      "fits": 216,
+      "new_native_episodes": 0
+    },
+    "collection_protocol": "native_transit_value_expansion_stage187_v1",
+    "collection_run": "native_transit_value_expansion_stage187_development_20261012_r2",
+    "coverage_comparison": "same_old120_heldout_states_against_Stage184_186_not_new600_vs_old120",
+    "data": "120_unchanged_existing_states_plus480_fresh_development_states_100_scenes_3600_labels",
+    "gate": "negative_mean_cost_and_nonpositive_wait_both_roots_all_three_splits",
+    "grouping": "six_callbacks_and_all_candidates_of_each_scene_kept_together",
+    "initialization_seed": 178,
+    "matching": "same_training_groups_targets_base_target_scales_steps_and_initial_predictor",
+    "method": "floor_absolute",
+    "modes": [
+      "tail_summary",
+      "timetable_sequence"
+    ],
+    "objective": "proper_mse",
+    "old_protocol": "native_transit_sequence_value_stage186_v1",
+    "old_run": "native_transit_sequence_value_stage186_fit_20261012_r1",
+    "optimizer": "unchanged_AdamW_lr0.003_weight_decay0.01_full_batch",
+    "parameters": {
+      "tail_summary": 1635,
+      "timetable_sequence": 2147
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "primary": "timetable_sequence:wait_feasible",
+    "selectors_share_fit": true,
+    "steps": 100,
+    "storage": "merged_timetable_bank_full_models_and_detailed_aggregate_server_only_compact_receipts_for_sync",
+    "validation": [
+      "100_leave_scene_out",
+      "5_leave_regime_out",
+      "2_leave_lower_root_out"
+    ]
+  },
+  "critic_updates": 0,
+  "event_count_range": [
+    45,
+    215
+  ],
+  "existing_states": 120,
+  "fresh_states": 480,
+  "independent_scene_groups": 100,
+  "native_deployment_eligible": false,
+  "new_native_steps": 0,
+  "paired_labels": 3600,
+  "protocol": "native_transit_coverage_value_stage188_v1",
+  "server_bank_bytes": 34907152,
+  "server_bank_path": "/home/zhengliang01/scheduleurm_work/TransitDuet_freqhrl_v3/transit_hrl/results/native_transit_coverage_value_stage188_fit_20261012_r1_raw/bank.json",
+  "software_qualified": true,
+  "third_scene_screen_eligible": false,
+  "training_states": 600
+}

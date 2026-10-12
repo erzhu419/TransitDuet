@@ -41,10 +41,25 @@ def task_specification(run_name, *, mode=None, fold=None):
     return task
 
 
+def report_task_specification(run_name):
+    task = task_specification(run_name)
+    result = ROOT/"results"/run_name/"report"
+    command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/analyze_native_transit_coverage_value_stage188.py",
+        "--run-name", run_name, "--output", str(result/"result.json")]
+    task.update(description="Freq-HRL compact expanded coverage comparison",
+        signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/report",
+        resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/report",
+        result_dir=str(result), local_result_dir=str(result),
+        cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 "
+            "MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= " + shlex.join(command),
+        cpu_training_justification="Aggregate completed matched folds into compact summary only; no model, actor or native updates.")
+    return task
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
-    parser.add_argument("--phase", choices=("prepare", "fits"), required=True)
+    parser.add_argument("--phase", choices=("prepare", "fits", "report"), required=True)
     args = parser.parse_args()
     directory = ROOT/"results"/args.run_name
     existing = inventory(args.run_name, protocol_spec=spec)
@@ -72,7 +87,7 @@ def main():
             "scheduler": {"allowed_nodes": task["allowed_nodes"], "require_node": None,
                 "cpu_per_task": 1, "ram_mb_per_task": task["ram_mb"]}})
         tasks = [task]
-    else:
+    elif args.phase == "fits":
         receipt = json.loads((directory/"prepare/result.json").read_text())
         if not (receipt["protocol"] == spec.EXPERIMENT_PROTOCOL and receipt["contract"] == spec.contract()
                 and receipt["software_qualified"] and receipt["training_states"] == 600
@@ -81,6 +96,13 @@ def main():
             raise SystemExit("Coverage fits require the prepared complete server-only bank")
         registered = json.loads((directory/"inputs/manifest.json").read_text())
         tasks = [task_specification(args.run_name, mode=m, fold=f) for m in spec.MODES for f in registered["folds"]]
+    else:
+        registered = json.loads((directory/"inputs/manifest.json").read_text())
+        expected = {task_specification(args.run_name)["signature"],
+            *[task_specification(args.run_name, mode=m, fold=f)["signature"] for m in spec.MODES for f in registered["folds"]]}
+        if {t["signature"] for t in existing} != expected or not all(t["status"] == "done" for t in existing):
+            raise SystemExit("Complete every registered coverage fit before node-side aggregation")
+        tasks = [report_task_specification(args.run_name)]
     execute_bulk(tasks, dry_run=False, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{args.run_name}")
 
 
