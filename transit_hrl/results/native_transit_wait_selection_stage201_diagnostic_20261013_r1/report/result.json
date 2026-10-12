@@ -1,0 +1,3324 @@
+{
+  "actor_updates": 0,
+  "contract": {
+    "boundary": "descriptive_selection_diagnosis_not_independent_confirmation_CI_or_HRL_proof",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 0,
+      "new_fits": 0,
+      "new_native_episodes": 0
+    },
+    "context": "candidate_id_queue0_0to50_over50_and_prefix_mean_gap_relative_to_identity",
+    "contributions": "sum_current_minus_baseline_cost_or_wait_divided_by_entire_scope_states",
+    "data": "same240_mean8_states_40_prefix_groups_47_grouped_folds",
+    "decomposition": "identity_retained_cancelled_rerouted_relative_to_zero_margin",
+    "queue_threshold": "50_passengers_existing_native_action_value_feature_unit",
+    "selection": "reuse_all_three_Stage200_policies_and_all_frozen_predictions",
+    "source_protocol": "native_transit_wait_margin_stage200_v1",
+    "source_run": "native_transit_wait_margin_stage200_development_20261013_r1",
+    "storage": "bank_targets_predictions_and_state_details_server_only_small_report_sync",
+    "wait_errors": "all_nonidentity_candidates_true_mean8_wait_minus_raw_prediction"
+  },
+  "critic_updates": 0,
+  "evaluation_prefix_groups": 40,
+  "evaluation_states": 240,
+  "folds": 47,
+  "native_deployment_eligible": false,
+  "new_fits": 0,
+  "new_native_episodes": 0,
+  "protocol": "native_transit_wait_selection_stage201_v1",
+  "software_qualified": true,
+  "third_scene_screen_eligible": false,
+  "validation": {
+    "lower_root": {
+      "by_root": {
+        "397": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 106,
+                "false_safe": 35,
+                "mean_residual_min": 0.005216432576516395,
+                "predicted_safe": 68,
+                "predicted_unsafe_actual_safe": 8,
+                "rmse_min": 0.05192703961727587,
+                "selected_overrides": 17,
+                "selected_residual_mean_min": 0.012433162734160829,
+                "unique_states": 106
+              },
+              "1": {
+                "candidate_evaluations": 113,
+                "false_safe": 34,
+                "mean_residual_min": 0.0026969421279251092,
+                "predicted_safe": 63,
+                "predicted_unsafe_actual_safe": 14,
+                "rmse_min": 0.05256049308351881,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": -0.0015989895912298518,
+                "unique_states": 113
+              },
+              "2": {
+                "candidate_evaluations": 118,
+                "false_safe": 36,
+                "mean_residual_min": -0.003209542589342562,
+                "predicted_safe": 64,
+                "predicted_unsafe_actual_safe": 13,
+                "rmse_min": 0.07922654492464454,
+                "selected_overrides": 3,
+                "selected_residual_mean_min": 0.005323713574312043,
+                "unique_states": 118
+              },
+              "3": {
+                "candidate_evaluations": 117,
+                "false_safe": 37,
+                "mean_residual_min": 0.0015143599248004464,
+                "predicted_safe": 63,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.07743323844877986,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.027435337998739484,
+                "unique_states": 117
+              },
+              "4": {
+                "candidate_evaluations": 89,
+                "false_safe": 21,
+                "mean_residual_min": 0.006845568764807228,
+                "predicted_safe": 44,
+                "predicted_unsafe_actual_safe": 11,
+                "rmse_min": 0.09470239975499321,
+                "selected_overrides": 14,
+                "selected_residual_mean_min": 0.016918538289654752,
+                "unique_states": 89
+              },
+              "5": {
+                "candidate_evaluations": 57,
+                "false_safe": 16,
+                "mean_residual_min": -0.0011639817794271649,
+                "predicted_safe": 34,
+                "predicted_unsafe_actual_safe": 5,
+                "rmse_min": 0.06316624250383637,
+                "selected_overrides": 22,
+                "selected_residual_mean_min": -0.0016536362425183632,
+                "unique_states": 57
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 111,
+                "false_safe": 37,
+                "mean_residual_min": -0.0022340581100451515,
+                "predicted_safe": 79,
+                "predicted_unsafe_actual_safe": 13,
+                "rmse_min": 0.10674484477563262,
+                "selected_overrides": 0,
+                "selected_residual_mean_min": null,
+                "unique_states": 32
+              },
+              "same": {
+                "candidate_evaluations": 53,
+                "false_safe": 16,
+                "mean_residual_min": 0.008394975366664994,
+                "predicted_safe": 42,
+                "predicted_unsafe_actual_safe": 6,
+                "rmse_min": 0.022224212675367786,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.0028548849990532514,
+                "unique_states": 50
+              },
+              "widened": {
+                "candidate_evaluations": 436,
+                "false_safe": 126,
+                "mean_residual_min": 0.0022984078294673548,
+                "predicted_safe": 215,
+                "predicted_unsafe_actual_safe": 47,
+                "rmse_min": 0.06380247735420587,
+                "selected_overrides": 57,
+                "selected_residual_mean_min": 0.007830562013010632,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 345,
+                "false_safe": 106,
+                "mean_residual_min": -0.004150469841727728,
+                "predicted_safe": 210,
+                "predicted_unsafe_actual_safe": 40,
+                "rmse_min": 0.0740212122333641,
+                "selected_overrides": 41,
+                "selected_residual_mean_min": -0.00012966013290925088,
+                "unique_states": 69
+              },
+              "over50": {
+                "candidate_evaluations": 255,
+                "false_safe": 73,
+                "mean_residual_min": 0.010317533934361045,
+                "predicted_safe": 126,
+                "predicted_unsafe_actual_safe": 26,
+                "rmse_min": 0.06789580288630437,
+                "selected_overrides": 18,
+                "selected_residual_mean_min": 0.025409326121610662,
+                "unique_states": 51
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 179,
+              "mean_residual_min": 0.0019984317631100016,
+              "predicted_safe": 336,
+              "predicted_unsafe_actual_safe": 66,
+              "rmse_min": 0.071482077759781,
+              "selected_overrides": 59,
+              "selected_residual_mean_min": 0.007661894995588349,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.023187499999999566,
+                "cost_change_contribution": 0.0023861291666666664,
+                "harmful_cost_overrides": 7,
+                "harmful_wait_overrides": 7,
+                "mean_new_cost": -0.000992312500000001,
+                "mean_new_wait_min": -0.0019322916666666306,
+                "mean_old_cost": -0.0033784416666666683,
+                "mean_old_wait_min": -0.002048958333333291,
+                "overrides": 10,
+                "predicted_selected_wait_mean_min": -0.04014275416597783,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.01695525416597827,
+                "states": 120,
+                "wait_change_contribution_min": 0.00011666666666666076
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.001590863541666668,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.003895992346938779,
+                  "mean_old_wait_min": -0.00012755102040813563,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 49,
+                  "wait_change_contribution_min": 5.208333333332205e-05
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": -0.04437499999999961,
+                  "cost_change_contribution": 0.0007952656249999986,
+                  "harmful_cost_overrides": 2,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": 0.05351381249999996,
+                  "mean_new_wait_min": -0.04437499999999961,
+                  "mean_old_cost": 0.005797875000000043,
+                  "mean_old_wait_min": -0.04824999999999993,
+                  "overrides": 2,
+                  "predicted_selected_wait_mean_min": -0.035528081268457704,
+                  "prefix_groups": 2,
+                  "selected_residual_mean_min": -0.008846918731541906,
+                  "states": 2,
+                  "wait_change_contribution_min": 6.458333333333872e-05
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.017890624999999556,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 5,
+                  "harmful_wait_overrides": 6,
+                  "mean_new_cost": -0.028263140625000002,
+                  "mean_new_wait_min": -0.017890624999999556,
+                  "mean_old_cost": -0.028263140625000002,
+                  "mean_old_wait_min": -0.017890624999999556,
+                  "overrides": 8,
+                  "predicted_selected_wait_mean_min": -0.04129642239035787,
+                  "prefix_groups": 5,
+                  "selected_residual_mean_min": 0.023405797390358314,
+                  "states": 8,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.007403846153846389,
+                "cost_change_contribution": 0.0013715187500000009,
+                "harmful_cost_overrides": 15,
+                "harmful_wait_overrides": 18,
+                "mean_new_cost": -0.0020069229166666666,
+                "mean_new_wait_min": 0.0016041666666667177,
+                "mean_old_cost": -0.0033784416666666683,
+                "mean_old_wait_min": -0.002048958333333291,
+                "overrides": 26,
+                "predicted_selected_wait_mean_min": -0.024227474314663523,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.03163132046850991,
+                "states": 120,
+                "wait_change_contribution_min": 0.003653125000000009
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0010404427083333342,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.0037834280303030324,
+                  "mean_old_wait_min": -0.01332575757575761,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 15,
+                  "selected_residual_mean_min": null,
+                  "states": 33,
+                  "wait_change_contribution_min": 0.003664583333333343
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": 0.0017916666666666359,
+                  "cost_change_contribution": 0.00033107604166666694,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 2,
+                  "mean_new_cost": 0.003194125000000006,
+                  "mean_new_wait_min": 0.0017916666666666359,
+                  "mean_old_cost": -0.010048916666666671,
+                  "mean_old_wait_min": 0.002249999999999993,
+                  "overrides": 3,
+                  "predicted_selected_wait_mean_min": -0.020662561083332535,
+                  "prefix_groups": 3,
+                  "selected_residual_mean_min": 0.02245422774999917,
+                  "states": 3,
+                  "wait_change_contribution_min": -1.1458333333333921e-05
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.008135869565217661,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 14,
+                  "harmful_wait_overrides": 16,
+                  "mean_new_cost": -0.010887527173913045,
+                  "mean_new_wait_min": 0.008135869565217661,
+                  "mean_old_cost": -0.010887527173913045,
+                  "mean_old_wait_min": 0.008135869565217661,
+                  "overrides": 23,
+                  "predicted_selected_wait_mean_min": -0.024692462997011045,
+                  "prefix_groups": 12,
+                  "selected_residual_mean_min": 0.032828332562228696,
+                  "states": 23,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.004167372881355847,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 32,
+                "harmful_wait_overrides": 35,
+                "mean_new_cost": -0.0033784416666666683,
+                "mean_new_wait_min": -0.002048958333333291,
+                "mean_old_cost": -0.0033784416666666683,
+                "mean_old_wait_min": -0.002048958333333291,
+                "overrides": 59,
+                "predicted_selected_wait_mean_min": -0.011829267876944197,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.007661894995588349,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.004167372881355847,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 32,
+                  "harmful_wait_overrides": 35,
+                  "mean_new_cost": -0.006871406779661019,
+                  "mean_new_wait_min": -0.004167372881355847,
+                  "mean_old_cost": -0.006871406779661019,
+                  "mean_old_wait_min": -0.004167372881355847,
+                  "overrides": 59,
+                  "predicted_selected_wait_mean_min": -0.011829267876944197,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": 0.007661894995588349,
+                  "states": 59,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 98,
+                "false_safe": 29,
+                "mean_residual_min": -0.004378557596466474,
+                "predicted_safe": 55,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.05362080074525891,
+                "selected_overrides": 30,
+                "selected_residual_mean_min": 0.00508426194901679,
+                "unique_states": 98
+              },
+              "1": {
+                "candidate_evaluations": 114,
+                "false_safe": 37,
+                "mean_residual_min": -0.004856970278704724,
+                "predicted_safe": 59,
+                "predicted_unsafe_actual_safe": 19,
+                "rmse_min": 0.07214487716389476,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.02144292438387689,
+                "unique_states": 114
+              },
+              "2": {
+                "candidate_evaluations": 117,
+                "false_safe": 34,
+                "mean_residual_min": -0.0016756614981590465,
+                "predicted_safe": 58,
+                "predicted_unsafe_actual_safe": 20,
+                "rmse_min": 0.09553415801731896,
+                "selected_overrides": 3,
+                "selected_residual_mean_min": -0.0011204412792459207,
+                "unique_states": 117
+              },
+              "3": {
+                "candidate_evaluations": 118,
+                "false_safe": 28,
+                "mean_residual_min": -0.0031320319493684575,
+                "predicted_safe": 54,
+                "predicted_unsafe_actual_safe": 19,
+                "rmse_min": 0.10239204322399742,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": -0.11175296943023007,
+                "unique_states": 118
+              },
+              "4": {
+                "candidate_evaluations": 95,
+                "false_safe": 24,
+                "mean_residual_min": -0.006729382306420219,
+                "predicted_safe": 39,
+                "predicted_unsafe_actual_safe": 19,
+                "rmse_min": 0.13397753251819755,
+                "selected_overrides": 6,
+                "selected_residual_mean_min": 0.07011692602215867,
+                "unique_states": 95
+              },
+              "5": {
+                "candidate_evaluations": 58,
+                "false_safe": 12,
+                "mean_residual_min": -0.005273538237944049,
+                "predicted_safe": 30,
+                "predicted_unsafe_actual_safe": 6,
+                "rmse_min": 0.04421410188653407,
+                "selected_overrides": 9,
+                "selected_residual_mean_min": -0.008379173014276717,
+                "unique_states": 58
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 122,
+                "false_safe": 29,
+                "mean_residual_min": 0.0017580143943528236,
+                "predicted_safe": 62,
+                "predicted_unsafe_actual_safe": 23,
+                "rmse_min": 0.15359083723750816,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.014976645778424287,
+                "unique_states": 36
+              },
+              "same": {
+                "candidate_evaluations": 51,
+                "false_safe": 12,
+                "mean_residual_min": -0.0030117889909755005,
+                "predicted_safe": 24,
+                "predicted_unsafe_actual_safe": 14,
+                "rmse_min": 0.023507325969820626,
+                "selected_overrides": 7,
+                "selected_residual_mean_min": 0.008615262500240759,
+                "unique_states": 40
+              },
+              "widened": {
+                "candidate_evaluations": 427,
+                "false_safe": 123,
+                "mean_residual_min": -0.005982338351330466,
+                "predicted_safe": 209,
+                "predicted_unsafe_actual_safe": 61,
+                "rmse_min": 0.07000396245947377,
+                "selected_overrides": 44,
+                "selected_residual_mean_min": 0.005421635460554808,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 390,
+                "false_safe": 133,
+                "mean_residual_min": -0.006650943380401741,
+                "predicted_safe": 222,
+                "predicted_unsafe_actual_safe": 78,
+                "rmse_min": 0.08642108372701461,
+                "selected_overrides": 42,
+                "selected_residual_mean_min": 0.0043682713914572156,
+                "unique_states": 78
+              },
+              "over50": {
+                "candidate_evaluations": 210,
+                "false_safe": 31,
+                "mean_residual_min": 0.0004775521900469725,
+                "predicted_safe": 73,
+                "predicted_unsafe_actual_safe": 20,
+                "rmse_min": 0.099665188847658,
+                "selected_overrides": 10,
+                "selected_residual_mean_min": 0.013036804510331807,
+                "unique_states": 42
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 164,
+              "mean_residual_min": -0.004155969930744692,
+              "predicted_safe": 295,
+              "predicted_unsafe_actual_safe": 98,
+              "rmse_min": 0.09127537930336062,
+              "selected_overrides": 52,
+              "selected_residual_mean_min": 0.006035296991240792,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.003749999999999837,
+                "cost_change_contribution": 0.0031396052083333343,
+                "harmful_cost_overrides": 2,
+                "harmful_wait_overrides": 1,
+                "mean_new_cost": 0.0009008874999999993,
+                "mean_new_wait_min": -0.00012499999999999455,
+                "mean_old_cost": -0.002238717708333335,
+                "mean_old_wait_min": -0.00053750000000002,
+                "overrides": 4,
+                "predicted_selected_wait_mean_min": -0.027828022899158172,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.024078022899158336,
+                "states": 120,
+                "wait_change_contribution_min": 0.0004125000000000258
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0031396052083333343,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.007849013020833335,
+                  "mean_old_wait_min": -0.0010312500000000634,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 48,
+                  "wait_change_contribution_min": 0.0004125000000000258
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 68,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.003749999999999837,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 2,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": 0.027026624999999978,
+                  "mean_new_wait_min": -0.003749999999999837,
+                  "mean_old_cost": 0.027026624999999978,
+                  "mean_old_wait_min": -0.003749999999999837,
+                  "overrides": 4,
+                  "predicted_selected_wait_mean_min": -0.027828022899158172,
+                  "prefix_groups": 4,
+                  "selected_residual_mean_min": 0.024078022899158336,
+                  "states": 4,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.012046052631579032,
+                "cost_change_contribution": 0.0015563531250000007,
+                "harmful_cost_overrides": 8,
+                "harmful_wait_overrides": 9,
+                "mean_new_cost": -0.0006823645833333341,
+                "mean_new_wait_min": -0.00190729166666668,
+                "mean_old_cost": -0.002238717708333335,
+                "mean_old_wait_min": -0.00053750000000002,
+                "overrides": 19,
+                "predicted_selected_wait_mean_min": -0.01589442267282778,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.0038483700412487573,
+                "states": 120,
+                "wait_change_contribution_min": -0.0013697916666666602
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0015106875000000014,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.0054934090909090965,
+                  "mean_old_wait_min": 0.006215909090909056,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 16,
+                  "selected_residual_mean_min": null,
+                  "states": 33,
+                  "wait_change_contribution_min": -0.0017093749999999902
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 68,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": -0.13875000000000015,
+                  "cost_change_contribution": 4.566562499999927e-05,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": -0.06994912500000014,
+                  "mean_new_wait_min": -0.13875000000000015,
+                  "mean_old_cost": -0.0726890625000001,
+                  "mean_old_wait_min": -0.15912499999999996,
+                  "overrides": 2,
+                  "predicted_selected_wait_mean_min": -0.014475968319997737,
+                  "prefix_groups": 2,
+                  "selected_residual_mean_min": -0.1242740316800024,
+                  "states": 2,
+                  "wait_change_contribution_min": 0.00033958333333333014
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.002860294117646982,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 7,
+                  "harmful_wait_overrides": 8,
+                  "mean_new_cost": 0.0034126176470588346,
+                  "mean_new_wait_min": 0.002860294117646982,
+                  "mean_old_cost": 0.0034126176470588346,
+                  "mean_old_wait_min": 0.002860294117646982,
+                  "overrides": 17,
+                  "predicted_selected_wait_mean_min": -0.016061299655513672,
+                  "prefix_groups": 12,
+                  "selected_residual_mean_min": 0.01892159377316066,
+                  "states": 17,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.0012403846153846614,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 24,
+                "harmful_wait_overrides": 24,
+                "mean_new_cost": -0.002238717708333335,
+                "mean_new_wait_min": -0.00053750000000002,
+                "mean_old_cost": -0.002238717708333335,
+                "mean_old_wait_min": -0.00053750000000002,
+                "overrides": 52,
+                "predicted_selected_wait_mean_min": -0.007275681606625451,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.006035296991240792,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 68,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.0012403846153846614,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 24,
+                  "harmful_wait_overrides": 24,
+                  "mean_new_cost": -0.005166271634615387,
+                  "mean_new_wait_min": -0.0012403846153846614,
+                  "mean_old_cost": -0.005166271634615387,
+                  "mean_old_wait_min": -0.0012403846153846614,
+                  "overrides": 52,
+                  "predicted_selected_wait_mean_min": -0.007275681606625451,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": 0.006035296991240792,
+                  "states": 52,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        }
+      },
+      "overall": {
+        "all_nonidentity_wait_errors": {
+          "by_candidate": {
+            "0": {
+              "candidate_evaluations": 204,
+              "false_safe": 64,
+              "mean_residual_min": 0.0006070745522403109,
+              "predicted_safe": 123,
+              "predicted_unsafe_actual_safe": 23,
+              "rmse_min": 0.0527474976505739,
+              "selected_overrides": 47,
+              "selected_residual_mean_min": 0.007742374998962507,
+              "unique_states": 204
+            },
+            "1": {
+              "candidate_evaluations": 227,
+              "false_safe": 71,
+              "mean_residual_min": -0.0010966526489726923,
+              "predicted_safe": 122,
+              "predicted_unsafe_actual_safe": 33,
+              "rmse_min": 0.0631595110316509,
+              "selected_overrides": 4,
+              "selected_residual_mean_min": 0.00992196739632352,
+              "unique_states": 227
+            },
+            "2": {
+              "candidate_evaluations": 235,
+              "false_safe": 70,
+              "mean_residual_min": -0.0024458656205405553,
+              "predicted_safe": 122,
+              "predicted_unsafe_actual_safe": 33,
+              "rmse_min": 0.0877254051212694,
+              "selected_overrides": 6,
+              "selected_residual_mean_min": 0.0021016361475330613,
+              "unique_states": 235
+            },
+            "3": {
+              "candidate_evaluations": 235,
+              "false_safe": 65,
+              "mean_residual_min": -0.0008187219524418118,
+              "predicted_safe": 117,
+              "predicted_unsafe_actual_safe": 34,
+              "rmse_min": 0.09082713184451936,
+              "selected_overrides": 3,
+              "selected_residual_mean_min": -0.06535686695390688,
+              "unique_states": 235
+            },
+            "4": {
+              "candidate_evaluations": 184,
+              "false_safe": 45,
+              "mean_residual_min": -0.00016323749479389875,
+              "predicted_safe": 83,
+              "predicted_unsafe_actual_safe": 30,
+              "rmse_min": 0.11664346661875559,
+              "selected_overrides": 20,
+              "selected_residual_mean_min": 0.03287805460940592,
+              "unique_states": 184
+            },
+            "5": {
+              "candidate_evaluations": 115,
+              "false_safe": 28,
+              "mean_residual_min": -0.0032366276454617684,
+              "predicted_safe": 64,
+              "predicted_unsafe_actual_safe": 11,
+              "rmse_min": 0.0544387940058854,
+              "selected_overrides": 31,
+              "selected_residual_mean_min": -0.0036062114343191763,
+              "unique_states": 115
+            }
+          },
+          "by_headway": {
+            "compressed": {
+              "candidate_evaluations": 233,
+              "false_safe": 66,
+              "mean_residual_min": -0.00014378838671230592,
+              "predicted_safe": 141,
+              "predicted_unsafe_actual_safe": 36,
+              "rmse_min": 0.1333423583236232,
+              "selected_overrides": 1,
+              "selected_residual_mean_min": 0.014976645778424287,
+              "unique_states": 68
+            },
+            "same": {
+              "candidate_evaluations": 104,
+              "false_safe": 28,
+              "mean_residual_min": 0.0028012736143605203,
+              "predicted_safe": 66,
+              "predicted_unsafe_actual_safe": 20,
+              "rmse_min": 0.02286243169353896,
+              "selected_overrides": 9,
+              "selected_residual_mean_min": 0.0073351786110879775,
+              "unique_states": 90
+            },
+            "widened": {
+              "candidate_evaluations": 863,
+              "false_safe": 249,
+              "mean_residual_min": -0.0017987863990386347,
+              "predicted_safe": 424,
+              "predicted_unsafe_actual_safe": 108,
+              "rmse_min": 0.06694272598563351,
+              "selected_overrides": 101,
+              "selected_residual_mean_min": 0.006781128663425917,
+              "unique_states": 202
+            }
+          },
+          "by_queue": {
+            "0to50": {
+              "candidate_evaluations": 735,
+              "false_safe": 239,
+              "mean_residual_min": -0.00547725171939149,
+              "predicted_safe": 432,
+              "predicted_unsafe_actual_safe": 118,
+              "rmse_min": 0.0808379474082497,
+              "selected_overrides": 83,
+              "selected_residual_mean_min": 0.0021464016023123346,
+              "unique_states": 147
+            },
+            "over50": {
+              "candidate_evaluations": 465,
+              "false_safe": 104,
+              "mean_residual_min": 0.005873671211122431,
+              "predicted_safe": 199,
+              "predicted_unsafe_actual_safe": 46,
+              "rmse_min": 0.08374912209368293,
+              "selected_overrides": 28,
+              "selected_residual_mean_min": 0.02099056840329678,
+              "unique_states": 93
+            }
+          },
+          "overall": {
+            "candidate_evaluations": 1200,
+            "false_safe": 343,
+            "mean_residual_min": -0.001078769083817345,
+            "predicted_safe": 631,
+            "predicted_unsafe_actual_safe": 164,
+            "rmse_min": 0.08197829684687201,
+            "selected_overrides": 111,
+            "selected_residual_mean_min": 0.00689988511967778,
+            "unique_states": 240
+          }
+        },
+        "policies": {
+          "cluster_margin90": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.017633928571428214,
+              "cost_change_contribution": 0.002762867187499999,
+              "harmful_cost_overrides": 9,
+              "harmful_wait_overrides": 8,
+              "mean_new_cost": -4.571250000000085e-05,
+              "mean_new_wait_min": -0.0010286458333333126,
+              "mean_old_cost": -0.0028085796875000012,
+              "mean_old_wait_min": -0.0012932291666666556,
+              "overrides": 14,
+              "predicted_selected_wait_mean_min": -0.03662425951831507,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.018990330946886857,
+              "states": 240,
+              "wait_change_contribution_min": 0.00026458333333334306
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.002365234375000001,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": -0.005852126288659797,
+                "mean_old_wait_min": -0.0005747422680412545,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 97,
+                "wait_change_contribution_min": 0.00023229166666667347
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 40,
+                "selected_residual_mean_min": null,
+                "states": 129,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": -0.04437499999999961,
+                "cost_change_contribution": 0.0003976328124999993,
+                "harmful_cost_overrides": 2,
+                "harmful_wait_overrides": 1,
+                "mean_new_cost": 0.05351381249999996,
+                "mean_new_wait_min": -0.04437499999999961,
+                "mean_old_cost": 0.005797875000000043,
+                "mean_old_wait_min": -0.04824999999999993,
+                "overrides": 2,
+                "predicted_selected_wait_mean_min": -0.035528081268457704,
+                "prefix_groups": 2,
+                "selected_residual_mean_min": -0.008846918731541906,
+                "states": 2,
+                "wait_change_contribution_min": 3.229166666666936e-05
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.013177083333332984,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 7,
+                "harmful_wait_overrides": 7,
+                "mean_new_cost": -0.00983321875000001,
+                "mean_new_wait_min": -0.013177083333332984,
+                "mean_old_cost": -0.00983321875000001,
+                "mean_old_wait_min": -0.013177083333332984,
+                "overrides": 12,
+                "predicted_selected_wait_mean_min": -0.036806955893291304,
+                "prefix_groups": 9,
+                "selected_residual_mean_min": 0.023629872559958322,
+                "states": 12,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "mean_bias": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.0008083333333332332,
+              "cost_change_contribution": 0.001463935937500001,
+              "harmful_cost_overrides": 23,
+              "harmful_wait_overrides": 27,
+              "mean_new_cost": -0.0013446437500000002,
+              "mean_new_wait_min": -0.00015156249999998122,
+              "mean_old_cost": -0.0028085796875000012,
+              "mean_old_wait_min": -0.0012932291666666556,
+              "overrides": 45,
+              "predicted_selected_wait_mean_min": -0.020709074732555104,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.019900741399221863,
+              "states": 240,
+              "wait_change_contribution_min": 0.0011416666666666743
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.001275565104166668,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": -0.004638418560606064,
+                "mean_old_wait_min": -0.0035549242424242774,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 31,
+                "selected_residual_mean_min": null,
+                "states": 66,
+                "wait_change_contribution_min": 0.0009776041666666763
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 40,
+                "selected_residual_mean_min": null,
+                "states": 129,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": -0.05442500000000008,
+                "cost_change_contribution": 0.0001883708333333331,
+                "harmful_cost_overrides": 2,
+                "harmful_wait_overrides": 3,
+                "mean_new_cost": -0.02606317500000005,
+                "mean_new_wait_min": -0.05442500000000008,
+                "mean_old_cost": -0.03510497500000004,
+                "mean_old_wait_min": -0.06229999999999999,
+                "overrides": 5,
+                "predicted_selected_wait_mean_min": -0.018187923977998614,
+                "prefix_groups": 5,
+                "selected_residual_mean_min": -0.036237076022001456,
+                "states": 5,
+                "wait_change_contribution_min": 0.0001640624999999981
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": 0.005893750000000123,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 21,
+                "harmful_wait_overrides": 24,
+                "mean_new_cost": -0.004809965624999997,
+                "mean_new_wait_min": 0.005893750000000123,
+                "mean_old_cost": -0.004809965624999997,
+                "mean_old_wait_min": 0.005893750000000123,
+                "overrides": 40,
+                "predicted_selected_wait_mean_min": -0.02102421857687466,
+                "prefix_groups": 24,
+                "selected_residual_mean_min": 0.026917968576874785,
+                "states": 40,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "uncalibrated": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.0027961711711711468,
+              "cost_change_contribution": 0.0,
+              "harmful_cost_overrides": 56,
+              "harmful_wait_overrides": 59,
+              "mean_new_cost": -0.0028085796875000012,
+              "mean_new_wait_min": -0.0012932291666666556,
+              "mean_old_cost": -0.0028085796875000012,
+              "mean_old_wait_min": -0.0012932291666666556,
+              "overrides": 111,
+              "predicted_selected_wait_mean_min": -0.009696056290848928,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.00689988511967778,
+              "states": 240,
+              "wait_change_contribution_min": 0.0
+            },
+            "transitions": {
+              "cancelled": {
+                "states": 0
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 40,
+                "selected_residual_mean_min": null,
+                "states": 129,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "states": 0
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.0027961711711711468,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 56,
+                "harmful_wait_overrides": 59,
+                "mean_new_cost": -0.006072604729729734,
+                "mean_new_wait_min": -0.0027961711711711468,
+                "mean_old_cost": -0.006072604729729734,
+                "mean_old_wait_min": -0.0027961711711711468,
+                "overrides": 111,
+                "predicted_selected_wait_mean_min": -0.009696056290848928,
+                "prefix_groups": 40,
+                "selected_residual_mean_min": 0.00689988511967778,
+                "states": 111,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "regime": {
+      "by_root": {
+        "397": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 106,
+                "false_safe": 34,
+                "mean_residual_min": -0.001230421247258617,
+                "predicted_safe": 60,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.06630579173355208,
+                "selected_overrides": 24,
+                "selected_residual_mean_min": 0.008549042657299484,
+                "unique_states": 106
+              },
+              "1": {
+                "candidate_evaluations": 113,
+                "false_safe": 31,
+                "mean_residual_min": -0.0017089214469234559,
+                "predicted_safe": 54,
+                "predicted_unsafe_actual_safe": 20,
+                "rmse_min": 0.06078042291162223,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.016157594072304014,
+                "unique_states": 113
+              },
+              "2": {
+                "candidate_evaluations": 118,
+                "false_safe": 34,
+                "mean_residual_min": -0.0062645709360442114,
+                "predicted_safe": 60,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.0836883598010532,
+                "selected_overrides": 4,
+                "selected_residual_mean_min": 0.0022135624828127916,
+                "unique_states": 118
+              },
+              "3": {
+                "candidate_evaluations": 117,
+                "false_safe": 36,
+                "mean_residual_min": -0.0004158407874276956,
+                "predicted_safe": 55,
+                "predicted_unsafe_actual_safe": 22,
+                "rmse_min": 0.08290097424824022,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.0033980310594125935,
+                "unique_states": 117
+              },
+              "4": {
+                "candidate_evaluations": 89,
+                "false_safe": 25,
+                "mean_residual_min": 0.0064868659539520325,
+                "predicted_safe": 41,
+                "predicted_unsafe_actual_safe": 18,
+                "rmse_min": 0.10149311865506393,
+                "selected_overrides": 15,
+                "selected_residual_mean_min": 0.034901245533070925,
+                "unique_states": 89
+              },
+              "5": {
+                "candidate_evaluations": 57,
+                "false_safe": 13,
+                "mean_residual_min": -0.00852251961623365,
+                "predicted_safe": 30,
+                "predicted_unsafe_actual_safe": 6,
+                "rmse_min": 0.07510350462190339,
+                "selected_overrides": 15,
+                "selected_residual_mean_min": -0.014944519013294352,
+                "unique_states": 57
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 111,
+                "false_safe": 31,
+                "mean_residual_min": -0.004738847315590871,
+                "predicted_safe": 58,
+                "predicted_unsafe_actual_safe": 28,
+                "rmse_min": 0.11693754779101483,
+                "selected_overrides": 0,
+                "selected_residual_mean_min": null,
+                "unique_states": 32
+              },
+              "same": {
+                "candidate_evaluations": 53,
+                "false_safe": 17,
+                "mean_residual_min": 0.0068128151188443144,
+                "predicted_safe": 36,
+                "predicted_unsafe_actual_safe": 13,
+                "rmse_min": 0.02120898609503828,
+                "selected_overrides": 11,
+                "selected_residual_mean_min": 0.006156391590631179,
+                "unique_states": 50
+              },
+              "widened": {
+                "candidate_evaluations": 436,
+                "false_safe": 125,
+                "mean_residual_min": -0.0019608376508847953,
+                "predicted_safe": 206,
+                "predicted_unsafe_actual_safe": 55,
+                "rmse_min": 0.0712051721093005,
+                "selected_overrides": 50,
+                "selected_residual_mean_min": 0.009372310403945473,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 345,
+                "false_safe": 126,
+                "mean_residual_min": -0.003855124344222795,
+                "predicted_safe": 219,
+                "predicted_unsafe_actual_safe": 51,
+                "rmse_min": 0.07597878533040266,
+                "selected_overrides": 44,
+                "selected_residual_mean_min": 0.007881116177194935,
+                "unique_states": 69
+              },
+              "over50": {
+                "candidate_evaluations": 255,
+                "false_safe": 47,
+                "mean_residual_min": 0.0012163130676049248,
+                "predicted_safe": 81,
+                "predicted_unsafe_actual_safe": 45,
+                "rmse_min": 0.08309425615220829,
+                "selected_overrides": 17,
+                "selected_residual_mean_min": 0.011150983288096432,
+                "unique_states": 51
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 173,
+              "mean_residual_min": -0.0016997634441960152,
+              "predicted_safe": 300,
+              "predicted_unsafe_actual_safe": 96,
+              "rmse_min": 0.07908112697727382,
+              "selected_overrides": 61,
+              "selected_residual_mean_min": 0.008792390617937977,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.004395833333333159,
+                "cost_change_contribution": 0.0009550458333333381,
+                "harmful_cost_overrides": 5,
+                "harmful_wait_overrides": 7,
+                "mean_new_cost": -0.0019044479166666671,
+                "mean_new_wait_min": -0.00043958333333331593,
+                "mean_old_cost": -0.002859493750000005,
+                "mean_old_wait_min": -0.00014999999999999042,
+                "overrides": 12,
+                "predicted_selected_wait_mean_min": -0.028607442660418633,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.02421160932708547,
+                "states": 120,
+                "wait_change_contribution_min": -0.0002895833333333255
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0009555968750000049,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.0023402372448979715,
+                  "mean_old_wait_min": 0.0007040816326530415,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 18,
+                  "selected_residual_mean_min": null,
+                  "states": 49,
+                  "wait_change_contribution_min": -0.0002874999999999919
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 59,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": 0.0003749999999999587,
+                  "cost_change_contribution": -5.51041666667131e-07,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": 0.0007473749999999391,
+                  "mean_new_wait_min": 0.0003749999999999587,
+                  "mean_old_cost": 0.0008134999999999948,
+                  "mean_old_wait_min": 0.0006249999999999867,
+                  "overrides": 1,
+                  "predicted_selected_wait_mean_min": -0.013921883267862136,
+                  "prefix_groups": 1,
+                  "selected_residual_mean_min": 0.014296883267862095,
+                  "states": 1,
+                  "wait_change_contribution_min": -2.0833333333335664e-06
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.004829545454545261,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 4,
+                  "harmful_wait_overrides": 6,
+                  "mean_new_cost": -0.020843738636363632,
+                  "mean_new_wait_min": -0.004829545454545261,
+                  "mean_old_cost": -0.020843738636363632,
+                  "mean_old_wait_min": -0.004829545454545261,
+                  "overrides": 11,
+                  "predicted_selected_wait_mean_min": -0.029942493514287405,
+                  "prefix_groups": 8,
+                  "selected_residual_mean_min": 0.025112948059742138,
+                  "states": 11,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.000214743589743586,
+                "cost_change_contribution": -0.00027219062499999854,
+                "harmful_cost_overrides": 17,
+                "harmful_wait_overrides": 26,
+                "mean_new_cost": -0.0031316843750000037,
+                "mean_new_wait_min": 6.979166666666546e-05,
+                "mean_old_cost": -0.002859493750000005,
+                "mean_old_wait_min": -0.00014999999999999042,
+                "overrides": 39,
+                "predicted_selected_wait_mean_min": -0.013205529727944754,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.013420273317688344,
+                "states": 120,
+                "wait_change_contribution_min": 0.00021979166666665588
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": -0.00025224062499999906,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0013758579545454495,
+                  "mean_old_wait_min": -0.0018863636363636153,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 11,
+                  "selected_residual_mean_min": null,
+                  "states": 22,
+                  "wait_change_contribution_min": 0.00034583333333332945
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 59,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": 0.001000000000000149,
+                  "cost_change_contribution": -1.9949999999999482e-05,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 2,
+                  "mean_new_cost": -0.018533666666666688,
+                  "mean_new_wait_min": 0.001000000000000149,
+                  "mean_old_cost": -0.01773566666666671,
+                  "mean_old_wait_min": 0.006041666666667093,
+                  "overrides": 3,
+                  "predicted_selected_wait_mean_min": -0.011057304783236297,
+                  "prefix_groups": 3,
+                  "selected_residual_mean_min": 0.012057304783236446,
+                  "states": 3,
+                  "wait_change_contribution_min": -0.0001260416666666736
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.00014930555555553912,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 16,
+                  "harmful_wait_overrides": 24,
+                  "mean_new_cost": -0.008894475694444456,
+                  "mean_new_wait_min": 0.00014930555555553912,
+                  "mean_old_cost": -0.008894475694444456,
+                  "mean_old_wait_min": 0.00014930555555553912,
+                  "overrides": 36,
+                  "predicted_selected_wait_mean_min": -0.01338454847333713,
+                  "prefix_groups": 13,
+                  "selected_residual_mean_min": 0.013533854028892662,
+                  "states": 36,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.0002950819672130959,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 32,
+                "harmful_wait_overrides": 37,
+                "mean_new_cost": -0.002859493750000005,
+                "mean_new_wait_min": -0.00014999999999999042,
+                "mean_old_cost": -0.002859493750000005,
+                "mean_old_wait_min": -0.00014999999999999042,
+                "overrides": 61,
+                "predicted_selected_wait_mean_min": -0.009087472585151074,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.008792390617937977,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 59,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.0002950819672130959,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 32,
+                  "harmful_wait_overrides": 37,
+                  "mean_new_cost": -0.005625233606557386,
+                  "mean_new_wait_min": -0.0002950819672130959,
+                  "mean_old_cost": -0.005625233606557386,
+                  "mean_old_wait_min": -0.0002950819672130959,
+                  "overrides": 61,
+                  "predicted_selected_wait_mean_min": -0.009087472585151074,
+                  "prefix_groups": 18,
+                  "selected_residual_mean_min": 0.008792390617937977,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 98,
+                "false_safe": 31,
+                "mean_residual_min": -0.007327267800844179,
+                "predicted_safe": 64,
+                "predicted_unsafe_actual_safe": 8,
+                "rmse_min": 0.06693743568251198,
+                "selected_overrides": 30,
+                "selected_residual_mean_min": 0.01186503474939317,
+                "unique_states": 98
+              },
+              "1": {
+                "candidate_evaluations": 114,
+                "false_safe": 37,
+                "mean_residual_min": -0.006471408064896798,
+                "predicted_safe": 60,
+                "predicted_unsafe_actual_safe": 18,
+                "rmse_min": 0.07721521229975696,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": -0.041342048222577615,
+                "unique_states": 114
+              },
+              "2": {
+                "candidate_evaluations": 117,
+                "false_safe": 34,
+                "mean_residual_min": -0.0019855910347356745,
+                "predicted_safe": 62,
+                "predicted_unsafe_actual_safe": 16,
+                "rmse_min": 0.10038884675920118,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.00908737432555976,
+                "unique_states": 117
+              },
+              "3": {
+                "candidate_evaluations": 118,
+                "false_safe": 29,
+                "mean_residual_min": -0.0020333019772583337,
+                "predicted_safe": 55,
+                "predicted_unsafe_actual_safe": 19,
+                "rmse_min": 0.10762741401261203,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": -0.0007287223661969593,
+                "unique_states": 118
+              },
+              "4": {
+                "candidate_evaluations": 95,
+                "false_safe": 25,
+                "mean_residual_min": -0.0038083774342080766,
+                "predicted_safe": 39,
+                "predicted_unsafe_actual_safe": 20,
+                "rmse_min": 0.13968537752055782,
+                "selected_overrides": 13,
+                "selected_residual_mean_min": 0.009628890207461084,
+                "unique_states": 95
+              },
+              "5": {
+                "candidate_evaluations": 58,
+                "false_safe": 13,
+                "mean_residual_min": -0.007978221472426212,
+                "predicted_safe": 27,
+                "predicted_unsafe_actual_safe": 10,
+                "rmse_min": 0.05246218136975767,
+                "selected_overrides": 11,
+                "selected_residual_mean_min": 0.005223930583879868,
+                "unique_states": 58
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 122,
+                "false_safe": 46,
+                "mean_residual_min": 0.0032880720303487417,
+                "predicted_safe": 68,
+                "predicted_unsafe_actual_safe": 34,
+                "rmse_min": 0.16185377671112122,
+                "selected_overrides": 0,
+                "selected_residual_mean_min": null,
+                "unique_states": 36
+              },
+              "same": {
+                "candidate_evaluations": 51,
+                "false_safe": 16,
+                "mean_residual_min": -0.0021378587653640277,
+                "predicted_safe": 33,
+                "predicted_unsafe_actual_safe": 9,
+                "rmse_min": 0.022516139390848424,
+                "selected_overrides": 10,
+                "selected_residual_mean_min": 0.0038628919011087794,
+                "unique_states": 40
+              },
+              "widened": {
+                "candidate_evaluations": 427,
+                "false_safe": 107,
+                "mean_residual_min": -0.007130452554053838,
+                "predicted_safe": 206,
+                "predicted_unsafe_actual_safe": 48,
+                "rmse_min": 0.0758435028364423,
+                "selected_overrides": 49,
+                "selected_residual_mean_min": 0.009700738536459757,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 390,
+                "false_safe": 126,
+                "mean_residual_min": -0.00556137775585329,
+                "predicted_safe": 224,
+                "predicted_unsafe_actual_safe": 69,
+                "rmse_min": 0.08871622742079996,
+                "selected_overrides": 44,
+                "selected_residual_mean_min": 0.011184828991199458,
+                "unique_states": 78
+              },
+              "over50": {
+                "candidate_evaluations": 210,
+                "false_safe": 43,
+                "mean_residual_min": -0.002779294881567748,
+                "predicted_safe": 83,
+                "predicted_unsafe_actual_safe": 22,
+                "rmse_min": 0.11145209841025795,
+                "selected_overrides": 15,
+                "selected_residual_mean_min": 0.001455508778989308,
+                "unique_states": 42
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 169,
+              "mean_residual_min": -0.004587648749853348,
+              "predicted_safe": 307,
+              "predicted_unsafe_actual_safe": 91,
+              "rmse_min": 0.09728010813662705,
+              "selected_overrides": 59,
+              "selected_residual_mean_min": 0.008711273005044335,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.015317307692307573,
+                "cost_change_contribution": 0.0008479208333333307,
+                "harmful_cost_overrides": 8,
+                "harmful_wait_overrides": 8,
+                "mean_new_cost": 0.00029000833333333334,
+                "mean_new_wait_min": 0.001659374999999987,
+                "mean_old_cost": -0.0005579124999999976,
+                "mean_old_wait_min": -0.00018541666666665272,
+                "overrides": 13,
+                "predicted_selected_wait_mean_min": -0.02543689223242915,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.04075419992473672,
+                "states": 120,
+                "wait_change_contribution_min": 0.0018447916666666398
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0008479208333333307,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.002211967391304342,
+                  "mean_old_wait_min": -0.00481249999999993,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 46,
+                  "wait_change_contribution_min": 0.0018447916666666398
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.015317307692307573,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 8,
+                  "harmful_wait_overrides": 8,
+                  "mean_new_cost": 0.0026769999999999997,
+                  "mean_new_wait_min": 0.015317307692307573,
+                  "mean_old_cost": 0.0026769999999999997,
+                  "mean_old_wait_min": 0.015317307692307573,
+                  "overrides": 13,
+                  "predicted_selected_wait_mean_min": -0.02543689223242915,
+                  "prefix_groups": 10,
+                  "selected_residual_mean_min": 0.04075419992473672,
+                  "states": 13,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.0012307692307691777,
+                "cost_change_contribution": -0.0005888354166666691,
+                "harmful_cost_overrides": 19,
+                "harmful_wait_overrides": 16,
+                "mean_new_cost": -0.0011467479166666667,
+                "mean_new_wait_min": -0.0003999999999999828,
+                "mean_old_cost": -0.0005579124999999976,
+                "mean_old_wait_min": -0.00018541666666665272,
+                "overrides": 39,
+                "predicted_selected_wait_mean_min": -0.011782232092656037,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.010551462861886863,
+                "states": 120,
+                "wait_change_contribution_min": -0.00021458333333333006
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": -0.0005990354166666684,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.003594212500000011,
+                  "mean_old_wait_min": 0.0016749999999999849,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 12,
+                  "selected_residual_mean_min": null,
+                  "states": 20,
+                  "wait_change_contribution_min": -0.00027916666666666416
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": -0.01016666666666651,
+                  "cost_change_contribution": 1.0199999999999445e-05,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.015367708333333355,
+                  "mean_new_wait_min": -0.01016666666666651,
+                  "mean_old_cost": 0.014959708333333377,
+                  "mean_old_wait_min": -0.012749999999999873,
+                  "overrides": 3,
+                  "predicted_selected_wait_mean_min": -0.006924255817337868,
+                  "prefix_groups": 3,
+                  "selected_residual_mean_min": -0.0032424108493286415,
+                  "states": 3,
+                  "wait_change_contribution_min": 6.458333333333408e-05
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.0004861111111110668,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 18,
+                  "harmful_wait_overrides": 16,
+                  "mean_new_cost": -0.005103135416666668,
+                  "mean_new_wait_min": -0.0004861111111110668,
+                  "mean_old_cost": -0.005103135416666668,
+                  "mean_old_wait_min": -0.0004861111111110668,
+                  "overrides": 36,
+                  "predicted_selected_wait_mean_min": -0.012187063448932552,
+                  "prefix_groups": 17,
+                  "selected_residual_mean_min": 0.011700952337821481,
+                  "states": 36,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.00037711864406776827,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 34,
+                "harmful_wait_overrides": 30,
+                "mean_new_cost": -0.0005579124999999976,
+                "mean_new_wait_min": -0.00018541666666665272,
+                "mean_old_cost": -0.0005579124999999976,
+                "mean_old_wait_min": -0.00018541666666665272,
+                "overrides": 59,
+                "predicted_selected_wait_mean_min": -0.009088391649112106,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.008711273005044335,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 61,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.00037711864406776827,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 34,
+                  "harmful_wait_overrides": 30,
+                  "mean_new_cost": -0.0011347372881355875,
+                  "mean_new_wait_min": -0.00037711864406776827,
+                  "mean_old_cost": -0.0011347372881355875,
+                  "mean_old_wait_min": -0.00037711864406776827,
+                  "overrides": 59,
+                  "predicted_selected_wait_mean_min": -0.009088391649112106,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": 0.008711273005044335,
+                  "states": 59,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        }
+      },
+      "overall": {
+        "all_nonidentity_wait_errors": {
+          "by_candidate": {
+            "0": {
+              "candidate_evaluations": 204,
+              "false_safe": 65,
+              "mean_residual_min": -0.00415929851319678,
+              "predicted_safe": 124,
+              "predicted_unsafe_actual_safe": 23,
+              "rmse_min": 0.06660997609840508,
+              "selected_overrides": 54,
+              "selected_residual_mean_min": 0.010391260486240424,
+              "unique_states": 204
+            },
+            "1": {
+              "candidate_evaluations": 227,
+              "false_safe": 68,
+              "mean_residual_min": -0.0041006548145400236,
+              "predicted_safe": 114,
+              "predicted_unsafe_actual_safe": 38,
+              "rmse_min": 0.06952136253465704,
+              "selected_overrides": 2,
+              "selected_residual_mean_min": -0.0125922270751368,
+              "unique_states": 227
+            },
+            "2": {
+              "candidate_evaluations": 235,
+              "false_safe": 68,
+              "mean_residual_min": -0.004134185197945921,
+              "predicted_safe": 122,
+              "predicted_unsafe_actual_safe": 31,
+              "rmse_min": 0.09238122240780416,
+              "selected_overrides": 6,
+              "selected_residual_mean_min": 0.004504833097061781,
+              "unique_states": 235
+            },
+            "3": {
+              "candidate_evaluations": 235,
+              "false_safe": 65,
+              "mean_residual_min": -0.0012280127891298879,
+              "predicted_safe": 110,
+              "predicted_unsafe_actual_safe": 41,
+              "rmse_min": 0.09611524063428752,
+              "selected_overrides": 4,
+              "selected_residual_mean_min": 0.0013346543466078173,
+              "unique_states": 235
+            },
+            "4": {
+              "candidate_evaluations": 184,
+              "false_safe": 50,
+              "mean_residual_min": 0.001171387030717194,
+              "predicted_safe": 80,
+              "predicted_unsafe_actual_safe": 38,
+              "rmse_min": 0.1227053818403584,
+              "selected_overrides": 28,
+              "selected_residual_mean_min": 0.023167651989037783,
+              "unique_states": 184
+            },
+            "5": {
+              "candidate_evaluations": 115,
+              "false_safe": 26,
+              "mean_residual_min": -0.008248004030661204,
+              "predicted_safe": 57,
+              "predicted_unsafe_actual_safe": 16,
+              "rmse_min": 0.06468269324783894,
+              "selected_overrides": 26,
+              "selected_residual_mean_min": -0.006411713414489878,
+              "unique_states": 115
+            }
+          },
+          "by_headway": {
+            "compressed": {
+              "candidate_evaluations": 233,
+              "false_safe": 77,
+              "mean_residual_min": -0.0005359110056997366,
+              "predicted_safe": 126,
+              "predicted_unsafe_actual_safe": 62,
+              "rmse_min": 0.1422360969258107,
+              "selected_overrides": 0,
+              "selected_residual_mean_min": null,
+              "unique_states": 68
+            },
+            "same": {
+              "candidate_evaluations": 104,
+              "false_safe": 33,
+              "mean_residual_min": 0.002423542348703685,
+              "predicted_safe": 69,
+              "predicted_unsafe_actual_safe": 22,
+              "rmse_min": 0.021859763049200703,
+              "selected_overrides": 21,
+              "selected_residual_mean_min": 0.005064248881334799,
+              "unique_states": 90
+            },
+            "widened": {
+              "candidate_evaluations": 863,
+              "false_safe": 232,
+              "mean_residual_min": -0.004518688825453949,
+              "predicted_safe": 412,
+              "predicted_unsafe_actual_safe": 103,
+              "rmse_min": 0.07353672697789473,
+              "selected_overrides": 99,
+              "selected_residual_mean_min": 0.009534865742260623,
+              "unique_states": 202
+            }
+          },
+          "by_queue": {
+            "0to50": {
+              "candidate_evaluations": 735,
+              "false_safe": 252,
+              "mean_residual_min": -0.004760483297332853,
+              "predicted_safe": 443,
+              "predicted_unsafe_actual_safe": 120,
+              "rmse_min": 0.08298126639689311,
+              "selected_overrides": 88,
+              "selected_residual_mean_min": 0.009532972584197196,
+              "unique_states": 147
+            },
+            "over50": {
+              "candidate_evaluations": 465,
+              "false_safe": 90,
+              "mean_residual_min": -0.0005881550384730557,
+              "predicted_safe": 164,
+              "predicted_unsafe_actual_safe": 67,
+              "rmse_min": 0.09693381933450486,
+              "selected_overrides": 32,
+              "selected_residual_mean_min": 0.006606229611952466,
+              "unique_states": 93
+            }
+          },
+          "overall": {
+            "candidate_evaluations": 1200,
+            "false_safe": 342,
+            "mean_residual_min": -0.0031437060970246817,
+            "predicted_safe": 607,
+            "predicted_unsafe_actual_safe": 187,
+            "rmse_min": 0.08864886937538898,
+            "selected_overrides": 120,
+            "selected_residual_mean_min": 0.008752507791598606,
+            "unique_states": 240
+          }
+        },
+        "policies": {
+          "cluster_margin90": {
+            "overall": {
+              "actual_selected_wait_mean_min": 0.005855000000000022,
+              "cost_change_contribution": 0.0009014833333333345,
+              "harmful_cost_overrides": 13,
+              "harmful_wait_overrides": 15,
+              "mean_new_cost": -0.0008072197916666669,
+              "mean_new_wait_min": 0.0006098958333333356,
+              "mean_old_cost": -0.0017087031250000012,
+              "mean_old_wait_min": -0.00016770833333332156,
+              "overrides": 25,
+              "predicted_selected_wait_mean_min": -0.026958756437864103,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.032813756437864126,
+              "states": 240,
+              "wait_change_contribution_min": 0.0007776041666666571
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.000901758854166668,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": -0.0022781276315789506,
+                "mean_old_wait_min": -0.0019671052631578707,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 37,
+                "selected_residual_mean_min": null,
+                "states": 95,
+                "wait_change_contribution_min": 0.0007786458333333239
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": 0.0003749999999999587,
+                "cost_change_contribution": -2.755208333335655e-07,
+                "harmful_cost_overrides": 1,
+                "harmful_wait_overrides": 1,
+                "mean_new_cost": 0.0007473749999999391,
+                "mean_new_wait_min": 0.0003749999999999587,
+                "mean_old_cost": 0.0008134999999999948,
+                "mean_old_wait_min": 0.0006249999999999867,
+                "overrides": 1,
+                "predicted_selected_wait_mean_min": -0.013921883267862136,
+                "prefix_groups": 1,
+                "selected_residual_mean_min": 0.014296883267862095,
+                "states": 1,
+                "wait_change_contribution_min": -1.0416666666667832e-06
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": 0.006083333333333357,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 12,
+                "harmful_wait_overrides": 14,
+                "mean_new_cost": -0.008103338541666666,
+                "mean_new_wait_min": 0.006083333333333357,
+                "mean_old_cost": -0.008103338541666666,
+                "mean_old_wait_min": 0.006083333333333357,
+                "overrides": 24,
+                "predicted_selected_wait_mean_min": -0.027501959486614186,
+                "prefix_groups": 18,
+                "selected_residual_mean_min": 0.03358529281994754,
+                "states": 24,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "mean_bias": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.0005080128205127959,
+              "cost_change_contribution": -0.0004305130208333338,
+              "harmful_cost_overrides": 36,
+              "harmful_wait_overrides": 42,
+              "mean_new_cost": -0.002139216145833335,
+              "mean_new_wait_min": -0.00016510416666665865,
+              "mean_old_cost": -0.0017087031250000012,
+              "mean_old_wait_min": -0.00016770833333332156,
+              "overrides": 78,
+              "predicted_selected_wait_mean_min": -0.0124938809103004,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.011985868089787605,
+              "states": 240,
+              "wait_change_contribution_min": 2.6041666666629104e-06
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": -0.0004256380208333338,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0024322172619047643,
+                "mean_old_wait_min": -0.0001904761904761867,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 23,
+                "selected_residual_mean_min": null,
+                "states": 42,
+                "wait_change_contribution_min": 3.333333333333267e-05
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": -0.00458333333333318,
+                "cost_change_contribution": -4.8750000000000185e-06,
+                "harmful_cost_overrides": 2,
+                "harmful_wait_overrides": 2,
+                "mean_new_cost": -0.0015829791666666672,
+                "mean_new_wait_min": -0.00458333333333318,
+                "mean_old_cost": -0.0013879791666666665,
+                "mean_old_wait_min": -0.0033541666666663896,
+                "overrides": 6,
+                "predicted_selected_wait_mean_min": -0.008990780300287082,
+                "prefix_groups": 6,
+                "selected_residual_mean_min": 0.004407446966953902,
+                "states": 6,
+                "wait_change_contribution_min": -3.072916666666976e-05
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.0001684027777777631,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 34,
+                "harmful_wait_overrides": 40,
+                "mean_new_cost": -0.006998805555555561,
+                "mean_new_wait_min": -0.0001684027777777631,
+                "mean_old_cost": -0.006998805555555561,
+                "mean_old_wait_min": -0.0001684027777777631,
+                "overrides": 72,
+                "predicted_selected_wait_mean_min": -0.012785805961134843,
+                "prefix_groups": 30,
+                "selected_residual_mean_min": 0.012617403183357075,
+                "states": 72,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "uncalibrated": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.0003354166666666422,
+              "cost_change_contribution": 0.0,
+              "harmful_cost_overrides": 66,
+              "harmful_wait_overrides": 67,
+              "mean_new_cost": -0.0017087031250000012,
+              "mean_new_wait_min": -0.00016770833333332156,
+              "mean_old_cost": -0.0017087031250000012,
+              "mean_old_wait_min": -0.00016770833333332156,
+              "overrides": 120,
+              "predicted_selected_wait_mean_min": -0.009087924458265248,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.008752507791598606,
+              "states": 240,
+              "wait_change_contribution_min": 0.0
+            },
+            "transitions": {
+              "cancelled": {
+                "states": 0
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "states": 0
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.0003354166666666422,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 66,
+                "harmful_wait_overrides": 67,
+                "mean_new_cost": -0.0034174062500000033,
+                "mean_new_wait_min": -0.0003354166666666422,
+                "mean_old_cost": -0.0034174062500000033,
+                "mean_old_wait_min": -0.0003354166666666422,
+                "overrides": 120,
+                "predicted_selected_wait_mean_min": -0.009087924458265248,
+                "prefix_groups": 37,
+                "selected_residual_mean_min": 0.008752507791598606,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "scene": {
+      "by_root": {
+        "397": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 106,
+                "false_safe": 39,
+                "mean_residual_min": 0.005263451325951161,
+                "predicted_safe": 72,
+                "predicted_unsafe_actual_safe": 8,
+                "rmse_min": 0.053842517160635615,
+                "selected_overrides": 34,
+                "selected_residual_mean_min": 0.007938466964779978,
+                "unique_states": 106
+              },
+              "1": {
+                "candidate_evaluations": 113,
+                "false_safe": 37,
+                "mean_residual_min": 0.00229079149353019,
+                "predicted_safe": 66,
+                "predicted_unsafe_actual_safe": 14,
+                "rmse_min": 0.05365678015085132,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.003726214270268865,
+                "unique_states": 113
+              },
+              "2": {
+                "candidate_evaluations": 118,
+                "false_safe": 38,
+                "mean_residual_min": -0.00451483168755886,
+                "predicted_safe": 67,
+                "predicted_unsafe_actual_safe": 12,
+                "rmse_min": 0.07928807405756239,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.018601152046729387,
+                "unique_states": 118
+              },
+              "3": {
+                "candidate_evaluations": 117,
+                "false_safe": 39,
+                "mean_residual_min": -0.0005995458948455248,
+                "predicted_safe": 63,
+                "predicted_unsafe_actual_safe": 17,
+                "rmse_min": 0.07698552395649266,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.00258467541948257,
+                "unique_states": 117
+              },
+              "4": {
+                "candidate_evaluations": 89,
+                "false_safe": 21,
+                "mean_residual_min": 0.0032079366531519897,
+                "predicted_safe": 41,
+                "predicted_unsafe_actual_safe": 14,
+                "rmse_min": 0.09323270619386344,
+                "selected_overrides": 11,
+                "selected_residual_mean_min": 0.03866761747904394,
+                "unique_states": 89
+              },
+              "5": {
+                "candidate_evaluations": 57,
+                "false_safe": 19,
+                "mean_residual_min": -0.0015161813498940134,
+                "predicted_safe": 39,
+                "predicted_unsafe_actual_safe": 3,
+                "rmse_min": 0.0646833122716982,
+                "selected_overrides": 21,
+                "selected_residual_mean_min": -0.0011588151603923282,
+                "unique_states": 57
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 111,
+                "false_safe": 28,
+                "mean_residual_min": -0.006020750534522934,
+                "predicted_safe": 68,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.10774757009140254,
+                "selected_overrides": 0,
+                "selected_residual_mean_min": null,
+                "unique_states": 32
+              },
+              "same": {
+                "candidate_evaluations": 53,
+                "false_safe": 16,
+                "mean_residual_min": 0.007776682930436389,
+                "predicted_safe": 40,
+                "predicted_unsafe_actual_safe": 8,
+                "rmse_min": 0.022358571736502554,
+                "selected_overrides": 13,
+                "selected_residual_mean_min": 0.010298663091854164,
+                "unique_states": 50
+              },
+              "widened": {
+                "candidate_evaluations": 436,
+                "false_safe": 149,
+                "mean_residual_min": 0.0015346591965512558,
+                "predicted_safe": 240,
+                "predicted_unsafe_actual_safe": 45,
+                "rmse_min": 0.06362208417271635,
+                "selected_overrides": 58,
+                "selected_residual_mean_min": 0.009797532102342965,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 345,
+                "false_safe": 121,
+                "mean_residual_min": -0.004530064375327913,
+                "predicted_safe": 223,
+                "predicted_unsafe_actual_safe": 42,
+                "rmse_min": 0.07406527072983536,
+                "selected_overrides": 46,
+                "selected_residual_mean_min": 0.004599489117500448,
+                "unique_states": 69
+              },
+              "over50": {
+                "candidate_evaluations": 255,
+                "false_safe": 72,
+                "mean_residual_min": 0.007748409824178669,
+                "predicted_safe": 125,
+                "predicted_unsafe_actual_safe": 26,
+                "rmse_min": 0.0682391172723333,
+                "selected_overrides": 25,
+                "selected_residual_mean_min": 0.01962251930899902,
+                "unique_states": 51
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 193,
+              "mean_residual_min": 0.0006882871594623848,
+              "predicted_safe": 348,
+              "predicted_unsafe_actual_safe": 68,
+              "rmse_min": 0.07164706740236318,
+              "selected_overrides": 71,
+              "selected_residual_mean_min": 0.009889288480704169,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.010338235294117782,
+                "cost_change_contribution": 6.342291666666758e-05,
+                "harmful_cost_overrides": 10,
+                "harmful_wait_overrides": 11,
+                "mean_new_cost": -0.002117769791666669,
+                "mean_new_wait_min": 0.0014645833333333524,
+                "mean_old_cost": -0.0021811927083333366,
+                "mean_old_wait_min": 0.0012291666666667076,
+                "overrides": 17,
+                "predicted_selected_wait_mean_min": -0.020888030779725612,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.031226266073843392,
+                "states": 120,
+                "wait_change_contribution_min": 0.0002354166666666449
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 6.408541666666814e-05,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.0001424120370370403,
+                  "mean_old_wait_min": -0.0005393518518518038,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 54,
+                  "wait_change_contribution_min": 0.0002427083333333117
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 49,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": -0.00025000000000011124,
+                  "cost_change_contribution": -6.625000000005469e-07,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": -1.093750000003002e-05,
+                  "mean_new_wait_min": -0.00025000000000011124,
+                  "mean_old_cost": 2.8812500000002794e-05,
+                  "mean_old_wait_min": 0.00018749999999989608,
+                  "overrides": 2,
+                  "predicted_selected_wait_mean_min": -0.015303903667751929,
+                  "prefix_groups": 2,
+                  "selected_residual_mean_min": 0.015053903667751818,
+                  "states": 2,
+                  "wait_change_contribution_min": -7.2916666666667886e-06
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.011750000000000168,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 9,
+                  "harmful_wait_overrides": 10,
+                  "mean_new_cost": -0.016940700000000017,
+                  "mean_new_wait_min": 0.011750000000000168,
+                  "mean_old_cost": -0.016940700000000017,
+                  "mean_old_wait_min": 0.011750000000000168,
+                  "overrides": 15,
+                  "predicted_selected_wait_mean_min": -0.0216325810613221,
+                  "prefix_groups": 10,
+                  "selected_residual_mean_min": 0.03338258106132227,
+                  "states": 15,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.0019454545454546592,
+                "cost_change_contribution": 0.0007894385416666654,
+                "harmful_cost_overrides": 33,
+                "harmful_wait_overrides": 33,
+                "mean_new_cost": -0.0013917541666666714,
+                "mean_new_wait_min": 0.0008916666666667193,
+                "mean_old_cost": -0.0021811927083333366,
+                "mean_old_wait_min": 0.0012291666666667076,
+                "overrides": 55,
+                "predicted_selected_wait_mean_min": -0.009843811746903594,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.011789266292358254,
+                "states": 120,
+                "wait_change_contribution_min": -0.00033749999999998825
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0004469729166666649,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": -0.003352296874999987,
+                  "mean_old_wait_min": -0.00035937500000009226,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 11,
+                  "selected_residual_mean_min": null,
+                  "states": 16,
+                  "wait_change_contribution_min": 4.791666666667897e-05
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 49,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "actual_selected_wait_mean_min": -0.013562500000000588,
+                  "cost_change_contribution": 0.0003424656250000005,
+                  "harmful_cost_overrides": 1,
+                  "harmful_wait_overrides": 1,
+                  "mean_new_cost": 0.031745000000000086,
+                  "mean_new_wait_min": -0.013562500000000588,
+                  "mean_old_cost": 0.011197062500000056,
+                  "mean_old_wait_min": 0.009562499999999446,
+                  "overrides": 2,
+                  "predicted_selected_wait_mean_min": -0.006252111686965013,
+                  "prefix_groups": 2,
+                  "selected_residual_mean_min": -0.007310388313035574,
+                  "states": 2,
+                  "wait_change_contribution_min": -0.00038541666666666726
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.002530660377358631,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 32,
+                  "harmful_wait_overrides": 32,
+                  "mean_new_cost": -0.004349066037735863,
+                  "mean_new_wait_min": 0.002530660377358631,
+                  "mean_old_cost": -0.004349066037735863,
+                  "mean_old_wait_min": 0.002530660377358631,
+                  "overrides": 53,
+                  "predicted_selected_wait_mean_min": -0.009979347598222032,
+                  "prefix_groups": 18,
+                  "selected_residual_mean_min": 0.012510007975580661,
+                  "states": 53,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": 0.0020774647887324632,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 43,
+                "harmful_wait_overrides": 42,
+                "mean_new_cost": -0.0021811927083333366,
+                "mean_new_wait_min": 0.0012291666666667076,
+                "mean_old_cost": -0.0021811927083333366,
+                "mean_old_wait_min": 0.0012291666666667076,
+                "overrides": 71,
+                "predicted_selected_wait_mean_min": -0.007811823691971706,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.009889288480704169,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 19,
+                  "selected_residual_mean_min": null,
+                  "states": 49,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": 0.0020774647887324632,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 43,
+                  "harmful_wait_overrides": 42,
+                  "mean_new_cost": -0.003686522887323948,
+                  "mean_new_wait_min": 0.0020774647887324632,
+                  "mean_old_cost": -0.003686522887323948,
+                  "mean_old_wait_min": 0.0020774647887324632,
+                  "overrides": 71,
+                  "predicted_selected_wait_mean_min": -0.007811823691971706,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": 0.009889288480704169,
+                  "states": 71,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "all_nonidentity_wait_errors": {
+            "by_candidate": {
+              "0": {
+                "candidate_evaluations": 98,
+                "false_safe": 34,
+                "mean_residual_min": -0.0013317765083083464,
+                "predicted_safe": 68,
+                "predicted_unsafe_actual_safe": 7,
+                "rmse_min": 0.05336825866308366,
+                "selected_overrides": 31,
+                "selected_residual_mean_min": 0.004081117499101858,
+                "unique_states": 98
+              },
+              "1": {
+                "candidate_evaluations": 114,
+                "false_safe": 38,
+                "mean_residual_min": -0.0027247536111009154,
+                "predicted_safe": 64,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.07082359767911442,
+                "selected_overrides": 2,
+                "selected_residual_mean_min": 0.004714002127480897,
+                "unique_states": 114
+              },
+              "2": {
+                "candidate_evaluations": 117,
+                "false_safe": 31,
+                "mean_residual_min": 0.0001563229768102354,
+                "predicted_safe": 60,
+                "predicted_unsafe_actual_safe": 15,
+                "rmse_min": 0.09521652003704045,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.007615002845278881,
+                "unique_states": 117
+              },
+              "3": {
+                "candidate_evaluations": 118,
+                "false_safe": 25,
+                "mean_residual_min": -0.001478344975619062,
+                "predicted_safe": 54,
+                "predicted_unsafe_actual_safe": 16,
+                "rmse_min": 0.10222908985559989,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": -0.3137624109967567,
+                "unique_states": 118
+              },
+              "4": {
+                "candidate_evaluations": 95,
+                "false_safe": 21,
+                "mean_residual_min": -0.005101334457121674,
+                "predicted_safe": 39,
+                "predicted_unsafe_actual_safe": 16,
+                "rmse_min": 0.1339128450558763,
+                "selected_overrides": 12,
+                "selected_residual_mean_min": 0.028891152027342423,
+                "unique_states": 95
+              },
+              "5": {
+                "candidate_evaluations": 58,
+                "false_safe": 15,
+                "mean_residual_min": -0.005977783077353218,
+                "predicted_safe": 28,
+                "predicted_unsafe_actual_safe": 11,
+                "rmse_min": 0.045899004797520265,
+                "selected_overrides": 15,
+                "selected_residual_mean_min": 0.0006772112466113798,
+                "unique_states": 58
+              }
+            },
+            "by_headway": {
+              "compressed": {
+                "candidate_evaluations": 122,
+                "false_safe": 37,
+                "mean_residual_min": 0.00280967125947673,
+                "predicted_safe": 68,
+                "predicted_unsafe_actual_safe": 25,
+                "rmse_min": 0.15393762525333296,
+                "selected_overrides": 1,
+                "selected_residual_mean_min": 0.0390542057862585,
+                "unique_states": 36
+              },
+              "same": {
+                "candidate_evaluations": 51,
+                "false_safe": 16,
+                "mean_residual_min": -0.0009101052351009464,
+                "predicted_safe": 31,
+                "predicted_unsafe_actual_safe": 11,
+                "rmse_min": 0.0229644813379745,
+                "selected_overrides": 7,
+                "selected_residual_mean_min": 0.011920709181817523,
+                "unique_states": 40
+              },
+              "widened": {
+                "candidate_evaluations": 427,
+                "false_safe": 111,
+                "mean_residual_min": -0.004039797767904057,
+                "predicted_safe": 214,
+                "predicted_unsafe_actual_safe": 44,
+                "rmse_min": 0.0693355263497899,
+                "selected_overrides": 54,
+                "selected_residual_mean_min": 0.0011879270656285214,
+                "unique_states": 101
+              }
+            },
+            "by_queue": {
+              "0to50": {
+                "candidate_evaluations": 390,
+                "false_safe": 121,
+                "mean_residual_min": -0.005205119910413582,
+                "predicted_safe": 226,
+                "predicted_unsafe_actual_safe": 62,
+                "rmse_min": 0.08522208839899549,
+                "selected_overrides": 46,
+                "selected_residual_mean_min": 0.0016949687159421361,
+                "unique_states": 78
+              },
+              "over50": {
+                "candidate_evaluations": 210,
+                "false_safe": 43,
+                "mean_residual_min": 0.002863655451582275,
+                "predicted_safe": 87,
+                "predicted_unsafe_actual_safe": 18,
+                "rmse_min": 0.1009048825632947,
+                "selected_overrides": 16,
+                "selected_residual_mean_min": 0.006792416916848941,
+                "unique_states": 42
+              }
+            },
+            "overall": {
+              "candidate_evaluations": 600,
+              "false_safe": 164,
+              "mean_residual_min": -0.0023810485337150333,
+              "predicted_safe": 313,
+              "predicted_unsafe_actual_safe": 80,
+              "rmse_min": 0.09101896061807856,
+              "selected_overrides": 62,
+              "selected_residual_mean_min": 0.0030104392194019573,
+              "unique_states": 120
+            }
+          },
+          "policies": {
+            "cluster_margin90": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.012668750000000109,
+                "cost_change_contribution": -1.2070833333331875e-05,
+                "harmful_cost_overrides": 8,
+                "harmful_wait_overrides": 9,
+                "mean_new_cost": -0.0011130635416666678,
+                "mean_new_wait_min": -0.0021114583333333515,
+                "mean_old_cost": -0.0011009927083333359,
+                "mean_old_wait_min": -0.003862500000000034,
+                "overrides": 20,
+                "predicted_selected_wait_mean_min": -0.022982021270937222,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.01031327127093712,
+                "states": 120,
+                "wait_change_contribution_min": 0.0017510416666666824
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": -1.2070833333331875e-05,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 3.448809523809107e-05,
+                  "mean_old_wait_min": -0.005002976190476236,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 42,
+                  "wait_change_contribution_min": 0.0017510416666666824
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 58,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.012668750000000109,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 8,
+                  "harmful_wait_overrides": 9,
+                  "mean_new_cost": -0.0066783812500000065,
+                  "mean_new_wait_min": -0.012668750000000109,
+                  "mean_old_cost": -0.0066783812500000065,
+                  "mean_old_wait_min": -0.012668750000000109,
+                  "overrides": 20,
+                  "predicted_selected_wait_mean_min": -0.022982021270937222,
+                  "prefix_groups": 13,
+                  "selected_residual_mean_min": 0.01031327127093712,
+                  "states": 20,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "mean_bias": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.00992708333333338,
+                "cost_change_contribution": -0.0005863895833333342,
+                "harmful_cost_overrides": 25,
+                "harmful_wait_overrides": 24,
+                "mean_new_cost": -0.00168738229166667,
+                "mean_new_wait_min": -0.003970833333333351,
+                "mean_old_cost": -0.0011009927083333359,
+                "mean_old_wait_min": -0.003862500000000034,
+                "overrides": 48,
+                "predicted_selected_wait_mean_min": -0.012907173291338921,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.0029800899580055417,
+                "states": 120,
+                "wait_change_contribution_min": -0.0001083333333333177
+              },
+              "transitions": {
+                "cancelled": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": -0.0005863895833333342,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.005026196428571436,
+                  "mean_old_wait_min": 0.0009285714285712946,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 11,
+                  "selected_residual_mean_min": null,
+                  "states": 14,
+                  "wait_change_contribution_min": -0.0001083333333333177
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 58,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.00992708333333338,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 25,
+                  "harmful_wait_overrides": 24,
+                  "mean_new_cost": -0.004218455729166675,
+                  "mean_new_wait_min": -0.00992708333333338,
+                  "mean_old_cost": -0.004218455729166675,
+                  "mean_old_wait_min": -0.00992708333333338,
+                  "overrides": 48,
+                  "predicted_selected_wait_mean_min": -0.012907173291338921,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": 0.0029800899580055417,
+                  "states": 48,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            },
+            "uncalibrated": {
+              "overall": {
+                "actual_selected_wait_mean_min": -0.007475806451612969,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 35,
+                "harmful_wait_overrides": 32,
+                "mean_new_cost": -0.0011009927083333359,
+                "mean_new_wait_min": -0.003862500000000034,
+                "mean_old_cost": -0.0011009927083333359,
+                "mean_old_wait_min": -0.003862500000000034,
+                "overrides": 62,
+                "predicted_selected_wait_mean_min": -0.010486245671014924,
+                "prefix_groups": 20,
+                "selected_residual_mean_min": 0.0030104392194019573,
+                "states": 120,
+                "wait_change_contribution_min": 0.0
+              },
+              "transitions": {
+                "cancelled": {
+                  "states": 0
+                },
+                "identity": {
+                  "actual_selected_wait_mean_min": null,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 0,
+                  "harmful_wait_overrides": 0,
+                  "mean_new_cost": 0.0,
+                  "mean_new_wait_min": 0.0,
+                  "mean_old_cost": 0.0,
+                  "mean_old_wait_min": 0.0,
+                  "overrides": 0,
+                  "predicted_selected_wait_mean_min": null,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": null,
+                  "states": 58,
+                  "wait_change_contribution_min": 0.0
+                },
+                "rerouted": {
+                  "states": 0
+                },
+                "retained": {
+                  "actual_selected_wait_mean_min": -0.007475806451612969,
+                  "cost_change_contribution": 0.0,
+                  "harmful_cost_overrides": 35,
+                  "harmful_wait_overrides": 32,
+                  "mean_new_cost": -0.0021309536290322626,
+                  "mean_new_wait_min": -0.007475806451612969,
+                  "mean_old_cost": -0.0021309536290322626,
+                  "mean_old_wait_min": -0.007475806451612969,
+                  "overrides": 62,
+                  "predicted_selected_wait_mean_min": -0.010486245671014924,
+                  "prefix_groups": 20,
+                  "selected_residual_mean_min": 0.0030104392194019573,
+                  "states": 62,
+                  "wait_change_contribution_min": 0.0
+                }
+              }
+            }
+          }
+        }
+      },
+      "overall": {
+        "all_nonidentity_wait_errors": {
+          "by_candidate": {
+            "0": {
+              "candidate_evaluations": 204,
+              "false_safe": 73,
+              "mean_residual_min": 0.0020951556016500245,
+              "predicted_safe": 140,
+              "predicted_unsafe_actual_safe": 15,
+              "rmse_min": 0.05361521068159152,
+              "selected_overrides": 65,
+              "selected_residual_mean_min": 0.006098807988841183,
+              "unique_states": 204
+            },
+            "1": {
+              "candidate_evaluations": 227,
+              "false_safe": 75,
+              "mean_residual_min": -0.00022802851496296414,
+              "predicted_safe": 130,
+              "predicted_unsafe_actual_safe": 29,
+              "rmse_min": 0.0628667075701733,
+              "selected_overrides": 4,
+              "selected_residual_mean_min": 0.004220108198874881,
+              "unique_states": 227
+            },
+            "2": {
+              "candidate_evaluations": 235,
+              "false_safe": 69,
+              "mean_residual_min": -0.002189192982319779,
+              "predicted_safe": 127,
+              "predicted_unsafe_actual_safe": 27,
+              "rmse_min": 0.08758126610735172,
+              "selected_overrides": 2,
+              "selected_residual_mean_min": 0.013108077446004134,
+              "unique_states": 235
+            },
+            "3": {
+              "candidate_evaluations": 235,
+              "false_safe": 64,
+              "mean_residual_min": -0.0010408152205105355,
+              "predicted_safe": 117,
+              "predicted_unsafe_actual_safe": 33,
+              "rmse_min": 0.0905450408446214,
+              "selected_overrides": 3,
+              "selected_residual_mean_min": -0.10286435338593053,
+              "unique_states": 235
+            },
+            "4": {
+              "candidate_evaluations": 184,
+              "false_safe": 42,
+              "mean_residual_min": -0.0010821761483479995,
+              "predicted_safe": 80,
+              "predicted_unsafe_actual_safe": 30,
+              "rmse_min": 0.11603081943046378,
+              "selected_overrides": 23,
+              "selected_residual_mean_min": 0.033566852895547505,
+              "unique_states": 184
+            },
+            "5": {
+              "candidate_evaluations": 115,
+              "false_safe": 34,
+              "mean_residual_min": -0.0037663804820038723,
+              "predicted_safe": 67,
+              "predicted_unsafe_actual_safe": 14,
+              "rmse_min": 0.05600261963813207,
+              "selected_overrides": 36,
+              "selected_residual_mean_min": -0.0003938041574741162,
+              "unique_states": 115
+            }
+          },
+          "by_headway": {
+            "compressed": {
+              "candidate_evaluations": 233,
+              "false_safe": 65,
+              "mean_residual_min": -0.0013970962046175306,
+              "predicted_safe": 136,
+              "predicted_unsafe_actual_safe": 40,
+              "rmse_min": 0.1339346374233273,
+              "selected_overrides": 1,
+              "selected_residual_mean_min": 0.0390542057862585,
+              "unique_states": 68
+            },
+            "same": {
+              "candidate_evaluations": 104,
+              "false_safe": 32,
+              "mean_residual_min": 0.0035168156569517347,
+              "predicted_safe": 71,
+              "predicted_unsafe_actual_safe": 19,
+              "rmse_min": 0.022657725218144242,
+              "selected_overrides": 20,
+              "selected_residual_mean_min": 0.010866379223341337,
+              "unique_states": 90
+            },
+            "widened": {
+              "candidate_evaluations": 863,
+              "false_safe": 260,
+              "mean_residual_min": -0.0012235020129764591,
+              "predicted_safe": 454,
+              "predicted_unsafe_actual_safe": 89,
+              "rmse_min": 0.06651038514521104,
+              "selected_overrides": 112,
+              "selected_residual_mean_min": 0.00564647253106993,
+              "unique_states": 202
+            }
+          },
+          "by_queue": {
+            "0to50": {
+              "candidate_evaluations": 735,
+              "false_safe": 242,
+              "mean_residual_min": -0.004888257108230514,
+              "predicted_safe": 449,
+              "predicted_unsafe_actual_safe": 104,
+              "rmse_min": 0.0801787788961705,
+              "selected_overrides": 92,
+              "selected_residual_mean_min": 0.00314722891672129,
+              "unique_states": 147
+            },
+            "over50": {
+              "candidate_evaluations": 465,
+              "false_safe": 115,
+              "mean_residual_min": 0.005542391720425459,
+              "predicted_safe": 212,
+              "predicted_unsafe_actual_safe": 44,
+              "rmse_min": 0.08456853408872583,
+              "selected_overrides": 41,
+              "selected_residual_mean_min": 0.01461565008279411,
+              "unique_states": 93
+            }
+          },
+          "overall": {
+            "candidate_evaluations": 1200,
+            "false_safe": 357,
+            "mean_residual_min": -0.0008463806871263242,
+            "predicted_safe": 661,
+            "predicted_unsafe_actual_safe": 148,
+            "rmse_min": 0.0819077330273342,
+            "selected_overrides": 133,
+            "selected_residual_mean_min": 0.006682606870172309,
+            "unique_states": 240
+          }
+        },
+        "policies": {
+          "cluster_margin90": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.002097972972972973,
+              "cost_change_contribution": 2.5676041666667857e-05,
+              "harmful_cost_overrides": 18,
+              "harmful_wait_overrides": 20,
+              "mean_new_cost": -0.0016154166666666684,
+              "mean_new_wait_min": -0.00032343749999999956,
+              "mean_old_cost": -0.0016410927083333365,
+              "mean_old_wait_min": -0.0013166666666666633,
+              "overrides": 37,
+              "predicted_selected_wait_mean_min": -0.022019917531731884,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.019921944558758918,
+              "states": 240,
+              "wait_change_contribution_min": 0.0009932291666666637
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 2.600729166666813e-05,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": -6.501822916667032e-05,
+                "mean_old_wait_min": -0.0024921874999999927,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 96,
+                "wait_change_contribution_min": 0.0009968749999999971
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 107,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": -0.00025000000000011124,
+                "cost_change_contribution": -3.3125000000027344e-07,
+                "harmful_cost_overrides": 1,
+                "harmful_wait_overrides": 1,
+                "mean_new_cost": -1.093750000003002e-05,
+                "mean_new_wait_min": -0.00025000000000011124,
+                "mean_old_cost": 2.8812500000002794e-05,
+                "mean_old_wait_min": 0.00018749999999989608,
+                "overrides": 2,
+                "predicted_selected_wait_mean_min": -0.015303903667751929,
+                "prefix_groups": 2,
+                "selected_residual_mean_min": 0.015053903667751818,
+                "states": 2,
+                "wait_change_contribution_min": -3.6458333333333943e-06
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.002203571428571419,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 17,
+                "harmful_wait_overrides": 19,
+                "mean_new_cost": -0.01107651785714287,
+                "mean_new_wait_min": -0.002203571428571419,
+                "mean_old_cost": -0.01107651785714287,
+                "mean_old_wait_min": -0.002203571428571419,
+                "overrides": 35,
+                "predicted_selected_wait_mean_min": -0.022403689752530737,
+                "prefix_groups": 23,
+                "selected_residual_mean_min": 0.02020011832395932,
+                "states": 35,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "mean_bias": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.003587378640776659,
+              "cost_change_contribution": 0.0001015244791666656,
+              "harmful_cost_overrides": 58,
+              "harmful_wait_overrides": 57,
+              "mean_new_cost": -0.0015395682291666707,
+              "mean_new_wait_min": -0.0015395833333333162,
+              "mean_old_cost": -0.0016410927083333365,
+              "mean_old_wait_min": -0.0013166666666666633,
+              "overrides": 103,
+              "predicted_selected_wait_mean_min": -0.011271397709358892,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.007684019068582235,
+              "states": 240,
+              "wait_change_contribution_min": -0.00022291666666665299
+            },
+            "transitions": {
+              "cancelled": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": -6.970833333333464e-05,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0005576666666666771,
+                "mean_old_wait_min": 0.00024166666666655494,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 22,
+                "selected_residual_mean_min": null,
+                "states": 30,
+                "wait_change_contribution_min": -3.0208333333319368e-05
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 107,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "actual_selected_wait_mean_min": -0.013562500000000588,
+                "cost_change_contribution": 0.00017123281250000025,
+                "harmful_cost_overrides": 1,
+                "harmful_wait_overrides": 1,
+                "mean_new_cost": 0.031745000000000086,
+                "mean_new_wait_min": -0.013562500000000588,
+                "mean_old_cost": 0.011197062500000056,
+                "mean_old_wait_min": 0.009562499999999446,
+                "overrides": 2,
+                "predicted_selected_wait_mean_min": -0.006252111686965013,
+                "prefix_groups": 2,
+                "selected_residual_mean_min": -0.007310388313035574,
+                "states": 2,
+                "wait_change_contribution_min": -0.00019270833333333363
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.003389851485148462,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 57,
+                "harmful_wait_overrides": 56,
+                "mean_new_cost": -0.0042869938118812,
+                "mean_new_wait_min": -0.003389851485148462,
+                "mean_old_cost": -0.0042869938118812,
+                "mean_old_wait_min": -0.003389851485148462,
+                "overrides": 101,
+                "predicted_selected_wait_mean_min": -0.011370789511782536,
+                "prefix_groups": 38,
+                "selected_residual_mean_min": 0.007980938026634072,
+                "states": 101,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          },
+          "uncalibrated": {
+            "overall": {
+              "actual_selected_wait_mean_min": -0.0023759398496240535,
+              "cost_change_contribution": 0.0,
+              "harmful_cost_overrides": 78,
+              "harmful_wait_overrides": 74,
+              "mean_new_cost": -0.0016410927083333365,
+              "mean_new_wait_min": -0.0013166666666666633,
+              "mean_old_cost": -0.0016410927083333365,
+              "mean_old_wait_min": -0.0013166666666666633,
+              "overrides": 133,
+              "predicted_selected_wait_mean_min": -0.009058546719796364,
+              "prefix_groups": 40,
+              "selected_residual_mean_min": 0.006682606870172309,
+              "states": 240,
+              "wait_change_contribution_min": 0.0
+            },
+            "transitions": {
+              "cancelled": {
+                "states": 0
+              },
+              "identity": {
+                "actual_selected_wait_mean_min": null,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 0,
+                "harmful_wait_overrides": 0,
+                "mean_new_cost": 0.0,
+                "mean_new_wait_min": 0.0,
+                "mean_old_cost": 0.0,
+                "mean_old_wait_min": 0.0,
+                "overrides": 0,
+                "predicted_selected_wait_mean_min": null,
+                "prefix_groups": 39,
+                "selected_residual_mean_min": null,
+                "states": 107,
+                "wait_change_contribution_min": 0.0
+              },
+              "rerouted": {
+                "states": 0
+              },
+              "retained": {
+                "actual_selected_wait_mean_min": -0.0023759398496240535,
+                "cost_change_contribution": 0.0,
+                "harmful_cost_overrides": 78,
+                "harmful_wait_overrides": 74,
+                "mean_new_cost": -0.0029613703007518844,
+                "mean_new_wait_min": -0.0023759398496240535,
+                "mean_old_cost": -0.0029613703007518844,
+                "mean_old_wait_min": -0.0023759398496240535,
+                "overrides": 133,
+                "predicted_selected_wait_mean_min": -0.009058546719796364,
+                "prefix_groups": 40,
+                "selected_residual_mean_min": 0.006682606870172309,
+                "states": 133,
+                "wait_change_contribution_min": 0.0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
