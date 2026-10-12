@@ -15,7 +15,7 @@ new600-state averages against old120-state averages would mix sample changes
 with training-coverage effects. Parallelize folds through scheduler, one CPU/
 3GB each, node001-006 unbound. Full bank/models remain server-only.
 
-Seven focused tests pass. Next: qualify the bank, run all matched folds and
+Eight focused tests pass. Next: qualify the bank, run all matched folds and
 decide from held-out effects rather than training losses or hindsight oracle.
 
 Run native_transit_coverage_value_stage188_fit_20261012_r1, fit code251473b2db.
@@ -23,6 +23,8 @@ t144065 completed exit0 on node006: all480 collections and100 combined groups
 qualified, bank34,907,152 bytes server-only, compact receipt4,658 bytes.
 Posthoc joint-improvable states:397=201/300,401=191/300. These are future-outcome
 oracle diagnostics. The216 fit tasks are t144082-t144297.
+Node-side report qualification uses complete fold exports, not delayed task
+status writeback; only its compact report directory is synchronized.
 
 ## Limitations
 

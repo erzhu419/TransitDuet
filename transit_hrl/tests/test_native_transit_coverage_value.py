@@ -1,11 +1,14 @@
 import copy
+import json
 from pathlib import Path
+import sys
 import unittest
 from unittest.mock import patch
 
 from scripts import run_native_transit_coverage_value_stage188 as spec
 from scripts.analyze_native_transit_coverage_value_stage188 import qualify_fold, summarize
 from scripts.submit_native_transit_coverage_value_stage188_scheduleurm import task_specification, report_task_specification
+from scripts import submit_native_transit_coverage_value_stage188_scheduleurm as submit
 from tests.test_native_transit_value_expansion import fixture as fresh_fixture
 from tests.test_native_transit_timetable_context import fixture as old_fixture
 from scripts.analyze_native_transit_value_expansion_stage187 import summarize as summarize_fresh
@@ -151,6 +154,20 @@ class CoverageValueTest(unittest.TestCase):
         self.assertIn("analyze_native_transit_coverage_value_stage188.py", task["cmd"])
         self.assertNotIn("_raw", task["result_dir"])
         self.assertIsNone(task["require_node"])
+
+    def test_report_uses_exported_folds_without_waiting_for_status_writeback(self):
+        registered = self.bank["manifest"]
+        tasks = [task_specification("unit_report"), *[task_specification("unit_report", mode=m, fold=f)
+            for m in spec.MODES for f in registered["folds"]]]
+        for task in tasks: task["status"] = "running"
+        tasks[0]["status"] = "done"
+        with patch.object(submit, "inventory", return_value=tasks), \
+                patch.object(Path, "read_text", return_value=json.dumps(registered)), \
+                patch.object(submit, "execute_bulk") as execute, \
+                patch.object(sys, "argv", ["submit", "--run-name", "unit_report", "--phase", "report"]):
+            submit.main()
+        self.assertEqual(len(execute.call_args.args[0]), 1)
+        self.assertEqual(execute.call_args.args[0][0]["signature"], report_task_specification("unit_report")["signature"])
 
 
 if __name__ == "__main__":
