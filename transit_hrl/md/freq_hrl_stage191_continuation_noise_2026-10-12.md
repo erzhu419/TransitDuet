@@ -34,3 +34,5 @@ source `b5bd1f4228`; preflight tasks `t144777-t144786` started on nodes001/004/0
 All ten preflight tasks finished exit0 with full qualification. Eight targeted
 synthetic/mock tests pass, including advancing without downloading receipts.
 Remaining230 are now eligible. No manual result pull was needed for preflight.
+They are registered as `t144798-t145027`. The submitter now uses the scheduler
+results API's terminal status; that API does not expose an exit-code field.
