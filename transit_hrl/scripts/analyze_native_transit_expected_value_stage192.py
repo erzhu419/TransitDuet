@@ -15,14 +15,15 @@ from scripts.analyze_native_transit_coverage_value_stage188 import group_key, va
 from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_json
 
 
-def qualify(cell, mode, fold, registered):
+def qualify(cell, mode, fold, registered, *, protocol_spec=spec):
+    spec = protocol_spec
     groups = [g for g in registered["groups"] if group_key(g, fold["split"]) != fold["held_out"]]
     expected = [[g["root"], g["scene_seed"]] for g in groups]
     test = {spec.state_key(r) for r in registered["mean_states"] if group_key(r, fold["split"]) == fold["held_out"]}
     if not (cell["protocol"] == spec.EXPERIMENT_PROTOCOL and cell["contract"] == spec.contract()
             and cell["software_qualified"] and cell["mode"] == mode and cell["fold"] == fold
             and cell["critic_updates"] == spec.STEPS and cell["actor_updates"] == cell["new_native_steps"] == 0
-            and cell["training_mean_states"] == 30-len(test) and cell["evaluation_mean_states"] == len(test)
+            and cell["training_mean_states"] == len(registered["mean_states"])-len(test) and cell["evaluation_mean_states"] == len(test)
             and set(cell["fits"]) == set(cell["predictions"]) == set(spec.VARIANTS)):
         raise ValueError("Changed expected-value coverage, fold or update budget")
     for fit in cell["fits"].values():

@@ -78,28 +78,20 @@ def frozen_choices(row, bank):
     return result
 
 
-def collect(root, scenario, probe, draw, model, output):
+def replay_draw(root, scenario, replica, probe, seed, registered, model, output):
     os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
     os.environ.setdefault("MPLBACKEND", "Agg")
     sys.path.insert(0, str(source.native.NATIVE))
     import frequency
     frequency.DemandFrequencyTracker = source.native.NativeRoutingTracker
     torch.set_num_threads(1)
-    bank = json.loads(bank_source.bank_path(BANK_RUN).read_text())
-    if not (bank["protocol"] == bank_source.EXPERIMENT_PROTOCOL and bank["contract"] == bank_source.contract()
-            and bank["software_qualified"]):
-        raise ValueError("Noise diagnostic requires the unchanged qualified bank")
-    scene = source.scene_seed(root, scenario, 0)
-    registered = next(r for r in bank["training_data"] if
-        (r["root"], r["scene_seed"], r["probe_index"]) == (root, scene, probe))
-    choices = frozen_choices(registered, bank)
-    print(f"NOISE_CHOICES_SEALED root={root} regime={scenario} probe={probe} draw={draw}", flush=True)
+    scene = source.scene_seed(root, scenario, replica)
     source.shared.source.incumbent.source.distributional.validate_model(model)
     _, checkpoint = source.native.load_source(root)
     raw = raw_directory(output)
     original, original_plan = source.shared.episode(root, scenario, scene, raw/"original", checkpoint,
         model, probe, plan_class=NativeTimetableContextAudit)
-    prior = json.loads(source_path(ROOT/"results"/COLLECTION_RUN, root, scenario, 0, probe).read_text())
+    prior = json.loads(source_path(ROOT/"results"/COLLECTION_RUN, root, scenario, replica, probe).read_text())
     source.qualify_cell(prior)
     source.qualify_observer(original)
     if ({k: original[k] for k in source.OUTCOME_KEYS} != prior["observer"]
@@ -111,7 +103,6 @@ def collect(root, scenario, probe, draw, model, output):
             or {k: context[k] for k in source.context_source.OCCUPANCY_KEYS} != registered["occupancy_context"]
             or context["timetable_context"] != registered["timetable_context"]):
         raise ValueError("Original replay changed the critic's causal inputs")
-    seed = continuation_seed(root, scenario, probe, draw)
     plan_class = partial(NativeContinuationValueAudit, continuation_seed=seed)
     baseline, plan = source.shared.episode(root, scenario, scene, raw/"observer", checkpoint, model,
         probe, reference=original_plan, plan_class=plan_class)
@@ -126,7 +117,7 @@ def collect(root, scenario, probe, draw, model, output):
             raise ValueError("Native branch did not consume the registered future innovation tape")
         row["policy_trace"] = source.shared.policy_trace(row.pop("supply"))
         branches.append(row)
-        print(f"noise_draw {root}/{scenario}/{probe}/{draw}/{candidate} "
+        print(f"noise_draw {root}/{scenario}/{replica}/{probe}/{seed}/{candidate} "
             f"cost={row['service_cost_restricted']} wait={row['restricted_wait_horizon_min']}", flush=True)
     branches.sort(key=lambda r: r["probe"]["selected"])
     baseline["policy_trace"] = source.shared.policy_trace(baseline["supply"])
@@ -137,13 +128,27 @@ def collect(root, scenario, probe, draw, model, output):
         raise ValueError("Future innovations changed preaction features or candidate plans")
     write_json(raw/"paired_rollouts.json", {"original": original, "snapshot": original_plan.snapshot,
         "observer": baseline, "branches": branches, "context": repeated_context})
-    result = {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "software_qualified": True,
-        "root": root, "scenario": scenario, "scene_seed": scene, "probe_index": probe, "draw": draw,
+    return {"software_qualified": True,
+        "root": root, "scenario": scenario, "scene_seed": scene, "probe_index": probe,
         "continuation_seed": seed, "original_choice": registered["original_choice"],
-        "existing_labels": copy.deepcopy(registered["labels"]), "labels": record["labels"], "frozen_choices": choices,
+        "existing_labels": copy.deepcopy(registered["labels"]), "labels": record["labels"],
         "original_source_reproductions": 1, "exact_resampled_identities": 1,
         "prefix_state_rng_matches": 7, "frozen_weight_qualified_episodes": 8, "window_ledger_qualified_episodes": 8,
         "continuation_qualified": True, "native_clock_ticks": 8*61380, "training_updates": 0}
+
+
+def collect(root, scenario, probe, draw, model, output):
+    bank = json.loads(bank_source.bank_path(BANK_RUN).read_text())
+    if not (bank["protocol"] == bank_source.EXPERIMENT_PROTOCOL and bank["contract"] == bank_source.contract()
+            and bank["software_qualified"]):
+        raise ValueError("Noise diagnostic requires the unchanged qualified bank")
+    scene = source.scene_seed(root, scenario, 0)
+    registered = next(r for r in bank["training_data"] if
+        (r["root"], r["scene_seed"], r["probe_index"]) == (root, scene, probe))
+    choices = frozen_choices(registered, bank)
+    print(f"NOISE_CHOICES_SEALED root={root} regime={scenario} probe={probe} draw={draw}", flush=True)
+    result = {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "draw": draw, "frozen_choices": choices,
+        **replay_draw(root, scenario, 0, probe, continuation_seed(root, scenario, probe, draw), registered, model, output)}
     qualify_cell(result)
     return result
 
