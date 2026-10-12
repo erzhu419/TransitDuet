@@ -1,0 +1,75 @@
+{
+  "contract": {
+    "boundary": "development_supervised_single_action_screen_not_matched_capacity_CI_or_full_learned_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "critic_optimizer_updates": 0,
+      "new_closed_form_fits": 94,
+      "new_native_episodes": 0,
+      "reused_cost_models": 47
+    },
+    "cost": "exact_frozen_Stage199_count_weighted_ridge_two_cost_heads_and_ranking",
+    "data": "same600_inputs_240_mean8_targets_360_single_targets_47_outer_folds",
+    "diagnostic_run": "native_transit_wait_selection_stage201_diagnostic_20261013_r1",
+    "features": {
+      "base": 98,
+      "conditional_wait": 198,
+      "conditions": [
+        "same_queue",
+        "same_queue_squared",
+        "other_queue",
+        "same_onboard",
+        "same_mean_load",
+        "same_max_load",
+        "same_queue_concentration",
+        "same_active",
+        "other_active",
+        "same_remaining_mean",
+        "queue_load_pressure",
+        "lf_forecast"
+      ],
+      "geometry": [
+        "mean_gap",
+        "first_gap",
+        "last_gap",
+        "gap_std",
+        "mean_nominal_shift",
+        "mean_squared_nominal_shift",
+        "early_nominal_shift",
+        "mean_squared_gap"
+      ],
+      "geometry_wait": 102
+    },
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "normalization": "own_unweighted_training_only_raw_input_std_and_wait_pair_RMS",
+    "primary": "conditional_wait",
+    "selection": "zero_margin_predicted_wait_nonpositive_then_frozen_cost_min_identity_exact_zero_and_tie_retained",
+    "source_protocol": "native_transit_pair_ridge_stage199_v1",
+    "source_run": "native_transit_pair_ridge_stage199_development_20261013_r1",
+    "storage": "bank_targets_wait_models_predictions_server_only_small_receipts_and_report_sync",
+    "variants": [
+      "frozen_wait",
+      "geometry_wait",
+      "conditional_wait"
+    ],
+    "wait": "two_wait_only_weighted_pair_ridge_fits_all15_pairs_per_training_state_ridge0.1",
+    "weights": "same_mean8_weight8_single_weight1_all_training_candidates_not_selected_only"
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_conditional_wait_stage202_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "bc885f0b5df6dba8d9a940553fc54bcc6a8c77c1"
+}
