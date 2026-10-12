@@ -25,21 +25,27 @@ Full context, draw labels, native rollouts, target map and models stay remote.
 Remaining1670 tasks registered as`t145389-t147058`, source`d0890febf4`.
 Scheduler adjusts live RAM estimates from observed family usage (816MB at
 release); `remaining_release.json` separates requested from scheduled memory.
-All1680 collection tasks are now done/exit0. All1680 remote receipts qualify,
-covering13440 new native episodes; peak process RSS is733.6MB. Preparation,
-47 fits and the performance report are pending.
+All1680 collection tasks/receipts qualify, covering13440 new native episodes;
+peak RSS733.6MB. Preparation`t147113`, fits`t147123-t147169` and report`t147179`
+completed exit0, source`0aaf516d48`. Budget47 fits/4700 updates plus47 reused
+controls; summed fit wall103.2s. One506,559-byte report was manually pulled;
+the589,204-byte target map, full feature bank and models remain server-only.
 
-Scheduler completion accounting stalled after the processes exited: node-batch
-timeouts discarded completed chunks, and exit0 without a recognized text marker
-remained ambiguous. Fix`7bef2eb` preserves chunks, accepts confirmed clean exit0,
-clears dead-task live usage and retains backend finish times. Only the control
-service was restarted. Terminal regression:79 passed; two existing ETA-format
-tests remain mismatched. No raw artifacts were downloaded for this diagnosis.
+Scheduler completion accounting was repaired by`7bef2eb`; backend finish times
+and completed native evidence are preserved in the collection receipt.
+
+## Result
+Primary mean8/wait-feasible: scene cost-0.001373/wait-0.001371min; regime
+cost+0.001356/wait+0.000588min; lower-root cost-0.002459/wait-0.004965min.
+Lower-root improves both roots versus the matched control, but the joint screen
+still fails: scene/root397 wait+0.001705min, scene/root401 cost+0.0000447, and
+regime cost is positive for both roots. False feasible choices are76/78/67 for
+scene/regime/lower-root, versus68/70/67 for the control. No general win.
 
 ## Next Step
-If broader targets reduce false wait-feasibility and pass the joint screen,
-test the frozen learned selector in repeated native upper decisions. Otherwise
-use the complete-group wait/cost diagnostics before changing the objective.
+Stage196: reuse all eight draws and frozen47 fits to separate sampling noise
+from fleet/nonfleet/wait errors and check odd/even choice transfer. No further
+native collection or fitting before identifying the source of the failed gate.
 
 ## Limitations
 These are forty existing development prefixes, not240 independent scenes or
