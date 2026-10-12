@@ -135,7 +135,7 @@ class MeanCoverageTest(unittest.TestCase):
                 task_specification("unit_mean", operation="report")]:
             self.assertIsNone(task["require_node"])
             self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
-            self.assertEqual((task["cpu"], task["ram_mb"]), (1, 3072))
+            self.assertEqual((task["cpu"], task["ram_mb"]), (1, 1536 if "/draw/" in task["signature"] else 3072))
             self.assertNotIn("_raw", task["result_dir"])
             self.assertNotIn("bank.json", task["cmd"])
         first = [dict(t, status="done") for t in tasks[:10]]

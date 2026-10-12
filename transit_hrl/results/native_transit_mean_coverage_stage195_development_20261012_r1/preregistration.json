@@ -1,0 +1,1555 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "collection_tasks": 1680,
+    "new_critic_updates": 4700,
+    "new_fits": 47,
+    "new_native_clock_ticks": 824947200,
+    "new_native_episodes": 13440,
+    "new_prefix_scenes": 0,
+    "reused_fits": 47,
+    "reused_native_episodes": 1920
+  },
+  "collection_tasks": 1680,
+  "contract": {
+    "boundary": "40_existing_development_prefixes_future_innovations_not_new_independent_confirmation_or_full_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "collection_tasks": 1680,
+      "new_critic_updates": 4700,
+      "new_fits": 47,
+      "new_native_clock_ticks": 824947200,
+      "new_native_episodes": 13440,
+      "new_prefix_scenes": 0,
+      "reused_fits": 47,
+      "reused_native_episodes": 1920
+    },
+    "control": "one_exact_original_observer_plus_resampled_observer_six_actions_including_exact_resampled_identity",
+    "data": "600_unchanged_inputs_240_mean8_targets_40_complete_prefix_groups_360_single_targets",
+    "draws": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "evaluation": "same240_heldout_states_original_and_mean8_labels_shared_fits_and_selectors",
+    "folds": "40_leave_scene_out_5_leave_regime_out_2_leave_lower_root_out_all6_callbacks_grouped",
+    "future_seed": "Stage191_seed+replica*1000000_replica0_old_draws_identical",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "intervention": "replace_ScenarioTape_after_exact_preaction_snapshot_then_one_candidate_and_original_greedy_suffix",
+    "method": "shared_three_head_floor_absolute_proper_mse_100steps_seed178_AdamW_lr0.003_wd0.01",
+    "modes": [
+      "tail_summary"
+    ],
+    "noise_protocol": "native_transit_continuation_noise_stage191_v1",
+    "noise_run": "native_transit_continuation_noise_stage191_development_20261012_r1",
+    "normalization": "unchanged_training_input_scales_target_scales_recomputed_training_only",
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "preflight": "ten_replica1_probe9_draw0_cells_both_roots_all_regimes_before1670_remaining",
+    "primary": "tail_summary:mean8_overlay:wait_feasible",
+    "probes": [
+      8,
+      9,
+      22,
+      23,
+      36,
+      37
+    ],
+    "randomness": "independent_future_Poisson_route_speed_streams_shared_within_six_actions",
+    "reference": "reuse47_Stage188_single_target_models_same_groups_architecture_optimizer_steps",
+    "replicas": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "retained": "all_prefix_physics_cost_RNG_and_episode_demand_profile_peak_phase_OD_multipliers_lower_weights_duration_prior",
+    "reuse": "30_Stage191_states_240_draws_unchanged_no_duplicate_native_collection",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_protocol": "native_transit_coverage_value_stage188_v1",
+    "source_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "storage": "draw_labels_rollouts_feature_bank_mean_map_models_predictions_server_only_receipts_report_sync",
+    "variants": [
+      "cached_original",
+      "mean8_overlay"
+    ]
+  },
+  "fit_tasks": 47,
+  "mean_states": [
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970001
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970002
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970003
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970101
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970102
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970103
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970201
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970202
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970203
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970301
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970302
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970303
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970401
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970402
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 9,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 23,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 37,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970403
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010001
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010002
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010003
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010101
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010102
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010103
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010201
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010202
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010203
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010301
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010302
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010303
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010401
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010402
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "probe_index": 9,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "probe_index": 23,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    },
+    {
+      "probe_index": 37,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010403
+    }
+  ],
+  "preflight_tasks": 10,
+  "prepare_tasks": 1,
+  "protocol": "native_transit_mean_coverage_stage195_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "e24921e6898895927072ecabdf9f797360af04b6"
+}

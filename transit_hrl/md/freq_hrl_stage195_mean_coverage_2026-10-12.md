@@ -15,8 +15,11 @@ Evaluate both models on the same240 states and same mean8 outcomes. Require
 negative physical cost and nonpositive wait for both roots in all three splits.
 
 Scheduler phases: ten replica1/probe9/draw0 qualification tasks, remaining1670,
-remote target preparation,47 fits, compact report. Nodes001-006 are unbound;
-one CPU and3072MB per task. Pilot receipts record measured peak process RSS.
+remote target preparation,47 fits, compact report. Nodes001-006 are unbound.
+Ten qualification tasks completed exit0 using one CPU/3072MB, source
+`e24921e689`, ids`t145379-t145388`. Measured peak RSS690-715MB permits1536MB
+for subsequent native collection; offline tasks retain3072MB. Input/label
+contracts and all fitting budgets are unchanged by this resource adjustment.
 Full context, draw labels, native rollouts, target map and models stay remote.
 
 ## Next Step

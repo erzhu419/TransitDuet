@@ -36,6 +36,7 @@ def task_specification(run_name, *, key=None, fold=None, operation="prepare"):
     command = [DEFAULT_LINUX_PYTHON, "-u", f"scripts/{script}", "--run-name", run_name]
     command.extend(["--output", str(result/"result.json")] if operation == "report" else arguments)
     task.update(project=spec.EXPERIMENT_PROTOCOL, description=f"Freq-HRL complete-group mean coverage {suffix}",
+        ram_mb=1536 if key is not None else task["ram_mb"],
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run_name}/{suffix}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{'native' if key is not None else 'offline'}",
         result_dir=str(result), local_result_dir=str(result),
