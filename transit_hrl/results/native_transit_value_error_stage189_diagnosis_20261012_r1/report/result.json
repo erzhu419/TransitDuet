@@ -1,0 +1,598 @@
+{
+  "actor_updates": 0,
+  "critic_updates": 0,
+  "diagnostics": {
+    "tail_summary": {
+      "lower_root": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": 0.0021014977238395616,
+            "all_candidate_cost_mse": 0.010391623224404964,
+            "all_candidate_wait_bias_min": -0.003982616930994543,
+            "all_candidate_wait_mse": 0.012859875548512308,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.016860043333333324,
+                "mean_wait_delta_min": -0.023316666666666767,
+                "positive_wait_choices": 26
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.000876299999999991,
+                "mean_wait_delta_min": -0.01785333333333339,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": 0.0018374533333333327,
+                "mean_wait_delta_min": -0.006010000000000081,
+                "positive_wait_choices": 65
+              }
+            },
+            "selected_cost_bias": -0.0129330652354542,
+            "selected_wait_bias_min": -0.0071719769926896285,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.0001547400253029685,
+            "all_candidate_cost_mse": 0.008157831745742573,
+            "all_candidate_wait_bias_min": 0.0077484871065462,
+            "all_candidate_wait_mse": 0.019433486292973347,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.019290910000000005,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.012421230000000009,
+                "mean_wait_delta_min": -0.01976333333333322,
+                "positive_wait_choices": 23
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.002890006666666673,
+                "mean_wait_delta_min": -0.02671666666666652,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.0022067233333333386,
+                "mean_wait_delta_min": -0.005093333333333203,
+                "positive_wait_choices": 78
+              }
+            },
+            "selected_cost_bias": -0.007758049587332526,
+            "selected_wait_bias_min": -0.005658564371309504,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": 0.0009733788492682973,
+          "all_candidate_cost_mse": 0.009274727485073768,
+          "all_candidate_wait_bias_min": 0.0018829350877758286,
+          "all_candidate_wait_mse": 0.016146680920742826,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.017889276666666672,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.014640636666666665,
+              "mean_wait_delta_min": -0.021539999999999993,
+              "positive_wait_choices": 49
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.0018831533333333317,
+              "mean_wait_delta_min": -0.022284999999999958,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.00018463500000000298,
+              "mean_wait_delta_min": -0.005551666666666642,
+              "positive_wait_choices": 143
+            }
+          },
+          "selected_cost_bias": -0.010345557411393364,
+          "selected_wait_bias_min": -0.006415270681999566,
+          "states": 600
+        }
+      },
+      "regime": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": 0.00039819260531988256,
+            "all_candidate_cost_mse": 0.010225617506487367,
+            "all_candidate_wait_bias_min": -0.0034040701455636388,
+            "all_candidate_wait_mse": 0.014463776150026711,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.02352056666666666,
+                "mean_wait_delta_min": -0.021040000000000045,
+                "positive_wait_choices": 31
+              },
+              "oracle_wait": {
+                "mean_cost_delta": 0.0007923333333333401,
+                "mean_wait_delta_min": -0.01569333333333339,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": 0.0018338799999999995,
+                "mean_wait_delta_min": 0.005819999999999932,
+                "positive_wait_choices": 87
+              }
+            },
+            "selected_cost_bias": -0.012316982460962323,
+            "selected_wait_bias_min": -0.0205957249054913,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.002486725640523729,
+            "all_candidate_cost_mse": 0.007698905612570804,
+            "all_candidate_wait_bias_min": 0.0025061819329070833,
+            "all_candidate_wait_mse": 0.020966273398118275,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.01929091,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.02051902666666668,
+                "mean_wait_delta_min": -0.01559666666666662,
+                "positive_wait_choices": 34
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.005632849999999998,
+                "mean_wait_delta_min": -0.02574666666666656,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.00838865000000002,
+                "mean_wait_delta_min": 0.001843333333333431,
+                "positive_wait_choices": 101
+              }
+            },
+            "selected_cost_bias": -0.00419414550934224,
+            "selected_wait_bias_min": -0.017295731373606366,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": -0.0010442665176019232,
+          "all_candidate_cost_mse": 0.008962261559529085,
+          "all_candidate_wait_bias_min": -0.0004489441063282769,
+          "all_candidate_wait_mse": 0.017715024774072493,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.01788927666666667,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.022019796666666674,
+              "mean_wait_delta_min": -0.018318333333333336,
+              "positive_wait_choices": 65
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.002420258333333329,
+              "mean_wait_delta_min": -0.020719999999999975,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.003277385000000009,
+              "mean_wait_delta_min": 0.0038316666666666816,
+              "positive_wait_choices": 188
+            }
+          },
+          "selected_cost_bias": -0.008255563985152283,
+          "selected_wait_bias_min": -0.018945728139548836,
+          "states": 600
+        }
+      },
+      "scene": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": 0.0018816268635963322,
+            "all_candidate_cost_mse": 0.010058304329639478,
+            "all_candidate_wait_bias_min": -0.0006366064551733604,
+            "all_candidate_wait_mse": 0.012820981282845225,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.018274159999999994,
+                "mean_wait_delta_min": -0.023543333333333402,
+                "positive_wait_choices": 35
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.003278609999999998,
+                "mean_wait_delta_min": -0.01477333333333341,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.000398579999999998,
+                "mean_wait_delta_min": -0.0009800000000000297,
+                "positive_wait_choices": 74
+              }
+            },
+            "selected_cost_bias": -0.006985543458077092,
+            "selected_wait_bias_min": -0.009286556479433362,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.0004963642634717313,
+            "all_candidate_cost_mse": 0.007895608455098705,
+            "all_candidate_wait_bias_min": 0.0017569301910116937,
+            "all_candidate_wait_mse": 0.019412919310504234,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.019290910000000005,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.020989913333333342,
+                "mean_wait_delta_min": -0.020116666666666567,
+                "positive_wait_choices": 28
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.0066720133333333315,
+                "mean_wait_delta_min": -0.022219999999999913,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.008760083333333342,
+                "mean_wait_delta_min": -0.001783333333333183,
+                "positive_wait_choices": 87
+              }
+            },
+            "selected_cost_bias": -0.00047498609480826405,
+            "selected_wait_bias_min": -0.0097175922741388,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": 0.0006926313000623012,
+          "all_candidate_cost_mse": 0.008976956392369092,
+          "all_candidate_wait_bias_min": 0.0005601618679191671,
+          "all_candidate_wait_mse": 0.016116950296674728,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.017889276666666672,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.01963203666666667,
+              "mean_wait_delta_min": -0.021829999999999985,
+              "positive_wait_choices": 63
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.004975311666666665,
+              "mean_wait_delta_min": -0.018496666666666658,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.0045793316666666705,
+              "mean_wait_delta_min": -0.0013816666666666062,
+              "positive_wait_choices": 161
+            }
+          },
+          "selected_cost_bias": -0.0037302647764426776,
+          "selected_wait_bias_min": -0.00950207437678608,
+          "states": 600
+        }
+      }
+    },
+    "timetable_sequence": {
+      "lower_root": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": 0.001058156967291866,
+            "all_candidate_cost_mse": 0.010595617933036854,
+            "all_candidate_wait_bias_min": -0.003201227703854143,
+            "all_candidate_wait_mse": 0.013134866645407405,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.01811818,
+                "mean_wait_delta_min": -0.02126666666666674,
+                "positive_wait_choices": 28
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.0007724799999999965,
+                "mean_wait_delta_min": -0.01728666666666672,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": 0.00043302666666667264,
+                "mean_wait_delta_min": -0.005763333333333372,
+                "positive_wait_choices": 60
+              }
+            },
+            "selected_cost_bias": -0.011573503733585561,
+            "selected_wait_bias_min": -0.006536349626743526,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.002074013941836584,
+            "all_candidate_cost_mse": 0.008444562339193284,
+            "all_candidate_wait_bias_min": 0.007263882738684437,
+            "all_candidate_wait_mse": 0.020515536458244357,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.019290910000000005,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.015341160000000003,
+                "mean_wait_delta_min": -0.02130333333333323,
+                "positive_wait_choices": 27
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.0029692233333333336,
+                "mean_wait_delta_min": -0.02633999999999985,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.006808026666666672,
+                "mean_wait_delta_min": 0.005783333333333574,
+                "positive_wait_choices": 97
+              }
+            },
+            "selected_cost_bias": -0.007005129990853822,
+            "selected_wait_bias_min": -0.02176525126186589,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": -0.0005079284872723587,
+          "all_candidate_cost_mse": 0.009520090136115069,
+          "all_candidate_wait_bias_min": 0.0020313275174151475,
+          "all_candidate_wait_mse": 0.01682520155182588,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.017889276666666672,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.016729670000000006,
+              "mean_wait_delta_min": -0.021284999999999984,
+              "positive_wait_choices": 55
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.0018708516666666648,
+              "mean_wait_delta_min": -0.021813333333333285,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.0031875000000000002,
+              "mean_wait_delta_min": 1.000000000010104e-05,
+              "positive_wait_choices": 157
+            }
+          },
+          "selected_cost_bias": -0.009289316862219692,
+          "selected_wait_bias_min": -0.014150800444304707,
+          "states": 600
+        }
+      },
+      "regime": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": -0.0006801204022695921,
+            "all_candidate_cost_mse": 0.010422379258311652,
+            "all_candidate_wait_bias_min": -0.005452064771847587,
+            "all_candidate_wait_mse": 0.013726387607267488,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.01987480333333333,
+                "mean_wait_delta_min": -0.02536000000000008,
+                "positive_wait_choices": 31
+              },
+              "oracle_wait": {
+                "mean_cost_delta": 0.0006658533333333405,
+                "mean_wait_delta_min": -0.01662333333333341,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": 0.006674530000000009,
+                "mean_wait_delta_min": 0.00012333333333325905,
+                "positive_wait_choices": 84
+              }
+            },
+            "selected_cost_bias": -0.018017366616587538,
+            "selected_wait_bias_min": -0.016093414540451417,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.003250470569001936,
+            "all_candidate_cost_mse": 0.007429536856419039,
+            "all_candidate_wait_bias_min": 0.0024536357469497525,
+            "all_candidate_wait_mse": 0.02115478389213673,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.01929091,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.016344943333333348,
+                "mean_wait_delta_min": -0.016263333333333338,
+                "positive_wait_choices": 29
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.005694190000000003,
+                "mean_wait_delta_min": -0.02567333333333324,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.008278150000000014,
+                "mean_wait_delta_min": 0.0032166666666667196,
+                "positive_wait_choices": 106
+              }
+            },
+            "selected_cost_bias": -0.005124969910922319,
+            "selected_wait_bias_min": -0.021096893502225076,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": -0.0019652954856357644,
+          "all_candidate_cost_mse": 0.008925958057365346,
+          "all_candidate_wait_bias_min": -0.0014992145124489175,
+          "all_candidate_wait_mse": 0.017440585749702107,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.01788927666666667,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.01810987333333334,
+              "mean_wait_delta_min": -0.020811666666666707,
+              "positive_wait_choices": 60
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.0025141683333333308,
+              "mean_wait_delta_min": -0.021148333333333328,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.0008018100000000016,
+              "mean_wait_delta_min": 0.0016699999999999892,
+              "positive_wait_choices": 190
+            }
+          },
+          "selected_cost_bias": -0.011571168263754927,
+          "selected_wait_bias_min": -0.01859515402133825,
+          "states": 600
+        }
+      },
+      "scene": {
+        "by_root": {
+          "397": {
+            "all_candidate_cost_bias": 0.0013490932506214758,
+            "all_candidate_cost_mse": 0.010502561992349894,
+            "all_candidate_wait_bias_min": -0.000490934734879196,
+            "all_candidate_wait_mse": 0.012491032418927935,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.016487643333333336,
+                "mean_wait_delta_min": -0.04312666666666676,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.014273399999999992,
+                "mean_wait_delta_min": -0.02533333333333344,
+                "positive_wait_choices": 22
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.000644076666666666,
+                "mean_wait_delta_min": -0.016180000000000055,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": 0.0035601600000000062,
+                "mean_wait_delta_min": -0.004253333333333409,
+                "positive_wait_choices": 67
+              }
+            },
+            "selected_cost_bias": -0.012844763372956898,
+            "selected_wait_bias_min": -0.008097470657807545,
+            "states": 300
+          },
+          "401": {
+            "all_candidate_cost_bias": -0.002174451499343276,
+            "all_candidate_cost_mse": 0.007927199764805423,
+            "all_candidate_wait_bias_min": 0.0025149475198335295,
+            "all_candidate_wait_mse": 0.019225370625528634,
+            "arms": {
+              "oracle_both": {
+                "mean_cost_delta": -0.019290910000000005,
+                "mean_wait_delta_min": -0.04498666666666656,
+                "positive_wait_choices": 0
+              },
+              "oracle_cost": {
+                "mean_cost_delta": -0.022410133333333346,
+                "mean_wait_delta_min": -0.022366666666666597,
+                "positive_wait_choices": 27
+              },
+              "oracle_wait": {
+                "mean_cost_delta": -0.0040103266666666635,
+                "mean_wait_delta_min": -0.02370999999999993,
+                "positive_wait_choices": 0
+              },
+              "predicted": {
+                "mean_cost_delta": -0.006355726666666675,
+                "mean_wait_delta_min": 0.006776666666666768,
+                "positive_wait_choices": 94
+              }
+            },
+            "selected_cost_bias": -0.00539938631918512,
+            "selected_wait_bias_min": -0.019927584847175554,
+            "states": 300
+          }
+        },
+        "overall": {
+          "all_candidate_cost_bias": -0.00041267912436090016,
+          "all_candidate_cost_mse": 0.009214880878577658,
+          "all_candidate_wait_bias_min": 0.0010120063924771666,
+          "all_candidate_wait_mse": 0.015858201522228284,
+          "arms": {
+            "oracle_both": {
+              "mean_cost_delta": -0.017889276666666672,
+              "mean_wait_delta_min": -0.044056666666666654,
+              "positive_wait_choices": 0
+            },
+            "oracle_cost": {
+              "mean_cost_delta": -0.018341766666666672,
+              "mean_wait_delta_min": -0.023850000000000017,
+              "positive_wait_choices": 49
+            },
+            "oracle_wait": {
+              "mean_cost_delta": -0.002327201666666665,
+              "mean_wait_delta_min": -0.01994499999999999,
+              "positive_wait_choices": 0
+            },
+            "predicted": {
+              "mean_cost_delta": -0.0013977833333333346,
+              "mean_wait_delta_min": 0.0012616666666666794,
+              "positive_wait_choices": 161
+            }
+          },
+          "selected_cost_bias": -0.009122074846071006,
+          "selected_wait_bias_min": -0.01401252775249155,
+          "states": 600
+        }
+      }
+    }
+  },
+  "new_native_steps": 0,
+  "protocol": "native_transit_value_error_stage189_v1",
+  "role": "hindsight_mask_decomposition_not_deployable_oracle_or_new_performance_validation",
+  "software_qualified": true,
+  "source_protocol": "native_transit_coverage_value_stage188_v1",
+  "source_run": "native_transit_coverage_value_stage188_fit_20261012_r1"
+}

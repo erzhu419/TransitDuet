@@ -26,6 +26,22 @@ oracle diagnostics. The216 fit tasks are t144082-t144297.
 Node-side report qualification uses complete fold exports, not delayed task
 status writeback; only its compact report directory is synchronized.
 
+t144335 qualified all216 fits/21,600 updates. Both joint gates remain false.
+Wait-feasible held-out means (negative is better):
+
+| Mode/Split | Cost397 | Cost401 | Wait397,min | Wait401,min |
+|---|---:|---:|---:|---:|
+| Scalar/scene | -0.000399 | -0.008760 | -0.000980 | -0.001783 |
+| Scalar/regime | +0.001834 | -0.008389 | +0.005820 | +0.001843 |
+| Scalar/lower root | +0.001837 | -0.002207 | -0.006010 | -0.005093 |
+| Sequence/scene | +0.003560 | -0.006356 | -0.004253 | +0.006777 |
+| Sequence/regime | +0.006675 | -0.008278 | +0.000123 | +0.003217 |
+| Sequence/lower root | +0.000433 | -0.006808 | -0.005763 | +0.005783 |
+
+Scalar improves some matched old-state effects but does not close all splits.
+Sequence gains are mixed. Mean fit wall time: scalar2.07s,sequence51.74s.
+Next: cached cost-ranking versus wait-mask error decomposition, not more seeds.
+
 ## Limitations
 
 The action labels still describe one forced action followed by original
