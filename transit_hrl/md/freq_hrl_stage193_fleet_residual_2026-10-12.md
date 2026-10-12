@@ -33,3 +33,25 @@ This is a ten-prefix development screen;570 training states still have noisy
 single-outcome labels. A physical prior win alone is not learned authority.
 Passing this screen does not open reserved labels or establish repeated upper
 control, promotion or end-to-end HRL.
+
+## Result and Next Step
+Run `native_transit_fleet_residual_stage193_fit_20261012_r1`, fit source
+`53a59be7f1`. Fits `t145252-t145268` and report `t145271` all finished exit0;
+six targeted tests pass. All four variants fail the joint screen. Total new
+fit time is41.5 seconds; no native rollout or actor update was added.
+
+On the same30 scene-held-out mean targets, residual reduces fleet MSE from
+the prior's0.019229 to0.005864, but selected cost increases from+0.000224 to
++0.000349 and wait from+0.005233 to+0.006133 minutes. Residual's predicted
+selected fleet gain is-0.006440 while the mean observed fleet gain is zero.
+The regime and lower-root cells remain in the report; no favorable-cell claim.
+
+Server-side posthoc inspection finds flat full-fleet priors in381/600 states,
+including21/30 mean-target test states. The eight-draw fleet labels are flat
+in20/30 states; this is sampled label sparsity, not proof of zero true effect.
+Next separate state-level absolute risk from candidate-relative fleet credit,
+with separate training-only scales and paired supervision. Broaden conditional
+mean-target coverage before any reserved-scene or repeated-upper experiment.
+Do not promote this residual critic as a deployment improvement.
+
+One178,402-byte summary was pulled; full data and models remain remote.

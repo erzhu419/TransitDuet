@@ -1,0 +1,17 @@
+{
+  "diagnostic": "posthoc_server_only_bank_action_resolution",
+  "fit_source_revision": "53a59be7f1",
+  "data": "same600_states_with_30_mean8_labels_570_single_labels",
+  "flat_tolerance": 1e-12,
+  "cost_units": "full_and_prefix_are_absolute_costs_actual_future_is_above_causal_floor_pair_gaps_are_offset_invariant",
+  "all600": {
+    "full": {"flat_states": 381, "states": 600, "absolute_RMS": 0.4340359216900886, "pair_RMS": 0.023890368985004812, "range": [0.08333333333333333, 0.75]},
+    "prefix": {"flat_states": 461, "states": 600, "absolute_RMS": 0.4160389790916611, "pair_RMS": 0.009019897151324223, "range": [0.03125, 0.75]},
+    "actual_future": {"flat_states": 517, "states": 600, "absolute_RMS": 0.2964823894322247, "pair_RMS": 0.09858573861769408, "range": [0.0, 0.75]}
+  },
+  "mean30": {
+    "full": {"flat_states": 21, "states": 30, "absolute_RMS": 0.4970038324508653, "pair_RMS": 0.020730631549533547, "range": [0.13020833333333331, 0.75]},
+    "prefix": {"flat_states": 25, "states": 30, "absolute_RMS": 0.48190521657127583, "pair_RMS": 0.005126307209643105, "range": [0.08333333333333333, 0.75]},
+    "actual_future": {"flat_states": 20, "states": 30, "absolute_RMS": 0.22798913593282258, "pair_RMS": 0.03310468454598063, "range": [0.0, 0.6666666666666666]}
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "actor_updates": 0,
+  "contract": {
+    "boundary": "fleet_head_development_screen_not_full600_confirmation_or_learned_upper_authority",
+    "budget": {
+      "actor_updates": 0,
+      "cached_reference_updates": 1700,
+      "new_critic_updates": 3400,
+      "new_fits": 34,
+      "new_native_episodes": 0,
+      "reused_fits": 17
+    },
+    "comparison": "from_zero_and_residual_have_same_features_groups_scales_loss_updates_and_initial_weights",
+    "controls": "reuse17_Stage192_scalar_mean8_models_freeze_nonfleet_and_wait_for_all_variants",
+    "data": "same600_states_100_scenes_30_mean8_targets_570_single_targets",
+    "evaluation": "same30_states_original_and_mean8_labels_no_label_dependent_predictions",
+    "fleet_fit": "98_16_1_tanh_1601_parameters_100steps_seed178_shared_hidden_zero_output_AdamW0.003_wd0.01",
+    "folds": "same10_target_scene_5_regime_2_lower_root_folds_all6_callbacks_grouped",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean8_splits",
+    "increment": "residual_vs_prior_and_from_zero_same_state_cost_wait_differences_all_cells_reported",
+    "loss": "absolute_future_fleet_MSE_plus15_pair_fleet_MSE_train_only_absolute_RMS",
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "prediction": "floor_plus_max_zero_prior_future_plus_learned_residual_in_physical_units",
+    "primary": "fleet_residual:wait_feasible",
+    "prior": "existing_causal_ensemble_full_candidate_fleet_cost_floored_at_historical_peak",
+    "reference_protocol": "native_transit_expected_value_stage192_v1",
+    "reference_run": "native_transit_expected_value_stage192_fit_20261012_r1",
+    "storage": "existing_bank_targets_and_all_models_predictions_server_only_receipts_and_summary_sync",
+    "variants": [
+      "cached_absolute",
+      "physics_prior",
+      "fleet_from_zero",
+      "fleet_residual"
+    ]
+  },
+  "critic_updates": 3400,
+  "expected_target_development_gate": false,
+  "local_file_sync": {
+    "manual_requests": 1,
+    "raw_banks_models_or_predictions_pulled": false,
+    "report_bytes": 178402
+  },
+  "native_deployment_eligible": false,
+  "new_fits": 34,
+  "new_native_steps": 0,
+  "phase": "complete",
+  "posthoc_diagnostic": "prior_action_resolution.json",
+  "protocol": "native_transit_fleet_residual_stage193_v1",
+  "reused_fits": 17,
+  "software_qualified": true,
+  "source_revision": "53a59be7f1c77762d6bb598d961b89ba497a7eed",
+  "tasks": [
+    {
+      "exit_code": 0,
+      "id": "t145252",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/10",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145253",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/18",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145254",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/26",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145255",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/34",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145256",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/42",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145257",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/60",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145258",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/68",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145259",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/76",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145260",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/84",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145261",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/scene/92",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145262",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/regime/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145263",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/regime/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145264",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/regime/2",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145265",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/regime/3",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145266",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/regime/4",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145267",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/lower_root/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145268",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/lower_root/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t145271",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fleet_residual_stage193_v1/native_transit_fleet_residual_stage193_fit_20261012_r1/report",
+      "status": "done"
+    }
+  ],
+  "third_scene_screen_eligible": false
+}
