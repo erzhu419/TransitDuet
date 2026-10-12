@@ -30,26 +30,50 @@ def floor_cost(row):
 
 
 def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, objective="decision_regret",
-        representation="occupancy"):
+        representation="occupancy", sample_weights=None):
     if method not in METHODS:
         raise ValueError("Unknown anchored fleet value method")
+    return _fit_value(rows, method, steps=steps, validation_rows=validation_rows, objective=objective,
+        representation=representation, sample_weights=sample_weights)
+
+
+def fit_advantage(rows, *, steps=occupancy.STEPS, representation="tail_summary", sample_weights=None):
+    """Learn relative action credit without estimating absolute fleet risk."""
+    return _fit_value(rows, "paired_advantage", steps=steps, objective="proper_mse",
+        representation=representation, sample_weights=sample_weights)
+
+
+def _fit_value(rows, method, *, steps, validation_rows=None, objective, representation, sample_weights):
     if objective not in ("decision_regret", "proper_mse"):
         raise ValueError("Unknown anchored fleet learning objective")
     raw = np.stack([features(r, representation) for r in rows])
     labels = [{l["candidate"]: l for l in r["labels"]} for r in rows]
     # The absolute target fixes the offset that pair differences cannot identify.
-    targets = np.asarray([[[l[i][h] for h in ("future_fleet_cost", *HEADS[1:])]
+    target_fields = HEADS if method == "paired_advantage" else ("future_fleet_cost", *HEADS[1:])
+    targets = np.asarray([[[l[i][h] for h in target_fields]
         for i in range(6)] for l in labels])
     center, scale = raw.mean(axis=(0, 1)), raw.std(axis=(0, 1))
     scale[scale < 1e-8] = 1.
     a, b = np.triu_indices(6, 1)
     target_scale = np.r_[np.sqrt(np.mean(targets[..., 0]**2)),
         np.sqrt(np.mean((targets[:, a, 1:]-targets[:, b, 1:])**2, axis=(0, 1)))]
+    if method == "paired_advantage":
+        target_scale[0] = np.sqrt(np.mean((targets[:, a, 0]-targets[:, b, 0])**2))
     target_scale = np.maximum(target_scale, 1e-6)
     actual_cost = np.asarray([[l[i]["actual_cost_delta"] for i in range(6)] for l in labels])
     native_scale = max(float(np.sqrt(np.mean(actual_cost**2))), 1e-6)
     x = torch.as_tensor((raw-center)/scale, dtype=torch.float32)
     y = torch.as_tensor(targets/target_scale, dtype=torch.float32)
+    weights_by_state = None
+    if sample_weights is not None:
+        weights_by_state = torch.as_tensor(sample_weights, dtype=torch.float32)
+        if weights_by_state.shape != (len(rows),) or not torch.isfinite(weights_by_state).all() or (weights_by_state <= 0).any():
+            raise ValueError("Sample weights require one positive finite weight per training state")
+    def reduce_states(errors):
+        if weights_by_state is None:
+            return errors.mean()
+        per_state = errors.reshape(len(rows), -1).mean(dim=1)
+        return (per_state*weights_by_state).sum()/weights_by_state.sum()
     units = torch.as_tensor(target_scale[:2]/native_scale, dtype=torch.float32)
     actual = torch.as_tensor(actual_cost/native_scale, dtype=torch.float32)
     a, b = (torch.as_tensor(v, dtype=torch.long) for v in (a, b))
@@ -62,7 +86,7 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
             raise ValueError("Checkpoint validation must hold out complete training scenes")
         vraw = np.stack([features(r, representation) for r in validation_rows])
         vl = [{l["candidate"]: l for l in r["labels"]} for r in validation_rows]
-        vt = np.asarray([[[l[i][h] for h in ("future_fleet_cost", *HEADS[1:])]
+        vt = np.asarray([[[l[i][h] for h in target_fields]
             for i in range(6)] for l in vl])
         vx = torch.as_tensor((vraw-center)/scale, dtype=torch.float32)
         vy = torch.as_tensor(vt/target_scale, dtype=torch.float32)
@@ -95,8 +119,9 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
             output = forward(x, event_batch if encoder is not None else None)
             predicted = (torch.cat((softplus(output[..., :1]), output[..., 1:]), dim=-1)
                 if method == "floor_absolute" else output)
-            anchor = ((predicted[..., 0]-y[..., 0])**2).mean()
-            pair_mse = ((predicted[:, a]-predicted[:, b]-(y[:, a]-y[:, b]))**2).mean()
+            anchor = (predicted.new_zeros(()) if method == "paired_advantage" else
+                reduce_states((predicted[..., 0]-y[..., 0])**2))
+            pair_mse = reduce_states((predicted[:, a]-predicted[:, b]-(y[:, a]-y[:, b]))**2)
             regret = occupancy.expected_regret(predicted[..., :2]*units, actual)
             loss = anchor+pair_mse+(regret if objective == "decision_regret" else 0.)
             optimizer.zero_grad(set_to_none=True)
@@ -113,7 +138,7 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
                     voutput = forward(vx, validation_events if encoder is not None else None)
                     vp = (torch.cat((softplus(voutput[..., :1]), voutput[..., 1:]), dim=-1)
                         if method == "floor_absolute" else voutput)
-                    va = ((vp[..., 0]-vy[..., 0])**2).mean()
+                    va = (vp.new_zeros(()) if method == "paired_advantage" else ((vp[..., 0]-vy[..., 0])**2).mean())
                     vm = ((vp[:, a]-vp[:, b]-(vy[:, a]-vy[:, b]))**2).mean()
                     checkpoints.append({"step": step+1, "validation_loss": float(va+vm),
                         "absolute_fleet_mse": float(va), "paired_mse": float(vm)})
@@ -131,6 +156,12 @@ def fit_value(rows, method, *, steps=occupancy.STEPS, validation_rows=None, obje
         "parameter_update_l2": update_l2, "training_states": len(rows), "pairwise_examples": len(rows)*15,
         "training_groups": [list(g) for g in sorted({paired.scene_group(r) for r in rows})],
         "target": "absolute_future_fleet_above_causal_peak_and_paired_nonfleet_wait_under_original_continuation"}
+    if method == "paired_advantage":
+        model.update(target="paired_fleet_nonfleet_wait_action_differences_under_original_continuation",
+            absolute_fleet_forecast=False, fleet_scale="training_pair_gap_RMS", loss="paired_mse_only")
+    if weights_by_state is not None:
+        model["sample_weights"] = weights_by_state.tolist()
+        model["sample_weight_sum"] = float(weights_by_state.sum())
     if validation_rows is not None:
         model.update(checkpoint_ledger=checkpoints, validation_states=len(validation_rows),
             validation_groups=[list(g) for g in sorted({paired.scene_group(r) for r in validation_rows})])
@@ -157,10 +188,11 @@ def predict(row, model):
     if model["method"] == "floor_absolute":
         heads[:, 0] = np.logaddexp(0., heads[:, 0])
     heads *= model["target_scale"]
-    absolute_fleet = floor_cost(row)+heads[:, 0]
     delta = heads-heads[row["original_choice"]].copy()
-    return {"predicted_heads": delta[:, :2].tolist(), "predicted_wait_delta_min": delta[:, 2].tolist(),
-        "absolute_fleet_cost": absolute_fleet.tolist(), "causal_fleet_floor": floor_cost(row)}
+    result = {"predicted_heads": delta[:, :2].tolist(), "predicted_wait_delta_min": delta[:, 2].tolist()}
+    if model["method"] != "paired_advantage":
+        result.update(absolute_fleet_cost=(floor_cost(row)+heads[:, 0]).tolist(), causal_fleet_floor=floor_cost(row))
+    return result
 
 
 def predict_value(row, model):
