@@ -25,7 +25,16 @@ Full context, draw labels, native rollouts, target map and models stay remote.
 Remaining1670 tasks registered as`t145389-t147058`, source`d0890febf4`.
 Scheduler adjusts live RAM estimates from observed family usage (816MB at
 release); `remaining_release.json` separates requested from scheduled memory.
-Native collection is in progress; preparation,47 fits and report are pending.
+All1680 collection tasks are now done/exit0. All1680 remote receipts qualify,
+covering13440 new native episodes; peak process RSS is733.6MB. Preparation,
+47 fits and the performance report are pending.
+
+Scheduler completion accounting stalled after the processes exited: node-batch
+timeouts discarded completed chunks, and exit0 without a recognized text marker
+remained ambiguous. Fix`7bef2eb` preserves chunks, accepts confirmed clean exit0,
+clears dead-task live usage and retains backend finish times. Only the control
+service was restarted. Terminal regression:79 passed; two existing ETA-format
+tests remain mismatched. No raw artifacts were downloaded for this diagnosis.
 
 ## Next Step
 If broader targets reduce false wait-feasibility and pass the joint screen,
