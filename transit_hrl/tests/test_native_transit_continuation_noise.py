@@ -1,4 +1,6 @@
 import copy
+from pathlib import Path
+import sys
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -10,6 +12,7 @@ from freq_hrl.domains.transit.native_continuation_value import NativeContinuatio
 from scripts import run_native_transit_continuation_noise_stage191 as spec
 from scripts.analyze_native_transit_continuation_noise_stage191 import signal, state_panel, summarize
 from scripts.submit_native_transit_continuation_noise_stage191_scheduleurm import task_specification, report_task_specification
+from scripts import submit_native_transit_continuation_noise_stage191_scheduleurm as submit
 
 
 def fixture(key):
@@ -127,6 +130,23 @@ class ContinuationNoiseTest(unittest.TestCase):
             self.assertNotIn("_raw", task["result_dir"])
             self.assertNotIn("bank.json", task["cmd"])
         self.assertIn("/report", report_task_specification("unit_noise")["result_dir"])
+
+    def test_remaining_uses_qualified_worker_exits_without_downloading_receipts(self):
+        tasks = [task_specification("unit_noise", *k) for k in spec.cells(preflight=True)]
+        for task in tasks:
+            task.update(status="done", exit_code=0)
+        with patch.object(submit, "inventory", return_value=tasks), \
+                patch.object(Path, "read_text", side_effect=AssertionError("No receipt download needed")), \
+                patch.object(submit, "execute_bulk") as execute, \
+                patch.object(sys, "argv", ["submit", "--run-name", "unit_noise", "--phase", "remaining"]):
+            submit.main()
+        self.assertEqual(len(execute.call_args.args[0]), 230)
+        tasks[0]["exit_code"] = 1
+        with patch.object(submit, "inventory", return_value=tasks), \
+                patch.object(submit, "execute_bulk") as execute, \
+                patch.object(sys, "argv", ["submit", "--run-name", "unit_noise", "--phase", "remaining"]):
+            with self.assertRaises(SystemExit): submit.main()
+        execute.assert_not_called()
 
 
 if __name__ == "__main__":

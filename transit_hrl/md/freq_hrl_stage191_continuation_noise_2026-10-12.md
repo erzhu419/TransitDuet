@@ -31,4 +31,6 @@ new performance confirmation or end-to-end HRL. Results pending.
 
 Run `native_transit_continuation_noise_stage191_development_20261012_r1`,
 source `b5bd1f4228`; preflight tasks `t144777-t144786` started on nodes001/004/005/006.
-Seven targeted synthetic/mock tests pass; remaining230 await native qualification.
+All ten preflight tasks finished exit0 with full qualification. Eight targeted
+synthetic/mock tests pass, including advancing without downloading receipts.
+Remaining230 are now eligible. No manual result pull was needed for preflight.

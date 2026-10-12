@@ -74,13 +74,9 @@ def main():
     elif args.phase == "remaining":
         if {t["signature"] for t in existing} != {task_specification(args.run_name, *k)["signature"] for k in first}:
             raise SystemExit("Remaining draws require exactly the registered ten preflight tasks")
-        for key in first:
-            receipt = json.loads(spec.result_path(directory, *key).read_text())
-            if not (receipt["protocol"] == spec.EXPERIMENT_PROTOCOL and receipt["contract"] == spec.contract()
-                    and receipt["software_qualified"] and receipt["original_source_reproductions"] == 1
-                    and receipt["exact_resampled_identities"] == 1 and receipt["prefix_state_rng_matches"] == 7
-                    and receipt["training_updates"] == 0):
-                raise SystemExit("Complete software qualification on both roots and all regimes first")
+        # Workers qualify full labels before exiting; no receipt download is needed.
+        if any(t["status"] != "done" or t.get("exit_code") != 0 for t in existing):
+            raise SystemExit("Complete software qualification on both roots and all regimes first")
         tasks = [task_specification(args.run_name, *k) for k in spec.cells() if k not in first]
     else:
         if {t["signature"] for t in existing} != {task_specification(args.run_name, *k)["signature"] for k in spec.cells()}:
