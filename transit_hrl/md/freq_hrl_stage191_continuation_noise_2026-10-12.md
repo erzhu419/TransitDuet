@@ -28,3 +28,7 @@ Full rollouts, draw labels and the original bank stay server-only; sync compact
 receipts and the final report. This is conditional Poisson/speed-innovation
 diagnosis with fixed episode-level latent profiles, not full regime uncertainty,
 new performance confirmation or end-to-end HRL. Results pending.
+
+Run `native_transit_continuation_noise_stage191_development_20261012_r1`,
+source `b5bd1f4228`; preflight tasks `t144777-t144786` started on nodes001/004/005/006.
+Seven targeted synthetic/mock tests pass; remaining230 await native qualification.

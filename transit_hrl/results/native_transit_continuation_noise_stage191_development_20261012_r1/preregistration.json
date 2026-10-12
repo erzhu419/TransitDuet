@@ -1,0 +1,258 @@
+{
+  "budget": {
+    "native_clock_ticks": 117849600,
+    "native_episodes": 1920,
+    "new_prefix_scenes": 0,
+    "tasks": 240,
+    "training_updates": 0
+  },
+  "contract": {
+    "analysis": "paired_effect_power_minus_sampling_variance_over8_mean_noise_cross_half_rank_and_frozen_choice_transfer",
+    "bank_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "boundary": "conditional_innovation_diagnostic_not_new_performance_confirmation_or_learned_upper_training",
+    "budget": {
+      "native_clock_ticks": 117849600,
+      "native_episodes": 1920,
+      "new_prefix_scenes": 0,
+      "tasks": 240,
+      "training_updates": 0
+    },
+    "calibration_run": "native_transit_calibrated_value_stage190_fit_20261012_r1",
+    "collection_run": "native_transit_value_expansion_stage187_development_20261012_r2",
+    "control": "one_exact_original_observer_plus_resampled_observer_six_actions_including_exact_resampled_identity",
+    "draws": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "frozen_choices": "Stage188_wait_feasible_and_Stage190_ensemble_mean_all_modes_splits_read_before_rollouts",
+    "future_seed": "920000000+root*100000+regime_index*10000+probe*100+draw",
+    "intervention": "replace_ScenarioTape_after_exact_preaction_snapshot_then_one_candidate_and_original_greedy_suffix",
+    "preflight": "both_roots_all5regimes_probe22_draw0_then_remaining230",
+    "probes": [
+      8,
+      22,
+      36
+    ],
+    "randomness": "independent_future_Poisson_route_speed_streams_shared_within_six_actions",
+    "retained": "all_prefix_physics_cost_RNG_and_episode_demand_profile_peak_phase_OD_multipliers_lower_weights_duration_prior",
+    "roots": [
+      397,
+      401
+    ],
+    "scenarios": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "source_states": "Stage187_replica0_only_30_existing_states_in10_scene_groups",
+    "storage": "bank_full_context_snapshots_rollouts_and_draw_labels_server_only_compact_receipts_report_for_sync"
+  },
+  "preflight_tasks": 10,
+  "protocol": "native_transit_continuation_noise_stage191_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "b5bd1f4228f25f665306a496dcc20c88add026cb",
+  "states": [
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "low_noise",
+      "scene_seed": 913970000
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "high_noise",
+      "scene_seed": 913970100
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "hour_burst",
+      "scene_seed": 913970200
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "persistent_shift",
+      "scene_seed": 913970300
+    },
+    {
+      "probe_index": 8,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 22,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 36,
+      "root": 397,
+      "scenario": "ood_period",
+      "scene_seed": 913970400
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "low_noise",
+      "scene_seed": 914010000
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "high_noise",
+      "scene_seed": 914010100
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "hour_burst",
+      "scene_seed": 914010200
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "persistent_shift",
+      "scene_seed": 914010300
+    },
+    {
+      "probe_index": 8,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 22,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    },
+    {
+      "probe_index": 36,
+      "root": 401,
+      "scenario": "ood_period",
+      "scene_seed": 914010400
+    }
+  ],
+  "tasks": 240
+}
