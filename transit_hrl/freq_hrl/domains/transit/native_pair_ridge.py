@@ -6,13 +6,18 @@ from freq_hrl.domains.transit import native_action_value as paired
 from freq_hrl.domains.transit import native_floor_value as value
 
 
-def fit_value(rows, reference, *, sample_weights=None):
+def fit_value(rows, reference=None, *, sample_weights=None):
     raw = np.stack([value.features(r, "tail_summary") for r in rows])
-    x = (raw-reference["center"])/reference["scale"]
     labels = [{l["candidate"]: l for l in r["labels"]} for r in rows]
     targets = np.asarray([[[l[i][h] for h in value.HEADS] for i in range(6)] for l in labels])
-    y = targets/reference["target_scale"]
     a, b = np.triu_indices(6, 1)
+    if reference is None:
+        scale = raw.std(axis=(0, 1))
+        scale[scale < 1e-8] = 1.
+        reference = {"center": raw.mean(axis=(0, 1)).tolist(), "scale": scale.tolist(),
+            "target_scale": np.maximum(np.sqrt(np.mean((targets[:, a]-targets[:, b])**2, axis=(0, 1))), 1e-6).tolist()}
+    x = (raw-reference["center"])/reference["scale"]
+    y = targets/reference["target_scale"]
     z, gaps = (x[:, a]-x[:, b]).reshape(-1, x.shape[-1]), (y[:, a]-y[:, b]).reshape(-1, 3)
     state_weights = np.ones(len(rows)) if sample_weights is None else np.asarray(sample_weights)
     weights = np.repeat(state_weights, len(a))
