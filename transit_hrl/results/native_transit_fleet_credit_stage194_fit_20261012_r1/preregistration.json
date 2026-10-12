@@ -1,0 +1,70 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "cached_reference_updates": 3400,
+    "new_critic_updates": 5100,
+    "new_fits": 51,
+    "new_native_episodes": 0,
+    "reused_fits": 34
+  },
+  "contract": {
+    "boundary": "ten_prefix_development_screen_not_conditional_coverage_confirmation_or_full_learned_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "cached_reference_updates": 3400,
+      "new_critic_updates": 5100,
+      "new_fits": 51,
+      "new_native_episodes": 0,
+      "reused_fits": 34
+    },
+    "controls": "reuse17_Stage193_from_zero_and17_Stage192_scalar_models_frozen_nonfleet_wait",
+    "data": "unchanged600_states_100_scenes_30_mean8_targets_570_single_targets",
+    "evaluation": "same30_states_original_and_mean8_labels_all_variants_and_cells_retained",
+    "factorial": "shared16_or_disjoint8plus8_crossed_with_absolute_or_pair_RMS_loss_units",
+    "fitting": "100steps_seed178_same16_initial_hidden_rows_zero_projections_AdamW0.003_wd0.01",
+    "folds": "same10_scene_5_regime_2_lower_root_all_callbacks_grouped",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean8_splits",
+    "gradient": "pair_loss_detaches_reference_risk_disjoint_networks_no_contrast_gradient_into_risk",
+    "matching": "same_features_groups_normalization_initial_predictions_updates_and1601_parameters",
+    "parameters": {
+      "fleet_from_zero": 1601,
+      "separated_pair_scaled": 1601,
+      "separated_shared_scale": 1601,
+      "shared_pair_scaled": 1601
+    },
+    "policies": [
+      "cost_only",
+      "wait_feasible"
+    ],
+    "prediction": "floor_plus_clamp_zero_reference_risk_plus_contrast_minus_reference_contrast",
+    "previous_protocol": "native_transit_fleet_residual_stage193_v1",
+    "previous_run": "native_transit_fleet_residual_stage193_fit_20261012_r1",
+    "primary": "separated_pair_scaled:wait_feasible",
+    "separated_target": "reference_future_risk_original_only_anchor_candidate_credit_all15_pairs",
+    "storage": "bank_targets_full_models_predictions_server_only_compact_receipts_summary_sync",
+    "units": "output_absolute_RMS_all_variants_loss_pair_RMS_only_pair_scaled_train_only_floor1e-6",
+    "variants": [
+      "cached_absolute",
+      "fleet_from_zero",
+      "shared_pair_scaled",
+      "separated_shared_scale",
+      "separated_pair_scaled"
+    ]
+  },
+  "protocol": "native_transit_fleet_credit_stage194_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "5b626463fdb74b0375d1deaf3b5c27f5b4cfb6dc",
+  "tasks": 18
+}
