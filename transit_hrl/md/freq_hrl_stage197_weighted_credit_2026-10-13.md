@@ -1,32 +1,32 @@
 # Stage197: weighting versus action credit
 
-Stage196 found weak fleet action credit even on training data, and held-out
-cost pair errors worse than zero differences. Stage197 separates two changes:
+Matched 2x2: absolute fleet anchor versus direct three-head action differences;
+uniform weights versus mean8 weight8/singleton weight1. Same600 inputs,
+240 mean8 targets,40 test prefix groups,47 folds,1635 parameters,100 updates,
+seed178 and AdamW. Weighting retains train-only scales; direct credit instead
+uses fleet pair RMS and has no absolute fleet-risk forecast.
 
-- Replicate-count weighting: mean8 states receive weight8, singleton states
-  weight1; normalized weighted state losses, unchanged training-only scales.
-- Direct action credit: remove the absolute fleet anchor, fit fleet/nonfleet/wait
-  pair gaps, normalize fleet by training pair RMS instead of absolute risk RMS.
+Completed: `t147315-t147361` and report `t147367`, all done/exit0.
+141 new fits,47 cached controls,14100 critic updates,0 actor/native updates.
+Tests:37 passed. Fit wall-time sum180.85s; not an end-to-end runtime benchmark.
+Only the708052-byte report was manually pulled; raw data/models remain remote.
 
-The 2x2 comparison reuses Stage195 anchored/uniform models and fits the other
-three variants. Same600 inputs,240 mean8 targets,40 evaluation prefix groups,
-47 grouped folds,1635 parameters,100 updates, seed178 and AdamW settings.
-All three heads train jointly. Replicate counts are a reliability proxy, not
-heteroskedastic inverse-variance estimates. Direct credit does not forecast
-absolute fleet risk; the network initialization is shared, not its decoded
-fleet output across objectives.
+Wait-feasible point estimates, cost delta / wait delta in minutes:
 
-Primary: advantage/count-weighted, wait-feasible. Gate unchanged: negative mean
-physical cost and nonpositive wait on both lower roots across all three splits.
-Native episodes and actor updates:0. Reserved scenes remain closed. This is an
-action-credit development screen under the original greedy continuation.
+| Model | Scene | Regime | Lower Root |
+| --- | --- | --- | --- |
+| Anchored/uniform | -0.001373 / -0.001371 | +0.001356 / +0.000588 | -0.002459 / -0.004965 |
+| Anchored/weighted | -0.000102 / -0.001692 | -0.001241 / -0.003613 | -0.000099 / -0.004118 |
+| Advantage/uniform | +0.000752 / -0.000903 | +0.000652 / +0.004709 | -0.000895 / -0.006127 |
+| Advantage/weighted | -0.001111 / -0.007728 | -0.000753 / -0.001965 | +0.001913 / -0.004467 |
 
-Run: `native_transit_weighted_credit_stage197_development_20261013_r1`.
-Scheduler:47 fit tasks plus one report,1CPU/3072MB, unbound node001-node006.
-Models, target maps, draws and raw predictions stay server-only.
-Tests:37 passed, including the existing floor/sequence/mean-target paths.
+Anchored/weighted passes both roots within regime; advantage/weighted passes
+both roots within scene. No model passes all three splits on both roots.
+Advantage/weighted scene cost pair MSE is merely near the zero-difference
+reference (0.00045111 vs0.00045212, noise-corrected), not a strong critic win.
 
-Next: compare weighting effects within each objective and objective effects
-within each weighting scheme, using physical outcomes, false-feasibility and
-noise-corrected pair errors against the zero-difference reference. A failed
-gate will not trigger more native collection or open the reserved screen.
+Next: check mean8 training-subset errors and cross-lower distribution changes
+before changing representation or training budget. No extra seed collection.
+Limits: replicate counts approximate reliability; this is a development
+one-action/original-greedy-suffix screen, without CI or full HRL validation.
+Reserved scenes and native deployment remain closed.
