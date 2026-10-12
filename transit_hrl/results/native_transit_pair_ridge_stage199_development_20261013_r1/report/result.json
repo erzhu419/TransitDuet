@@ -1,0 +1,2364 @@
+{
+  "actor_updates": 0,
+  "contract": {
+    "boundary": "lower_capacity_regularized_baseline_not_matched_capacity_or_optimizer_budget_or_HRL_proof",
+    "budget": {
+      "actor_updates": 0,
+      "critic_optimizer_updates": 0,
+      "new_closed_form_fits": 94,
+      "new_native_episodes": 0,
+      "reused_neural_models": 94
+    },
+    "data": "unchanged600_inputs_240_mean8_targets_360_single_targets_47_folds",
+    "diagnostic_run": "native_transit_fit_transfer_stage198_diagnostic_20261013_r1",
+    "evaluation": "same240_mean8_states_both_roots_all_three_grouped_splits_both_fixed_selectors",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "normalization": "exact_Stage197_neural_advantage_training_input_and_target_scales_within_each_fold",
+    "primary": "ridge_count_weighted:wait_feasible",
+    "reference": "reuse94_frozen_neural_advantage_models_and_exact_heldout_predictions_1635_parameters_100updates",
+    "ridge": "existing_native_action_value_RIDGE0.1_three_heads_98_features_294_coefficients_no_intercept",
+    "source_protocol": "native_transit_weighted_credit_stage197_v1",
+    "source_run": "native_transit_weighted_credit_stage197_development_20261013_r1",
+    "storage": "features_mean_map_models_predictions_server_only_compact_receipts_report_sync",
+    "variants": [
+      "neural_uniform",
+      "neural_count_weighted",
+      "ridge_uniform",
+      "ridge_count_weighted"
+    ],
+    "weights": "uniform_or_mean8_weight8_single_weight1_training_states_only"
+  },
+  "critic_optimizer_updates": 0,
+  "development_gate": false,
+  "evaluation_prefix_groups": 40,
+  "evaluation_states": 240,
+  "native_deployment_eligible": false,
+  "new_closed_form_fits": 94,
+  "new_native_episodes": 0,
+  "protocol": "native_transit_pair_ridge_stage199_v1",
+  "reused_neural_models": 94,
+  "software_qualified": true,
+  "third_scene_screen_eligible": false,
+  "variants": {
+    "neural_count_weighted:cost_only": {
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 90,
+              "concordant_pairs": 910,
+              "false_feasible_choices": 28,
+              "improved_states": 29,
+              "mean_actual_cost_delta": -0.0001845374999999987,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.004939583333337794,
+              "mean_fleet_cost_delta": -0.0003472222222222219,
+              "mean_nonfleet_cost_delta": 0.00016268472222222345,
+              "mean_regret": 0.016910232291666667,
+              "mean_wait_delta_min": 0.0018697916666666522,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 61
+            },
+            "401": {
+              "changed_choices": 81,
+              "concordant_pairs": 946,
+              "false_feasible_choices": 20,
+              "improved_states": 28,
+              "mean_actual_cost_delta": 0.0055190479166666645,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.21279687499999914,
+              "mean_fleet_cost_delta": 0.005642361111111111,
+              "mean_nonfleet_cost_delta": -0.00012331319444444598,
+              "mean_regret": 0.017423184374999998,
+              "mean_wait_delta_min": -0.0018510416666667122,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 53
+            }
+          },
+          "overall": {
+            "changed_choices": 171,
+            "concordant_pairs": 1856,
+            "false_feasible_choices": 48,
+            "improved_states": 57,
+            "mean_actual_cost_delta": 0.0026672552083333327,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.10392864583333067,
+            "mean_fleet_cost_delta": 0.0026475694444444446,
+            "mean_nonfleet_cost_delta": 1.9685763888888734e-05,
+            "mean_regret": 0.017166708333333332,
+            "mean_wait_delta_min": 9.374999999970055e-06,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 114
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00019115486794930988,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.1408950811932694,
+                "noise_corrected_pair_mse": 0.00064327200492311,
+                "observed_pair_mse": 0.0015478726918107253,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0002359586205867661,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.188407998131922,
+                "noise_corrected_pair_mse": 0.0006192120376943501,
+                "observed_pair_mse": 0.0014883397452009639,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 7.12621223503052e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.1093501089341564,
+                "noise_corrected_pair_mse": 4.671785758625509e-05,
+                "observed_pair_mse": 7.229498348263365e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.000594480162053118,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1033718356930444,
+                "noise_corrected_pair_mse": 0.004137020013243599,
+                "observed_pair_mse": 0.006345371186358678,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 95,
+              "concordant_pairs": 899,
+              "false_feasible_choices": 33,
+              "improved_states": 37,
+              "mean_actual_cost_delta": -0.0014269822916666665,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.4611843750000022,
+              "mean_fleet_cost_delta": -0.0019097222222222224,
+              "mean_nonfleet_cost_delta": 0.00048273993055555637,
+              "mean_regret": 0.0156677875,
+              "mean_wait_delta_min": 0.006856250000000004,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 58
+            },
+            "401": {
+              "changed_choices": 88,
+              "concordant_pairs": 975,
+              "false_feasible_choices": 24,
+              "improved_states": 35,
+              "mean_actual_cost_delta": 0.0007504854166666633,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.9750916666666666,
+              "mean_fleet_cost_delta": 0.00078125,
+              "mean_nonfleet_cost_delta": -3.0764583333336576e-05,
+              "mean_regret": 0.012654621874999994,
+              "mean_wait_delta_min": 0.0003041666666666697,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 53
+            }
+          },
+          "overall": {
+            "changed_choices": 183,
+            "concordant_pairs": 1874,
+            "false_feasible_choices": 57,
+            "improved_states": 72,
+            "mean_actual_cost_delta": -0.0003382484375000013,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.2569536458333322,
+            "mean_fleet_cost_delta": -0.0005642361111111112,
+            "mean_nonfleet_cost_delta": 0.0002259876736111099,
+            "mean_regret": 0.014161204687499995,
+            "mean_wait_delta_min": 0.0035802083333333363,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 111
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00016775575137364896,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.1236482254623823,
+                "noise_corrected_pair_mse": 0.0006198728883474495,
+                "observed_pair_mse": 0.0015244735752350648,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00014638265391433004,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.1168834718420273,
+                "noise_corrected_pair_mse": 0.0005296360710219138,
+                "observed_pair_mse": 0.0013987637785285276,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5922259367966748e-05,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.2443234552861444,
+                "noise_corrected_pair_mse": 5.551390471919135e-05,
+                "observed_pair_mse": 8.109103061556992e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0010963933060628732,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1906475538188912,
+                "noise_corrected_pair_mse": 0.004638933157253354,
+                "observed_pair_mse": 0.006847284330368434,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 91,
+              "concordant_pairs": 949,
+              "false_feasible_choices": 29,
+              "improved_states": 36,
+              "mean_actual_cost_delta": -0.0029551072916666698,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.2615875000000012,
+              "mean_fleet_cost_delta": -0.0024305555555555556,
+              "mean_nonfleet_cost_delta": -0.0005245517361111142,
+              "mean_regret": 0.014139662499999995,
+              "mean_wait_delta_min": -0.002858333333333337,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 55
+            },
+            "401": {
+              "changed_choices": 93,
+              "concordant_pairs": 1014,
+              "false_feasible_choices": 33,
+              "improved_states": 38,
+              "mean_actual_cost_delta": -0.0006780239583333359,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.9062958333333339,
+              "mean_fleet_cost_delta": -0.0002604166666666669,
+              "mean_nonfleet_cost_delta": -0.00041760729166666956,
+              "mean_regret": 0.011226112499999993,
+              "mean_wait_delta_min": -0.0034708333333333874,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 55
+            }
+          },
+          "overall": {
+            "changed_choices": 184,
+            "concordant_pairs": 1963,
+            "false_feasible_choices": 62,
+            "improved_states": 74,
+            "mean_actual_cost_delta": -0.0018165656250000027,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.32235416666666633,
+            "mean_fleet_cost_delta": -0.0013454861111111113,
+            "mean_nonfleet_cost_delta": -0.00047107951388889184,
+            "mean_regret": 0.012682887499999995,
+            "mean_wait_delta_min": -0.003164583333333362,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 110
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -1.0064370605459682e-06,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9992581824732858,
+                "noise_corrected_pair_mse": 0.0004511106999132541,
+                "observed_pair_mse": 0.0013557113868008694,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 2.4310850502647302e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.0194117030549597,
+                "noise_corrected_pair_mse": 0.0004075642676102313,
+                "observed_pair_mse": 0.001276691975116845,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.2707339802621817e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.0194991244415847,
+                "noise_corrected_pair_mse": 4.086237933148675e-05,
+                "observed_pair_mse": 6.643950522786531e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -2.510896734125162e-06,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9995633899645266,
+                "noise_corrected_pair_mse": 0.0035400289544563553,
+                "observed_pair_mse": 0.005748380127571435,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "neural_count_weighted:wait_feasible": {
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 50,
+              "concordant_pairs": 910,
+              "false_feasible_choices": 30,
+              "improved_states": 18,
+              "mean_actual_cost_delta": 0.00045186249999999657,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.5923416666666673,
+              "mean_fleet_cost_delta": 0.0006944444444444445,
+              "mean_nonfleet_cost_delta": -0.00024258194444444728,
+              "mean_regret": 0.017546632291666663,
+              "mean_wait_delta_min": -0.0033729166666666625,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 32
+            },
+            "401": {
+              "changed_choices": 53,
+              "concordant_pairs": 946,
+              "false_feasible_choices": 28,
+              "improved_states": 19,
+              "mean_actual_cost_delta": 0.0033739843750000015,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.3613864583333329,
+              "mean_fleet_cost_delta": 0.00390625,
+              "mean_nonfleet_cost_delta": -0.0005322656249999981,
+              "mean_regret": 0.01527812083333333,
+              "mean_wait_delta_min": -0.005561458333333369,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            }
+          },
+          "overall": {
+            "changed_choices": 103,
+            "concordant_pairs": 1856,
+            "false_feasible_choices": 58,
+            "improved_states": 37,
+            "mean_actual_cost_delta": 0.001912923437499999,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.4768640625000001,
+            "mean_fleet_cost_delta": 0.0023003472222222223,
+            "mean_nonfleet_cost_delta": -0.00038742378472222266,
+            "mean_regret": 0.016412376562499997,
+            "mean_wait_delta_min": -0.004467187500000015,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 66
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00019115486794930988,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.1408950811932694,
+                "noise_corrected_pair_mse": 0.00064327200492311,
+                "observed_pair_mse": 0.0015478726918107253,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0002359586205867661,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.188407998131922,
+                "noise_corrected_pair_mse": 0.0006192120376943501,
+                "observed_pair_mse": 0.0014883397452009639,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 7.12621223503052e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.1093501089341564,
+                "noise_corrected_pair_mse": 4.671785758625509e-05,
+                "observed_pair_mse": 7.229498348263365e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.000594480162053118,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1033718356930444,
+                "noise_corrected_pair_mse": 0.004137020013243599,
+                "observed_pair_mse": 0.006345371186358678,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 59,
+              "concordant_pairs": 899,
+              "false_feasible_choices": 37,
+              "improved_states": 25,
+              "mean_actual_cost_delta": -0.0031885979166666684,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.3481135416666682,
+              "mean_fleet_cost_delta": -0.0034722222222222225,
+              "mean_nonfleet_cost_delta": 0.0002836243055555539,
+              "mean_regret": 0.013906171875,
+              "mean_wait_delta_min": 0.003463541666666642,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            },
+            "401": {
+              "changed_choices": 54,
+              "concordant_pairs": 975,
+              "false_feasible_choices": 28,
+              "improved_states": 20,
+              "mean_actual_cost_delta": 0.0016818156249999961,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -1.0483218749999985,
+              "mean_fleet_cost_delta": 0.00234375,
+              "mean_nonfleet_cost_delta": -0.0006619343750000043,
+              "mean_regret": 0.013585952083333325,
+              "mean_wait_delta_min": -0.007392708333333328,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            }
+          },
+          "overall": {
+            "changed_choices": 113,
+            "concordant_pairs": 1874,
+            "false_feasible_choices": 65,
+            "improved_states": 45,
+            "mean_actual_cost_delta": -0.0007533911458333364,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.35010416666666516,
+            "mean_fleet_cost_delta": -0.0005642361111111112,
+            "mean_nonfleet_cost_delta": -0.00018915503472222524,
+            "mean_regret": 0.013746061979166661,
+            "mean_wait_delta_min": -0.0019645833333333433,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 68
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.00016775575137364896,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.1236482254623823,
+                "noise_corrected_pair_mse": 0.0006198728883474495,
+                "observed_pair_mse": 0.0015244735752350648,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.00014638265391433004,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.1168834718420273,
+                "noise_corrected_pair_mse": 0.0005296360710219138,
+                "observed_pair_mse": 0.0013987637785285276,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.5922259367966748e-05,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.2443234552861444,
+                "noise_corrected_pair_mse": 5.551390471919135e-05,
+                "observed_pair_mse": 8.109103061556992e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0010963933060628732,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1906475538188912,
+                "noise_corrected_pair_mse": 0.004638933157253354,
+                "observed_pair_mse": 0.006847284330368434,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 60,
+              "concordant_pairs": 949,
+              "false_feasible_choices": 34,
+              "improved_states": 24,
+              "mean_actual_cost_delta": -0.0020487385416666716,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.12611770833333366,
+              "mean_fleet_cost_delta": -0.0010416666666666667,
+              "mean_nonfleet_cost_delta": -0.001007071875000005,
+              "mean_regret": 0.015046031249999996,
+              "mean_wait_delta_min": -0.008341666666666673,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 36
+            },
+            "401": {
+              "changed_choices": 68,
+              "concordant_pairs": 1014,
+              "false_feasible_choices": 40,
+              "improved_states": 26,
+              "mean_actual_cost_delta": -0.00017296875000000396,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5616239583333341,
+              "mean_fleet_cost_delta": 0.0006076388888888888,
+              "mean_nonfleet_cost_delta": -0.000780607638888893,
+              "mean_regret": 0.011731167708333325,
+              "mean_wait_delta_min": -0.007113541666666692,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 42
+            }
+          },
+          "overall": {
+            "changed_choices": 128,
+            "concordant_pairs": 1963,
+            "false_feasible_choices": 74,
+            "improved_states": 50,
+            "mean_actual_cost_delta": -0.0011108536458333377,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.21775312500000024,
+            "mean_fleet_cost_delta": -0.00021701388888888893,
+            "mean_nonfleet_cost_delta": -0.000893839756944449,
+            "mean_regret": 0.013388599479166659,
+            "mean_wait_delta_min": -0.007727604166666682,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 78
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -1.0064370605459682e-06,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9992581824732858,
+                "noise_corrected_pair_mse": 0.0004511106999132541,
+                "observed_pair_mse": 0.0013557113868008694,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 2.4310850502647302e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.0194117030549597,
+                "noise_corrected_pair_mse": 0.0004075642676102313,
+                "observed_pair_mse": 0.001276691975116845,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.2707339802621817e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.0194991244415847,
+                "noise_corrected_pair_mse": 4.086237933148675e-05,
+                "observed_pair_mse": 6.643950522786531e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -2.510896734125162e-06,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9995633899645266,
+                "noise_corrected_pair_mse": 0.0035400289544563553,
+                "observed_pair_mse": 0.005748380127571435,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "neural_uniform:cost_only": {
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 90,
+              "concordant_pairs": 892,
+              "false_feasible_choices": 29,
+              "improved_states": 32,
+              "mean_actual_cost_delta": 0.0017243427083333356,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.1283531249999965,
+              "mean_fleet_cost_delta": 0.0018229166666666667,
+              "mean_nonfleet_cost_delta": -9.857395833333105e-05,
+              "mean_regret": 0.018819112500000002,
+              "mean_wait_delta_min": -0.0008833333333333646,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 58
+            },
+            "401": {
+              "changed_choices": 86,
+              "concordant_pairs": 996,
+              "false_feasible_choices": 25,
+              "improved_states": 33,
+              "mean_actual_cost_delta": 0.0004231083333333367,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.11498541666667018,
+              "mean_fleet_cost_delta": 0.00078125,
+              "mean_nonfleet_cost_delta": -0.0003581416666666638,
+              "mean_regret": 0.012327244791666666,
+              "mean_wait_delta_min": -0.0025333333333333497,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 53
+            }
+          },
+          "overall": {
+            "changed_choices": 176,
+            "concordant_pairs": 1888,
+            "false_feasible_choices": 54,
+            "improved_states": 65,
+            "mean_actual_cost_delta": 0.001073725520833336,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.12166927083333334,
+            "mean_fleet_cost_delta": 0.0013020833333333333,
+            "mean_nonfleet_cost_delta": -0.00022835781249999743,
+            "mean_regret": 0.015573178645833333,
+            "mean_wait_delta_min": -0.001708333333333357,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 111
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006787377624536946,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.5002792404701433,
+                "noise_corrected_pair_mse": 0.0011308548994274947,
+                "observed_pair_mse": 0.00203545558631511,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0008129025381101037,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.6490855875526889,
+                "noise_corrected_pair_mse": 0.0011961559552176877,
+                "observed_pair_mse": 0.0020652836627243014,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.128608046072326e-05,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.3266300722450117,
+                "noise_corrected_pair_mse": 6.087772581194783e-05,
+                "observed_pair_mse": 8.64548517083264e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0016706037000561412,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.2904947586374882,
+                "noise_corrected_pair_mse": 0.005213143551246621,
+                "observed_pair_mse": 0.0074214947243617015,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 94,
+              "concordant_pairs": 883,
+              "false_feasible_choices": 23,
+              "improved_states": 40,
+              "mean_actual_cost_delta": 9.30895833333357e-05,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.1462364583333354,
+              "mean_fleet_cost_delta": -0.0011284722222222223,
+              "mean_nonfleet_cost_delta": 0.001221561805555558,
+              "mean_regret": 0.017187859375000003,
+              "mean_wait_delta_min": 0.01284895833333333,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 54
+            },
+            "401": {
+              "changed_choices": 92,
+              "concordant_pairs": 903,
+              "false_feasible_choices": 31,
+              "improved_states": 36,
+              "mean_actual_cost_delta": 0.0036798156249999944,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.7927489583333347,
+              "mean_fleet_cost_delta": 0.003211805555555556,
+              "mean_nonfleet_cost_delta": 0.00046801006944443814,
+              "mean_regret": 0.015583952083333324,
+              "mean_wait_delta_min": 0.0044218750000000005,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 56
+            }
+          },
+          "overall": {
+            "changed_choices": 186,
+            "concordant_pairs": 1786,
+            "false_feasible_choices": 54,
+            "improved_states": 76,
+            "mean_actual_cost_delta": 0.0018864526041666644,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.3232562499999997,
+            "mean_fleet_cost_delta": 0.0010416666666666667,
+            "mean_nonfleet_cost_delta": 0.000844785937499998,
+            "mean_regret": 0.016385905729166664,
+            "mean_wait_delta_min": 0.008635416666666666,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 110
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006642970291489251,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.4896353666661792,
+                "noise_corrected_pair_mse": 0.0011164141661227256,
+                "observed_pair_mse": 0.002021014853010341,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006549455786005205,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.5229602760120484,
+                "noise_corrected_pair_mse": 0.0010381989957081042,
+                "observed_pair_mse": 0.001907326703214718,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.0951028526846856e-05,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.3214887763840937,
+                "noise_corrected_pair_mse": 6.054267387807146e-05,
+                "observed_pair_mse": 8.611979977445003e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001867616226949394,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.3247524981878638,
+                "noise_corrected_pair_mse": 0.005410156078139876,
+                "observed_pair_mse": 0.007618507251254955,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 78,
+              "concordant_pairs": 974,
+              "false_feasible_choices": 19,
+              "improved_states": 31,
+              "mean_actual_cost_delta": 0.00197477604166667,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.3233718750000018,
+              "mean_fleet_cost_delta": 0.002256944444444444,
+              "mean_nonfleet_cost_delta": -0.00028216840277777523,
+              "mean_regret": 0.019069545833333333,
+              "mean_wait_delta_min": -0.0015843750000000504,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 47
+            },
+            "401": {
+              "changed_choices": 76,
+              "concordant_pairs": 1016,
+              "false_feasible_choices": 18,
+              "improved_states": 33,
+              "mean_actual_cost_delta": 0.0011511354166666649,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.9209437499999995,
+              "mean_fleet_cost_delta": 0.0010416666666666667,
+              "mean_nonfleet_cost_delta": 0.0001094687499999981,
+              "mean_regret": 0.013055271874999993,
+              "mean_wait_delta_min": 0.0012999999999999544,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 43
+            }
+          },
+          "overall": {
+            "changed_choices": 154,
+            "concordant_pairs": 1990,
+            "false_feasible_choices": 37,
+            "improved_states": 64,
+            "mean_actual_cost_delta": 0.0015629557291666674,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.2987859374999989,
+            "mean_fleet_cost_delta": 0.0016493055555555553,
+            "mean_nonfleet_cost_delta": -8.634982638888858e-05,
+            "mean_regret": 0.016062408854166665,
+            "mean_wait_delta_min": -0.00014218750000004796,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 90
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0003513922629506034,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.2590017295936233,
+                "noise_corrected_pair_mse": 0.0008035093999244035,
+                "observed_pair_mse": 0.0017081100868120188,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0003505992880933927,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.279946161118802,
+                "noise_corrected_pair_mse": 0.0007338527052009767,
+                "observed_pair_mse": 0.0016029804127075905,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3318544671693378e-05,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.2043700443743326,
+                "noise_corrected_pair_mse": 5.2910190022917947e-05,
+                "observed_pair_mse": 7.848731591929651e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001240267568258369,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.2156652878686978,
+                "noise_corrected_pair_mse": 0.004782807419448849,
+                "observed_pair_mse": 0.006991158592563929,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "neural_uniform:wait_feasible": {
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 51,
+              "concordant_pairs": 892,
+              "false_feasible_choices": 33,
+              "improved_states": 20,
+              "mean_actual_cost_delta": -0.0005398833333333344,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.04354166666666733,
+              "mean_fleet_cost_delta": -0.00017361111111111096,
+              "mean_nonfleet_cost_delta": -0.000366272222222223,
+              "mean_regret": 0.01655488645833333,
+              "mean_wait_delta_min": -0.003043750000000028,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 31
+            },
+            "401": {
+              "changed_choices": 54,
+              "concordant_pairs": 996,
+              "false_feasible_choices": 25,
+              "improved_states": 25,
+              "mean_actual_cost_delta": -0.0012491166666666683,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.4600197916666652,
+              "mean_fleet_cost_delta": -8.68055555555556e-05,
+              "mean_nonfleet_cost_delta": -0.0011623111111111128,
+              "mean_regret": 0.010655019791666661,
+              "mean_wait_delta_min": -0.009210416666666667,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 29
+            }
+          },
+          "overall": {
+            "changed_choices": 105,
+            "concordant_pairs": 1888,
+            "false_feasible_choices": 58,
+            "improved_states": 45,
+            "mean_actual_cost_delta": -0.0008945000000000013,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": 0.2517807291666662,
+            "mean_fleet_cost_delta": -0.00013020833333333328,
+            "mean_nonfleet_cost_delta": -0.0007642916666666679,
+            "mean_regret": 0.013604953124999996,
+            "mean_wait_delta_min": -0.006127083333333348,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 60
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006787377624536946,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.5002792404701433,
+                "noise_corrected_pair_mse": 0.0011308548994274947,
+                "observed_pair_mse": 0.00203545558631511,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0008129025381101037,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.6490855875526889,
+                "noise_corrected_pair_mse": 0.0011961559552176877,
+                "observed_pair_mse": 0.0020652836627243014,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.128608046072326e-05,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.3266300722450117,
+                "noise_corrected_pair_mse": 6.087772581194783e-05,
+                "observed_pair_mse": 8.64548517083264e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0016706037000561412,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.2904947586374882,
+                "noise_corrected_pair_mse": 0.005213143551246621,
+                "observed_pair_mse": 0.0074214947243617015,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 46,
+              "concordant_pairs": 883,
+              "false_feasible_choices": 26,
+              "improved_states": 20,
+              "mean_actual_cost_delta": -0.0009446468749999996,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": -0.004613541666661547,
+              "mean_fleet_cost_delta": -0.0013020833333333333,
+              "mean_nonfleet_cost_delta": 0.00035743645833333405,
+              "mean_regret": 0.016150122916666666,
+              "mean_wait_delta_min": 0.0038604166666666878,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 26
+            },
+            "401": {
+              "changed_choices": 62,
+              "concordant_pairs": 903,
+              "false_feasible_choices": 38,
+              "improved_states": 22,
+              "mean_actual_cost_delta": 0.0022481302083333324,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.4003666666666682,
+              "mean_fleet_cost_delta": 0.001736111111111111,
+              "mean_nonfleet_cost_delta": 0.0005120190972222215,
+              "mean_regret": 0.014152266666666661,
+              "mean_wait_delta_min": 0.005558333333333324,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 40
+            }
+          },
+          "overall": {
+            "changed_choices": 108,
+            "concordant_pairs": 1786,
+            "false_feasible_choices": 64,
+            "improved_states": 42,
+            "mean_actual_cost_delta": 0.0006517416666666667,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.20249010416666485,
+            "mean_fleet_cost_delta": 0.00021701388888888888,
+            "mean_nonfleet_cost_delta": 0.00043472777777777777,
+            "mean_regret": 0.015151194791666664,
+            "mean_wait_delta_min": 0.004709375000000006,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 66
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0006642970291489251,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.4896353666661792,
+                "noise_corrected_pair_mse": 0.0011164141661227256,
+                "observed_pair_mse": 0.002021014853010341,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0006549455786005205,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.5229602760120484,
+                "noise_corrected_pair_mse": 0.0010381989957081042,
+                "observed_pair_mse": 0.001907326703214718,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 2.0951028526846856e-05,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.3214887763840937,
+                "noise_corrected_pair_mse": 6.054267387807146e-05,
+                "observed_pair_mse": 8.611979977445003e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001867616226949394,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.3247524981878638,
+                "noise_corrected_pair_mse": 0.005410156078139876,
+                "observed_pair_mse": 0.007618507251254955,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 49,
+              "concordant_pairs": 974,
+              "false_feasible_choices": 26,
+              "improved_states": 20,
+              "mean_actual_cost_delta": 0.0018914447916666716,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.1011656250000037,
+              "mean_fleet_cost_delta": 0.0019965277777777776,
+              "mean_nonfleet_cost_delta": -0.00010508298611110641,
+              "mean_regret": 0.018986214583333338,
+              "mean_wait_delta_min": -0.0010218750000000137,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 29
+            },
+            "401": {
+              "changed_choices": 47,
+              "concordant_pairs": 1016,
+              "false_feasible_choices": 25,
+              "improved_states": 20,
+              "mean_actual_cost_delta": -0.0003874114583333333,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.780328125,
+              "mean_fleet_cost_delta": -0.00026041666666666666,
+              "mean_nonfleet_cost_delta": -0.00012699479166666667,
+              "mean_regret": 0.011516724999999997,
+              "mean_wait_delta_min": -0.000784375000000057,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 27
+            }
+          },
+          "overall": {
+            "changed_choices": 96,
+            "concordant_pairs": 1990,
+            "false_feasible_choices": 51,
+            "improved_states": 40,
+            "mean_actual_cost_delta": 0.0007520166666666691,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.33958124999999817,
+            "mean_fleet_cost_delta": 0.0008680555555555555,
+            "mean_nonfleet_cost_delta": -0.00011603888888888653,
+            "mean_regret": 0.015251469791666668,
+            "mean_wait_delta_min": -0.0009031250000000354,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 56
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": 0.0003513922629506034,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 1.2590017295936233,
+                "noise_corrected_pair_mse": 0.0008035093999244035,
+                "observed_pair_mse": 0.0017081100868120188,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": 0.0003505992880933927,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 1.279946161118802,
+                "noise_corrected_pair_mse": 0.0007338527052009767,
+                "observed_pair_mse": 0.0016029804127075905,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 1.3318544671693378e-05,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 1.2043700443743326,
+                "noise_corrected_pair_mse": 5.2910190022917947e-05,
+                "observed_pair_mse": 7.848731591929651e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.001240267568258369,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.2156652878686978,
+                "noise_corrected_pair_mse": 0.004782807419448849,
+                "observed_pair_mse": 0.006991158592563929,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "ridge_count_weighted:cost_only": {
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 78,
+              "concordant_pairs": 987,
+              "false_feasible_choices": 31,
+              "improved_states": 34,
+              "mean_actual_cost_delta": -0.0027318666666666684,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.2009510416666688,
+              "mean_fleet_cost_delta": -0.0026041666666666665,
+              "mean_nonfleet_cost_delta": -0.000127700000000002,
+              "mean_regret": 0.014362903124999998,
+              "mean_wait_delta_min": 0.0011093749999999962,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 44
+            },
+            "401": {
+              "changed_choices": 79,
+              "concordant_pairs": 1145,
+              "false_feasible_choices": 22,
+              "improved_states": 35,
+              "mean_actual_cost_delta": -0.0014823749999999982,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.7808645833333315,
+              "mean_fleet_cost_delta": -0.0011284722222222223,
+              "mean_nonfleet_cost_delta": -0.0003539027777777761,
+              "mean_regret": 0.01042176145833333,
+              "mean_wait_delta_min": -0.002406250000000049,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 44
+            }
+          },
+          "overall": {
+            "changed_choices": 157,
+            "concordant_pairs": 2132,
+            "false_feasible_choices": 53,
+            "improved_states": 69,
+            "mean_actual_cost_delta": -0.002107120833333333,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.2899567708333314,
+            "mean_fleet_cost_delta": -0.0018663194444444445,
+            "mean_nonfleet_cost_delta": -0.00024080138888888907,
+            "mean_regret": 0.012392332291666664,
+            "mean_wait_delta_min": -0.0006484375000000264,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 88
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00015813488017788185,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8834430583893952,
+                "noise_corrected_pair_mse": 0.0002939822567959182,
+                "observed_pair_mse": 0.0011985829436835336,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00013509009884052695,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.8921333959882682,
+                "noise_corrected_pair_mse": 0.00024816331826705705,
+                "observed_pair_mse": 0.0011172910257736708,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.2969539512529557e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9494089901016168,
+                "noise_corrected_pair_mse": 3.629469139997161e-05,
+                "observed_pair_mse": 6.187181729635018e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00029717926164247576,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9483246577988563,
+                "noise_corrected_pair_mse": 0.0032453605895480047,
+                "observed_pair_mse": 0.005453711762663085,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 92,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 29,
+              "improved_states": 41,
+              "mean_actual_cost_delta": -0.0023443229166666703,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.34745000000000087,
+              "mean_fleet_cost_delta": -0.0022569444444444447,
+              "mean_nonfleet_cost_delta": -8.737847222222572e-05,
+              "mean_regret": 0.014750446874999993,
+              "mean_wait_delta_min": 0.0017781250000000234,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 51
+            },
+            "401": {
+              "changed_choices": 81,
+              "concordant_pairs": 1141,
+              "false_feasible_choices": 27,
+              "improved_states": 37,
+              "mean_actual_cost_delta": -0.0019611343750000052,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.6950812499999945,
+              "mean_fleet_cost_delta": -0.001388888888888889,
+              "mean_nonfleet_cost_delta": -0.0005722454861111162,
+              "mean_regret": 0.009943002083333324,
+              "mean_wait_delta_min": -0.0038322916666666865,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 44
+            }
+          },
+          "overall": {
+            "changed_choices": 173,
+            "concordant_pairs": 2174,
+            "false_feasible_choices": 56,
+            "improved_states": 78,
+            "mean_actual_cost_delta": -0.002152728645833338,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.17381562499999686,
+            "mean_fleet_cost_delta": -0.001822916666666667,
+            "mean_nonfleet_cost_delta": -0.000329811979166671,
+            "mean_regret": 0.012346724479166661,
+            "mean_wait_delta_min": -0.0010270833333333317,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 95
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -6.778025539603844e-05,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9500410076406853,
+                "noise_corrected_pair_mse": 0.00038433688157776206,
+                "observed_pair_mse": 0.0012889375684653774,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -8.024749598090292e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9359240614508434,
+                "noise_corrected_pair_mse": 0.00030300592112668086,
+                "observed_pair_mse": 0.0011721336286332946,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.4502882416960086e-06,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.0989782087065703,
+                "noise_corrected_pair_mse": 4.604193359292061e-05,
+                "observed_pair_mse": 7.161905948929918e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005702942475701292,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.0991662413980439,
+                "noise_corrected_pair_mse": 0.00411283409876061,
+                "observed_pair_mse": 0.00632118527187569,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 91,
+              "concordant_pairs": 1025,
+              "false_feasible_choices": 36,
+              "improved_states": 40,
+              "mean_actual_cost_delta": -0.002676977083333339,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.13900208333333405,
+              "mean_fleet_cost_delta": -0.0026041666666666665,
+              "mean_nonfleet_cost_delta": -7.281041666667211e-05,
+              "mean_regret": 0.014417792708333328,
+              "mean_wait_delta_min": 0.0017333333333333359,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 51
+            },
+            "401": {
+              "changed_choices": 80,
+              "concordant_pairs": 1134,
+              "false_feasible_choices": 28,
+              "improved_states": 35,
+              "mean_actual_cost_delta": -0.00217977604166667,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.6101020833333296,
+              "mean_fleet_cost_delta": -0.001388888888888889,
+              "mean_nonfleet_cost_delta": -0.0007908871527777808,
+              "mean_regret": 0.009724360416666659,
+              "mean_wait_delta_min": -0.0055427083333333595,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 45
+            }
+          },
+          "overall": {
+            "changed_choices": 171,
+            "concordant_pairs": 2159,
+            "false_feasible_choices": 64,
+            "improved_states": 75,
+            "mean_actual_cost_delta": -0.002428376562500005,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.2355499999999978,
+            "mean_fleet_cost_delta": -0.001996527777777778,
+            "mean_nonfleet_cost_delta": -0.00043184878472222647,
+            "mean_regret": 0.012071076562499995,
+            "mean_wait_delta_min": -0.001904687500000012,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 96
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00015048818712862211,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8890792289436348,
+                "noise_corrected_pair_mse": 0.00030162894984517795,
+                "observed_pair_mse": 0.0012062296367327933,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00013249414946743662,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.8942062069897037,
+                "noise_corrected_pair_mse": 0.0002507592676401474,
+                "observed_pair_mse": 0.0011198869751467611,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.1245071046003285e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9520551478141419,
+                "noise_corrected_pair_mse": 3.646713824662424e-05,
+                "observed_pair_mse": 6.20442641430028e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00028765814811243084,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9499802470788139,
+                "noise_corrected_pair_mse": 0.0032548817030780496,
+                "observed_pair_mse": 0.0054632328761931295,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "ridge_count_weighted:wait_feasible": {
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 59,
+              "concordant_pairs": 987,
+              "false_feasible_choices": 35,
+              "improved_states": 27,
+              "mean_actual_cost_delta": -0.0033784416666666683,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.01510937500000272,
+              "mean_fleet_cost_delta": -0.0030381944444444445,
+              "mean_nonfleet_cost_delta": -0.0003402472222222231,
+              "mean_regret": 0.013716328125,
+              "mean_wait_delta_min": -0.002048958333333291,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 32
+            },
+            "401": {
+              "changed_choices": 52,
+              "concordant_pairs": 1145,
+              "false_feasible_choices": 24,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.002238717708333335,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.012587500000002432,
+              "mean_fleet_cost_delta": -0.0019965277777777776,
+              "mean_nonfleet_cost_delta": -0.00024218993055555676,
+              "mean_regret": 0.009665418749999995,
+              "mean_wait_delta_min": -0.00053750000000002,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 24
+            }
+          },
+          "overall": {
+            "changed_choices": 111,
+            "concordant_pairs": 2132,
+            "false_feasible_choices": 59,
+            "improved_states": 55,
+            "mean_actual_cost_delta": -0.0028085796875000012,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": 0.013848437500002576,
+            "mean_fleet_cost_delta": -0.002517361111111111,
+            "mean_nonfleet_cost_delta": -0.0002912185763888899,
+            "mean_regret": 0.011690873437499997,
+            "mean_wait_delta_min": -0.0012932291666666556,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 56
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00015813488017788185,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8834430583893952,
+                "noise_corrected_pair_mse": 0.0002939822567959182,
+                "observed_pair_mse": 0.0011985829436835336,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00013509009884052695,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.8921333959882682,
+                "noise_corrected_pair_mse": 0.00024816331826705705,
+                "observed_pair_mse": 0.0011172910257736708,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.2969539512529557e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9494089901016168,
+                "noise_corrected_pair_mse": 3.629469139997161e-05,
+                "observed_pair_mse": 6.187181729635018e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00029717926164247576,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9483246577988563,
+                "noise_corrected_pair_mse": 0.0032453605895480047,
+                "observed_pair_mse": 0.005453711762663085,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 61,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 37,
+              "improved_states": 29,
+              "mean_actual_cost_delta": -0.002859493750000005,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.35125729166667036,
+              "mean_fleet_cost_delta": -0.0026909722222222226,
+              "mean_nonfleet_cost_delta": -0.00016852152777778253,
+              "mean_regret": 0.01423527604166666,
+              "mean_wait_delta_min": -0.00014999999999999042,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 32
+            },
+            "401": {
+              "changed_choices": 59,
+              "concordant_pairs": 1141,
+              "false_feasible_choices": 30,
+              "improved_states": 25,
+              "mean_actual_cost_delta": -0.0005579124999999976,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.6269781249999968,
+              "mean_fleet_cost_delta": -0.0005208333333333335,
+              "mean_nonfleet_cost_delta": -3.707916666666431e-05,
+              "mean_regret": 0.01134622395833333,
+              "mean_wait_delta_min": -0.00018541666666665272,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            }
+          },
+          "overall": {
+            "changed_choices": 120,
+            "concordant_pairs": 2174,
+            "false_feasible_choices": 67,
+            "improved_states": 54,
+            "mean_actual_cost_delta": -0.0017087031250000012,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.13786041666666324,
+            "mean_fleet_cost_delta": -0.0016059027777777781,
+            "mean_nonfleet_cost_delta": -0.00010280034722222343,
+            "mean_regret": 0.012790749999999997,
+            "mean_wait_delta_min": -0.00016770833333332156,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 66
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -6.778025539603844e-05,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9500410076406853,
+                "noise_corrected_pair_mse": 0.00038433688157776206,
+                "observed_pair_mse": 0.0012889375684653774,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -8.024749598090292e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9359240614508434,
+                "noise_corrected_pair_mse": 0.00030300592112668086,
+                "observed_pair_mse": 0.0011721336286332946,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 6.4502882416960086e-06,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.0989782087065703,
+                "noise_corrected_pair_mse": 4.604193359292061e-05,
+                "observed_pair_mse": 7.161905948929918e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0005702942475701292,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.0991662413980439,
+                "noise_corrected_pair_mse": 0.00411283409876061,
+                "observed_pair_mse": 0.00632118527187569,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 71,
+              "concordant_pairs": 1025,
+              "false_feasible_choices": 42,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.0021811927083333366,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.07478333333333301,
+              "mean_fleet_cost_delta": -0.0021701388888888894,
+              "mean_nonfleet_cost_delta": -1.1053819444447645e-05,
+              "mean_regret": 0.014913577083333329,
+              "mean_wait_delta_min": 0.0012291666666667076,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 43
+            },
+            "401": {
+              "changed_choices": 62,
+              "concordant_pairs": 1134,
+              "false_feasible_choices": 32,
+              "improved_states": 27,
+              "mean_actual_cost_delta": -0.0011009927083333359,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.41893645833332965,
+              "mean_fleet_cost_delta": -0.0005208333333333333,
+              "mean_nonfleet_cost_delta": -0.0005801593750000025,
+              "mean_regret": 0.010803143749999992,
+              "mean_wait_delta_min": -0.003862500000000034,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 35
+            }
+          },
+          "overall": {
+            "changed_choices": 133,
+            "concordant_pairs": 2159,
+            "false_feasible_choices": 74,
+            "improved_states": 55,
+            "mean_actual_cost_delta": -0.0016410927083333365,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.1720765624999983,
+            "mean_fleet_cost_delta": -0.0013454861111111113,
+            "mean_nonfleet_cost_delta": -0.00029560659722222514,
+            "mean_regret": 0.01285836041666666,
+            "mean_wait_delta_min": -0.0013166666666666633,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 78
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00015048818712862211,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8890792289436348,
+                "noise_corrected_pair_mse": 0.00030162894984517795,
+                "observed_pair_mse": 0.0012062296367327933,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00013249414946743662,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.8942062069897037,
+                "noise_corrected_pair_mse": 0.0002507592676401474,
+                "observed_pair_mse": 0.0011198869751467611,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.1245071046003285e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9520551478141419,
+                "noise_corrected_pair_mse": 3.646713824662424e-05,
+                "observed_pair_mse": 6.20442641430028e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00028765814811243084,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9499802470788139,
+                "noise_corrected_pair_mse": 0.0032548817030780496,
+                "observed_pair_mse": 0.0054632328761931295,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "ridge_uniform:cost_only": {
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 85,
+              "concordant_pairs": 977,
+              "false_feasible_choices": 26,
+              "improved_states": 36,
+              "mean_actual_cost_delta": -0.0024549458333333334,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.2498104166666683,
+              "mean_fleet_cost_delta": -0.00234375,
+              "mean_nonfleet_cost_delta": -0.00011119583333333328,
+              "mean_regret": 0.01463982395833333,
+              "mean_wait_delta_min": 0.001212500000000002,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 49
+            },
+            "401": {
+              "changed_choices": 85,
+              "concordant_pairs": 1119,
+              "false_feasible_choices": 36,
+              "improved_states": 42,
+              "mean_actual_cost_delta": -0.0022487229166666617,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.8125937499999978,
+              "mean_fleet_cost_delta": -0.0015625,
+              "mean_nonfleet_cost_delta": -0.0006862229166666619,
+              "mean_regret": 0.009655413541666666,
+              "mean_wait_delta_min": -0.006156250000000035,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 43
+            }
+          },
+          "overall": {
+            "changed_choices": 170,
+            "concordant_pairs": 2096,
+            "false_feasible_choices": 62,
+            "improved_states": 78,
+            "mean_actual_cost_delta": -0.0023518343749999978,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.28139166666666476,
+            "mean_fleet_cost_delta": -0.001953125,
+            "mean_nonfleet_cost_delta": -0.0003987093749999976,
+            "mean_regret": 0.01214761875,
+            "mean_wait_delta_min": -0.002471875000000017,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 92
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00012622751566274582,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9069611134734826,
+                "noise_corrected_pair_mse": 0.00032588962131105425,
+                "observed_pair_mse": 0.0012304903081986696,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -8.658912802863151e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9308604015767918,
+                "noise_corrected_pair_mse": 0.0002966642890789525,
+                "observed_pair_mse": 0.0011657919965855662,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -2.5369972119697966e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9610703537384387,
+                "noise_corrected_pair_mse": 3.705464813925477e-05,
+                "observed_pair_mse": 6.263177403563334e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00026246463752964324,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9543610483279265,
+                "noise_corrected_pair_mse": 0.003280075213660837,
+                "observed_pair_mse": 0.005488426386775917,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 99,
+              "concordant_pairs": 1031,
+              "false_feasible_choices": 40,
+              "improved_states": 41,
+              "mean_actual_cost_delta": -0.0017894447916666676,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.28395208333333505,
+              "mean_fleet_cost_delta": -0.0019097222222222226,
+              "mean_nonfleet_cost_delta": 0.00012027743055555458,
+              "mean_regret": 0.015305324999999998,
+              "mean_wait_delta_min": 0.0032083333333333204,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 58
+            },
+            "401": {
+              "changed_choices": 96,
+              "concordant_pairs": 1057,
+              "false_feasible_choices": 33,
+              "improved_states": 42,
+              "mean_actual_cost_delta": -0.0005637770833333316,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.7207468750000011,
+              "mean_fleet_cost_delta": -8.68055555555556e-05,
+              "mean_nonfleet_cost_delta": -0.00047697152777777593,
+              "mean_regret": 0.011340359374999998,
+              "mean_wait_delta_min": -0.002602083333333318,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 54
+            }
+          },
+          "overall": {
+            "changed_choices": 195,
+            "concordant_pairs": 2088,
+            "false_feasible_choices": 73,
+            "improved_states": 83,
+            "mean_actual_cost_delta": -0.0011766109374999995,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.21839739583333304,
+            "mean_fleet_cost_delta": -0.000998263888888889,
+            "mean_nonfleet_cost_delta": -0.00017834704861111075,
+            "mean_regret": 0.013322842187499998,
+            "mean_wait_delta_min": 0.0003031250000000013,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 112
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -3.483808965945448e-05,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9743217867070544,
+                "noise_corrected_pair_mse": 0.000417279047314346,
+                "observed_pair_mse": 0.0013218797342019614,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -2.565057227520628e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9795185572737628,
+                "noise_corrected_pair_mse": 0.0003576028448323775,
+                "observed_pair_mse": 0.0012267305523389913,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.981798024132318e-06,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.1378236516077116,
+                "noise_corrected_pair_mse": 4.857344337535692e-05,
+                "observed_pair_mse": 7.415056927173549e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007941828099964207,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1380973498958487,
+                "noise_corrected_pair_mse": 0.0043367226611869016,
+                "observed_pair_mse": 0.006545073834301982,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 107,
+              "concordant_pairs": 1014,
+              "false_feasible_choices": 45,
+              "improved_states": 45,
+              "mean_actual_cost_delta": -0.0014320020833333386,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.1685697916666676,
+              "mean_fleet_cost_delta": -0.0014756944444444446,
+              "mean_nonfleet_cost_delta": 4.36923611111061e-05,
+              "mean_regret": 0.015662767708333327,
+              "mean_wait_delta_min": 0.0025499999999999564,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 62
+            },
+            "401": {
+              "changed_choices": 98,
+              "concordant_pairs": 1068,
+              "false_feasible_choices": 36,
+              "improved_states": 44,
+              "mean_actual_cost_delta": -0.0020318947916666647,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.6294135416666661,
+              "mean_fleet_cost_delta": -0.0015625,
+              "mean_nonfleet_cost_delta": -0.0004693947916666656,
+              "mean_regret": 0.009872241666666663,
+              "mean_wait_delta_min": -0.0028624999999999883,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 54
+            }
+          },
+          "overall": {
+            "changed_choices": 205,
+            "concordant_pairs": 2082,
+            "false_feasible_choices": 81,
+            "improved_states": 89,
+            "mean_actual_cost_delta": -0.0017319484375000018,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.23042187499999922,
+            "mean_fleet_cost_delta": -0.0015190972222222225,
+            "mean_nonfleet_cost_delta": -0.00021285121527777972,
+            "mean_regret": 0.012767504687499993,
+            "mean_wait_delta_min": -0.00015625000000001586,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 116
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00014028072602904982,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8966028723424665,
+                "noise_corrected_pair_mse": 0.00031183641094475025,
+                "observed_pair_mse": 0.0012164370978323656,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00011750667329429908,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9061733916418634,
+                "noise_corrected_pair_mse": 0.0002657467438132849,
+                "observed_pair_mse": 0.0011348744513198987,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.6254532331062987e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9443682431983917,
+                "noise_corrected_pair_mse": 3.596619211811827e-05,
+                "observed_pair_mse": 6.154331801449683e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0003466943919057464,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9397146650074784,
+                "noise_corrected_pair_mse": 0.003195845459284734,
+                "observed_pair_mse": 0.005404196632399814,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    },
+    "ridge_uniform:wait_feasible": {
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "validation": {
+        "lower_root": {
+          "by_root": {
+            "397": {
+              "changed_choices": 58,
+              "concordant_pairs": 977,
+              "false_feasible_choices": 33,
+              "improved_states": 27,
+              "mean_actual_cost_delta": -0.002847079166666665,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.043460416666665225,
+              "mean_fleet_cost_delta": -0.002777777777777778,
+              "mean_nonfleet_cost_delta": -6.930138888888733e-05,
+              "mean_regret": 0.014247690624999998,
+              "mean_wait_delta_min": 7.812500000004043e-05,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 31
+            },
+            "401": {
+              "changed_choices": 73,
+              "concordant_pairs": 1119,
+              "false_feasible_choices": 42,
+              "improved_states": 36,
+              "mean_actual_cost_delta": -0.0031384635416666657,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.4002489583333301,
+              "mean_fleet_cost_delta": -0.002864583333333333,
+              "mean_nonfleet_cost_delta": -0.00027388020833333236,
+              "mean_regret": 0.008765672916666663,
+              "mean_wait_delta_min": -0.0013041666666667002,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 37
+            }
+          },
+          "overall": {
+            "changed_choices": 131,
+            "concordant_pairs": 2096,
+            "false_feasible_choices": 75,
+            "improved_states": 63,
+            "mean_actual_cost_delta": -0.0029927713541666656,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.22185468749999765,
+            "mean_fleet_cost_delta": -0.0028211805555555555,
+            "mean_nonfleet_cost_delta": -0.00017159079861110983,
+            "mean_regret": 0.01150668177083333,
+            "mean_wait_delta_min": -0.0006130208333333299,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 68
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00012622751566274582,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9069611134734826,
+                "noise_corrected_pair_mse": 0.00032588962131105425,
+                "observed_pair_mse": 0.0012304903081986696,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -8.658912802863151e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9308604015767918,
+                "noise_corrected_pair_mse": 0.0002966642890789525,
+                "observed_pair_mse": 0.0011657919965855662,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -2.5369972119697966e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9610703537384387,
+                "noise_corrected_pair_mse": 3.705464813925477e-05,
+                "observed_pair_mse": 6.263177403563334e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.00026246463752964324,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9543610483279265,
+                "noise_corrected_pair_mse": 0.003280075213660837,
+                "observed_pair_mse": 0.005488426386775917,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "regime": {
+          "by_root": {
+            "397": {
+              "changed_choices": 73,
+              "concordant_pairs": 1031,
+              "false_feasible_choices": 41,
+              "improved_states": 30,
+              "mean_actual_cost_delta": -0.0017324447916666715,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.23519375000000126,
+              "mean_fleet_cost_delta": -0.0014756944444444448,
+              "mean_nonfleet_cost_delta": -0.0002567503472222268,
+              "mean_regret": 0.015362324999999993,
+              "mean_wait_delta_min": -0.0013489583333333073,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 43
+            },
+            "401": {
+              "changed_choices": 71,
+              "concordant_pairs": 1057,
+              "false_feasible_choices": 36,
+              "improved_states": 33,
+              "mean_actual_cost_delta": -0.003767740624999999,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.21516458333333166,
+              "mean_fleet_cost_delta": -0.003559027777777778,
+              "mean_nonfleet_cost_delta": -0.0002087128472222207,
+              "mean_regret": 0.00813639583333333,
+              "mean_wait_delta_min": -0.00012812500000004788,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 38
+            }
+          },
+          "overall": {
+            "changed_choices": 144,
+            "concordant_pairs": 2088,
+            "false_feasible_choices": 77,
+            "improved_states": 63,
+            "mean_actual_cost_delta": -0.0027500927083333347,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": 0.010014583333334789,
+            "mean_fleet_cost_delta": -0.0025173611111111113,
+            "mean_nonfleet_cost_delta": -0.00023273159722222373,
+            "mean_regret": 0.011749360416666662,
+            "mean_wait_delta_min": -0.0007385416666666778,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 81
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -3.483808965945448e-05,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.9743217867070544,
+                "noise_corrected_pair_mse": 0.000417279047314346,
+                "observed_pair_mse": 0.0013218797342019614,
+                "zero_gap_pair_mse": 0.0013567178238614158
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -2.565057227520628e-05,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9795185572737628,
+                "noise_corrected_pair_mse": 0.0003576028448323775,
+                "observed_pair_mse": 0.0012267305523389913,
+                "zero_gap_pair_mse": 0.0012523811246141975
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": 8.981798024132318e-06,
+                "mean_label_noise": 2.5577125896378567e-05,
+                "mse_over_zero": 1.1378236516077116,
+                "noise_corrected_pair_mse": 4.857344337535692e-05,
+                "observed_pair_mse": 7.415056927173549e-05,
+                "zero_gap_pair_mse": 6.516877124760317e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": 0.0007941828099964207,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 1.1380973498958487,
+                "noise_corrected_pair_mse": 0.0043367226611869016,
+                "observed_pair_mse": 0.006545073834301982,
+                "zero_gap_pair_mse": 0.005750891024305561
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        },
+        "scene": {
+          "by_root": {
+            "397": {
+              "changed_choices": 84,
+              "concordant_pairs": 1014,
+              "false_feasible_choices": 48,
+              "improved_states": 37,
+              "mean_actual_cost_delta": -0.0014660322916666703,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.25011979166666715,
+              "mean_fleet_cost_delta": -0.0014756944444444448,
+              "mean_nonfleet_cost_delta": 9.662152777773863e-06,
+              "mean_regret": 0.015628737499999993,
+              "mean_wait_delta_min": 0.0013270833333333214,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 47
+            },
+            "401": {
+              "changed_choices": 83,
+              "concordant_pairs": 1068,
+              "false_feasible_choices": 43,
+              "improved_states": 41,
+              "mean_actual_cost_delta": -0.0017958281250000023,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.6416281249999957,
+              "mean_fleet_cost_delta": -0.0011284722222222223,
+              "mean_nonfleet_cost_delta": -0.0006673559027777801,
+              "mean_regret": 0.010108308333333326,
+              "mean_wait_delta_min": -0.005179166666666687,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 42
+            }
+          },
+          "overall": {
+            "changed_choices": 167,
+            "concordant_pairs": 2082,
+            "false_feasible_choices": 91,
+            "improved_states": 78,
+            "mean_actual_cost_delta": -0.0016309302083333363,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.1957541666666643,
+            "mean_fleet_cost_delta": -0.0013020833333333335,
+            "mean_nonfleet_cost_delta": -0.0003288468750000031,
+            "mean_regret": 0.01286852291666666,
+            "mean_wait_delta_min": -0.0019260416666666827,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 89
+          },
+          "pair_errors": {
+            "model_state_evaluations": 240,
+            "pair_metrics": {
+              "actual_cost_delta": {
+                "error_change_vs_zero": -0.00014028072602904982,
+                "mean_label_noise": 0.0009046006868876153,
+                "mse_over_zero": 0.8966028723424665,
+                "noise_corrected_pair_mse": 0.00031183641094475025,
+                "observed_pair_mse": 0.0012164370978323656,
+                "zero_gap_pair_mse": 0.0013567178238614154
+              },
+              "fleet_cost_delta": {
+                "error_change_vs_zero": -0.00011750667329429908,
+                "mean_label_noise": 0.0008691277075066138,
+                "mse_over_zero": 0.9061733916418634,
+                "noise_corrected_pair_mse": 0.0002657467438132849,
+                "observed_pair_mse": 0.0011348744513198987,
+                "zero_gap_pair_mse": 0.0012523811246141978
+              },
+              "nonfleet_cost_delta": {
+                "error_change_vs_zero": -3.6254532331062987e-06,
+                "mean_label_noise": 2.5577125896378564e-05,
+                "mse_over_zero": 0.9443682431983917,
+                "noise_corrected_pair_mse": 3.596619211811827e-05,
+                "observed_pair_mse": 6.154331801449683e-05,
+                "zero_gap_pair_mse": 6.516877124760313e-05
+              },
+              "wait_delta_min": {
+                "error_change_vs_zero": -0.0003466943919057464,
+                "mean_label_noise": 0.00220835117311508,
+                "mse_over_zero": 0.9397146650074784,
+                "noise_corrected_pair_mse": 0.003195845459284734,
+                "observed_pair_mse": 0.005404196632399814,
+                "zero_gap_pair_mse": 0.00575089102430556
+              }
+            },
+            "unique_prefix_groups": 40,
+            "unique_states": 240
+          }
+        }
+      }
+    }
+  }
+}

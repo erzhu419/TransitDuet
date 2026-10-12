@@ -1,0 +1,47 @@
+{
+  "contract": {
+    "boundary": "lower_capacity_regularized_baseline_not_matched_capacity_or_optimizer_budget_or_HRL_proof",
+    "budget": {
+      "actor_updates": 0,
+      "critic_optimizer_updates": 0,
+      "new_closed_form_fits": 94,
+      "new_native_episodes": 0,
+      "reused_neural_models": 94
+    },
+    "data": "unchanged600_inputs_240_mean8_targets_360_single_targets_47_folds",
+    "diagnostic_run": "native_transit_fit_transfer_stage198_diagnostic_20261013_r1",
+    "evaluation": "same240_mean8_states_both_roots_all_three_grouped_splits_both_fixed_selectors",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "normalization": "exact_Stage197_neural_advantage_training_input_and_target_scales_within_each_fold",
+    "primary": "ridge_count_weighted:wait_feasible",
+    "reference": "reuse94_frozen_neural_advantage_models_and_exact_heldout_predictions_1635_parameters_100updates",
+    "ridge": "existing_native_action_value_RIDGE0.1_three_heads_98_features_294_coefficients_no_intercept",
+    "source_protocol": "native_transit_weighted_credit_stage197_v1",
+    "source_run": "native_transit_weighted_credit_stage197_development_20261013_r1",
+    "storage": "features_mean_map_models_predictions_server_only_compact_receipts_report_sync",
+    "variants": [
+      "neural_uniform",
+      "neural_count_weighted",
+      "ridge_uniform",
+      "ridge_count_weighted"
+    ],
+    "weights": "uniform_or_mean8_weight8_single_weight1_training_states_only"
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_pair_ridge_stage199_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "63b2aa97dfa09849be610ee612b9cd963c95f2dc"
+}
