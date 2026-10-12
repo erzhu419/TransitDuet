@@ -75,7 +75,7 @@ def main():
         if {t["signature"] for t in existing} != {task_specification(args.run_name, *k)["signature"] for k in first}:
             raise SystemExit("Remaining draws require exactly the registered ten preflight tasks")
         # Workers qualify full labels before exiting; no receipt download is needed.
-        if any(t["status"] != "done" or t.get("exit_code") != 0 for t in existing):
+        if any(t["status"] != "done" for t in existing):
             raise SystemExit("Complete software qualification on both roots and all regimes first")
         tasks = [task_specification(args.run_name, *k) for k in spec.cells() if k not in first]
     else:

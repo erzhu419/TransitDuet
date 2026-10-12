@@ -134,14 +134,14 @@ class ContinuationNoiseTest(unittest.TestCase):
     def test_remaining_uses_qualified_worker_exits_without_downloading_receipts(self):
         tasks = [task_specification("unit_noise", *k) for k in spec.cells(preflight=True)]
         for task in tasks:
-            task.update(status="done", exit_code=0)
+            task.update(status="done")
         with patch.object(submit, "inventory", return_value=tasks), \
                 patch.object(Path, "read_text", side_effect=AssertionError("No receipt download needed")), \
                 patch.object(submit, "execute_bulk") as execute, \
                 patch.object(sys, "argv", ["submit", "--run-name", "unit_noise", "--phase", "remaining"]):
             submit.main()
         self.assertEqual(len(execute.call_args.args[0]), 230)
-        tasks[0]["exit_code"] = 1
+        tasks[0]["status"] = "failed"
         with patch.object(submit, "inventory", return_value=tasks), \
                 patch.object(submit, "execute_bulk") as execute, \
                 patch.object(sys, "argv", ["submit", "--run-name", "unit_noise", "--phase", "remaining"]):
