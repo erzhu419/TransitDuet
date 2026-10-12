@@ -27,6 +27,9 @@ Budget: 214 scheduler fit tasks, 856 critics, 85,600 updates; zero new native
 episodes or actor updates. Nodes001-006 are eligible without node binding, with
 one CPU and 3GB per task. Only compact receipts/report sync locally.
 
+Run: `native_transit_calibrated_value_stage190_fit_20261012_r1`, fit-source
+revision `4213e1d860`, scheduler tasks `t144436` through `t144649` (214 tasks).
+
 ## Limitations
 This remains a development single-action value screen with greedy continuation,
 not repeated learned-upper deployment or end-to-end HRL. Empirical margins do

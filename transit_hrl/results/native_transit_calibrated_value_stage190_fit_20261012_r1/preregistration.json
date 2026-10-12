@@ -1,0 +1,62 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "critic_updates": 85600,
+    "fits": 856,
+    "new_native_episodes": 0
+  },
+  "contract": {
+    "boundary": "development_single_action_screen_not_repeated_upper_or_HRL_no_OOD_coverage_guarantee",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 85600,
+      "fits": 856,
+      "new_native_episodes": 0
+    },
+    "calibration": "separate_cost_wait_90percent_upper_rank_max_standardized_residual_over_five_actions_and_six_callbacks_per_scene",
+    "data": "unchanged_server_only_600_states_100_scenes_3600_labels",
+    "gate": "strict_negative_mean_cost_and_nonpositive_mean_wait_both_roots_all_three_splits",
+    "members": 4,
+    "method": "unchanged_floor_absolute_proper_mse_AdamW_lr0.003_wd0.01_seed178",
+    "modes": [
+      "tail_summary",
+      "timetable_sequence"
+    ],
+    "outer_folds": 107,
+    "outer_splits": [
+      "scene",
+      "regime",
+      "lower_root"
+    ],
+    "partition": "root_regime_stratified_seed190_ceil20percent_scene_calibration_then_four_leave_quarter_members",
+    "policies": [
+      "ensemble_mean",
+      "calibrated"
+    ],
+    "primary": "timetable_sequence:calibrated",
+    "reference": "cached_Stage188_wait_feasible_same_test_states",
+    "selection": "min_pessimistic_cost_subject_to_pessimistic_wait_nonpositive_identity_exact_zero_ties_identity",
+    "source_protocol": "native_transit_coverage_value_stage188_v1",
+    "source_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "steps_per_member": 100,
+    "storage": "bank_models_detailed_predictions_server_only_compact_receipts_and_report_synced",
+    "uncertainty": "std_of_paired_total_cost_and_wait_across_members_floor_10percent_proper_training_RMS_min1e-6"
+  },
+  "protocol": "native_transit_calibrated_value_stage190_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "4213e1d860617ab88ba0ab1963c20e62e1703d27",
+  "tasks": 214
+}
