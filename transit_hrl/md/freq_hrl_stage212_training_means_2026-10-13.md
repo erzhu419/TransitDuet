@@ -28,7 +28,10 @@ nodes. Source pushed;23 collection/continuation tests passed.
 GLM and bounded-head loss/scaling now consume explicit sample_weight;
 37 targeted tests passed,including exact old-weight model reproduction
 when actual draw depth changes. Eight tests passed after matching the
-scheduler results interface;full collection and preparation remain pending.
+scheduler results interface. All2881 collection/preflight-report tasks
+done/exit0. Prepare`t151390` done/exit0:600 mean8 states,original sample
+weight sum2280,max RSS735.8MB. One2497-byte prepare receipt pulled;
+1,223,077-byte target map remains remote. Full collection now qualified.
 
 Next: refit outer/inner symmetric GLMs on the new training masses;
 repeat fixed B1/ridge0-or0.1 heads with original inner validation states
