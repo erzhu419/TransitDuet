@@ -176,13 +176,7 @@ def analyze(bank, masses, panels, registered, load_fold, save_references):
         "feasible_fold_counts": counts, "variants": variants, "third_scene_screen_eligible": False, "native_deployment_eligible": False}
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args()
-    prior = json.loads((ROOT/"results"/SOURCE_RUN/"report/result.json").read_text())
-    if prior["protocol"] != previous.EXPERIMENT_PROTOCOL or prior["contract"] != previous.contract() or not prior["controls_reproduced"]:
-        raise ValueError("Complete corrected Stage216 before diagnosing the linear class")
+def load_data():
     registered = json.loads((ROOT/"results"/previous.SOURCE_RUN/"inputs/manifest.json").read_text())
     wait_registered = json.loads((ROOT/"results"/source.SOURCE_RUN/"inputs/manifest.json").read_text())
     bank = json.loads(wait_source.collection.mean_source.source.bank_path(wait_source.collection.mean_source.SOURCE_RUN).read_text())
@@ -191,23 +185,37 @@ def main():
     masses = wait_source.checked_masses(bank, prepared, original, wait_registered)
     old_targets = json.loads(wait_source.collection.mean_source.expected.targets_path(wait_source.collection.MODEL_RUN).read_text())["targets"]
     bank["training_data"] = source.base.mean.expected.replace_targets(bank["training_data"], [*old_targets, *prepared["new_mean_labels"]])
-    def load_fold(fold):
-        d = raw_directory(source.result_path(previous.SOURCE_RUN, fold))
-        cell, ridge = [json.loads((d/name).read_text()) for name in ("result.json", "mean_cost.json")]
-        source.qualify(cell, fold, registered)
-        if {k: v for k, v in ridge.items() if k != "coefficients"} != cell["fits"]["mean_cost"]:
-            raise ValueError("Changed the mean8 ridge model")
-        wd = raw_directory(wait_source.result_path(source.SOURCE_RUN, fold))
-        wait_cell, glm = [json.loads((wd/name).read_text()) for name in ("result.json", f"{wait_source.NEW_GLM}.json")]
-        wait_source.qualify(wait_cell, fold, wait_registered)
-        if wait_source.stopping.metadata(glm) != wait_cell["fits"][wait_source.NEW_GLM]:
-            raise ValueError("Changed the frozen mean8 GLM")
-        return cell, ridge, glm
+    return bank, masses, registered, wait_registered
+
+
+def load_frozen_fold(fold, registered, wait_registered):
+    d = raw_directory(source.result_path(previous.SOURCE_RUN, fold))
+    cell, ridge = [json.loads((d/name).read_text()) for name in ("result.json", "mean_cost.json")]
+    source.qualify(cell, fold, registered)
+    if {k: v for k, v in ridge.items() if k != "coefficients"} != cell["fits"]["mean_cost"]:
+        raise ValueError("Changed the mean8 ridge model")
+    wd = raw_directory(wait_source.result_path(source.SOURCE_RUN, fold))
+    wait_cell, glm = [json.loads((wd/name).read_text()) for name in ("result.json", f"{wait_source.NEW_GLM}.json")]
+    wait_source.qualify(wait_cell, fold, wait_registered)
+    if wait_source.stopping.metadata(glm) != wait_cell["fits"][wait_source.NEW_GLM]:
+        raise ValueError("Changed the frozen mean8 GLM")
+    return cell, ridge, glm
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    prior = json.loads((ROOT/"results"/SOURCE_RUN/"report/result.json").read_text())
+    if prior["protocol"] != previous.EXPERIMENT_PROTOCOL or prior["contract"] != previous.contract() or not prior["controls_reproduced"]:
+        raise ValueError("Complete corrected Stage216 before diagnosing the linear class")
+    bank, masses, registered, wait_registered = load_data()
     def save_references(fold, model, witnesses):
         d = raw_directory(args.output)/fold["split"]/f"fold_{fold['index']:03}"
         write_json(d/"projection.json", model)
         write_json(d/"witnesses.json", witnesses)
-    result = analyze(bank, masses, wait_source.source.diagnostic.load_panels(), registered, load_fold, save_references)
+    result = analyze(bank, masses, wait_source.source.diagnostic.load_panels(), registered,
+        lambda f: load_frozen_fold(f, registered, wait_registered), save_references)
     for split in SPLITS:
         for root, observed in result["variants"]["ridge_glm"]["validation"][split]["held"]["by_root"].items():
             expected = prior["variants"][source.PRIMARY]["validation"][split]["held"]["by_root"][root]
