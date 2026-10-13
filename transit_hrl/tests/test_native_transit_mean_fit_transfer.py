@@ -121,7 +121,17 @@ class MeanFitTransferTest(unittest.TestCase):
             self.assertEqual(len(variant["fold_gaps"]), 47)
             for contrast in variant["same_state_held_minus_scene"].values():
                 self.assertEqual(contrast["states"], 240)
+                self.assertNotIn("cost_head_pair_normalized_mse", contrast["overall"])
                 self.assertTrue(all(v in (None, 0.) for v in contrast["overall"].values()))
+            for split in spec.SPLITS:
+                held = variant["validation"][split]["held"]["overall"]
+                self.assertAlmostEqual(held["mean_selected_harm_min"]-held["mean_selected_benefit_min"], held["mean_selected_wait_min"])
+
+    def test_different_fold_scales_are_not_used_as_same_state_transfer_errors(self):
+        train = {k: 1. for k in spec.GAP_METRICS}
+        held = {**train, "cost_head_pair_normalized_mse": 100.}
+        self.assertEqual(spec.gaps(train, held)["cost_head_pair_normalized_mse"], 99.)
+        self.assertTrue(all(v == 0 for v in spec.gaps(train, held, spec.CONTRAST_METRICS).values()))
 
     def test_scheduler_unbound_read_only_small_results(self):
         task = task_specification("unit_fit_transfer")

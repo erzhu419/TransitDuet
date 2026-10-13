@@ -22,6 +22,7 @@ PARTITIONS = source.diagnosis.PARTITIONS
 GAP_METRICS = ("cost_pair_mse", "cost_head_pair_normalized_mse", "mass_weighted_excess_nats",
     "mean_expected_boundary_regret_min", "first_last_cost_inversion_rate", "even_odd_cost_inversion_rate",
     "first_last_stable_false_safe_rate", "even_odd_stable_false_safe_rate")
+CONTRAST_METRICS = tuple(k for k in GAP_METRICS if k != "cost_head_pair_normalized_mse")
 
 
 def contract():
@@ -32,7 +33,8 @@ def contract():
         "scopes": "training_all600_training_original240_scene_root_regime_matched_reference_held_original240",
         "weights": wait_source.collection.contract()["weights"],
         "comparison": "same240_held_states_scene_vs_regime_vs_root_plus_within_fold_train_held_gaps",
-        "errors": "physical_and_normalized_cost_pair_MSE_wait_mass_excess_stable_cost_order_and_false_safe_signs",
+        "units": "physical_cost_MSE_for_cross_fold_contrasts_normalized_head_MSE_within_fold_only",
+        "errors": "physical_and_normalized_cost_pair_MSE_wait_mass_excess_stable_cost_order_false_safe_signs_selected_harm_benefit",
         "partitions": source.diagnosis.factorial.contract()["partitions"],
         "feature_support": "causal_cost_pair_wait_pair_and_absolute_wait_context_outside_training_coordinate_ranges",
         "counts": "model_state_evaluations_and_unique_states_prefixes_separate",
@@ -78,11 +80,16 @@ def records(rows, masses, panels, heads, logits, scores, cost_scale):
         record.update(sample_weight_sum=float(weights[i]),
             weighted_cost_pair_sse=float(weights[i]*np.mean(residual.sum(axis=1)**2)),
             weighted_cost_head_pair_sse=float(weights[i]*np.mean((residual/np.asarray(cost_scale[:2]))**2)),
-            selected_cost_sum=labels[selected]["actual_cost_delta"], selected_wait_sum_min=labels[selected]["wait_delta_min"])
+            selected_cost_sum=labels[selected]["actual_cost_delta"], selected_wait_sum_min=labels[selected]["wait_delta_min"],
+            selected_wait_harm_sum_min=max(labels[selected]["wait_delta_min"], 0.),
+            selected_wait_benefit_sum_min=max(-labels[selected]["wait_delta_min"], 0.),
+            selected_overrides=int(selected != row["original_choice"]),
+            selected_false_safe=int(selected != row["original_choice"] and labels[selected]["wait_delta_min"] > 0))
         for partition, halves in PARTITIONS.items():
             counts = record[partition]
             counts.update(stable_safe_candidates=0, stable_unsafe_candidates=0,
-                stable_feasible_cost_pairs=0, stable_cost_inversions=0, stable_cost_prediction_ties=0)
+                stable_feasible_cost_pairs=0, stable_cost_inversions=0, stable_cost_prediction_ties=0,
+                selected_stable_wait_harm=0, selected_wait_half_disagreement=0)
             if state_key(row) not in panels: continue
             values = panels[state_key(row)]["values"]
             a, b = [values[list(indices), :, 3].mean(axis=0) for indices in halves]
@@ -92,6 +99,8 @@ def records(rows, masses, panels, heads, logits, scores, cost_scale):
             e = source.diagnosis.factorial.panel(values, cost, scores[i], row["original_choice"], partition)["errors"]
             for key in ("stable_feasible_cost_pairs", "stable_cost_inversions", "stable_cost_prediction_ties"):
                 counts[key] = e[key]
+            counts["selected_stable_wait_harm"] = e["learned_selected_both_halves_wait_harm"]
+            counts["selected_wait_half_disagreement"] = e["learned_selected_wait_half_disagreement"]
     return result
 
 
@@ -100,7 +109,9 @@ def summary(rows):
     if not rows: return result
     result.update(cost_pair_mse=transfer.ratio(result["weighted_cost_pair_sse"], result["sample_weight_sum"]),
         cost_head_pair_normalized_mse=transfer.ratio(result["weighted_cost_head_pair_sse"], result["sample_weight_sum"]),
-        mean_selected_cost=result["selected_cost_sum"]/len(rows), mean_selected_wait_min=result["selected_wait_sum_min"]/len(rows))
+        mean_selected_cost=result["selected_cost_sum"]/len(rows), mean_selected_wait_min=result["selected_wait_sum_min"]/len(rows),
+        mean_selected_harm_min=result["selected_wait_harm_sum_min"]/len(rows),
+        mean_selected_benefit_min=result["selected_wait_benefit_sum_min"]/len(rows))
     for partition, counts in result["halves"].items():
         result[partition+"_cost_inversion_rate"] = transfer.ratio(counts["stable_cost_inversions"], counts["stable_feasible_cost_pairs"])
         result[partition+"_stable_false_safe_rate"] = transfer.ratio(counts["stable_false_safe"], counts["stable_unsafe_candidates"])
@@ -112,8 +123,8 @@ def scopes(rows):
         for r in wait_source.collection.ROOTS}}
 
 
-def gaps(training, held):
-    return {k: held[k]-training[k] if training.get(k) is not None and held.get(k) is not None else None for k in GAP_METRICS}
+def gaps(training, held, metrics=GAP_METRICS):
+    return {k: held[k]-training[k] if training.get(k) is not None and held.get(k) is not None else None for k in metrics}
 
 
 def feature_support(rows, batch, mask):
@@ -189,8 +200,8 @@ def analyze(bank, masses, panels, registered, load_fold):
         for split in ("regime", "lower_root"):
             held = pooled[variant][split]["held"]
             baseline = [scene[state_key(r)] for r in held]
-            contrasts[split] = {"states": len(held), "overall": gaps(summary(baseline), summary(held)),
-                "by_root": {str(root): gaps(summary([r for r in baseline if r["root"] == root]), summary([r for r in held if r["root"] == root]))
+            contrasts[split] = {"states": len(held), "overall": gaps(summary(baseline), summary(held), CONTRAST_METRICS),
+                "by_root": {str(root): gaps(summary([r for r in baseline if r["root"] == root]), summary([r for r in held if r["root"] == root]), CONTRAST_METRICS)
                     for root in wait_source.collection.ROOTS}}
         variants[variant] = {"validation": validation, "same_state_held_minus_scene": contrasts,
             "fold_gaps": fold_gaps[variant], "lower_root_directions": directions[variant]}
