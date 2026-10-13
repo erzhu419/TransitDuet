@@ -29,7 +29,7 @@ def validation_loss(rows, masses, model, batch=None):
     return {"loss_sum_min": float(weights@loss), "mass_sum_min": float(weights@(positive+negative))}
 
 
-def fit_path(rows, masses, reference, checkpoints, *, validation=None, batch=None):
+def fit_path(rows, masses, reference, checkpoints, *, validation=None, batch=None, on_checkpoint=None):
     batch = neural.batches(rows) if batch is None else batch
     center, std = batch[1].mean(axis=0), batch[1].std(axis=0)
     std[std < 1e-8] = 1.
@@ -81,6 +81,8 @@ def fit_path(rows, masses, reference, checkpoints, *, validation=None, batch=Non
             ledger.append({"step": step, "mass_loss_after_step": final_loss})
             if validation is not None:
                 curve.append({"step": step, **validation_loss(validation, masses, model, validation_batch)})
+            if on_checkpoint is not None:
+                on_checkpoint(model)
     return {**model, "loss_ledger": ledger}, curve
 
 
