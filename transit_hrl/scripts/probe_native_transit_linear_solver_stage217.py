@@ -33,6 +33,9 @@ def main():
         for name, (d, margins) in spec.stable_constraints(rows, panels, cost, wait, training, partition).items():
             norm = abs(d).max(axis=1)
             norm[norm == 0] = 1.
+            u, singular, vt = np.linalg.svd(d, full_matrices=False)
+            cutoff = np.finfo(d.dtype).eps*max(d.shape)*singular[0]
+            rank = int(np.sum(singular > cutoff))
             outcomes = {}
             for formulation in ("L1", "free", "scaled_free"):
                 scaled = formulation == "scaled_free"
@@ -47,12 +50,19 @@ def main():
                     beta = result.x[:d.shape[1]]-result.x[d.shape[1]:] if formulation == "L1" else result.x
                     outcome.update(violation=float(np.maximum(margins-d@beta, 0).max()), coefficient_l1=float(abs(beta).sum()))
                 outcomes[formulation] = outcome
+            result = linprog(np.zeros(rank), A_ub=-u[:, :rank], b_ub=-margins, bounds=(None, None),
+                method="highs-ds", options={"threads": 1, "presolve": False})
+            outcomes["numerical_basis"] = {"status": int(result.status), "message": result.message,
+                "iterations": int(result.nit), "rank": rank, "singular_cutoff": float(cutoff)}
+            if result.status == 0:
+                beta = vt[:rank].T@(result.x/singular[:rank])
+                outcomes["numerical_basis"].update(violation=float(np.maximum(margins-d@beta, 0).max()), coefficient_l1=float(abs(beta).sum()))
             probes.append({"partition": partition, "kind": name, "shape": list(d.shape),
                 "zero_strict_rows": int(np.sum((np.max(abs(d), axis=1) == 0) & (margins > 0))),
                 "smallest_nonzero_coefficient": float(abs(d[d != 0]).min()), "largest_coefficient": float(abs(d).max()),
                 "outcomes": outcomes})
     write_json(args.output, {"protocol": "native_transit_linear_solver_stage217_v1", "fold": fold,
-        "scipy_version": scipy.__version__, "linear_programs": 12, "new_native_episodes": 0, "probes": probes})
+        "scipy_version": scipy.__version__, "linear_programs": 16, "new_native_episodes": 0, "probes": probes})
     print("NATIVE_LINEAR_SOLVER_PROBE_COMPLETE", flush=True)
 
 
