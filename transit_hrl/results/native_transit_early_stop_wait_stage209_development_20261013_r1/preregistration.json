@@ -1,0 +1,87 @@
+{
+  "contract": {
+    "boundary": "supervised_single_action_development_on_existing_prefixes_not_independent_CI_or_full_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "inner_neural_paths": 188,
+      "max_adamw_steps": 141000,
+      "new_cost_fits": 0,
+      "new_inner_glm_fits": 188,
+      "new_native_episodes": 0,
+      "outer_model_assemblies": 47
+    },
+    "checkpoint_grid": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "data": "same600_inputs_240_mean8_targets_360_single_targets_47_outer_folds",
+    "future_halves": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "gate": "negative_cost_nonpositive_wait_both_roots_all_three_splits_and_lower_held_excess_loss_than_fixed600_all_splits",
+    "inner_folds": 4,
+    "inner_reference": "refit_symmetric_GLM_and_all_normalizations_on_inner_train_only",
+    "outer": "frozen_Stage206_GLM_costs_menu_and_threshold0.5_exact_identity_ties_Stage208_fixed600_control",
+    "partition": "outer_training_scenes_stratified_by_root_regime_mean8_membership_all_callbacks_grouped",
+    "partition_seed": 200,
+    "primary": "inner_scene_early_stop",
+    "refit": "same210_input16_tanh_residual_seed208_AdamW_lr0.003_decay0.01_float64_on_all_outer_train_at_selected_step",
+    "selection": "pooled_inner_mean8_mass_weighted_crossentropy_minimum_exact_ties_earliest_including_GLM_step0",
+    "source_protocol": "native_transit_nonlinear_wait_stage208_v1",
+    "source_run": "native_transit_nonlinear_wait_stage208_development_20261013_r1",
+    "storage": "raw_inputs_inner_ledger_and_final_models_remote_small_report_only",
+    "variants": [
+      "symmetric_feasibility",
+      "state_conditioned_pair",
+      "inner_scene_early_stop"
+    ]
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_early_stop_wait_stage209_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "dfb4ca2bb49c955c20ab2f2786c051ed450a9e2e"
+}

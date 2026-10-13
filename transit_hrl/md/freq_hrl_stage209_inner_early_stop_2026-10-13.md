@@ -17,5 +17,20 @@ both future-half partitions. Development gate:negative cost/nonpositive
 wait for both roots/all three splits,and lower held excess loss than
 fixed600 in all splits. Outer results never select checkpoints.
 
+Completed47 fits`t148191-t148237` and report`t148250`,all exit0;
+source`dfb4ca2bb4`;six tests passed. Only458096-byte report pulled.
+46 folds select step0;scene/root401 fold77 selects50. Actual112850 AdamW
+steps,188 inner GLMs/6442 L-BFGS iterations,only one optimized outer head.
+Cost passes,wait fails;both half partitions fail wait. No promotion.
+Held excess nats,fixed600 ->early stop:scene0.513596 ->0.291976,
+regime0.634518 ->0.331915,lower-root0.585128 ->0.278310. Scene GLM is
+still better at0.280190. Failed waits remain regime/root397 +0.000179167
+and lower-root/root401 +0.002670833min;frozen controls reproduce exactly.
+
+Next: refit GLM/neural heads using one future half's labels only;evaluate
+the other half on the same prefixes versus held-out prefixes,then reverse.
+This separates future-target noise from prefix memorization before further
+capacity changes;the reference GLM must not see the evaluation-half labels.
+
 Limits: Existing prefixes and noisy eight-draw targets;supervised
 single-intervention development,not independent CI or full learned HRL.
