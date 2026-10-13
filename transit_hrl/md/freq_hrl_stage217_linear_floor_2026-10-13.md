@@ -8,15 +8,21 @@ and projected cost selectors on unchanged47 folds/original240 held states.
 
 Training-original240 only: independently probe both future partitions for
 linear representability of stable true-safe cost order (98 coefficients)
-and stable wait signs (199 coefficients including GLM bias). Minimum-L1 LP
-witnesses are references, not policies; safe logits<=0, unsafe>=1, strict
-cost-order margin1. Feasible/infeasible and numerical failures are distinct.
+and stable wait signs (199 coefficients including GLM bias). Minimum-margin
+deficit LPs in the numerical SVD column space include nonnegative slacks;
+dual lower bounds distinguish a positive minimum from zero. Witnesses are
+references, not policies; safe logits<=0, unsafe>=1, strict cost-order margin1.
+Numerically unresolved cases remain separate; they do not discard value bounds.
 
 One unbound node001-node006 task,1CPU/3072MB;47 projection fits, at most188
 single-thread LPs, no gradient/actor updates or native episodes. Reference
 models/witnesses and data remain remote;small report only. No model promotion.
 
-Limits: empirical numerical bounds for the registered linear class and
+Initial r1 t151734 failed on HiGHS Unknown, not an expressivity conclusion.
+Solver probes t151757/t151761 reproduced failures at ~1e-17 coefficients;
+v2/r2 uses the always-feasible slack formulation instead of hard feasibility.
+
+Limits: empirical bounds for the numerical column space of the linear class and
 finite mean8/stable-label training set, not impossibility for nonlinear
 features or population truth. Unregularized references can overfit; held
 labels do not choose rank, coefficients, normalization, margins or thresholds.

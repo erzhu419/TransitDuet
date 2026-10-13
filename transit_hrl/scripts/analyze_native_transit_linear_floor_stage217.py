@@ -8,13 +8,14 @@ import sys
 
 import numpy as np
 from scipy.optimize import linprog
+from scipy.sparse import csc_matrix, eye, hstack
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts import analyze_native_transit_fit_transfer_stage216 as previous
 from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_json
 
-EXPERIMENT_PROTOCOL = "native_transit_linear_floor_stage217_v1"
+EXPERIMENT_PROTOCOL = "native_transit_linear_floor_stage217_v2"
 SOURCE_RUN = "native_transit_fit_transfer_stage216_diagnostic_20261013_r2"
 source, wait_source = previous.source, previous.wait_source
 SPLITS, PARTITIONS, state_key = previous.SPLITS, previous.PARTITIONS, previous.state_key
@@ -28,7 +29,7 @@ def contract():
         "decomposition": "physical_total_cost_MSE_projection_floor_plus_ridge_minus_projection_energy",
         "ordinal_bound": "train_original240_only_both_half_stable_true_safe_cost_pairs_strict_order_margin1",
         "wait_bound": "same199_GLM_design_train_original240_stable_safe_logit_le0_unsafe_logit_ge1_identity_excluded",
-        "witness": "minimum_L1_coefficients_HiGHS_threads1_no_coefficient_cap_numerical_feasibility_tolerance1e-7",
+        "witness": "minimum_mean_margin_deficit_in_numerical_SVD_column_space_HiGHS_ds_threads1_no_coef_cap_tolerance1e-7",
         "partitions": source.diagnosis.factorial.contract()["partitions"], "variants": list(VARIANTS),
         "evaluation": "projection_with_frozen_GLM_threshold_and_identity_ties_training_and_held_physical_units",
         "budget": {"cost_projection_fits": 47, "max_linear_programs": 188, "optimizer_updates": 0,
@@ -74,18 +75,36 @@ def linear_witness(directions, margins):
     if not n:
         return {"constraints": 0, "dimensions": dimensions, "linear_programs": 0, "feasible": True,
             "status": 0, "coefficient_l1": 0., "constraint_violation": 0., "coefficients": [0.]*dimensions}
-    # Positive/negative coefficient parts minimize L1 without constraining the class.
-    result = linprog(np.ones(2*dimensions), A_ub=-np.c_[directions, -directions], b_ub=-margins,
-        bounds=(0., None), method="highs", options={"threads": 1})
-    if result.status not in (0, 2):
-        raise RuntimeError(f"Linear expressivity probe was not solved: {result.message}")
-    metadata = {"constraints": n, "dimensions": dimensions, "linear_programs": 1, "feasible": result.status == 0,
-        "status": int(result.status), "solver_iterations": int(result.nit), "coefficients": None}
-    if result.status == 0:
-        coefficients = result.x[:dimensions]-result.x[dimensions:]
-        violation = float(np.maximum(margins-directions@coefficients, 0).max())
-        if violation > 1e-7: raise ValueError("LP witness violates its registered training inequalities")
-        metadata.update(coefficients=coefficients.tolist(), coefficient_l1=float(abs(coefficients).sum()), constraint_violation=violation)
+    u, singular, vt = np.linalg.svd(directions, full_matrices=False)
+    cutoff = np.finfo(directions.dtype).eps*max(directions.shape)*singular[0]
+    rank = int(np.sum(singular > cutoff))
+    metadata = {"constraints": n, "dimensions": dimensions, "numerical_rank": rank, "singular_cutoff": float(cutoff),
+        "linear_programs": int(rank > 0), "feasible": None, "status": 0, "coefficients": None}
+    if not rank:
+        violation = np.maximum(margins, 0)
+        metadata.update(feasible=bool(violation.max() <= 1e-7), coefficients=[0.]*dimensions,
+            margin_violation_mean=float(violation.mean()), constraint_violation=float(violation.max()))
+        return metadata
+    basis = u[:, :rank]
+    # Slacks make the problem feasible even when no linear decision boundary exists.
+    result = linprog(np.r_[np.zeros(rank), np.full(n, 1/n)],
+        A_ub=hstack((-csc_matrix(basis), -eye(n)), format="csc"), b_ub=-margins,
+        bounds=[(None, None)]*rank+[(0., None)]*n, method="highs-ds", options={"threads": 1, "presolve": False})
+    metadata.update(status=int(result.status), message=result.message, solver_iterations=int(result.nit))
+    if result.status != 0: return metadata
+    gamma, slack = result.x[:rank], result.x[rank:]
+    coefficients = vt[:rank].T@(gamma/singular[:rank])
+    violation = float(np.maximum(margins-directions@coefficients, 0).max())
+    dual = -result.ineqlin.marginals
+    dual_bound, primal = float(margins@dual), float(result.fun)
+    stationarity = float(abs(basis.T@dual).max())
+    certified = (abs(primal-dual_bound) <= 1e-7 and stationarity <= 1e-7
+        and dual.min() >= -1e-7 and dual.max() <= 1/n+1e-7
+        and float(np.maximum(margins-basis@gamma-slack, 0).max()) <= 1e-7)
+    feasible = True if certified and slack.max() <= 1e-7 and violation <= 1e-7 else False if certified and dual_bound > 1e-7 else None
+    metadata.update(feasible=feasible, coefficients=coefficients.tolist(), coefficient_l1=float(abs(coefficients).sum()),
+        constraint_violation=violation, margin_violation_mean=primal, dual_lower_bound=dual_bound,
+        duality_gap=primal-dual_bound, dual_stationarity_linf=stationarity)
     return metadata
 
 
@@ -168,12 +187,16 @@ def analyze(bank, masses, panels, registered, load_fold, save_references):
         roots = [r for v in validation.values() for r in v["held"]["by_root"].values()]
         variants[variant] = {"validation": validation,
             "gates": {"cost": all(r["mean_selected_cost"] < 0 for r in roots), "wait": all(r["mean_selected_wait_min"] <= 0 for r in roots)}}
-    counts = {p: {name: sum(f["stable_training_constraints"][p][name]["feasible"] for f in folds)
+    counts = {p: {name: sum(f["stable_training_constraints"][p][name]["feasible"] is True for f in folds)
+        for name in ("cost_order", "wait_sign")} for p in PARTITIONS}
+    unresolved = {p: {name: sum(f["stable_training_constraints"][p][name]["feasible"] is None for f in folds)
         for name in ("cost_order", "wait_sign")} for p in PARTITIONS}
     return {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "software_qualified": True,
         "cost_projection_fits": len(folds), "linear_programs": sum(w["linear_programs"] for f in folds for p in f["stable_training_constraints"].values() for w in p.values()),
         "optimizer_updates": 0, "actor_updates": 0, "new_native_episodes": 0, "folds": folds,
-        "feasible_fold_counts": counts, "variants": variants, "third_scene_screen_eligible": False, "native_deployment_eligible": False}
+        "feasible_fold_counts": counts, "unresolved_fold_counts": unresolved,
+        "linear_bounds_qualified": all(n == 0 for p in unresolved.values() for n in p.values()),
+        "variants": variants, "third_scene_screen_eligible": False, "native_deployment_eligible": False}
 
 
 def load_data():

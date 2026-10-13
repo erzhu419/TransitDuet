@@ -63,13 +63,19 @@ class LinearFloorTest(unittest.TestCase):
         self.assertTrue(np.all(d@result["coefficients"] >= 1.-1e-7))
         impossible = spec.linear_witness(np.asarray([[1.], [-1.]]), np.ones(2))
         self.assertFalse(impossible["feasible"])
-        self.assertEqual(impossible["status"], 2)
-        self.assertIsNone(impossible["coefficients"])
+        self.assertEqual(impossible["status"], 0)
+        self.assertGreater(impossible["dual_lower_bound"], 0.)
+        self.assertGreater(impossible["margin_violation_mean"], 0.)
         empty = spec.linear_witness(np.empty((0, 2)), np.empty(0))
         self.assertTrue(empty["feasible"])
         self.assertEqual(empty["linear_programs"], 0)
-        with patch.object(spec, "linprog", return_value=SimpleNamespace(status=4, message="numerical problem")):
-            with self.assertRaises(RuntimeError): spec.linear_witness(d, np.ones(2))
+        with patch.object(spec, "linprog", return_value=SimpleNamespace(status=4, message="numerical problem", nit=0)):
+            failure = spec.linear_witness(d, np.ones(2))
+            self.assertIsNone(failure["feasible"])
+            self.assertIsNone(failure["coefficients"])
+        zero = spec.linear_witness(np.zeros((2, 1)), np.ones(2))
+        self.assertFalse(zero["feasible"])
+        self.assertEqual(zero["linear_programs"], 0)
 
     def test_training_only_constraints_exclude_identity_and_half_disagreements(self):
         row = {"root": 397, "scene_seed": 7, "probe_index": 8, "original_choice": 0}
