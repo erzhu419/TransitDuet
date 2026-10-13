@@ -1,0 +1,55 @@
+{
+  "contract": {
+    "boundary": "nested_supervised_single_action_development_not_independent_CI_or_full_HRL_validation",
+    "budget": {
+      "actor_updates": 0,
+      "critic_optimizer_updates": 0,
+      "final_wait_fits": 47,
+      "inner_cost_fits": 230,
+      "inner_wait_fits": 920,
+      "new_closed_form_fits": 1197,
+      "new_native_episodes": 0,
+      "reused_outer_cost_models": 47,
+      "reused_outer_wait_models": 141
+    },
+    "cost": "outer_Stage199_cost_heads_and_all_four_Stage203_controls_frozen",
+    "criterion": "min_positive_worst_root_regime_actual_wait_then_worst_root_equal_regime_cost_then_equal_root_cost_then_worst_pair_MSE_then_stronger_penalty",
+    "data": "same600_inputs_240_mean8_targets_360_single_targets_47_outer_folds",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "infeasible": "least_wait_violation_no_threshold_relaxation_or_claim_of_guaranteed_safety",
+    "inner": "outer_training_regime_holdout_all_scene_callbacks_and_candidates_grouped_mean8_only_validation",
+    "inner_cost": "one_train_only98_feature_three_head_pair_ridge0.1_per_inner_regime_wait_head_unused",
+    "normalization": "inner_cost_and_wait_own_inner_train_scales_final_wait_own_outer_train_scales",
+    "primary": "decision_selected_wait",
+    "selection": "zero_margin_wait_nonpositive_then_cost_min_identity_exact0_and_tie_retained",
+    "source_protocol": "native_transit_nested_wait_stage203_v1",
+    "source_run": "native_transit_nested_wait_stage203_development_20261013_r1",
+    "storage": "bank_targets_models_inner_decision_ledgers_predictions_server_only_small_report_sync",
+    "variants": [
+      "frozen_wait",
+      "geometry_wait",
+      "conditional_wait",
+      "regime_selected_wait",
+      "decision_selected_wait"
+    ],
+    "wait": "unchanged198_features_base102_ridge0.1_interaction_grid0.1_1_10_100",
+    "weights": "training_only_mean8_weight8_single_weight1_all15_action_pairs"
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_decision_wait_stage204_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "99b7e203204f87d43f19366fdc3bda3b7a125bdd"
+}
