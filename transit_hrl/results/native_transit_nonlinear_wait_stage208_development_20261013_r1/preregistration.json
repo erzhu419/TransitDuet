@@ -1,0 +1,92 @@
+{
+  "contract": {
+    "architecture": "frozen_symmetric_GLM_logit_plus_learned16_tanh_residual_zero_output_initialization",
+    "boundary": "capacity_optimizer_regularization_differ_from_GLM_supervised_development_not_CI_or_full_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "new_cost_fits": 0,
+      "new_native_episodes": 0,
+      "new_wait_fits": 94,
+      "wait_optimizer_steps": 56400
+    },
+    "checkpoint": "fixed_final_step_no_heldout_selection_or_threshold_tuning",
+    "cost": "exact_Stage206_cost_heads_candidate_menu_and_both_GLMS_frozen",
+    "data": "same600_inputs_240_mean8_targets_360_single_targets_47_folds",
+    "diagnostic_run": "native_transit_wait_transfer_stage207_diagnostic_20261013_r1",
+    "future_halves": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_splits",
+    "inputs": "same198_paired_features_or_plus12_absolute_causal_conditions_no_root_regime_or_future_features",
+    "normalization": "exact_frozen_GLM_train_scales_plus_own_training_only_context_mean_std",
+    "optimizer": {
+      "dtype": "float64",
+      "lr": 0.003,
+      "method": "AdamW",
+      "seed": 208,
+      "steps": 600,
+      "weight_decay": 0.01
+    },
+    "parameters": {
+      "nonlinear_pair": 3201,
+      "state_conditioned_pair": 3393
+    },
+    "primary": "state_conditioned_pair",
+    "selection": "fixed_share_at_most0.5_then_frozen_cost_min_identity_zero_ties_retained",
+    "source_protocol": "native_transit_wait_feasibility_stage206_v1",
+    "source_run": "native_transit_wait_feasibility_stage206_development_20261013_r1",
+    "storage": "bank_masses_models_and_predictions_server_only_small_receipts_report",
+    "target_loss": "unchanged_symmetric_positive_negative_mass_loss_draw_count8_or1_train_only_scale",
+    "training_fit_gate": "lower_mean8_excess_mass_loss_and_boundary_error_all_splits_vs_frozen_symmetric_GLM_scene_matched_root_regime",
+    "variants": [
+      "symmetric_feasibility",
+      "asymmetric_feasibility",
+      "nonlinear_pair",
+      "state_conditioned_pair"
+    ]
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_nonlinear_wait_stage208_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "6b2cd642dff30434d5ee94853cd676e38ebceff4"
+}
