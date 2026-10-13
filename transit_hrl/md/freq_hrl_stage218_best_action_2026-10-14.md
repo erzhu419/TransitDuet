@@ -9,6 +9,12 @@ Stage217 mixed-root full-order failures did not isolate sample size or the weake
 
 If best-only is feasible after matching but full orders are not, the next step is linear decision-focused learning, not an assertion that nonlinear conditioning is necessary. If mixed-root best-only remains infeasible while single-root is feasible in both partitions and complementary views, test causal conditional features next.
 
+## Result
+
+`t151836`, node004, exit0: all32 bounds numerically feasible, unresolved0. This includes full orders and wait signs in both single-root and both mixed-root views. Matching input count removed the previous qualitative single/mixed difference; weakening the target was not needed to make these120-state views feasible.
+
+Best targets cover82-92/120 states, with23-34 nonidentity optima;28-38 states disagree between future halves, near-tie exclusions0. No actor updates or new episodes. Only38,676 bytes of report were pulled;14 tests passed. Next: test best-only on the complete240-state cohort before selecting a larger model.
+
 ## Limitations
 
-These are finite training-class diagnostics under an oracle-safe menu, not held-out learned-policy evidence. Eligible counts may differ despite equal input counts; both future partitions reuse the same eight draws. Root bundles include different lower policies and demand/prefix seeds.
+These are finite training-class diagnostics under an oracle-safe menu, not held-out learned-policy evidence. Feasibility uses numerical tolerance1e-7, without coefficient-norm minimization; LP witnesses are not deployment parameters. Eligible counts differ despite equal input counts; both future partitions reuse the same eight draws. Root bundles include different lower policies and demand/prefix seeds.
