@@ -1,0 +1,90 @@
+{
+  "contract": {
+    "boundary": "conditional_future_and_prefix_transfer_diagnostic_not_CI_native_reward_or_isolated_lower_policy_effect",
+    "budget": {
+      "actor_updates": 0,
+      "adamw_steps": 112800,
+      "neural_paths": 188,
+      "new_cost_fits": 0,
+      "new_native_episodes": 0,
+      "new_wait_glm_fits": 188
+    },
+    "checkpoint_selection": "none_report_all_primary600_step0_exact_GLM",
+    "checkpoints": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "contrasts": "neural_minus_own_GLM_on_same_prefix_other_future_and_held_prefix_other_future",
+    "controls": "same_fit_predictions_on_both_label_halves_no_cost_fit_or_policy_selection",
+    "data": "same600_causal_inputs_240_mean8_states_360_single_targets_47_grouped_outer_folds",
+    "directions": [
+      "A",
+      "B"
+    ],
+    "neural": "unchanged_state_conditioned210_input16_tanh_residual_seed208_lr0.003_decay0.01_float64",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "populations": [
+      "same_prefix_train_future",
+      "same_prefix_other_future",
+      "held_prefix_train_future",
+      "held_prefix_other_future"
+    ],
+    "reference": "new_symmetric_GLM_and_all_scales_fit_on_outer_train_and_training_half_only",
+    "scene_reference": "same_root_regime_training_mean_states",
+    "source_protocol": "native_transit_early_stop_wait_stage209_v1",
+    "source_run": "native_transit_early_stop_wait_stage209_development_20261013_r1",
+    "storage": "bank_half_targets_and_state_diagnostics_remote_small_receipts_report_only",
+    "target": "only_training_half_positive_negative_wait_masses_count4_mean_states_count1_unchanged_single_states"
+  },
+  "fit_tasks": 47,
+  "prepare_tasks": 1,
+  "protocol": "native_transit_future_transfer_stage210_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "29dd47e00b9f8f455cea8450257c3441f97d7414"
+}
