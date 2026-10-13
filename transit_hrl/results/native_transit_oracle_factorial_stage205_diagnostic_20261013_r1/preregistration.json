@@ -1,0 +1,82 @@
+{
+  "contract": {
+    "boundary": "conditional_future_diagnostic_not_independent_prefix_seeds_or_learned_HRL_proof",
+    "budget": {
+      "actor_updates": 0,
+      "critic_updates": 0,
+      "new_fits": 0,
+      "new_native_episodes": 0
+    },
+    "data": "same240_states_40_prefix_groups_8_conditional_future_draws_47_frozen_outer_folds",
+    "draw_source": "native_transit_mean_coverage_stage195_development_20261012_r1",
+    "errors": "wait_signs_and_feasible_cost_pair_order_repeated_in_both_halves_not_CI",
+    "evaluation": "both_directions_other_half_only_mean8_hindsight_separate_identity_ties_retained",
+    "gate": "negative_cross_cost_nonpositive_cross_wait_both_roots_all_three_splits",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "primary_partition": "first_last",
+    "primary_variant": "decision_selected_wait",
+    "selectors": {
+      "LL": "learned_cost_learned_wait",
+      "LO": "learned_cost_selection_half_wait",
+      "OL": "selection_half_cost_learned_wait",
+      "OO": "selection_half_cost_selection_half_wait",
+      "unconstrained": "selection_half_cost_no_wait_filter"
+    },
+    "sensitivity_partition": "even_odd",
+    "source_protocol": "native_transit_decision_wait_stage204_v1",
+    "source_run": "native_transit_decision_wait_stage204_development_20261013_r1",
+    "storage": "existing_draws_and_frozen_predictions_server_only_small_summary_sync",
+    "variants": [
+      "frozen_wait",
+      "geometry_wait",
+      "conditional_wait",
+      "regime_selected_wait",
+      "decision_selected_wait"
+    ]
+  },
+  "protocol": "native_transit_oracle_factorial_stage205_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "cb9320f66125b43d0e0b3067dd33a9b7f47be7e9",
+  "tasks": 1
+}
