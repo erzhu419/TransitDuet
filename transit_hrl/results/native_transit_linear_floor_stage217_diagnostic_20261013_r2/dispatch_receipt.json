@@ -1,0 +1,52 @@
+{
+  "additional_solver_report_bytes": [
+    4386,
+    5568
+  ],
+  "controls_reproduced": true,
+  "cost_projection_fits": 47,
+  "default_model_replaced": false,
+  "distinct_tests_passed": 7,
+  "initial_failure": "r1 HiGHS Unknown; not used as expressivity evidence",
+  "linear_bounds_qualified": true,
+  "linear_programs": 188,
+  "protocol": "native_transit_linear_floor_stage217_v2",
+  "raw_or_model_pull_bytes": 0,
+  "report_pulled_bytes": 396982,
+  "run_name": "native_transit_linear_floor_stage217_diagnostic_20261013_r2",
+  "source_revision": "86657a487b17c6107f9dae138207d8efdde9709c",
+  "tasks": [
+    {
+      "exit_code": 1,
+      "id": "t151734",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_linear_floor_stage217_v1/native_transit_linear_floor_stage217_diagnostic_20261013_r1/report",
+      "status": "failed"
+    },
+    {
+      "exit_code": 0,
+      "id": "t151757",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_linear_solver_stage217_v1/native_transit_linear_solver_stage217_probe_20261013_r1/report",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t151761",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_linear_solver_stage217_v1/native_transit_linear_solver_stage217_probe_20261013_r2/report",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t151780",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_linear_floor_stage217_v2/native_transit_linear_floor_stage217_diagnostic_20261013_r2/report",
+      "status": "done"
+    }
+  ],
+  "test_runs_passed": [
+    7,
+    7
+  ]
+}

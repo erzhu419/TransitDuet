@@ -1,0 +1,72 @@
+{
+  "contract": {
+    "boundary": "finite_training_numerical_linear_class_bounds_not_all_feature_impossibility_or_population_CI",
+    "budget": {
+      "actor_updates": 0,
+      "cost_projection_fits": 47,
+      "max_linear_programs": 188,
+      "new_native_episodes": 0,
+      "optimizer_updates": 0
+    },
+    "data": "same600_mean8_targets_original240_panels_47_folds_original240_weight8_360_weight1",
+    "decomposition": "physical_total_cost_MSE_projection_floor_plus_ridge_minus_projection_energy",
+    "evaluation": "projection_with_frozen_GLM_threshold_and_identity_ties_training_and_held_physical_units",
+    "ordinal_bound": "train_original240_only_both_half_stable_true_safe_cost_pairs_strict_order_margin1",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "source_protocol": "native_transit_fit_transfer_stage216_v1",
+    "source_run": "native_transit_fit_transfer_stage216_diagnostic_20261013_r2",
+    "storage": "projection_models_witnesses_bank_targets_panels_remote_small_report_only",
+    "value_bound": "weighted_numpy_lstsq_rcond_None_same98_causal_features_three_RHS_original_training_scales",
+    "variants": [
+      "ridge_glm",
+      "projection_glm"
+    ],
+    "wait_bound": "same199_GLM_design_train_original240_stable_safe_logit_le0_unsafe_logit_ge1_identity_excluded",
+    "witness": "minimum_mean_margin_deficit_in_numerical_SVD_column_space_HiGHS_ds_threads1_no_coef_cap_tolerance1e-7"
+  },
+  "protocol": "native_transit_linear_floor_stage217_v2",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "86657a487b17c6107f9dae138207d8efdde9709c",
+  "tasks": 1
+}

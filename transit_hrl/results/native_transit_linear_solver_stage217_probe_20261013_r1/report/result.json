@@ -1,0 +1,140 @@
+{
+  "fold": {
+    "held_out": [
+      397,
+      913970000
+    ],
+    "index": 10,
+    "split": "scene"
+  },
+  "linear_programs": 12,
+  "new_native_episodes": 0,
+  "probes": [
+    {
+      "kind": "cost_order",
+      "largest_coefficient": 8.400694298608844,
+      "outcomes": {
+        "L1": {
+          "iterations": 279,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs",
+          "status": 2
+        },
+        "free": {
+          "iterations": 169,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs-ds",
+          "status": 2
+        },
+        "scaled_free": {
+          "iterations": 215,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs-ds",
+          "status": 2
+        }
+      },
+      "partition": "first_last",
+      "shape": [
+        360,
+        98
+      ],
+      "smallest_nonzero_coefficient": 1.3877787807814457e-17,
+      "zero_strict_rows": 0
+    },
+    {
+      "kind": "wait_sign",
+      "largest_coefficient": 20.530800698687248,
+      "outcomes": {
+        "L1": {
+          "iterations": 711,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs",
+          "status": 4
+        },
+        "free": {
+          "iterations": 419,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs-ds",
+          "status": 4
+        },
+        "scaled_free": {
+          "iterations": 430,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs-ds",
+          "status": 2
+        }
+      },
+      "partition": "first_last",
+      "shape": [
+        799,
+        199
+      ],
+      "smallest_nonzero_coefficient": 1.3877787807814457e-17,
+      "zero_strict_rows": 0
+    },
+    {
+      "kind": "cost_order",
+      "largest_coefficient": 6.180141825269733,
+      "outcomes": {
+        "L1": {
+          "iterations": 213,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs",
+          "status": 4
+        },
+        "free": {
+          "iterations": 180,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs-ds",
+          "status": 4
+        },
+        "scaled_free": {
+          "iterations": 154,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs-ds",
+          "status": 4
+        }
+      },
+      "partition": "even_odd",
+      "shape": [
+        385,
+        98
+      ],
+      "smallest_nonzero_coefficient": 1.5612511283791264e-17,
+      "zero_strict_rows": 0
+    },
+    {
+      "kind": "wait_sign",
+      "largest_coefficient": 20.530800698687248,
+      "outcomes": {
+        "L1": {
+          "iterations": 556,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs",
+          "status": 2
+        },
+        "free": {
+          "iterations": 428,
+          "message": "The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is At lower/fixed bound)",
+          "method": "highs-ds",
+          "status": 2
+        },
+        "scaled_free": {
+          "iterations": 406,
+          "message": "The HiGHS status code was not recognized. (HiGHS Status 15: model_status is Unknown; primal_status is Basic)",
+          "method": "highs-ds",
+          "status": 4
+        }
+      },
+      "partition": "even_odd",
+      "shape": [
+        796,
+        199
+      ],
+      "smallest_nonzero_coefficient": 1.3877787807814457e-17,
+      "zero_strict_rows": 0
+    }
+  ],
+  "protocol": "native_transit_linear_solver_stage217_v1",
+  "scipy_version": "1.13.1"
+}
