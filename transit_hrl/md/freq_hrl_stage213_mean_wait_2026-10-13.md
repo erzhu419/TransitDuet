@@ -24,8 +24,23 @@ Run:`native_transit_mean_wait_stage213_development_20261013_r1`.
 Five targeted tests passed:target/weight identity,outer-label exclusion,
 inner-reference exclusion,frozen costs/controls,and zero-action gate.
 
-Next: compare matched old/new heads and half transfers to determine
-whether training-target noise explained the previous transfer failure.
+Completed`t151407-t151453` plus report`t151462`,all48 done/exit0;
+source`c2a8b50e5f`.235 GLMs,outer1593/inner6363 solver iterations,
+231700 AdamW steps. Three old controls reproduce exactly. One840841-byte
+report pulled;prepared targets/models remain remote.
+
+New GLM passes cost/wait in scene and regime splits;cross-root401 wait
+remains+0.002805208min versus old+0.002670833. Shrunk nonzero refits33/47
+versus old13/47,but cross-root397 cost-0.002595199 ->+0.000902642.
+New shrunk lower-root train excess0.144915 versus new GLM0.233646;
+held excess0.306717 versus0.284118. Neural held excess also exceeds the
+new GLM in scene/regime,and half cost/wait gates fail. Full gate fails.
+
+Next: quantify erroneous safety decisions that the fixed residual bound
+cannot repair,and separate frozen cost-ranking errors from wait errors.
+Label precision alone did not close transfer;do not expand seeds/capacity
+before this diagnosis. Cross-root also changes demand/prefix seeds,not
+only the lower policy;the present contrast does not isolate policy shift.
 
 Limits: reused development prefixes and supervised one-action effects;
 not independent CI or complete learned upper/end-to-end HRL.

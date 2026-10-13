@@ -1,0 +1,96 @@
+{
+  "contract": {
+    "boundary": "single_action_supervised_development_not_independent_CI_or_full_learned_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "inner_neural_paths": 376,
+      "max_adamw_steps": 282000,
+      "new_cost_fits": 0,
+      "new_inner_glm_fits": 188,
+      "new_native_episodes": 0,
+      "new_outer_glm_fits": 47,
+      "outer_model_assemblies": 94
+    },
+    "checkpoint_grid": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "control_run": "native_transit_bounded_wait_stage211_development_20261013_r1",
+    "costs": "exact_Stage211_cost_heads_menu_threshold0.5_identity_ties_frozen",
+    "data": "same600_inputs_all600_mean8_training_masses_original240_evaluation_states_47_outer_folds",
+    "functional_ridges": {
+      "bounded_only": 0.0,
+      "shrunk_bounded": 0.1
+    },
+    "future_halves": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "gate": "negative_cost_nonpositive_wait_both_roots_all_three_splits_and_lower_held_excess_than_new_GLM_all_splits",
+    "inner_selection": "unchanged_four_scene_partitions_validation_original240_only_pooled_crossentropy_ties_earliest",
+    "optimizer": "same3393_parameters_seed208_float64_AdamW_lr0.003_wd0.01",
+    "partition_seed": 200,
+    "primary": "mean8_shrunk",
+    "reference": "new_outer_train_only_symmetric_GLM_and_four_shared_inner_train_only_GLMS",
+    "residual_bound": 1.0,
+    "source_protocol": "native_transit_training_means_stage212_v1",
+    "source_run": "native_transit_training_means_stage212_development_20261013_r1",
+    "storage": "mean_targets_models_predictions_remote_small_report_only",
+    "variants": [
+      "old_glm",
+      "old_bounded",
+      "old_shrunk",
+      "mean8_glm",
+      "mean8_bounded",
+      "mean8_shrunk"
+    ],
+    "weights": "preserve_original_240_count8_and360_count1_optimization_weights_separate_from_actual_draw_count8"
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_mean_wait_stage213_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "c2a8b50e5ff4a8dc8c5cc0255969792a855f27d2"
+}
