@@ -17,6 +17,12 @@ def wait_masses(values):
     return np.maximum(values, 0).mean(axis=0), np.maximum(-values, 0).mean(axis=0)
 
 
+def sample_weights(rows, masses):
+    """Keep Stage212 target precision independent of optimization weighting."""
+    targets = [masses[r["root"], r["scene_seed"], r["probe_index"]] for r in rows]
+    return np.asarray([m.get("sample_weight", m["draw_count"]) for m in targets])
+
+
 def design(raw, originals, center, scale):
     x = (raw-center)/scale
     x -= x[np.arange(len(x)), originals][:, None].copy()
@@ -43,7 +49,7 @@ def fit_wait(rows, masses, variant):
     keys = [(r["root"], r["scene_seed"], r["probe_index"]) for r in rows]
     positive = np.asarray([masses[k]["positive_wait_min"] for k in keys])[mask]
     negative = np.asarray([masses[k]["negative_wait_min"] for k in keys])[mask]
-    weights = np.repeat([masses[k]["draw_count"] for k in keys], 5)
+    weights = np.repeat(sample_weights(rows, masses), 5)
     target_scale = max(float(np.average(positive+negative, weights=weights)), 1e-6)
     result = minimize(objective, np.zeros(x.shape[1]), args=(x, positive/target_scale,
         negative/target_scale, weights, false_safe_cost), method="L-BFGS-B", jac=True,

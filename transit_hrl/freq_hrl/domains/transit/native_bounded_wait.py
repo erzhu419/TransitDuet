@@ -42,7 +42,7 @@ def validation_loss(rows, masses, model, batch):
     mask = np.arange(6)[None, :] != np.asarray([r["original_choice"] for r in rows])[:, None]
     p = np.asarray([masses[stopping.key(r)]["positive_wait_min"] for r in rows])[mask]
     n = np.asarray([masses[stopping.key(r)]["negative_wait_min"] for r in rows])[mask]
-    weights = np.repeat([masses[stopping.key(r)]["draw_count"] for r in rows], 5)
+    weights = np.repeat(neural.base.sample_weights(rows, masses), 5)
     return {"loss_sum_min": float(weights@(p*np.logaddexp(0, -logits[mask])+n*np.logaddexp(0, logits[mask]))),
         "mass_sum_min": float(weights@(p+n))}
 
@@ -57,13 +57,14 @@ def fit_path(rows, masses, reference, variant, checkpoints, *, validation=None, 
     p = np.asarray([masses[stopping.key(r)]["positive_wait_min"] for r in rows])[mask]
     n = np.asarray([masses[stopping.key(r)]["negative_wait_min"] for r in rows])[mask]
     counts = np.asarray([masses[stopping.key(r)]["draw_count"] for r in rows])
-    scale = max(float(np.average(p+n, weights=np.repeat(counts, 5))), 1e-6)
+    row_weights = neural.base.sample_weights(rows, masses)
+    scale = max(float(np.average(p+n, weights=np.repeat(row_weights, 5))), 1e-6)
     groups = sorted(map(list, {neural.base.paired.scene_group(r) for r in rows}))
     if reference["training_groups"] != groups or reference["false_safe_cost"] != 1. or not np.isclose(
             scale, reference["target_scale_min"], atol=1e-12, rtol=0):
         raise ValueError("Bounded residual requires its own training-only symmetric reference")
     tx, toffset, p, n, weights = [torch.as_tensor(a, dtype=torch.float64) for a in
-        (x[mask], offset[mask], p/scale, n/scale, np.repeat(counts, 5))]
+        (x[mask], offset[mask], p/scale, n/scale, np.repeat(row_weights, 5))]
     validation_batch = None if validation is None else neural.batches(validation)
     curve, ledger, gradient = [], [], 0.
     with torch.random.fork_rng(devices=[]):
@@ -93,7 +94,7 @@ def fit_path(rows, masses, reference, variant, checkpoints, *, validation=None, 
                     "frozen_parameters": 199, "steps": step, "initialization_seed": neural.SEED, "width": neural.WIDTH,
                     "learning_rate": neural.LEARNING_RATE, "weight_decay": neural.WEIGHT_DECAY,
                     "training_states": len(rows), "training_groups": groups, "training_mean_states": int(np.sum(counts == 8)),
-                    "sample_weight_sum": float(counts.sum()), "target_scale_min": scale,
+                    "sample_weight_sum": float(row_weights.sum()), "target_scale_min": scale,
                     "initial_mass_loss": initial_loss, "final_mass_loss": loss, "final_functional_penalty": shrink,
                     "final_objective": loss+shrink, "residual_logit_rms": float(residual.square().mean().sqrt()),
                     "residual_logit_max_abs": float(residual.abs().max()),

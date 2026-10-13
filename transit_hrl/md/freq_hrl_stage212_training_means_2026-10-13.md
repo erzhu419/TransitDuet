@@ -18,6 +18,14 @@ release2860 only after a server-side qualified preflight report.
 Unbound scheduler,node001-node006,1CPU/1536MB native task. Rollouts,
 draw labels and prepared targets stay on servers;small receipts only.
 
+Run:`native_transit_training_means_stage212_development_20261013_r1`.
+Collection source`a04a546838`;preflight`t148478-t148497` launched on
+node001/004/005/006. Source pushed;23 collection/continuation tests passed.
+GLM and bounded-head loss/scaling now consume explicit sample_weight;
+37 targeted tests passed,including exact old-weight model reproduction
+when actual draw depth changes. Remaining collection requires preflight
+qualification;no performance result has been claimed.
+
 Next: refit outer/inner symmetric GLMs on the new training masses;
 repeat fixed B1/ridge0-or0.1 heads with original inner validation states
 and sample weights. Compare against both newly fitted GLM and Stage211.

@@ -5,9 +5,11 @@ import unittest
 from unittest.mock import Mock, patch
 
 import numpy as np
+import torch
 
 from scripts import run_native_transit_training_means_stage212 as spec
 from scripts.submit_native_transit_training_means_stage212_scheduleurm import task_specification, preceding
+from tests.test_native_transit_sequence_value import fixture
 
 
 def original_manifest():
@@ -146,6 +148,28 @@ class TrainingMeansTest(unittest.TestCase):
         for path in (spec.ROOT/"scripts/run_native_transit_training_means_stage212.py",
                 spec.ROOT/"scripts/submit_native_transit_training_means_stage212_scheduleurm.py"):
             ast.parse(path.read_text(), feature_version=(3, 10))
+
+    def test_glm_bounded_loss_and_scaling_preserve_old_weights_when_depth_changes(self):
+        torch.set_num_threads(1)
+        rows = fixture()[0]["training_data"][:12]
+        masses = {spec.state_key(r): r for r in spec.previous.source.build_masses(rows, {})}
+        for r in rows[:6]:
+            masses[spec.state_key(r)]["draw_count"] = 8
+        upgraded = {k: {**m, "draw_count": 8, "sample_weight": m["draw_count"]} for k, m in masses.items()}
+        api = spec.previous.source.feasibility
+        old_glm = api.fit_wait(rows, masses, "symmetric_feasibility")
+        new_glm = api.fit_wait(rows, upgraded, "symmetric_feasibility")
+        self.assertEqual(new_glm["training_mean_states"], 12)
+        self.assertEqual(new_glm["sample_weight_sum"], 54.)
+        self.assertEqual({k: v for k, v in old_glm.items() if k != "training_mean_states"},
+            {k: v for k, v in new_glm.items() if k != "training_mean_states"})
+        for variant in spec.previous.bounded.FUNCTIONAL_RIDGES:
+            old, curve = spec.previous.bounded.fit_path(rows, masses, old_glm, variant, (0, 2), validation=rows)
+            new, other = spec.previous.bounded.fit_path(rows, upgraded, new_glm, variant, (0, 2), validation=rows)
+            self.assertEqual(curve, other)
+            self.assertEqual({k: v for k, v in old.items() if k not in ("reference", "training_mean_states")},
+                {k: v for k, v in new.items() if k not in ("reference", "training_mean_states")})
+            self.assertEqual(new["training_mean_states"], 12)
 
 
 if __name__ == "__main__":
