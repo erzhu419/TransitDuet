@@ -1,0 +1,2651 @@
+{
+  "actor_updates": 0,
+  "closed_form_solves": 94,
+  "contract": {
+    "boundary": "supervised_development_target_precision_comparison_not_independent_CI_or_full_learned_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "closed_form_solves": 94,
+      "control_cost_refits": 47,
+      "critic_optimizer_updates": 0,
+      "new_cost_fits": 47,
+      "new_native_episodes": 0,
+      "operational_wait_fits": 0
+    },
+    "control": "reproduce_old240_mean8_360_single_target_pair_ridge_and_archived_cost_heads_before_comparison",
+    "cost": "same98_features294_coefficient_three_rhs_pair_ridge0.1_original_training_scales_fixed_unused_wait_rhs_ignored",
+    "data": "same600_inputs_all600_mean8_cost_targets_original240_evaluation_states_47_folds",
+    "diagnostic_run": "native_transit_bound_ranking_stage214_diagnostic_20261013_r1",
+    "future_halves": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "gate": "negative_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "primary": "mean_cost_glm",
+    "source_protocol": "native_transit_mean_wait_stage213_v1",
+    "source_run": "native_transit_mean_wait_stage213_development_20261013_r1",
+    "storage": "bank_targets_cost_models_and_predictions_remote_small_report_only",
+    "variants": [
+      "old_cost_glm",
+      "old_cost_shrunk",
+      "mean_cost_glm",
+      "mean_cost_shrunk"
+    ],
+    "wait": "exact_Stage213_GLM_and_shrunk_harm_shares_scores_masks_bound_and_threshold0.5_frozen",
+    "weights": "preserve_original_240_count8_and360_count1_optimization_weights_separate_from_actual_draw_count8"
+  },
+  "control_cost_refits": 47,
+  "critic_optimizer_updates": 0,
+  "development_gate": false,
+  "native_deployment_eligible": false,
+  "new_cost_fits": 47,
+  "new_native_episodes": 0,
+  "operational_wait_fits": 0,
+  "protocol": "native_transit_mean_cost_stage215_v1",
+  "software_qualified": true,
+  "third_scene_screen_eligible": false,
+  "variants": {
+    "mean_cost_glm": {
+      "future_halves": {
+        "lower_root": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0018394187499999994,
+                "mean_wait_min": -0.0016083333333332755,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0033293604166666677,
+                "mean_wait_min": -0.004354166666666664,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0025394354166666717,
+                "mean_wait_min": 0.0006000000000000061,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0036953937500000017,
+                "mean_wait_min": 0.0030145833333333114,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0016743520833333318,
+                "mean_wait_min": -0.00301041666666662,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0034944270833333355,
+                "mean_wait_min": -0.00295208333333332,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0033128916666666655,
+                "mean_wait_min": -0.0005312500000000313,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0029219375000000074,
+                "mean_wait_min": 0.004145833333333349,
+                "states": 120
+              }
+            }
+          }
+        },
+        "regime": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.004306949999999994,
+                "mean_wait_min": -0.0006979166666666,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.002177725000000006,
+                "mean_wait_min": -0.0013958333333333943,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0021083041666666736,
+                "mean_wait_min": -0.004212500000000019,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.00033218124999999653,
+                "mean_wait_min": -0.00012291666666671788,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.003195058333333329,
+                "mean_wait_min": -0.001214583333333331,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.003289616666666671,
+                "mean_wait_min": -0.0008791666666666633,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0019002687499999982,
+                "mean_wait_min": -0.0029041666666667315,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.00012414583333332044,
+                "mean_wait_min": -0.0014312500000000052,
+                "states": 120
+              }
+            }
+          }
+        },
+        "scene": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0021338458333333334,
+                "mean_wait_min": -0.0034416666666665643,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.003228125000000003,
+                "mean_wait_min": -0.0029520833333333716,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.001211675000000007,
+                "mean_wait_min": -0.0043000000000000226,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0020871708333333404,
+                "mean_wait_min": -0.005966666666666702,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0026317249999999967,
+                "mean_wait_min": -0.0030374999999999374,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.002730245833333339,
+                "mean_wait_min": -0.0033562499999999986,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.001960106250000001,
+                "mean_wait_min": -0.0037729166666666805,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0013387395833333474,
+                "mean_wait_min": -0.006493750000000044,
+                "states": 120
+              }
+            }
+          }
+        }
+      },
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "half_gates": {
+        "even_odd": {
+          "cost": false,
+          "wait": false
+        },
+        "first_last": {
+          "cost": false,
+          "wait": false
+        }
+      },
+      "validation": {
+        "lower_root": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 13,
+              "concordant_pairs": 381,
+              "false_feasible_choices": 7,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -0.0013950885416666701,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -0.6196562499999937,
+              "mean_fleet_cost_delta": -0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.0003100190972222257,
+              "mean_regret": 0.012790010416666657,
+              "mean_wait_delta_min": -0.0024947916666666348,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "hour_burst": {
+              "changed_choices": 15,
+              "concordant_pairs": 404,
+              "false_feasible_choices": 8,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.005337351562500006,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.20951041666666312,
+              "mean_fleet_cost_delta": -0.005425347222222223,
+              "mean_nonfleet_cost_delta": 8.799565972221638e-05,
+              "mean_regret": 0.011020140624999982,
+              "mean_wait_delta_min": 0.0019010416666666817,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 6
+            },
+            "low_noise": {
+              "changed_choices": 11,
+              "concordant_pairs": 455,
+              "false_feasible_choices": 8,
+              "improved_states": 6,
+              "mean_actual_cost_delta": -0.0010244817708333312,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.18076302083333515,
+              "mean_fleet_cost_delta": -0.0010850694444444445,
+              "mean_nonfleet_cost_delta": 6.058767361111318e-05,
+              "mean_regret": 0.011323651041666665,
+              "mean_wait_delta_min": 0.0010546875000000087,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 5
+            },
+            "ood_period": {
+              "changed_choices": 22,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 9,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.004179937500000002,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": 0.14617447916666867,
+              "mean_fleet_cost_delta": -0.003906250000000001,
+              "mean_nonfleet_cost_delta": -0.00027368750000000266,
+              "mean_regret": 0.006478760416666667,
+              "mean_wait_delta_min": -0.0017552083333333458,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "persistent_shift": {
+              "changed_choices": 18,
+              "concordant_pairs": 437,
+              "false_feasible_choices": 8,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.002317651041666665,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.9258828124999982,
+              "mean_fleet_cost_delta": -0.0017361111111111112,
+              "mean_nonfleet_cost_delta": -0.0005815399305555536,
+              "mean_regret": 0.01663019270833334,
+              "mean_wait_delta_min": -0.0016406249999999882,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 48,
+              "concordant_pairs": 990,
+              "false_feasible_choices": 25,
+              "improved_states": 23,
+              "mean_actual_cost_delta": -0.0025843895833333338,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.02495104166666451,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -0.0004142506944444447,
+              "mean_regret": 0.014510380208333333,
+              "mean_wait_delta_min": -0.00298124999999997,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 25
+            },
+            "401": {
+              "changed_choices": 31,
+              "concordant_pairs": 1126,
+              "false_feasible_choices": 15,
+              "improved_states": 17,
+              "mean_actual_cost_delta": -0.0031174145833333363,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.19441250000000257,
+              "mean_fleet_cost_delta": -0.0031250000000000006,
+              "mean_nonfleet_cost_delta": 7.585416666663786e-06,
+              "mean_regret": 0.008786721874999992,
+              "mean_wait_delta_min": 0.0018072916666666587,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            }
+          },
+          "overall": {
+            "changed_choices": 79,
+            "concordant_pairs": 2116,
+            "false_feasible_choices": 40,
+            "improved_states": 40,
+            "mean_actual_cost_delta": -0.0028509020833333352,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": 0.08473072916666903,
+            "mean_fleet_cost_delta": -0.0026475694444444446,
+            "mean_nonfleet_cost_delta": -0.0002033326388888905,
+            "mean_regret": 0.011648551041666661,
+            "mean_wait_delta_min": -0.0005869791666666557,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 39
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 178,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 172,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "regime": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 18,
+              "concordant_pairs": 373,
+              "false_feasible_choices": 6,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 6.375000000000304e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.860640624999995,
+              "mean_fleet_cost_delta": 0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.0010213194444444415,
+              "mean_regret": 0.01424884895833333,
+              "mean_wait_delta_min": -0.01070572916666663,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 14,
+              "concordant_pairs": 414,
+              "false_feasible_choices": 8,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.0035632083333333314,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": 0.12376041666666993,
+              "mean_fleet_cost_delta": -0.004340277777777778,
+              "mean_nonfleet_cost_delta": 0.0007770694444444465,
+              "mean_regret": 0.012794283854166658,
+              "mean_wait_delta_min": 0.00885937500000001,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 5
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 458,
+              "false_feasible_choices": 12,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.002172184895833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5545598958333363,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -2.046006944445069e-06,
+              "mean_regret": 0.010175947916666664,
+              "mean_wait_delta_min": 0.00095833333333334,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "ood_period": {
+              "changed_choices": 33,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 20,
+              "improved_states": 13,
+              "mean_actual_cost_delta": -0.002874018229166672,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.08072916666666667,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -5.2837673611115986e-05,
+              "mean_regret": 0.0077846796875,
+              "mean_wait_delta_min": 0.0002057291666666683,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 20
+            },
+            "persistent_shift": {
+              "changed_choices": 26,
+              "concordant_pairs": 456,
+              "false_feasible_choices": 13,
+              "improved_states": 13,
+              "mean_actual_cost_delta": -0.0017803359375000126,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.14728645833333273,
+              "mean_fleet_cost_delta": -0.0006510416666666668,
+              "mean_nonfleet_cost_delta": -0.0011292942708333459,
+              "mean_regret": 0.017167507812499993,
+              "mean_wait_delta_min": -0.0073541666666668,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 13
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 55,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 31,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.0032423374999999994,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.09687916666666775,
+              "mean_fleet_cost_delta": -0.003038194444444445,
+              "mean_nonfleet_cost_delta": -0.00020414305555555538,
+              "mean_regret": 0.013852432291666664,
+              "mean_wait_delta_min": -0.001046874999999997,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 27
+            },
+            "401": {
+              "changed_choices": 58,
+              "concordant_pairs": 1107,
+              "false_feasible_choices": 28,
+              "improved_states": 27,
+              "mean_actual_cost_delta": -0.0008880614583333387,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5431843749999968,
+              "mean_fleet_cost_delta": -0.0005208333333333333,
+              "mean_nonfleet_cost_delta": -0.00036722812500000534,
+              "mean_regret": 0.011016074999999991,
+              "mean_wait_delta_min": -0.0021677083333333682,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 31
+            }
+          },
+          "overall": {
+            "changed_choices": 113,
+            "concordant_pairs": 2140,
+            "false_feasible_choices": 59,
+            "improved_states": 55,
+            "mean_actual_cost_delta": -0.0020651994791666692,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.22315260416666452,
+            "mean_fleet_cost_delta": -0.001779513888888889,
+            "mean_nonfleet_cost_delta": -0.00028568559027778036,
+            "mean_regret": 0.012434253645833329,
+            "mean_wait_delta_min": -0.0016072916666666829,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 58
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 179,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 176,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "scene": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 380,
+              "false_feasible_choices": 10,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 0.002368343750000002,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -2.1275989583333277,
+              "mean_fleet_cost_delta": 0.003255208333333334,
+              "mean_nonfleet_cost_delta": -0.000886864583333332,
+              "mean_regret": 0.016553442708333328,
+              "mean_wait_delta_min": -0.010018229166666627,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            },
+            "hour_burst": {
+              "changed_choices": 17,
+              "concordant_pairs": 406,
+              "false_feasible_choices": 10,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.004028721354166668,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.09565104166666376,
+              "mean_fleet_cost_delta": -0.004340277777777778,
+              "mean_nonfleet_cost_delta": 0.00031155642361111016,
+              "mean_regret": 0.01232877083333332,
+              "mean_wait_delta_min": 0.00397135416666666,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 7
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 459,
+              "false_feasible_choices": 12,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.002172184895833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5545598958333363,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -2.046006944445069e-06,
+              "mean_regret": 0.010175947916666664,
+              "mean_wait_delta_min": 0.00095833333333334,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "ood_period": {
+              "changed_choices": 30,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 17,
+              "improved_states": 13,
+              "mean_actual_cost_delta": -0.003043898437500005,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": 0.07270052083333252,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -0.00022271788194444934,
+              "mean_regret": 0.007614799479166666,
+              "mean_wait_delta_min": -0.0010859375000000018,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 17
+            },
+            "persistent_shift": {
+              "changed_choices": 26,
+              "concordant_pairs": 462,
+              "false_feasible_choices": 12,
+              "improved_states": 13,
+              "mean_actual_cost_delta": -0.003949559895833349,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.7151927083333286,
+              "mean_fleet_cost_delta": -0.001736111111111111,
+              "mean_nonfleet_cost_delta": -0.002213448784722238,
+              "mean_regret": 0.014998283854166655,
+              "mean_wait_delta_min": -0.014651041666666698,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 13
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 58,
+              "concordant_pairs": 1018,
+              "false_feasible_choices": 33,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.002680985416666668,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.18212291666666686,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -0.000510846527777779,
+              "mean_regret": 0.014413784374999997,
+              "mean_wait_delta_min": -0.0031968749999999684,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 30
+            },
+            "401": {
+              "changed_choices": 59,
+              "concordant_pairs": 1128,
+              "false_feasible_choices": 28,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.001649422916666674,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5344416666666644,
+              "mean_fleet_cost_delta": -0.0009548611111111112,
+              "mean_nonfleet_cost_delta": -0.0006945618055555628,
+              "mean_regret": 0.010254713541666655,
+              "mean_wait_delta_min": -0.005133333333333362,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 31
+            }
+          },
+          "overall": {
+            "changed_choices": 117,
+            "concordant_pairs": 2146,
+            "false_feasible_choices": 61,
+            "improved_states": 56,
+            "mean_actual_cost_delta": -0.002165204166666671,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.17615937499999876,
+            "mean_fleet_cost_delta": -0.0015625,
+            "mean_nonfleet_cost_delta": -0.0006027041666666708,
+            "mean_regret": 0.012334248958333327,
+            "mean_wait_delta_min": -0.004165104166666665,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 61
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 164,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 161,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        }
+      }
+    },
+    "mean_cost_shrunk": {
+      "future_halves": {
+        "lower_root": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": 0.0017234812499999986,
+                "mean_wait_min": -0.0027645833333332795,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.00038376041666666956,
+                "mean_wait_min": -0.004166666666666667,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0025394354166666717,
+                "mean_wait_min": 0.0006000000000000061,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0036953937500000017,
+                "mean_wait_min": 0.0030145833333333114,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": 0.0012266166666666653,
+                "mean_wait_min": -0.004010416666666606,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.00011310416666666401,
+                "mean_wait_min": -0.00292083333333334,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0033128916666666655,
+                "mean_wait_min": -0.0005312500000000313,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0029219375000000074,
+                "mean_wait_min": 0.004145833333333349,
+                "states": 120
+              }
+            }
+          }
+        },
+        "regime": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0019931583333333237,
+                "mean_wait_min": -0.0034916666666666347,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0017185104166666666,
+                "mean_wait_min": -0.0007250000000000479,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0019917666666666688,
+                "mean_wait_min": -0.003958333333333389,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0013800479166666717,
+                "mean_wait_min": -0.004220833333333404,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.004019674999999999,
+                "mean_wait_min": -0.0038937499999999736,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.0003080062500000078,
+                "mean_wait_min": -0.00032291666666670884,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0012903895833333314,
+                "mean_wait_min": -0.002414583333333416,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0020814250000000096,
+                "mean_wait_min": -0.005764583333333377,
+                "states": 120
+              }
+            }
+          }
+        },
+        "scene": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.001878883333333336,
+                "mean_wait_min": -0.0014124999999999101,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.004061181250000003,
+                "mean_wait_min": -0.0030291666666667012,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0027662937500000048,
+                "mean_wait_min": -0.003429166666666693,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.0018444062499999975,
+                "mean_wait_min": -0.0019312500000000204,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0024437791666666654,
+                "mean_wait_min": -0.0019958333333332753,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0034962854166666743,
+                "mean_wait_min": -0.002445833333333336,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.001120220833333332,
+                "mean_wait_min": -0.0044812500000000225,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.00019833333333332492,
+                "mean_wait_min": -0.0008791666666666911,
+                "states": 120
+              }
+            }
+          }
+        }
+      },
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "half_gates": {
+        "even_odd": {
+          "cost": false,
+          "wait": false
+        },
+        "first_last": {
+          "cost": false,
+          "wait": false
+        }
+      },
+      "validation": {
+        "lower_root": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 14,
+              "concordant_pairs": 381,
+              "false_feasible_choices": 7,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -9.261718750000365e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.0284869791666622,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -9.261718750000365e-05,
+              "mean_regret": 0.014092481770833325,
+              "mean_wait_delta_min": -0.0010442708333332888,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 14,
+              "concordant_pairs": 404,
+              "false_feasible_choices": 7,
+              "improved_states": 5,
+              "mean_actual_cost_delta": -0.00020610677083333454,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.46172395833333074,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -0.00020610677083333454,
+              "mean_regret": 0.016151385416666653,
+              "mean_wait_delta_min": -0.0012916666666666955,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "low_noise": {
+              "changed_choices": 8,
+              "concordant_pairs": 455,
+              "false_feasible_choices": 4,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -7.916666666666489e-06,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.09567187500000252,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -7.916666666666489e-06,
+              "mean_regret": 0.012340216145833333,
+              "mean_wait_delta_min": 1.5625000000004063e-05,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 4
+            },
+            "ood_period": {
+              "changed_choices": 21,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 10,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.004723520833333336,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.3660885416666648,
+              "mean_fleet_cost_delta": -0.004557291666666667,
+              "mean_nonfleet_cost_delta": -0.00016622916666666942,
+              "mean_regret": 0.005935177083333334,
+              "mean_wait_delta_min": -0.001557291666666672,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "persistent_shift": {
+              "changed_choices": 16,
+              "concordant_pairs": 437,
+              "false_feasible_choices": 7,
+              "improved_states": 8,
+              "mean_actual_cost_delta": -0.0010887239583333385,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 1.033221354166665,
+              "mean_fleet_cost_delta": -0.0006510416666666668,
+              "mean_nonfleet_cost_delta": -0.0004376822916666717,
+              "mean_regret": 0.017859119791666666,
+              "mean_wait_delta_min": -0.00026822916666663366,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 8
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 42,
+              "concordant_pairs": 990,
+              "false_feasible_choices": 20,
+              "improved_states": 14,
+              "mean_actual_cost_delta": 0.0006698604166666647,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.4853749999999986,
+              "mean_fleet_cost_delta": 0.001041666666666667,
+              "mean_nonfleet_cost_delta": -0.0003718062500000021,
+              "mean_regret": 0.01776463020833333,
+              "mean_wait_delta_min": -0.003465624999999973,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 28
+            },
+            "401": {
+              "changed_choices": 31,
+              "concordant_pairs": 1126,
+              "false_feasible_choices": 15,
+              "improved_states": 17,
+              "mean_actual_cost_delta": -0.0031174145833333363,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.19441250000000257,
+              "mean_fleet_cost_delta": -0.0031250000000000006,
+              "mean_nonfleet_cost_delta": 7.585416666663786e-06,
+              "mean_regret": 0.008786721874999992,
+              "mean_wait_delta_min": 0.0018072916666666587,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            }
+          },
+          "overall": {
+            "changed_choices": 73,
+            "concordant_pairs": 2116,
+            "false_feasible_choices": 35,
+            "improved_states": 31,
+            "mean_actual_cost_delta": -0.0012237770833333356,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.14548124999999804,
+            "mean_fleet_cost_delta": -0.0010416666666666667,
+            "mean_nonfleet_cost_delta": -0.00018211041666666916,
+            "mean_regret": 0.01327567604166666,
+            "mean_wait_delta_min": -0.0008291666666666572,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 42
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 178,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 172,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "regime": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 18,
+              "concordant_pairs": 373,
+              "false_feasible_choices": 6,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 6.375000000000304e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.860640624999995,
+              "mean_fleet_cost_delta": 0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.0010213194444444415,
+              "mean_regret": 0.01424884895833333,
+              "mean_wait_delta_min": -0.01070572916666663,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 18,
+              "concordant_pairs": 414,
+              "false_feasible_choices": 10,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.001392263020833331,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.4025651041666644,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": 0.0007778758680555579,
+              "mean_regret": 0.014965229166666658,
+              "mean_wait_delta_min": 0.007513020833333307,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 8
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 458,
+              "false_feasible_choices": 12,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.002172184895833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5545598958333363,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -2.046006944445069e-06,
+              "mean_regret": 0.010175947916666664,
+              "mean_wait_delta_min": 0.00095833333333334,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "ood_period": {
+              "changed_choices": 21,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 12,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.0036416666666666694,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.026671874999998717,
+              "mean_fleet_cost_delta": -0.0034722222222222225,
+              "mean_nonfleet_cost_delta": -0.0001694444444444469,
+              "mean_regret": 0.007017031250000002,
+              "mean_wait_delta_min": -0.0008307291666666666,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "persistent_shift": {
+              "changed_choices": 21,
+              "concordant_pairs": 456,
+              "false_feasible_choices": 13,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.0017119895833333325,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.03761197916666603,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -0.0017119895833333325,
+              "mean_regret": 0.017235854166666672,
+              "mean_wait_delta_min": -0.012429687500000194,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 12
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 46,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 27,
+              "improved_states": 23,
+              "mean_actual_cost_delta": -0.001855834374999995,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.03199166666666808,
+              "mean_fleet_cost_delta": -0.0015625,
+              "mean_nonfleet_cost_delta": -0.0002933343749999952,
+              "mean_regret": 0.01523893541666667,
+              "mean_wait_delta_min": -0.0021083333333333414,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 23
+            },
+            "401": {
+              "changed_choices": 54,
+              "concordant_pairs": 1107,
+              "false_feasible_choices": 26,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.0016859072916666704,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.7110739583333303,
+              "mean_fleet_cost_delta": -0.0011284722222222223,
+              "mean_nonfleet_cost_delta": -0.000557435069444448,
+              "mean_regret": 0.010218229166666658,
+              "mean_wait_delta_min": -0.004089583333333396,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 26
+            }
+          },
+          "overall": {
+            "changed_choices": 100,
+            "concordant_pairs": 2140,
+            "false_feasible_choices": 53,
+            "improved_states": 51,
+            "mean_actual_cost_delta": -0.0017708708333333324,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.3395411458333311,
+            "mean_fleet_cost_delta": -0.001345486111111111,
+            "mean_nonfleet_cost_delta": -0.00042538472222222154,
+            "mean_regret": 0.012728582291666667,
+            "mean_wait_delta_min": -0.003098958333333369,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 49
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 179,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 176,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "scene": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 23,
+              "concordant_pairs": 380,
+              "false_feasible_choices": 11,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 0.0023971197916666663,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -2.129307291666661,
+              "mean_fleet_cost_delta": 0.003255208333333334,
+              "mean_nonfleet_cost_delta": -0.0008580885416666676,
+              "mean_regret": 0.016582218749999992,
+              "mean_wait_delta_min": -0.009731770833333287,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 15
+            },
+            "hour_burst": {
+              "changed_choices": 18,
+              "concordant_pairs": 406,
+              "false_feasible_choices": 8,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.003998591145833333,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.3990833333333293,
+              "mean_fleet_cost_delta": -0.004340277777777778,
+              "mean_nonfleet_cost_delta": 0.00034168663194444486,
+              "mean_regret": 0.012358901041666656,
+              "mean_wait_delta_min": 0.0038671875000000078,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 6
+            },
+            "low_noise": {
+              "changed_choices": 17,
+              "concordant_pairs": 459,
+              "false_feasible_choices": 9,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.0032610833333333346,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.6844791666666689,
+              "mean_fleet_cost_delta": -0.0032552083333333335,
+              "mean_nonfleet_cost_delta": -5.875000000000816e-06,
+              "mean_regret": 0.009087049479166663,
+              "mean_wait_delta_min": 0.0010989583333333441,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 7
+            },
+            "ood_period": {
+              "changed_choices": 23,
+              "concordant_pairs": 439,
+              "false_feasible_choices": 13,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.0029820546875000027,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.10013281249999946,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -0.00016087413194444764,
+              "mean_regret": 0.007676643229166669,
+              "mean_wait_delta_min": -0.0008046875000000108,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "persistent_shift": {
+              "changed_choices": 19,
+              "concordant_pairs": 462,
+              "false_feasible_choices": 10,
+              "improved_states": 8,
+              "mean_actual_cost_delta": -0.0007328307291666787,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.5412187499999964,
+              "mean_fleet_cost_delta": 0.0004340277777777778,
+              "mean_nonfleet_cost_delta": -0.0011668585069444565,
+              "mean_regret": 0.018215013020833323,
+              "mean_wait_delta_min": -0.0066822916666667105,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 48,
+              "concordant_pairs": 1018,
+              "false_feasible_choices": 28,
+              "improved_states": 22,
+              "mean_actual_cost_delta": -0.0029700322916666696,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.18279375000000161,
+              "mean_fleet_cost_delta": -0.002604166666666667,
+              "mean_nonfleet_cost_delta": -0.00036586562500000297,
+              "mean_regret": 0.014124737499999995,
+              "mean_wait_delta_min": -0.0022208333333333056,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 26
+            },
+            "401": {
+              "changed_choices": 52,
+              "concordant_pairs": 1128,
+              "false_feasible_choices": 23,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.0004609437500000037,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.7439239583333314,
+              "mean_fleet_cost_delta": -8.680555555555571e-05,
+              "mean_nonfleet_cost_delta": -0.0003741381944444481,
+              "mean_regret": 0.011443192708333326,
+              "mean_wait_delta_min": -0.002680208333333357,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 24
+            }
+          },
+          "overall": {
+            "changed_choices": 100,
+            "concordant_pairs": 2146,
+            "false_feasible_choices": 51,
+            "improved_states": 50,
+            "mean_actual_cost_delta": -0.0017154880208333366,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.28056510416666486,
+            "mean_fleet_cost_delta": -0.0013454861111111113,
+            "mean_nonfleet_cost_delta": -0.00037000190972222557,
+            "mean_regret": 0.012783965104166661,
+            "mean_wait_delta_min": -0.0024505208333333315,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 50
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 164,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 161,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        }
+      }
+    },
+    "old_cost_glm": {
+      "future_halves": {
+        "lower_root": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0018689104166666674,
+                "mean_wait_min": -0.0019874999999999208,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.003336393750000001,
+                "mean_wait_min": -0.004350000000000016,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0019628729166666684,
+                "mean_wait_min": 0.0006479166666666592,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.002585572916666667,
+                "mean_wait_min": 0.004962499999999977,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.00165936458333333,
+                "mean_wait_min": -0.0029791666666666252,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.003545939583333338,
+                "mean_wait_min": -0.0033583333333333113,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.002337581250000002,
+                "mean_wait_min": 0.0001729166666666282,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0022108645833333338,
+                "mean_wait_min": 0.005437500000000008,
+                "states": 120
+              }
+            }
+          }
+        },
+        "regime": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0032452187500000016,
+                "mean_wait_min": -0.0006937499999999458,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0016047291666666714,
+                "mean_wait_min": -0.001014583333333365,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0024939270833333423,
+                "mean_wait_min": -0.007837500000000037,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0008228125000000063,
+                "mean_wait_min": -0.0026229166666666757,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.00261786458333333,
+                "mean_wait_min": -0.0008374999999999873,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.002232083333333343,
+                "mean_wait_min": -0.0008708333333333235,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.003179704166666669,
+                "mean_wait_min": -0.006493750000000058,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.00013703541666667957,
+                "mean_wait_min": -0.003966666666666656,
+                "states": 120
+              }
+            }
+          }
+        },
+        "scene": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0021549187500000044,
+                "mean_wait_min": -0.0035583333333332515,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0031878000000000032,
+                "mean_wait_min": -0.0026416666666666745,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0017913000000000085,
+                "mean_wait_min": -0.009222916666666702,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0033715687500000054,
+                "mean_wait_min": -0.009166666666666667,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0025889812499999996,
+                "mean_wait_min": -0.002614583333333274,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0027537375000000076,
+                "mean_wait_min": -0.003585416666666652,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.003456041666666672,
+                "mean_wait_min": -0.008810416666666694,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0017068270833333421,
+                "mean_wait_min": -0.009579166666666675,
+                "states": 120
+              }
+            }
+          }
+        }
+      },
+      "gates": {
+        "cost": true,
+        "wait": false
+      },
+      "half_gates": {
+        "even_odd": {
+          "cost": true,
+          "wait": false
+        },
+        "first_last": {
+          "cost": true,
+          "wait": false
+        }
+      },
+      "validation": {
+        "lower_root": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 13,
+              "concordant_pairs": 388,
+              "false_feasible_choices": 7,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -0.0013958932291666694,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -0.6084374999999937,
+              "mean_fleet_cost_delta": -0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.00031082378472222487,
+              "mean_regret": 0.012789205729166657,
+              "mean_wait_delta_min": -0.0024583333333333033,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "hour_burst": {
+              "changed_choices": 17,
+              "concordant_pairs": 406,
+              "false_feasible_choices": 12,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.0051664166666666725,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.16696614583333277,
+              "mean_fleet_cost_delta": -0.005425347222222223,
+              "mean_nonfleet_cost_delta": 0.0002589305555555503,
+              "mean_regret": 0.011191075520833316,
+              "mean_wait_delta_min": 0.0037005208333333365,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 8
+            },
+            "low_noise": {
+              "changed_choices": 11,
+              "concordant_pairs": 447,
+              "false_feasible_choices": 8,
+              "improved_states": 6,
+              "mean_actual_cost_delta": -0.0010244817708333312,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.18076302083333515,
+              "mean_fleet_cost_delta": -0.0010850694444444445,
+              "mean_nonfleet_cost_delta": 6.058767361111318e-05,
+              "mean_regret": 0.011323651041666665,
+              "mean_wait_delta_min": 0.0010546875000000087,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 5
+            },
+            "ood_period": {
+              "changed_choices": 25,
+              "concordant_pairs": 429,
+              "false_feasible_choices": 13,
+              "improved_states": 13,
+              "mean_actual_cost_delta": -0.0031746380208333355,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.2687890624999998,
+              "mean_fleet_cost_delta": -0.0032552083333333335,
+              "mean_nonfleet_cost_delta": 8.057031249999768e-05,
+              "mean_regret": 0.007484059895833335,
+              "mean_wait_delta_min": 0.000648437499999991,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 12
+            },
+            "persistent_shift": {
+              "changed_choices": 18,
+              "concordant_pairs": 462,
+              "false_feasible_choices": 6,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.0014307578124999956,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.7153906249999983,
+              "mean_fleet_cost_delta": -0.0006510416666666666,
+              "mean_nonfleet_cost_delta": -0.000779716145833329,
+              "mean_regret": 0.017517085937500006,
+              "mean_wait_delta_min": -0.0038541666666666585,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 7
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 50,
+              "concordant_pairs": 987,
+              "false_feasible_choices": 28,
+              "improved_states": 25,
+              "mean_actual_cost_delta": -0.0026026520833333346,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.0861687499999988,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -0.00043251319444444507,
+              "mean_regret": 0.014492117708333332,
+              "mean_wait_delta_min": -0.0031687499999999685,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 25
+            },
+            "401": {
+              "changed_choices": 34,
+              "concordant_pairs": 1145,
+              "false_feasible_choices": 18,
+              "improved_states": 18,
+              "mean_actual_cost_delta": -0.0022742229166666673,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.026953125000001656,
+              "mean_fleet_cost_delta": -0.0024305555555555556,
+              "mean_nonfleet_cost_delta": 0.00015633263888888802,
+              "mean_regret": 0.009629913541666662,
+              "mean_wait_delta_min": 0.002805208333333318,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 16
+            }
+          },
+          "overall": {
+            "changed_choices": 84,
+            "concordant_pairs": 2132,
+            "false_feasible_choices": 46,
+            "improved_states": 43,
+            "mean_actual_cost_delta": -0.002438437500000001,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.029607812499998568,
+            "mean_fleet_cost_delta": -0.0023003472222222223,
+            "mean_nonfleet_cost_delta": -0.00013809027777777854,
+            "mean_regret": 0.012061015624999998,
+            "mean_wait_delta_min": -0.0001817708333333251,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 41
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 178,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 158,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "regime": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 18,
+              "concordant_pairs": 369,
+              "false_feasible_choices": 6,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 6.708854166666914e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.8786432291666617,
+              "mean_fleet_cost_delta": 0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.0010179809027777754,
+              "mean_regret": 0.014252187499999997,
+              "mean_wait_delta_min": -0.010703124999999966,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 16,
+              "concordant_pairs": 424,
+              "false_feasible_choices": 11,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.0034485572916666657,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": 0.06309635416666974,
+              "mean_fleet_cost_delta": -0.004340277777777778,
+              "mean_nonfleet_cost_delta": 0.0008917204861111123,
+              "mean_regret": 0.012908934895833321,
+              "mean_wait_delta_min": 0.00984895833333335,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 7
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 457,
+              "false_feasible_choices": 13,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.002165169270833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5482916666666705,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": 4.969618055555153e-06,
+              "mean_regret": 0.010182963541666664,
+              "mean_wait_delta_min": 0.0009609375000000075,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "ood_period": {
+              "changed_choices": 36,
+              "concordant_pairs": 452,
+              "false_feasible_choices": 23,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.00120198177083334,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.08702083333333317,
+              "mean_fleet_cost_delta": -0.000868055555555556,
+              "mean_nonfleet_cost_delta": -0.00033392621527778433,
+              "mean_regret": 0.00945671614583333,
+              "mean_wait_delta_min": -0.0020312499999999927,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 24
+            },
+            "persistent_shift": {
+              "changed_choices": 28,
+              "concordant_pairs": 472,
+              "false_feasible_choices": 13,
+              "improved_states": 15,
+              "mean_actual_cost_delta": -0.003459739583333356,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": -0.05499218749999931,
+              "mean_fleet_cost_delta": -0.0017361111111111112,
+              "mean_nonfleet_cost_delta": -0.0017236284722222446,
+              "mean_regret": 0.015488104166666647,
+              "mean_wait_delta_min": -0.013286458333333426,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 13
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 60,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 35,
+              "improved_states": 29,
+              "mean_actual_cost_delta": -0.002424973958333336,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.021537500000000164,
+              "mean_fleet_cost_delta": -0.0022569444444444447,
+              "mean_nonfleet_cost_delta": -0.00016802951388889166,
+              "mean_regret": 0.01466979583333333,
+              "mean_wait_delta_min": -0.0008541666666666554,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 31
+            },
+            "401": {
+              "changed_choices": 60,
+              "concordant_pairs": 1141,
+              "false_feasible_choices": 31,
+              "improved_states": 26,
+              "mean_actual_cost_delta": -0.001658369791666674,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5852447916666618,
+              "mean_fleet_cost_delta": -0.0009548611111111112,
+              "mean_nonfleet_cost_delta": -0.0007035086805555632,
+              "mean_regret": 0.010245766666666656,
+              "mean_wait_delta_min": -0.005230208333333357,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            }
+          },
+          "overall": {
+            "changed_choices": 120,
+            "concordant_pairs": 2174,
+            "false_feasible_choices": 66,
+            "improved_states": 55,
+            "mean_actual_cost_delta": -0.002041671875000005,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.2818536458333308,
+            "mean_fleet_cost_delta": -0.001605902777777778,
+            "mean_nonfleet_cost_delta": -0.0004357690972222274,
+            "mean_regret": 0.012457781249999992,
+            "mean_wait_delta_min": -0.0030421875000000063,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 65
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 155,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 145,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "scene": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 23,
+              "concordant_pairs": 380,
+              "false_feasible_choices": 11,
+              "improved_states": 9,
+              "mean_actual_cost_delta": 0.0023332760416666654,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.9444374999999947,
+              "mean_fleet_cost_delta": 0.003255208333333334,
+              "mean_nonfleet_cost_delta": -0.0009219322916666681,
+              "mean_regret": 0.01651837499999999,
+              "mean_wait_delta_min": -0.009947916666666628,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            },
+            "hour_burst": {
+              "changed_choices": 18,
+              "concordant_pairs": 413,
+              "false_feasible_choices": 12,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.004003867187500002,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": 0.05341406250000169,
+              "mean_fleet_cost_delta": -0.004340277777777778,
+              "mean_nonfleet_cost_delta": 0.00033641059027777624,
+              "mean_regret": 0.012353624999999986,
+              "mean_wait_delta_min": 0.00470052083333333,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 459,
+              "false_feasible_choices": 13,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.002165169270833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5482916666666705,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": 4.969618055555153e-06,
+              "mean_regret": 0.010182963541666664,
+              "mean_wait_delta_min": 0.0009609375000000075,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "ood_period": {
+              "changed_choices": 31,
+              "concordant_pairs": 438,
+              "false_feasible_choices": 19,
+              "improved_states": 12,
+              "mean_actual_cost_delta": -0.003393541666666671,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": 0.09042708333333375,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -0.0005723611111111155,
+              "mean_regret": 0.007265156249999999,
+              "mean_wait_delta_min": -0.003627604166666664,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 19
+            },
+            "persistent_shift": {
+              "changed_choices": 29,
+              "concordant_pairs": 469,
+              "false_feasible_choices": 12,
+              "improved_states": 15,
+              "mean_actual_cost_delta": -0.005902682291666686,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.49175520833333114,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -0.0030815017361111295,
+              "mean_regret": 0.013045161458333317,
+              "mean_wait_delta_min": -0.022822916666666665,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 62,
+              "concordant_pairs": 1025,
+              "false_feasible_choices": 36,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.0026713593750000036,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.11820625000000007,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": -0.0005012204861111148,
+              "mean_regret": 0.014423410416666662,
+              "mean_wait_delta_min": -0.0030999999999999626,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 34
+            },
+            "401": {
+              "changed_choices": 61,
+              "concordant_pairs": 1134,
+              "false_feasible_choices": 31,
+              "improved_states": 28,
+              "mean_actual_cost_delta": -0.002581434375000007,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.4224260416666631,
+              "mean_fleet_cost_delta": -0.001388888888888889,
+              "mean_nonfleet_cost_delta": -0.0011925454861111179,
+              "mean_regret": 0.009322702083333322,
+              "mean_wait_delta_min": -0.009194791666666683,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 33
+            }
+          },
+          "overall": {
+            "changed_choices": 123,
+            "concordant_pairs": 2159,
+            "false_feasible_choices": 67,
+            "improved_states": 56,
+            "mean_actual_cost_delta": -0.002626396875000005,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.1521098958333315,
+            "mean_fleet_cost_delta": -0.001779513888888889,
+            "mean_nonfleet_cost_delta": -0.0008468829861111165,
+            "mean_regret": 0.011873056249999991,
+            "mean_wait_delta_min": -0.006147395833333322,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 67
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 149,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 137,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        }
+      }
+    },
+    "old_cost_shrunk": {
+      "future_halves": {
+        "lower_root": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": 0.0016757229166666646,
+                "mean_wait_min": -0.003149999999999924,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.000129560416666664,
+                "mean_wait_min": -0.004185416666666695,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0019628729166666684,
+                "mean_wait_min": 0.0006479166666666592,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.002585572916666667,
+                "mean_wait_min": 0.004962499999999977,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": 0.0017604125,
+                "mean_wait_min": -0.003995833333333287,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 4.4870833333328825e-05,
+                "mean_wait_min": -0.003339583333333332,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.002337581250000002,
+                "mean_wait_min": 0.0001729166666666282,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0022108645833333338,
+                "mean_wait_min": 0.005437500000000008,
+                "states": 120
+              }
+            }
+          }
+        },
+        "regime": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0009655791666666628,
+                "mean_wait_min": -0.0035437499999999575,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0006976395833333336,
+                "mean_wait_min": -0.0005270833333333651,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0021406312500000034,
+                "mean_wait_min": -0.004991666666666727,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0015337354166666743,
+                "mean_wait_min": -0.00507500000000005,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0029990375000000014,
+                "mean_wait_min": -0.00398541666666665,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": 0.0013358187500000045,
+                "mean_wait_min": -8.541666666667206e-05,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0014161187499999999,
+                "mean_wait_min": -0.0029833333333334025,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0022582479166666776,
+                "mean_wait_min": -0.007083333333333374,
+                "states": 120
+              }
+            }
+          }
+        },
+        "scene": {
+          "even_odd": {
+            "397": {
+              "A": {
+                "mean_cost": -0.0018867812500000087,
+                "mean_wait_min": -0.0015770833333332633,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.004016054166666671,
+                "mean_wait_min": -0.00271666666666667,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.0032767562500000042,
+                "mean_wait_min": -0.007695833333333372,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.0003261375000000027,
+                "mean_wait_min": -0.005347916666666664,
+                "states": 120
+              }
+            }
+          },
+          "first_last": {
+            "397": {
+              "A": {
+                "mean_cost": -0.002399531250000003,
+                "mean_wait_min": -0.0015687499999999448,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.003503304166666677,
+                "mean_wait_min": -0.0027249999999999887,
+                "states": 120
+              }
+            },
+            "401": {
+              "A": {
+                "mean_cost": -0.003459877083333335,
+                "mean_wait_min": -0.009254166666666706,
+                "states": 120
+              },
+              "B": {
+                "mean_cost": -0.00014301666666667137,
+                "mean_wait_min": -0.0037895833333333306,
+                "states": 120
+              }
+            }
+          }
+        }
+      },
+      "gates": {
+        "cost": false,
+        "wait": false
+      },
+      "half_gates": {
+        "even_odd": {
+          "cost": false,
+          "wait": false
+        },
+        "first_last": {
+          "cost": false,
+          "wait": false
+        }
+      },
+      "validation": {
+        "lower_root": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 14,
+              "concordant_pairs": 388,
+              "false_feasible_choices": 7,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -9.342187500000279e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.0172682291666622,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -9.342187500000279e-05,
+              "mean_regret": 0.014091677083333325,
+              "mean_wait_delta_min": -0.0010078124999999573,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 15,
+              "concordant_pairs": 406,
+              "false_feasible_choices": 10,
+              "improved_states": 4,
+              "mean_actual_cost_delta": -5.061979166667204e-05,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.44605468749999905,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -5.061979166667204e-05,
+              "mean_regret": 0.016306872395833314,
+              "mean_wait_delta_min": 0.00034114583333332005,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "low_noise": {
+              "changed_choices": 9,
+              "concordant_pairs": 447,
+              "false_feasible_choices": 5,
+              "improved_states": 5,
+              "mean_actual_cost_delta": -1.3958333333333127e-05,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.13143489583333512,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -1.3958333333333127e-05,
+              "mean_regret": 0.012334174479166663,
+              "mean_wait_delta_min": 2.083333333333451e-05,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 4
+            },
+            "ood_period": {
+              "changed_choices": 22,
+              "concordant_pairs": 429,
+              "false_feasible_choices": 12,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.003087104166666668,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.6262499999999971,
+              "mean_fleet_cost_delta": -0.0032552083333333335,
+              "mean_nonfleet_cost_delta": 0.0001681041666666655,
+              "mean_regret": 0.007571593750000002,
+              "mean_wait_delta_min": 0.0008072916666666587,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 12
+            },
+            "persistent_shift": {
+              "changed_choices": 15,
+              "concordant_pairs": 462,
+              "false_feasible_choices": 5,
+              "improved_states": 9,
+              "mean_actual_cost_delta": -0.000183848958333332,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.8114218749999994,
+              "mean_fleet_cost_delta": 0.0004340277777777778,
+              "mean_nonfleet_cost_delta": -0.0006178767361111098,
+              "mean_regret": 0.018763994791666672,
+              "mean_wait_delta_min": -0.002317708333333335,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 6
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 41,
+              "concordant_pairs": 987,
+              "false_feasible_choices": 21,
+              "improved_states": 14,
+              "mean_actual_cost_delta": 0.0009026416666666644,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": -0.4856395833333311,
+              "mean_fleet_cost_delta": 0.0013020833333333337,
+              "mean_nonfleet_cost_delta": -0.00039944166666666897,
+              "mean_regret": 0.01799741145833333,
+              "mean_wait_delta_min": -0.0036677083333333097,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 27
+            },
+            "401": {
+              "changed_choices": 34,
+              "concordant_pairs": 1145,
+              "false_feasible_choices": 18,
+              "improved_states": 18,
+              "mean_actual_cost_delta": -0.0022742229166666673,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": 0.026953125000001656,
+              "mean_fleet_cost_delta": -0.0024305555555555556,
+              "mean_nonfleet_cost_delta": 0.00015633263888888802,
+              "mean_regret": 0.009629913541666662,
+              "mean_wait_delta_min": 0.002805208333333318,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 16
+            }
+          },
+          "overall": {
+            "changed_choices": 75,
+            "concordant_pairs": 2132,
+            "false_feasible_choices": 39,
+            "improved_states": 32,
+            "mean_actual_cost_delta": -0.0006857906250000015,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.22934322916666475,
+            "mean_fleet_cost_delta": -0.000564236111111111,
+            "mean_nonfleet_cost_delta": -0.00012155451388889046,
+            "mean_regret": 0.013813662499999995,
+            "mean_wait_delta_min": -0.00043124999999999576,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 43
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 178,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 158,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "regime": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 18,
+              "concordant_pairs": 369,
+              "false_feasible_choices": 6,
+              "improved_states": 8,
+              "mean_actual_cost_delta": 6.708854166666914e-05,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.8786432291666617,
+              "mean_fleet_cost_delta": 0.0010850694444444443,
+              "mean_nonfleet_cost_delta": -0.0010179809027777754,
+              "mean_regret": 0.014252187499999997,
+              "mean_wait_delta_min": -0.010703124999999966,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 10
+            },
+            "hour_burst": {
+              "changed_choices": 19,
+              "concordant_pairs": 424,
+              "false_feasible_choices": 11,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.0014536276041666654,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.15710156249999763,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": 0.0007165112847222236,
+              "mean_regret": 0.014903864583333324,
+              "mean_wait_delta_min": 0.007614583333333311,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 8
+            },
+            "low_noise": {
+              "changed_choices": 22,
+              "concordant_pairs": 457,
+              "false_feasible_choices": 13,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.002165169270833334,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.5482916666666705,
+              "mean_fleet_cost_delta": -0.002170138888888889,
+              "mean_nonfleet_cost_delta": 4.969618055555153e-06,
+              "mean_regret": 0.010182963541666664,
+              "mean_wait_delta_min": 0.0009609375000000075,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            },
+            "ood_period": {
+              "changed_choices": 24,
+              "concordant_pairs": 452,
+              "false_feasible_choices": 14,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.0013415937500000025,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": 0.3171041666666697,
+              "mean_fleet_cost_delta": -0.000868055555555556,
+              "mean_nonfleet_cost_delta": -0.00047353819444444684,
+              "mean_regret": 0.009317104166666668,
+              "mean_wait_delta_min": -0.002588541666666666,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 13
+            },
+            "persistent_shift": {
+              "changed_choices": 21,
+              "concordant_pairs": 472,
+              "false_feasible_choices": 12,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.00177867968750001,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.1532083333333336,
+              "mean_fleet_cost_delta": 0.0,
+              "mean_nonfleet_cost_delta": -0.00177867968750001,
+              "mean_regret": 0.017169164062499992,
+              "mean_wait_delta_min": -0.01295572916666681,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 51,
+              "concordant_pairs": 1033,
+              "false_feasible_choices": 30,
+              "improved_states": 24,
+              "mean_actual_cost_delta": -0.0008316093749999985,
+              "mean_best_realized_cost_delta": -0.01709476979166667,
+              "mean_episode_reward_delta": 0.15558958333333522,
+              "mean_fleet_cost_delta": -0.0005208333333333333,
+              "mean_nonfleet_cost_delta": -0.000310776041666665,
+              "mean_regret": 0.016263160416666665,
+              "mean_wait_delta_min": -0.0020354166666666615,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 27
+            },
+            "401": {
+              "changed_choices": 53,
+              "concordant_pairs": 1141,
+              "false_feasible_choices": 26,
+              "improved_states": 27,
+              "mean_actual_cost_delta": -0.0018371833333333388,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5624458333333294,
+              "mean_fleet_cost_delta": -0.0011284722222222223,
+              "mean_nonfleet_cost_delta": -0.0007087111111111164,
+              "mean_regret": 0.010066953124999991,
+              "mean_wait_delta_min": -0.005033333333333389,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 26
+            }
+          },
+          "overall": {
+            "changed_choices": 104,
+            "concordant_pairs": 2174,
+            "false_feasible_choices": 56,
+            "improved_states": 51,
+            "mean_actual_cost_delta": -0.0013343963541666685,
+            "mean_best_realized_cost_delta": -0.014499453124999999,
+            "mean_episode_reward_delta": -0.2034281249999971,
+            "mean_fleet_cost_delta": -0.0008246527777777779,
+            "mean_nonfleet_cost_delta": -0.0005097435763888907,
+            "mean_regret": 0.013165056770833327,
+            "mean_wait_delta_min": -0.003534375000000025,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 53
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 155,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 145,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        },
+        "scene": {
+          "by_regime": {
+            "high_noise": {
+              "changed_choices": 24,
+              "concordant_pairs": 380,
+              "false_feasible_choices": 12,
+              "improved_states": 9,
+              "mean_actual_cost_delta": 0.0023620520833333293,
+              "mean_best_realized_cost_delta": -0.014185098958333328,
+              "mean_episode_reward_delta": -1.946145833333328,
+              "mean_fleet_cost_delta": 0.003255208333333334,
+              "mean_nonfleet_cost_delta": -0.0008931562500000038,
+              "mean_regret": 0.016547151041666656,
+              "mean_wait_delta_min": -0.00966145833333329,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 15
+            },
+            "hour_burst": {
+              "changed_choices": 20,
+              "concordant_pairs": 413,
+              "false_feasible_choices": 11,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.005103330729166667,
+              "mean_best_realized_cost_delta": -0.01635749218749999,
+              "mean_episode_reward_delta": -0.11779687499999625,
+              "mean_fleet_cost_delta": -0.005425347222222223,
+              "mean_nonfleet_cost_delta": 0.0003220164930555559,
+              "mean_regret": 0.011254161458333321,
+              "mean_wait_delta_min": 0.004260416666666674,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 9
+            },
+            "low_noise": {
+              "changed_choices": 19,
+              "concordant_pairs": 459,
+              "false_feasible_choices": 9,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.003258156250000001,
+              "mean_best_realized_cost_delta": -0.0123481328125,
+              "mean_episode_reward_delta": 0.6461718750000021,
+              "mean_fleet_cost_delta": -0.0032552083333333335,
+              "mean_nonfleet_cost_delta": -2.9479166666674466e-06,
+              "mean_regret": 0.009089976562499996,
+              "mean_wait_delta_min": 0.0010859375000000112,
+              "states": 48,
+              "strict_pairs": 718,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 8
+            },
+            "ood_period": {
+              "changed_choices": 25,
+              "concordant_pairs": 438,
+              "false_feasible_choices": 16,
+              "improved_states": 11,
+              "mean_actual_cost_delta": -0.003310002604166669,
+              "mean_best_realized_cost_delta": -0.01065869791666667,
+              "mean_episode_reward_delta": -0.234971354166665,
+              "mean_fleet_cost_delta": -0.002821180555555556,
+              "mean_nonfleet_cost_delta": -0.0004888220486111133,
+              "mean_regret": 0.007348695312500001,
+              "mean_wait_delta_min": -0.003388020833333337,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 14
+            },
+            "persistent_shift": {
+              "changed_choices": 21,
+              "concordant_pairs": 469,
+              "false_feasible_choices": 10,
+              "improved_states": 10,
+              "mean_actual_cost_delta": -0.0025727239583333513,
+              "mean_best_realized_cost_delta": -0.018947843750000002,
+              "mean_episode_reward_delta": 0.3132499999999994,
+              "mean_fleet_cost_delta": -0.0006510416666666668,
+              "mean_nonfleet_cost_delta": -0.0019216822916666848,
+              "mean_regret": 0.016375119791666653,
+              "mean_wait_delta_min": -0.013968750000000021,
+              "states": 48,
+              "strict_pairs": 720,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 11
+            }
+          },
+          "by_root": {
+            "397": {
+              "changed_choices": 53,
+              "concordant_pairs": 1025,
+              "false_feasible_choices": 31,
+              "improved_states": 23,
+              "mean_actual_cost_delta": -0.00295141770833334,
+              "mean_best_realized_cost_delta": -0.017094769791666665,
+              "mean_episode_reward_delta": 0.04693541666666808,
+              "mean_fleet_cost_delta": -0.002604166666666667,
+              "mean_nonfleet_cost_delta": -0.0003472510416666729,
+              "mean_regret": 0.014143352083333328,
+              "mean_wait_delta_min": -0.0021468749999999665,
+              "states": 120,
+              "strict_pairs": 1796,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 30
+            },
+            "401": {
+              "changed_choices": 56,
+              "concordant_pairs": 1134,
+              "false_feasible_choices": 27,
+              "improved_states": 29,
+              "mean_actual_cost_delta": -0.0018014468750000036,
+              "mean_best_realized_cost_delta": -0.011904136458333329,
+              "mean_episode_reward_delta": -0.5827322916666631,
+              "mean_fleet_cost_delta": -0.0009548611111111113,
+              "mean_nonfleet_cost_delta": -0.0008465857638888923,
+              "mean_regret": 0.010102689583333326,
+              "mean_wait_delta_min": -0.006521875000000018,
+              "states": 120,
+              "strict_pairs": 1800,
+              "tied_predicted_pairs": 0,
+              "worsened_states": 27
+            }
+          },
+          "overall": {
+            "changed_choices": 109,
+            "concordant_pairs": 2159,
+            "false_feasible_choices": 58,
+            "improved_states": 52,
+            "mean_actual_cost_delta": -0.002376432291666672,
+            "mean_best_realized_cost_delta": -0.014499453124999997,
+            "mean_episode_reward_delta": -0.26789843749999753,
+            "mean_fleet_cost_delta": -0.0017795138888888893,
+            "mean_nonfleet_cost_delta": -0.0005969184027777827,
+            "mean_regret": 0.012123020833333328,
+            "mean_wait_delta_min": -0.004334374999999992,
+            "states": 240,
+            "strict_pairs": 3596,
+            "tied_predicted_pairs": 0,
+            "worsened_states": 57
+          },
+          "stable_ranking": {
+            "even_odd": {
+              "stable_cost_inversions": 149,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 387
+            },
+            "first_last": {
+              "stable_cost_inversions": 137,
+              "stable_cost_prediction_ties": 0,
+              "stable_feasible_cost_pairs": 361
+            }
+          }
+        }
+      }
+    }
+  }
+}
