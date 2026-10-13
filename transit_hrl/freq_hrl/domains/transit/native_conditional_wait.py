@@ -50,7 +50,13 @@ def features(row, representation):
     return result
 
 
-def fit_wait(rows, representation, *, sample_weights):
+def fit_wait(rows, representation, *, sample_weights, interaction_ridge=paired.RIDGE):
+    return fit_wait_path(rows, representation, sample_weights=sample_weights,
+        interaction_ridges=(interaction_ridge,))[0]
+
+
+def fit_wait_path(rows, representation, *, sample_weights, interaction_ridges):
+    """Share feature extraction and normal equations across the block penalties."""
     raw = np.stack([features(r, representation) for r in rows])
     labels = [{l["candidate"]: l["wait_delta_min"] for l in r["labels"]} for r in rows]
     targets = np.asarray([[label[i] for i in range(6)] for label in labels])
@@ -62,15 +68,22 @@ def fit_wait(rows, representation, *, sample_weights):
     x = (raw-center)/scale
     z, y = (x[:, a]-x[:, b]).reshape(-1, raw.shape[-1]), gaps.reshape(-1)/target_scale
     weights = np.repeat(sample_weights, len(a))
-    coefficients = np.linalg.solve(z.T@(weights[:, None]*z)/weights.sum()+paired.RIDGE*np.eye(z.shape[1]),
-        z.T@(weights*y)/weights.sum())
-    return {"method": "paired_wait_ridge", "representation": representation, "coefficients": coefficients.tolist(),
+    gram, rhs = z.T@(weights[:, None]*z)/weights.sum(), z.T@(weights*y)/weights.sum()
+    common = {"method": "paired_wait_ridge", "representation": representation,
         "center": center.tolist(), "scale": scale.tolist(), "target_scale_min": target_scale,
-        "ridge": paired.RIDGE, "parameter_count": coefficients.size, "steps": 0,
-        "final_pair_loss": float(np.average((z@coefficients-y)**2, weights=weights)),
+        "ridge": paired.RIDGE, "parameter_count": z.shape[1], "steps": 0,
         "training_states": len(rows), "training_groups": sorted(map(list, {paired.scene_group(r) for r in rows})),
         "sample_weight_sum": float(sum(sample_weights)), "target": "all_candidate_paired_terminal_wait_delta_min",
         "condition_names": list(STATE_NAMES), "geometry_names": list(GEOMETRY_NAMES)}
+    models = []
+    for penalty in interaction_ridges:
+        diagonal = np.full(z.shape[1], paired.RIDGE)
+        if representation == "conditional_wait": diagonal[FEATURE_COUNTS["geometry_wait"]:] = penalty
+        coefficients = np.linalg.solve(gram+np.diag(diagonal), rhs)
+        models.append({**common, "coefficients": coefficients.tolist(),
+            "interaction_ridge": penalty if representation == "conditional_wait" else None,
+            "final_pair_loss": float(np.average((z@coefficients-y)**2, weights=weights))})
+    return models
 
 
 def predict_wait(row, model):
