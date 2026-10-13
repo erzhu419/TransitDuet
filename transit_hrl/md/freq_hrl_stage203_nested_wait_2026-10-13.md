@@ -16,6 +16,19 @@ Run: `native_transit_nested_wait_stage203_development_20261013_r1`.
 1CPU/3072MB per task. Raw data, models and inner ledgers remain server-only.
 Tests:23 passed, including block normal equations, feature reuse, default-path
 reproduction, inner/outer label isolation and exact967-fit accounting.
-Next: compare transfer gates and selected penalties against all frozen controls.
+All47 fits`t147687-t147733` and report`t147748` completed with exit0.
+967 solves completed; only the34456-byte summary was pulled, no raw/models.
+The primary passes cost but fails wait. Penalty100 is selected for all40 scene
+and all5 regime folds; lower-root selects0.1 for root397 and100 for root401.
+Cross-lower-root wait improves to -0.003069792/-0.001342708 min for397/401;
+however scene/root397 regresses from Stage202's -0.003104167 to +0.001013542,
+and regime/root401 remains +0.000113542. No variant is promoted.
+Scene/regime selections match the geometry-only control despite small changes
+in prediction MSE: strong shrinkage trades away the conditional scene benefit.
+
+Next: replace MSE-only inner selection with a preregistered decision-level
+cost/wait criterion. Inner cost models must be trained without their validation
+regime; using outer-fitted cost predictions there would contaminate selection.
+Keep the outer cost heads, evaluation cohort and strict gate unchanged.
 Limits: nested development selection is not independent confirmation, cross-root
 training diversity, CI-supported improvement or full learned-HRL validation.

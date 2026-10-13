@@ -1,0 +1,58 @@
+{
+  "contract": {
+    "action": "zero_margin_wait_nonpositive_then_unchanged_cost_ranking_identity_exact0",
+    "boundary": "nested_development_single_action_screen_not_independent_CI_or_full_HRL_validation",
+    "budget": {
+      "actor_updates": 0,
+      "critic_optimizer_updates": 0,
+      "final_wait_fits": 47,
+      "inner_wait_fits": 920,
+      "new_closed_form_fits": 967,
+      "new_native_episodes": 0,
+      "reused_cost_models": 47,
+      "reused_wait_models": 94
+    },
+    "cost": "exact_frozen_Stage199_two_cost_heads_reuse_all_Stage202_controls",
+    "data": "same600_inputs_240_mean8_targets_360_single_targets_47_outer_folds",
+    "execution": "reuse_each_inner_feature_matrix_and_normal_equations_for_all_four_penalties",
+    "gate": "negative_mean_cost_nonpositive_wait_both_roots_all_three_mean_label_splits",
+    "inner": "leave_each_outer_training_regime_out_all_scenes_callbacks_and_candidates_together",
+    "interaction_ridges": [
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "normalization": "each_inner_model_own_training_input_std_and_wait_pair_RMS_final_own_outer_train_scales",
+    "primary": "regime_selected_wait",
+    "selection": "min_worst_regime_mean8_physical_wait_pair_MSE_then_equal_regime_mean_then_stronger_penalty",
+    "source_protocol": "native_transit_conditional_wait_stage202_v1",
+    "source_run": "native_transit_conditional_wait_stage202_development_20261013_r1",
+    "storage": "bank_targets_wait_models_inner_ledgers_predictions_server_only_small_reports_sync",
+    "variants": [
+      "frozen_wait",
+      "geometry_wait",
+      "conditional_wait",
+      "regime_selected_wait"
+    ],
+    "wait": "198_features_base102_ridge0.1_last96_interaction_penalty_selected_from_fixed_grid",
+    "weights": "training_only_mean8_weight8_single_weight1_all15_pairs_per_state"
+  },
+  "fit_tasks": 47,
+  "protocol": "native_transit_nested_wait_stage203_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "3cc82cda5a0a857e21a0596d6c92843069326b42"
+}
