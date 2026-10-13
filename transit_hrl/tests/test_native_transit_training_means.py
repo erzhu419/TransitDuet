@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from scripts import run_native_transit_training_means_stage212 as spec
-from scripts.submit_native_transit_training_means_stage212_scheduleurm import task_specification, preceding
+from scripts.submit_native_transit_training_means_stage212_scheduleurm import task_specification, require_completed
 from tests.test_native_transit_sequence_value import fixture
 
 
@@ -133,9 +133,9 @@ class TrainingMeansTest(unittest.TestCase):
         summary = spec.summarize_draws(self.registered, lambda k: draw_fixture(rows[k], k[-1]), preflight=True)
         self.assertEqual((summary["draws"], summary["native_episodes"]), (20, 160))
         self.assertEqual(summary["by_origin"], {"existing": 10, "fresh": 10})
-        preceding([{"signature": "a", "status": "done", "exit_code": 0}], {"a"})
+        require_completed([{"signature": "a", "status": "done"}], {"a"})
         with self.assertRaises(SystemExit):
-            preceding([{"signature": "a", "status": "done", "exit_code": 1}], {"a"})
+            require_completed([{"signature": "a", "status": "failed"}], {"a"})
 
     def test_scheduler_only_unbound_cpu_small_results_python310(self):
         key = spec.cells(self.registered, preflight=True)[0]

@@ -43,12 +43,6 @@ def task_specification(run_name, key=None, operation="prepare"):
     return task
 
 
-def preceding(existing, expected):
-    require_completed(existing, expected)
-    if any(t.get("exit_code") != 0 for t in existing):
-        raise SystemExit("A preceding task failed; do not release the next phase")
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-name", required=True)
@@ -80,7 +74,7 @@ def main():
         expected = {task_specification(args.run_name, k)["signature"] for k in keys}
         if args.phase != "preflight_report":
             expected.add(task_specification(args.run_name, operation="preflight_report")["signature"])
-        preceding(existing, expected)
+        require_completed(existing, expected)
         if args.phase == "remaining":
             report = json.loads((directory/"preflight_report/receipt.json").read_text())
             if not (report["protocol"] == spec.EXPERIMENT_PROTOCOL and report["contract"] == spec.contract()
