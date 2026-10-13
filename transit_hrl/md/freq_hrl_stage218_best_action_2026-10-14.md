@@ -1,20 +1,23 @@
-# Stage218: matched roots and best-action constraints
+# Stage218/219: matched samples and optimal-action constraints
 
-Stage217 mixed-root full-order failures did not isolate sample size or the weaker objective of choosing an optimal action. Stage218 uses only the original 240 mean8 development states.
+## Protocol
 
-- Four views: root397, root401, mixed A and complementary mixed B. Each has 120 states, 20 complete prefixes and four prefixes per regime. Mixed A uses root397 replicas0/1 and root401 replicas2/3; B reverses this assignment.
-- Both existing future partitions are retained. On the common true-safe menu, use only states whose identity-first best action agrees between halves. Report disagreements and preceding near-ties separately.
-- Compare all stable orders, best-action inequalities, and their union on exactly the same eligible states. Keep wait-sign feasibility as a separate control. Normalization uses each selected view's causal inputs only.
-- Scheduler: one CPU, 3072 MB, unbound node001-node006; at most32 linear programs, no new native episodes or actor updates. Pull only the compact report.
+Stage218 compares root397, root401 and complementary mixed A/B, each with120 states,20 complete prefixes and four prefixes per regime. A uses root397 replicas0/1 and root401 replicas2/3; B reverses this. Stage219 restores all240 states as a sample-growth reference.
 
-If best-only is feasible after matching but full orders are not, the next step is linear decision-focused learning, not an assertion that nonlinear conditioning is necessary. If mixed-root best-only remains infeasible while single-root is feasible in both partitions and complementary views, test causal conditional features next.
+Both future partitions use the same causal features. Best targets require half-group agreement on the common true-safe menu, with identity-first ties. Compare best-only against full orders on exactly the same target states, plus full-data order and wait-sign controls.
 
-## Result
+## Results
 
-`t151836`, node004, exit0: all32 bounds numerically feasible, unresolved0. This includes full orders and wait signs in both single-root and both mixed-root views. Matching input count removed the previous qualitative single/mixed difference; weakening the target was not needed to make these120-state views feasible.
+- `t151836`: all32 matched-size bounds feasible, including full orders and wait signs. Input-count matching removes the earlier qualitative single/mixed difference. Best targets cover82-92/120 states; near-tie exclusions0.
+- `t151841`: full240 cost orders infeasible, but best-only AND same-target full orders feasible in both partitions. Stable targets cover174/180 states with50/57 nonidentity optima;66/60 states disagree between halves. Excluding disputed targets, not weaker ordering alone, suffices for feasibility.
+- Full240 wait-sign bounds remain infeasible: minimum mean margin deficits0.077144/0.090511, dimensionless. The linear cost head can express stable optima; exact full-data linear safety classification remains limited.
 
-Best targets cover82-92/120 states, with23-34 nonidentity optima;28-38 states disagree between future halves, near-tie exclusions0. No actor updates or new episodes. Only38,676 bytes of report were pulled;14 tests passed. Next: test best-only on the complete240-state cohort before selecting a larger model.
+Both tasks: node004, exit0;40 bounds qualified, unresolved0; no new episodes or actor updates.17 tests passed. Reports pulled:38,676+13,414 bytes, no raw data/models.
+
+## Next
+
+Train regularized decision-focused cost heads using one future half only; evaluate the other half on all held prefixes, including disputed states. Separately compare linear and causal conditional wait-risk heads at matched budgets.
 
 ## Limitations
 
-These are finite training-class diagnostics under an oracle-safe menu, not held-out learned-policy evidence. Feasibility uses numerical tolerance1e-7, without coefficient-norm minimization; LP witnesses are not deployment parameters. Eligible counts differ despite equal input counts; both future partitions reuse the same eight draws. Root bundles include different lower policies and demand/prefix seeds.
+Numerical training-class feasibility (tolerance1e-7), not learned-policy generalization. Oracle safe menus, no coefficient-norm minimization, reused eight draws. Root bundles change lower policy and demand seeds together.
