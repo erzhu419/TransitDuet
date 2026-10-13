@@ -31,16 +31,18 @@ def main():
     probes = []
     for partition in spec.PARTITIONS:
         for name, (d, margins) in spec.stable_constraints(rows, panels, cost, wait, training, partition).items():
-            norm = np.maximum(abs(d).max(axis=1), 1e-30)
+            norm = abs(d).max(axis=1)
+            norm[norm == 0] = 1.
             outcomes = {}
             for formulation in ("L1", "free", "scaled_free"):
                 scaled = formulation == "scaled_free"
                 a, b = (d/norm[:, None], margins/norm) if scaled else (d, margins)
                 objective = np.ones(2*d.shape[1]) if formulation == "L1" else np.zeros(d.shape[1])
                 inequalities = np.c_[a, -a] if formulation == "L1" else a
+                method = "highs" if formulation == "L1" else "highs-ds"
                 result = linprog(objective, A_ub=-inequalities, b_ub=-b, bounds=(0., None) if formulation == "L1" else (None, None),
-                    method="highs-ds", options={"threads": 1})
-                outcome = {"status": int(result.status), "message": result.message, "iterations": int(result.nit)}
+                    method=method, options={"threads": 1})
+                outcome = {"method": method, "status": int(result.status), "message": result.message, "iterations": int(result.nit)}
                 if result.status == 0:
                     beta = result.x[:d.shape[1]]-result.x[d.shape[1]:] if formulation == "L1" else result.x
                     outcome.update(violation=float(np.maximum(margins-d@beta, 0).max()), coefficient_l1=float(abs(beta).sum()))
