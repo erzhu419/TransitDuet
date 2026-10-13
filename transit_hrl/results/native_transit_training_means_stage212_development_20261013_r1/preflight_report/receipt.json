@@ -1,0 +1,40 @@
+{
+  "by_origin": {
+    "existing": 10,
+    "fresh": 10
+  },
+  "contract": {
+    "bank_run": "native_transit_coverage_value_stage188_fit_20261012_r1",
+    "boundary": "conditional_training_label_precision_development_not_new_independent_CI_or_full_learned_HRL",
+    "budget": {
+      "collection_tasks": 2880,
+      "new_native_clock_ticks": 1414195200,
+      "new_native_episodes": 23040,
+      "new_prefix_scenes": 0,
+      "training_updates": 0
+    },
+    "control": "one_exact_original_observer_plus_resampled_observer_six_actions_including_exact_resampled_identity",
+    "data": "same600_causal_inputs_600_mean8_targets_original240_evaluation_states_and47_outer_folds",
+    "evaluation": "original240_mean8_states_future_panels_and47_outer_folds_unchanged_no_new_eval_labels",
+    "gate": "negative_cost_nonpositive_wait_both_roots_all_three_splits_and_lower_held_excess_than_GLM_all_splits",
+    "intervention": "replace_ScenarioTape_after_exact_preaction_snapshot_then_one_candidate_and_original_greedy_suffix",
+    "mass_run": "native_transit_wait_feasibility_stage206_development_20261013_r1",
+    "new_targets": "120_existing_states_first_two_opened_scenes_plus240_fresh_states_replicas4_to7",
+    "next_fit": "refit_training_only_outer_and_inner_symmetric_GLM_then_same_B1_ridge0_or0.1_bounded_heads_inner_validation_on_original240_only",
+    "preflight": "20_cells_two_origins_both_roots_all5regimes_probe8_draw0_before2860_remaining",
+    "randomness": "independent_future_Poisson_route_speed_streams_shared_within_six_actions",
+    "retained": "all_prefix_physics_cost_RNG_and_episode_demand_profile_peak_phase_OD_multipliers_lower_weights_duration_prior",
+    "seeds": "Stage191_seed+continuation_slot*1000000_fresh_slot4_to7_existing_slot8_plus_scene_index",
+    "source_protocol": "native_transit_bounded_wait_stage211_v1",
+    "source_run": "native_transit_bounded_wait_stage211_development_20261013_r1",
+    "storage": "raw_rollouts_draw_labels_mean_targets_server_only_small_preflight_and_prepare_receipts",
+    "weights": "preserve_original_240_count8_and360_count1_optimization_weights_separate_from_actual_draw_count8"
+  },
+  "draws": 20,
+  "native_clock_ticks": 9820800,
+  "native_episodes": 160,
+  "peak_process_rss_mb_max": 727.734375,
+  "protocol": "native_transit_training_means_stage212_v1",
+  "software_qualified": true,
+  "training_updates": 0
+}
