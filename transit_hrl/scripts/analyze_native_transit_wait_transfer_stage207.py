@@ -49,7 +49,7 @@ def model_scores(raw, originals, model):
 def records(rows, masses, logits, scores, false_safe_cost, panels):
     positive = np.asarray([masses[source.state_key(r)]["positive_wait_min"] for r in rows])
     negative = np.asarray([masses[source.state_key(r)]["negative_wait_min"] for r in rows])
-    weights = np.asarray([masses[source.state_key(r)]["draw_count"] for r in rows])[:, None]
+    weights = source.feasibility.sample_weights(rows, masses)[:, None]
     mask = np.arange(6)[None, :] != np.asarray([r["original_choice"] for r in rows])[:, None]
     expected = positive-negative
     harm, benefit = false_safe_cost*positive, negative
