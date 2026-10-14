@@ -1,0 +1,103 @@
+{
+  "contract": {
+    "aggregation": "sum_candidate_and_state_statistics_before_dividing_not_mean_of_subset_means",
+    "boundary": "development_diagnostics_reused240_states8_draws_no_independent_CI_no_default_replacement",
+    "budget": {
+      "analysis_tasks": 32,
+      "calibration_scalar_fits": 0,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "reused_final4_cells": 32,
+      "reused_oof_cells": 32,
+      "rl_actor_updates": 0,
+      "wait_residual_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "future_noise": "same_vs_other_four_draw_mean_wait_sign_and_changed_choice_wait_harm",
+    "gates": [
+      "glm",
+      "raw_linear",
+      "raw_nonlinear_pair",
+      "raw_state_conditioned_pair",
+      "risk_linear",
+      "risk_nonlinear_pair",
+      "risk_state_conditioned_pair",
+      "oof_linear",
+      "oof_nonlinear_pair",
+      "oof_state_conditioned_pair",
+      "final_linear",
+      "final_nonlinear_pair",
+      "final_state_conditioned_pair",
+      "joint_linear",
+      "joint_nonlinear_pair",
+      "joint_state_conditioned_pair"
+    ],
+    "gradient": "uniform_mass_loss_residual_alpha_derivative_at0_at1_and_frozen_uniform_risk_alpha",
+    "masks": "causal_cost_only_shared_by_all_wait_heads_and_future_labels",
+    "models": "exact_final4_and_c2v4_OOF_predictions_calibration_fixed_no_fitting",
+    "oracle": "diagnostic_true_wait_menu_fixed_predicted_cost_ranking_never_inference",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "scopes": [
+      "train_same",
+      "train_other",
+      "held_same",
+      "held_other",
+      "oof_same",
+      "oof_other"
+    ],
+    "source_protocol": "native_transit_refit_binding_stage224_v1",
+    "source_run": "native_transit_refit_binding_stage224_development_20261014_r1",
+    "storage": "remote_compact_cell_totals_only_pull_aggregate_report_no_panels_models",
+    "strata": {
+      "all": "five_nonidentity_candidates",
+      "contender": "nonidentity_predicted_cost_lt_zero",
+      "excluded": "nonidentity_predicted_cost_ge_zero",
+      "front": "identity_first_unfiltered_predicted_cost_winner_if_negative"
+    }
+  },
+  "protocol": "native_transit_decision_relevance_stage225_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "7244f157777557cacc1dbc895a5a37c300f838b5"
+}
