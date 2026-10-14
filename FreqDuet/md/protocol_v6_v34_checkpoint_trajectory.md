@@ -82,3 +82,28 @@ checkpoints and completed evaluations. Two completion tests pass (`t152548`).
 Aggregation `t152588` waits for the 39 replacement markers and preserves the
 original analysis and historical-endpoint check. Runtime provenance is recorded
 separately; no training is restarted and no experiment protocol is changed.
+
+## Completed Results and Next Decision
+
+All 2,160 rollouts and aggregation completed; the original V9 endpoints match.
+Only 141 KB of summary files were retrieved. Absolute-duration analysis
+`t152590` uses the original crossed bootstrap; regression test `t152589` passes.
+
+| Main metric | 40 episodes | 200 episodes | Paired change [95% CI] |
+| --- | ---: | ---: | ---: |
+| Headway CV | 0.2270 | 0.2166 | -0.0104 [-0.0171,-0.0035] |
+| Restricted journey (min) | 18.6090 | 19.9666 | +1.3576 [+0.7704,+1.9867] |
+| Holding per trip (s) | 216.87 | 291.86 | +74.99 [+44.22,+103.76] |
+
+At 200 episodes, main-minus-noguard journey is -0.8591 min
+[-1.5264,-0.3334], and main-minus-compact is -0.6460 [-1.3257,-0.1864].
+Their CV differences are -0.0102 [-0.0259,+0.0029] and
+-0.0082 [-0.0240,+0.0036]. Relative CV advantage versus noguard shrinks by
++0.0320 [+0.0143,+0.0537]; both controls improve their own CV more than main.
+All three policies worsen journey time; 11/12 main training seeds worsen it.
+
+Next: isolate execution-policy aging with 40/200 upper/lower policy crosses,
+holding other deployment state fixed. This is attribution, not checkpoint
+selection. Prioritize the shared growth in holding and passenger/fleet delay,
+then confirm a targeted repair on fresh seeds. These reused-seed diagnostics
+do not establish independent confirmation or superiority to fixed-headway.
