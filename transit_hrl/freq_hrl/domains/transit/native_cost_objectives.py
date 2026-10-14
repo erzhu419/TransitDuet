@@ -3,7 +3,7 @@
 import copy
 
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import minimize, NonlinearConstraint
 from scipy.special import expit
 
 from freq_hrl.domains.transit import native_refit_matrix as previous
@@ -11,7 +11,7 @@ from freq_hrl.domains.transit import native_refit_matrix as previous
 joint, strength = previous.joint, previous.strength
 OBJECTIVES = ("all_mse", "feasible_mse", "rank_regret")
 VARIANTS = ("raw", *(f"{o}_{a}_{m}" for o in OBJECTIVES for a in joint.ANCHORS for m in previous.diagnostic.FIELDS))
-MAX_ITERATIONS, FTOL = 200, 1e-10
+MAX_ITERATIONS, GTOL = 400, 1e-9
 
 
 def losses(z, offset, truth, eligible, anchor):
@@ -33,10 +33,14 @@ def losses(z, offset, truth, eligible, anchor):
     def rank(theta):
         score = delta+dz@theta
         return float((pair_weights*np.logaddexp(0., -score)).sum()/n), -np.einsum("na,nak->k", pair_weights*expit(-score), dz)/n
-    return {"feasible_mse": mse, "rank_regret": rank}
+    mse_hessian = 2*np.einsum("na,nak,nal->kl", weights, z, z)/n
+    def rank_hessian(theta):
+        p = expit(delta+dz@theta)
+        return np.einsum("na,nak,nal->kl", pair_weights*p*(1-p), dz, dz)/n
+    return {"feasible_mse": (mse, lambda theta: mse_hessian), "rank_regret": (rank, rank_hessian)}
 
 
-def constrained_fit(loss, initial):
+def constrained_fit(loss, hessian, initial):
     radius = float(np.linalg.norm(initial))
     start = loss(initial)[0]
     if radius == 0:
@@ -45,15 +49,19 @@ def constrained_fit(loss, initial):
     def objective(unit):
         value, gradient = loss(radius*unit)
         return value/normalization, gradient*radius/normalization
-    result = minimize(objective, initial/radius, jac=True, method="SLSQP",
-        constraints={"type": "ineq", "fun": lambda u: 1-u@u, "jac": lambda u: -2*u},
-        options={"maxiter": MAX_ITERATIONS, "ftol": FTOL})
+    ball = NonlinearConstraint(lambda u: u@u, -np.inf, 1., jac=lambda u: 2*u[None, :],
+        hess=lambda u, v: 2*v[0]*np.eye(len(u)))
+    result = minimize(objective, initial/radius, jac=True, method="trust-constr",
+        hess=lambda u: hessian(radius*u)*radius**2/normalization, constraints=ball,
+        options={"maxiter": MAX_ITERATIONS, "gtol": GTOL, "xtol": 1e-12, "barrier_tol": 1e-10,
+            "initial_barrier_parameter": 1e-10, "initial_barrier_tolerance": GTOL})
     unit = result.x/max(1., np.linalg.norm(result.x))
     theta, end = radius*unit, loss(radius*unit)[0]
-    if not result.success or end > start+1e-8*max(1., start):
+    if not result.success or result.optimality > 1e-8 or result.constr_violation > 1e-8 or end > start+1e-8*max(1., start):
         raise ValueError(f"Cost objective solve failed: {result.message}; loss {start} -> {end}")
     return theta, {"iterations": int(result.nit), "success": bool(result.success), "loss_before": start,
-        "loss_after": end, "radius": radius, "norm": float(np.linalg.norm(theta))}
+        "loss_after": end, "radius": radius, "norm": float(np.linalg.norm(theta)),
+        "optimality": float(result.optimality), "constraint_violation": float(result.constr_violation)}
 
 
 def fit_objectives(data, values, cached, levels):
@@ -79,8 +87,8 @@ def fit_objectives(data, values, cached, levels):
         z = x@basis
         initial = (vt[:k]@old)*s[:k]/np.sqrt(mask.sum())
         objectives = losses(z, offset, target, data["raw_logits"] <= 0, anchor)
-        for name, loss in objectives.items():
-            theta, fit = constrained_fit(loss, initial)
+        for name, (loss, hessian) in objectives.items():
+            theta, fit = constrained_fit(loss, hessian, initial)
             models[name]["weights"][level][0] = (basis@theta).tolist()
             ledger.append({"objective": name, "level": level, "requested_rank": int(level), "retained_rank": k,
                 "parameter_count": k, "residual_rms_limit_physical": float(np.linalg.norm(initial)*scale),

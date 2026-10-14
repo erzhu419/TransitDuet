@@ -12,7 +12,7 @@ from scripts import run_native_transit_refit_matrix_stage237 as previous
 from freq_hrl.domains.transit import native_cost_objectives as learning
 from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_json
 
-EXPERIMENT_PROTOCOL = "native_transit_cost_objectives_stage238_v1"
+EXPERIMENT_PROTOCOL = "native_transit_cost_objectives_stage238_v2"
 SOURCE_RUN = "native_transit_refit_matrix_stage237_development_20261015_r1"
 VIEWS, PARTITIONS, KEYS, CONFIGS = previous.VIEWS, previous.PARTITIONS, previous.KEYS, previous.CONFIGS
 training, joint = previous.training, learning.joint
@@ -31,7 +31,9 @@ def contract():
         "feasible_mse": "equal_state_MSE_over_nonanchor_actions_with_cached_raw_logit_le0_empty_states_zero_weight",
         "rank_regret": "equal_state_mean_feasible_pair_logistic_loss_weighted_by_absolute_training_cost_gap_divided_by_cached_cost_scale",
         "constraint": "unshrunk_fit_pair_residual_RMS_no_larger_than_cached_all_MSE_same_ball_for_all_objectives_no_tuned_penalty",
-        "optimizer": {"solver": "SciPy_SLSQP", "max_iterations": learning.MAX_ITERATIONS, "ftol": learning.FTOL,
+        "optimizer": {"solver": "SciPy_trust_constr_analytic_Hessian", "max_iterations": learning.MAX_ITERATIONS, "gtol": learning.GTOL,
+            "xtol": 1e-12, "barrier_tol": 1e-10, "optimality_and_constraint_limit": 1e-8,
+            "initial_barrier_parameter": 1e-10, "initial_barrier_tolerance": learning.GTOL,
             "initial": "cached_all_MSE_coefficients", "alpha": "same_frozen_postfit_alpha_no_new_strength_selection"},
         "training_labels": "same54_or60_states_same2_or4_training_draws_no_held_prefix_or_other_future_labels",
         "gate": "cached_predicted_raw_gate_unchanged_true_wait_only_for_evaluation",

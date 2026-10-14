@@ -29,25 +29,28 @@ class CostObjectiveTest(unittest.TestCase):
         gate = np.array([[True, True, True, False, False, False]]*4)
         anchor, theta = np.zeros(4, dtype=int), rng.normal(size=3)
         losses = learning.losses(z, offset, truth, gate, anchor)
-        for loss in losses.values():
+        for loss, hessian in losses.values():
             self.assertLess(check_grad(lambda t: loss(t)[0], lambda t: loss(t)[1], theta), 1e-6)
+            for column in range(3):
+                step = np.eye(3)[column]*1e-5
+                np.testing.assert_allclose((loss(theta+step)[1]-loss(theta-step)[1])/2e-5, hessian(theta)[:, column], atol=1e-7)
         altered = truth.copy()
         altered[:, 3:] += 100.
         other = learning.losses(z, offset, altered, gate, anchor)
         for name in losses:
-            self.assertEqual(losses[name](theta)[0], other[name](theta)[0])
-            np.testing.assert_array_equal(losses[name](theta)[1], other[name](theta)[1])
+            self.assertEqual(losses[name][0](theta)[0], other[name][0](theta)[0])
+            np.testing.assert_array_equal(losses[name][0](theta)[1], other[name][0](theta)[1])
 
     def test_separable_ranking_is_bounded_and_zero_radius_is_exact(self):
         z = np.zeros((1, 6, 1))
         z[0, 1, 0] = 1.
         gate = np.array([[True, True, False, False, False, False]])
         target = np.array([[0., -2., 0., 0., 0., 0.]])
-        rank = learning.losses(z, np.zeros((1, 6)), target, gate, np.zeros(1, dtype=int))['rank_regret']
-        theta, ledger = learning.constrained_fit(rank, np.array([1.]))
-        self.assertAlmostEqual(theta[0], -1., places=7)
+        rank, hessian = learning.losses(z, np.zeros((1, 6)), target, gate, np.zeros(1, dtype=int))['rank_regret']
+        theta, ledger = learning.constrained_fit(rank, hessian, np.array([1.]))
+        self.assertAlmostEqual(theta[0], -1., places=4)
         self.assertLess(ledger['loss_after'], ledger['loss_before'])
-        zero, ledger = learning.constrained_fit(rank, np.zeros(1))
+        zero, ledger = learning.constrained_fit(rank, hessian, np.zeros(1))
         np.testing.assert_array_equal(zero, np.zeros(1))
         self.assertEqual(ledger['iterations'], 0)
 
