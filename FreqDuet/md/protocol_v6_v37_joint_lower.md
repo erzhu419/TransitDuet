@@ -31,3 +31,20 @@ improvement space; they do not validate a learned controller or a repaired paper
 
 All tests, audit, smoke, rollouts and aggregation use scheduler on node001-node006.
 Only logs and small summaries return; raw records and checkpoints stay on server.
+
+## Execution
+
+V36 audit `t153197` completed after four regression tests (`t153196`): all
+864 contexts retained. Main has Pareto alternatives in 66/144 early and 72/144
+late contexts; all three endpoints improve strictly in 33/144 and 59/144.
+Late hindsight selection gives journey -0.022425 min, CV -0.001209 and readiness
+-2.559160 s on average. Median journey change is -0.0000185 min: gains are
+heterogeneous, and these selected effects are not controller-performance estimates.
+Four summary files totaling 38,862 bytes were retrieved.
+
+V37 source `2a02dff5aa` passed 16 tests and a five-rollout smoke (`t153199`),
+including V35 reference, V36 first-only, exact first/second prefixes and second
+actor noop. Formal CPU batches `t153201-t153205` use scheduler-sized workers
+19/8/19/19/19 on node001/node002/node004/node005/node006, one parallel wave.
+Aggregation `t153206` waits for five small `batch_done.json` exports; per-shard
+records and ready markers remain server-side. Formal results are pending.
