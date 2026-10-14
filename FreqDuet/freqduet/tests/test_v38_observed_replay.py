@@ -3,7 +3,10 @@ import sys
 from types import SimpleNamespace as NS
 import unittest
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from audit_freqduet_v38_mechanism import cumulative_at
 from run_freqduet_v38_observed_replay import FEATURE_NAMES, observable_snapshot
 
 
@@ -52,6 +55,14 @@ class ObservableSnapshotTest(unittest.TestCase):
         features = self.snapshot()
         self.assertEqual(features["has_return_departure"], 0)
         self.assertEqual(features["return_margin_proxy_s"], 0)
+
+
+class ExposureCutsTest(unittest.TestCase):
+    def test_common_clock_cuts_use_only_completed_ticks(self):
+        timeline = np.array([[1, 10, 20, 1], [2, 30, 60, 3], [3, 60, 120, 6]])
+        np.testing.assert_array_equal(cumulative_at(timeline, 0), [0, 0, 0])
+        np.testing.assert_array_equal(cumulative_at(timeline, 2), [30, 60, 3])
+        np.testing.assert_array_equal(cumulative_at(timeline, np.inf), [60, 120, 6])
 
 
 if __name__ == "__main__":
