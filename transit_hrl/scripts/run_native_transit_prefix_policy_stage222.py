@@ -21,9 +21,10 @@ KEYS = tuple((v, f, p, d) for v in VIEWS for f in (0, 1) for p in PARTITIONS for
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL,
-        "cohort": previous.contract()["cohort"], "outer": previous.contract()["outer"],
-        "partitions": previous.contract()["partitions"], "final_heads": "reuse_exact32_stage221_models_no_refitting",
+        "cohort": parent["cohort"], "outer": parent["outer"],
+        "partitions": parent["partitions"], "final_heads": "reuse_exact32_stage221_models_no_refitting",
         "inner": "leave_one_complete_training_prefix_out54_train6_validate_crossed_with2_complementary2_future_splits",
         "inner_models": "own54_state2_draw_native_ridge_and_GLM_plus_three600_update_wait_residuals",
         "normalization": "inner_training_prefixes_only_no_outer_held_features_or_labels",
@@ -32,7 +33,7 @@ def contract():
         "policy_solver": "zero_logit_menu_event_sweep_boundary_ties_interval_risk_optima_identity_first_exact_ties",
         "inference": "one_fixed_alpha_per_architecture_no_root_ids_or_future_outcomes",
         "parameters": {v: previous.PARAMETERS[v] for v in learning.WAIT_VARIANTS},
-        "optimizer": previous.contract()["optimizer"], "variants": list(learning.VARIANTS),
+        "optimizer": parent["optimizer"], "variants": list(learning.VARIANTS),
         "evaluation": "all_states_four_scopes_rootwise_and_future_sensitivity_controls_reproduced_no_CI",
         "budget": {"fit_tasks": 32, "report_tasks": 1, "training_cells": 32, "reused_final_cells": 32,
             "inner_folds": 640, "analytic_cost_fits": 640, "glm_fits": 640,

@@ -22,11 +22,12 @@ VIEWS, PARTITIONS, KEYS, SCOPES = previous.VIEWS, previous.PARTITIONS, previous.
 
 def contract():
     result = training.contract()
+    parent = previous.contract()
     result.update(source_run=SOURCE_RUN, source_protocol=previous.EXPERIMENT_PROTOCOL,
         representation="linear198_engineered_causal_action_features_two_head_zero_initialized_residual_over_same_ridge",
         null_terms="omit12_action_constant_context_terms_and_bias_that_cancel_exactly_in_linear_paired_differences",
-        parameters_per_branch=learning.PARAMETERS, selection=previous.contract()["selection"],
-        selection_scale=previous.contract()["scale"], variants=list(learning.VARIANTS),
+        parameters_per_branch=learning.PARAMETERS, selection=parent["selection"],
+        selection_scale=parent["scale"], variants=list(learning.VARIANTS),
         controls="all11_frozen_Stage227_controllers_plus_linear_zero_last_MSE_joint_for_both_anchors",
         budget={"fit_tasks":32, "report_tasks":1, "clean_inner_reference_fits":640, "analytic_cost_fits":640,
             "glm_fits":640, "linear_inner_fits":1280, "linear_final_fits":64, "raw_wait_updates":384000,

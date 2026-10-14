@@ -20,17 +20,18 @@ VIEWS, PARTITIONS, SCOPES, KEYS = previous.VIEWS, previous.PARTITIONS, previous.
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL,
-        "cohort": previous.contract()["cohort"], "outer": previous.contract()["outer"],
-        "partitions": previous.contract()["partitions"], "calibration_factors": {
+        "cohort": parent["cohort"], "outer": parent["outer"],
+        "partitions": parent["partitions"], "calibration_factors": {
             "legacy": "reused_stage222_inner2_validation_other2",
             "c2v4": "reused_inner2_predictions_validated_on_all4_draws_of_excluded_prefix",
             "c4v4": "new_inner4_predictions_validated_on_same4_draws_of_excluded_prefix"},
         "final_factors": "same60_training_states_final2_each_complementary_subhalf_or_reused_final4",
         "normalization": "own_training_prefix_features_and_targets_only54_inner60_final",
         "validation": "prefix_held_in_c2v4_c4v4_not_inner_future_held_outer_other4_futures_never_used_for_fitting",
-        "guard": previous.contract()["policy_constraint"], "solver": previous.contract()["policy_solver"],
-        "parameters": previous.contract()["parameters"], "optimizer": previous.contract()["optimizer"],
+        "guard": parent["policy_constraint"], "solver": parent["policy_solver"],
+        "parameters": parent["parameters"], "optimizer": parent["optimizer"],
         "variants": list(learning.VARIANTS), "coverage": "each_scope120_cases60_unique_states_two_subhalf_models_final4_repeated_not_ensembled",
         "budget": {"fit_tasks": 32, "report_tasks": 1, "training_cells": 32,
             "reused_inner2_cells": 32, "reused_final4_cells": 32, "inner4_fits": 320, "final2_fits": 64,

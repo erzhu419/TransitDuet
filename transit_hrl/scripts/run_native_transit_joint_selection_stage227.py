@@ -19,8 +19,9 @@ learning = selection.learning
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run":SOURCE_RUN,"source_protocol":previous.EXPERIMENT_PROTOCOL,
-        "cohort":previous.contract()["cohort"],"outer":previous.contract()["outer"],"partitions":previous.contract()["partitions"],
+        "cohort":parent["cohort"],"outer":parent["outer"],"partitions":parent["partitions"],
         "selection":"pool_physical_cost_wait_means_first_then_divide_by_one_positive_training_RMS_per_source_root",
         "scale":"held_case_weighted_mean_of_recorded_training_only_fold_RMS_fixed_across_checkpoints",
         "paths":"reuse_all64_final_paths_all_snapshots_weights_unchanged_MSE_selection_unchanged",

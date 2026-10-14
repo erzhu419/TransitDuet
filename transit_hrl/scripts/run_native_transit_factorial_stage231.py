@@ -23,8 +23,9 @@ FOCUS_KEY = ("mixed_b",1,"even_odd",0)
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run":SOURCE_RUN,"source_protocol":previous.EXPERIMENT_PROTOCOL,"reference_run":REFERENCE_RUN,
-        "cohort":previous.contract()["cohort"],"outer":previous.contract()["outer"],"partitions":previous.contract()["partitions"],
+        "cohort":parent["cohort"],"outer":parent["outer"],"partitions":parent["partitions"],
         "ranks":list(learning.lowrank.RANKS),"anchors":list(joint.ANCHORS),"arms":list(learning.ARMS),"modes":list(learning.lowrank.MODES),
         "selection":"reuse_joint_MSE_and_joint_selected_rank_exactly_for_all_four_arms_no_cost_only_reselection_raw_hold_for_all_if_None",
         "prediction":"same_frozen_cost_wait_heads_toggle_cost_and_wait_residual_independently_anchor_first_ties",

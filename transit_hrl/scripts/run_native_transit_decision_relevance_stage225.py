@@ -24,9 +24,10 @@ SCOPES = (*previous.SCOPES, "oof_same", "oof_other")
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL,
-        "cohort": previous.contract()["cohort"], "outer": previous.contract()["outer"],
-        "partitions": previous.contract()["partitions"], "models": "exact_final4_and_c2v4_OOF_predictions_calibration_fixed_no_fitting",
+        "cohort": parent["cohort"], "outer": parent["outer"],
+        "partitions": parent["partitions"], "models": "exact_final4_and_c2v4_OOF_predictions_calibration_fixed_no_fitting",
         "strata": {"all": "five_nonidentity_candidates", "contender": "nonidentity_predicted_cost_lt_zero",
             "front": "identity_first_unfiltered_predicted_cost_winner_if_negative", "excluded": "nonidentity_predicted_cost_ge_zero"},
         "masks": "causal_cost_only_shared_by_all_wait_heads_and_future_labels",

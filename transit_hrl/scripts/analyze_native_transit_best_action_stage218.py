@@ -23,6 +23,7 @@ VIEWS = ("root_397", "root_401", "mixed_a", "mixed_b")
 
 
 def contract():
+    parent = source.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": source.EXPERIMENT_PROTOCOL,
         "data": "original240_mean8_development_states_only_replicas0to3_six_callbacks_per_prefix",
         "matching": "each_view120_states20_prefixes_four_prefixes_per_regime_all_states_equal_weight",
@@ -36,8 +37,8 @@ def contract():
         "all_orders": "Stage217_both_half_stable_strict_cost_pairs_on_common_true_safe_menu",
         "same_targets_all_orders": "best_action_constraints_plus_all_orders_on_exact_same_eligible_states",
         "wait_sign": "unchanged_Stage217_nonidentity_both_half_safe_le0_unsafe_ge1",
-        "partitions": source.contract()["partitions"], "problems": list(PROBLEMS),
-        "solver": source.contract()["witness"],
+        "partitions": parent["partitions"], "problems": list(PROBLEMS),
+        "solver": parent["witness"],
         "budget": {"views": 4, "max_linear_programs": 32, "optimizer_updates": 0,
             "actor_updates": 0, "new_native_episodes": 0},
         "storage": "normalizers_target_rows_witnesses_remote_compact_report_only",

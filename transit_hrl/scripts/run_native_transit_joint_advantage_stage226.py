@@ -26,8 +26,9 @@ SCOPES = cohort.SCOPES
 
 def contract():
     steps = max(learning.CHECKPOINTS)
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL, "model_run": MODEL_RUN,
-        "cohort": previous.contract()["cohort"], "outer": previous.contract()["outer"], "partitions": previous.contract()["partitions"],
+        "cohort": parent["cohort"], "outer": parent["outer"], "partitions": parent["partitions"],
         "objective": "two_head_standardized_MSE_of_physical_actual_cost_and_mean_wait_increments",
         "anchors": list(learning.ANCHORS), "representation": "same210_causal_inputs_width16_tanh_shared_two_head_residual_over_three_head_ridge",
         "parameters_per_branch": learning.PARAMETERS, "optimizer": {"steps": steps, "lr": learning.binding.learned.neural.LEARNING_RATE,

@@ -21,9 +21,10 @@ PARAMETERS = {"best": 98, "gap": 98, "linear": 199, "nonlinear_pair": 3201, "sta
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL,
-        "cohort": previous.contract()["data"], "views": list(VIEWS), "outer": previous.contract()["outer"],
-        "partitions": previous.contract()["partitions"], "filtering": "all_states_no_agreement_filter",
+        "cohort": parent["data"], "views": list(VIEWS), "outer": parent["outer"],
+        "partitions": parent["partitions"], "filtering": "all_states_no_agreement_filter",
         "controls": "unchanged_stage220_ridge_CE_GLM_and_three_raw_wait_residuals",
         "gap_target": "softmax_of_negative_physical_mean_cost_over_training_nonidentity_RMS_cost_no_true_safe_menu",
         "gap_score": "frozen_native_ridge_cost_plus_temperature_times_zero_initialized98_feature_linear_residual",
@@ -31,7 +32,7 @@ def contract():
         "wait_calibration": "two_complementary2_train2_validate_future_splits_within_outer_training4_same_training_prefixes",
         "shrinkage": "one_alpha_per_wait_architecture_in_closed_interval0_1_minimizes_pooled_inner_OOF_physical_draw_mass_logloss",
         "normalization": "training_prefix_features_only_each_inner_GLM_uses_its_own2_future_targets",
-        "parameters": PARAMETERS, "optimizer": previous.contract()["optimizer"],
+        "parameters": PARAMETERS, "optimizer": parent["optimizer"],
         "inference": "causal_cost_and_learned_wait_logits_no_future_labels_or_true_safe_menu",
         "variants": list(learning.VARIANTS), "evaluation": "same_four_scopes_rootwise_and_future_direction_physical_cost_wait_proper_risk_no_CI",
         "budget": {"fit_tasks": 8, "report_tasks": 1, "training_cells": 32, "analytic_cost_fits": 32,

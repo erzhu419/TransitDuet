@@ -21,9 +21,10 @@ ENFORCED = {"final": ("final",), "joint": ("oof", "final")}
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run": SOURCE_RUN, "source_protocol": previous.EXPERIMENT_PROTOCOL,
-        "cohort": previous.contract()["cohort"], "outer": previous.contract()["outer"],
-        "partitions": previous.contract()["partitions"], "models": "reuse_exact_stage223_final4_all_three_wait_architectures_no_weight_updates",
+        "cohort": parent["cohort"], "outer": parent["outer"],
+        "partitions": parent["partitions"], "models": "reuse_exact_stage223_final4_all_three_wait_architectures_no_weight_updates",
         "oof": "reuse_c2v4_inner2_predictions_on_four_draw_excluded_prefix_truths",
         "objective": "same_OOF_physical_mass_logloss_not_final_training_loss",
         "constraints": "cost_and_wait_le_own_raw_controller_means_each_source_root",

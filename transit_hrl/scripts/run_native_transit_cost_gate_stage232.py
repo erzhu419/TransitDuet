@@ -22,15 +22,16 @@ VIEWS,PARTITIONS,KEYS,SCOPES,FOCUS_KEY = previous.VIEWS,previous.PARTITIONS,prev
 
 
 def contract():
+    parent = previous.contract()
     return {"source_run":SOURCE_RUN,"source_protocol":previous.EXPERIMENT_PROTOCOL,"model_run":MODEL_RUN,"reference_run":REFERENCE_RUN,
-        "cohort":previous.contract()["cohort"],"outer":previous.contract()["outer"],"partitions":previous.contract()["partitions"],
+        "cohort":parent["cohort"],"outer":parent["outer"],"partitions":parent["partitions"],
         "ranks":list(learning.lowrank.RANKS),"anchors":list(joint.ANCHORS),"arms":list(learning.ARMS),"modes":list(learning.lowrank.MODES),
         "selection":"inherit_joint_MSE_and_selected_rank_for_all_four_arms_None_holds_raw_no_reselection",
         "prediction":"identical_cost_heads_crossed_with_frozen_physical_wait_or_unrebased_raw_logits_same_anchor_first_ties",
         "raw_gate":"original_action_logit_zero_raw_action_already_feasible_do_not_subtract_anchor_logit",
         "controls":"reproduce_Stage231_base_cost_all_modes_and_raw_base_all_modes_raw_cost_zero_in_all_four_scopes",
         "diagnostics":"cost_wait_unsafe_menu_switch_effects_by_source_future_and_predeclared_rank8_focus",
-        "focus_key":list(FOCUS_KEY),"budget":previous.contract()["budget"],
+        "focus_key":list(FOCUS_KEY),"budget":parent["budget"],
         "boundary":"reused_development_predictor_menu_intervention_not_new_CI_or_end_to_end_HRL",
         "storage":"pull_aggregate_only_no_panels_models_or_new_weights"}
 
