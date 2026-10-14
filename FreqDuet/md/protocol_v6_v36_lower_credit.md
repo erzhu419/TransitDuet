@@ -57,3 +57,40 @@ and records rollout and aggregation commits separately. It completed on node004
 with exit code zero, aggregating all 288 cases, 864 contexts and 6,624 rollouts.
 This closes aggregation execution; interpretation of the action-credit results
 and any algorithmic repair remain separate work.
+
+## Initial interpretation, 2026-10-15
+
+The five summary files (148,833 bytes) were retrieved; action-level records and
+checkpoints remain on the server. The main configuration gives the following
+late-minus-early preferences on identical causal states. Actor ages below count
+completed episodes, rather than zero-based checkpoint indices. Intervals are
+the existing crossed-bootstrap 95% intervals, not new confirmation tests.
+
+| Continuation actor | Actor action difference, s | Energy-minimizing action difference, s | Journey difference from actor choice, min |
+| --- | --- | --- | --- |
+| 40 | +7.0486 [2.9167, 11.4583] | +5.6944 [1.5625, 9.9306] | +0.002659 [-0.003060, 0.012727] |
+| 200 | +3.8542 [1.3542, 6.7708] | +4.5139 [1.3194, 7.8472] | +0.003676 [-0.006101, 0.017728] |
+
+The late actor and the late Q/pessimism/cost score both favor longer actions
+relative to their early counterparts. This does not isolate an actor-only or
+temperature-only failure. However, actor/energy agreement on individual states
+cannot be inferred from these contrasts or from averaged action-score curves.
+
+The main single-action actor contrasts do not establish a directional daily
+journey or CV effect under either continuation actor. This sparse, one-action
+intervention is different from V35's full-day lower-policy replacement; its
+effect must not be multiplied by the number of daily decisions.
+
+Longer holding is not uniformly better even for the recorded local objective:
+45 s versus zero reduces main deterministic remaining-trip reward by
+0.276555 [0.127881, 0.456611] under continuation 40 and
+0.187991 [0.056148, 0.331582] under continuation 200. These are deployment
+reward returns, not entropy-regularized Q targets or the full actor objective.
+
+The GPT6 assessment's resource/credit mismatch is a strong working hypothesis,
+not a root cause established by V36. Next use the existing server-side records
+for per-state actor-versus-energy regret and Boltzmann-distribution agreement,
+then match continuation, entropy and terminal semantics before judging critic
+calibration. The frozen runner passes reward_scale=1.0, so reward scaling alone
+is not an established mismatch here. A small joint-action feasibility study
+should precede any slack/MPC redesign or further large training campaign.
