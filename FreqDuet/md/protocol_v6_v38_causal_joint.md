@@ -60,3 +60,15 @@ report actual violations rather than treating predictions as hard guarantees.
 
 All computation and tests use scheduler on node001-node006. Only small exports
 and summaries return locally; checkpoints and detailed traces stay on server.
+
+## Development outcome
+
+All 84 snapshot replays (`t153259-t153263`, 19/8/19/19/19 workers) exactly
+match V37. Scorer source `2e11f970ea` passes 14 tests in `t153310` and retains
+all contexts. Causal joint selection gives journey +0.016058 min, CV +0.000517,
+readiness +5.158715 s; 0/12 joint improvements and 7/12 actual constraint
+violations. First-only/second-only journey deltas are +0.007614/+0.003820 min.
+The prototype is rejected, not promoted. No gate or ridge tuning on this bank.
+Next work needs a fleet-pool availability/service-commitment representation and
+short-horizon causal rollout with a separately validated tail value, rather
+than treating a local ETA margin or a small fitted regression as a hard budget.

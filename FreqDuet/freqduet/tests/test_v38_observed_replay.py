@@ -4,9 +4,10 @@ from types import SimpleNamespace as NS
 import unittest
 
 import numpy as np
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from audit_freqduet_v38_mechanism import cumulative_at
+from audit_freqduet_v38_mechanism import contrast_events, cumulative_at
 from run_freqduet_v38_observed_replay import FEATURE_NAMES, observable_snapshot
 
 
@@ -63,6 +64,18 @@ class ExposureCutsTest(unittest.TestCase):
         np.testing.assert_array_equal(cumulative_at(timeline, 0), [0, 0, 0])
         np.testing.assert_array_equal(cumulative_at(timeline, 2), [30, 60, 3])
         np.testing.assert_array_equal(cumulative_at(timeline, np.inf), [60, 120, 6])
+
+    def test_published_plan_change_is_not_an_actual_launch_change(self):
+        launches = pd.DataFrame([dict(trip_id=1, bus_id=7, time_s=100,
+                                      scheduled_s=90.1, readiness_s=9)])
+        holds = pd.DataFrame([dict(trip_id=1, station_id=3, time_s=200, action_s=15)])
+        reference = dict(launches=launches, holds=holds)
+        candidate = dict(launches=launches.assign(scheduled_s=90.10001), holds=holds)
+        result = contrast_events(reference, candidate)
+        self.assertEqual(result["launches_changed"], 0)
+        self.assertEqual(result["published_plan_changes"], 1)
+        candidate["launches"] = candidate["launches"].assign(time_s=127, readiness_s=36)
+        self.assertEqual(contrast_events(reference, candidate)["launches_changed"], 1)
 
 
 if __name__ == "__main__":

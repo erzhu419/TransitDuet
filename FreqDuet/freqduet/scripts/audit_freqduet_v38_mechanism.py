@@ -25,7 +25,7 @@ def contrast_events(reference, candidate):
     for field in ("time_s", "scheduled_s", "readiness_s"):
         launches[f"delta_{field}"] = launches[f"{field}_new"] - launches[f"{field}_ref"]
     changed = launches.loc[(launches.bus_id_new != launches.bus_id_ref)
-                           | (launches.delta_time_s != 0) | (launches.delta_scheduled_s != 0)]
+                           | (launches.delta_time_s != 0) | (launches.delta_readiness_s != 0)]
     launch_fields = ["trip_id", "bus_id_ref", "bus_id_new", "time_s_ref", "time_s_new",
                      "delta_time_s", "delta_scheduled_s", "delta_readiness_s"]
     holds = reference["holds"].merge(candidate["holds"], on=["trip_id", "station_id"], how="outer",
@@ -33,7 +33,9 @@ def contrast_events(reference, candidate):
     holds["delta_action_s"] = holds.action_s_new.fillna(0) - holds.action_s_ref.fillna(0)
     changed_holds = holds.loc[holds.delta_action_s != 0]
     totals = changed_holds.groupby("trip_id").delta_action_s.sum()
-    return dict(launches_changed=len(changed), vehicles_reassigned=int((launches.bus_id_new != launches.bus_id_ref).sum()),
+    return dict(launches_changed=len(changed),
+                published_plan_changes=int((launches.delta_scheduled_s != 0).sum()),
+                vehicles_reassigned=int((launches.bus_id_new != launches.bus_id_ref).sum()),
                 first_changed_launches=changed.sort_values("time_s_ref")[launch_fields].head(8).to_dict("records"),
                 largest_readiness_reductions=launches.nsmallest(6, "delta_readiness_s")[launch_fields].to_dict("records"),
                 holding_commands_changed=len(changed_holds),
