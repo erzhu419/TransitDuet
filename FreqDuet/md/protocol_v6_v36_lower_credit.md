@@ -31,3 +31,17 @@ a repaired policy or replace the failed long-training regularity gate.
 All regression tests, smokes, rollouts and aggregation run through scheduleurm
 on node001-node006. Only summaries return locally; checkpoints and action-level
 records remain on shared server storage. Formal jobs wait for smoke completion.
+
+Implementation `489c22ce02` is frozen in the server-side `source/` directory.
+Regression `t152858` passed five tests. The initial smoke caught a deployment
+checkpoint being passed to the full-training-state loader; the diagnostic now
+uses the existing deployment loader, leaving all historical files untouched.
+Replacement smokes `t152859-t152864` passed in all three configs and both actors:
+54 rollouts, unchanged V35 controls/repeats, and all seven action bins
+(0, 5, 10, 15, 20, 30, 45 s) passed exact-prefix and same-action checks.
+Formal cases `t152865-t153152` are released after these six smoke ready markers:
+864 contexts and 6,624 complete rollouts, including references/repeats.
+Aggregation `t153153` waits for all 288 cases. Placement is soft-preferred from the live
+CPU plan across node001/node002/node004/node005/node006, with only node001-node006
+eligible. Summaries include action terms and measured action consequences
+relative to zero hold, plus paired early/late action-preference contrasts.
