@@ -130,6 +130,7 @@ def load_records(root):
 def summarize(frame, groups, metrics, interval):
     rows = []
     for key, group in frame.groupby(groups, sort=True):
+        key = key if isinstance(key, tuple) else (key,)
         paired = group.groupby(["train_seed", "eval_seed"])[list(metrics)].mean().reset_index()
         for metric in metrics:
             low, high = interval(paired, metric)

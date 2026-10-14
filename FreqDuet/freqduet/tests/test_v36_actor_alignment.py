@@ -69,6 +69,11 @@ class ActorAlignmentTest(unittest.TestCase):
         result = summarize(frame, ["config", "anchor_lower_ep"], ["value"], interval)
         self.assertEqual(float(result.iloc[0]["mean"]), 15.0)
 
+    def test_single_group_column_preserves_the_complete_contrast_name(self):
+        frame = pd.DataFrame([dict(contrast="joint_vs_actor", train_seed=1, eval_seed=2, value=3)])
+        result = summarize(frame, ["contrast"], ["value"], lambda frame, metric: (3, 3))
+        self.assertEqual(result.iloc[0].contrast, "joint_vs_actor")
+
 
 if __name__ == "__main__":
     unittest.main()
