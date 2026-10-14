@@ -1,12 +1,16 @@
 import unittest
 from pathlib import Path
+import tempfile
+from unittest.mock import Mock, patch
 
 import pandas as pd
 
 from scripts.run_freqduet_protocol_v6_checkpoint_trajectory import (
     METRICS,
+    EVAL_SEEDS,
     assert_same_deployment,
     checkpoint_change,
+    evaluate_checkpoint,
     paired_trajectory,
     runtime_config,
     validate_grid,
@@ -14,6 +18,46 @@ from scripts.run_freqduet_protocol_v6_checkpoint_trajectory import (
 
 
 class CheckpointTrajectoryTest(unittest.TestCase):
+    def test_precomputed_checkpoint_is_reused_without_running_model(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "logs/current_seed11/frozen_trajectory/ep39"
+            output.mkdir(parents=True)
+            rows = pd.DataFrame([
+                dict(eval_seed=seed, checkpoint_ep=39, scenario_tape_id=f"tape{seed}",
+                     protocol_version="freqduet-eval-v6", policy_digest="frozen",
+                     **{metric: 0.2 for metric in METRICS}) for seed in EVAL_SEEDS])
+            rows.to_csv(output / "evaluation.csv", index=False)
+            runner, load_config = Mock(), Mock()
+            evaluate_checkpoint(Path("/unused"), root, "current", 11, 39,
+                                runtime=(None, runner, load_config, None))
+            runner.assert_not_called()
+            load_config.assert_not_called()
+            record = pd.read_csv(root / "records/current_seed11_ep39.csv")
+            self.assertEqual(list(record.eval_seed), list(EVAL_SEEDS))
+            self.assertTrue(record.train_seed.eq(11).all())
+
+    def test_checkpoint_worker_keeps_original_evaluation_protocol(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runner, load_config, torch = Mock(), Mock(return_value={}), Mock()
+            runner.return_value.upper_warmup = 30
+            rows = pd.DataFrame([
+                dict(eval_seed=seed, checkpoint_ep=39, scenario_tape_id=f"tape{seed}",
+                     **{metric: 0.2 for metric in METRICS}) for seed in EVAL_SEEDS])
+            with patch("scripts.run_freqduet_protocol_v6_checkpoint_trajectory.seed_runtime") as seed_fn, \
+                    patch("scripts.run_freqduet_protocol_v6_checkpoint_trajectory.evaluation_rows",
+                          return_value=rows):
+                evaluate_checkpoint(Path("/model"), root, "current", 11, 39,
+                                    runtime=(None, runner, load_config, torch))
+            seed_fn.assert_called_once_with(torch, 11)
+            runner.return_value.load_checkpoint.assert_called_once_with(
+                root / "logs/current_seed11/checkpoints", ep=39, require_deployment_state=True)
+            runner.return_value.evaluate.assert_called_once_with(
+                EVAL_SEEDS, output_dir=root / "logs/current_seed11/frozen_trajectory/ep39",
+                policy_ep=39)
+            runner.return_value.train.assert_not_called()
+
     def frame(self):
         rows = []
         for config in ("current", "reference"):

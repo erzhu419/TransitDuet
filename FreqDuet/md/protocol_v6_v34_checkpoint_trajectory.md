@@ -52,3 +52,24 @@ restricted to node001-node006. All 36 trajectories are running: six each on
 node001/node002 and eight each on node004/node005/node006. Node003 was full, so
 the scheduler used other allowed nodes. Only aggregation awaits completion.
 There is no new efficacy result or change to the paper controller yet.
+
+## Runtime optimization (2026-10-14)
+
+Server profile `t152418` found 912,985 keyed random-generator constructions,
+accounting for 71% of profiled rollout time. Reusing a scalar generator with
+the same legacy seed preserves keyed draws; persistent streams stay separate.
+Six paired full rollouts cover all three configurations and both evaluation
+cohorts: all 390 non-timing/non-run-identifier columns and complete lower/upper
+action/reward traces match exactly. Main/45007 takes 169.5 s originally versus
+41.4 s optimized (4.09x; aggregate 4.14x over six pairs). Tests `t152425-t152426`
+pass 16 cases; `t152433`
+matches both episodes' lower, upper, and operational deployment checkpoints
+against the archived original smoke.
+
+The immutable V9 snapshot and 36 running training workers remain unchanged.
+Tasks `t152434-t152541` precompute the already-available episodes 39/79/119 with
+the original V9 evaluator on five CPU nodes; owning workers reuse those files.
+Optimized source is isolated in `FreqDuet-v6-engineering-v9-runtime-optimized`.
+Next: finish the original V34 matrix and paired aggregation; use the verified
+runtime optimization for subsequent experiments. Models and profiles stay on
+the server; only small benchmark/training summary JSON files are retrieved.

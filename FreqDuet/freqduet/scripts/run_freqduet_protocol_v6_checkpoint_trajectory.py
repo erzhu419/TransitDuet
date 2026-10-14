@@ -133,21 +133,8 @@ def run_trajectory(model_root: Path, out_root: Path, config: str, seed: int) -> 
         runner.train(total_episodes=200)
         del runner
     for checkpoint in CHECKPOINTS:
-        output = run_dir / "frozen_trajectory" / f"ep{checkpoint}"
-        if not (output / "evaluation.csv").is_file():
-            seed_runtime(torch, seed)
-            runner = Runner(runtime_config(source_config, seed, logs_dir, 40), device="cpu")
-            runner.load_checkpoint(run_dir / "checkpoints", ep=checkpoint, require_deployment_state=True)
-            runner.evaluate(EVAL_SEEDS, output_dir=output, policy_ep=max(checkpoint, runner.upper_warmup))
-            del runner
-        frame = evaluation_rows(output / "evaluation.csv", EVAL_SEEDS, checkpoint)
-        print(f"TRAJECTORY_CHECKPOINT_DONE config={config} seed={seed} ep={checkpoint}", flush=True)
-        small = frame[["eval_seed", "checkpoint_ep", "scenario_tape_id", *METRICS]].copy()
-        small.insert(0, "train_seed", seed)
-        small.insert(0, "config", config)
-        destination = out_root / "records" / f"{config}_seed{seed}_ep{checkpoint}.csv"
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        small.to_csv(destination, index=False)
+        evaluate_checkpoint(model_root, out_root, config, seed, checkpoint,
+                            runtime=(matrix, Runner, load_config, torch))
     ready = out_root / "ready" / f"{config}_seed{seed}"
     ready.mkdir(parents=True, exist_ok=True)
     (ready / "ready.json").write_text(json.dumps({
@@ -155,6 +142,34 @@ def run_trajectory(model_root: Path, out_root: Path, config: str, seed: int) -> 
         "source_commit": SOURCE_COMMIT, "rollouts": len(CHECKPOINTS) * len(EVAL_SEEDS),
     }) + "\n")
     print("TRAJECTORY_JOB_DONE", flush=True)
+
+
+def evaluate_checkpoint(model_root: Path, out_root: Path, config: str, seed: int,
+                        checkpoint: int, runtime=None) -> None:
+    """Precompute an available checkpoint while its training worker continues.
+
+    Run only before the owning worker enters evaluation; each checkpoint has
+    one producer. Its original worker reuses the same validated output later.
+    """
+    _, Runner, load_config, torch = runtime or locked_runtime(model_root)
+    logs_dir = out_root / "logs"
+    run_dir = logs_dir / f"{config}_seed{seed}"
+    output = run_dir / "frozen_trajectory" / f"ep{checkpoint}"
+    if not (output / "evaluation.csv").is_file():
+        source_config = load_config(str(model_root / "configs_freqduet" / f"{config}.yaml"))
+        seed_runtime(torch, seed)
+        runner = Runner(runtime_config(source_config, seed, logs_dir, 40), device="cpu")
+        runner.load_checkpoint(run_dir / "checkpoints", ep=checkpoint, require_deployment_state=True)
+        runner.evaluate(EVAL_SEEDS, output_dir=output, policy_ep=max(checkpoint, runner.upper_warmup))
+        del runner
+    frame = evaluation_rows(output / "evaluation.csv", EVAL_SEEDS, checkpoint)
+    print(f"TRAJECTORY_CHECKPOINT_DONE config={config} seed={seed} ep={checkpoint}", flush=True)
+    small = frame[["eval_seed", "checkpoint_ep", "scenario_tape_id", *METRICS]].copy()
+    small.insert(0, "train_seed", seed)
+    small.insert(0, "config", config)
+    destination = out_root / "records" / f"{config}_seed{seed}_ep{checkpoint}.csv"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    small.to_csv(destination, index=False)
 
 
 def paired_trajectory(frame: pd.DataFrame, candidate: str, reference: str) -> pd.DataFrame:
@@ -358,17 +373,24 @@ def smoke(model_root: Path, out_root: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "smoke", "verify-smoke", "aggregate"))
+    parser.add_argument("command", choices=("run", "smoke", "verify-smoke", "aggregate", "evaluate-checkpoint"))
     parser.add_argument("--model-root", type=Path, default=MODEL_ROOT)
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--config", choices=CONFIGS)
     parser.add_argument("--train-seed", type=int, choices=TRAIN_SEEDS)
+    parser.add_argument("--checkpoint-ep", type=int, choices=CHECKPOINTS)
     args = parser.parse_args()
     args.out_root = args.out_root.resolve()
-    if args.command == "run":
+    if args.command in ("run", "evaluate-checkpoint"):
         if args.config is None or args.train_seed is None:
-            parser.error("run requires --config and --train-seed")
-        run_trajectory(args.model_root, args.out_root, args.config, args.train_seed)
+            parser.error(f"{args.command} requires --config and --train-seed")
+        if args.command == "evaluate-checkpoint":
+            if args.checkpoint_ep is None:
+                parser.error("evaluate-checkpoint requires --checkpoint-ep")
+            evaluate_checkpoint(args.model_root, args.out_root, args.config,
+                                args.train_seed, args.checkpoint_ep)
+        else:
+            run_trajectory(args.model_root, args.out_root, args.config, args.train_seed)
     elif args.command == "smoke":
         smoke(args.model_root, args.out_root)
     elif args.command == "verify-smoke":

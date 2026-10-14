@@ -38,6 +38,8 @@ class ScenarioTape:
     version: str = "freqduet-scenario-v1"
     _streams: dict[tuple[Any, ...], np.random.RandomState] = field(
         default_factory=dict, init=False, repr=False)
+    _scalar_rng: np.random.RandomState = field(
+        default_factory=lambda: np.random.RandomState(0), init=False, repr=False)
 
     def _seed_for(self, namespace: str, *key: Any) -> int:
         payload = json.dumps(
@@ -50,7 +52,10 @@ class ScenarioTape:
         return int.from_bytes(digest[:4], byteorder="little", signed=False)
 
     def _rng(self, namespace: str, *key: Any) -> np.random.RandomState:
-        return np.random.RandomState(self._seed_for(namespace, *key))
+        # Reseeding preserves legacy keyed draws, without constructing MT19937
+        # (and its unused initial entropy state) for every scalar sample.
+        self._scalar_rng.seed(self._seed_for(namespace, *key))
+        return self._scalar_rng
 
     def _stream_rng(self, namespace: str, *key: Any) -> np.random.RandomState:
         stream_key = (str(namespace),) + key
@@ -60,7 +65,7 @@ class ScenarioTape:
             stream_key = (str(namespace),) + tuple(_normalise_key(key))
         rng = self._streams.get(stream_key)
         if rng is None:
-            rng = self._rng(f"{namespace}:stream", *key)
+            rng = np.random.RandomState(self._seed_for(f"{namespace}:stream", *key))
             self._streams[stream_key] = rng
         return rng
 
