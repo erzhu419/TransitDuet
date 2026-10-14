@@ -1,0 +1,352 @@
+{
+  "analysis": {
+    "mixed_raw_mean": {
+      "active_source_cells": 24,
+      "deletion_checks": 160,
+      "deletion_choice_changes": 32,
+      "deletion_eligibility_checks": 120,
+      "deletion_eligibility_losses": 26,
+      "future_half_loss_classification": {
+        "material_positive": 10,
+        "zero_or_roundoff_boundary": 6
+      },
+      "median_top1_cost_benefit_share": 1.0,
+      "remote_classification_source": "server-side Stage235 raw results; only scalar/example JSON stdout retrieved",
+      "remote_deletion_loss_classification": {
+        "mixed_a": {
+          "material_positive": 12,
+          "zero_or_roundoff_boundary": 3
+        },
+        "mixed_b": {
+          "material_positive": 8,
+          "zero_or_roundoff_boundary": 3
+        }
+      },
+      "single_improving_cost_prefix": 13,
+      "top1_cost_benefit_share_at_least_80pct": 24
+    },
+    "roundoff_interpretation_threshold": 1e-12,
+    "selector_thresholds_changed": false
+  },
+  "budget": {
+    "analytic_cost_fits": 640,
+    "clean_inner_reference_fits": 640,
+    "fit_tasks": 32,
+    "full_selection_replays": 64,
+    "future_half_rescores": 128,
+    "glm_fits": 640,
+    "inner_candidate_evaluations": 21760,
+    "network_updates": 384000,
+    "new_native_episodes": 0,
+    "new_outer_prediction_calls": 0,
+    "positive_rank_solutions": 5120,
+    "raw_wait_updates": 384000,
+    "report_tasks": 1,
+    "residual_SVDs": 1280,
+    "residual_optimizer_updates": 0,
+    "reused_outer_paths": 64,
+    "reused_outer_references": 32,
+    "rl_actor_updates": 0,
+    "selector_deletion_comparisons": 1920,
+    "validation_prefix_deletions": 640
+  },
+  "default_changed": false,
+  "inner_reference_max_abs_difference": 0.0,
+  "protocol": "native_transit_prefix_stability_stage235_v1",
+  "pull": {
+    "aggregate_report_bytes": 1099891,
+    "model_weights": 0,
+    "raw_panels": 0,
+    "raw_prefix_records": 0
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "selection_reproduction": {
+    "anchor_selections": 64,
+    "differences": 0
+  },
+  "source_revision": "9974a6b336bc318de17a65236f3b356be9e69609",
+  "tasks": [
+    {
+      "exit_code": 0,
+      "id": "t153154",
+      "log_path": "/tmp/sched_t153154.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153155",
+      "log_path": "/tmp/sched_t153155.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153156",
+      "log_path": "/tmp/sched_t153156.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153157",
+      "log_path": "/tmp/sched_t153157.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153158",
+      "log_path": "/tmp/sched_t153158.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153159",
+      "log_path": "/tmp/sched_t153159.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153160",
+      "log_path": "/tmp/sched_t153160.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153161",
+      "log_path": "/tmp/sched_t153161.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_397/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153162",
+      "log_path": "/tmp/sched_t153162.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153163",
+      "log_path": "/tmp/sched_t153163.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153164",
+      "log_path": "/tmp/sched_t153164.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153165",
+      "log_path": "/tmp/sched_t153165.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153166",
+      "log_path": "/tmp/sched_t153166.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153167",
+      "log_path": "/tmp/sched_t153167.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153168",
+      "log_path": "/tmp/sched_t153168.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153169",
+      "log_path": "/tmp/sched_t153169.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/root_401/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153170",
+      "log_path": "/tmp/sched_t153170.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153171",
+      "log_path": "/tmp/sched_t153171.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153172",
+      "log_path": "/tmp/sched_t153172.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153173",
+      "log_path": "/tmp/sched_t153173.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153174",
+      "log_path": "/tmp/sched_t153174.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153175",
+      "log_path": "/tmp/sched_t153175.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153176",
+      "log_path": "/tmp/sched_t153176.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153177",
+      "log_path": "/tmp/sched_t153177.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_a/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153178",
+      "log_path": "/tmp/sched_t153178.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153179",
+      "log_path": "/tmp/sched_t153179.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153180",
+      "log_path": "/tmp/sched_t153180.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153181",
+      "log_path": "/tmp/sched_t153181.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153182",
+      "log_path": "/tmp/sched_t153182.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153183",
+      "log_path": "/tmp/sched_t153183.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153184",
+      "log_path": "/tmp/sched_t153184.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153185",
+      "log_path": "/tmp/sched_t153185.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/fit/mixed_b/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153186",
+      "log_path": "/tmp/sched_t153186.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_prefix_stability_stage235_v1/native_transit_prefix_stability_stage235_development_20261015_r1/report",
+      "status": "done"
+    }
+  ],
+  "unit_tests": {
+    "focused_elapsed_seconds": 0.564,
+    "focused_summary_passed": 1,
+    "suite_elapsed_seconds": 2.744,
+    "unique_passed": 7
+  }
+}
