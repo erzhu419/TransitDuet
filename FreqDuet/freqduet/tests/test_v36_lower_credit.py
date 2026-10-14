@@ -10,7 +10,8 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from run_freqduet_v36_lower_credit import (
-    KEYS, OUTCOMES, RETURNS, action_values, check_unchanged, preference_pairs, same_prefix,
+    KEYS, OUTCOMES, RETURNS, action_differences, action_values, check_unchanged,
+    preference_pairs, same_prefix,
 )
 
 
@@ -83,6 +84,16 @@ class LowerCreditTest(unittest.TestCase):
         self.assertEqual(pairs.loc["energy200_minus_energy40", "trip_cost_return"], 225.0)
         self.assertEqual(pairs.loc["max_hold_minus_zero", "action_delta_s"], 30.0)
         self.assertEqual(pairs.loc["max_hold_minus_zero", "headway_cv"], 900.0)
+
+    def test_action_differences_keep_contexts_and_subtract_zero_in_correct_direction(self):
+        rows = pd.DataFrame([dict(context=context, action_s=action, value=context + 2 * action)
+                             for context in (11, 13) for action in (0, 15)])
+        paired = action_differences(rows, ["context"], ["value"])
+        self.assertEqual(len(paired), 4)
+        self.assertEqual(set(paired.loc[paired.action_s == 15, "value_delta_vs_zero"]), {30})
+        with self.assertRaisesRegex(ValueError, "missing zero-hold"):
+            action_differences(rows.loc[~((rows.context == 13) & (rows.action_s == 0))],
+                               ["context"], ["value"])
 
 
 if __name__ == "__main__":

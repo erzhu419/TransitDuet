@@ -97,7 +97,7 @@ def run_branch(out_root, config, seed, scenario, anchor, times, label,
     if diagnose:
         for ep in ACTOR_EPS:
             models[ep] = copy.deepcopy(runner.lower_trainer)
-            models[ep].load_training_state_dict(lower_states[ep])
+            models[ep].load(str(checkpoints / f"lower_ep{ep}.pt"))
     del lower_states
     captures, value_rows = {}, []
     lower_prefix, upper_prefix = [], []
@@ -277,6 +277,17 @@ def preference_pairs(values, rollouts):
     return pd.DataFrame(choices)
 
 
+def action_differences(frame, keys, metrics):
+    zero = frame.loc[frame.action_s == 0, [*keys, *metrics]]
+    paired = frame.merge(zero, on=keys, how="left", validate="many_to_one",
+                         suffixes=("", "_zero"), indicator=True)
+    if not paired["_merge"].eq("both").all():
+        raise ValueError("missing zero-hold action in a causal context")
+    for metric in metrics:
+        paired[f"{metric}_delta_vs_zero"] = paired[metric] - paired[f"{metric}_zero"]
+    return paired
+
+
 def aggregate(out_root):
     expected = {case_name(config, seed, scenario, anchor)
                 for config in CONFIGS for seed in TRAIN_SEEDS
@@ -294,8 +305,10 @@ def aggregate(out_root):
     from scripts.run_freqduet_protocol_v2_matrix import hierarchical_interval
     summary = []
     primary = ("action_delta_s", "headway_cv", "restricted_total_journey_horizon_min",
-               "restricted_wait_horizon_min", "holding_vehicle_seconds_per_launched_trip",
-               "fleet_readiness_delay_mean_s", *RETURNS)
+               "restricted_wait_horizon_min", "restricted_in_vehicle_horizon_min",
+               "holding_vehicle_seconds_per_launched_trip", "holding_passenger_seconds",
+               "fleet_readiness_delay_mean_s", "upper_interval_wait_cost_sum",
+               "upper_interval_onboard_cost_sum", "upper_interval_dispatch_backlog_cost_sum", *RETURNS)
     for (config, anchor, contrast), rows in pairs.groupby(["config", "anchor_lower_ep", "contrast"]):
         # Average contexts within train/scenario before the crossed bootstrap.
         contexts = rows.groupby(["train_seed", "eval_seed"])[list(primary)].mean().reset_index()
@@ -309,16 +322,16 @@ def aggregate(out_root):
     pd.DataFrame(summary).to_csv(target / "preference_effects.csv", index=False)
     pairs.groupby(["config", "anchor_lower_ep", "contrast", "train_seed"])[
         list(primary)].mean().to_csv(target / "training_seed_effects.csv")
-    numeric = ["probability", "q_mean", "q_std", "pessimism", "cost_penalty",
-               "entropy_term", "energy", "actor_loss_term", "alpha", "lambda_value",
+    numeric = ["probability", "q_std", "alpha", "lambda_value",
                "load_penalty", "regularity_reward", "regularity_cost"]
-    zero = values.loc[values.action_s == 0, [*KEYS, "model_ep", *numeric]]
-    relative = values.merge(zero, on=[*KEYS, "model_ep"], validate="many_to_one",
-                            suffixes=("", "_zero"))
-    for metric in ("q_mean", "pessimism", "cost_penalty", "entropy_term", "energy", "actor_loss_term"):
-        relative[metric] -= relative[f"{metric}_zero"]
+    terms = ["q_mean", "pessimism", "cost_penalty", "entropy_term", "energy", "actor_loss_term"]
+    relative = action_differences(values, [*KEYS, "model_ep"], terms)
     relative.groupby(["config", "anchor_lower_ep", "model_ep", "action_s"])[
-        numeric].mean().to_csv(target / "action_terms.csv")
+        [*numeric, *[f"{name}_delta_vs_zero" for name in terms]]].mean().to_csv(target / "action_terms.csv")
+    consequences = action_differences(rollouts, KEYS, [*OUTCOMES, *RETURNS])
+    consequences.groupby(["config", "anchor_lower_ep", "action_s"])[
+        [f"{name}_delta_vs_zero" for name in (*OUTCOMES, *RETURNS)]
+    ].mean().to_csv(target / "action_consequences_descriptive.csv")
     result = dict(status="complete_exploratory_lower_credit", cases=len(expected),
                   contexts=len(values[KEYS].drop_duplicates()),
                   rollouts=sum(json.loads(path.read_text())["rollouts"] for path in ready_paths),
