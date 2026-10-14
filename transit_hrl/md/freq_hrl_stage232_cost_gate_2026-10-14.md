@@ -11,7 +11,22 @@
 
 ## Results
 
-Pending. Determine whether the existing raw menu retains learned cost gains and removes the residual wait/unsafe deficit before adding capacity or retraining.
+- t152380-t152411 analyses and t152412 report all exited 0; six tests passed. All 345,600 choice and 691,200 physical-score comparisons reproduced exactly, including rank0/raw-gate identity under both anchors. Aggregate pull: 1,720,783 bytes; no panels/weights or new fits/rollouts.
+- Predeclared original-anchor rank8 focus, held-prefix/opposite-future outcomes (increments versus the original action; smaller is better):
+
+| Controller | Cost | Wait (min) | Wait-worsening actions |
+| --- | ---: | ---: | ---: |
+| Raw | -0.00370825 | -0.00300417 | 15.0% |
+| Learned cost / physical gate | -0.00659011 | -0.00232500 | 23.3% |
+| Learned cost / raw gate | -0.00401957 | -0.00551667 | 13.3% |
+
+- The new arm changes 7/60 held actions versus raw and improves both means at each focus source root. Root401 cost/wait becomes -0.00411682/-0.00820000 versus raw -0.00369682/-0.00485000; wait-worsening fraction stays 16.7%. Root397 cost/wait also improves, and that fraction falls from 13.3% to 10.0%. Thus the prior source wait/unsafe deficit can be removed by the existing menu while retaining a smaller genuine learned-cost gain.
+- This does not make fixed rank8 generally superior: in mixed_a/mixed_b, new-arm held-other cost is worse than raw by +0.00079368/+0.00090506, although wait and wait-worsening fractions improve. In the focus held-same-future scope, cost is worse by +0.00140435; on training-prefix/opposite-future, wait is worse by +0.00358750 min. Gate substitution helps, but cost ranking still has prefix/future-dependent tradeoffs.
+- Inherited original-anchor selection gives mixed pooled cost/wait -0.00225963/-0.00461589 versus raw -0.00224017/-0.00445885, with wait-worsening fraction 14.90% versus 15.00%. Only one of 16 mixed cells uses a nonzero rank; the other cells hold raw or select zero. Single-source root397 with inherited selection worsens both means. Default remains unchanged.
+
+## Next
+
+Do prefix-and-future inner selection specifically for learned cost under the raw gate, retaining the frozen outer references/paths and rank0/raw-hold controls. Select using the actual new controller's physical cost, wait and wait-worsening outcomes at each source root, not the old joint physical-gate score or outer held-out gains. Reuse the current development cohort; do not increase model capacity or open the reserved confirmation cohorts.
 
 ## Limitations
 
