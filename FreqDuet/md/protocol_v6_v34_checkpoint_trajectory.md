@@ -41,3 +41,8 @@ The formal trajectories wait for its small success marker. A scheduler task
 freezes the diagnostic script on the shared server filesystem and releases the
 workers only after smoke passes; aggregation waits for all 36 completion
 markers. This keeps the full sequence visible in tui-top.
+
+Dispatch: diagnostic source `2a08394209`; smoke-release task `t151971`,
+36 trajectories `t151972-t152007`, and aggregation `t152008`. Every task is
+restricted to node001-node006. Formal trajectories currently await smoke;
+there is no new efficacy result or change to the paper controller yet.

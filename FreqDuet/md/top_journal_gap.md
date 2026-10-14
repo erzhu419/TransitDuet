@@ -1,5 +1,13 @@
 # FreqDuet Top-Journal Gap Backlog
 
+> **2026-10-14 V34 duration diagnostic:** server smoke `t151969` passed five
+> pairing/scenario/instrumentation tests and is checking checkpoint-save
+> equivalence. Tasks `t151972-t152007` are queued for 36 locked-V9 training
+> trajectories and 2,160 frozen rollouts; `t151971` releases them after smoke,
+> and `t152008` aggregates server-side after all trajectories finish. This
+> development diagnostic leaves the current paper result and evidence decision
+> unchanged. See `protocol_v6_v34_checkpoint_trajectory.md` for the frozen design.
+
 > **2026-10-14 Protocol V6 manuscript-v5 polish closure:** the canonical
 > `FreqDuet/paper/protocol_v6` bundle now includes the V33 lower-actor-timescale
 > no-pass result alongside V8 and V9, uses the paper title *FreqDuet: Online
