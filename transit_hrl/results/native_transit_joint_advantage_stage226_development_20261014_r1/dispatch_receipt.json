@@ -1,0 +1,325 @@
+{
+  "analytic_cost_fits": 640,
+  "clean_inner_reference_fits": 640,
+  "control_reproduction": {
+    "comparisons": 240,
+    "max_abs_difference": 1.3877787807814457e-17
+  },
+  "coverage_qualified": true,
+  "default_model_replaced": false,
+  "fit_tasks": 32,
+  "glm_fits": 640,
+  "independent_confirmation": false,
+  "inner_reference_max_abs_difference": 0.0,
+  "joint_final_fits": 64,
+  "joint_inner_fits": 1280,
+  "joint_updates": 806400,
+  "network_updates": 1190400,
+  "new_native_episodes": 0,
+  "new_tests_passed": 8,
+  "physical_aggregation_issue": [
+    {
+      "anchor": "original",
+      "cases": 60,
+      "cell_index": 4,
+      "mean_delta_cost": 2.299999999999987e-05,
+      "mean_delta_wait_min": -1.666666666666483e-05,
+      "mean_scaled_cost": -0.00020826774167468504,
+      "mean_scaled_wait": -0.0018681662240110956,
+      "root": "397",
+      "step": 0,
+      "view": "mixed_b"
+    },
+    {
+      "anchor": "raw",
+      "cases": 120,
+      "cell_index": 5,
+      "mean_delta_cost": -0.0017993541666666692,
+      "mean_delta_wait_min": 7.916666666660799e-05,
+      "mean_scaled_cost": -0.026211285490106588,
+      "mean_scaled_wait": -0.0014971463558575901,
+      "root": "397",
+      "step": 0,
+      "view": "root_397"
+    },
+    {
+      "anchor": "raw",
+      "cases": 120,
+      "cell_index": 6,
+      "mean_delta_cost": 0.0002593708333333301,
+      "mean_delta_wait_min": -0.0031125000000000293,
+      "mean_scaled_cost": -0.007157145561354318,
+      "mean_scaled_wait": -0.032634433098424884,
+      "root": "397",
+      "step": 50,
+      "view": "root_397"
+    },
+    {
+      "anchor": "original",
+      "cases": 120,
+      "cell_index": 6,
+      "mean_delta_cost": 0.00019453750000000502,
+      "mean_delta_wait_min": -0.0006916666666665923,
+      "mean_scaled_cost": -0.01162528617433819,
+      "mean_scaled_wait": -0.006740251299944459,
+      "root": "401",
+      "step": 0,
+      "view": "root_401"
+    },
+    {
+      "anchor": "raw",
+      "cases": 120,
+      "cell_index": 4,
+      "mean_delta_cost": 0.00011403333333332849,
+      "mean_delta_wait_min": -0.0009708333333333652,
+      "mean_scaled_cost": -0.001668110333540363,
+      "mean_scaled_wait": -0.006546047724518772,
+      "root": "401",
+      "step": 100,
+      "view": "root_401"
+    }
+  ],
+  "protocol": "native_transit_joint_advantage_stage226_v1",
+  "raw_or_model_pull_bytes": 0,
+  "raw_wait_updates": 384000,
+  "report_pulled_bytes": 471964,
+  "report_tasks": 1,
+  "reused_final4_cells": 32,
+  "rl_actor_updates": 0,
+  "run_name": "native_transit_joint_advantage_stage226_development_20261014_r1",
+  "source_revision": "b28cfcf8279f90c4362990366f58418b59759e4b",
+  "tasks": [
+    {
+      "exit_code": 0,
+      "id": "t152141",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152142",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152143",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152144",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152145",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152146",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152147",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152148",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_397/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152149",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152150",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152151",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152152",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152153",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152154",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152155",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152156",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/root_401/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152157",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152158",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152159",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152160",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152161",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152162",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152163",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152164",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_a/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152165",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152166",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152167",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152168",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152169",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152170",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152171",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152172",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/fit/mixed_b/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152175",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_joint_advantage_stage226_v1/native_transit_joint_advantage_stage226_development_20261014_r1/report",
+      "status": "done"
+    }
+  ],
+  "training_cells": 32
+}
