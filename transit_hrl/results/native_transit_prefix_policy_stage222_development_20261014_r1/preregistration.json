@@ -1,0 +1,124 @@
+{
+  "contract": {
+    "boundary": "development_same240_states_and8_futures_relative_OOF_floors_not_a_held_control_guarantee",
+    "budget": {
+      "analytic_cost_fits": 640,
+      "calibration_scalar_fits": 192,
+      "fit_tasks": 32,
+      "glm_fits": 640,
+      "inner_folds": 640,
+      "inner_wait_fits": 1920,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "reused_final_cells": 32,
+      "rl_actor_updates": 0,
+      "supervised_decision_updates": 0,
+      "training_cells": 32,
+      "wait_residual_updates": 1152000
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "evaluation": "all_states_four_scopes_rootwise_and_future_sensitivity_controls_reproduced_no_CI",
+    "final_heads": "reuse_exact32_stage221_models_no_refitting",
+    "inference": "one_fixed_alpha_per_architecture_no_root_ids_or_future_outcomes",
+    "inner": "leave_one_complete_training_prefix_out54_train6_validate_crossed_with2_complementary2_future_splits",
+    "inner_models": "own54_state2_draw_native_ridge_and_GLM_plus_three600_update_wait_residuals",
+    "normalization": "inner_training_prefixes_only_no_outer_held_features_or_labels",
+    "optimizer": {
+      "dtype": "float64",
+      "lr": 0.003,
+      "seed": 208,
+      "steps_per_branch": 600,
+      "weight_decay": 0.01
+    },
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "parameters": {
+      "linear": 199,
+      "nonlinear_pair": 3201,
+      "state_conditioned_pair": 3393
+    },
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "policy_constraint": "same_risk_objective_subject_selected_cost_and_wait_le_raw_controller_OOF_means_for_each_source_root",
+    "policy_solver": "zero_logit_menu_event_sweep_boundary_ties_interval_risk_optima_identity_first_exact_ties",
+    "risk_control": "prefix_and_future_OOF_physical_mass_logloss_alpha_in0_1",
+    "source_protocol": "native_transit_gap_calibration_stage221_v1",
+    "source_run": "native_transit_gap_calibration_stage221_development_20261014_r1",
+    "storage": "inner_OOF_predictions_and_reused_final_models_remote_only_compact_report_pull",
+    "variants": [
+      "ridge_glm",
+      "ridge_linear",
+      "ridge_nonlinear_pair",
+      "ridge_state_conditioned_pair",
+      "ridge_shrunk_linear",
+      "ridge_shrunk_nonlinear_pair",
+      "ridge_shrunk_state_conditioned_pair",
+      "best_glm",
+      "best_linear",
+      "best_nonlinear_pair",
+      "best_state_conditioned_pair",
+      "best_shrunk_linear",
+      "best_shrunk_nonlinear_pair",
+      "best_shrunk_state_conditioned_pair",
+      "gap_glm",
+      "gap_linear",
+      "gap_nonlinear_pair",
+      "gap_state_conditioned_pair",
+      "gap_shrunk_linear",
+      "gap_shrunk_nonlinear_pair",
+      "gap_shrunk_state_conditioned_pair",
+      "best_unfiltered",
+      "gap_unfiltered",
+      "ridge_prefix_risk_linear",
+      "ridge_prefix_risk_nonlinear_pair",
+      "ridge_prefix_risk_state_conditioned_pair",
+      "ridge_prefix_policy_linear",
+      "ridge_prefix_policy_nonlinear_pair",
+      "ridge_prefix_policy_state_conditioned_pair"
+    ]
+  },
+  "fit_tasks": 32,
+  "protocol": "native_transit_prefix_policy_stage222_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "611a238e508da0ede9d1a5525937511fad3c9197"
+}
