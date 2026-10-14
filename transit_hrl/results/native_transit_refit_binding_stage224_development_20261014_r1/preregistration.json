@@ -1,0 +1,107 @@
+{
+  "calibration_tasks": 32,
+  "contract": {
+    "boundary": "final_training_noninferiority_is_constructed_only_outer_evaluation_tests_transfer_no_new_independent_CI",
+    "budget": {
+      "analytic_cost_fits": 0,
+      "calibration_scalar_fits": 192,
+      "calibration_tasks": 32,
+      "glm_fits": 0,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "reused_final4_cells": 32,
+      "reused_oof_cells": 32,
+      "rl_actor_updates": 0,
+      "supervised_decision_updates": 0,
+      "training_cells": 32,
+      "wait_residual_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "constraints": "cost_and_wait_le_own_raw_controller_means_each_source_root",
+    "controls": "GLM_raw_risk_only_and_stage223_c2v4_OOF_only",
+    "coverage": "four_scopes60_cases_per_cell_all_states_no_subhalf_repetition",
+    "inference": "fixed_alpha_causal_final4_predictions_only_no_true_safe_menu",
+    "labels": "final_constraints_only60_outer_training_states_training4_draws_no_outer_held_labels",
+    "models": "reuse_exact_stage223_final4_all_three_wait_architectures_no_weight_updates",
+    "modes": {
+      "final": [
+        "final"
+      ],
+      "joint": [
+        "oof",
+        "final"
+      ]
+    },
+    "objective": "same_OOF_physical_mass_logloss_not_final_training_loss",
+    "oof": "reuse_c2v4_inner2_predictions_on_four_draw_excluded_prefix_truths",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "solver": "union_of_OOF_and_final_zero_logit_events_boundary_ties_interval_risk_minima_alpha1_exact_raw_feasible",
+    "source_protocol": "native_transit_precision_stage223_v1",
+    "source_run": "native_transit_precision_stage223_development_20261014_r1",
+    "storage": "models_predictions_training_constraints_remote_only_compact_report_pull",
+    "variants": [
+      "glm",
+      "raw_linear",
+      "raw_nonlinear_pair",
+      "raw_state_conditioned_pair",
+      "risk_linear",
+      "risk_nonlinear_pair",
+      "risk_state_conditioned_pair",
+      "oof_linear",
+      "oof_nonlinear_pair",
+      "oof_state_conditioned_pair",
+      "final_linear",
+      "final_nonlinear_pair",
+      "final_state_conditioned_pair",
+      "joint_linear",
+      "joint_nonlinear_pair",
+      "joint_state_conditioned_pair"
+    ]
+  },
+  "protocol": "native_transit_refit_binding_stage224_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "e3162318c95f58effc7875c6225b45bbb303c8ab"
+}
