@@ -125,18 +125,18 @@ def qualify(result, key, views):
             raise ValueError("Dropped a state or a joint selector")
 
 
-def metrics(rows):
+def metrics(rows, *, variants=learning.VARIANTS):
     return {"prediction_cases": len(rows), "unique_states": len({learning.binding.learned.state_key(r) for r in rows}),
         "variants": {v: {"mean_cost": float(np.mean([r["decisions"][v]["cost"] for r in rows])),
             "mean_wait_min": float(np.mean([r["decisions"][v]["wait"] for r in rows])),
             "changed_fraction": float(np.mean([r["decisions"][v]["changed"] for r in rows])),
             "unsafe_fraction": float(np.mean([r["decisions"][v]["unsafe"] for r in rows])),
             "switch_fraction_to_raw": float(np.mean([r["decisions"][v]["selected"] != r["decisions"]["raw"]["selected"] for r in rows]))}
-            for v in learning.VARIANTS},
+            for v in variants},
         "wait_heads": {g: {"physical_mass_loss_min": float(np.mean([r["gates"][g]["mass_loss_min"] for r in rows]))} for g in learning.CONTROLS},
         "joint_prediction_errors": {v: {"cases": sum(v in r["joint_prediction_errors"] for r in rows),
             "normalized_mse": float(np.mean([r["joint_prediction_errors"][v] for r in rows if v in r["joint_prediction_errors"]]))
-                if any(v in r["joint_prediction_errors"] for r in rows) else None} for v in learning.VARIANTS if v.startswith("pair_")}}
+                if any(v in r["joint_prediction_errors"] for r in rows) else None} for v in variants if v not in learning.CONTROLS}}
 
 
 def summarize(results, views):

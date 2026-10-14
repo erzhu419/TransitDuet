@@ -62,11 +62,15 @@ def choose(data, model, step):
 
 def validation_stats(data, values, model, step):
     anchor = anchors(data, model["anchor"])
+    return prediction_stats(data, values, increments(data, model, step), model["scales"], anchor)
+
+
+def prediction_stats(data, values, prediction, scales, anchor):
     mask = np.arange(6)[None, :] != anchor[:, None]
-    errors = ((increments(data, model, step)-relative(values, anchor))/model["scales"])**2
-    selected = choose(data, model, step)
+    errors = ((prediction-relative(values, anchor))/scales)**2
+    selected = binding.policy.selected(prediction[..., 0], prediction[..., 1], anchor)
     delta = values[np.arange(len(values)), selected]-values[np.arange(len(values)), data["raw_choices"]]
-    scaled = delta/model["scales"]
+    scaled = delta/scales
     return {"error_sum": float(errors[mask].sum()), "error_cases": int(mask.sum()*2),
         "changed_count": int((selected != data["raw_choices"]).sum()),
         "by_root": {str(root): {"cases": int((data["roots"] == root).sum()),
@@ -136,7 +140,7 @@ def select_checkpoints(curves):
     return {"mse_step": mse_step, "joint_step": joint_step, "curves": pooled}
 
 
-def collect(train, panels, indices, reused_oof):
+def collect(train, panels, indices, reused_oof, *, path_fitter=fit_path):
     batch = binding.learned.neural.batches(train)
     curves, ledger, predictions = {a: [] for a in ANCHORS}, [], []
     halves = (tuple(indices[:2]), tuple(indices[2:]))
@@ -149,7 +153,7 @@ def collect(train, panels, indices, reused_oof):
             data, val_data = causal_data(rows, reference, batch=train_batch), causal_data(validation, reference, batch=val_batch)
             fits = {}
             for kind in ANCHORS:
-                _, fits[kind], curve = fit_path(rows, data, physical_values(rows, panels, a), kind,
+                _, fits[kind], curve = path_fitter(rows, data, physical_values(rows, panels, a), kind,
                     validation=(val_data, physical_values(validation, panels, b)))
                 curves[kind].append(curve)
             predictions.append(val_data)
@@ -168,11 +172,11 @@ def collect(train, panels, indices, reused_oof):
     return {a: select_checkpoints(curves[a]) for a in ANCHORS}, ledger, {"max_abs_difference": difference, "changed_choices": changed}
 
 
-def fit_final(train, panels, indices, bundle, selection):
+def fit_final(train, panels, indices, bundle, selection, *, path_fitter=fit_path):
     reference = {"ridge": bundle["ridge"], "wait": bundle["wait"]["state_conditioned_pair"]}
     data, values = causal_data(train, reference), physical_values(train, panels, indices)
     models, fits = {}, {}
-    for kind in ANCHORS: models[kind], fits[kind], _ = fit_path(train, data, values, kind)
+    for kind in ANCHORS: models[kind], fits[kind], _ = path_fitter(train, data, values, kind)
     return {"reference": reference, "paths": models, "selection": selection}, fits
 
 
