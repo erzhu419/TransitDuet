@@ -75,3 +75,5 @@ The prototype is rejected, not promoted. No gate or ridge tuning on this bank.
 Next work needs a fleet-pool availability/service-commitment representation and
 short-horizon causal rollout with a separately validated tail value, rather
 than treating a local ETA margin or a small fitted regression as a hard budget.
+Final regression `t153356` passes 15 tests and separates actual launch/readiness
+changes from published-plan changes; all four-arm outcome totals are unchanged.
