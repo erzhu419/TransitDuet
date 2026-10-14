@@ -2,16 +2,19 @@
 
 ## Protocol
 
-- Run: `native_transit_stability_admission_stage236_development_20261015_r1`. Reuse all 32 Stage234 action ledgers and Stage235 diagnostic cells on the same 240-state/eight-future development bank.
-- Retain all 27 Stage234 controllers, including raw, cost-MSE and unfiltered mean/safe selection. Add future-only, prefix-only and joint admission for the two anchors and mean/safe selectors (39 controllers total).
-- Admit the original fixed candidate only if its original pooled per-source cost/wait improvement remains strict. Future-only checks both inner future halves; prefix-only checks deletion of each validation prefix; joint checks both. Subset cost/wait nonharm allows `1e-12` numerical boundaries; safe selection also requires nonincreased wait-worsening fraction. Subset reselected candidates are ignored.
-- Each cell's gate applies to every outer scope/source. Accepted actions/scores equal the old candidate; rejected ones equal raw. Preserve all four scopes, per-source and future-direction outcomes, admission counts and actual action switches. Reproduce all historical controls and Stage235 outer deltas exactly.
-- One unbound scheduler CPU task on node001-node006. Zero new fits, optimizer updates, model predictions or native episodes. Pull aggregate JSON only.
+- Run: `native_transit_stability_admission_stage236_development_20261015_r1`.
+- Reuse Stage234 actions and Stage235 curves: 27 controls plus 12 admission variants; zero training/rollouts. Check fixed candidates on both future halves, every prefix deletion, or both. Keep pooled strict improvement; allow subset cost/wait nonharm within `1e-12`, with nonincreased risk for safe selection. Rejected candidates use raw.
 
 ## Results
 
-Pending. Compare retained interventions and physical gains against raw and unfiltered controls, including accepted candidates that make no outer action change.
+- t153189 completed on node006; seven tests passed. Legacy choices/scores and 5130 aggregate metrics reproduced exactly. Only the 1.86 MB report was pulled.
+- Mixed-source raw-mean held-other cost/wait deltas: future-only **+1.779e-6 / +1.797e-5 min**; prefix-only/joint **-7.370e-7 / -1.563e-6 min**, from only **one** changed action in 960 cases. Joint raw-safe still increased cost **+8.388e-5**. Admission mainly removes interventions, not the tradeoff.
+- Jointly admitted `mixed_b/1/even_odd/1`, raw-safe rank3/strength1, worsened cost/wait on outer training states too. Single-source root401 raw-mean joint remained positive; root397 still increased wait. All scopes/source/future contrasts are retained in the report. Defaults unchanged.
+
+## Next
+
+Stop tightening admission. Freeze raw reference/feature coordinates and compare residual refits at 54/60 training states and 2/4 future draws. Track regression error and decision cost/wait on training/held scopes against the changing-reference path. Keep every source cell and the fixed grid.
 
 ## Limitations
 
-Development-cohort reuse and admission based on correlated OOF subsets do not yield independent performance CI. Prefix deletion removes validation records, not that prefix from all training fits. Returning to raw is abstention, not an algorithm improvement. Reference-refit and prefix-coverage effects remain confounded.
+Correlated development reuse gives no fresh CI. Deletions remove validation records only. Reference-refit and prefix-coverage effects remain confounded; raw fallback is abstention.
