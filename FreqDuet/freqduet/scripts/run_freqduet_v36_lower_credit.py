@@ -189,7 +189,9 @@ def run_branch(out_root, config, seed, scenario, anchor, times, label,
         raise ValueError("upper dispatch prefix was not observed")
     if any(not cap["trip_done"] or cap["transitions"] == 0 for cap in captures.values()):
         raise ValueError("target trip did not produce a complete lower return")
-    result = dict(episode=rows[0], captures=captures, values=value_rows,
+    # Compare CSV-normalized fields to the archived CSV (including empty cells).
+    episode = pd.read_csv(cell / "evaluation" / label / "evaluation.csv").iloc[0].to_dict()
+    result = dict(episode=episode, captures=captures, values=value_rows,
                   actions=runner.lower_trainer.policy_net.action_bins.flatten().tolist())
     del runner, models
     gc.collect()
