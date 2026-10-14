@@ -1,0 +1,120 @@
+{
+  "contract": {
+    "anchors": [
+      "original",
+      "raw"
+    ],
+    "boundary": "development_reused240_states8_draws_not_new_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "analytic_cost_fits": 640,
+      "clean_inner_reference_fits": 640,
+      "fit_tasks": 32,
+      "glm_fits": 640,
+      "network_updates": 384000,
+      "new_native_episodes": 0,
+      "positive_rank_solutions": 5120,
+      "raw_wait_updates": 384000,
+      "report_tasks": 1,
+      "residual_SVDs": 1280,
+      "residual_optimizer_updates": 0,
+      "reused_outer_paths": 64,
+      "reused_outer_references": 32,
+      "rl_actor_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "all15_Stage232_raw_and_raw_gate_rank_MSE_inherited_selection_controllers_exact_choices_and_scores",
+    "final": "frozen_Stage230_outer_paths_and_Stage226_references_only_inner_selector_changes",
+    "focus_key": [
+      "mixed_b",
+      1,
+      "even_odd",
+      0
+    ],
+    "inner": "20_clean54_state2_draw_reference_refits_and_two_anchor_TSVD_paths_validate6_unseen_prefix_states_other2_draws_inside_outer_training4",
+    "model_run": "native_transit_lowrank_joint_stage230_development_20261014_r1",
+    "normalization": "pool_physical_root_means_then_divide_own_training_RMS_same_Stage229_rule",
+    "objective": "unchanged_TSVD_cost_column_raw_logits_menu_wait_residual_unused_cost_MSE_for_prediction_diagnostic",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "ranks": [
+      0,
+      1,
+      3,
+      8,
+      16
+    ],
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "selection": "cost_MSE_or_strict_cost_wait_improvement_each_root_or_same_plus_nonincreased_wait_worsening_fraction_each_root",
+    "source_protocol": "native_transit_cost_gate_stage232_v1",
+    "source_run": "native_transit_cost_gate_stage232_development_20261014_r1",
+    "storage": "raw_models_panels_stay_remote_write_only_new_selection_and_result_pull_aggregate",
+    "ties": "lower_rank_exact_ties_raw_hold_if_no_strict_cost_wait_improvement_zero_exactly_raw",
+    "variants": [
+      "raw",
+      "raw_gate_original_zero",
+      "raw_gate_original_rank1",
+      "raw_gate_original_rank3",
+      "raw_gate_original_rank8",
+      "raw_gate_original_rank16",
+      "raw_gate_original_mse",
+      "raw_gate_original_selected",
+      "raw_gate_raw_zero",
+      "raw_gate_raw_rank1",
+      "raw_gate_raw_rank3",
+      "raw_gate_raw_rank8",
+      "raw_gate_raw_rank16",
+      "raw_gate_raw_mse",
+      "raw_gate_raw_selected",
+      "cost_rank_original_cost_mse",
+      "cost_rank_original_mean_selected",
+      "cost_rank_original_safe_selected",
+      "cost_rank_raw_cost_mse",
+      "cost_rank_raw_mean_selected",
+      "cost_rank_raw_safe_selected"
+    ]
+  },
+  "protocol": "native_transit_cost_rank_stage233_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "410a0c2c8a19abfaa832ecce93a7060fbb5963e3"
+}

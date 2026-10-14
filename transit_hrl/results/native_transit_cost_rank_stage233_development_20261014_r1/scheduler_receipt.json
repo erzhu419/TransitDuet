@@ -1,0 +1,313 @@
+{
+  "budget": {
+    "analytic_cost_fits": 640,
+    "clean_inner_reference_fits": 640,
+    "fit_tasks": 32,
+    "glm_fits": 640,
+    "network_updates": 384000,
+    "new_native_episodes": 0,
+    "positive_rank_solutions": 5120,
+    "raw_wait_updates": 384000,
+    "report_tasks": 1,
+    "residual_SVDs": 1280,
+    "residual_optimizer_updates": 0,
+    "reused_outer_paths": 64,
+    "reused_outer_references": 32,
+    "rl_actor_updates": 0
+  },
+  "control_reproduction": {
+    "changed_choices": 0,
+    "choice_comparisons": 115200,
+    "max_abs_difference": 0.0,
+    "score_comparisons": 230400
+  },
+  "default_changed": false,
+  "inner_reference_max_abs_difference": 0.0,
+  "protocol": "native_transit_cost_rank_stage233_v1",
+  "pull": {
+    "aggregate_report_bytes": 611894,
+    "model_weights": 0,
+    "raw_panels": 0
+  },
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "410a0c2c8a19abfaa832ecce93a7060fbb5963e3",
+  "tasks": [
+    {
+      "exit_code": 0,
+      "id": "t152602",
+      "log_path": "/tmp/sched_t152602.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152603",
+      "log_path": "/tmp/sched_t152603.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152604",
+      "log_path": "/tmp/sched_t152604.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152605",
+      "log_path": "/tmp/sched_t152605.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152606",
+      "log_path": "/tmp/sched_t152606.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152607",
+      "log_path": "/tmp/sched_t152607.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152608",
+      "log_path": "/tmp/sched_t152608.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152609",
+      "log_path": "/tmp/sched_t152609.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_397/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152610",
+      "log_path": "/tmp/sched_t152610.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152611",
+      "log_path": "/tmp/sched_t152611.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152612",
+      "log_path": "/tmp/sched_t152612.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152613",
+      "log_path": "/tmp/sched_t152613.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152614",
+      "log_path": "/tmp/sched_t152614.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152615",
+      "log_path": "/tmp/sched_t152615.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152616",
+      "log_path": "/tmp/sched_t152616.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152617",
+      "log_path": "/tmp/sched_t152617.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/root_401/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152618",
+      "log_path": "/tmp/sched_t152618.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152619",
+      "log_path": "/tmp/sched_t152619.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152620",
+      "log_path": "/tmp/sched_t152620.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152621",
+      "log_path": "/tmp/sched_t152621.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152622",
+      "log_path": "/tmp/sched_t152622.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152623",
+      "log_path": "/tmp/sched_t152623.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152624",
+      "log_path": "/tmp/sched_t152624.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152625",
+      "log_path": "/tmp/sched_t152625.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_a/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152626",
+      "log_path": "/tmp/sched_t152626.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/0/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152627",
+      "log_path": "/tmp/sched_t152627.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/0/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152628",
+      "log_path": "/tmp/sched_t152628.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/0/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152629",
+      "log_path": "/tmp/sched_t152629.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/0/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152630",
+      "log_path": "/tmp/sched_t152630.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/1/first_last/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152631",
+      "log_path": "/tmp/sched_t152631.log",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/1/first_last/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152632",
+      "log_path": "/tmp/sched_t152632.log",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/1/even_odd/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152633",
+      "log_path": "/tmp/sched_t152633.log",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/fit/mixed_b/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t152634",
+      "log_path": "/tmp/sched_t152634.log",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_cost_rank_stage233_v1/native_transit_cost_rank_stage233_development_20261014_r1/report",
+      "status": "done"
+    }
+  ],
+  "tests_passed": 8
+}
