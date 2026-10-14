@@ -54,6 +54,20 @@ class CostObjectiveTest(unittest.TestCase):
         np.testing.assert_array_equal(zero, np.zeros(1))
         self.assertEqual(ledger['iterations'], 0)
 
+    def test_quadratic_ball_matches_analytic_solution_without_barrier_error(self):
+        matrix = np.diag([1., 2., 4.])
+        desired = np.array([2., 1., -1.])
+        def loss(t):
+            d = t-desired
+            return float(d@matrix@d/2), matrix@d
+        theta, fit = learning.quadratic_fit(loss, lambda t: matrix, np.array([1., 0., 0.]))
+        self.assertAlmostEqual(np.linalg.norm(theta), 1., places=10)
+        self.assertLess(fit['loss_after'], fit['loss_before'])
+        self.assertLessEqual(fit['optimality'], 1e-8)
+        at_optimum, fit = learning.quadratic_fit(loss, lambda t: matrix, desired)
+        np.testing.assert_array_equal(at_optimum, desired)
+        self.assertEqual(fit['loss_after'], 0.)
+
     def test_cached_reference_no_refit_and_all_mse_reproduces(self):
         with patch.object(learning.joint, 'fit_reference', side_effect=AssertionError('Raw reference retraining')):
             cell, cache = learning.compare_cell(*self.args)
@@ -137,7 +151,7 @@ class CostObjectiveTest(unittest.TestCase):
                         p = {'cases': count, 'variants': {v: {'cost_mse': float(n)} for v in learning.VARIANTS}}
                         return {'all': p, 'by_root': {'397': p}}
                     fit = [{'objective': o, 'level': '1', 'success': True, 'parameter_count': 1, 'retained_rank': 1,
-                        'iterations': 1, 'loss_before': 2., 'loss_after': 1., 'residual_rms_physical': 1., 'residual_rms_limit_physical': 1.} for o in learning.OBJECTIVES[1:]]
+                        'iterations': 1, 'optimality': 0., 'loss_before': 2., 'loss_after': 1., 'residual_rms_physical': 1., 'residual_rms_limit_physical': 1.} for o in learning.OBJECTIVES[1:]]
                     lookup[g, h] = len(trials)
                     trials.append({'removed_group': list(g) if g else None, 'half': h, 'training_states': n, 'training_draws': ds,
                         'fits': {k: copy.deepcopy(fit) for k in learning.joint.ANCHORS}, 'scopes': {s: stats(s) for s in learning.previous.SCOPES}})

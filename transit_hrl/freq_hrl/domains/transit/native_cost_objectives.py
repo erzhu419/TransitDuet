@@ -3,7 +3,7 @@
 import copy
 
 import numpy as np
-from scipy.optimize import minimize, NonlinearConstraint
+from scipy.optimize import brentq, root
 from scipy.special import expit
 
 from freq_hrl.domains.transit import native_refit_matrix as previous
@@ -11,7 +11,7 @@ from freq_hrl.domains.transit import native_refit_matrix as previous
 joint, strength = previous.joint, previous.strength
 OBJECTIVES = ("all_mse", "feasible_mse", "rank_regret")
 VARIANTS = ("raw", *(f"{o}_{a}_{m}" for o in OBJECTIVES for a in joint.ANCHORS for m in previous.diagnostic.FIELDS))
-MAX_ITERATIONS, GTOL = 400, 1e-9
+MAX_ITERATIONS, GTOL = 400, 1e-10
 
 
 def losses(z, offset, truth, eligible, anchor):
@@ -40,28 +40,84 @@ def losses(z, offset, truth, eligible, anchor):
     return {"feasible_mse": (mse, lambda theta: mse_hessian), "rank_regret": (rank, rank_hessian)}
 
 
-def constrained_fit(loss, hessian, initial):
+def finish_fit(loss, initial, theta, iterations):
     radius = float(np.linalg.norm(initial))
     start = loss(initial)[0]
     if radius == 0:
-        return initial.copy(), {"iterations": 0, "success": True, "loss_before": start, "loss_after": start, "radius": 0., "norm": 0.}
+        return initial.copy(), {"iterations": 0, "success": True, "loss_before": start, "loss_after": start,
+            "radius": 0., "norm": 0., "optimality": 0., "constraint_violation": 0.}
+    theta = theta*min(1., radius/max(np.linalg.norm(theta), 1e-30))
+    unit = theta/radius
+    end, gradient = loss(theta)
+    gradient = gradient*radius/max(start, 1e-12)
+    multiplier = max(0., -unit@gradient/max(unit@unit, 1e-30))
+    optimality = max(float(np.linalg.norm(gradient+multiplier*unit, ord=np.inf)), multiplier*max(0., 1-unit@unit))
+    if optimality > 1e-8 or end > start+1e-12*max(1., start):
+        raise ValueError(f"Projected objective not optimal: KKT={optimality}, loss {start} -> {end}")
+    return theta, {"iterations": iterations, "success": True, "loss_before": start, "loss_after": float(end),
+        "radius": radius, "norm": float(np.linalg.norm(theta)), "optimality": optimality,
+        "constraint_violation": max(0., float(unit@unit-1))}
+
+
+def quadratic_fit(loss, hessian, initial):
+    radius = float(np.linalg.norm(initial))
+    if radius == 0: return finish_fit(loss, initial, initial, 0)
+    matrix = hessian(np.zeros_like(initial))
+    eigenvalues, vectors = np.linalg.eigh(matrix)
+    eigenvalues = np.maximum(eigenvalues, 0.)
+    beta = vectors.T@(-loss(np.zeros_like(initial))[1])
+    positive = eigenvalues > eigenvalues.max()*len(initial)*np.finfo(float).eps
+    def solution(multiplier):
+        coefficients = np.zeros_like(beta)
+        valid = positive if multiplier == 0 else np.ones(len(beta), dtype=bool)
+        coefficients[valid] = beta[valid]/(eigenvalues[valid]+multiplier)
+        return vectors@coefficients
+    theta, iterations = solution(0.), 0
+    if np.linalg.norm(theta) > radius:
+        high = max(float(eigenvalues.max()), float(np.linalg.norm(beta)/radius), 1e-12)
+        while np.linalg.norm(solution(high)) > radius: high *= 2
+        multiplier, solved = brentq(lambda m: np.linalg.norm(solution(m))-radius, 0., high, xtol=1e-14, full_output=True)
+        theta, iterations = solution(multiplier), solved.iterations
+    if loss(initial)[0] < loss(theta)[0]: theta = initial.copy()
+    return finish_fit(loss, initial, theta, iterations)
+
+
+def constrained_fit(loss, hessian, initial):
+    radius = float(np.linalg.norm(initial))
+    start = loss(initial)[0]
+    if radius == 0: return finish_fit(loss, initial, initial, 0)
     normalization = max(start, 1e-12)
-    def objective(unit):
-        value, gradient = loss(radius*unit)
-        return value/normalization, gradient*radius/normalization
-    ball = NonlinearConstraint(lambda u: u@u, -np.inf, 1., jac=lambda u: 2*u[None, :],
-        hess=lambda u, v: 2*v[0]*np.eye(len(u)))
-    result = minimize(objective, initial/radius, jac=True, method="trust-constr",
-        hess=lambda u: hessian(radius*u)*radius**2/normalization, constraints=ball,
-        options={"maxiter": MAX_ITERATIONS, "gtol": GTOL, "xtol": 1e-12, "barrier_tol": 1e-10,
-            "initial_barrier_parameter": 1e-10, "initial_barrier_tolerance": GTOL})
-    unit = result.x/max(1., np.linalg.norm(result.x))
-    theta, end = radius*unit, loss(radius*unit)[0]
-    if not result.success or result.optimality > 1e-8 or result.constr_violation > 1e-8 or end > start+1e-8*max(1., start):
-        raise ValueError(f"Cost objective solve failed: {result.message}; loss {start} -> {end}")
-    return theta, {"iterations": int(result.nit), "success": bool(result.success), "loss_before": start,
-        "loss_after": end, "radius": radius, "norm": float(np.linalg.norm(theta)),
-        "optimality": float(result.optimality), "constraint_violation": float(result.constr_violation)}
+    warm, iterations = initial/radius, 0
+    def solve(multiplier):
+        nonlocal warm, iterations
+        def stationarity(unit):
+            return loss(radius*unit)[1]*radius/normalization+multiplier*unit
+        result = root(stationarity, warm, method="hybr",
+            jac=lambda u: hessian(radius*u)*radius**2/normalization+multiplier*np.eye(len(u)),
+            options={"maxfev": MAX_ITERATIONS, "xtol": GTOL})
+        if np.linalg.norm(stationarity(result.x), ord=np.inf) > 1e-9:
+            raise ValueError(f"Ranking dual solve not stationary: {result.message}")
+        warm = result.x
+        iterations += int(result.nfev)
+        return result.x.copy()
+    high = max(float(np.linalg.norm(loss(np.zeros_like(initial))[1])*radius/normalization), 1e-12)
+    unit = solve(high)
+    while np.linalg.norm(unit) > 1:
+        high *= 2
+        unit = solve(high)
+    low = high/2
+    lower = solve(low)
+    while np.linalg.norm(lower) < 1 and low > GTOL:
+        high, unit = low, lower
+        low /= 2
+        lower = solve(low)
+    if np.linalg.norm(lower) <= 1:
+        theta = radius*lower
+    else:
+        multiplier = brentq(lambda m: np.linalg.norm(solve(m))-1, low, high, xtol=1e-14)
+        theta = radius*solve(multiplier)
+    if loss(initial)[0] <= loss(theta)[0]: theta = initial.copy()
+    return finish_fit(loss, initial, theta, iterations)
 
 
 def fit_objectives(data, values, cached, levels):
@@ -88,7 +144,8 @@ def fit_objectives(data, values, cached, levels):
         initial = (vt[:k]@old)*s[:k]/np.sqrt(mask.sum())
         objectives = losses(z, offset, target, data["raw_logits"] <= 0, anchor)
         for name, (loss, hessian) in objectives.items():
-            theta, fit = constrained_fit(loss, hessian, initial)
+            solver = quadratic_fit if name == "feasible_mse" else constrained_fit
+            theta, fit = solver(loss, hessian, initial)
             models[name]["weights"][level][0] = (basis@theta).tolist()
             ledger.append({"objective": name, "level": level, "requested_rank": int(level), "retained_rank": k,
                 "parameter_count": k, "residual_rms_limit_physical": float(np.linalg.norm(initial)*scale),

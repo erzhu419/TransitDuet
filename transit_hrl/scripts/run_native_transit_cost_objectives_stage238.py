@@ -12,7 +12,7 @@ from scripts import run_native_transit_refit_matrix_stage237 as previous
 from freq_hrl.domains.transit import native_cost_objectives as learning
 from freq_hrl.experiments.pointmaze_root_response import raw_directory, write_json
 
-EXPERIMENT_PROTOCOL = "native_transit_cost_objectives_stage238_v2"
+EXPERIMENT_PROTOCOL = "native_transit_cost_objectives_stage238_v3"
 SOURCE_RUN = "native_transit_refit_matrix_stage237_development_20261015_r1"
 VIEWS, PARTITIONS, KEYS, CONFIGS = previous.VIEWS, previous.PARTITIONS, previous.KEYS, previous.CONFIGS
 training, joint = previous.training, learning.joint
@@ -31,9 +31,10 @@ def contract():
         "feasible_mse": "equal_state_MSE_over_nonanchor_actions_with_cached_raw_logit_le0_empty_states_zero_weight",
         "rank_regret": "equal_state_mean_feasible_pair_logistic_loss_weighted_by_absolute_training_cost_gap_divided_by_cached_cost_scale",
         "constraint": "unshrunk_fit_pair_residual_RMS_no_larger_than_cached_all_MSE_same_ball_for_all_objectives_no_tuned_penalty",
-        "optimizer": {"solver": "SciPy_trust_constr_analytic_Hessian", "max_iterations": learning.MAX_ITERATIONS, "gtol": learning.GTOL,
-            "xtol": 1e-12, "barrier_tol": 1e-10, "optimality_and_constraint_limit": 1e-8,
-            "initial_barrier_parameter": 1e-10, "initial_barrier_tolerance": learning.GTOL,
+        "optimizer": {"feasible_mse_solver": "analytic_quadratic_ball_eigendecomposition_SciPy_brentq",
+            "rank_solver": "ball_Lagrangian_dual_SciPy_hybr_stationarity_root_analytic_Hessian_and_brentq", "max_root_evaluations_per_dual_solve": learning.MAX_ITERATIONS,
+            "stationarity_root_xtol": learning.GTOL, "dual_root_xtol": 1e-14, "dual_stationarity_limit": 1e-9, "actual_KKT_limit": 1e-8,
+            "acceptance": "best_of_initial_and_projected_candidate_actual_KKT_le1e-8_and_loss_increase_le1e-12",
             "initial": "cached_all_MSE_coefficients", "alpha": "same_frozen_postfit_alpha_no_new_strength_selection"},
         "training_labels": "same54_or60_states_same2_or4_training_draws_no_held_prefix_or_other_future_labels",
         "gate": "cached_predicted_raw_gate_unchanged_true_wait_only_for_evaluation",
@@ -78,7 +79,8 @@ def qualify(result, key):
                 raise ValueError("Dropped selected-capacity objective solve")
             for f in fits:
                 if (not f["success"] or f["objective"] not in learning.OBJECTIVES[1:] or f["parameter_count"] != f["retained_rank"]
-                        or f["residual_rms_physical"] > f["residual_rms_limit_physical"]+1e-12 or f["loss_after"] > f["loss_before"]+1e-8*max(1., f["loss_before"])):
+                        or f["residual_rms_physical"] > f["residual_rms_limit_physical"]+1e-12 or f["optimality"] > 1e-8
+                        or f["loss_after"] > f["loss_before"]+1e-12*max(1., f["loss_before"])):
                     raise ValueError("Objective solver or matched capacity failed")
         for scope, stats in t["scopes"].items():
             n = t["training_states"] if scope == "fit_training" else 60
@@ -108,7 +110,7 @@ def summarize(results):
         "regression_case": {"key": list(previous.REGRESSION_KEY), "matrix": aggregate([results[previous.REGRESSION_KEY]["cell"]])},
         "reproduction": {"choice_comparisons": sum(r["choice_comparisons"] for r in checks), "changed_choices": sum(r["changed_choices"] for r in checks),
             **{f: max(r[f] for r in checks) for f in ("metric_max_abs_difference", "subspace_prediction_max_abs_difference")}},
-        "objective_solves": len(fits), "optimizer_iterations": sum(f["iterations"] for f in fits),
+        "objective_solves": len(fits), "solver_evaluations": sum(f["iterations"] for f in fits),
         **contract()["budget"], "default_changed": False, "native_deployment_eligible": False}
 
 
