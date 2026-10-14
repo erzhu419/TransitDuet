@@ -11,8 +11,8 @@ from audit_freqduet_v36_joint_space import PRIMARY, SYSTEM_OUTCOMES, joint_space
 
 class JointSpaceTest(unittest.TestCase):
     def frame(self, triples):
-        return pd.DataFrame([dict(action_s=5 * i, **{m: 0.0 for m in SYSTEM_OUTCOMES},
-                                  **dict(zip(PRIMARY, triple))) for i, triple in enumerate(triples)])
+        return pd.DataFrame([{"action_s": 5 * i, **{m: 0.0 for m in SYSTEM_OUTCOMES},
+                              **dict(zip(PRIMARY, triple))} for i, triple in enumerate(triples)])
 
     def test_cannot_buy_journey_with_worse_cv_or_readiness(self):
         frame = self.frame([(10, .2, 100), (9, .21, 80), (9.5, .19, 90), (8, .19, 110)])
