@@ -299,6 +299,10 @@ def assert_same_state(left, right, label="state") -> None:
     elif isinstance(left, np.ndarray):
         if not np.array_equal(left, right, equal_nan=True):
             raise AssertionError(f"checkpoint array differs: {label}")
+    elif (isinstance(left, (float, np.floating))
+          and isinstance(right, (float, np.floating))
+          and np.isnan(left) and np.isnan(right)):
+        pass
     elif left != right:
         raise AssertionError(f"checkpoint value differs: {label}")
 
