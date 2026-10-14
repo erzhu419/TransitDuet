@@ -73,3 +73,12 @@ Optimized source is isolated in `FreqDuet-v6-engineering-v9-runtime-optimized`.
 Next: finish the original V34 matrix and paired aggregation; use the verified
 runtime optimization for subsequent experiments. Models and profiles stay on
 the server; only small benchmark/training summary JSON files are retrieved.
+
+At the user's request, the remaining 35 original workers and old aggregation
+were cancelled. Audit `t152546` confirms all 36 trainings completed 200 episodes;
+141 checkpoint evaluations are complete and 39 remain. Replacement evaluations
+`t152549-t152587` use the verified optimized snapshot, retaining all training
+checkpoints and completed evaluations. Two completion tests pass (`t152548`).
+Aggregation `t152588` waits for the 39 replacement markers and preserves the
+original analysis and historical-endpoint check. Runtime provenance is recorded
+separately; no training is restarted and no experiment protocol is changed.
