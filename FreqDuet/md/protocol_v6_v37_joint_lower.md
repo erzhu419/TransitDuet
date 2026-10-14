@@ -47,4 +47,28 @@ including V35 reference, V36 first-only, exact first/second prefixes and second
 actor noop. Formal CPU batches `t153201-t153205` use scheduler-sized workers
 19/8/19/19/19 on node001/node002/node004/node005/node006, one parallel wave.
 Aggregation `t153206` waits for five small `batch_done.json` exports; per-shard
-records and ready markers remain server-side. Formal results are pending.
+records and ready markers remain server-side. All five batches and aggregation
+completed with exit code zero: 12 contexts, 588 pairs and 756 rollouts; all
+prefix, V36 first-only and actor-noop checks passed. The five exports totaled
+3,486 bytes; three result summaries totaled 17,433 bytes. No checkpoints or
+raw rollout tables returned locally.
+
+## Outcome And Next Step
+
+On the same 12 contexts, hindsight feasible journey minima give:
+
+| Comparison | Journey delta, min | CV delta | Readiness delta, s |
+| --- | ---: | ---: | ---: |
+| Best single at either decision vs actor | -0.023546 | -0.001825 | -2.777354 |
+| Joint vs actor | -0.042266 | -0.003233 | -5.557888 |
+| Joint constrained not to harm best single | -0.018622 | -0.001425 | -2.713740 |
+
+Joint Pareto improvements exist in 9/12 contexts versus the actor and 5/12
+versus the selected best single; strict three-endpoint improvements exist in
+7/12 and 3/12 respectively. About 90% of the incremental journey gain comes
+from one context (train 933013, scenario 45007, 2 h); two other improvements
+are below 0.0004 min. These are localized hindsight opportunities, not broad
+controller gains or confirmation against fixed. Next explain that operational
+context and its joint actions, then test a causal joint-action score using
+deployment-visible state before launching a training sweep. Critic calibration
+and the cross-trip objective remain unresolved.
