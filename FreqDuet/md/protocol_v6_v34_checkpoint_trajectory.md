@@ -35,14 +35,20 @@ All training, smoke, and aggregation run through scheduleurm on node001-node006.
 Model snapshots and checkpoints stay on the server. Only the small summary
 CSV/JSON files are eligible for local retrieval.
 
-Server smoke: `t151969` on node004. The five pairing, grid, scenario, and
-instrumentation tests passed; checkpoint-save equivalence is running.
-The formal trajectories wait for its small success marker. A scheduler task
-freezes the diagnostic script on the shared server filesystem and releases the
-workers only after smoke passes; aggregation waits for all 36 completion
-markers. This keeps the full sequence visible in tui-top.
+Server smoke `t151969` passed five tests, but its equivalence comparison
+incorrectly required configuration metadata to match across different save
+frequencies and logging paths. The failure left the formal matrix waiting for
+its success marker. Fix `0a5542347a` validates each saved configuration against
+its runtime configuration and omits cached diagnostic timing, then compares all
+operational deployment state and complete actor/critic checkpoints. Inspection
+`t152019` found only configuration identifiers and wall-clock timing differed.
+Recovery `t152020` reused the saved models: eight regression tests, all three
+checkpoint comparisons, and both frozen evaluations passed. Its success marker
+was synchronized and the obsolete V34 failure escalations were resolved.
 
-Dispatch: diagnostic source `2a08394209`; smoke-release task `t151971`,
+Dispatch: diagnostic source `0a5542347a`; recovery/release task `t152020`,
 36 trajectories `t151972-t152007`, and aggregation `t152008`. Every task is
-restricted to node001-node006. Formal trajectories currently await smoke;
-there is no new efficacy result or change to the paper controller yet.
+restricted to node001-node006. All 36 trajectories are running: six each on
+node001/node002 and eight each on node004/node005/node006. Node003 was full, so
+the scheduler used other allowed nodes. Only aggregation awaits completion.
+There is no new efficacy result or change to the paper controller yet.

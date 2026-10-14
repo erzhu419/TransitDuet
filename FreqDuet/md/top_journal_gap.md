@@ -1,9 +1,10 @@
 # FreqDuet Top-Journal Gap Backlog
 
-> **2026-10-14 V34 duration diagnostic:** server smoke `t151969` passed five
-> pairing/scenario/instrumentation tests and is checking checkpoint-save
-> equivalence. Tasks `t151972-t152007` are queued for 36 locked-V9 training
-> trajectories and 2,160 frozen rollouts; `t151971` releases them after smoke,
+> **2026-10-14 V34 duration diagnostic:** the original smoke failed on an
+> expected configuration/log-timing difference. Recovery task `t152020` passed
+> eight tests, operational checkpoint equality, and both frozen evaluations.
+> Tasks `t151972-t152007` are running 36 locked-V9 training trajectories and
+> 2,160 frozen rollouts on node001/node002/node004/node005/node006,
 > and `t152008` aggregates server-side after all trajectories finish. This
 > development diagnostic leaves the current paper result and evidence decision
 > unchanged. See `protocol_v6_v34_checkpoint_trajectory.md` for the frozen design.
