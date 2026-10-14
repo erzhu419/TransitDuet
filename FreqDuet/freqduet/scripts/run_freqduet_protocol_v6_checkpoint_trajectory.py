@@ -288,20 +288,36 @@ def assert_same_state(left, right, label="state") -> None:
         raise AssertionError(f"checkpoint value differs: {label}")
 
 
-def smoke(model_root: Path, out_root: Path) -> None:
+def assert_same_deployment(left: dict, right: dict, expected_fingerprints) -> None:
+    states = []
+    for state, expected in zip((left, right), expected_fingerprints):
+        if state["config_fingerprint_sha256"] != expected:
+            raise AssertionError("checkpoint does not match its instrumentation configuration")
+        states.append({key: value for key, value in state.items()
+                       if key != "config_fingerprint_sha256"})
+    assert_same_state(*states)
+
+
+def verify_smoke(model_root: Path, out_root: Path) -> None:
     _, Runner, load_config, torch = locked_runtime(model_root)
     os.environ.pop("FREQDUET_SUPPRESS_HEAVY_ARTIFACTS", None)
     config = load_config(str(model_root / "configs_freqduet" / f"{CURRENT}.yaml"))
     seed = V9_TRAIN_SEEDS[0]
+    expected_fingerprints = []
     for label, frequency in (("intermediate", 1), ("final_only", 0)):
         seed_runtime(torch, seed)
         runner = Runner(runtime_config(config, seed, out_root / label, frequency), device="cpu")
-        runner.train(total_episodes=2)
+        expected_fingerprints.append(runner.config_fingerprint_sha256)
         del runner
     for component in ("lower", "upper", "runner"):
         files = [out_root / label / f"{CURRENT}_seed{seed}/checkpoints/{component}_ep1.pt"
                  for label in ("intermediate", "final_only")]
-        assert_same_state(*(torch.load(path, map_location="cpu", weights_only=False) for path in files))
+        states = [torch.load(path, map_location="cpu", weights_only=False) for path in files]
+        if component == "runner":
+            assert_same_deployment(*states, expected_fingerprints)
+        else:
+            assert_same_state(*states)
+        print(f"CHECKPOINT_SAVE_EQUIVALENT component={component}", flush=True)
     for checkpoint in (0, 1):
         seed_runtime(torch, seed)
         runner = Runner(runtime_config(config, seed, out_root / "intermediate", 1), device="cpu")
@@ -319,9 +335,22 @@ def smoke(model_root: Path, out_root: Path) -> None:
     print("TRAJECTORY_SMOKE_PASS", flush=True)
 
 
+def smoke(model_root: Path, out_root: Path) -> None:
+    _, Runner, load_config, torch = locked_runtime(model_root)
+    os.environ.pop("FREQDUET_SUPPRESS_HEAVY_ARTIFACTS", None)
+    config = load_config(str(model_root / "configs_freqduet" / f"{CURRENT}.yaml"))
+    seed = V9_TRAIN_SEEDS[0]
+    for label, frequency in (("intermediate", 1), ("final_only", 0)):
+        seed_runtime(torch, seed)
+        runner = Runner(runtime_config(config, seed, out_root / label, frequency), device="cpu")
+        runner.train(total_episodes=2)
+        del runner
+    verify_smoke(model_root, out_root)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("run", "smoke", "aggregate"))
+    parser.add_argument("command", choices=("run", "smoke", "verify-smoke", "aggregate"))
     parser.add_argument("--model-root", type=Path, default=MODEL_ROOT)
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--config", choices=CONFIGS)
@@ -334,6 +363,8 @@ def main() -> None:
         run_trajectory(args.model_root, args.out_root, args.config, args.train_seed)
     elif args.command == "smoke":
         smoke(args.model_root, args.out_root)
+    elif args.command == "verify-smoke":
+        verify_smoke(args.model_root, args.out_root)
     else:
         aggregate(args.out_root, args.model_root)
 

@@ -5,6 +5,7 @@ import pandas as pd
 
 from scripts.run_freqduet_protocol_v6_checkpoint_trajectory import (
     METRICS,
+    assert_same_deployment,
     checkpoint_change,
     paired_trajectory,
     runtime_config,
@@ -58,6 +59,19 @@ class CheckpointTrajectoryTest(unittest.TestCase):
         self.assertEqual(result["training"]["updates"], 100)
         self.assertEqual(result["training"]["checkpoint_freq"], 40)
         self.assertNotIn("checkpoint_freq", config["training"])
+
+    def test_instrumentation_metadata_is_validated_separately(self):
+        left = {"config_fingerprint_sha256": "intermediate", "belief": [0.25, 0.75]}
+        right = {"config_fingerprint_sha256": "final-only", "belief": [0.25, 0.75]}
+        assert_same_deployment(left, right, ("intermediate", "final-only"))
+        with self.assertRaisesRegex(AssertionError, "instrumentation configuration"):
+            assert_same_deployment(left, right, ("unexpected", "final-only"))
+
+    def test_deployment_difference_still_fails(self):
+        left = {"config_fingerprint_sha256": "intermediate", "belief": [0.25, 0.75]}
+        right = {"config_fingerprint_sha256": "final-only", "belief": [0.5, 0.5]}
+        with self.assertRaisesRegex(AssertionError, "checkpoint value differs"):
+            assert_same_deployment(left, right, ("intermediate", "final-only"))
 
 
 if __name__ == "__main__":
