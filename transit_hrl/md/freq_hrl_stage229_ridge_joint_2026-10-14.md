@@ -12,7 +12,15 @@
 
 ## Results
 
-Pending. Compare ridge versus zero residual, frozen linear and nonlinear errors, selected shrinkage/df, and held physical cost/wait versus raw before changing any default.
+- t152248-t152279 fits and t152280 report all exited 0; 28 tests passed. All 1820 frozen-control comparisons and inner raw references reproduced exactly. Pulled report: 1,452,677 bytes; raw panels/model weights: zero.
+- Final designs have numerical rank 149-150 but participation effective rank about 3-3.5; 8-9 modes contain 95% of feature energy. Strong gamma=1000 has about 0.187 effective df/head, versus 34-36 at gamma=0.01. Nominal parameter count substantially overstates independent feature directions.
+- Equal-weight four-view raw-anchor held-other MSE: zero residual **1.239783**, weak ridge **1.924226**, strongest ridge **1.239732**, inner-MSE-selected ridge **1.243683**. Explicit shrinkage controls overfit but gives no meaningful aggregate prediction gain. MSE selection chooses zero in 17/32 original and 14/32 raw cells; most other selections strongly shrink the residual.
+- Under the original anchor, weak ridge wait error improves on a new future within training prefixes in all four views (pooled **-7.86%**) but worsens on held prefixes in all four (**+57.00%**). Cost error worsens within training prefixes on new futures in all four (pooled **+14.13%**). There is within-prefix wait signal; neither complete signal absence nor missing nonlinear capacity alone explains the failure.
+- Joint-selected ridge original/raw are negative on cost and wait versus the original action in 8/8 mixed future directions. Raw-anchor ridge beats raw on both axes in **0/8**; 15/16 mixed fitting cells hold raw. Its mixed pooled cost/wait **-0.00223780/-0.00401120 min** is slightly worse than raw **-0.00224017/-0.00445885 min**. Root401 original-anchor gains in 2/4 directions remain source-local.
+
+## Next
+
+Keep the default unchanged. Compare a frozen-cost, training-only low-rank wait residual against a matched dual-head low-rank residual. This isolates unnecessary cost refitting from fitting weak feature modes and tests held-prefix transfer, rather than expanding the ridge grid or training longer.
 
 ## Limitations
 
