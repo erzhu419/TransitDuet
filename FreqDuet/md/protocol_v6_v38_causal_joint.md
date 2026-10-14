@@ -25,8 +25,10 @@ There is no vehicle reassignment. Trip 38 returns at 9120 s in both reference
 and joint; trip 40 returns at 9557/9584 s, delaying its next departure by 27 s.
 Before both reference returns, joint waiting/onboard exposure increases by
 1174/3144 person-seconds; afterward it decreases by 170221/80257 person-seconds.
-There are 1423 changed subsequent holding commands and -8025 backlog trip-seconds
-after that cut. The evidence supports a later policy-path cascade, not an
+There are 1423 changed holding commands, including the two interventions;
+the induced subsequent commands sum to -1465 s, giving the net -1405 s.
+Backlog exposure changes by -8025 trip-seconds after that cut. The evidence
+supports a later policy-path cascade, not an
 immediate fleet-readiness benefit. Only the 40205-byte mechanism summary returns.
 
 Use current APC/AVL, observed past movement and holding, terminal inventory,
@@ -68,6 +70,7 @@ match V37. Scorer source `2e11f970ea` passes 14 tests in `t153310` and retains
 all contexts. Causal joint selection gives journey +0.016058 min, CV +0.000517,
 readiness +5.158715 s; 0/12 joint improvements and 7/12 actual constraint
 violations. First-only/second-only journey deltas are +0.007614/+0.003820 min.
+The dominant held-out context retains (0, 0), missing its (15, 45) opportunity.
 The prototype is rejected, not promoted. No gate or ridge tuning on this bank.
 Next work needs a fleet-pool availability/service-commitment representation and
 short-horizon causal rollout with a separately validated tail value, rather
