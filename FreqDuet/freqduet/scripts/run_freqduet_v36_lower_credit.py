@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import random
+import sys
 
 import numpy as np
 import pandas as pd
@@ -302,6 +303,7 @@ def aggregate(out_root):
     if values.duplicated([*KEYS, "model_ep", "action_s"]).any() or rollouts.duplicated([*KEYS, "action_s"]).any():
         raise ValueError("duplicate lower-credit action records")
     pairs = preference_pairs(values, rollouts)
+    sys.path.insert(0, str(MODEL_ROOT))
     from scripts.run_freqduet_protocol_v2_matrix import hierarchical_interval
     summary = []
     primary = ("action_delta_s", "headway_cv", "restricted_total_journey_horizon_min",
@@ -338,7 +340,9 @@ def aggregate(out_root):
                   training_runs=0, independent_confirmation=False,
                   unchanged_controls_match_v35=True, exact_prefixes=True,
                   return_scope="deterministic remaining target trip; not stochastic soft-Q calibration",
-                  diagnostic_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))
+                  rollout_diagnostic_commits=sorted({
+                      json.loads(path.read_text())["diagnostic_commit"] for path in ready_paths}),
+                  aggregation_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))
     (target / "status.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result), flush=True)
 
