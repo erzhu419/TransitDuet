@@ -123,12 +123,12 @@ def summarize(results, views):
         **contract()["budget"], "native_deployment_eligible":False}
 
 
-def reproduce_controls(result, prior):
+def reproduce_controls(result, prior, *, names=joint.VARIANTS):
     differences = []
     for view in VIEWS:
         for scope in SCOPES:
             a,b = result["views"][view]["scopes"][scope],prior["views"][view]["scopes"][scope]
-            for name in joint.VARIANTS:
+            for name in names:
                 for m in ("mean_cost","mean_wait_min","changed_fraction","unsafe_fraction","switch_fraction_to_raw"):
                     differences.append(abs(a["variants"][name][m]-b["variants"][name][m]))
                 if name in joint.CONTROLS:
@@ -136,9 +136,9 @@ def reproduce_controls(result, prior):
                 else:
                     ae,be = a["joint_prediction_errors"][name],b["joint_prediction_errors"][name]
                     if ae["cases"]!=be["cases"] or (ae["normalized_mse"] is None)!=(be["normalized_mse"] is None):
-                        raise ValueError("Frozen nonlinear prediction coverage changed")
+                        raise ValueError("Frozen source prediction coverage changed")
                     if ae["normalized_mse"] is not None: differences.append(abs(ae["normalized_mse"]-be["normalized_mse"]))
-    if max(differences)>1e-12: raise ValueError("Frozen Stage227 controller or path changed")
+    if max(differences)>1e-12: raise ValueError("Frozen source controller or path changed")
     return {"comparisons":len(differences), "max_abs_difference":max(differences)}
 
 

@@ -141,6 +141,11 @@ def select_checkpoints(curves):
 
 
 def collect(train, panels, indices, reused_oof, *, path_fitter=fit_path):
+    curves, ledger, reproduction = collect_paths(train, panels, indices, reused_oof, path_fitter=path_fitter)
+    return {a: select_checkpoints(curves[a]) for a in ANCHORS}, ledger, reproduction
+
+
+def collect_paths(train, panels, indices, reused_oof, *, path_fitter):
     batch = binding.learned.neural.batches(train)
     curves, ledger, predictions = {a: [] for a in ANCHORS}, [], []
     halves = (tuple(indices[:2]), tuple(indices[2:]))
@@ -169,7 +174,7 @@ def collect(train, panels, indices, reused_oof, *, path_fitter=fit_path):
         reused_oof["costs"], reused_oof["state_conditioned_pair"], reused_oof["originals"])))
     if difference > 1e-12 or changed or not np.array_equal(originals, reused_oof["originals"]) or not np.array_equal(roots, reused_oof["roots"]):
         raise ValueError("Clean inner raw references failed Stage223 OOF reproduction")
-    return {a: select_checkpoints(curves[a]) for a in ANCHORS}, ledger, {"max_abs_difference": difference, "changed_choices": changed}
+    return curves, ledger, {"max_abs_difference": difference, "changed_choices": changed}
 
 
 def fit_final(train, panels, indices, bundle, selection, *, path_fitter=fit_path):

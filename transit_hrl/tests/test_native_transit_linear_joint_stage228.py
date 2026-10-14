@@ -168,7 +168,7 @@ class LinearJointTest(unittest.TestCase):
         a,b = report(),report()
         self.assertEqual(spec.reproduce_controls(a,b)['max_abs_difference'],0.)
         b['views']['mixed_a']['scopes']['held_other']['variants']['pair_raw_selected']['mean_cost'] = 1.
-        with self.assertRaisesRegex(ValueError,'Frozen Stage227'): spec.reproduce_controls(a,b)
+        with self.assertRaisesRegex(ValueError,'Frozen source'): spec.reproduce_controls(a,b)
         for key in (spec.KEYS[0],(None,None,None,None)):
             task = task_specification('unit_linear_joint',*key)
             self.assertEqual((task['cpu'],task['ram_mb']),(1,3072))
