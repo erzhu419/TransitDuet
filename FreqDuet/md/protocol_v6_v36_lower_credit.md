@@ -94,3 +94,37 @@ then match continuation, entropy and terminal semantics before judging critic
 calibration. The frozen runner passes reward_scale=1.0, so reward scaling alone
 is not an established mismatch here. A small joint-action feasibility study
 should precede any slack/MPC redesign or further large training campaign.
+
+## Fixed-state actor alignment
+
+Analysis source `ee9b043755` reads existing records only. Regression `t153191`
+passed six tests; analysis `t153193` completed on node004 with exit code zero:
+864 contexts, 1,728 state/model pairs, zero new rollouts or training. The first
+test launch (`t153190`) preceded source delivery and failed before running tests;
+the staged replacement passed. Only 172,338 bytes of summaries returned locally.
+
+For each state, energy is `-Q_mean + pessimism + lambda * Q_cost`. Compare the
+actor with its own energy minimizer and ideal fixed-score Boltzmann distribution;
+average contexts within each train/scenario before the existing crossed bootstrap.
+
+| Main continuation | KL, model 40 -> 200 | Energy regret, model 40 -> 200 |
+| --- | --- | --- |
+| 40 | 0.229746 -> 0.065936 | 0.027747 -> 0.012496 |
+| 200 | 0.203761 -> 0.064063 | 0.022046 -> 0.013041 |
+
+At continuation 200, the paired KL change is -0.139697 [-0.236860, -0.067350].
+The late actor still differs from its energy minimizer in 59/144 states, but
+its mean energy regret is 0.013041 [0.007555, 0.020162]. Substituting that one
+energy-minimizing action changes journey by +0.003074 [-0.006136, 0.017221] min,
+holding/trip by +0.005169 [-0.206902, 0.219867] s, and readiness delay by
++0.635973 [-0.572288, 2.845678] s. Neither continuation shows a clear journey
+benefit for this substitution. Both controls also have lower late-model KL.
+
+The recorded late actor is closer to its own score target, not increasingly
+misaligned with it. Scores and temperature also change with training, so this
+is not proof of optimizer convergence, critic accuracy or actor irrelevance.
+There is no basis here to prioritize another actor projection as the repair.
+Next inspect joint passenger/regularity/readiness improvement space in the
+existing action bank, then freeze a small two-related-decision search; use
+matched stochastic-value calibration where needed to distinguish critic error
+from the missing cross-trip system objective. Do not launch another training sweep.
