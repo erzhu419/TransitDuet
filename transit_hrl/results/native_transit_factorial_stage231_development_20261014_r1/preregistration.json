@@ -1,0 +1,104 @@
+{
+  "contract": {
+    "anchors": [
+      "original",
+      "raw"
+    ],
+    "arms": [
+      "base",
+      "cost",
+      "wait",
+      "joint"
+    ],
+    "boundary": "development_reused_states_futures_predictor_ablation_not_new_CI_or_end_to_end_HRL",
+    "budget": {
+      "analysis_tasks": 32,
+      "network_updates": 0,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "residual_SVDs": 0,
+      "reused_lowrank_paths": 64,
+      "reused_raw_references": 32,
+      "rl_actor_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "reproduce_frozen_raw_and_all_fixed_rank_base_wait_joint_choices_and_physical_scores_at_each_future_half",
+    "diagnostics": "physical_cost_wait_switches_added_removed_feasible_candidates_by_source_future_and_predeclared_rank8_focus",
+    "effects": "cost_only_minus_base_wait_only_minus_base_joint_minus_base_interaction_joint_minus_cost_only_minus_wait_only_plus_base",
+    "focus_key": [
+      "mixed_b",
+      1,
+      "even_odd",
+      0
+    ],
+    "interventions": "base_cost_base_wait__learned_cost_base_wait__base_cost_learned_wait__learned_cost_learned_wait",
+    "modes": [
+      "zero",
+      "rank1",
+      "rank3",
+      "rank8",
+      "rank16",
+      "mse",
+      "selected"
+    ],
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "prediction": "same_frozen_cost_wait_heads_toggle_cost_and_wait_residual_independently_anchor_first_ties",
+    "ranks": [
+      0,
+      1,
+      3,
+      8,
+      16
+    ],
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "selection": "reuse_joint_MSE_and_joint_selected_rank_exactly_for_all_four_arms_no_cost_only_reselection_raw_hold_for_all_if_None",
+    "source_protocol": "native_transit_lowrank_joint_stage230_v1",
+    "source_run": "native_transit_lowrank_joint_stage230_development_20261014_r1",
+    "storage": "frozen_models_and_panels_remote_only_pull_compact_aggregate_no_new_weights"
+  },
+  "protocol": "native_transit_factorial_stage231_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "3332ff2ac5f7e507f2ae8604266b4e80ef757e4d"
+}
