@@ -127,6 +127,7 @@ class PrecisionTest(unittest.TestCase):
             results[key] = {"protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(), "key": list(key), "software_qualified": True, "cell": cell}
         report = spec.summarize(results, views)
         self.assertTrue(all(v["scopes"]["held_other"]["prediction_cases"] == 960 and v["scopes"]["held_other"]["unique_states"] == 120 for v in report["views"].values()))
+        self.assertTrue(all(m["prediction_cases"] == 480 and m["unique_states"] == 120 for v in report["views"].values() for m in v["by_deployment_subhalf"].values()))
         self.assertEqual(report["wait_residual_updates"], 691200)
         cells = results[spec.KEYS[0]]["cell"]["scopes"]["held_other"]
         cells[0]["deployment_subhalf"] = 1

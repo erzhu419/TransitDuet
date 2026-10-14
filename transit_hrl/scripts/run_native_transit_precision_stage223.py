@@ -137,6 +137,7 @@ def summarize(results, views):
         if any(len(rs) != 960 or len({learning.base.base.base.state_key(r) for r in rs}) != 120 for rs in scopes.values()):
             raise ValueError("Changed correlated subhalf/future coverage")
         output[view] = {"scopes": {s: metrics(rs) for s, rs in scopes.items()},
+            "by_deployment_subhalf": {str(h): metrics([r for r in scopes["held_other"] if r["deployment_subhalf"] == h]) for h in (0, 1)},
             "held_other_by_root": {str(root): metrics([r for r in scopes["held_other"] if r["root"] == root]) for root in sorted({r["root"] for r in views[view]})},
             "by_future_direction": {f"{p}/{d}": metrics([r for c in cells if c["partition"] == p and c["direction"] == d
                 for r in c["scopes"]["held_other"]]) for p in PARTITIONS for d in (0, 1)},
