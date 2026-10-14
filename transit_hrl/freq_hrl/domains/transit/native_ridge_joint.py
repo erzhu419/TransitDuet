@@ -50,12 +50,12 @@ def fit_path(rows, data, values, kind, *, validation=None):
     return model,fit,curves
 
 
-def select(curves, ledger, kind):
+def select(curves, ledger, kind, *, levels=LEVELS):
     roots = sorted({str(f["held_group"][0]) for f in ledger})
     scales = {r:np.average([f["fits"][kind]["scales"] for f in ledger if str(f["held_group"][0])==r],axis=0,
         weights=[f["held_states"] for f in ledger if str(f["held_group"][0])==r]).tolist() for r in roots}
     pooled = {}
-    for level in LEVELS:
+    for level in levels:
         xs = [c[level] for c in curves]
         by_root = {}
         for root in roots:
@@ -67,8 +67,8 @@ def select(curves, ledger, kind):
         pooled[level] = {"mse":sum(x["error_sum"] for x in xs)/sum(x["error_cases"] for x in xs),
             "joint_score":max(x[k] for x in by_root.values() for k in ("mean_scaled_cost","mean_scaled_wait")),
             "by_root":by_root,"changed_count":sum(x["changed_count"] for x in xs)}
-    mse = min(LEVELS,key=lambda l:pooled[l]["mse"])
-    chosen = min(LEVELS,key=lambda l:pooled[l]["joint_score"])
+    mse = min(levels,key=lambda l:pooled[l]["mse"])
+    chosen = min(levels,key=lambda l:pooled[l]["joint_score"])
     return {"mse_level":mse,"joint_level":chosen if pooled[chosen]["joint_score"]<0 else None,
         "curves":pooled,"source_scales":scales}
 
