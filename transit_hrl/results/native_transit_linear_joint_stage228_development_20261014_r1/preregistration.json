@@ -1,0 +1,130 @@
+{
+  "contract": {
+    "anchors": [
+      "original",
+      "raw"
+    ],
+    "boundary": "development240_states8_draws_supervised_single_action_greedy_suffix_not_new_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "analytic_cost_fits": 640,
+      "clean_inner_reference_fits": 640,
+      "fit_tasks": 32,
+      "glm_fits": 640,
+      "linear_final_fits": 64,
+      "linear_inner_fits": 1280,
+      "linear_updates": 806400,
+      "network_updates": 1190400,
+      "new_native_episodes": 0,
+      "raw_wait_updates": 384000,
+      "report_tasks": 1,
+      "reused_nonlinear_paths": 64,
+      "rl_actor_updates": 0
+    },
+    "checkpoints": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "compute_boundary": "linear_vs_frozen_nonlinear_same600_steps_lr_decay_targets_and_selection_not_equal_total_to_raw_controls",
+    "controls": "all11_frozen_Stage227_controllers_plus_linear_zero_last_MSE_joint_for_both_anchors",
+    "final": "two60_state_four_draw_branches_run600_then_use_inner_selected_checkpoint",
+    "hold": "joint_selection_keeps_raw_if_every_checkpoint_score_ge0_not_a_new_training_constraint",
+    "inference": "predict_both_increments_select_lowest_cost_among_wait_le0_with_exact_anchor_first_ties_no_truth_menu",
+    "inner": "leave_one_complete_prefix54_train6_validation_times_both2_draw_directions_inside_outer_training4",
+    "model_run": "native_transit_refit_binding_stage224_development_20261014_r1",
+    "normalization": "reference_inputs_and_own_training_nonanchor_RMS_targets_only_no_validation_scales",
+    "null_terms": "omit12_action_constant_context_terms_and_bias_that_cancel_exactly_in_linear_paired_differences",
+    "objective": "two_head_standardized_MSE_of_physical_actual_cost_and_mean_wait_increments",
+    "optimizer": {
+      "dtype": "float64",
+      "initialization": "zero",
+      "lr": 0.003,
+      "steps": 600,
+      "weight_decay": 0.01
+    },
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "parameters_per_branch": 396,
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "reference": "inner_raw_ridge_GLM_conditioned600_refit_excluding_validation_prefix_and_future_half_final_raw_exact_reused_final4",
+    "representation": "linear198_engineered_causal_action_features_two_head_zero_initialized_residual_over_same_ridge",
+    "selection": "pool_physical_cost_wait_means_first_then_divide_by_one_positive_training_RMS_per_source_root",
+    "selection_scale": "held_case_weighted_mean_of_recorded_training_only_fold_RMS_fixed_across_checkpoints",
+    "source_protocol": "native_transit_joint_selection_stage227_v1",
+    "source_run": "native_transit_joint_selection_stage227_development_20261014_r1",
+    "storage": "clean_refits_and_new_linear_models_remote_only_pull_aggregate_report",
+    "variants": [
+      "glm",
+      "raw",
+      "c2v4",
+      "pair_original_zero",
+      "pair_original_last",
+      "pair_original_mse",
+      "pair_original_selected",
+      "pair_raw_zero",
+      "pair_raw_last",
+      "pair_raw_mse",
+      "pair_raw_selected",
+      "linear_original_zero",
+      "linear_original_last",
+      "linear_original_mse",
+      "linear_original_selected",
+      "linear_raw_zero",
+      "linear_raw_last",
+      "linear_raw_mse",
+      "linear_raw_selected"
+    ],
+    "wait_gates": [
+      "glm",
+      "raw",
+      "c2v4"
+    ]
+  },
+  "protocol": "native_transit_linear_joint_stage228_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "9272f6cb48b15ecd3ffff1afcd96a0ef2d5d6454"
+}
