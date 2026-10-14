@@ -1,11 +1,22 @@
 # Stage220: learned decisions without an oracle inference menu
 
-- Original240 development states only. Four matched views, two complementary complete-prefix folds each:60 train/60 held states, balanced regimes and mixed-root counts.
-- Both future partitions and both directions: four training draws only; evaluate the other four. Keep every state, including future-half disagreements. Train-input normalization only.
-- Cost: exact paired-ridge control versus regularized linear safe-best-action cross-entropy over all six inference actions. Scores are decision logits, not calibrated cost forecasts.
-- Wait: shared train-only GLM; linear, nonlinear and state-conditioned residuals. Each new branch uses600 AdamW steps with the same learning rate, decay and seed. Compare nonlinear versus conditioned to isolate conditioning from capacity.
-- Evaluate same/other futures for both training and held prefixes, actual selected cost/wait, physical wait-mass loss and disputed-state outcomes. No oracle menu at inference; retain an unfiltered decision control.
+## Protocol
 
-Scheduler: eight1-CPU/3072-MB fit tasks, unbound node001-node006, then one report task.32 cells,19,200 decision and57,600 wait-residual updates; no new native episodes or RL actor updates. Models/predictions stay remote.
+Original240 states, four matched views; complete-prefix60/60 train/held splits. Both future partitions and both directions use four training draws only. No disputed-state filtering, held-input normalization or future menu at inference.
 
-Next decision follows held-other-future cost and wait jointly, not training loss. The data remain development counterfactuals under the original greedy suffix; future sensitivity repeats are not independent seed CI or full HRL validation.
+Compare exact98-feature paired-ridge against safe-best-action CE; shared GLM plus linear/nonlinear/conditioned wait residuals. New branches use600 matched AdamW steps. Report same/other futures on train/held prefixes and same-state single/mixed comparisons.
+
+## Results
+
+- `t151863-t151870` fits and `t151884` report: all exit0,32 cells qualified,6 tests passed.19,200 decision and57,600 wait-residual updates; no new native episodes or RL updates. Pulled248,223 report bytes, no raw data/models.
+- Own-menu best actions disagree in152/240 and142/240 states, versus66/60 under the common-safe menu in Stage219. Menu flips add168/294 disagreements (57.1%); hard labels amplify safety-boundary noise.
+- Equal-view mean physical wait-mass log-loss, GLM/conditioned: train same0.030381/0.016648; train other0.035117/0.047713; held other0.041557/0.060782. All residual heads have worse held-other risk than GLM in all four views. Conditioning is active (minimum context-weight norm4.707), not an unused path.
+- CE has worse held-other cost than paired-ridge with the same linear gate in3/4 views. With paired-ridge, conditioned gating gives negative cost/wait deltas in8/8 mixed-view future-direction aggregates (linear6/8, unconditioned nonlinear3/8). This is useful local control evidence, not uniform calibration or cost dominance.
+
+## Next
+
+Retain the proper cost critic. Replace hard winner imitation with physical cost-gap/regret-sensitive learning; soften the noisy safety boundary and calibrate/shrink wait corrections using training-only future splits. Keep every held state.
+
+## Boundary
+
+Development counterfactuals under the original greedy suffix; reused future sensitivities are not independent seed CI or end-to-end HRL validation. Exact training fit is not the current bottleneck.
