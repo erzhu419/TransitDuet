@@ -22,13 +22,13 @@ class ObservableSnapshotTest(unittest.TestCase):
         self.runner = NS(env=self.env, _pending_lower_action_context={7: context})
 
     def snapshot(self):
-        return observable_snapshot(self.runner, self.bus, [7, 2], 5, 0, 5)
+        return observable_snapshot(self.runner, self.bus, [7, 2], 5, 0, 5, 10)
 
     def test_observable_geometry_and_resource_margin(self):
         features = self.snapshot()
         self.assertEqual(tuple(features), FEATURE_NAMES)
-        self.assertEqual(features["return_eta_proxy_s"], 230)
-        self.assertEqual(features["return_margin_proxy_s"], -30)
+        self.assertEqual(features["return_eta_proxy_s"], 215)
+        self.assertEqual(features["return_margin_proxy_s"], -15)
         self.assertEqual(features["ready_origin"], 1)
         self.assertEqual(features["ready_return"], 2)
         self.assertEqual(features["load_ratio"], .2)
@@ -39,6 +39,7 @@ class ObservableSnapshotTest(unittest.TestCase):
         self.env.latent_waiting = 0
         self.env.future_journey = -100
         self.trip.future_actual_launch = 1500
+        self.bus.effective_route[0].speed_limit = 2
         self.assertEqual(before, self.snapshot())
 
     def test_current_backlog_and_published_plan_are_observed(self):

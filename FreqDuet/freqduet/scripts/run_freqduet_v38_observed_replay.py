@@ -26,16 +26,16 @@ FEATURE_NAMES = (
 )
 
 
-def observable_snapshot(runner, bus, raw, previous, actor, mean_hold):
+def observable_snapshot(runner, bus, raw, previous, actor, mean_hold, observed_speed):
     """Only clock, APC/AVL, route geometry and the currently published plan."""
     env = runner.env
     now, direction = float(env.current_time), bool(bus.direction)
     context = runner._pending_lower_action_context[int(bus.bus_id)]
     routes = bus.effective_route
     distances = np.asarray([route.distance for route in routes], dtype=float)
-    speed = max(float(np.mean([route.speed_limit for route in routes])), 1.0)
+    speed = max(float(observed_speed), 1.0)
     remaining = max(float(distances.sum()) - float(bus.travel_distance), 0.0)
-    stops = int((np.cumsum(distances) > float(bus.travel_distance)).sum())
+    stops = int((np.cumsum(distances)[:-1] > float(bus.travel_distance)).sum())
     eta = remaining / speed + stops * (float(bus.last_service_dwell_s) + mean_hold)
     pending = [float(getattr(trip, "_freqduet_scheduled_launch", trip.launch_time))
                for trip in env.timetables if not trip.launched and bool(trip.direction) != direction]
@@ -59,6 +59,7 @@ class Observer:
         self.decisions, self.launches, self.terminals, self.holds = {}, [], [], []
         self.denied, self.timeline = {}, []
         self.hold_sum, self.hold_count = 0.0, 0
+        self.moving_distance_m, self.moving_time_s = 0.0, 0.0
         self.exposure = np.zeros(3, dtype=float)
 
     def attach(self, runner):
@@ -93,10 +94,16 @@ class Observer:
 
         def step(action, *args, **kwargs):
             now = float(env.current_time)
-            before = {bus.bus_id: (bool(bus.on_route), int(bus.trip_id), bool(bus.direction)) for bus in env.bus_all}
+            before = {bus.bus_id: (bool(bus.on_route), int(bus.trip_id), bool(bus.direction),
+                                   float(bus.absolute_distance)) for bus in env.bus_all}
             result = original_step(action, *args, **kwargs)
             for bus in env.bus_all:
                 previous = before.get(bus.bus_id)
+                if previous and previous[0] and previous[1] == bus.trip_id:
+                    distance = abs(float(bus.absolute_distance) - previous[3])
+                    if distance > 0:
+                        self.moving_distance_m += distance
+                        self.moving_time_s += float(env.time_step)
                 if self.detailed and previous and previous[0] and not bus.on_route:
                     self.terminals.append(dict(time_s=float(bus.back_to_terminal_time), bus_id=int(bus.bus_id),
                                                trip_id=previous[1], direction=previous[2]))
@@ -128,7 +135,8 @@ class Observer:
         if decision:
             self.decisions[decision] = dict(identity=identity, features=observable_snapshot(
                 runner, bus, obs, previous, float(np.asarray(action).item()),
-                self.hold_sum / max(self.hold_count, 1)))
+                self.hold_sum / max(self.hold_count, 1),
+                self.moving_distance_m / max(self.moving_time_s, 1.0)))
 
 
 def replay(root, v37_root, seed, scenario, target, label, first, second, detailed):
