@@ -27,7 +27,7 @@ def contract():
         "oof": "reuse_c2v4_inner2_predictions_on_four_draw_excluded_prefix_truths",
         "objective": "same_OOF_physical_mass_logloss_not_final_training_loss",
         "constraints": "cost_and_wait_le_own_raw_controller_means_each_source_root",
-        "modes": ENFORCED, "controls": "GLM_raw_risk_only_and_stage223_c2v4_OOF_only",
+        "modes": {k: list(v) for k, v in ENFORCED.items()}, "controls": "GLM_raw_risk_only_and_stage223_c2v4_OOF_only",
         "solver": "union_of_OOF_and_final_zero_logit_events_boundary_ties_interval_risk_minima_alpha1_exact_raw_feasible",
         "labels": "final_constraints_only60_outer_training_states_training4_draws_no_outer_held_labels",
         "inference": "fixed_alpha_causal_final4_predictions_only_no_true_safe_menu",

@@ -1,4 +1,5 @@
 import copy
+import json
 import unittest
 from unittest.mock import patch
 
@@ -132,6 +133,7 @@ class RefitBindingTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Actual final training decisions"): spec.summarize(results, views)
 
     def test_primary_controls_and_unbound_scheduler(self):
+        self.assertEqual(spec.contract(), json.loads(json.dumps(spec.contract())))
         names = {"glm": "f4_glm", **{f"raw_{v}": f"f4_raw_{v}" for v in learning.WAIT_VARIANTS},
             **{f"{m}_{v}": f"f4_c2v4_{old}_{v}" for m, old in (("risk", "risk"), ("oof", "policy")) for v in learning.WAIT_VARIANTS}}
         metric = {"mean_cost": 0., "mean_wait_min": 0., "changed_fraction": 0., "unsafe_fraction": 0.}
