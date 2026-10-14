@@ -293,8 +293,16 @@ def assert_same_deployment(left: dict, right: dict, expected_fingerprints) -> No
     for state, expected in zip((left, right), expected_fingerprints):
         if state["config_fingerprint_sha256"] != expected:
             raise AssertionError("checkpoint does not match its instrumentation configuration")
-        states.append({key: value for key, value in state.items()
-                       if key != "config_fingerprint_sha256"})
+        deployment = copy.deepcopy(state)
+        deployment.pop("config_fingerprint_sha256")
+        previous = deployment.get("fixed_selector_prev_diag")
+        if isinstance(previous, dict):
+            if previous["config_fingerprint_sha256"] != expected:
+                raise AssertionError("cached diagnostics do not match their instrumentation configuration")
+            # Keep operational cached outcomes in the comparison; omit log metadata.
+            for key in ("config_fingerprint_sha256", "wall_env_s", "wall_train_s"):
+                previous.pop(key, None)
+        states.append(deployment)
     assert_same_state(*states)
 
 

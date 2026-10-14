@@ -61,11 +61,28 @@ class CheckpointTrajectoryTest(unittest.TestCase):
         self.assertNotIn("checkpoint_freq", config["training"])
 
     def test_instrumentation_metadata_is_validated_separately(self):
-        left = {"config_fingerprint_sha256": "intermediate", "belief": [0.25, 0.75]}
-        right = {"config_fingerprint_sha256": "final-only", "belief": [0.25, 0.75]}
+        left = {"config_fingerprint_sha256": "intermediate", "belief": [0.25, 0.75],
+                "fixed_selector_prev_diag": {
+                    "config_fingerprint_sha256": "intermediate", "headway_cv": 0.2,
+                    "wall_env_s": 100.0, "wall_train_s": 3.0}}
+        right = {"config_fingerprint_sha256": "final-only", "belief": [0.25, 0.75],
+                 "fixed_selector_prev_diag": {
+                     "config_fingerprint_sha256": "final-only", "headway_cv": 0.2,
+                     "wall_env_s": 105.0, "wall_train_s": 4.0}}
         assert_same_deployment(left, right, ("intermediate", "final-only"))
         with self.assertRaisesRegex(AssertionError, "instrumentation configuration"):
             assert_same_deployment(left, right, ("unexpected", "final-only"))
+        right["fixed_selector_prev_diag"]["config_fingerprint_sha256"] = "wrong-config"
+        with self.assertRaisesRegex(AssertionError, "cached diagnostics"):
+            assert_same_deployment(left, right, ("intermediate", "final-only"))
+
+    def test_cached_operational_outcome_difference_still_fails(self):
+        left = {"config_fingerprint_sha256": "intermediate", "fixed_selector_prev_diag": {
+            "config_fingerprint_sha256": "intermediate", "headway_cv": 0.2}}
+        right = {"config_fingerprint_sha256": "final-only", "fixed_selector_prev_diag": {
+            "config_fingerprint_sha256": "final-only", "headway_cv": 0.3}}
+        with self.assertRaisesRegex(AssertionError, "fixed_selector_prev_diag.headway_cv"):
+            assert_same_deployment(left, right, ("intermediate", "final-only"))
 
     def test_deployment_difference_still_fails(self):
         left = {"config_fingerprint_sha256": "intermediate", "belief": [0.25, 0.75]}
