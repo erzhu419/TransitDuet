@@ -1,0 +1,143 @@
+{
+  "contract": {
+    "boundary": "precision_factorial_development_original240_states8_futures_no_new_independent_CI",
+    "budget": {
+      "analytic_cost_fits": 384,
+      "calibration_scalar_fits": 384,
+      "final2_fits": 64,
+      "fit_tasks": 32,
+      "glm_fits": 384,
+      "inner4_fits": 320,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "reused_final4_cells": 32,
+      "reused_inner2_cells": 32,
+      "rl_actor_updates": 0,
+      "supervised_decision_updates": 0,
+      "training_cells": 32,
+      "wait_fits": 1152,
+      "wait_residual_updates": 691200
+    },
+    "calibration_factors": {
+      "c2v4": "reused_inner2_predictions_validated_on_all4_draws_of_excluded_prefix",
+      "c4v4": "new_inner4_predictions_validated_on_same4_draws_of_excluded_prefix",
+      "legacy": "reused_stage222_inner2_validation_other2"
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "coverage": "each_scope120_cases60_unique_states_two_subhalf_models_final4_repeated_not_ensembled",
+    "final_factors": "same60_training_states_final2_each_complementary_subhalf_or_reused_final4",
+    "guard": "same_risk_objective_subject_selected_cost_and_wait_le_raw_controller_OOF_means_for_each_source_root",
+    "normalization": "own_training_prefix_features_and_targets_only54_inner60_final",
+    "optimizer": {
+      "dtype": "float64",
+      "lr": 0.003,
+      "seed": 208,
+      "steps_per_branch": 600,
+      "weight_decay": 0.01
+    },
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "parameters": {
+      "linear": 199,
+      "nonlinear_pair": 3201,
+      "state_conditioned_pair": 3393
+    },
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "solver": "zero_logit_menu_event_sweep_boundary_ties_interval_risk_optima_identity_first_exact_ties",
+    "source_protocol": "native_transit_prefix_policy_stage222_v1",
+    "source_run": "native_transit_prefix_policy_stage222_development_20261014_r1",
+    "storage": "server_only_models_OOF_records_compact_report_pull",
+    "validation": "prefix_held_in_c2v4_c4v4_not_inner_future_held_outer_other4_futures_never_used_for_fitting",
+    "variants": [
+      "f2_glm",
+      "f2_raw_linear",
+      "f2_raw_nonlinear_pair",
+      "f2_raw_state_conditioned_pair",
+      "f2_legacy_risk_linear",
+      "f2_legacy_risk_nonlinear_pair",
+      "f2_legacy_risk_state_conditioned_pair",
+      "f2_legacy_policy_linear",
+      "f2_legacy_policy_nonlinear_pair",
+      "f2_legacy_policy_state_conditioned_pair",
+      "f2_c2v4_risk_linear",
+      "f2_c2v4_risk_nonlinear_pair",
+      "f2_c2v4_risk_state_conditioned_pair",
+      "f2_c2v4_policy_linear",
+      "f2_c2v4_policy_nonlinear_pair",
+      "f2_c2v4_policy_state_conditioned_pair",
+      "f2_c4v4_risk_linear",
+      "f2_c4v4_risk_nonlinear_pair",
+      "f2_c4v4_risk_state_conditioned_pair",
+      "f2_c4v4_policy_linear",
+      "f2_c4v4_policy_nonlinear_pair",
+      "f2_c4v4_policy_state_conditioned_pair",
+      "f4_glm",
+      "f4_raw_linear",
+      "f4_raw_nonlinear_pair",
+      "f4_raw_state_conditioned_pair",
+      "f4_legacy_risk_linear",
+      "f4_legacy_risk_nonlinear_pair",
+      "f4_legacy_risk_state_conditioned_pair",
+      "f4_legacy_policy_linear",
+      "f4_legacy_policy_nonlinear_pair",
+      "f4_legacy_policy_state_conditioned_pair",
+      "f4_c2v4_risk_linear",
+      "f4_c2v4_risk_nonlinear_pair",
+      "f4_c2v4_risk_state_conditioned_pair",
+      "f4_c2v4_policy_linear",
+      "f4_c2v4_policy_nonlinear_pair",
+      "f4_c2v4_policy_state_conditioned_pair",
+      "f4_c4v4_risk_linear",
+      "f4_c4v4_risk_nonlinear_pair",
+      "f4_c4v4_risk_state_conditioned_pair",
+      "f4_c4v4_policy_linear",
+      "f4_c4v4_policy_nonlinear_pair",
+      "f4_c4v4_policy_state_conditioned_pair"
+    ]
+  },
+  "fit_tasks": 32,
+  "protocol": "native_transit_precision_stage223_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "49674a697032329303a3768a8b0b1d1153a87f3a"
+}

@@ -1,16 +1,20 @@
 # Stage223: inner/final target precision
 
-Cross two/four-draw calibration models with two/four-draw final models. Reuse Stage222 two-draw OOF predictions, its legacy two-draw validation calibration and final four-draw heads. New c2v4 and c4v4 calibration use the same four-draw truths of entirely excluded prefixes; outer evaluation futures/prefixes never select parameters.
+Cross two/four-draw calibration and final models, keeping architecture/600 updates fixed. c2v4/c4v4 use common four-draw truths of excluded prefixes. Protocol/budget: `results/native_transit_precision_stage223_development_20261014_r1/preregistration.json`.
 
-Each architecture keeps 600 updates per fit. New budget: 320 inner4 + 64 final2 bundles; 384 analytic cost/GLM fits, 1,152 wait fits (691,200 updates), 384 scalar calibrations, zero new rollouts or actor updates. Final2's complementary half-models are separate sensitivity controls, not an ensemble; final4 is repeated for matched comparisons. Raw/model files stay remote.
+## Results
 
-## Status
+Fits t152035-t152066 and report t152067 completed with exit0. Five new/eight Stage222 tests passed. All 32 cells qualified; 800 control comparisons reproduced within 1.39e-17. Only the 1,278,977-byte report was pulled, no raw/models. Default/native policy unchanged.
 
-Five new tests and eight Stage222 tests passed (13/13), including common validation magnitudes, real precision fits, outer label isolation and correlated coverage accounting. Scheduler dispatch pending. Default/native policy unchanged.
+Matching two-draw final fitting does not close transfer: raw held conditioned risk rises to 0.07114293 versus four-draw 0.06078162; mixed joint cost/wait benefit is 4/8 versus 8/8. Its two training subhalves show opposite cost/wait outcomes in mixed_b. Matching inner4/final4 also yields only 6/8.
+
+Keeping the same inner2 predictions but validating on four draws (c2v4/final4) restores 8/8 versus legacy 7/8. The previously failing mixed_b even_odd/0 wait changes +0.00328125 -> -0.00143750. Calibration-label precision matters; model precision mismatch alone is not a sufficient explanation.
+
+c2v4/final4 held risk is 0.05133240, 15.5% below raw. Pooled mixed cost/wait improve versus raw by -0.00015026/-0.00018646 min, but there are view-specific tradeoffs and root401 wait worsens by +0.00000521 min. This is a promising development result, not uniform no-tradeoff or new CI-supported evidence.
 
 ## Next Decision
 
-Compare legacy2->final2 versus legacy2->final4, then c2v4 versus c4v4 on the same final4 model. Inspect train_same and held_other cost/wait floors plus proper risk. This separates final fitting precision from validation-target precision without enlarging the model class.
+Keep c2v4/final4 as the calibration candidate and raw as control. Next bind selected-action constraints to the actual final fitted controller as well as OOF predictions, to address refit/decision-boundary drift rather than merely matching draw counts or retuning alpha.
 
 ## Limitations
 
