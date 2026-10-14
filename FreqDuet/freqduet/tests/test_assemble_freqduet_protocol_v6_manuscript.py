@@ -10,6 +10,10 @@ from scripts.assemble_freqduet_protocol_v6_manuscript import (
     PAPER_CONTROLLER,
     REFERENCE,
     SOURCE_CANDIDATE,
+    V33_CANDIDATES,
+    V33_EVAL_SEEDS,
+    V33_PHASE,
+    V33_TRAIN_SEEDS,
     build_manuscript,
 )
 
@@ -94,6 +98,34 @@ def external_rows() -> list[dict[str, object]]:
     return rows
 
 
+def v33_rows() -> list[dict[str, object]]:
+    primary = {
+        V33_CANDIDATES[0]: {"passenger_journey_min": -1.050, "headway_cv": -0.00715},
+        V33_CANDIDATES[1]: {"passenger_journey_min": -1.491, "headway_cv": -0.00447},
+        V33_CANDIDATES[2]: {"passenger_journey_min": -1.954, "headway_cv": -0.01230},
+    }
+    rows = []
+    for candidate in V33_CANDIDATES:
+        for metric, *_ in METRICS:
+            delta = primary[candidate].get(metric, -0.1)
+            spread = 0.02 if metric == "headway_cv" else 0.5
+            rows.append({
+                "phase": V33_PHASE,
+                "paper_controller": PAPER_CONTROLLER,
+                "source_candidate": candidate,
+                "reference": REFERENCE,
+                "metric": metric,
+                "delta_candidate_minus_reference": delta,
+                "ci95_low": delta - spread,
+                "ci95_high": delta + spread,
+                "paired_signflip_p": 0.125,
+                "paired_signflip_p_holm": 0.75,
+                "n_pairs": 16,
+                "registered_gate_pass": False,
+            })
+    return rows
+
+
 class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = TemporaryDirectory()
@@ -106,6 +138,9 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             "paper_controller": PAPER_CONTROLLER,
             "v8_confirmation_status": "unique_pass",
             "v9_longtrain_status": "longtrain_not_confirmed",
+            "v33_timescale_status": "no_pass",
+            "v33_claim_eligible": False,
+            "v33_confirmation_authorized": False,
             "submission_ready": False,
             "submission_blocker": "v9_longtrain_not_confirmed",
         })
@@ -168,6 +203,10 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             ],
         )
         write_csv(
+            self.package / "tables" / "table5_v33_timescale_development.csv",
+            v33_rows(),
+        )
+        write_csv(
             self.package / "source_artifacts" / "v9" / "frozen_summary.csv",
             [
                 {
@@ -176,6 +215,42 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
                     "trip_completion_rate_mean": 1.0,
                 }
             ],
+        )
+        write_json(
+            self.package
+            / "source_artifacts"
+            / "v33_timescale"
+            / "v33_timescale_gate.json",
+            {
+                "status": "no_pass",
+                "claim_eligible": False,
+                "confirmation_authorized": False,
+                "selected_for_confirmation": None,
+                "passing_candidates": [],
+                "candidate_priority": list(V33_CANDIDATES),
+                "candidate_results": [
+                    {
+                        "candidate": candidate,
+                        "passes": False,
+                        "headway_cv_negative_train_seed_fraction": fraction,
+                    }
+                    for candidate, fraction in zip(V33_CANDIDATES, (0.5, 0.5, 1.0))
+                ],
+                "development_design": {
+                    "train_episodes": 200,
+                    "checkpoint_ep": 199,
+                    "train_seeds": list(V33_TRAIN_SEEDS),
+                    "eval_seeds": list(V33_EVAL_SEEDS),
+                },
+                "strict_checks": {"strict_complete": True},
+                "unfrozen_control_result": {
+                    "candidate_results": [{
+                        "headway_cv_delta_vs_reference": -0.021,
+                        "headway_cv_delta_ci_low": -0.045,
+                        "headway_cv_delta_ci_high": -0.003,
+                    }],
+                },
+            },
         )
         figures = self.package / "figures"
         for stem in (
@@ -213,6 +288,8 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             "| V9 (200 ep) | 8 x 8 | 64 | Not confirmed | No |",
             supplement,
         )
+        self.assertIn("## S5. V33 lower-actor timescale development screen", supplement)
+        self.assertIn("confirmation roster was not used", supplement)
         methods_flat = " ".join(methods.split())
         manuscript_flat = " ".join(manuscript.split())
         self.assertIn("promotion, leakage-penalty", methods)
@@ -229,16 +306,24 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         self.assertIn("Both upper and lower actors are deterministic", methods_flat)
         self.assertIn("passed the preregistered V8 gate", methods_flat)
         self.assertIn("longtrain_not_confirmed", results)
+        self.assertIn("Lower-actor freezing did not repair", results)
+        self.assertIn("All three candidates therefore failed", results)
         self.assertIn("gate-positive under its preregistered criteria", results)
         self.assertIn("not a familywise-significant effect", results)
         self.assertIn("do not establish that this interface caused", discussion)
         self.assertIn("V9 did not confirm", discussion)
+        self.assertIn("no candidate passed", discussion)
         self.assertIn("Holm-adjusted $p=0.047$", discussion)
         self.assertIn("sign-flip value is not used", discussion)
         self.assertIn("does not establish superiority", discussion)
         self.assertIn("was not re-estimated from the external data", discussion)
         self.assertIn("higher denied-trip rate", results)
         self.assertIn("cannot be interpreted as", results)
+        self.assertIn(
+            "\\Needspace{15\\baselineskip}\n\n"
+            "**Table 2. FreqDuet minus external baseline under V9.**",
+            results,
+        )
         self.assertIn("does not contain a same-stage NoFreq", supplement)
         self.assertIn("## Abstract", manuscript)
         headings = [
@@ -273,6 +358,7 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             manifest["outputs"],
         )
         self.assertTrue((self.out / "tables" / "table1_confirmation_and_robustness.tex").is_file())
+        self.assertTrue((self.out / "tables" / "table_s2_v33_timescale.tex").is_file())
         self.assertTrue((self.out / "assembly_manifest.json").is_file())
         self.assertTrue((self.out / "references.bib").is_file())
         self.assertIn(
@@ -297,7 +383,12 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
             (submission / "manuscript_body.md").read_text(),
         )
         self.assertIn("long-training gate", (submission / "README.md").read_text())
+        self.assertNotIn("\n    tables, and figure paths", (submission / "README.md").read_text())
         self.assertTrue((submission / "elsarticle-template.tex").is_file())
+        self.assertIn(
+            "\\begin{small}\n\\bibliographystyle{elsarticle-harv}",
+            (submission / "elsarticle-template.tex").read_text(),
+        )
         self.assertTrue((submission / "supplementary-template.tex").is_file())
         self.assertIn(
             "## S1. Frozen evidence and decision ledger",
@@ -317,7 +408,7 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         self.assertIn("Holm-adjusted training-seed sign-flip result is $p=0.125$", readme)
         self.assertEqual(
             manifest["assembly_version"],
-            "freqduet-protocol-v6-manuscript-v4",
+            "freqduet-protocol-v6-manuscript-v5",
         )
 
     def test_rejects_missing_v9_failure(self) -> None:
@@ -326,6 +417,14 @@ class ProtocolV6ManuscriptAssemblyTest(unittest.TestCase):
         write_json(self.package / "evidence_status.json", status)
 
         with self.assertRaisesRegex(ValueError, "V9 negative result is missing"):
+            build_manuscript(self.package, self.out)
+
+    def test_rejects_v33_confirmation_after_no_pass(self) -> None:
+        status = json.loads((self.package / "evidence_status.json").read_text())
+        status["v33_confirmation_authorized"] = True
+        write_json(self.package / "evidence_status.json", status)
+
+        with self.assertRaisesRegex(ValueError, "V33 confirmation was unexpectedly authorized"):
             build_manuscript(self.package, self.out)
 
     def test_rejects_method_switch_drift(self) -> None:

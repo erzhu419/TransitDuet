@@ -1,5 +1,21 @@
 # FreqDuet Top-Journal Gap Backlog
 
+> **2026-10-14 Protocol V6 manuscript-v5 polish closure:** the canonical
+> `FreqDuet/paper/protocol_v6` bundle now includes the V33 lower-actor-timescale
+> no-pass result alongside V8 and V9, uses the paper title *FreqDuet: Online
+> Frequency-to-Authority Allocation for Hierarchical Bus Control*, and keeps
+> temporal causality distinct from causal-effect identification. Server task
+> `t151927` passed all 14 evidence, figure, and manuscript-assembly tests; task
+> `t151929` compiled the anonymous Elsevier bundle with Pandoc 3.12.1 and
+> Tectonic 0.17.0. The final PDFs are 25 manuscript pages and 5 Supplementary
+> Material pages. Figure/table pages and all supplementary pages were rendered
+> server-side at review and 144-dpi resolution. Table 2's caption and body are
+> now co-located, the orphaned final reference page is removed, and there are
+> no unresolved citations, oversized floats, clipping, overlap, or blank pages.
+> This editorial closure does not change the evidence decision:
+> `submission_ready` remains `false` because V9 did not confirm the registered
+> long-training regularity gate and no V33 freeze schedule passed.
+
 > **2026-09-10 current-best closure:** algorithm selection is frozen at
 > `F_freqduet_protocol_v6_confirmed_main_hiro`. V8 passed its preregistered
 > 40-episode effect/no-harm gate (crossed-bootstrap headway-CV interval excludes
@@ -28,10 +44,10 @@
 > toolchain task `t92181` was superseded after remaining capacity-blocked. An
 > isolated user-prefix toolchain on `jtl110gpu2` (Pandoc 3.11 and Tectonic
 > 0.17.0) now builds the flat anonymous Elsevier `elsarticle` bundle entirely
-> on the server. The final outputs are a 24-page manuscript and a 4-page
+> on the server. That v4 build produced a 24-page manuscript and a 4-page
 > Supplementary Material PDF. Server assembly tests pass 4/4; citations and
 > references resolve; no float, vertical-box, or page-boundary overflow remains.
-> All 28 pages were rendered server-side, scanned for blank/cropped pages, and
+> All 28 pages of that build were rendered server-side, scanned for blank/cropped pages, and
 > reviewed through contact sheets and 144-dpi key-page renders. This closes PDF
 > compilation and visual QA, not the scientific hold: V9 remains
 > `longtrain_not_confirmed`, the
@@ -49,7 +65,7 @@
 > method/evidence track. It is now superseded by the Protocol V6 status above;
 > old completed items remain provenance and negative-result evidence.
 
-Last updated: 2026-09-11 CST
+Last updated: 2026-10-14 CST
 
 This file records the remaining gap between the current FreqDuet implementation
 and a top-journal-ready paper package. It should be used as the execution
@@ -89,6 +105,9 @@ Current evidence decision:
   with Holm-adjusted `p=0.047`, but crossed-bootstrap headway-CV uncertainty
   crosses zero, so the registered long-training regularity gate is not
   confirmed;
+- V33 development screen: lower-actor freezing after episode 40, 80, or 100
+  produced no candidate that passed the registered regularity magnitude and
+  interval gate; the reserved confirmation roster was not used;
 - external comparison: competitive service cost and headway regularity against
   fixed-headway, but worse passenger journey time; better journey time than the
   weaker rule-holding and rule-MPC baselines;

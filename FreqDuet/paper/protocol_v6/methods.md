@@ -2,14 +2,16 @@
 
 ## Study question and control setting
 
-FreqDuet studies whether frequency structure in an exogenous demand stream can
-be aligned with authority in an asynchronous hierarchical controller. The
-upper policy changes an executable target-headway plan at dispatch events; the
-lower policy chooses holding at station-arrival events. One upper decision can
-therefore span many lower decisions. The current paper controller is the
-compact APC/AVL, weight-two configuration that passed the preregistered V8
-gate. Its exact identifier and inheritance chain are reported in
-Supplementary Section S2.
+FreqDuet allocates two causally available components of an exogenous demand
+stream to two authorities in an asynchronous hierarchical controller. Here,
+`causal` refers only to online information timing: a decision cannot use an
+observation that has not yet occurred. It does not denote identification of a
+causal treatment effect. The upper policy changes an executable target-headway
+plan at dispatch events, whereas the lower policy chooses holding at
+station-arrival events. One upper decision can therefore span many lower
+decisions. The current paper controller is the compact APC/AVL, weight-two
+configuration that passed the preregistered V8 gate. Its exact identifier and
+inheritance chain are reported in Supplementary Section S2.
 
 ![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](figures/fig1_protocol_v6_method.png){#fig:protocol-v6-1}
 
@@ -155,6 +157,14 @@ without policy or critic freezing for 200 episodes and evaluates checkpoint
 and the evaluator rejects any change in deployment state across evaluation
 seeds.
 
+V33 is a subsequent, preregistered development screen of lower-policy update
+duration. Each candidate trains for 200 episodes, but lower-actor updates stop
+after episode 40, 80, or 100. The lower critics and both upper components keep
+training. V33 uses four new training seeds crossed with four new evaluation
+seeds. It is not an independent confirmation stage; its confirmation roster
+was reserved for use only if exactly one candidate passed the development
+gate.
+
 ## External comparators
 
 Three non-learned comparators use the same V6 environment, fixed 12-vehicle
@@ -230,6 +240,13 @@ disable the legacy holding guard; the current policy additionally has compact
 APC/AVL context and the two-sided regularity objective, so their difference is
 a combined-policy contrast.
 
+The V33 development screen uses four training seeds crossed with four
+evaluation seeds (16 paired rollouts per candidate). A candidate had to pass
+the unchanged V8 effect and mechanism gate, place the headway-CV interval below
+zero, satisfy the passenger-journey no-harm bound, and improve headway CV for
+at least three of four training seeds. No candidate passed, so the reserved
+confirmation roster was not opened.
+
 Uncertainty uses a crossed bootstrap over training and evaluation seeds while
 sharing each evaluation-seed resample across paired policies. Two-sided
 sign-flip tests operate on training-seed mean differences, with Holm correction
@@ -237,4 +254,4 @@ within each metric family. Lower values favor FreqDuet for every reported
 outcome. For each external comparator, its eight evaluation-seed realizations
 are crossed with the eight V9 learned training seeds, yielding 64 paired rows;
 the crossed analysis retains training seed as the independent policy-training
-unit. The V8 and V9 estimates are kept separate and are never pooled.
+unit. V8, V9, and V33 estimates are kept separate and are never pooled.

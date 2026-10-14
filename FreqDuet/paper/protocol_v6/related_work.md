@@ -70,13 +70,14 @@ A third line applies spectral representations to policy inputs, context, or
 action sequences. Learnable wavelet policies decompose long-horizon sequences
 into coarse and fine components [@huang2025wavelet], and low-frequency
 truncation has been used to summarize long context for multi-agent RL
-[@duan2025adaptive]. FreqDuet adopts the multiscale motivation but uses a causal
+[@duan2025adaptive]. FreqDuet adopts the multiscale motivation but uses an online
 harmonic estimator with a historical prior rather than a full-trajectory
-transform. Low-frequency demand summaries inform upper planning; station-local
-pre-update innovations inform lower holding. This allocation is a control
-contract, not merely a richer shared representation. The current experiment,
-however, compares complete policies and does not isolate this contract from the
-simultaneous APC/AVL and reward changes.
+transform. The estimator is causal only in the temporal sense: it uses no
+future observations. Low-frequency demand summaries inform upper planning;
+station-local pre-update innovations inform lower holding. This allocation is a
+control contract, not merely a richer shared representation. The current
+experiment, however, compares complete policies and does not isolate this
+contract from the simultaneous APC/AVL and reward changes.
 
 ## Passenger data and realism
 

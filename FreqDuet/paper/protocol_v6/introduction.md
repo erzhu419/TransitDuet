@@ -12,11 +12,11 @@ passenger-oriented, real-time, and coordinated control as central research needs
 [@ibarra2015planning; @gkiotsalitis2021atstop]. This trade-off makes a strong
 fixed-headway policy an essential comparator rather than a nominal baseline.
 
-Reinforcement learning (RL) provides a way to optimize nonlinear bus operations
-without solving a new mathematical program at every control event. Existing
-work has learned fleet-wide holding policies, represented asynchronous bus
-arrivals explicitly, modeled uncertainty with distributional objectives, and
-combined holding with other control actions [@wang2020dynamic;
+Reinforcement learning (RL) can optimize nonlinear bus operations without
+solving a new mathematical program at every control event. Existing work has
+learned fleet-wide holding policies, represented asynchronous bus arrivals,
+modeled uncertainty with distributional objectives, and combined holding with
+other control actions [@wang2020dynamic;
 @wang2021asynchronous; @wang2023robust; @rodriguez2023cooperative]. Hierarchical
 multi-agent control has also separated strategic action selection from detailed
 holding or speed decisions [@yu2024hierarchical]. These studies establish that
@@ -37,24 +37,24 @@ uses Fourier or wavelet representations to expose long trends and local detail
 [@huang2025wavelet; @duan2025adaptive]. These approaches motivate multiscale
 decision making, but temporal hierarchy, action frequency, and signal
 decomposition are not interchangeable. In particular, they do not by themselves
-specify which causally observable component of an external demand stream should
-inform each control authority.
+specify which component of an external demand stream is available to each
+control authority without future-information leakage.
 
 This study examines that interface in an asynchronous bus-control system. We
-propose FreqDuet, which updates a harmonic demand model from completed automatic
-passenger counting (APC) bins, passes low-frequency level, slope, and forecast
-information to an executable terminal headway planner, and passes station-local
-innovations with compact APC and automatic vehicle location (AVL) context to a
-discrete holding policy. The upper and lower decisions remain coupled through
-the executable target headway, while planned and actual terminal releases are
-distinguished under a fixed physical fleet. We make three contributions. First,
-we formulate frequency-to-authority allocation as an explicit information
-interface for asynchronous hierarchical control. Second, we implement this
-interface with causal observation timing, executable timetable semantics, and
-coherent sampled holding actions. Third, we evaluate a frozen controller in an
-independent short-training confirmation and a separately preregistered
-long-training robustness test, retaining the negative robustness result and the
-passenger cost of competing with fixed headway.
+propose FreqDuet, an online frequency-to-authority architecture. It updates a
+harmonic demand model from completed automatic passenger counting (APC) bins.
+Low-frequency level, slope, and forecast information enters an executable
+terminal headway planner. Station-local innovations and compact APC and
+automatic vehicle location (AVL) context enter a discrete holding policy. The
+two authorities remain coupled through the executable target headway, while
+planned and actual terminal releases remain distinct under a fixed physical
+fleet. We make three contributions. First, we formulate frequency-to-authority
+allocation as an explicit information interface for asynchronous hierarchical
+control. Second, we implement that interface with online observation timing,
+executable timetable semantics, and coherent sampled holding actions. Third,
+we evaluate a frozen controller in independent short- and long-training stages,
+retain the failed robustness result, and report a preregistered timescale-repair
+screen in which no candidate passed.
 
 The empirical claim is deliberately narrower than the architectural proposal.
 The confirmatory contrast changes compact APC/AVL context and a two-sided
@@ -62,4 +62,6 @@ regularity reward while retaining the harmonic frequency pathway in both arms.
 It therefore tests the complete selected controller, not the isolated causal
 effect of frequency separation. The study asks whether that controller has a
 reproducible operating effect and where the effect stops, rather than treating
-all favorable metrics or development variants as confirmation.
+all favorable metrics or development variants as confirmation. In particular,
+the V33 repair screen remains negative evidence and does not supersede the
+failed long-training gate.

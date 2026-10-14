@@ -1,32 +1,34 @@
-# FreqDuet: Causally Observed Frequency Allocation for Hierarchical Bus Timetable and Holding Control
+# FreqDuet: Online Frequency-to-Authority Allocation for Hierarchical Bus Control
 
 ## Abstract
 
-Bus timetable planning and station-level holding operate at
-different temporal and physical scales, creating an information-allocation
-problem for a learned hierarchy.
-FreqDuet estimates demand causally from completed APC bins, sends a
-harmonic low-frequency state to an executable upper headway planner, and sends
-station-local innovations plus compact APC/AVL context to a discrete lower
-holding policy. In an independent 40-episode confirmation with 24 paired
-rollouts, the complete current controller changed headway coefficient of
-variation by -0.022 [-0.038, -0.008]
-relative to a same-protocol reference. The bootstrap interval excluded zero,
-whereas the Holm-adjusted training-seed sign-flip result was
-$p=0.125$. Restricted passenger journey changed by
+Terminal dispatch and intermediate-stop holding act at different
+scales, but a learned hierarchy must still decide which demand information each
+authority can use. FreqDuet updates a harmonic demand model only after automatic
+passenger counting bins close. It routes low-frequency level, slope, and
+forecast information to an executable terminal planner, and station-local
+innovations with compact passenger and vehicle context to discrete holding. In
+an independent 40-episode confirmation with 24 paired rollouts, the complete
+controller changed headway coefficient of variation by
+-0.022 [-0.038, -0.008] relative to a
+same-protocol reference. The bootstrap interval excluded zero, whereas the
+Holm-adjusted training-seed sign-flip result was
+$p=0.125$. Restricted passenger journey
+changed by
 -0.263 [-0.837, +0.175]
-min and satisfied the registered no-harm condition. In a separate 200-episode,
-64-pair robustness test, journey improved by
+min and met the registered no-harm condition. In a separate 200-episode test
+with 64 pairs, journey improved by
 -1.242 [-2.204, -0.536]
-min (Holm-adjusted $p=0.047$), but the headway effect weakened to
+min, but the headway effect weakened to
 -0.009 [-0.028, +0.006] and failed the
-registered long-training gate. Against fixed headway, FreqDuet was more regular
-but increased passenger journey by
+registered long-training gate. A preregistered development screen of three
+lower-actor freeze schedules produced no passing repair. Against fixed headway,
+FreqDuet was more regular but increased passenger journey by
 +2.470 [+1.874, +3.188]
-min. The results support a registered gate-positive short-training regularity
-signal and expose its training-horizon and passenger-service limits; they do not establish
-long-run regularity confirmation, passenger-service superiority over fixed
-headway, or an isolated causal effect of frequency separation.
+min. The evidence supports an online frequency-to-authority architecture and a
+bounded short-training result. It does not establish long-run regularity,
+passenger superiority over fixed headway, or an isolated causal effect of
+frequency allocation.
 
 
 **Keywords:** bus holding; hierarchical reinforcement learning; demand decomposition; causal observation; headway control; reproducibility
@@ -45,11 +47,11 @@ passenger-oriented, real-time, and coordinated control as central research needs
 [@ibarra2015planning; @gkiotsalitis2021atstop]. This trade-off makes a strong
 fixed-headway policy an essential comparator rather than a nominal baseline.
 
-Reinforcement learning (RL) provides a way to optimize nonlinear bus operations
-without solving a new mathematical program at every control event. Existing
-work has learned fleet-wide holding policies, represented asynchronous bus
-arrivals explicitly, modeled uncertainty with distributional objectives, and
-combined holding with other control actions [@wang2020dynamic;
+Reinforcement learning (RL) can optimize nonlinear bus operations without
+solving a new mathematical program at every control event. Existing work has
+learned fleet-wide holding policies, represented asynchronous bus arrivals,
+modeled uncertainty with distributional objectives, and combined holding with
+other control actions [@wang2020dynamic;
 @wang2021asynchronous; @wang2023robust; @rodriguez2023cooperative]. Hierarchical
 multi-agent control has also separated strategic action selection from detailed
 holding or speed decisions [@yu2024hierarchical]. These studies establish that
@@ -70,24 +72,24 @@ uses Fourier or wavelet representations to expose long trends and local detail
 [@huang2025wavelet; @duan2025adaptive]. These approaches motivate multiscale
 decision making, but temporal hierarchy, action frequency, and signal
 decomposition are not interchangeable. In particular, they do not by themselves
-specify which causally observable component of an external demand stream should
-inform each control authority.
+specify which component of an external demand stream is available to each
+control authority without future-information leakage.
 
 This study examines that interface in an asynchronous bus-control system. We
-propose FreqDuet, which updates a harmonic demand model from completed automatic
-passenger counting (APC) bins, passes low-frequency level, slope, and forecast
-information to an executable terminal headway planner, and passes station-local
-innovations with compact APC and automatic vehicle location (AVL) context to a
-discrete holding policy. The upper and lower decisions remain coupled through
-the executable target headway, while planned and actual terminal releases are
-distinguished under a fixed physical fleet. We make three contributions. First,
-we formulate frequency-to-authority allocation as an explicit information
-interface for asynchronous hierarchical control. Second, we implement this
-interface with causal observation timing, executable timetable semantics, and
-coherent sampled holding actions. Third, we evaluate a frozen controller in an
-independent short-training confirmation and a separately preregistered
-long-training robustness test, retaining the negative robustness result and the
-passenger cost of competing with fixed headway.
+propose FreqDuet, an online frequency-to-authority architecture. It updates a
+harmonic demand model from completed automatic passenger counting (APC) bins.
+Low-frequency level, slope, and forecast information enters an executable
+terminal headway planner. Station-local innovations and compact APC and
+automatic vehicle location (AVL) context enter a discrete holding policy. The
+two authorities remain coupled through the executable target headway, while
+planned and actual terminal releases remain distinct under a fixed physical
+fleet. We make three contributions. First, we formulate frequency-to-authority
+allocation as an explicit information interface for asynchronous hierarchical
+control. Second, we implement that interface with online observation timing,
+executable timetable semantics, and coherent sampled holding actions. Third,
+we evaluate a frozen controller in independent short- and long-training stages,
+retain the failed robustness result, and report a preregistered timescale-repair
+screen in which no candidate passed.
 
 The empirical claim is deliberately narrower than the architectural proposal.
 The confirmatory contrast changes compact APC/AVL context and a two-sided
@@ -95,7 +97,9 @@ regularity reward while retaining the harmonic frequency pathway in both arms.
 It therefore tests the complete selected controller, not the isolated causal
 effect of frequency separation. The study asks whether that controller has a
 reproducible operating effect and where the effect stops, rather than treating
-all favorable metrics or development variants as confirmation.
+all favorable metrics or development variants as confirmation. In particular,
+the V33 repair screen remains negative evidence and does not supersede the
+failed long-training gate.
 
 # Related Work
 
@@ -169,13 +173,14 @@ A third line applies spectral representations to policy inputs, context, or
 action sequences. Learnable wavelet policies decompose long-horizon sequences
 into coarse and fine components [@huang2025wavelet], and low-frequency
 truncation has been used to summarize long context for multi-agent RL
-[@duan2025adaptive]. FreqDuet adopts the multiscale motivation but uses a causal
+[@duan2025adaptive]. FreqDuet adopts the multiscale motivation but uses an online
 harmonic estimator with a historical prior rather than a full-trajectory
-transform. Low-frequency demand summaries inform upper planning; station-local
-pre-update innovations inform lower holding. This allocation is a control
-contract, not merely a richer shared representation. The current experiment,
-however, compares complete policies and does not isolate this contract from the
-simultaneous APC/AVL and reward changes.
+transform. The estimator is causal only in the temporal sense: it uses no
+future observations. Low-frequency demand summaries inform upper planning;
+station-local pre-update innovations inform lower holding. This allocation is a
+control contract, not merely a richer shared representation. The current
+experiment, however, compares complete policies and does not isolate this
+contract from the simultaneous APC/AVL and reward changes.
 
 ## Passenger data and realism
 
@@ -192,14 +197,16 @@ analysis is therefore a realism audit, not policy validation on those agencies.
 
 ## Study question and control setting
 
-FreqDuet studies whether frequency structure in an exogenous demand stream can
-be aligned with authority in an asynchronous hierarchical controller. The
-upper policy changes an executable target-headway plan at dispatch events; the
-lower policy chooses holding at station-arrival events. One upper decision can
-therefore span many lower decisions. The current paper controller is the
-compact APC/AVL, weight-two configuration that passed the preregistered V8
-gate. Its exact identifier and inheritance chain are reported in
-Supplementary Section S2.
+FreqDuet allocates two causally available components of an exogenous demand
+stream to two authorities in an asynchronous hierarchical controller. Here,
+`causal` refers only to online information timing: a decision cannot use an
+observation that has not yet occurred. It does not denote identification of a
+causal treatment effect. The upper policy changes an executable target-headway
+plan at dispatch events, whereas the lower policy chooses holding at
+station-arrival events. One upper decision can therefore span many lower
+decisions. The current paper controller is the compact APC/AVL, weight-two
+configuration that passed the preregistered V8 gate. Its exact identifier and
+inheritance chain are reported in Supplementary Section S2.
 
 ![Causal frequency-to-authority architecture of the current controller. Historical OD intensities initialize a recursive harmonic demand prior, while online APC arrivals update the filter causally in 60-s bins. Low-frequency level, slope, and forecast features enter the upper policy, which replans an executable terminal headway curve every 15 min over a 45-min horizon under a rolling zero-sum headway budget. Station-local high-frequency innovations and compact same-time APC/AVL context enter the lower policy, which selects from seven discrete holding actions between 0 and 45 s. The two-sided regularity reward uses forward and follower departure gaps frozen before the action. In the current paper configuration, the legacy holding guard, promotion, and leakage penalty are disabled.](figures/fig1_protocol_v6_method.png){#fig:protocol-v6-1}
 
@@ -345,6 +352,14 @@ without policy or critic freezing for 200 episodes and evaluates checkpoint
 and the evaluator rejects any change in deployment state across evaluation
 seeds.
 
+V33 is a subsequent, preregistered development screen of lower-policy update
+duration. Each candidate trains for 200 episodes, but lower-actor updates stop
+after episode 40, 80, or 100. The lower critics and both upper components keep
+training. V33 uses four new training seeds crossed with four new evaluation
+seeds. It is not an independent confirmation stage; its confirmation roster
+was reserved for use only if exactly one candidate passed the development
+gate.
+
 ## External comparators
 
 Three non-learned comparators use the same V6 environment, fixed 12-vehicle
@@ -420,6 +435,13 @@ disable the legacy holding guard; the current policy additionally has compact
 APC/AVL context and the two-sided regularity objective, so their difference is
 a combined-policy contrast.
 
+The V33 development screen uses four training seeds crossed with four
+evaluation seeds (16 paired rollouts per candidate). A candidate had to pass
+the unchanged V8 effect and mechanism gate, place the headway-CV interval below
+zero, satisfy the passenger-journey no-harm bound, and improve headway CV for
+at least three of four training seeds. No candidate passed, so the reserved
+confirmation roster was not opened.
+
 Uncertainty uses a crossed bootstrap over training and evaluation seeds while
 sharing each evaluation-seed resample across paired policies. Two-sided
 sign-flip tests operate on training-seed mean differences, with Holm correction
@@ -427,7 +449,7 @@ within each metric family. Lower values favor FreqDuet for every reported
 outcome. For each external comparator, its eight evaluation-seed realizations
 are crossed with the eight V9 learned training seeds, yielding 64 paired rows;
 the crossed analysis retains training seed as the independent policy-training
-unit. The V8 and V9 estimates are kept separate and are never pooled.
+unit. V8, V9, and V33 estimates are kept separate and are never pooled.
 
 # Results
 
@@ -476,6 +498,26 @@ zero and the mean improvement did not reach the registered 0.02 threshold.
 V9 therefore returned `longtrain_not_confirmed`; the favorable journey result
 cannot be relabelled as confirmation of the registered regularity effect.
 
+## Lower-actor freezing did not repair long-training regularity
+
+V33 tested three lower-actor freeze schedules on a preregistered 4-by-4
+development roster. Freezing after episode 100, 80, or 40 changed headway CV by
+-0.007 [-0.049, +0.030],
+-0.004 [-0.031, +0.015],
+and
+-0.012 [-0.038, +0.008],
+respectively. Every interval crossed zero, and no mean reduction reached the
+registered 0.02 threshold. The episode-40 schedule improved restricted journey by
+-1.954 [-3.190, -1.077]
+min and had negative headway-CV differences for
+4 of 4 training
+seeds. It still failed the registered magnitude and interval requirements.
+All three candidates therefore failed; the reserved confirmation
+roster was not used. The unfrozen controller passed the incremental gate on
+these development seeds, but it was a control rather than a V33 candidate and
+does not replace the failed independent V9 result. Full V33 outcomes are
+reported in Supplementary Section S5.
+
 ## External baselines reveal a passenger-regularity trade-off
 
 The source-identical V9 comparison (Fig. 3; Table 2) shows that FreqDuet had
@@ -507,7 +549,7 @@ better for passenger journey and fleet-readiness burden.
 
 ![External baseline trade-off under the V9 source contract. Points show paired mean differences between FreqDuet and each external baseline; bars show 95% crossed-bootstrap confidence intervals over eight training and eight evaluation seeds (64 paired rollouts). Lower values favor FreqDuet. FreqDuet improved regularity and restricted service cost relative to fixed headway but increased passenger journey time. It reduced passenger journey time relative to rule holding and rule MPC. Exact two-sided sign-flip tests and Holm-adjusted values are provided in the source table and are not encoded as significance symbols in the figure.](figures/fig3_protocol_v6_external_tradeoff.png){#fig:protocol-v6-3}
 
-\Needspace{8\baselineskip}
+\Needspace{15\baselineskip}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.
@@ -576,13 +618,26 @@ training and evaluation seeds. The registered V9 gate required the latter
 effect-size interval and was not passed; the smaller sign-flip value is not used
 to relabel V9 as a confirmation.
 
+V33 then tested a specific stability hypothesis: lower-actor updates after the
+short-training checkpoint might erode regularity. Freezing the lower actor after
+episode 40, 80, or 100 did not resolve the problem. All three schedules improved
+restricted journey relative to the reference, but no candidate passed the
+registered regularity gate. The episode-40 schedule had a negative headway-CV
+difference for every training seed, yet its mean reduction was only 0.012 and
+its confidence interval crossed zero. The unused confirmation roster therefore
+remained untouched. The unfrozen control passed on the V33 development roster,
+but that selected-data observation cannot replace the failed independent V9
+test.
+
 This pattern matters for learning-based bus control. Prior work demonstrates
 that RL can coordinate asynchronous holding and adapt to operational uncertainty
 [@wang2020dynamic; @wang2021asynchronous; @wang2023robust], but the present
 results show why training duration belongs in the evaluation contract. A policy
 can retain a favorable passenger outcome while the regularity effect used for
-selection weakens. Reporting only the selected checkpoint or pooling training
-horizons would conceal that failure mode.
+selection weakens. V33 further shows that a plausible timescale repair can fail
+even when its passenger endpoint improves. Reporting only the selected
+checkpoint, the best development seed, or pooled training horizons would
+conceal that failure mode.
 
 ## Passenger service versus regularity
 
@@ -652,8 +707,9 @@ noncompliance, or field dispatch interventions.
 ## Limitations
 
 Five limitations define the present claim. First, V9 did not confirm the
-registered 200-episode regularity effect; long-horizon learning stability remains
-unresolved. Second, the confirmatory contrast is bundled and lacks current-stage
+registered 200-episode regularity effect, and no V33 freeze schedule repaired
+it; long-horizon learning stability remains unresolved. Second, the
+confirmatory contrast is bundled and lacks current-stage
 NoFreq, RawHistory, AllFreq, and swapped-authority controls, so frequency
 allocation is not causally isolated. Third, the strong fixed-headway baseline is
 better on passenger journey and fleet-readiness burden, despite worse headway
@@ -667,9 +723,10 @@ transportability beyond the evaluated corridor.
 
 ## Implications for further evaluation
 
-The next decisive experiment is not another gate tuned on V8 or V9. It is a
-new, frozen factorial confirmation that holds APC/AVL context, reward, physical
-fleet, and training protocol constant while varying only frequency allocation.
+The next decisive experiment is not another gate tuned on V8, V9, or V33. It is
+a new, frozen factorial confirmation that holds APC/AVL context, reward,
+physical fleet, and training protocol constant while varying only frequency
+allocation.
 Such a study should use unseen route and service-day families and retain
 fixed-headway passenger journey and fleet burden as co-primary constraints.
 Separately, replacing the current restricted scalar with an objective that
@@ -681,14 +738,17 @@ signal, not as a universally superior bus controller.
 
 # Conclusions
 
-FreqDuet implements a causal frequency-to-authority interface for asynchronous
+FreqDuet implements an online frequency-to-authority interface for asynchronous
 bus control: historical and completed-bin demand information defines a smooth
 state for executable terminal headway planning, while station-local innovations
 and same-time APC/AVL context inform discrete intermediate-stop holding. The
 frozen controller met its independent short-training headway-regularity gate
 without violating the registered passenger-journey no-harm condition. In the
 separate long-training test, passenger journey improved relative to the Protocol
-V6 reference, but the registered regularity magnitude was not confirmed.
+V6 reference, but the registered regularity magnitude was not confirmed. A
+preregistered development screen then tested three lower-actor freeze schedules;
+none restored the registered long-training effect, so confirmation was not
+authorized.
 
 The external comparison clarifies the practical meaning of these results.
 FreqDuet was more regular than fixed headway and improved passenger journey over
@@ -698,18 +758,19 @@ supports a registered gate-positive short-horizon result for the complete
 selected controller. Because the Holm-adjusted sign-flip result was $p=0.125$,
 it does not establish a familywise-significant effect, long-run robustness, or
 universal superiority. A fresh factorial confirmation and matched route-day
-evaluation are required to isolate frequency allocation and determine whether
-its regularity benefit can be converted into a passenger-service benefit.
+evaluation are required to isolate frequency allocation. A passenger-centered
+objective must also determine whether improved regularity can be converted into
+a passenger-service benefit.
 
 # Data and Code Availability
 
-The repository contains the small immutable CSV and JSON artifacts supporting
-the V8 confirmation, V9 robustness test, and V9 external-baseline comparison,
-together with exact seed contracts, resolved configurations, source commits,
-derived figure data, and assembly scripts. Checkpoints and full training logs
-remain on the HPC filesystem and are not part of the manuscript bundle. A
-persistent archival identifier will be added after the manuscript scope and
-release snapshot are frozen.
+The repository contains the compact CSV and JSON artifacts supporting the V8
+confirmation, V9 robustness test, V33 timescale screen, and V9 external-baseline
+comparison. It also records exact seed contracts, resolved configurations,
+source commits, derived figure data, and assembly scripts. Checkpoints and full
+training logs are not part of the manuscript bundle. A persistent archival
+identifier will be added after the manuscript scope and release snapshot are
+frozen.
 
 The external realism audit uses bounded subsets derived from public MTA AFC and
 Halifax Transit APC sources. Source endpoints, selection rules, coverage, and

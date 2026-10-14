@@ -1,9 +1,11 @@
 ## S1. Frozen evidence and decision ledger
 
-The current paper package binds the gate-positive V8 decision and failed V9
-long-training gate. They use disjoint training and evaluation seeds and are not
-pooled. The V8 decision label records its preregistered effect/no-harm gate; it
-does not imply a familywise-significant result at 0.05.
+The current paper package binds the gate-positive V8 decision, failed V9
+long-training gate, and no-pass V33 development screen. The stages use
+disjoint training and evaluation seeds and are not pooled. The V8 decision
+label records its preregistered effect/no-harm gate; it does not imply a
+familywise-significant result at 0.05. V33 was not a confirmation stage and is
+listed separately from the confirmatory decision ledger.
 
 | Phase | Train x eval | Pairs | Registered decision | Claim eligible |
 | --- | --- | --- | --- | --- |
@@ -90,7 +92,30 @@ to its exact paper alias \path{F_freqduet_protocol_v6_confirmed_main_hiro}. Both
 legacy holding guard. The contrast
 combines compact APC/AVL context with the incremental regularity objective.
 
-## S5. Complete V9 external-baseline outcomes
+## S5. V33 lower-actor timescale development screen
+
+V33 tested whether stopping lower-actor updates after episode 40, 80, or 100
+could preserve the short-training regularity effect at checkpoint 199. The
+lower critics and both upper components continued training. Each candidate used
+four training seeds crossed with four evaluation seeds. Values below are
+candidate minus the Protocol V6 reference; lower is better.
+
+| Lower actor frozen after episode | Headway CV delta [95% CI] | Negative train seeds | Journey delta [95% CI], min | Gate passed |
+| --- | --- | --- | --- | --- |
+| 100 | -0.007 [-0.049, +0.030] | 2/4 | -1.050 [-2.369, -0.302] | No |
+| 80 | -0.004 [-0.031, +0.015] | 2/4 | -1.491 [-2.937, -0.491] | No |
+| 40 | -0.012 [-0.038, +0.008] | 4/4 | -1.954 [-3.190, -1.077] | No |
+
+All three candidates met the journey no-harm condition, but none achieved a
+headway-CV reduction of at least 0.02 with its interval below zero. The
+episode-40 schedule had a negative headway-CV difference for all four training
+seeds, but its mean reduction was 0.012 and its interval crossed zero. V33
+therefore returned `no_pass`. The confirmation roster was not used. The
+unfrozen current controller passed the incremental gate on this
+development roster, but it was a control rather than a registered V33
+candidate. It cannot replace the failed independent V9 result.
+
+## S6. Complete V9 external-baseline outcomes
 
 | Baseline | Outcome | FreqDuet mean | Baseline mean | Delta [95% CI] | Holm p |
 | --- | --- | --- | --- | --- | --- |
@@ -124,7 +149,7 @@ denied-trip rate is the fraction of scheduled trips denied at least once by
 the fixed-pool readiness check; retry duration is reported separately in the
 source artifacts. A launch rate of one does not imply a zero denial rate.
 
-## S6. Statistical procedure
+## S7. Statistical procedure
 
 Each train-seed policy is evaluated on every registered evaluation seed under
 common random numbers. Crossed-bootstrap intervals resample training seeds and
@@ -132,8 +157,8 @@ a shared set of evaluation seeds, preserving policy pairing. Sign-flip tests
 operate on train-seed mean deltas and therefore target conditional
 training-seed inference rather than the crossed population represented by the
 bootstrap. Holm adjustment is performed across compared methods separately for
-each outcome. No V8 and V9 estimate is pooled, and no failed gate is rescued by
-a favorable secondary endpoint.
+each outcome. V8, V9, and V33 estimates are not pooled, and no failed gate is
+rescued by a favorable secondary endpoint.
 
 The V8 gate required a headway-CV improvement of at least 0.02 against the
 Protocol V6 reference, at least 0.01 against compact context alone, passenger
@@ -145,19 +170,26 @@ than +0.15 min, and negative train-seed CV differences for at least 75% of
 training seeds. V9 met the latter two added directional/no-harm conditions but
 failed the inherited CV magnitude gates and CI-exclusion requirement.
 
-## S7. Frequency-claim boundary and negative development evidence
+V33 reused the V8 effect and mechanism thresholds. It additionally required a
+headway-CV interval below zero, a journey CI upper bound no larger than +0.15
+min, and negative train-seed CV differences for at least 75% of training
+seeds. A development candidate had to pass every condition before the reserved
+confirmation seeds could be used. None did.
+
+## S8. Frequency-claim boundary and negative development evidence
 
 The current confirmatory package does not contain a same-stage NoFreq,
 RawHistory, AllFreq, swapped-layer, promotion, or leakage ablation. Earlier V6
 engineering screens used some of these controls, but they were exploratory,
 incomplete, or tied to superseded controller semantics. They cannot be used as
 confirmatory evidence that frequency separation itself caused the V8 effect.
-Likewise, V28-V32 counterfactual value/rank/margin planners all failed their
-registered development gates and were not promoted. These negative results
-define the stopping decision: the manuscript uses the frozen V6 controller and
-does not tune another gate on the same development contexts.
+Likewise, V28-V32 counterfactual value/rank/margin planners and all three V33
+lower-actor freeze schedules failed their registered development gates and
+were not promoted. These negative results define the stopping decision: the
+manuscript uses the frozen V6 controller and does not tune another gate on the
+same development contexts.
 
-## S8. External-data provenance
+## S9. External-data provenance
 
 Figure 5 uses separately normalized demand shapes from the local FreqDuet OD
 input, 39 complete station-complex days selected from a bounded public MTA AFC
@@ -168,11 +200,11 @@ or onboard load. MBTA boarding, alighting, and load data provide separate
 calibration targets but are not a same-day matched calibration of the simulated
 network. API credentials are not stored in the repository or paper package.
 
-## S9. Reproducibility boundary
+## S10. Reproducibility boundary
 
-The paper evidence directory tracks the small V8/V9 CSV and JSON artifacts,
-exact seed contracts, source commits, and resolved config lineage. Checkpoints
-and full training logs remain on the HPC filesystem and are intentionally not
-part of the manuscript package. A build validates the frozen package before
-rendering any text or table. A successful build verifies consistency; it does
-not change the scientific decision or create a field-deployment claim.
+The paper evidence directory tracks the small V8, V9, and V33 CSV and JSON
+artifacts, exact seed contracts, source commits, and resolved config lineage.
+Checkpoints and full training logs are intentionally not part of the manuscript
+bundle. A build validates the frozen package before rendering any text or
+table. A successful build verifies consistency; it does not change the
+scientific decision or create a field-deployment claim.

@@ -17,6 +17,8 @@ passenger-journey benefit.
 
 ![Independent confirmation and long-training robustness. Points show paired mean differences between the current policy and the Protocol V6 reference config named `F_freqduet_protocol_v6_noguard_hiro`; bars show 95% crossed-bootstrap confidence intervals over training and evaluation seeds. Both configurations disable the legacy causal holding guard. The current policy additionally uses compact APC/AVL context and the two-sided departure-regularity objective, so this is a combined-policy comparison rather than an isolated guard effect. Lower values favor the current policy. V8 contains 24 paired rollouts (six training seeds by four untouched evaluation seeds) and passed the registered effect/no-harm gate. Its Holm-adjusted training-seed sign-flip result was p=0.125, so the figure labels V8 as gate-positive rather than familywise significant. V9 contains 64 paired rollouts (eight by eight); its passenger-journey interval favored FreqDuet, but the headway-CV effect did not meet the registered magnitude and interval gate, so V9 is reported as not confirmed.](figures/fig2_protocol_v6_confirmation_robustness.png){#fig:protocol-v6-2}
 
+\Needspace{8\baselineskip}
+
 **Table 1. Current policy minus the Protocol V6 reference.** Values are paired
 mean differences with crossed-bootstrap 95% confidence intervals. Lower is
 better. Holm-adjusted sign-flip p-values use training-seed mean differences.
@@ -42,6 +44,26 @@ eight training-seed CV differences were negative, but the interval included
 zero and the mean improvement did not reach the registered 0.02 threshold.
 V9 therefore returned `longtrain_not_confirmed`; the favorable journey result
 cannot be relabelled as confirmation of the registered regularity effect.
+
+## Lower-actor freezing did not repair long-training regularity
+
+V33 tested three lower-actor freeze schedules on a preregistered 4-by-4
+development roster. Freezing after episode 100, 80, or 40 changed headway CV by
+-0.007 [-0.049, +0.030],
+-0.004 [-0.031, +0.015],
+and
+-0.012 [-0.038, +0.008],
+respectively. Every interval crossed zero, and no mean reduction reached the
+registered 0.02 threshold. The episode-40 schedule improved restricted journey by
+-1.954 [-3.190, -1.077]
+min and had negative headway-CV differences for
+4 of 4 training
+seeds. It still failed the registered magnitude and interval requirements.
+All three candidates therefore failed; the reserved confirmation
+roster was not used. The unfrozen controller passed the incremental gate on
+these development seeds, but it was a control rather than a V33 candidate and
+does not replace the failed independent V9 result. Full V33 outcomes are
+reported in Supplementary Section S5.
 
 ## External baselines reveal a passenger-regularity trade-off
 
@@ -73,6 +95,8 @@ produced more regular service than fixed headway, while fixed headway remained
 better for passenger journey and fleet-readiness burden.
 
 ![External baseline trade-off under the V9 source contract. Points show paired mean differences between FreqDuet and each external baseline; bars show 95% crossed-bootstrap confidence intervals over eight training and eight evaluation seeds (64 paired rollouts). Lower values favor FreqDuet. FreqDuet improved regularity and restricted service cost relative to fixed headway but increased passenger journey time. It reduced passenger journey time relative to rule holding and rule MPC. Exact two-sided sign-flip tests and Holm-adjusted values are provided in the source table and are not encoded as significance symbols in the figure.](figures/fig3_protocol_v6_external_tradeoff.png){#fig:protocol-v6-3}
+
+\Needspace{15\baselineskip}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.

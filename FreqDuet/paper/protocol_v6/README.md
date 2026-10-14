@@ -17,8 +17,9 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 - `discussion.md` and `conclusion.md`: interpretation and claim boundaries.
 - `availability.md`: evidence, public-data, and archive-status statement.
 - `manuscript.md`: complete assembled article draft.
-- `supplementary.md`: full outcomes, configuration lineage, statistical
-  procedure, negative-result boundary, and external-data provenance.
+- `supplementary.md`: full outcomes, V33 timescale screen, configuration
+  lineage, statistical procedure, negative-result boundary, and external-data
+  provenance.
 - `references.bib`: verified working bibliography.
 - `terminology.md`: canonical paper terms and prohibited conflations.
 - `literature_verification.md`: primary-record bibliography audit.
@@ -36,9 +37,10 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 The manuscript uses `F_freqduet_protocol_v6_confirmed_main_hiro` as the current best controller. V8
 passed its registered 40-episode effect/no-harm gate, although its
 Holm-adjusted training-seed sign-flip result is $p=0.125$. V9 did not confirm
-the registered 200-episode regularity gate. The V9
-fixed-headway comparison is a trade-off, not a passenger-journey superiority
-result. The evidence status therefore remains `submission_ready: false`; adding
-editorial sections and a journal template does not override that scientific
-decision. Author metadata and the current portal-specific submission fields
-remain pre-submission tasks.
+the registered 200-episode regularity gate. V33 then screened three
+lower-actor freeze schedules; none passed, and confirmation was not authorized.
+The V9 fixed-headway comparison is a trade-off, not a passenger-journey
+superiority result. The evidence status therefore remains
+`submission_ready: false`; editorial assembly does not override that scientific
+decision. Author metadata and current portal-specific submission fields remain
+pre-submission tasks.

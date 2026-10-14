@@ -1,12 +1,12 @@
 # Data and Code Availability
 
-The repository contains the small immutable CSV and JSON artifacts supporting
-the V8 confirmation, V9 robustness test, and V9 external-baseline comparison,
-together with exact seed contracts, resolved configurations, source commits,
-derived figure data, and assembly scripts. Checkpoints and full training logs
-remain on the HPC filesystem and are not part of the manuscript bundle. A
-persistent archival identifier will be added after the manuscript scope and
-release snapshot are frozen.
+The repository contains the compact CSV and JSON artifacts supporting the V8
+confirmation, V9 robustness test, V33 timescale screen, and V9 external-baseline
+comparison. It also records exact seed contracts, resolved configurations,
+source commits, derived figure data, and assembly scripts. Checkpoints and full
+training logs are not part of the manuscript bundle. A persistent archival
+identifier will be added after the manuscript scope and release snapshot are
+frozen.
 
 The external realism audit uses bounded subsets derived from public MTA AFC and
 Halifax Transit APC sources. Source endpoints, selection rules, coverage, and

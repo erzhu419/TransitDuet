@@ -1,0 +1,5 @@
+| Lower actor frozen after episode | Headway CV delta [95% CI] | Negative train seeds | Journey delta [95% CI], min | Gate passed |
+| --- | --- | --- | --- | --- |
+| 100 | -0.007 [-0.049, +0.030] | 2/4 | -1.050 [-2.369, -0.302] | No |
+| 80 | -0.004 [-0.031, +0.015] | 2/4 | -1.491 [-2.937, -0.491] | No |
+| 40 | -0.012 [-0.038, +0.008] | 4/4 | -1.954 [-3.190, -1.077] | No |

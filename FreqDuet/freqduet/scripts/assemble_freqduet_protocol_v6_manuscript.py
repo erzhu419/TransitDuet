@@ -2,8 +2,8 @@
 """Assemble the Protocol V6 paper text from the frozen evidence package.
 
 The output is deliberately claim-bounded.  A successful build means that the
-text and tables agree with the packaged V8/V9 evidence; it does not override
-the failed V9 long-training gate or make the study submission-ready.
+text and tables agree with the packaged V8/V9/V33 evidence; it does not
+override the failed V9 long-training gate or make the study submission-ready.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ PROTOCOL = "freqduet-eval-v6"
 PAPER_CONTROLLER = "F_freqduet_protocol_v6_confirmed_main_hiro"
 SOURCE_CANDIDATE = "F_freqduet_protocol_v6_avlcompact_w2_hiro"
 REFERENCE = "F_freqduet_protocol_v6_noguard_hiro"
-TITLE = "FreqDuet: Causally Observed Frequency Allocation for Hierarchical Bus Timetable and Holding Control"
+TITLE = "FreqDuet: Online Frequency-to-Authority Allocation for Hierarchical Bus Control"
 KEYWORDS = (
     "bus holding",
     "hierarchical reinforcement learning",
@@ -59,6 +59,15 @@ FIGURE_STEMS = {
     4: "physical_outcomes",
     5: "external_realism",
 }
+V33_PHASE = "v33_lower_actor_timescale_development_ep200"
+V33_CANDIDATES = (
+    "F_freqduet_protocol_v6_v33_lowerfreeze100_hiro",
+    "F_freqduet_protocol_v6_v33_lowerfreeze80_hiro",
+    "F_freqduet_protocol_v6_v33_lowerfreeze40_hiro",
+)
+V33_FREEZE_EPISODES = dict(zip(V33_CANDIDATES, (100, 80, 40)))
+V33_TRAIN_SEEDS = (933013, 933031, 933059, 933083)
+V33_EVAL_SEEDS = (934011, 934029, 934047, 934071)
 
 METRICS = (
     ("passenger_journey_min", "Restricted passenger journey", "min", 1.0, 3),
@@ -211,6 +220,10 @@ def read_editorial_sources(source_dir: Path = EDITORIAL_SOURCE_DIR) -> dict[str,
         "V9 failure is missing from Discussion",
     )
     require(
+        "V33" in sources["discussion.md"] and "no candidate passed" in sources["discussion.md"],
+        "V33 negative result is missing from Discussion",
+    )
+    require(
         "fixed headway remained better" in sources["conclusion.md"],
         "fixed-headway trade-off is missing from Conclusions",
     )
@@ -234,6 +247,12 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
         status.get("submission_blocker") == "v9_longtrain_not_confirmed",
         "submission blocker mismatch",
     )
+    require(status.get("v33_timescale_status") == "no_pass", "V33 no-pass result is missing")
+    require(status.get("v33_claim_eligible") is False, "V33 was unexpectedly made claim eligible")
+    require(
+        status.get("v33_confirmation_authorized") is False,
+        "V33 confirmation was unexpectedly authorized",
+    )
 
     method = read_json(
         package_dir / "figures" / "source_data" / "figure1_method_contract.json"
@@ -249,9 +268,11 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
     v9 = read_rows(package_dir / "tables" / "table2_v9_longtrain.csv")
     external = read_rows(package_dir / "tables" / "table3_v9_external_baselines.csv")
     decisions = read_rows(package_dir / "tables" / "table4_evidence_decisions.csv")
+    v33 = read_rows(package_dir / "tables" / "table5_v33_timescale_development.csv")
     require(len(v8) == len(METRICS), "V8 table metric roster mismatch")
     require(len(v9) == len(METRICS), "V9 table metric roster mismatch")
     require(len(external) == 3 * len(METRICS), "external table metric roster mismatch")
+    require(len(v33) == len(V33_CANDIDATES) * len(METRICS), "V33 table metric roster mismatch")
 
     for rows, pairs, phase, candidate in (
         (v8, "24", "v8_independent_confirmation_ep40", SOURCE_CANDIDATE),
@@ -279,6 +300,25 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
             f"external paper controller mismatch for {baseline}",
         )
         require(all(row.get("n_pairs") == "64" for row in subset), "external pair count mismatch")
+
+    for candidate in V33_CANDIDATES:
+        subset = [row for row in v33 if row.get("source_candidate") == candidate]
+        require(len(subset) == len(METRICS), f"V33 metric roster mismatch for {candidate}")
+        require(
+            {row.get("metric") for row in subset} == set(METRIC_SPEC),
+            f"V33 metrics mismatch for {candidate}",
+        )
+        require(all(row.get("n_pairs") == "16" for row in subset), "V33 pair count mismatch")
+        require(all(row.get("phase") == V33_PHASE for row in subset), "V33 phase mismatch")
+        require(
+            all(row.get("paper_controller") == PAPER_CONTROLLER for row in subset),
+            "V33 paper controller mismatch",
+        )
+        require(all(row.get("reference") == REFERENCE for row in subset), "V33 reference mismatch")
+        require(
+            all(row.get("registered_gate_pass") == "False" for row in subset),
+            f"V33 candidate unexpectedly passed: {candidate}",
+        )
 
     require(len(decisions) == 2, "decision ledger must contain exactly V8 and V9")
     v8_decision = one_row(decisions, phase="v8_independent_confirmation_ep40")
@@ -318,6 +358,40 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
         "V9 learned-policy completion rate is not complete",
     )
 
+    v33_gate = read_json(
+        package_dir
+        / "source_artifacts"
+        / "v33_timescale"
+        / "v33_timescale_gate.json"
+    )
+    require(v33_gate.get("status") == "no_pass", "V33 gate status mismatch")
+    require(v33_gate.get("claim_eligible") is False, "V33 gate eligibility mismatch")
+    require(
+        v33_gate.get("confirmation_authorized") is False,
+        "V33 gate confirmation authorization mismatch",
+    )
+    require(v33_gate.get("selected_for_confirmation") is None, "V33 selected a candidate")
+    require(v33_gate.get("passing_candidates") == [], "V33 passing-candidate list is not empty")
+    require(
+        tuple(v33_gate.get("candidate_priority", ())) == V33_CANDIDATES,
+        "V33 candidate priority mismatch",
+    )
+    v33_results = v33_gate.get("candidate_results", [])
+    require(
+        {result.get("candidate") for result in v33_results} == set(V33_CANDIDATES),
+        "V33 gate candidate roster mismatch",
+    )
+    require(all(result.get("passes") is False for result in v33_results), "V33 gate pass mismatch")
+    design = v33_gate.get("development_design", {})
+    require(design.get("train_episodes") == 200, "V33 training horizon mismatch")
+    require(design.get("checkpoint_ep") == 199, "V33 checkpoint mismatch")
+    require(tuple(design.get("train_seeds", ())) == V33_TRAIN_SEEDS, "V33 train seeds mismatch")
+    require(tuple(design.get("eval_seeds", ())) == V33_EVAL_SEEDS, "V33 evaluation seeds mismatch")
+    require(
+        v33_gate.get("strict_checks", {}).get("strict_complete") is True,
+        "V33 strict evidence checks are incomplete",
+    )
+
     for stem in (
         "fig1_protocol_v6_method",
         "fig2_protocol_v6_confirmation_robustness",
@@ -336,6 +410,8 @@ def validate_package(package_dir: Path) -> dict[str, Any]:
         "external": external,
         "decisions": decisions,
         "v9_summary": v9_summary,
+        "v33": v33,
+        "v33_gate": v33_gate,
     }
 
 
@@ -468,6 +544,40 @@ def external_full_table(external: list[dict[str, str]]) -> tuple[str, str]:
     return markdown_table(headers, rows), latex_table(headers, rows, "llrrrr")
 
 
+def v33_timescale_table(
+    v33: list[dict[str, str]],
+    gate: dict[str, Any],
+) -> tuple[str, str]:
+    gate_results = {
+        result["candidate"]: result for result in gate["candidate_results"]
+    }
+    rows: list[list[str]] = []
+    for candidate in V33_CANDIDATES:
+        cv = one_row(v33, source_candidate=candidate, metric="headway_cv")
+        journey = one_row(
+            v33,
+            source_candidate=candidate,
+            metric="passenger_journey_min",
+        )
+        fraction = float(gate_results[candidate]["headway_cv_negative_train_seed_fraction"])
+        negative_seeds = round(fraction * len(V33_TRAIN_SEEDS))
+        rows.append([
+            str(V33_FREEZE_EPISODES[candidate]),
+            effect(cv, "delta_candidate_minus_reference", "headway_cv"),
+            f"{negative_seeds}/{len(V33_TRAIN_SEEDS)}",
+            effect(journey, "delta_candidate_minus_reference", "passenger_journey_min"),
+            "No",
+        ])
+    headers = [
+        "Lower actor frozen after episode",
+        "Headway CV delta [95% CI]",
+        "Negative train seeds",
+        "Journey delta [95% CI], min",
+        "Gate passed",
+    ]
+    return markdown_table(headers, rows), latex_table(headers, rows, "lrrrr")
+
+
 def relative_link(source: Path, output_dir: Path) -> str:
     return Path(os.path.relpath(source, output_dir)).as_posix()
 
@@ -517,9 +627,9 @@ def metadata_yaml(data: dict[str, Any]) -> str:
 
 def highlights_text() -> str:
     highlights = (
-        "A causal demand filter assigns slow and fast signals to different bus controls.",
+        "An online demand filter assigns slow and fast signals to different controls.",
         "The controller passed a preregistered short-training regularity gate.",
-        "Long training did not retain the registered regularity gain.",
+        "Long training and lower-actor freezing did not retain that regularity gain.",
         "Fixed headway gave shorter journeys and fewer fleet readiness delays.",
     )
     require(all(len(item) <= 85 for item in highlights), "Elsevier highlight exceeds 85 characters")
@@ -539,8 +649,10 @@ On a server with the isolated paper toolchain, run:
 The command writes `manuscript.tex`, `manuscript.pdf`, `supplementary.tex`, and
 `supplementary.pdf`. A successful build means that the prose, citations,
 tables, and figure paths compile. It does not override the failed V9
-long-training gate. Before submission, replace anonymous metadata and re-check
-the current TRC submission portal requirements.
+long-training gate or the no-pass V33 development screen. Before submission,
+replace anonymous metadata and re-check the current TRC submission portal
+requirements.
+
 `highlights.txt` is the source text for four Elsevier-length bullets; convert it
 to the portal's required upload format at final submission.
 """
@@ -611,14 +723,16 @@ def manuscript_methods(method: dict[str, Any], figure_path: str) -> str:
 
 ## Study question and control setting
 
-FreqDuet studies whether frequency structure in an exogenous demand stream can
-be aligned with authority in an asynchronous hierarchical controller. The
-upper policy changes an executable target-headway plan at dispatch events; the
-lower policy chooses holding at station-arrival events. One upper decision can
-therefore span many lower decisions. The current paper controller is the
-compact APC/AVL, weight-two configuration that passed the preregistered V8
-gate. Its exact identifier and inheritance chain are reported in
-Supplementary Section S2.
+FreqDuet allocates two causally available components of an exogenous demand
+stream to two authorities in an asynchronous hierarchical controller. Here,
+`causal` refers only to online information timing: a decision cannot use an
+observation that has not yet occurred. It does not denote identification of a
+causal treatment effect. The upper policy changes an executable target-headway
+plan at dispatch events, whereas the lower policy chooses holding at
+station-arrival events. One upper decision can therefore span many lower
+decisions. The current paper controller is the compact APC/AVL, weight-two
+configuration that passed the preregistered V8 gate. Its exact identifier and
+inheritance chain are reported in Supplementary Section S2.
 
 ![Figure 1. Causal frequency-to-authority architecture.]({figure_path})
 
@@ -764,6 +878,14 @@ without policy or critic freezing for 200 episodes and evaluates checkpoint
 and the evaluator rejects any change in deployment state across evaluation
 seeds.
 
+V33 is a subsequent, preregistered development screen of lower-policy update
+duration. Each candidate trains for 200 episodes, but lower-actor updates stop
+after episode 40, 80, or 100. The lower critics and both upper components keep
+training. V33 uses four new training seeds crossed with four new evaluation
+seeds. It is not an independent confirmation stage; its confirmation roster
+was reserved for use only if exactly one candidate passed the development
+gate.
+
 ## External comparators
 
 Three non-learned comparators use the same V6 environment, fixed 12-vehicle
@@ -839,6 +961,13 @@ disable the legacy holding guard; the current policy additionally has compact
 APC/AVL context and the two-sided regularity objective, so their difference is
 a combined-policy contrast.
 
+The V33 development screen uses four training seeds crossed with four
+evaluation seeds (16 paired rollouts per candidate). A candidate had to pass
+the unchanged V8 effect and mechanism gate, place the headway-CV interval below
+zero, satisfy the passenger-journey no-harm bound, and improve headway CV for
+at least three of four training seeds. No candidate passed, so the reserved
+confirmation roster was not opened.
+
 Uncertainty uses a crossed bootstrap over training and evaluation seeds while
 sharing each evaluation-seed resample across paired policies. Two-sided
 sign-flip tests operate on training-seed mean differences, with Holm correction
@@ -846,7 +975,7 @@ within each metric family. Lower values favor FreqDuet for every reported
 outcome. For each external comparator, its eight evaluation-seed realizations
 are crossed with the eight V9 learned training seeds, yielding 64 paired rows;
 the crossed analysis retains training seed as the independent policy-training
-unit. The V8 and V9 estimates are kept separate and are never pooled.
+unit. V8, V9, and V33 estimates are kept separate and are never pooled.
 """
 
 
@@ -858,6 +987,8 @@ def manuscript_results(
 ) -> str:
     v8 = data["v8"]
     v9 = data["v9"]
+    v33 = data["v33"]
+    v33_gate = data["v33_gate"]
     external = data["external"]
 
     def pair(rows: list[dict[str, str]], metric: str) -> dict[str, str]:
@@ -869,6 +1000,28 @@ def manuscript_results(
     v9_cv = pair(v9, "headway_cv")
     v9_hold = pair(v9, "holding_s_per_trip")
     v9_denied = pair(v9, "denied_trip_rate")
+    v33_cv = {
+        candidate: one_row(v33, source_candidate=candidate, metric="headway_cv")
+        for candidate in V33_CANDIDATES
+    }
+    v33_journey = {
+        candidate: one_row(
+            v33,
+            source_candidate=candidate,
+            metric="passenger_journey_min",
+        )
+        for candidate in V33_CANDIDATES
+    }
+    v33_gate_results = {
+        result["candidate"]: result for result in v33_gate["candidate_results"]
+    }
+    v33_negative_seeds = {
+        candidate: round(
+            float(v33_gate_results[candidate]["headway_cv_negative_train_seed_fraction"])
+            * len(V33_TRAIN_SEEDS)
+        )
+        for candidate in V33_CANDIDATES
+    }
     fixed_journey = one_row(external, baseline="fixed_headway", metric="passenger_journey_min")
     fixed_cv = one_row(external, baseline="fixed_headway", metric="headway_cv")
     fixed_cost = one_row(external, baseline="fixed_headway", metric="restricted_service_cost")
@@ -922,6 +1075,26 @@ zero and the mean improvement did not reach the registered 0.02 threshold.
 V9 therefore returned `longtrain_not_confirmed`; the favorable journey result
 cannot be relabelled as confirmation of the registered regularity effect.
 
+## Lower-actor freezing did not repair long-training regularity
+
+V33 tested three lower-actor freeze schedules on a preregistered 4-by-4
+development roster. Freezing after episode 100, 80, or 40 changed headway CV by
+{effect(v33_cv[V33_CANDIDATES[0]], 'delta_candidate_minus_reference', 'headway_cv')},
+{effect(v33_cv[V33_CANDIDATES[1]], 'delta_candidate_minus_reference', 'headway_cv')},
+and
+{effect(v33_cv[V33_CANDIDATES[2]], 'delta_candidate_minus_reference', 'headway_cv')},
+respectively. Every interval crossed zero, and no mean reduction reached the
+registered 0.02 threshold. The episode-40 schedule improved restricted journey by
+{effect(v33_journey[V33_CANDIDATES[2]], 'delta_candidate_minus_reference', 'passenger_journey_min')}
+min and had negative headway-CV differences for
+{v33_negative_seeds[V33_CANDIDATES[2]]} of {len(V33_TRAIN_SEEDS)} training
+seeds. It still failed the registered magnitude and interval requirements.
+All three candidates therefore failed; the reserved confirmation
+roster was not used. The unfrozen controller passed the incremental gate on
+these development seeds, but it was a control rather than a V33 candidate and
+does not replace the failed independent V9 result. Full V33 outcomes are
+reported in Supplementary Section S5.
+
 ## External baselines reveal a passenger-regularity trade-off
 
 The source-identical V9 comparison (Fig. 3; Table 2) shows that FreqDuet had
@@ -953,7 +1126,7 @@ better for passenger journey and fleet-readiness burden.
 
 ![Figure 3. V9 external-baseline trade-off.]({figures[3]})
 
-\\Needspace{{8\\baselineskip}}
+\\Needspace{{15\\baselineskip}}
 
 **Table 2. FreqDuet minus external baseline under V9.** Values are paired mean
 differences with crossed-bootstrap 95% confidence intervals. Lower is better.
@@ -1002,31 +1175,34 @@ def abstract_body(data: dict[str, Any]) -> str:
     fixed_journey = one_row(
         data["external"], baseline="fixed_headway", metric="passenger_journey_min"
     )
-    return f"""Bus timetable planning and station-level holding operate at
-different temporal and physical scales, creating an information-allocation
-problem for a learned hierarchy.
-FreqDuet estimates demand causally from completed APC bins, sends a
-harmonic low-frequency state to an executable upper headway planner, and sends
-station-local innovations plus compact APC/AVL context to a discrete lower
-holding policy. In an independent 40-episode confirmation with 24 paired
-rollouts, the complete current controller changed headway coefficient of
-variation by {effect(v8_cv, 'delta_candidate_minus_reference', 'headway_cv')}
-relative to a same-protocol reference. The bootstrap interval excluded zero,
-whereas the Holm-adjusted training-seed sign-flip result was
-$p={p_value(v8_cv['paired_signflip_p_holm'])}$. Restricted passenger journey changed by
+    require(data["v33_gate"]["status"] == "no_pass", "V33 abstract status mismatch")
+    return f"""Terminal dispatch and intermediate-stop holding act at different
+scales, but a learned hierarchy must still decide which demand information each
+authority can use. FreqDuet updates a harmonic demand model only after automatic
+passenger counting bins close. It routes low-frequency level, slope, and
+forecast information to an executable terminal planner, and station-local
+innovations with compact passenger and vehicle context to discrete holding. In
+an independent 40-episode confirmation with 24 paired rollouts, the complete
+controller changed headway coefficient of variation by
+{effect(v8_cv, 'delta_candidate_minus_reference', 'headway_cv')} relative to a
+same-protocol reference. The bootstrap interval excluded zero, whereas the
+Holm-adjusted training-seed sign-flip result was
+$p={p_value(v8_cv['paired_signflip_p_holm'])}$. Restricted passenger journey
+changed by
 {effect(v8_journey, 'delta_candidate_minus_reference', 'passenger_journey_min')}
-min and satisfied the registered no-harm condition. In a separate 200-episode,
-64-pair robustness test, journey improved by
+min and met the registered no-harm condition. In a separate 200-episode test
+with 64 pairs, journey improved by
 {effect(v9_journey, 'delta_candidate_minus_reference', 'passenger_journey_min')}
-min (Holm-adjusted $p={p_value(v9_journey['paired_signflip_p_holm'])}$), but the headway effect weakened to
+min, but the headway effect weakened to
 {effect(v9_cv, 'delta_candidate_minus_reference', 'headway_cv')} and failed the
-registered long-training gate. Against fixed headway, FreqDuet was more regular
-but increased passenger journey by
+registered long-training gate. A preregistered development screen of three
+lower-actor freeze schedules produced no passing repair. Against fixed headway,
+FreqDuet was more regular but increased passenger journey by
 {effect(fixed_journey, 'delta_learned_minus_baseline', 'passenger_journey_min')}
-min. The results support a registered gate-positive short-training regularity
-signal and expose its training-horizon and passenger-service limits; they do not establish
-long-run regularity confirmation, passenger-service superiority over fixed
-headway, or an isolated causal effect of frequency separation.
+min. The evidence supports an online frequency-to-authority architecture and a
+bounded short-training result. It does not establish long-run regularity,
+passenger superiority over fixed headway, or an isolated causal effect of
+frequency allocation.
 """
 
 
@@ -1039,6 +1215,7 @@ def supplementary_text(
     data: dict[str, Any],
     full_external: str,
     main_table: str,
+    v33_table: str,
 ) -> str:
     method = data["method"]
     decisions = data["decisions"]
@@ -1073,10 +1250,12 @@ def supplementary_text(
 
 ## S1. Frozen evidence and decision ledger
 
-The current paper package binds the gate-positive V8 decision and failed V9
-long-training gate. They use disjoint training and evaluation seeds and are not
-pooled. The V8 decision label records its preregistered effect/no-harm gate; it
-does not imply a familywise-significant result at 0.05.
+The current paper package binds the gate-positive V8 decision, failed V9
+long-training gate, and no-pass V33 development screen. The stages use
+disjoint training and evaluation seeds and are not pooled. The V8 decision
+label records its preregistered effect/no-harm gate; it does not imply a
+familywise-significant result at 0.05. V33 was not a confirmation stage and is
+listed separately from the confirmatory decision ledger.
 
 {decision_table}
 
@@ -1121,7 +1300,26 @@ to its exact paper alias \\path{{{PAPER_CONTROLLER}}}. Both arms disable the
 legacy holding guard. The contrast
 combines compact APC/AVL context with the incremental regularity objective.
 
-## S5. Complete V9 external-baseline outcomes
+## S5. V33 lower-actor timescale development screen
+
+V33 tested whether stopping lower-actor updates after episode 40, 80, or 100
+could preserve the short-training regularity effect at checkpoint 199. The
+lower critics and both upper components continued training. Each candidate used
+four training seeds crossed with four evaluation seeds. Values below are
+candidate minus the Protocol V6 reference; lower is better.
+
+{v33_table}
+
+All three candidates met the journey no-harm condition, but none achieved a
+headway-CV reduction of at least 0.02 with its interval below zero. The
+episode-40 schedule had a negative headway-CV difference for all four training
+seeds, but its mean reduction was 0.012 and its interval crossed zero. V33
+therefore returned `no_pass`. The confirmation roster was not used. The
+unfrozen current controller passed the incremental gate on this
+development roster, but it was a control rather than a registered V33
+candidate. It cannot replace the failed independent V9 result.
+
+## S6. Complete V9 external-baseline outcomes
 
 {full_external}
 
@@ -1130,7 +1328,7 @@ denied-trip rate is the fraction of scheduled trips denied at least once by
 the fixed-pool readiness check; retry duration is reported separately in the
 source artifacts. A launch rate of one does not imply a zero denial rate.
 
-## S6. Statistical procedure
+## S7. Statistical procedure
 
 Each train-seed policy is evaluated on every registered evaluation seed under
 common random numbers. Crossed-bootstrap intervals resample training seeds and
@@ -1138,8 +1336,8 @@ a shared set of evaluation seeds, preserving policy pairing. Sign-flip tests
 operate on train-seed mean deltas and therefore target conditional
 training-seed inference rather than the crossed population represented by the
 bootstrap. Holm adjustment is performed across compared methods separately for
-each outcome. No V8 and V9 estimate is pooled, and no failed gate is rescued by
-a favorable secondary endpoint.
+each outcome. V8, V9, and V33 estimates are not pooled, and no failed gate is
+rescued by a favorable secondary endpoint.
 
 The V8 gate required a headway-CV improvement of at least 0.02 against the
 Protocol V6 reference, at least 0.01 against compact context alone, passenger
@@ -1151,19 +1349,26 @@ than +0.15 min, and negative train-seed CV differences for at least 75% of
 training seeds. V9 met the latter two added directional/no-harm conditions but
 failed the inherited CV magnitude gates and CI-exclusion requirement.
 
-## S7. Frequency-claim boundary and negative development evidence
+V33 reused the V8 effect and mechanism thresholds. It additionally required a
+headway-CV interval below zero, a journey CI upper bound no larger than +0.15
+min, and negative train-seed CV differences for at least 75% of training
+seeds. A development candidate had to pass every condition before the reserved
+confirmation seeds could be used. None did.
+
+## S8. Frequency-claim boundary and negative development evidence
 
 The current confirmatory package does not contain a same-stage NoFreq,
 RawHistory, AllFreq, swapped-layer, promotion, or leakage ablation. Earlier V6
 engineering screens used some of these controls, but they were exploratory,
 incomplete, or tied to superseded controller semantics. They cannot be used as
 confirmatory evidence that frequency separation itself caused the V8 effect.
-Likewise, V28-V32 counterfactual value/rank/margin planners all failed their
-registered development gates and were not promoted. These negative results
-define the stopping decision: the manuscript uses the frozen V6 controller and
-does not tune another gate on the same development contexts.
+Likewise, V28-V32 counterfactual value/rank/margin planners and all three V33
+lower-actor freeze schedules failed their registered development gates and
+were not promoted. These negative results define the stopping decision: the
+manuscript uses the frozen V6 controller and does not tune another gate on the
+same development contexts.
 
-## S8. External-data provenance
+## S9. External-data provenance
 
 Figure 5 uses separately normalized demand shapes from the local FreqDuet OD
 input, 39 complete station-complex days selected from a bounded public MTA AFC
@@ -1174,14 +1379,14 @@ or onboard load. MBTA boarding, alighting, and load data provide separate
 calibration targets but are not a same-day matched calibration of the simulated
 network. API credentials are not stored in the repository or paper package.
 
-## S9. Reproducibility boundary
+## S10. Reproducibility boundary
 
-The paper evidence directory tracks the small V8/V9 CSV and JSON artifacts,
-exact seed contracts, source commits, and resolved config lineage. Checkpoints
-and full training logs remain on the HPC filesystem and are intentionally not
-part of the manuscript package. A build validates the frozen package before
-rendering any text or table. A successful build verifies consistency; it does
-not change the scientific decision or create a field-deployment claim.
+The paper evidence directory tracks the small V8, V9, and V33 CSV and JSON
+artifacts, exact seed contracts, source commits, and resolved config lineage.
+Checkpoints and full training logs are intentionally not part of the manuscript
+bundle. A build validates the frozen package before rendering any text or
+table. A successful build verifies consistency; it does not change the
+scientific decision or create a field-deployment claim.
 """
 
 
@@ -1205,8 +1410,9 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 - `discussion.md` and `conclusion.md`: interpretation and claim boundaries.
 - `availability.md`: evidence, public-data, and archive-status statement.
 - `manuscript.md`: complete assembled article draft.
-- `supplementary.md`: full outcomes, configuration lineage, statistical
-  procedure, negative-result boundary, and external-data provenance.
+- `supplementary.md`: full outcomes, V33 timescale screen, configuration
+  lineage, statistical procedure, negative-result boundary, and external-data
+  provenance.
 - `references.bib`: verified working bibliography.
 - `terminology.md`: canonical paper terms and prohibited conflations.
 - `literature_verification.md`: primary-record bibliography audit.
@@ -1224,12 +1430,13 @@ python FreqDuet/freqduet/scripts/assemble_freqduet_protocol_v6_manuscript.py
 The manuscript uses `{PAPER_CONTROLLER}` as the current best controller. V8
 passed its registered 40-episode effect/no-harm gate, although its
 Holm-adjusted training-seed sign-flip result is $p=0.125$. V9 did not confirm
-the registered 200-episode regularity gate. The V9
-fixed-headway comparison is a trade-off, not a passenger-journey superiority
-result. The evidence status therefore remains `submission_ready: false`; adding
-editorial sections and a journal template does not override that scientific
-decision. Author metadata and the current portal-specific submission fields
-remain pre-submission tasks.
+the registered 200-episode regularity gate. V33 then screened three
+lower-actor freeze schedules; none passed, and confirmation was not authorized.
+The V9 fixed-headway comparison is a trade-off, not a passenger-journey
+superiority result. The evidence status therefore remains
+`submission_ready: false`; editorial assembly does not override that scientific
+decision. Author metadata and current portal-specific submission fields remain
+pre-submission tasks.
 """
 
 
@@ -1295,6 +1502,7 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
     main_md, main_tex = main_confirmation_table(data["v8"], data["v9"])
     external_md, external_tex = external_main_table(data["external"])
     external_full_md, external_full_tex = external_full_table(data["external"])
+    v33_md, v33_tex = v33_timescale_table(data["v33"], data["v33_gate"])
     figure_outputs = copy_figure_previews(package_dir, out_dir)
 
     method_figure = relative_link(
@@ -1311,7 +1519,7 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
         (2, 3, 4, 5),
     )
     abstract = abstract_text(data)
-    supplementary = supplementary_text(data, external_full_md, main_md)
+    supplementary = supplementary_text(data, external_full_md, main_md, v33_md)
     article_sections = (
         sources["introduction.md"],
         sources["related_work.md"],
@@ -1346,6 +1554,8 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
         "tables/table2_external_tradeoff.tex": external_tex,
         "tables/table_s1_external_full.md": external_full_md + "\n",
         "tables/table_s1_external_full.tex": external_full_tex,
+        "tables/table_s2_v33_timescale.md": v33_md + "\n",
+        "tables/table_s2_v33_timescale.tex": v33_tex,
         "figure_captions.md": ordered_figure_captions(caption_sections),
     }
     for relative, content in outputs.items():
@@ -1363,7 +1573,7 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
     )
 
     manifest = {
-        "assembly_version": "freqduet-protocol-v6-manuscript-v4",
+        "assembly_version": "freqduet-protocol-v6-manuscript-v5",
         "protocol": PROTOCOL,
         "target_journal": "Transportation Research Part C: Emerging Technologies",
         "working_template": "elsarticle-preprint-authoryear",
@@ -1372,6 +1582,8 @@ def build_manuscript(package_dir: Path, out_dir: Path) -> dict[str, Any]:
         "reference": REFERENCE,
         "v8_status": "primary_confirmed",
         "v9_status": "longtrain_not_confirmed",
+        "v33_status": "no_pass",
+        "v33_confirmation_authorized": False,
         "submission_ready": False,
         "submission_blocker": "v9_longtrain_not_confirmed",
         "source_package": source_package_label(package_dir),

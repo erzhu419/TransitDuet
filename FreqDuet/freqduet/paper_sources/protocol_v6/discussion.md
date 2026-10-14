@@ -24,13 +24,26 @@ training and evaluation seeds. The registered V9 gate required the latter
 effect-size interval and was not passed; the smaller sign-flip value is not used
 to relabel V9 as a confirmation.
 
+V33 then tested a specific stability hypothesis: lower-actor updates after the
+short-training checkpoint might erode regularity. Freezing the lower actor after
+episode 40, 80, or 100 did not resolve the problem. All three schedules improved
+restricted journey relative to the reference, but no candidate passed the
+registered regularity gate. The episode-40 schedule had a negative headway-CV
+difference for every training seed, yet its mean reduction was only 0.012 and
+its confidence interval crossed zero. The unused confirmation roster therefore
+remained untouched. The unfrozen control passed on the V33 development roster,
+but that selected-data observation cannot replace the failed independent V9
+test.
+
 This pattern matters for learning-based bus control. Prior work demonstrates
 that RL can coordinate asynchronous holding and adapt to operational uncertainty
 [@wang2020dynamic; @wang2021asynchronous; @wang2023robust], but the present
 results show why training duration belongs in the evaluation contract. A policy
 can retain a favorable passenger outcome while the regularity effect used for
-selection weakens. Reporting only the selected checkpoint or pooling training
-horizons would conceal that failure mode.
+selection weakens. V33 further shows that a plausible timescale repair can fail
+even when its passenger endpoint improves. Reporting only the selected
+checkpoint, the best development seed, or pooled training horizons would
+conceal that failure mode.
 
 ## Passenger service versus regularity
 
@@ -100,8 +113,9 @@ noncompliance, or field dispatch interventions.
 ## Limitations
 
 Five limitations define the present claim. First, V9 did not confirm the
-registered 200-episode regularity effect; long-horizon learning stability remains
-unresolved. Second, the confirmatory contrast is bundled and lacks current-stage
+registered 200-episode regularity effect, and no V33 freeze schedule repaired
+it; long-horizon learning stability remains unresolved. Second, the
+confirmatory contrast is bundled and lacks current-stage
 NoFreq, RawHistory, AllFreq, and swapped-authority controls, so frequency
 allocation is not causally isolated. Third, the strong fixed-headway baseline is
 better on passenger journey and fleet-readiness burden, despite worse headway
@@ -115,9 +129,10 @@ transportability beyond the evaluated corridor.
 
 ## Implications for further evaluation
 
-The next decisive experiment is not another gate tuned on V8 or V9. It is a
-new, frozen factorial confirmation that holds APC/AVL context, reward, physical
-fleet, and training protocol constant while varying only frequency allocation.
+The next decisive experiment is not another gate tuned on V8, V9, or V33. It is
+a new, frozen factorial confirmation that holds APC/AVL context, reward,
+physical fleet, and training protocol constant while varying only frequency
+allocation.
 Such a study should use unseen route and service-day families and retain
 fixed-headway passenger journey and fleet burden as co-primary constraints.
 Separately, replacing the current restricted scalar with an objective that

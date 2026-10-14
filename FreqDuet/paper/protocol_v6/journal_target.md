@@ -27,10 +27,11 @@ portal at final submission.
 
 Journal formatting does not change the Protocol V6 decision. V8 provides a
 registered short-training regularity result with passenger-journey no-harm. V9
-does not confirm the registered long-training regularity magnitude. The current
-contrast is bundled and does not isolate frequency separation. The manuscript
-must retain these boundaries in the abstract, results, discussion, conclusion,
-and cover letter.
+does not confirm the registered long-training regularity magnitude. V33 does
+not repair that failure through lower-actor freezing. The current contrast is
+bundled and does not isolate frequency allocation. The manuscript must retain
+these boundaries in the abstract, results, discussion, conclusion, and cover
+letter.
 
 ## Authoritative format sources
 
