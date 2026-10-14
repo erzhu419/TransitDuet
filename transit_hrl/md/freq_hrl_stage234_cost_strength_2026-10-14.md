@@ -10,7 +10,14 @@
 
 ## Results
 
-Pending. Assess whether weaker interventions improve cost/wait without moving the source-level regression elsewhere, retaining all four scopes and root/future breakdowns.
+- All 32 fits and the report completed. The 21 frozen controllers reproduced 161,280 choices and 322,560 physical scores with zero differences; all 640 inner fit ledgers and 64 full-strength selections reproduced exactly. Fourteen unit tests passed. Only the 1,338,217-byte aggregate report was pulled.
+- Raw-anchor mean selection chose weaker strength in 10/16 mixed-view cells, full strength in 2 and raw hold in 4. On pooled `held_other`, versus raw, cost delta was **+0.0000914682**, wait delta **-0.0013033854 min**, and wait-worsening fraction delta **-0.00729167**. Cost/wait jointly improved in 3/8 future-direction summaries, down from Stage233's 4/8. Weakening does not resolve the tradeoff.
+- `mixed_b/root401` wait delta changed from +0.0003364583 to **-0.003521875 min**, but cost delta worsened from +0.0000550865 to **+0.0001170760**. `mixed_a/root401` cost delta became **+0.0003999385**. The source-level regression was not eliminated. Single-source root397 mean selection still increased cost; its safe selector improved the three aggregate measures, but not every future direction.
+- For raw-anchor mean selection, pooled cost deltas were `train_same=-0.0000428203`, `train_other=-0.0005455195`, `held_same=-0.0001973076`, `held_other=+0.0000914682`. This points to a prefix/future interaction, not a general lack of training-set fit. Cost-MSE selection improved pooled held-other cost/wait, but still increased mixed_b/root401 cost; it is not a uniform replacement. The pre-existing focus remains raw hold for both improvement selectors. Defaults remain unchanged.
+
+## Next
+
+Fix the candidate grid and decompose selected-candidate gains by validation prefix, future direction and outer scope. Test whether deleting one validation prefix changes eligibility/rank/strength, and whether gains are concentrated in a few prefixes. Separate selection instability from transfer of the refitted controller before changing capacity or opening fresh confirmation cohorts.
 
 ## Limitations
 
