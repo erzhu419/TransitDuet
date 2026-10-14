@@ -1,0 +1,43 @@
+# V34: Paired checkpoint trajectory diagnostic
+
+V9 at 200 episodes retained a favorable journey effect but failed the registered
+headway-CV magnitude and interval gates. V33's unfrozen control improved on its
+development roster, while lower-actor freezing did not repair the effect. V9
+and V33 also used different source snapshots, so their endpoints alone cannot
+identify a learning-duration effect.
+
+This diagnostic fixes the model to V9 commit
+`673355cae10640b2737b6d51d541a9685059c342`. It trains the original reference,
+compact-context control, and current policy on the eight V9 and four V33
+training seeds. Every policy is evaluated on all eight V9 and four V33 scenario
+seeds at episodes 39, 79, 119, 159, and 199: 36 training runs, 2,160 frozen
+rollouts. These already-used seeds define development evidence.
+
+Only checkpoint saving and trip-dump settings change. Training completes before
+frozen evaluation starts. A server smoke compares final actor, critic, and
+deployment state after two identical trainings with and without intermediate
+saves, and verifies loading and evaluating both saved checkpoints.
+
+The analysis reports each checkpoint's paired current-minus-control effects,
+then the paired change in that effect from episode 39 to 199. Crossed-bootstrap
+intervals reuse the existing estimator. Training/evaluation cohorts are also
+reported separately. Headway CV, restricted journey/wait/in-vehicle time,
+holding, denied-trip rate, readiness delay, upper/lower action means and spreads,
+and regularity-evidence coverage are retained. Action summaries are descriptive.
+
+The 200-episode endpoints on the original V9 seeds are checked against the
+archived evaluation rows. A mismatch requires a reproduction diagnosis before
+attributing a difference to training duration. No checkpoint is selected as a
+new paper main, no confirmation gate is relaxed, and no V33 reserved seeds are
+used. A later independent confirmation needs a separately frozen design.
+
+All training, smoke, and aggregation run through scheduleurm on node001-node006.
+Model snapshots and checkpoints stay on the server. Only the small summary
+CSV/JSON files are eligible for local retrieval.
+
+Server smoke: `t151969` on node004. The five pairing, grid, scenario, and
+instrumentation tests passed; checkpoint-save equivalence is running.
+The formal trajectories wait for its small success marker. A scheduler task
+freezes the diagnostic script on the shared server filesystem and releases the
+workers only after smoke passes; aggregation waits for all 36 completion
+markers. This keeps the full sequence visible in tui-top.
