@@ -1,0 +1,303 @@
+[
+  {
+    "key": [
+      "mixed_a",
+      1,
+      "even_odd",
+      1
+    ],
+    "selected_level": "zero",
+    "validation": {
+      "397": {
+        "cases": 60,
+        "mean_delta_cost": -0.0035798166666666546,
+        "mean_delta_wait_min": -0.0038916666666666674,
+        "mean_scaled_cost": -0.04025046657635791,
+        "mean_scaled_wait": -0.025415659450651065
+      },
+      "401": {
+        "cases": 60,
+        "mean_delta_cost": -0.003693999999999998,
+        "mean_delta_wait_min": -0.0036249999999999117,
+        "mean_scaled_cost": -0.04182393380285725,
+        "mean_scaled_wait": -0.023582412177806513
+      }
+    },
+    "scopes": {
+      "held_other": {
+        "raw": {
+          "cost": -0.0020107499999999978,
+          "wait": -0.0020791666666667005
+        },
+        "c2v4": {
+          "cost": -0.0020097124999999987,
+          "wait": -0.0020708333333333715
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.00223006666666667,
+          "wait": -0.004754166666666693
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.00223006666666667,
+          "wait": -0.004754166666666693
+        },
+        "switches_to_zero": 0
+      },
+      "held_same": {
+        "raw": {
+          "cost": 0.006540087500000009,
+          "wait": -0.003987500000000049
+        },
+        "c2v4": {
+          "cost": 0.00654206250000001,
+          "wait": -0.003937500000000048
+        },
+        "lowrank_original_joint_zero": {
+          "cost": 0.005131520833333331,
+          "wait": -0.0025208333333333723
+        },
+        "lowrank_original_joint_selected": {
+          "cost": 0.005131520833333331,
+          "wait": -0.0025208333333333723
+        },
+        "switches_to_zero": 0
+      },
+      "train_other": {
+        "raw": {
+          "cost": -0.002048687500000007,
+          "wait": -0.01617083333333339
+        },
+        "c2v4": {
+          "cost": -0.0038798916666666714,
+          "wait": -0.01667083333333338
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.0012728166666666693,
+          "wait": -0.008479166666666708
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.0012728166666666693,
+          "wait": -0.008479166666666708
+        },
+        "switches_to_zero": 0
+      },
+      "train_same": {
+        "raw": {
+          "cost": -0.014662320833333351,
+          "wait": -0.039666666666666656
+        },
+        "c2v4": {
+          "cost": -0.014770858333333348,
+          "wait": -0.03953749999999999
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.01655677916666668,
+          "wait": -0.024925000000000027
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.01655677916666668,
+          "wait": -0.024925000000000027
+        },
+        "switches_to_zero": 0
+      }
+    },
+    "held_other_by_root": {
+      "397": {
+        "raw": {
+          "cost": -0.0002362333333333272,
+          "wait": -0.0010333333333333084
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.0042177916666666735,
+          "wait": -0.008283333333333294
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.0042177916666666735,
+          "wait": -0.008283333333333294
+        }
+      },
+      "401": {
+        "raw": {
+          "cost": -0.0037852666666666683,
+          "wait": -0.0031250000000000925
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.00024234166666666686,
+          "wait": -0.0012250000000000908
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.00024234166666666686,
+          "wait": -0.0012250000000000908
+        }
+      }
+    },
+    "changed_prefixes": []
+  },
+  {
+    "key": [
+      "mixed_b",
+      1,
+      "even_odd",
+      0
+    ],
+    "selected_level": "8",
+    "validation": {
+      "397": {
+        "cases": 60,
+        "mean_delta_cost": -0.00575170833333331,
+        "mean_delta_wait_min": -0.000624999999999994,
+        "mean_scaled_cost": -0.0694216178314563,
+        "mean_scaled_wait": -0.004513054740025767
+      },
+      "401": {
+        "cases": 60,
+        "mean_delta_cost": -0.004131158333333332,
+        "mean_delta_wait_min": -0.0067499999999999305,
+        "mean_scaled_cost": -0.05122517393322256,
+        "mean_scaled_wait": -0.05235576843195354
+      }
+    },
+    "scopes": {
+      "held_other": {
+        "raw": {
+          "cost": -0.00370825,
+          "wait": -0.0030041666666667226
+        },
+        "c2v4": {
+          "cost": -0.00370825,
+          "wait": -0.0030041666666667226
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.005472116666666671,
+          "wait": 0.008720833333333181
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.00668289583333334,
+          "wait": -0.003508333333333419
+        },
+        "switches_to_zero": 16
+      },
+      "held_same": {
+        "raw": {
+          "cost": -0.0036663916666666773,
+          "wait": 0.0002458333333334043
+        },
+        "c2v4": {
+          "cost": -0.0036663916666666773,
+          "wait": 0.0002458333333334043
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.004655541666666664,
+          "wait": 0.008516666666666724
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.005781825000000003,
+          "wait": -0.0012291666666665831
+        },
+        "switches_to_zero": 16
+      },
+      "train_other": {
+        "raw": {
+          "cost": 0.0012795875000000054,
+          "wait": -0.0035916666666666727
+        },
+        "c2v4": {
+          "cost": 0.0012795875000000054,
+          "wait": -0.0035916666666666727
+        },
+        "lowrank_original_joint_zero": {
+          "cost": 0.0036693958333333396,
+          "wait": 0.002695833333333388
+        },
+        "lowrank_original_joint_selected": {
+          "cost": 0.0005266583333333329,
+          "wait": 0.004454166666666735
+        },
+        "switches_to_zero": 20
+      },
+      "train_same": {
+        "raw": {
+          "cost": -0.0009491416666666614,
+          "wait": -0.014500000000000032
+        },
+        "c2v4": {
+          "cost": -0.0009491416666666614,
+          "wait": -0.014500000000000032
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.004059137499999993,
+          "wait": -0.007641666666666667
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.004980791666666664,
+          "wait": -0.008062499999999988
+        },
+        "switches_to_zero": 20
+      }
+    },
+    "held_other_by_root": {
+      "397": {
+        "raw": {
+          "cost": -0.003719675000000001,
+          "wait": -0.0011583333333332947
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.002331625000000004,
+          "wait": 0.013258333333333306
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.0037985583333333406,
+          "wait": -0.002974999999999998
+        }
+      },
+      "401": {
+        "raw": {
+          "cost": -0.003696824999999999,
+          "wait": -0.00485000000000015
+        },
+        "lowrank_original_joint_zero": {
+          "cost": -0.008612608333333337,
+          "wait": 0.004183333333333057
+        },
+        "lowrank_original_joint_selected": {
+          "cost": -0.009567233333333341,
+          "wait": -0.00404166666666684
+        }
+      }
+    },
+    "changed_prefixes": [
+      [
+        397,
+        913970102
+      ],
+      [
+        397,
+        913970202
+      ],
+      [
+        397,
+        913970302
+      ],
+      [
+        397,
+        913970402
+      ],
+      [
+        401,
+        914010100
+      ],
+      [
+        401,
+        914010200
+      ],
+      [
+        401,
+        914010300
+      ],
+      [
+        401,
+        914010400
+      ]
+    ]
+  }
+]

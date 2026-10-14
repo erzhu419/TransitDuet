@@ -12,7 +12,15 @@
 
 ## Results
 
-Pending. Determine whether retaining dominant modes improves held-prefix wait prediction, whether cost refitting harms the matched control, and whether either selected arm beats raw on both physical metrics before changing defaults.
+- t152281-t152312 fits and t152313 report all exited 0; 36 tests passed. All 2772 frozen-control comparisons, 320 matched-arm checks and inner raw references reproduced exactly. Pulled aggregate: 2,044,043 bytes, plus a small two-cell audit; no raw panels or weights.
+- Raw-anchor four-view held-other wait MSE: zero **1.185213**, rank3 **1.182237**, rank8 **1.234040**, rank16 **1.359608**. Low rank controls weak-mode overfit; the rank3 gain is small. Under the original anchor, higher ranks improve within-training-prefix new-future wait error but still worsen held-prefix error.
+- Original-anchor joint-selected mixed cost/wait **-0.00243980/-0.00465755 min**, versus raw **-0.00224017/-0.00445885 min**: both pooled increments improve, 8/8 directions remain negative versus the original action, and 2/8 strictly beat raw on both axes. Of 16 mixed cells, 14 hold raw, one selects zero residual and one rank8. Raw-anchor joint-selected still has no strict dual-metric win over raw in mixed directions.
+- The nonzero cell `mixed_b/fold1/even_odd/direction0` genuinely changes 16/60 held actions across eight unseen prefixes. Rank8 held-other cost/wait **-0.00668290/-0.00350833 min** versus the same cell's zero residual **-0.00547212/+0.00872083 min**; both improve. It also beats pooled raw **-0.00370825/-0.00300417 min**, but root401 has a wait tradeoff versus raw. The positive result is not entirely zero-residual routing, nor is it a uniform-source gain.
+- Frozen-cost wait-only does not dominate joint control. At the same rank both arms have identical wait predictions, yet realized controls differ; prediction MSE alone does not establish which cost ranking is useful. Default remains unchanged.
+
+## Next
+
+Freeze these paths and add the missing cost-only counterfactual, completing baseline/cost-only/wait-only/joint at identical ranks. Attribute the rank8 improvement to cost ranking, wait feasibility or their interaction across future partitions and source roots without further fitting or new cohorts.
 
 ## Limitations
 

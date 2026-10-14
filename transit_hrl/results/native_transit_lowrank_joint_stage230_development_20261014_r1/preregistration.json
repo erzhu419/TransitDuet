@@ -1,0 +1,194 @@
+{
+  "contract": {
+    "anchors": [
+      "original",
+      "raw"
+    ],
+    "boundary": "development240_states8_draws_supervised_single_action_greedy_suffix_not_new_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "analytic_cost_fits": 640,
+      "clean_inner_reference_fits": 640,
+      "fit_tasks": 32,
+      "glm_fits": 640,
+      "lowrank_final_paths": 64,
+      "lowrank_inner_paths": 1280,
+      "matched_arm_paths": 2688,
+      "network_updates": 384000,
+      "new_native_episodes": 0,
+      "positive_rank_solutions": 5376,
+      "raw_wait_updates": 384000,
+      "report_tasks": 1,
+      "residual_SVDs": 1344,
+      "residual_optimizer_updates": 0,
+      "reused_linear_paths": 64,
+      "reused_nonlinear_paths": 64,
+      "reused_ridge_paths": 64,
+      "rl_actor_updates": 0
+    },
+    "checkpoints": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "compute_boundary": "both_arms_share_SVD_and_exact_wait_coefficients_only_cost_residual_differs_not_equal_grid_to_frozen_controls",
+    "controls": "all29_frozen_Stage229_controllers_plus_each_rank_MSE_joint_for_two_anchors_and_two_arms",
+    "diagnostics": "training_and_validation_cost_wait_errors_at_each_rank_and_held_prefix_future_error_and_control_performance",
+    "final": "two60_state_four_draw_shared_TSVD_paths_each_with_two_matched_arms_use_inner_selected_rank",
+    "hold": "joint_selection_keeps_raw_if_every_checkpoint_score_ge0_not_a_new_training_constraint",
+    "inference": "predict_both_increments_select_lowest_cost_among_wait_le0_with_exact_anchor_first_ties_no_truth_menu",
+    "inner": "leave_one_complete_prefix54_train6_validation_times_both2_draw_directions_inside_outer_training4",
+    "lowrank": {
+      "arms": [
+        "wait",
+        "joint"
+      ],
+      "coefficient_parameters": {
+        "joint": 396,
+        "wait": 198
+      },
+      "degrees_of_freedom": "wait_k_or_joint_2k_per_training_design",
+      "dtype": "float64",
+      "levels": [
+        "zero",
+        "1",
+        "3",
+        "8",
+        "16"
+      ],
+      "ranks": [
+        0,
+        1,
+        3,
+        8,
+        16
+      ],
+      "steps": 0
+    },
+    "model_run": "native_transit_refit_binding_stage224_development_20261014_r1",
+    "normalization": "reference_inputs_and_own_training_nonanchor_RMS_targets_only_no_validation_scales",
+    "null_terms": "omit12_action_constant_context_terms_and_bias_that_cancel_exactly_in_linear_paired_differences",
+    "objective": "standardized_physical_residual_least_squares_in_training_only_top_singular_subspace",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "reference": "inner_raw_ridge_GLM_conditioned600_refit_excluding_validation_prefix_and_future_half_final_raw_exact_reused_final4",
+    "representation": "same198_causal_features_shared_TSVD_wait_coefficients_identical_across_frozen_cost_and_dual_head_arms",
+    "selection": "pool_physical_means_then_one_positive_training_RMS_per_source_root_MSE_or_worst_root_axis_score",
+    "selection_scale": "held_case_weighted_mean_of_recorded_training_only_fold_RMS_fixed_across_checkpoints",
+    "source_protocol": "native_transit_ridge_joint_stage229_v1",
+    "source_run": "native_transit_ridge_joint_stage229_development_20261014_r1",
+    "storage": "models_and_panels_remote_only_pull_aggregate_report",
+    "ties": "zero_residual_then_lower_rank_on_exact_ties_hold_raw_if_best_joint_score_ge0",
+    "variants": [
+      "glm",
+      "raw",
+      "c2v4",
+      "pair_original_zero",
+      "pair_original_last",
+      "pair_original_mse",
+      "pair_original_selected",
+      "pair_raw_zero",
+      "pair_raw_last",
+      "pair_raw_mse",
+      "pair_raw_selected",
+      "linear_original_zero",
+      "linear_original_last",
+      "linear_original_mse",
+      "linear_original_selected",
+      "linear_raw_zero",
+      "linear_raw_last",
+      "linear_raw_mse",
+      "linear_raw_selected",
+      "ridge_original_zero",
+      "ridge_original_strong",
+      "ridge_original_weak",
+      "ridge_original_mse",
+      "ridge_original_selected",
+      "ridge_raw_zero",
+      "ridge_raw_strong",
+      "ridge_raw_weak",
+      "ridge_raw_mse",
+      "ridge_raw_selected",
+      "lowrank_original_wait_zero",
+      "lowrank_original_wait_rank1",
+      "lowrank_original_wait_rank3",
+      "lowrank_original_wait_rank8",
+      "lowrank_original_wait_rank16",
+      "lowrank_original_wait_mse",
+      "lowrank_original_wait_selected",
+      "lowrank_original_joint_zero",
+      "lowrank_original_joint_rank1",
+      "lowrank_original_joint_rank3",
+      "lowrank_original_joint_rank8",
+      "lowrank_original_joint_rank16",
+      "lowrank_original_joint_mse",
+      "lowrank_original_joint_selected",
+      "lowrank_raw_wait_zero",
+      "lowrank_raw_wait_rank1",
+      "lowrank_raw_wait_rank3",
+      "lowrank_raw_wait_rank8",
+      "lowrank_raw_wait_rank16",
+      "lowrank_raw_wait_mse",
+      "lowrank_raw_wait_selected",
+      "lowrank_raw_joint_zero",
+      "lowrank_raw_joint_rank1",
+      "lowrank_raw_joint_rank3",
+      "lowrank_raw_joint_rank8",
+      "lowrank_raw_joint_rank16",
+      "lowrank_raw_joint_mse",
+      "lowrank_raw_joint_selected"
+    ],
+    "wait_gates": [
+      "glm",
+      "raw",
+      "c2v4"
+    ]
+  },
+  "protocol": "native_transit_lowrank_joint_stage230_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "2139b9ff2b24820dc20563df7ca937cbab088121"
+}
