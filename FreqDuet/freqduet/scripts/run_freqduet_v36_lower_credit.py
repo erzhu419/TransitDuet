@@ -102,17 +102,17 @@ def run_branch(out_root, config, seed, scenario, anchor, times, label,
     captures, value_rows = {}, []
     lower_prefix, upper_prefix = [], []
     original_lower = runner._lower_action_for_agent
+    original_upper = runner._upper_callback_v2
     original_transition = runner._record_lower_transition
 
-    def upper_trace(**event):
+    def upper_trace(state, trip):
+        result = original_upper(state, trip)
         if len(captures) < len(times):
             upper_prefix.append(dict(
-                time_s=float(event["decision_time_s"]),
-                trip_id=int(event["trip"].launch_turn),
-                state=np.asarray(event["s_upper"]).copy(),
-                action=np.asarray(event["action_vec"]).copy(),
-                terminal=bool(event["write_terminal_dispatch"])))
-        return None
+                time_s=float(runner.env.current_time), trip_id=int(trip.launch_turn),
+                state=np.asarray(state).copy(), target_headway_s=float(result),
+                decision=copy.deepcopy(runner._ep_trip_records[-1])))
+        return result
 
     def lower_trace(obs, key, last_action=0.0, deterministic=False):
         action = original_lower(obs, key, last_action=last_action, deterministic=deterministic)
@@ -180,11 +180,13 @@ def run_branch(out_root, config, seed, scenario, anchor, times, label,
         return result
 
     runner._lower_action_for_agent = lower_trace
+    runner._upper_callback_v2 = upper_trace
     runner._record_lower_transition = transition_trace
-    runner._offline_upper_action_intervention = upper_trace
     rows, _ = runner.evaluate([scenario], output_dir=cell / "evaluation" / label, policy_ep=BASE_EP)
     if set(captures) != set(times):
         raise ValueError(f"missing causal targets: {set(times) - set(captures)}")
+    if any(not cap["upper_prefix"] for cap in captures.values()):
+        raise ValueError("upper dispatch prefix was not observed")
     if any(not cap["trip_done"] or cap["transitions"] == 0 for cap in captures.values()):
         raise ValueError("target trip did not produce a complete lower return")
     result = dict(episode=rows[0], captures=captures, values=value_rows,
