@@ -1,0 +1,89 @@
+{
+  "contract": {
+    "boundary": "posthoc_development_protocol_correction_same_states_futures_not_independent_confirmation",
+    "budget": {
+      "network_updates": 0,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "reselection_tasks": 32,
+      "reused_joint_paths": 64,
+      "rl_actor_updates": 0
+    },
+    "checkpoints": [
+      0,
+      50,
+      100,
+      200,
+      400,
+      600
+    ],
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "GLM_raw_c2v4_and_original_raw_zero_last_MSE_unchanged",
+    "joint_rule": "same_worst_root_component_score_earlier_ties_keep_raw_if_score_ge0",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "paths": "reuse_all64_final_paths_all_snapshots_weights_unchanged_MSE_selection_unchanged",
+    "scale": "held_case_weighted_mean_of_recorded_training_only_fold_RMS_fixed_across_checkpoints",
+    "selection": "pool_physical_cost_wait_means_first_then_divide_by_one_positive_training_RMS_per_source_root",
+    "source_protocol": "native_transit_joint_advantage_stage226_v1",
+    "source_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "storage": "source_weights_remote_save_new_selection_only_pull_aggregate_report",
+    "variants": [
+      "glm",
+      "raw",
+      "c2v4",
+      "pair_original_zero",
+      "pair_original_last",
+      "pair_original_mse",
+      "pair_original_selected",
+      "pair_raw_zero",
+      "pair_raw_last",
+      "pair_raw_mse",
+      "pair_raw_selected"
+    ]
+  },
+  "protocol": "native_transit_joint_selection_stage227_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "16acd70cc841a818941703819badf194e2a6192f"
+}

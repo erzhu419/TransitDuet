@@ -22,10 +22,10 @@ Mixed cost/wait both negative: raw/c2v4 8/8, original-selected7/8, raw-selected6
 
 ## Next Decision
 
-Fix the actual checkpoint aggregation issue below using saved paths, without retraining. Then assess refit/held transfer and regression overfit; a zero-step or raw-hold winner is not learned improvement.
+Stage227 fixed the aggregation issue using saved paths, without retraining; mixed held performance still does not beat raw. Next reduce residual capacity under the corrected selection protocol; a zero-step or raw-hold winner is not learned improvement.
 
 ## Limitations
 
 Same240 development states/eight draws, no new independent CI or native learned HRL. Inner54/two-draw versus final60/four-draw refit transfer remains testable, not guaranteed. A predicted joint improvement or internal raw-hold rule is not an actual held no-tradeoff guarantee.
 
-Known issue: five selected anchor/cell cases have negative fold-normalized joint scores but a positive pooled physical cost or wait increment. Averaging after different fold-RMS divisions can reverse the physical mean sign. Stage227 will pool physical increments first and use one positive training-derived RMS per source, retaining these v1 results and all trained weights.
+Known issue in v1: five selected anchor/cell cases have negative fold-normalized joint scores but a positive pooled physical cost or wait increment. Averaging after different fold-RMS divisions can reverse the physical mean sign. Stage227 pools physical increments first and uses one positive training-derived RMS per source, retaining these v1 results and all trained weights.
