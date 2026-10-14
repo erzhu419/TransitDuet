@@ -45,3 +45,15 @@ Aggregation `t153153` waits for all 288 cases. Placement is soft-preferred from 
 CPU plan across node001/node002/node004/node005/node006, with only node001-node006
 eligible. Summaries include action terms and measured action consequences
 relative to zero hold, plus paired early/late action-preference contrasts.
+
+2026-10-15 aggregation recovery: all 288 cases completed with exit code zero,
+but `t153153` awaited local copies of ready markers (76/288 present while all
+288 existed remotely). A small marker-only rsync cleared this prerequisite
+backlog without rerunning evaluations. The released aggregator then exposed a
+missing import path for the frozen V9 statistics module. Fix `8ac7a21165`
+loads that module from `MODEL_ROOT`; the original rollout source is unchanged.
+Replacement `t153188` uses a separate `aggregation_source/8ac7a21165` directory
+and records rollout and aggregation commits separately. It completed on node004
+with exit code zero, aggregating all 288 cases, 864 contexts and 6,624 rollouts.
+This closes aggregation execution; interpretation of the action-credit results
+and any algorithmic repair remain separate work.
