@@ -1,21 +1,21 @@
 # Stage221: cost-gap objective and train-future wait shrinkage
 
-Stage220's hard safe-winner CE lost cost magnitudes. Its wait residuals lowered training risk but increased risk even on other futures of the same prefixes. This stage tests both causes without enlarging the cost representation.
+Same Stage220 cohort, folds and controls. The new 98-parameter ridge-residual learns soft physical cost gaps rather than hard safe winners. Three wait residuals get identical 2/2-future inner fits and convex alpha shrinkage; outer held labels never choose parameters. Full protocol and budget are in `results/native_transit_gap_calibration_stage221_development_20261014_r1/preregistration.json`.
 
-The original 240 states, four matched single/mixed views, 60/60-state complete-prefix folds, two future partitions and both directions are unchanged. Ridge, CE and raw wait heads remain controls. A new 98-parameter ridge-initialized residual minimizes KL to a soft target based on physical mean cost differences, without a true-safe action mask. Temperature is the outer training half's nonidentity cost RMS.
+## Results
 
-Each wait architecture gets two complementary 2/2-future inner fits within the outer training four draws. A scalar alpha in [0,1] minimizes pooled inner out-of-fit physical draw-mass log-loss. The final four-draw residual is multiplied by that alpha. No outer held prefix or evaluation-half label selects alpha, temperature or optimizer steps.
+Tasks t151918-t151925 and t151928 completed with exit0; 12 tests passed. All 32 cells and budgets qualified; 640 control-summary comparisons reproduced exactly. Only the 469,069-byte report was pulled, no raw/models. The default/native policy is unchanged.
 
-Budget: eight fit tasks, 32 cells, 32 analytic cost fits, 96 GLM fits, 38,400 CE/gap updates, 172,800 wait residual updates and 96 scalar calibrations. Both cost objectives have 600 updates; all three wait architectures have the same full and inner update budgets. CPU1/RAM3072 tasks are unbound across node001-node006. Models and predictions stay remote; only the compact final report is retrieved.
+With the same linear gate, gap-minus-CE held cost is -0.00143002, -0.00053605, -0.00399175, -0.00199130 for root397/root401/mixed_a/mixed_b. All improve, but only two beat ridge and only root401 also improves wait over CE.
 
-## Status
+Conditioned physical wait mass-risk: train_other 0.04771256 -> 0.03356002; held_other 0.06078162 -> 0.04272991 (-29.7%). Held risk still exceeds GLM (mean 0.04155699) in every view: future-noise overfit improves, prefix generalization does not close.
 
-Implemented in the isolated Freq-HRL checkout. Six new focused tests and six Stage220 control tests passed (12/12): cost-gap magnitude/ties, convex shrinkage, causal inference, future/held-label isolation, full report coverage and scheduler budgets. Scheduler fitting and results pending.
+Ridge + conditioned mixed_b wait: -0.00269740 -> +0.00268698. Joint negative cost/wait across eight mixed/future summaries drops 8/8 -> 4/8 (gap raw 6/8; shrunk 5/8). Better calibration is not better control.
 
 ## Next Decision
 
-Compare same-gate ridge/CE/gap selected physical cost and wait, and raw/shrunk proper wait risk in train_same, train_other and held_other. Retain conditioning if its selected-action benefit survives shrinkage, rather than treating lower global log-loss as sufficient control success.
+Keep ridge + raw conditioned as control. Next: training-internal prefix AND future holdouts, plus an explicit selected-action wait/cost constraint rather than prediction log-loss alone.
 
 ## Limitations
 
-Inner calibration holds out futures, not prefixes; a two-draw shrinkage factor may transfer imperfectly to the final four-draw fit. Both partitions reuse eight conditional draws. This is one-action supervised validation with the frozen greedy suffix, not independent-seed CI or end-to-end learned HRL.
+Inner fitting uses two draws versus four in the final fit. Sensitivities reuse eight draws; roots bundle lower-policy and demand/prefix changes. This remains supervised one-action validation with a frozen greedy suffix, not independent-seed CI or end-to-end HRL.

@@ -1,0 +1,125 @@
+{
+  "contract": {
+    "boundary": "original240_states_same8_conditional_futures_not_independent_replication_or_end_to_end_HRL",
+    "budget": {
+      "analytic_cost_fits": 32,
+      "calibration_scalar_fits": 96,
+      "fit_tasks": 8,
+      "glm_fits": 96,
+      "inner_wait_fits": 192,
+      "new_native_episodes": 0,
+      "report_tasks": 1,
+      "rl_actor_updates": 0,
+      "supervised_decision_updates": 38400,
+      "training_cells": 32,
+      "wait_residual_updates": 172800
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "unchanged_stage220_ridge_CE_GLM_and_three_raw_wait_residuals",
+    "evaluation": "same_four_scopes_rootwise_and_future_direction_physical_cost_wait_proper_risk_no_CI",
+    "filtering": "all_states_no_agreement_filter",
+    "gap_objective": "KL_soft_cost_target_to_predicted_soft_cost_same_temperature_600_AdamW_updates",
+    "gap_score": "frozen_native_ridge_cost_plus_temperature_times_zero_initialized98_feature_linear_residual",
+    "gap_target": "softmax_of_negative_physical_mean_cost_over_training_nonidentity_RMS_cost_no_true_safe_menu",
+    "inference": "causal_cost_and_learned_wait_logits_no_future_labels_or_true_safe_menu",
+    "normalization": "training_prefix_features_only_each_inner_GLM_uses_its_own2_future_targets",
+    "optimizer": {
+      "dtype": "float64",
+      "lr": 0.003,
+      "seed": 208,
+      "steps_per_branch": 600,
+      "weight_decay": 0.01
+    },
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "parameters": {
+      "best": 98,
+      "gap": 98,
+      "linear": 199,
+      "nonlinear_pair": 3201,
+      "state_conditioned_pair": 3393
+    },
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "shrinkage": "one_alpha_per_wait_architecture_in_closed_interval0_1_minimizes_pooled_inner_OOF_physical_draw_mass_logloss",
+    "source_protocol": "native_transit_best_action_crossfit_stage220_v1",
+    "source_run": "native_transit_best_action_crossfit_stage220_development_20261014_r1",
+    "storage": "models_predictions_remote_only_compact_report_and_receipts",
+    "variants": [
+      "ridge_glm",
+      "ridge_linear",
+      "ridge_nonlinear_pair",
+      "ridge_state_conditioned_pair",
+      "ridge_shrunk_linear",
+      "ridge_shrunk_nonlinear_pair",
+      "ridge_shrunk_state_conditioned_pair",
+      "best_glm",
+      "best_linear",
+      "best_nonlinear_pair",
+      "best_state_conditioned_pair",
+      "best_shrunk_linear",
+      "best_shrunk_nonlinear_pair",
+      "best_shrunk_state_conditioned_pair",
+      "gap_glm",
+      "gap_linear",
+      "gap_nonlinear_pair",
+      "gap_state_conditioned_pair",
+      "gap_shrunk_linear",
+      "gap_shrunk_nonlinear_pair",
+      "gap_shrunk_state_conditioned_pair",
+      "best_unfiltered",
+      "gap_unfiltered"
+    ],
+    "views": [
+      "root_397",
+      "root_401",
+      "mixed_a",
+      "mixed_b"
+    ],
+    "wait_calibration": "two_complementary2_train2_validate_future_splits_within_outer_training4_same_training_prefixes"
+  },
+  "fit_tasks": 8,
+  "protocol": "native_transit_gap_calibration_stage221_v1",
+  "report_tasks": 1,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "5f89610fa69306cd95c84ca3434764edb437ecf0"
+}
