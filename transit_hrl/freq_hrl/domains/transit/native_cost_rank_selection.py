@@ -11,9 +11,17 @@ FROZEN = ("raw", *FROZEN_SOURCES)
 VARIANTS = (*FROZEN, *(f"cost_rank_{a}_{m}" for a in joint.ANCHORS for m in NEW_MODES))
 
 
-def stats(data, values, path, level):
+def costs(data, path, level, alpha=1.):
     anchor = joint.anchors(data,path["anchor"])
-    cost = lowrank.increments(data,path,level,"joint")[...,0]
+    full = lowrank.increments(data,path,level,"joint")[...,0]
+    if alpha==1.: return full
+    baseline = joint.relative(data["heads"],anchor)[...,0]
+    return baseline if alpha==0. else baseline+alpha*(full-baseline)
+
+
+def stats(data, values, path, level, *, alpha=1.):
+    anchor = joint.anchors(data,path["anchor"])
+    cost = costs(data,path,level,alpha)
     chosen = joint.binding.policy.selected(cost,data["raw_logits"],anchor)
     actual = values[np.arange(len(values)),chosen]
     raw = values[np.arange(len(values)),data["raw_choices"]]
@@ -35,8 +43,8 @@ def fit_path(rows, data, values, kind, *, validation=None):
     return path,fit,curves
 
 
-def select(curves, ledger, kind):
-    chosen = lowrank.ridge.select(curves,ledger,kind,levels=lowrank.LEVELS)
+def select(curves, ledger, kind, *, levels=lowrank.LEVELS):
+    chosen = lowrank.ridge.select(curves,ledger,kind,levels=levels)
     for level,c in chosen["curves"].items():
         for root,x in c["by_root"].items():
             pieces = [f[level]["by_root"][root] for f in curves if root in f[level]["by_root"]]
@@ -45,7 +53,7 @@ def select(curves, ledger, kind):
     if zero["changed_count"] or any(x[k]!=0 for x in zero["by_root"].values()
             for k in ("mean_delta_cost","mean_delta_wait_min","mean_delta_unsafe")):
         raise ValueError("Inner zero residual did not reproduce raw")
-    eligible = [l for l in lowrank.LEVELS if chosen["curves"][l]["joint_score"]<0 and
+    eligible = [l for l in levels if chosen["curves"][l]["joint_score"]<0 and
         all(x["mean_delta_unsafe"]<=0 for x in chosen["curves"][l]["by_root"].values())]
     safe = min(eligible,key=lambda l:chosen["curves"][l]["joint_score"]) if eligible else None
     return {"mse_level":chosen["mse_level"],"mean_level":chosen["joint_level"],"safe_level":safe,
