@@ -3,10 +3,12 @@
 
 import argparse
 import copy
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict
 import gc
 import itertools
 import json
+from multiprocessing import get_context
 import os
 from pathlib import Path
 import sys
@@ -31,6 +33,10 @@ CONTEXT_KEYS = ["train_seed", "eval_seed", "target_time_s"]
 
 def shard_name(seed, scenario, target, first_action):
     return f"seed{seed}_eval{scenario}_t{target}_a{first_action}"
+
+
+def pilot_items():
+    return list(itertools.product(SEEDS, SCENARIOS, TARGET_TIMES, ACTIONS))
 
 
 def second_matches(first, event):
@@ -189,8 +195,30 @@ def context_spaces(group):
             for contrast, result in results.items()]
 
 
+def _run_item(item):
+    run_shard(*item)
+    return shard_name(*item[2:])
+
+
+def run_batch(root, v36_root, start, end, workers):
+    all_items = pilot_items()
+    if not 0 <= start < end <= len(all_items) or workers < 1:
+        raise ValueError("batch range or worker count is outside the frozen pilot")
+    completed = []
+    with ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn")) as pool:
+        futures = [pool.submit(_run_item, (root, v36_root, *item)) for item in all_items[start:end]]
+        for future in as_completed(futures):
+            completed.append(future.result())
+            print(f"V37_BATCH_PROGRESS {len(completed)}/{end - start}", flush=True)
+    export = root / "exports" / f"batch_{start}_{end}"
+    export.mkdir(parents=True, exist_ok=True)
+    (export / "batch_done.json").write_text(json.dumps(dict(
+        start=start, end=end, workers=workers, completed=sorted(completed),
+        diagnostic_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))) + "\n")
+
+
 def aggregate(root):
-    expected = {shard_name(*item) for item in itertools.product(SEEDS, SCENARIOS, TARGET_TIMES, ACTIONS)}
+    expected = {shard_name(*item) for item in pilot_items()}
     ready = list((root / "ready").glob("*/ready.json"))
     if {path.parent.name for path in ready} != expected:
         raise ValueError("joint-action pilot is incomplete or outside its frozen cohort")
@@ -228,18 +256,24 @@ def aggregate(root):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["run", "smoke", "aggregate"])
+    parser.add_argument("command", choices=["run", "smoke", "batch", "aggregate"])
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--v36-root", type=Path)
     parser.add_argument("--train-seed", type=int, choices=SEEDS, default=SEEDS[0])
     parser.add_argument("--eval-seed", type=int, choices=SCENARIOS, default=SCENARIOS[0])
     parser.add_argument("--target-time", type=int, choices=TARGET_TIMES, default=TARGET_TIMES[0])
     parser.add_argument("--first-action", type=int, choices=ACTIONS, default=0)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--end", type=int, default=84)
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     if args.command == "aggregate":
         aggregate(args.out_root)
     else:
         if args.v36_root is None:
             parser.error("--v36-root is required for rollout controls")
-        run_shard(args.out_root, args.v36_root, args.train_seed, args.eval_seed,
-                  args.target_time, args.first_action, smoke=args.command == "smoke")
+        if args.command == "batch":
+            run_batch(args.out_root, args.v36_root, args.start, args.end, args.workers)
+        else:
+            run_shard(args.out_root, args.v36_root, args.train_seed, args.eval_seed,
+                      args.target_time, args.first_action, smoke=args.command == "smoke")

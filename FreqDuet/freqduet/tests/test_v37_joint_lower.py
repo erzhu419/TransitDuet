@@ -5,10 +5,16 @@ import unittest
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from run_freqduet_v37_joint_lower import OUTCOMES, PRIMARY, context_spaces, second_matches
+from run_freqduet_v37_joint_lower import OUTCOMES, PRIMARY, context_spaces, pilot_items, second_matches
 
 
 class JointLowerTest(unittest.TestCase):
+    def test_flattened_batch_covers_every_prespecified_context_and_first_action(self):
+        items = pilot_items()
+        self.assertEqual(len(items), 84)
+        self.assertEqual(len(set(items)), 84)
+        self.assertEqual(len({item[:3] for item in items}), 12)
+
     def grid(self):
         rows = []
         outcomes = {(0, 0): (10, .2, 100), (5, 0): (9.8, .2, 100),
