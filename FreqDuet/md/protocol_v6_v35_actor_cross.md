@@ -31,3 +31,9 @@ trip, headway CV, and fleet readiness delay. Use the original crossed-bootstrap
 intervals and V34 cohorts. APC holding penalties, regularity reward, and upper
 wait/backlog credit are descriptive mechanism outputs. This is reused-seed
 attribution, not an independent confirmation or selection of a new main policy.
+
+Regression `t152598` passed 16 tests. Smokes `t152599-t152601` reproduced 390
+unchanged-control columns in each configuration and passed mixed-actor frozen
+evaluation. Diagnostic source `263ded1317` is frozen server-side. Evaluations
+`t152635-t152778` are running, 36 each on node001/node004/node005/node006;
+aggregation `t152779` awaits their small completion markers.
