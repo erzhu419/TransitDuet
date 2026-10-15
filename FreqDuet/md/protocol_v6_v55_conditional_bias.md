@@ -22,10 +22,14 @@ Gate t162148 fails in every cohort. Short-lead MAE delta versus V50 +2.190 s
 +6.604 s [6.122,7.067], versus V54 +5.441 s [5.081,5.812]. There are 17 physical
 floor predictions. No closed-loop matrix or policy promotion is launched.
 
-Alignment audit t162150 is queued on node001-node006, which are currently full.
-It compares effective corrections with actual-minus-issued V54 errors and
-decomposes MSE change into correction energy minus twice correction/error
-alignment. This is diagnostic only; no future-fitted attenuation is deployed.
+Alignment audit t162150 completed. Correction/error correlation is -0.196
+[-0.220,-0.176] for 0-15 min and -0.242 [-0.269,-0.219] for 15-30 min.
+Mean correction/error products are -81.141 and -153.006 s^2, while correction
+energies are 147.741 and 223.515 s^2. MSE increases by 310.023 [283.184,343.075]
+and 529.527 [491.432,573.570] s^2. These six-demand-cluster results show wrong
+aggregate alignment, not just excessive amplitude: a uniform positive shrink
+factor cannot improve aggregate MSE when its correction/error product is
+negative. No retrospective attenuation or sign flip is fitted or deployed.
 Close V55 promotion and retain V54 as the stronger forecast candidate, not a
 passed long-horizon model. The alignment audit explains this negative result;
 it does not authorize retrospective attenuation or another bias patch. The

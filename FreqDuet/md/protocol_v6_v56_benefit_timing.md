@@ -65,3 +65,29 @@ Submit missing-arm CPU batches only after smoke passes, using the missing-arm
 count above; aggregate only after all completion markers. Earlier failed attempts
 remain in scheduler history; the result's `failed_arm_attempts` counts replay-arm
 failures specifically, not pre-replay smoke failures.
+
+Formal batches `t162200-t162203` use scheduler-planned workers 4/8/8/8 on
+node002/node004/node005/node006. The 28-item missing-arm plan reuses one completed
+smoke arm, so at most 27 new days are run. Aggregation waits for the four small
+`exports/batch_*/done.json` markers; raw traces and checkpoints stay server-side.
+
+## Result
+
+All batches and aggregation `t162204` completed: 12 contexts, 32 unique arms,
+four cached traces, 28 new full-day replays including smoke, zero failed replay
+arms, and exact V37 endpoints throughout. Joint journey improves in 9/12 contexts;
+the other three are noops. In 5/9 nonzero contexts the 30-min passenger-exposure
+change is harmful despite a beneficial full day. The 15-min and both-reference-
+return cuts each also have five reversals, but not necessarily the same contexts.
+No daily exposure/journey sign disagreement occurs in these four-arm comparisons.
+
+In the dominant context, joint exposure is -632 person-s at 15 min, +3032 at
+30 min, +4318 at both reference returns, and -246160 at day end; the post-return
+part is -250478 person-s. First-only looks beneficial at 30 min (-2123 person-s)
+but harms the full day (+12207); joint adds holding initially yet reduces full-
+day commanded holding by 1405 s. Thus a perfect short-window forecast can still
+choose the wrong action; the mechanism is not explained by immediate readiness
+alone. Mean hindsight joint deltas are journey -0.042168 min, CV -0.003250 and
+readiness -5.491094 s. These are development-bank opportunities, not learned-policy
+improvements. Next V57 compares realized trip credit with full-day outcomes using
+the existing V36 bank, before specifying a cross-trip system-credit candidate.
