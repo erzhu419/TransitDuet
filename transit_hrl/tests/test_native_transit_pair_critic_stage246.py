@@ -31,6 +31,16 @@ class PairCriticTest(unittest.TestCase):
             points.append(theta)
         np.testing.assert_allclose(*points, atol=1e-12)
 
+    def test_interior_optimum_does_not_infer_multiplier_from_roundoff(self):
+        target = np.array([1e-5])
+        def loss(t):
+            d = t-target
+            return float(1e-12+d@d/2), d
+        theta = np.nextafter(target, np.zeros_like(target))
+        _, fit = learning.optimizer.finish_fit(loss, np.zeros(1), theta, 0, radius=.5)
+        self.assertLess(fit["optimality"], 1e-8)
+        self.assertLess(fit["norm"], .001*fit["radius"])
+
     def test_recovery_gate_keeps_failed_attempts_and_requires_successful_leaf(self):
         records = {"old": {"id": "old", "signature": "cell", "status": "failed", "exit_code": 1},
             "cancel": {"id": "cancel", "signature": "cell", "status": "cancelled", "parent_id": "old"},

@@ -51,7 +51,7 @@ def finish_fit(loss, initial, theta, iterations, *, radius=None):
     unit = theta/radius
     end, gradient = loss(theta)
     gradient = gradient*radius/max(start, 1e-12)
-    multiplier = max(0., -unit@gradient/max(unit@unit, 1e-30))
+    multiplier = max(0., -unit@gradient/max(unit@unit, 1e-30)) if unit@unit >= 1-GTOL else 0.
     optimality = max(float(np.linalg.norm(gradient+multiplier*unit, ord=np.inf)), multiplier*max(0., 1-unit@unit))
     if optimality > 1e-8 or end > start+1e-12*max(1., start):
         raise ValueError(f"Projected objective not optimal: KKT={optimality}, loss {start} -> {end}")
