@@ -20,11 +20,23 @@ actor updates, and whether any update used the first positive-violation dual.
 Average the three sampler repeats within each of four development contexts.
 Run tests and one exact replay through scheduler before the full server batch.
 
+## Outcome
+
+Source `5f3de1bf7a`; tests/smoke `t162425`, shards `t162428`-`t162431`,
+aggregate `t162434`: all exit 0. Twelve tests pass; all 12 rollouts reproduce V60
+exactly (62,400 decisions). Context-averaged full-return MAE is **0.136658**
+versus **0.016456** for zero; all 12 days are worse than zero. One-step target
+MAE is 0.027763, which does not establish full-return calibration.
+All four cases have 64 actor steps at `lambda=1`; the first positive dual update
+to `1.0000743866` is only saved, never used by an actor update. This is missing
+adaptive feedback in the smoke, not an absent fixed cost penalty.
+Summary: `freqduet/results_freqduet/protocol_v6_v61_cost_calibration/summary/status.json`.
+
 ## Limitations / Next Step
 
-These are chosen-action value labels under the current stochastic policy, not
-counterfactual rankings of the six unexecuted actions. Decisions are correlated;
-no seed-level inference is made from their count. The actor has only 64 updates,
-and a delayed dual in this two-day smoke does not by itself prove a long-run
-algorithm defect. Use calibration and timing evidence to select critic warm-up
-or update-order repair before multiplier changes and long training.
+Chosen-action labels do not establish the six unexecuted actions' ranking;
+absolute bias need not change action preferences. Correlated decisions are not
+independent seeds, and the two-day smoke cannot establish long-run dual failure.
+Next: freeze the actor, fit signed full returns with complete-day validation,
+then test completed-day dual feedback before the next actor block. No multiplier
+tuning, relaxed validation, long training or main switch at this stage.
