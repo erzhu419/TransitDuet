@@ -36,3 +36,25 @@ with this null. Recompute centering on the preserved strata. Null quantiles are
 shuffle reference ranges, not population CIs; demand-cluster bootstrap summarizes
 observed-minus-null effects. This controls mechanically induced negative
 dependence, particularly the two half-hour windows sharing an hourly mean.
+
+## Results And Next Step
+All 12 days completed: matrix t155813-t155817, aggregate t155818; 200-shuffle
+controls t155831-t155835, aggregate t155837. Smoke t155810 passed 11 tests;
+t155836 passed 12. Earlier smoke attempts exposed two test-assertion issues
+(pandas method/column collision and floating equality), repaired without
+changing experiment parameters; failed/cancelled attempts remain in scheduler.
+Audit source 3e27ae6061, permutation code 070061a960, test-only repair 8a9068761a.
+
+Raw same-leg/next-vehicle travel correlation is 0.516. Its excess over the
+within-hour/stop permutation null is +0.060 [0.052,0.068]. Holding excess is
++0.170 [0.112,0.229] across trips of one bus, but -0.180 [-0.187,-0.173]
+between adjacent vehicles at a stop. Incoming travel-to-holding excess is
+-0.069 [-0.072,-0.067]. Adjacent 30-minute window correlations do not show extra
+positive persistence beyond the null (travel -0.020; holding -0.004).
+Raw 30-minute travel/holding innovation-sum MSE divided by independent model
+variance is 9.48/1.03. These are conditional factual-state diagnostics.
+
+Next: prioritize completed-prefix, road/time-conditioned travel means and
+short shared residual structure, then turnover-conditioned holding response.
+Validate each causally and in closed-loop forecasting before any controller
+change. A global positive holding-noise process is not supported by this audit.
