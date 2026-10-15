@@ -57,10 +57,6 @@ def smoke(root, v56_root, case_index, updates):
                 if day == 0:
                     original = super()._lower_policy_action(obs, last_action, deterministic=True)
                     np.testing.assert_array_equal(np.asarray(action).reshape(-1), np.asarray(original).reshape(-1))
-                else:
-                    with torch.no_grad():
-                        probs, logs, _ = learner.trainer.policy_net.dist_info(torch.from_numpy(encoded)[None, :])
-                    self._ep_lower_policy_entropies.append(float(-(probs * logs).sum()))
                 states.append(encoded)
                 potentials.append(moments.cv_squared)
                 return np.asarray([float(np.asarray(action).item())], dtype=np.float32)
@@ -84,7 +80,7 @@ def smoke(root, v56_root, case_index, updates):
         if learner is None:
             cfg = config["lower"]
             old = runner.lower_trainer
-            if (old.regularity_policy_enabled or runner.lower_terminal_action_mode != "transition"
+            if (runner.lower_terminal_action_mode != "transition"
                     or runner.lower_causal_guard_policy_mask_enabled):
                 raise ValueError("V59 smoke requires the frozen unmasked main action contract")
             trainer = RESACLagrangianTrainer(
@@ -93,7 +89,7 @@ def smoke(root, v56_root, case_index, updates):
                 weight_reg=old.weight_reg, weight_reg_mode=old.weight_reg_mode,
                 lr=cfg["lr"], lambda_lr=cfg["lambda_lr"], gamma=1.0, soft_tau=old.soft_tau,
                 auto_entropy=False, action_bins=joint.ACTIONS, policy_sample_seed=seed + 59000,
-                critic_aggregation=old.critic_aggregation, discrete_critic=old.discrete_critic,
+                critic_aggregation=old.critic_aggregation,
                 action_limit_feature_index=old.action_limit_feature_index, device="cpu")
             trainer.alpha = 1e-5
             warm_start_actor(old.policy_net, trainer.policy_net, encoder.local_dim)
