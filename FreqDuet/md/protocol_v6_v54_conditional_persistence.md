@@ -18,3 +18,12 @@ cohort's 0-900 s MAE must be no worse than V50 and 900-1800 s no worse than V48.
 No tolerance, cohort exclusion or retrospective gate tuning. Only a passing
 prefix model proceeds to a 72-origin closed-loop screen with holding, passenger
 and noise processes unchanged. All six demand seeds remain development data.
+
+## Results
+Smoke t160188 passes 16 tests. Preparation t160189-t160193 completes all 12 days;
+gate t160195 fails: short-lead MAE delta versus V50 -1.345 s [-1.725,-1.021],
+long-lead delta versus V48 +1.163 s [0.947,1.361], six demand clusters. The
+long-lead gap narrows from V53's +2.019 s, but every cohort still fails. No
+closed-loop matrix or real-policy promotion is launched. Preserve this partial
+repair and inspect the remaining road/time residuals before choosing a further
+model change; the short-lead gain is not full forecast qualification.
