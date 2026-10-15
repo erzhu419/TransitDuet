@@ -52,6 +52,8 @@ def freeze_pool(runner, telemetry, identity, actor):
         hold = [telemetry.stop_mean("hold", direction, station) for station in ids]
         cycle = telemetry.cycles[direction]
         routes[str(direction)] = dict(station_ids=ids, lengths_m=lengths, travel_s=travel,
+                                      speed_limit_mps=[float(index[(a.station_name, b.station_name)].speed_limit)
+                                                       for a, b in zip(stations[:-1], stations[1:])],
                                       dwell_s=dwell, hold_s=hold,
                                       cycle_s=float(np.mean(cycle)) if cycle else
                                       float(sum(travel) + sum(dwell[:-1]) + sum(hold[:-1]) + 2 * len(lengths)))

@@ -33,3 +33,22 @@ are not covered. No main-policy switch in this step, regardless of the screen.
 
 Run smoke/tests, eight full days and aggregation through scheduler on
 node001-node006. Retain raw forecasts/labels remotely; pull small summaries only.
+
+## V42 result and V43 state-contract correction
+
+V42 source `6316c487e4`: 22 tests and exact V35 full-day smoke pass (`t155516`).
+Eight days complete on node001/004/005/006 (`t155517-t155520`), all unchanged.
+Aggregation `t155521`, analysis `45e41d9340`: 30-min holding MAE 833/768 s
+(development/new-demand), versus rounded response 675/572 and historical
+337/333. Closed-loop biases -494/-702 s; teacher-forced exposure biases
++76/-31 s. Holding bands cover 0/25%; finite return bands cover only 20/24%.
+Both cohort screens fail. No main-policy promotion.
+
+Code inspection identifies a real feature-contract mismatch: original follower
+ETA uses nearest physical follower, journey-average speed including past stops,
+and the current bus's observed service dwell. The fluid predictor instead used
+cruise speed and historical stop dwell. V43 reuses the existing causal estimator
+with observable launch time, projected AVL progress and updated service dwell.
+Keep the categorical fit, draws and acceptance thresholds unchanged. Rerun the
+eight days under `protocol_v6_v43_state_contract`; these are now regression
+contexts, not an untouched confirmation. Preserve V42 artifacts separately.

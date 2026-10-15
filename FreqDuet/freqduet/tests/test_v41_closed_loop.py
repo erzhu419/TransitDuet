@@ -10,12 +10,13 @@ from freqduet_closed_loop_forecast import FlowHistory, HoldingHistory, fluid_rol
 
 def observation():
     route = dict(station_ids=[0, 1, 2], lengths_m=[100, 100], travel_s=[10, 10],
-                 dwell_s=[0, 4, 0], hold_s=[0, 0, 0], holding_mask=[False] * 3, cycle_s=26)
+                 dwell_s=[0, 4, 0], hold_s=[0, 0, 0], holding_mask=[False] * 3, cycle_s=26,
+                 speed_limit_mps=[10, 10])
     flows = [dict(rate_per_s=0.0, queue=0.0, alight_fraction=0.0) for _ in range(3)]
     vehicle = dict(bus_id=7, trip_id=1, direction=True, on_route=True, station_index=0,
                    progress_m=0, phase="travel", remaining_stop_s=0, remaining_service_s=0,
                    load=5.0, capacity=50.0, ready_since_s=-1, predecessor_trip=None,
-                   previous_hold_s=0, target_headway_s=360)
+                   previous_hold_s=0, target_headway_s=360, launch_time_s=-1, last_service_dwell_s=0)
     return dict(time_s=0.0, dt_s=1.0, routes={"True": route, "False": dict(route)},
                 flows={"True": flows, "False": [dict(row) for row in flows]},
                 vehicles=[vehicle], commitments=[], decision=None,

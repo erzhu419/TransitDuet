@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from freqduet_closed_loop_forecast import ACTIONS, holding_features, fluid_rollout
+from freqduet_closed_loop_forecast import ACTIONS, holding_features, fluid_rollout, projected_follower
 from freqduet_holding_distribution import ensemble, fit_distribution, probabilities, sample_action
 from test_v41_closed_loop import observation
 
@@ -74,6 +74,31 @@ class HoldingDistributionTest(unittest.TestCase):
         self.assertTrue(all(row["action_s"] in ACTIONS for row in result["commands"]))
         observed["routes"]["True"]["holding_mask"][1] = True
         self.assertEqual(fluid_rollout(observed, 200, "response", lambda _: 45)["holding_vehicle_seconds"], 0)
+
+    def test_projected_follower_uses_journey_speed_including_past_stops(self):
+        observed = observation()
+        controlled = dict(observed["vehicles"][0], phase="service", progress_m=1000, last_service_dwell_s=20)
+        follower = dict(controlled, bus_id=8, trip_id=2, progress_m=500, launch_time_s=0)
+        estimate = projected_follower(controlled, {7: controlled, 8: follower}, observed["routes"], 200, 1)
+        self.assertEqual(estimate.source, "same_time_avl_journey_speed_eta")
+        self.assertEqual(estimate.departure_gap_s, 220)
+
+    def test_follower_selects_nearest_physical_bus_not_smallest_eta(self):
+        observed = observation()
+        controlled = dict(observed["vehicles"][0], phase="service", progress_m=1000, last_service_dwell_s=20)
+        near = dict(controlled, bus_id=8, trip_id=2, progress_m=900, launch_time_s=-800)
+        far = dict(controlled, bus_id=9, trip_id=3, progress_m=500, launch_time_s=150)
+        estimate = projected_follower(controlled, {7: controlled, 8: near, 9: far}, observed["routes"], 200, 1)
+        self.assertEqual(estimate.follower_bus_id, 8)
+
+    def test_travelling_follower_progress_is_interpolated_before_eta(self):
+        observed = observation()
+        controlled = dict(observed["vehicles"][0], phase="service", progress_m=1000, last_service_dwell_s=20)
+        follower = dict(controlled, bus_id=8, trip_id=2, progress_m=0, launch_time_s=0,
+                        phase="travel", travel_start_s=0, travel_end_s=200,
+                        start_progress_m=0, end_progress_m=500)
+        estimate = projected_follower(controlled, {7: controlled, 8: follower}, observed["routes"], 100, 1)
+        self.assertEqual(estimate.departure_gap_s, 320)
 
 
 if __name__ == "__main__":

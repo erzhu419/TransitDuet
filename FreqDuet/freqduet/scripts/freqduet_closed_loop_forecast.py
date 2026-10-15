@@ -4,8 +4,13 @@ from collections import defaultdict, deque
 import copy
 import heapq
 import math
+from pathlib import Path
+import sys
 
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lower"))
+from causal_follower_eta import AVLVehicleSnapshot, estimate_follower_departure_gap
 
 
 ACTIONS = np.array([0, 5, 10, 15, 20, 30, 45], dtype=float)
@@ -79,6 +84,30 @@ def response_action(model, values, historical):
         return historical
     predicted = float(holding_features(values) @ np.asarray(model["coef"])) * 45
     return float(ACTIONS[np.argmin(np.abs(ACTIONS - predicted))])
+
+
+def projected_follower(vehicle, vehicles, routes, time, dt):
+    snapshots = []
+    for follower in vehicles.values():
+        progress = follower["progress_m"]
+        route = routes[str(follower["direction"])]
+        leg = min(follower["station_index"], len(route["lengths_m"]) - 1)
+        speed = 0.0
+        if follower["on_route"] and follower["phase"] == "travel":
+            duration = max(follower["travel_end_s"] - follower["travel_start_s"], dt)
+            fraction = np.clip((time - follower["travel_start_s"]) / duration, 0, 1)
+            progress = follower["start_progress_m"] + fraction * (
+                follower["end_progress_m"] - follower["start_progress_m"])
+            speed = (follower["end_progress_m"] - follower["start_progress_m"]) / duration
+        snapshots.append(AVLVehicleSnapshot(
+            bus_id=follower["bus_id"], direction=follower["direction"], on_route=follower["on_route"],
+            progress_m=float(progress), launch_time_s=follower["launch_time_s"],
+            current_speed_mps=float(speed), route_speed_mps=route["speed_limit_mps"][leg],
+            trip_id=follower["trip_id"]))
+    return estimate_follower_departure_gap(
+        current_bus_id=vehicle["bus_id"], current_direction=vehicle["direction"],
+        current_progress_m=vehicle["progress_m"], current_time_s=time,
+        service_dwell_proxy_s=vehicle["last_service_dwell_s"], vehicles=snapshots)
 
 
 def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
@@ -167,6 +196,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
             vehicle = vehicles[bus_id]
             vehicle.update(direction=direction, trip_id=trip_id, on_route=True, load=0.0,
                            station_index=0, progress_m=0.0, previous_hold_s=0.0,
+                           launch_time_s=time, last_service_dwell_s=0.0,
                            target_headway_s=trip["target_headway_s"], phase="service", predecessor_trip=None)
             launches.append(dict(time_s=time, trip_id=trip_id, bus_id=bus_id, direction=direction,
                                  scheduled_s=trip["scheduled_s"], readiness_s=time - trip["first_eligible_s"]))
@@ -228,6 +258,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
             else:
                 vehicle["phase"] = "service"
                 dwell = max(alight, 2 * board) + 4
+                vehicle["last_service_dwell_s"] = dwell
                 schedule(time + dwell + dt, "hold", bus_id)
         elif kind == "hold":
             station_key = key(vehicle["direction"], route["station_ids"][station])
@@ -237,21 +268,9 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
                      and departure is not None and departure["trip_id"] == predecessor)
             action = 0.0
             if valid:
-                follower_gaps = []
-                for follower in vehicles.values():
-                    if not follower["on_route"] or follower["direction"] != vehicle["direction"] or follower["bus_id"] == bus_id:
-                        continue
-                    progress = follower["progress_m"]
-                    if follower["phase"] == "travel":
-                        fraction = np.clip((time - follower["travel_start_s"]) /
-                                           max(follower["travel_end_s"] - follower["travel_start_s"], dt), 0, 1)
-                        progress = follower["start_progress_m"] + fraction * (follower["end_progress_m"] - follower["start_progress_m"])
-                    gap = vehicle["progress_m"] - progress
-                    if gap > 0:
-                        mean_speed = sum(route["lengths_m"]) / max(sum(route["travel_s"]), 1)
-                        follower_gaps.append(gap / mean_speed + route["dwell_s"][station])
+                follower = projected_follower(vehicle, vehicles, observed["routes"], time, dt)
                 values = dict(forward_gap_s=time - departure["time_s"], target_headway_s=vehicle["target_headway_s"],
-                              follower_gap_s=min(follower_gaps, default=0.0), follower_valid=bool(follower_gaps),
+                              follower_gap_s=follower.departure_gap_s or 0.0, follower_valid=follower.valid,
                               load_ratio=vehicle["load"] / vehicle["capacity"], previous_hold_s=vehicle["previous_hold_s"],
                               station_phase=station / (len(route["station_ids"]) - 1), direction=vehicle["direction"], time_s=time)
                 historical = route["hold_s"][station]

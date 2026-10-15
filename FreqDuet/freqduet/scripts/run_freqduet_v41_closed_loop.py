@@ -48,6 +48,8 @@ class ClosedLoopObserver(uncertainty.IntervalObserver):
         for vehicle, bus in zip(pool["vehicles"], env.bus_all):
             vehicle.update(target_headway_s=float(getattr(bus, "_target_headway", 360.0)),
                            previous_hold_s=float(bus.last_action_s),
+                           launch_time_s=float(bus.launch_time),
+                           last_service_dwell_s=float(bus.last_service_dwell_s),
                            predecessor_trip=getattr(bus, "forward_predecessor_trip_id", None))
         targets = {int(trip.launch_turn): float(trip.target_headway) for trip in env.timetables}
         for trip in pool["commitments"]:
