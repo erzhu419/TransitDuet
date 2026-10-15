@@ -40,11 +40,12 @@ def losses(z, offset, truth, eligible, anchor):
     return {"feasible_mse": (mse, lambda theta: mse_hessian), "rank_regret": (rank, rank_hessian)}
 
 
-def finish_fit(loss, initial, theta, iterations):
-    radius = float(np.linalg.norm(initial))
+def finish_fit(loss, initial, theta, iterations, *, radius=None):
+    radius = float(np.linalg.norm(initial)) if radius is None else float(radius)
     start = loss(initial)[0]
     if radius == 0:
-        return initial.copy(), {"iterations": 0, "success": True, "loss_before": start, "loss_after": start,
+        point = np.zeros_like(initial)
+        return point, {"iterations": 0, "success": True, "loss_before": start, "loss_after": float(loss(point)[0]),
             "radius": 0., "norm": 0., "optimality": 0., "constraint_violation": 0.}
     theta = theta*min(1., radius/max(np.linalg.norm(theta), 1e-30))
     unit = theta/radius
@@ -59,9 +60,9 @@ def finish_fit(loss, initial, theta, iterations):
         "constraint_violation": max(0., float(unit@unit-1))}
 
 
-def quadratic_fit(loss, hessian, initial):
-    radius = float(np.linalg.norm(initial))
-    if radius == 0: return finish_fit(loss, initial, initial, 0)
+def quadratic_fit(loss, hessian, initial, *, radius=None):
+    radius = float(np.linalg.norm(initial)) if radius is None else float(radius)
+    if radius == 0: return finish_fit(loss, initial, initial, 0, radius=radius)
     matrix = hessian(np.zeros_like(initial))
     eigenvalues, vectors = np.linalg.eigh(matrix)
     eigenvalues = np.maximum(eigenvalues, 0.)
@@ -79,13 +80,13 @@ def quadratic_fit(loss, hessian, initial):
         multiplier, solved = brentq(lambda m: np.linalg.norm(solution(m))-radius, 0., high, xtol=1e-14, full_output=True)
         theta, iterations = solution(multiplier), solved.iterations
     if loss(initial)[0] < loss(theta)[0]: theta = initial.copy()
-    return finish_fit(loss, initial, theta, iterations)
+    return finish_fit(loss, initial, theta, iterations, radius=radius)
 
 
-def constrained_fit(loss, hessian, initial):
-    radius = float(np.linalg.norm(initial))
+def constrained_fit(loss, hessian, initial, *, radius=None):
+    radius = float(np.linalg.norm(initial)) if radius is None else float(radius)
     start = loss(initial)[0]
-    if radius == 0: return finish_fit(loss, initial, initial, 0)
+    if radius == 0: return finish_fit(loss, initial, initial, 0, radius=radius)
     normalization = max(start, 1e-12)
     warm, iterations = initial/radius, 0
     def solve(multiplier):
@@ -117,7 +118,7 @@ def constrained_fit(loss, hessian, initial):
         multiplier = brentq(lambda m: np.linalg.norm(solve(m))-1, low, high, xtol=1e-14)
         theta = radius*solve(multiplier)
     if loss(initial)[0] <= loss(theta)[0]: theta = initial.copy()
-    return finish_fit(loss, initial, theta, iterations)
+    return finish_fit(loss, initial, theta, iterations, radius=radius)
 
 
 def fit_objectives(data, values, cached, levels):
