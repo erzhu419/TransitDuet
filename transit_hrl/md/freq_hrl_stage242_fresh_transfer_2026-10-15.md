@@ -27,7 +27,9 @@ pooled result. Neither observation alone identifies held-prefix transfer loss.
 
 Seven focused tests passed, including cached endpoint reproduction, fixed actions
 under poisoned future labels, panel axes, physical cost units and weighted aggregation.
-Next: qualify the server panel cache, evaluate all32 cells, then aggregate.
+Preparation t155550 completed with exit zero: 240 states, 40 prefixes, a 218,484-byte
+server-only old/fresh cache. Evaluation tasks t155558-t155589 are dispatched, eight
+each on node001/004/005/006. Aggregate only after all32 finish with exit zero.
 Use seen-versus-held and fixed-reference-versus-native differences to choose
 the next training change; do not adopt the secondary just from Stage241 means.
 

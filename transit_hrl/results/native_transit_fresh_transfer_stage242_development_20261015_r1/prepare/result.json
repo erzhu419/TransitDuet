@@ -1,0 +1,97 @@
+{
+  "cache_bytes": 218484,
+  "contract": {
+    "averaging": "equal20_prefix_future_blocks_then_equal_cells_no_independent_seed_CI",
+    "boundary": "reused_development_data_fresh241_already_inspected_no_new_confirmation_or_candidate_reselection_defaults_unchanged",
+    "budget": {
+      "evaluation_tasks": 32,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "new_residual_fits": 0,
+      "prepare_tasks": 1,
+      "report_tasks": 1,
+      "training_updates": 0
+    },
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "consistency_run": "native_transit_refit_consistency_stage240_development_20261015_r2",
+    "controls": "all5_old_matched_Stage240_probe_train_held_metrics_and_80640_Stage241_sealed_probe_action_records_reproduce",
+    "endpoints": [
+      "54_2_cached",
+      "60_2_fixed54ref",
+      "60_2_native",
+      "60_4_fixed60ref",
+      "60_4_native"
+    ],
+    "exposure": "54/2_seen54_old_inner2_is_training_exposed_full60/4_train60_old_outer4_is_training_exposed_all_fresh_labels_unseen_by_all_models",
+    "focal_variants": [
+      "raw",
+      "joint_raw_half_safe",
+      "all_mse_original_pooled_safe"
+    ],
+    "label_sets": [
+      "old_inner2",
+      "old_outer4",
+      "old_matched",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "metrics": "own_common_raw_cost_wait_risk_regret_score_MSE_action_switch_plus_fleet_nonfleet_cost_and_draw_wait_harm_components",
+    "old_matched": "probe6_uses_old_OOF_opposite2_other_scopes_use_old_outer_unused4_exact_Stage240_controls",
+    "prediction": "all_Stage239_selections_and_Stage237_239_240_models_fixed_actions_written_before_reading_fresh_panels",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "scopes": [
+      "probe6",
+      "seen54",
+      "train60",
+      "held60"
+    ],
+    "scopes_detail": "54_seen_prefix_states_6_leave_prefix_out_states_60_full_train_states_60_outer_held_prefix_states",
+    "secondary": "all_MSE_original_pooled_named_after_Stage241_inspection_not_a_new_confirmatory_primary",
+    "selection_run": "native_transit_objective_oof_stage239_development_20261015_r1",
+    "source_protocol": "native_transit_frozen_future_stage241_v1",
+    "source_run": "native_transit_frozen_future_stage241_development_20261015_r1",
+    "storage": "compressed_panels_actions_full_block_and_aggregate_metrics_remote_only_pull_focal_matrix_plus_all21_fresh8_endpoint_summary",
+    "variants": [
+      "raw",
+      "all_mse_original_pooled_safe",
+      "all_mse_original_half_safe",
+      "all_mse_raw_pooled_safe",
+      "all_mse_raw_half_safe",
+      "feasible_mse_original_pooled_safe",
+      "feasible_mse_original_half_safe",
+      "feasible_mse_raw_pooled_safe",
+      "feasible_mse_raw_half_safe",
+      "rank_regret_original_pooled_safe",
+      "rank_regret_original_half_safe",
+      "rank_regret_raw_pooled_safe",
+      "rank_regret_raw_half_safe",
+      "wait_rank_original_pooled_safe",
+      "wait_rank_original_half_safe",
+      "wait_rank_raw_pooled_safe",
+      "wait_rank_raw_half_safe",
+      "joint_original_pooled_safe",
+      "joint_original_half_safe",
+      "joint_raw_pooled_safe",
+      "joint_raw_half_safe"
+    ]
+  },
+  "fields": [
+    "actual_cost_delta",
+    "fleet_cost_delta",
+    "nonfleet_cost_delta",
+    "wait_delta_min"
+  ],
+  "new_native_episodes": 0,
+  "panel_shape": [
+    240,
+    8,
+    6,
+    4
+  ],
+  "prefixes": 40,
+  "protocol": "native_transit_fresh_transfer_stage242_v1",
+  "software_qualified": true,
+  "states": 240,
+  "training_updates": 0
+}
