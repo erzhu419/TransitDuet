@@ -10,7 +10,7 @@ from freqduet_closed_loop_forecast import FlowHistory, HoldingHistory, fluid_rol
 
 def observation():
     route = dict(station_ids=[0, 1, 2], lengths_m=[100, 100], travel_s=[10, 10],
-                 dwell_s=[0, 4, 0], hold_s=[0, 0, 0], cycle_s=26)
+                 dwell_s=[0, 4, 0], hold_s=[0, 0, 0], holding_mask=[False] * 3, cycle_s=26)
     flows = [dict(rate_per_s=0.0, queue=0.0, alight_fraction=0.0) for _ in range(3)]
     vehicle = dict(bus_id=7, trip_id=1, direction=True, on_route=True, station_index=0,
                    progress_m=0, phase="travel", remaining_stop_s=0, remaining_service_s=0,
@@ -87,6 +87,12 @@ class ClosedLoopTest(unittest.TestCase):
                       station_phase=.5, direction=True, time_s=99)
         self.assertEqual(response_action(model, values, 15), 0)
         self.assertEqual(response_action(model, dict(values, forward_gap_s=720), 15), 45)
+
+    def test_existing_penultimate_stop_mask_is_preserved(self):
+        observed = observation()
+        observed["routes"]["True"]["holding_mask"][1] = True
+        result = fluid_rollout(observed, 100, "response")
+        self.assertEqual(result["holding_vehicle_seconds"], 0)
 
 
 if __name__ == "__main__":

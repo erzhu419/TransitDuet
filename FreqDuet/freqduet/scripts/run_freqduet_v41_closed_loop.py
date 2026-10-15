@@ -26,6 +26,10 @@ class ClosedLoopObserver(uncertainty.IntervalObserver):
         env, now = runner.env, pool["time_s"]
         pool["flows"] = self.flows.freeze(pool)
         pool["holding_model"] = self.holding_history.freeze(now)
+        for route in pool["routes"].values():
+            route["holding_mask"] = [False] * len(route["station_ids"])
+            if runner.lower_terminal_action_mode == "mask":
+                route["holding_mask"][-2] = True
         for vehicle, bus in zip(pool["vehicles"], env.bus_all):
             vehicle.update(target_headway_s=float(getattr(bus, "_target_headway", 360.0)),
                            previous_hold_s=float(bus.last_action_s),

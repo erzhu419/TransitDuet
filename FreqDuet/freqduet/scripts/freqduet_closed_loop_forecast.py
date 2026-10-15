@@ -232,7 +232,8 @@ def fluid_rollout(observed, horizon_s, holding_mode):
             station_key = key(vehicle["direction"], route["station_ids"][station])
             predecessor = vehicle["predecessor_trip"]
             departure = departures.get(station_key)
-            valid = station > 0 and departure is not None and departure["trip_id"] == predecessor
+            valid = (station > 0 and not route["holding_mask"][station]
+                     and departure is not None and departure["trip_id"] == predecessor)
             action = 0.0
             if valid:
                 follower_gaps = []
