@@ -1,34 +1,37 @@
 # Stage243: variance-aware, group-shrunk service/risk critic
 
-## Design
+Run `native_transit_variance_critic_stage243_development_20261015_r1`:
+all33 tasks done/0, no retries (t155610, t155617-t155647, t155651);13 tests passed.
+65,280 combined-MSE OOF records reproduce exactly; split OLS differs by <=3.71e-16.
+Zero raw-reference fits/native episodes/actor updates; only the1,298,200-byte aggregate
+was pulled. Models, panels and full fit records remain remote.
 
-Reuse the Stage242 remote panel cache and Stage237/239 frozen raw references.
-Service is nonfleet cost; risk is the fleet cost component, not wait-violation probability.
-Fit both residual heads in the same198-feature TSVD space, with the original anchor
-and the existing17 rank/strength candidates. Compare combined MSE, split OLS,
-variance-weighted GLS, group shrinkage and their combination. Primary:
-`variance_group_pooled_safe`; half-safe and the other arms are controls.
+## Method And Results
 
-Estimate paired action-minus-original MC variance from training futures only.
-Pool variance equally across prefixes, then half-pool group and state estimates.
-Estimate each group's prior residual signal energy from the other training groups;
-shrink its residual targets toward the frozen reference by signal/(signal+noise).
-No prefix ID enters inference. Zero observed risk variance is reported as unidentified,
-not certainty. Total residual RMS is constrained to the cached MSE budget by an exact
-two-head convex GLS dual solve. All arms have k total-cost function degrees of freedom;
-the split heads have2k component degrees of freedom, not extra total-cost capacity.
+Fit separate nonfleet-service/fleet-risk residuals with training-only paired MC variance,
+prefix variance pooling and leave-group-out residual-signal shrinkage toward raw.
+Same198-feature TSVD space,17 rank/strength candidates, frozen wait gate, original
+anchor and total-residual RMS budget; k total-cost and2k component function dimensions.
+Unchanged pooled-safe/half-safe OOF selection; primary `variance_group_pooled_safe`.
+All fits/actions sealed before fresh-future evaluation. Mixed held60/fresh8 versus raw:
 
-Select with unchanged inner prefix/future OOF nonharm rules. Compare old fit/unseen
-labels and fresh4+4/8 on OOF prefixes, full training prefixes and outer held prefixes.
-Split OLS must reproduce combined MSE at every rank/strength and selected action.
-Seal models and actions before fresh-label evaluation. One real-cache cell precedes
-expansion to32 cells; aggregate only after every cell finishes successfully.
+| Pooled-Safe Arm | Cost Delta | Wait Delta (min) | Cost MSE |
+|---|---:|---:|---:|
+| Raw | 0 | 0 | 0.001598575 |
+| Combined / split OLS | +0.000062695 | +0.000188151 | 0.001616719 |
+| Variance GLS | +0.000052930 | -0.000223698 | 0.001551933 |
+| Group shrinkage | 0 | 0 | 0.001597592 |
+| Variance + group | +0.000000293 | +0.000002344 | 0.001598506 |
+
+Variance GLS reduces held-fresh MSE by2.92% and improves mean wait in both roots,
+but fleet +0.000075955 outweighs service -0.000023025 in total cost. Root397 harms
+cost while root401 improves. Joint shrinkage admits2/16 mixed cells and changes only
+0.104% of full-held action comparisons;103/160 full-fit group risk reliabilities are zero.
+Its OOF fresh cost -0.000082500 does not survive full refit as meaningful control gain.
 
 ## Limits And Next Step
 
-Zero raw-reference fits, native episodes or actor updates. Small aggregates only
-are pulled locally. Fresh futures are already-inspected development data, not new
-confirmation or independent training-seed CI; Stage169 reserved cohorts stay closed.
-Moment shrinkage and finite-draw precision weights are estimators, not risk guarantees.
-Judge improvement by unseen-future MSE and held-prefix physical cost/wait together;
-do not promote a model from lower training error alone. Defaults remain unchanged.
+Reused development states/futures, not fresh seed CI or end-to-end HRL; defaults and
+Stage169 reserves unchanged. No total-cost superiority established. Next: matched-count
+disjoint-future critic targets under frozen raw references, to separate signal-estimation
+bias from genuine absence of transferable risk signal; retain current GLS/OLS controls.

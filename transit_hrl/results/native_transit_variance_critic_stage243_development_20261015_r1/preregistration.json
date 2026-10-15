@@ -1,0 +1,164 @@
+{
+  "contract": {
+    "anchor": "original_fixed_from_prior_development_not_an_anchor_search",
+    "arms": [
+      "combined",
+      "split",
+      "variance",
+      "group",
+      "variance_group"
+    ],
+    "boundary": "240_reused_states_40_prefixes_two_Transit_mixtures_not_new_seed_CI_or_end_to_end_HRL_reserved_Stage169_closed",
+    "budget": {
+      "critic_subspace_fits": 672,
+      "fit_tasks": 32,
+      "inner_blocks": 640,
+      "new_component_GLS_solves": 8064,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "raw_wait_updates": 0,
+      "report_tasks": 1,
+      "rl_actor_updates": 0
+    },
+    "capacity": "same198_causal_features_TSVD_basis_k_total_function_df_2k_component_df_all_arms_same_cached_sum_residual_RMS_ball",
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "controls": "split_OLS_sum_reproduces_cached_all_MSE_all_ranks_and_strengths_combined_OOF_curves_selections_exact",
+    "filters": [
+      "pooled_safe",
+      "half_safe"
+    ],
+    "fresh": "Stage241_eight_draw_cache_already_inspected_development_only_never_used_for_fit_or_selection",
+    "gate": "frozen_cached_raw_wait_gate_no_new_safety_threshold",
+    "grid": {
+      "16@0.25": {
+        "alpha": 0.25,
+        "level": "16"
+      },
+      "16@0.5": {
+        "alpha": 0.5,
+        "level": "16"
+      },
+      "16@0.75": {
+        "alpha": 0.75,
+        "level": "16"
+      },
+      "16@1": {
+        "alpha": 1.0,
+        "level": "16"
+      },
+      "1@0.25": {
+        "alpha": 0.25,
+        "level": "1"
+      },
+      "1@0.5": {
+        "alpha": 0.5,
+        "level": "1"
+      },
+      "1@0.75": {
+        "alpha": 0.75,
+        "level": "1"
+      },
+      "1@1": {
+        "alpha": 1.0,
+        "level": "1"
+      },
+      "3@0.25": {
+        "alpha": 0.25,
+        "level": "3"
+      },
+      "3@0.5": {
+        "alpha": 0.5,
+        "level": "3"
+      },
+      "3@0.75": {
+        "alpha": 0.75,
+        "level": "3"
+      },
+      "3@1": {
+        "alpha": 1.0,
+        "level": "3"
+      },
+      "8@0.25": {
+        "alpha": 0.25,
+        "level": "8"
+      },
+      "8@0.5": {
+        "alpha": 0.5,
+        "level": "8"
+      },
+      "8@0.75": {
+        "alpha": 0.75,
+        "level": "8"
+      },
+      "8@1": {
+        "alpha": 1.0,
+        "level": "8"
+      },
+      "zero": {
+        "alpha": 0.0,
+        "level": "zero"
+      }
+    },
+    "heads": {
+      "risk": "cached_fleet_cost_delta_not_wait_violation_probability",
+      "service": "cached_nonfleet_cost_delta"
+    },
+    "inner": "20_blocks_54states_2old_draws_fit_6held_prefix_states_opposite2old_draws_validate_cached_native_inner_reference",
+    "labels": [
+      "old_same",
+      "old_other",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "old_same": "inner_same2_is_unseen_prefix_but_same_future_indices_full_train_same4_is_fit_exposed",
+    "optimizer": "two_head_convex_GLS_dual_sum_ball_solve_KKT_1e-8_no_gradient_training",
+    "outer": "full60states_4old_draws_fit_cached_native_full_reference_then_train60_and_held60_evaluate",
+    "pooling": "equal_prefix_pooled_variance_group_half_pooled_then_state_half_group_prior_no_tuned_hyperparameters",
+    "primary": "variance_group_pooled_safe",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "reliability": "leave_group_out_signal_over_signal_plus_prefix_half_pooled_MC_variance_unchanged_at_inference_no_group_ID_predictor",
+    "scopes": [
+      "oof6",
+      "train60",
+      "held60"
+    ],
+    "selection": "same_Stage239_pooled_safe_and_half_safe_nonharm_rules_separate_per_arm_no_joint_arm_search",
+    "selection_run": "native_transit_objective_oof_stage239_development_20261015_r1",
+    "shrinkage": "prefix_residual_vector_raw_centred_pseudo_target_signal_energy_from_other_training_prefixes_minus_MC_variance_clamped_at_zero",
+    "source_protocol": "native_transit_fresh_transfer_stage242_v1",
+    "source_run": "native_transit_fresh_transfer_stage242_development_20261015_r1",
+    "storage": "reuse_remote_Stage242_npz_no_panel_or_model_download_small_aggregate_only",
+    "variance": "paired_action_minus_original_future_variance_ddof1_divided_by_training_draw_count",
+    "variants": [
+      "raw",
+      "combined_pooled_safe",
+      "combined_half_safe",
+      "split_pooled_safe",
+      "split_half_safe",
+      "variance_pooled_safe",
+      "variance_half_safe",
+      "group_pooled_safe",
+      "group_half_safe",
+      "variance_group_pooled_safe",
+      "variance_group_half_safe"
+    ],
+    "zero_variance": "all_zero_observed_channel_uses_unit_precision_and_is_reported_as_unidentified_not_certain"
+  },
+  "protocol": "native_transit_variance_critic_stage243_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "3e76f41d599f1198d867129c5ac18cf6e649379b"
+}
