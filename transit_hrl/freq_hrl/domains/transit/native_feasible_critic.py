@@ -72,11 +72,11 @@ def candidates(data, models):
     return {o: base.candidates(data, m) for o, m in models.items()}
 
 
-def select(blocks):
+def select(blocks, *, objectives=OBJECTIVES):
     roots = sorted({r for b in blocks for r in b["curves"]["all_mse"]["zero"]["by_root"]})
     scales = {r: np.mean([b["scales"] for b in blocks if str(b["held_group"][0]) == r], axis=0) for r in roots}
     summaries, selections = {}, {}
-    for objective in OBJECTIVES:
+    for objective in objectives:
         summaries[objective] = {c: {"pooled": base.previous.curve_summary([b["curves"][objective][c] for b in blocks], scales),
             "halves": [base.previous.curve_summary([b["curves"][objective][c] for b in blocks if b["half"] == h], scales) for h in (0, 1)]}
             for c in strength.CANDIDATES}
@@ -91,13 +91,13 @@ def select(blocks):
 
 def predict(paths, selection):
     return {"raw": paths["all_mse"]["zero"],
-        **{f"{o}_{f}": paths[o][selection[o][f] or "zero"] for o in OBJECTIVES for f in FILTERS}}
+        **{f"{o}_{f}": paths[o][selection[o][f] or "zero"] for o in selection for f in FILTERS}}
 
 
-def aggregate(pieces):
+def aggregate(pieces, *, variants=VARIANTS):
     def average(xs):
         return {"comparisons": len(xs), "mean_cases": float(np.mean([p["cases"] for p in xs])),
-            "variants": {v: {f: float(np.mean([p["variants"][v][f] for p in xs])) for f in xs[0]["variants"][v]} for v in VARIANTS}}
+            "variants": {v: {f: float(np.mean([p["variants"][v][f] for p in xs])) for f in xs[0]["variants"][v]} for v in variants}}
     roots = sorted({r for p in pieces for r in p["by_root"]})
     return {"all": average([p["all"] for p in pieces]),
         "by_root": {r: average([p["by_root"][r] for p in pieces if r in p["by_root"]]) for r in roots}}
