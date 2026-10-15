@@ -1,8 +1,10 @@
 # V52: matched clock-propagation audit
 
 Freeze the real U200/L200 controller, all V48/V50 fitted models, and passenger /
-holding processes. Replay 12 certified days at clocks 7200, 21600 and 36000,
-64 draws each, comparing V48, V50 independent and V50 shared. Require exact
+holding processes. Replay 12 certified days at clocks 6300/7200, 20700/21600
+and 35100/36000 (72 origins), 64 draws each, comparing V48, V50 independent and
+V50 shared. The paired offsets expose hour crossings absent from the original
+common clocks. Require exact
 cached scalar-metric replay before accepting each diagnostic origin.
 
 Match trip/stop/stage identities including launch/terminal boundaries. Arrival

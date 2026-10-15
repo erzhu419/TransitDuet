@@ -26,7 +26,8 @@ STAGES = {"departure": 4, "arrival": 1, "ready": 2, "action": 3}
 
 
 def items():
-    return [(s, d, c, clock) for s, d, c in previous.previous.items() for clock in previous.COMMON]
+    clocks = sorted([clock + offset for clock in previous.COMMON for offset in (-900, 0)])
+    return [(s, d, c, clock) for s, d, c in previous.previous.items() for clock in clocks]
 
 
 def component(previous_stage, stage):
@@ -53,10 +54,9 @@ def decompose(predicted, actual, observed, launches):
     launch = launches.set_index("trip_id").time_s.to_dict()
     initial = {v["trip_id"] for v in observed["vehicles"] if v["on_route"]}
     rows = []
-    for trip, group in actual.groupby("trip_id", sort=False):
-        future = group.loc[(group.time_s > now) & (group.time_s <= end)].copy()
-        if future.empty:
-            continue
+    future_events = actual.loc[(actual.time_s > now) & (actual.time_s <= end)]
+    for trip, group in future_events.groupby("trip_id", sort=False):
+        future = group.copy()
         route = observed["routes"][str(bool(group.direction.iloc[0]))]["station_ids"]
         future["order"] = [route.index(int(s)) * 4 + STAGES[k] for s, k in zip(future.station_id, future.stage)]
         future = future.sort_values("order")
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--data-base", type=Path, required=True)
     parser.add_argument("--start", type=int, default=0)
-    parser.add_argument("--end", type=int, default=36)
+    parser.add_argument("--end", type=int, default=72)
     parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     if args.command == "aggregate":

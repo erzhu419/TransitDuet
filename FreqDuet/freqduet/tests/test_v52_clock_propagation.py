@@ -3,10 +3,18 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from run_freqduet_v52_clock_propagation import COMPONENTS, arrival_scores, decompose
+from run_freqduet_v52_clock_propagation import COMPONENTS, arrival_scores, decompose, items, previous
 
 
 class ClockPropagationTests(unittest.TestCase):
+    def test_clock_plan_covers_hour_crossings_and_common_clocks(self):
+        plan = items()
+        self.assertEqual(len(plan), 72)
+        clocks = {row[-1] for row in plan}
+        self.assertTrue(set(previous.COMMON).issubset(clocks))
+        self.assertTrue(clocks.issubset(previous.CLOCKS))
+        self.assertTrue(any(t // 3600 != (t + 1800) // 3600 for t in clocks))
+
     def setUp(self):
         self.observed = dict(time_s=100, vehicles=[dict(trip_id=1, on_route=True)],
             routes={"True": dict(station_ids=[0, 1, 2])})
