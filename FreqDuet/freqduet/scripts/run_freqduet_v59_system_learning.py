@@ -40,7 +40,7 @@ def smoke(root, v56_root, case_index, updates):
     cell = root / "cells" / label
     replay = CostReplayBuffer(capacity=100000, seed=seed)
     reference = reference_trace(v56_root, seed, scenario)
-    budget = float(reference["snapshot"]["episode"]["headway_cv"]) ** 2
+    budget = None
     learner = None
     rows, update_rows = [], []
 
@@ -134,7 +134,12 @@ def smoke(root, v56_root, case_index, updates):
         if any(hold["action_s"] not in joint.ACTIONS for hold in observer.holds):
             raise AssertionError("learning emitted an action outside the registered seven bins")
         moments.observe(env.headway_events.headways_s)
-        np.testing.assert_allclose(moments.cv_squared, float(episode["headway_cv"]) ** 2, rtol=0, atol=1e-10)
+        raw_cv = float(env.headway_events.summary()["headway_cv"])
+        np.testing.assert_allclose(moments.cv_squared, raw_cv ** 2, rtol=0, atol=1e-10)
+        if round(raw_cv, 4) != episode["headway_cv"]:
+            raise AssertionError("unrounded arrival CV does not match the reported four-decimal metric")
+        if day == 0:
+            budget = moments.cv_squared
         audit = observer.stream.audit()
         inserted = ingest_day(replay, observer.stream, states, potentials, moments.cv_squared, day)
         for _ in range(updates):

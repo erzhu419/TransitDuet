@@ -22,6 +22,8 @@ This is a learning/interface smoke, not a policy-effectiveness confirmation.
   per-trip replay insertion, upper optimization, or duplicated passenger cost.
 - Independent constraint: final **arrival headway CV squared**, matching the
   reported service metric, no greater than the matched frozen reference.
+  Use the unrounded CV from the exact reference replay, not the four-decimal
+  headline CSV value.
   Replay cost is the signed change of observed CV squared between decisions;
   its sum plus the uncontrolled prefix equals final CV squared. A decrease is
   valid and must not be clipped to zero. The multiplier updates once per full
