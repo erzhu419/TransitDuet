@@ -79,6 +79,9 @@ def main():
             preflight = json.loads((directory/"preflight_report/result.json").read_text())
             if preflight["contract"] != spec.contract() or not preflight["coverage_qualified"]: raise SystemExit("Qualify and sync native preflight before expansion")
             tasks = [task_specification(args.run_name, key=k) for k in spec.cells(registered) if k not in set(initial)]
+            # The exact phase gate already excludes every remaining signature.
+            # Avoid the scheduler's quadratic identity scan for this trusted batch.
+            for task in tasks: task["allow_duplicate"] = True
         else: tasks = [task_specification(args.run_name, operation=args.phase)]
     execute_bulk(tasks, dry_run=False, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{args.run_name}")
 

@@ -26,6 +26,16 @@ Scheduler only, node001-node006, one core/task, no node binding.
 Seal -> ten native preflight cells -> qualified preflight report -> remaining
 draws -> final report. Raw labels/rollouts remain server-only; sync small receipts.
 
+Seal t155893 completed with maximum Stage247 reproduction error 2.17e-19.
+There are 66 active states, 4,224 draw tasks and 22,528 native episodes;
+100,352 exhaustive-replay episodes are avoided. The 17 fixture tests passed.
+Native preflight t155896-t155905 and its report t155914 completed with exit zero:
+51 qualified episodes, maximum task time 166 s, maximum process RSS 691 MB,
+zero training updates. Remaining 4,214 draws are t155915-t160128; confirmation is pending.
+Bulk registration completed normally. The submitter now skips a redundant quadratic
+identity scan after its exact preceding-phase gate; failed or already-expanded
+phases still block submission. No scheduler code or research protocol changed.
+
 ## Limitations
 
 This confirms conditional-future replication on existing development prefixes,

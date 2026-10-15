@@ -1,6 +1,8 @@
 import copy
 import json
+import sys
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
@@ -8,6 +10,7 @@ import numpy as np
 from freq_hrl.domains.transit import native_frozen_confirmation as learning
 from scripts import run_native_transit_frozen_confirmation_stage248 as spec
 from scripts.submit_native_transit_frozen_confirmation_stage248_scheduleurm import task_specification
+from scripts import submit_native_transit_frozen_confirmation_stage248_scheduleurm as submit
 
 
 class FrozenConfirmationTest(unittest.TestCase):
@@ -101,6 +104,34 @@ class FrozenConfirmationTest(unittest.TestCase):
         self.assertTrue(all(learning.confirm(primary, [half, half]).values()))
         half["variants"][learning.PRIMARY]["fields"]["cost"]["mean"] = .1
         self.assertFalse(learning.confirm(primary, [half, half])["cost"])
+
+    def test_remaining_fast_submit_still_requires_exact_completed_phase(self):
+        registered = {"contract": spec.contract(), "coverage_qualified": True,
+            "active": [{"key": list(st)} for st in spec.coverage.states() if st[1:] == ("low_noise", 0, 8)]}
+        initial = spec.cells(registered, preflight=True)
+        previous = [task_specification("unit_confirmation"),
+            *[task_specification("unit_confirmation", key=k) for k in initial],
+            task_specification("unit_confirmation", operation="preflight_report")]
+        records = [{**t, "id": f"t{i}", "status": "done", "exit_code": 0} for i, t in enumerate(previous)]
+        runtime = SimpleNamespace(load_state=lambda: {"tasks": records})
+        with patch.object(sys, "argv", ["submit", "--run-name", "unit_confirmation", "--phase", "remaining"]), \
+                patch.object(submit, "inventory", return_value=records), \
+                patch.object(submit.Path, "read_text", return_value=json.dumps(registered)), \
+                patch.dict(sys.modules, {"scheduler": runtime}), patch.object(submit, "execute_bulk") as bulk:
+            submit.main()
+            tasks = bulk.call_args.args[0]
+            self.assertEqual(len(tasks), 126)
+            self.assertEqual(len({t["signature"] for t in tasks}), len(tasks))
+            self.assertFalse({t["signature"] for t in tasks} & {t["signature"] for t in records})
+            self.assertTrue(all(t["allow_duplicate"] for t in tasks))
+            bulk.reset_mock()
+            records[-1]["exit_code"] = 1
+            with self.assertRaises(SystemExit): submit.main()
+            bulk.assert_not_called()
+            records[-1]["exit_code"] = 0
+            records.append({**tasks[0], "id": "already_submitted", "status": "queued"})
+            with self.assertRaises(SystemExit): submit.main()
+            bulk.assert_not_called()
 
 
 if __name__ == "__main__": unittest.main()
