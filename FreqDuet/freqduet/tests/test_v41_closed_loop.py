@@ -102,6 +102,10 @@ class ClosedLoopTest(unittest.TestCase):
         result = fluid_rollout(observed, 10, "response")
         self.assertEqual(result["launches"][0]["time_s"], 1)
 
+    def test_holding_window_excludes_ticks_at_its_end(self):
+        result = fluid_rollout(observation(), 20, "response")
+        self.assertEqual(result["holding_vehicle_seconds"], 4)
+
 
 if __name__ == "__main__":
     unittest.main()

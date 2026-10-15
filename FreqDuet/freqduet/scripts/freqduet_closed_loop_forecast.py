@@ -145,7 +145,7 @@ def fluid_rollout(observed, horizon_s, holding_mode):
         commands.append(dict(time_s=time, bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
                              direction=vehicle["direction"], station_id=route_of(vehicle)["station_ids"][vehicle["station_index"]],
                              action_s=action))
-        holding += min(action, max(end - time, 0))
+        holding += min(action, max(end - dt - time, 0))
         vehicle.update(previous_hold_s=action, phase="commanded_hold")
         schedule(time + max(action, dt), "departure", vehicle["bus_id"])
 
