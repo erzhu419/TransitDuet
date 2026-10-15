@@ -94,6 +94,14 @@ class ClosedLoopTest(unittest.TestCase):
         result = fluid_rollout(observed, 100, "response")
         self.assertEqual(result["holding_vehicle_seconds"], 0)
 
+    def test_real_fractional_published_deadlines_use_one_tick_key(self):
+        observed = observation()
+        observed["vehicles"][0].update(on_route=False, load=0)
+        observed["commitments"] = [dict(trip_id=2, direction=True, scheduled_s=.413,
+            min_gap_s=0, first_eligible_s=None, target_headway_s=360.413)]
+        result = fluid_rollout(observed, 10, "response")
+        self.assertEqual(result["launches"][0]["time_s"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

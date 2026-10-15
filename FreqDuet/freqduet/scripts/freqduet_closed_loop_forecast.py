@@ -102,12 +102,13 @@ def fluid_rollout(observed, horizon_s, holding_mode):
 
     def schedule(time, kind, bus_id=None):
         nonlocal serial
+        time = tick(time)
         if kind == "dispatch":
             if time in wakes:
                 return
             wakes.add(time)
         priority = 0 if kind == "available" else 1 if kind == "dispatch" else 2
-        heapq.heappush(events, (tick(time), priority, serial, kind, bus_id))
+        heapq.heappush(events, (time, priority, serial, kind, bus_id))
         serial += 1
 
     def key(direction, station):
