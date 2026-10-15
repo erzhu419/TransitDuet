@@ -2,13 +2,14 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace as NS
 import unittest
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from run_freqduet_v37_joint_lower import OUTCOMES
-from run_freqduet_v56_benefit_timing import common_cuts, exposure_at, reversal_rows, timing_rows, unique_branches, validate_snapshot
+from run_freqduet_v56_benefit_timing import common_cuts, evaluation_horizon, exposure_at, reversal_rows, timing_rows, unique_branches, validate_snapshot
 
 
 def trace(second_return=3000, change=0):
@@ -25,6 +26,17 @@ def trace(second_return=3000, change=0):
 
 
 class BenefitTimingTest(unittest.TestCase):
+    def test_fixed_clock_comes_from_initialized_environment_protocol(self):
+        env = Mock(protocol=NS(evaluation_end_time_s=64800))
+        factory = Mock(return_value=env)
+        config = dict(env=dict(path="env/original_env", route_sigma=1.5))
+        runtime = (None, None, lambda path: config, None)
+        with patch("run_freqduet_v56_benefit_timing.joint.optimized_runtime", return_value=runtime), \
+                patch.dict(sys.modules, {"env.sim": NS(env_bus=factory)}):
+            self.assertEqual(evaluation_horizon(Path("unused")), 64800)
+        env.reset.assert_called_once_with()
+        self.assertEqual(factory.call_args.kwargs["env_config"], config["env"])
+
     def test_duplicate_arms_do_not_require_duplicate_rollouts(self):
         branches = {a: NS(first_action_s=x, second_action_s=y) for a, x, y in
                     [("reference", 0, 0), ("first_only", 0, 0), ("second_only", 0, 15), ("joint", 0, 15)]}

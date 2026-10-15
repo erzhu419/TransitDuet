@@ -159,10 +159,14 @@ def batch(root, v37, start, end, workers):
 
 def evaluation_horizon(root):
     _, _, load_config, _ = joint.optimized_runtime(root)
+    from env.sim import env_bus
+
     config = load_config(str(joint.MODEL_ROOT / "configs_freqduet" / f"{joint.CURRENT}.yaml"))
-    env = config["env"]
-    data = json.loads((OPTIMIZED_ROOT / env["path"] / "config.json").read_text())
-    return float(env.get("evaluation_end_time_s", data["max_time"]))
+    settings = config["env"]
+    env = env_bus(str(OPTIMIZED_ROOT / settings["path"]),
+                  env_config=settings, route_sigma=settings["route_sigma"])
+    env.reset()
+    return float(env.protocol.evaluation_end_time_s)
 
 
 def exposure_at(data, time):
