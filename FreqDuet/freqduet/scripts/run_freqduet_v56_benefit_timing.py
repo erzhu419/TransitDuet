@@ -14,6 +14,7 @@ import pandas as pd
 
 from audit_freqduet_v38_dominant_case import select_branches
 from audit_freqduet_v38_mechanism import ARMS, cumulative_at
+from complete_freqduet_v34_optimized_evaluation import OPTIMIZED_ROOT
 import run_freqduet_v37_joint_lower as joint
 from run_freqduet_v38_observed_replay import replay
 
@@ -156,10 +157,31 @@ def batch(root, v37, start, end, workers):
     (export / "done.json").write_text(json.dumps(dict(start=start, end=end, completed=done)) + "\n")
 
 
-def common_cuts(reference):
+def evaluation_horizon(root):
+    _, _, load_config, _ = joint.optimized_runtime(root)
+    config = load_config(str(joint.MODEL_ROOT / "configs_freqduet" / f"{joint.CURRENT}.yaml"))
+    env = config["env"]
+    data = json.loads((OPTIMIZED_ROOT / env["path"] / "config.json").read_text())
+    return float(env.get("evaluation_end_time_s", data["max_time"]))
+
+
+def exposure_at(data, time):
+    timeline = data["timeline"]
+    end = float(timeline[-1, 0])
+    if time <= end:
+        return cumulative_at(timeline, time)
+    episode = data["snapshot"]["episode"]
+    if (episode["done_reason"] != "service_cleared" or episode["trips_unlaunched"] != 0
+            or episode["trips_incomplete"] != 0):
+        raise ValueError("trace is truncated rather than service-cleared")
+    # Demand has ended and no vehicle or unlaunched trip remains. Any unserved
+    # passengers keep waiting to the fixed censor clock; all other rates are zero.
+    return timeline[-1, 1:] + (time - end) * np.array([episode["passengers_unserved"], 0, 0])
+
+
+def common_cuts(reference, horizon):
     decisions = reference["snapshot"]["decisions"]
     first = float(decisions["first"]["identity"]["time_s"])
-    end = float(reference["timeline"][-1, 0])
     cuts = [("before_first", first), ("second_decision", float(decisions["second"]["identity"]["time_s"])),
             ("15min", first + 900), ("30min", first + 1800)]
     returns = []
@@ -171,27 +193,27 @@ def common_cuts(reference):
         time = float(rows.iloc[0].time_s)
         returns.append(time)
         cuts.append((f"{decision}_reference_return", time))
-    cuts.extend([("both_reference_returns", max(returns)), ("day_end", end)])
-    if any(time > end for _, time in cuts):
+    cuts.extend([("both_reference_returns", max(returns)), ("day_end", horizon)])
+    if any(time > horizon for _, time in cuts):
         raise ValueError("requested timing cut exceeds the common evaluation horizon")
     return cuts
 
 
-def timing_rows(context, traces):
+def timing_rows(context, traces, horizon):
     reference = traces["reference"]
-    cuts = common_cuts(reference)
-    before = cumulative_at(reference["timeline"], cuts[0][1])
+    cuts = common_cuts(reference, horizon)
+    before = exposure_at(reference, cuts[0][1])
     records = []
     for arm, data in traces.items():
-        if data["timeline"][-1, 0] != reference["timeline"][-1, 0]:
-            raise ValueError("four arms have different evaluation horizons")
+        if data["timeline"][-1, 0] > horizon:
+            raise ValueError("trace extends beyond fixed evaluation horizon")
         joint.assert_same_state(data["snapshot"]["decisions"]["first"]["identity"],
                                 reference["snapshot"]["decisions"]["first"]["identity"])
-        if not np.array_equal(cumulative_at(data["timeline"], cuts[0][1]), before):
+        if not np.array_equal(exposure_at(data, cuts[0][1]), before):
             raise ValueError("exposure changed before the first intervention")
         for cut, time in cuts:
-            exposure = cumulative_at(data["timeline"], time)
-            ref_exposure = cumulative_at(reference["timeline"], time)
+            exposure = exposure_at(data, time)
+            ref_exposure = exposure_at(reference, time)
             row = dict(context=context["name"], train_seed=context["seed"], eval_seed=context["scenario"],
                        target_time_s=context["target_time_s"], arm=arm, cut=cut, time_s=time,
                        elapsed_s=time - cuts[0][1])
@@ -232,11 +254,12 @@ def reversal_rows(timing, endpoints):
 
 def aggregate(root):
     plan = load_plan(root)
+    horizon = evaluation_horizon(root)
     traces = {i["label"]: load_trace(root, i) for i in plan["items"]}
     timing, endpoints = [], []
     for context in plan["contexts"]:
         arms = {arm: traces[label] for arm, label in context["arms"].items()}
-        timing.extend(timing_rows(context, arms))
+        timing.extend(timing_rows(context, arms, horizon))
         ref = arms["reference"]["snapshot"]["episode"]
         for arm, data in arms.items():
             snapshot = data["snapshot"]
@@ -266,8 +289,9 @@ def aggregate(root):
     failures = sum(sum(1 for _ in p.open()) for p in (root / "failures").glob("*.jsonl"))
     status = dict(status="complete_development_timing_diagnosis", contexts=len(plan["contexts"]),
                   unique_arms=len(plan["items"]), reused_traces=sum(bool(i["reused_trace"]) for i in plan["items"]),
-                  failed_attempts=failures, all_endpoints_match_v37=True,
+                  failed_arm_attempts=failures, all_endpoints_match_v37=True,
                   exposure_units="tick-integrated person/trip seconds, not restricted journey estimator",
+                  evaluation_horizon_s=horizon,
                   selection=plan["selection"], training_runs=0, main_policy_changed=False,
                   independent_confirmation=False, diagnostic_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))
     (summary / "status.json").write_text(json.dumps(status, indent=2) + "\n")
@@ -283,14 +307,16 @@ def smoke(root, v37):
     dominant = next(c for c in plan["contexts"] if (c["seed"], c["scenario"], c["target_time_s"]) == DOMINANT)
     arms = {a: load_trace(root, next(i for i in plan["items"] if i["label"] == label))
             for a, label in dominant["arms"].items()}
-    dominant_timing = timing_rows(dominant, arms)
+    horizon = evaluation_horizon(root)
+    dominant_timing = timing_rows(dominant, arms, horizon)
     item = next(i for i in plan["items"] if not i["reused_trace"] and not i["label"].endswith("_reference"))
     run_item(root, v37, item)
     export = root / "smoke_export"
     export.mkdir(exist_ok=True)
     pd.DataFrame(dominant_timing).to_csv(export / "dominant_timing.csv", index=False)
     (export / "done.json").write_text(json.dumps(dict(replayed=item["label"], matches_v37=True,
-                                                      reused_dominant_accounting_pass=True)) + "\n")
+                                                      reused_dominant_accounting_pass=True,
+                                                      evaluation_horizon_s=horizon)) + "\n")
     print("V56_SMOKE_PASS", flush=True)
 
 
