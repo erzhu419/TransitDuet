@@ -103,6 +103,10 @@ def batch(root, start, end, workers):
 
 
 def aggregate(root):
+    suite = unittest.defaultTestLoader.discover(str(Path(__file__).resolve().parents[1] / "tests"),
+                                               pattern="test_v4[1245]*.py")
+    if not unittest.TextTestRunner(verbosity=1).run(suite).wasSuccessful():
+        raise SystemExit(1)
     rows, controls = [], []
     for seed, scenario, cohort in items():
         cell = root / "observed" / f"seed{seed}_eval{scenario}"
@@ -172,7 +176,7 @@ def aggregate(root):
             coverage=("covered", "mean"), width=("width", "mean"))
         result.append(group.reset_index().assign(scope=scope))
     errors = pd.concat(result, ignore_index=True)
-    out = root / "summary"
+    out = root / "observable_summary"
     out.mkdir(parents=True, exist_ok=True)
     errors.to_csv(out / "errors.csv", index=False)
     frame.to_csv(root / "calibration_records.csv", index=False)
