@@ -133,6 +133,15 @@ def aggregate(root):
                             covered=float(lo <= truth[metric] <= hi) if lo is not None else np.nan,
                             width=hi - lo if lo is not None else np.nan))
     frame = pd.DataFrame(rows)
+    archive = pd.read_csv(root.parent / "protocol_v6_v43_state_contract" / "prediction_records.csv")
+    archive = archive.loc[archive["mode"] == "categorical"]
+    raw = frame.loc[frame.common_clock & (frame["mode"] == "raw") & (frame.cohort != "fresh_demand")]
+    keys = ["cohort", "train_seed", "eval_seed", "origin", "horizon_s", "metric"]
+    matched = raw.merge(archive, on=keys, suffixes=("_new", "_v43"), validate="one_to_one")
+    if len(matched) != len(raw):
+        raise ValueError("missing V43 raw common-clock comparator")
+    np.testing.assert_allclose(matched.point, matched.predicted, rtol=1e-12, atol=1e-8)
+    np.testing.assert_allclose(matched.actual_new, matched.actual_v43, rtol=1e-12, atol=1e-8)
     frame["abs_error"] = frame.error.abs()
     result = []
     for scope, subset in (("all_origins", frame), ("common_clocks", frame.loc[frame.common_clock])):
@@ -157,7 +166,8 @@ def aggregate(root):
             passenger_mae_within_5pct=bool(all(cat.loc[m].mae <= 1.05 * base.loc[m].mae for m in METRICS[:2])),
             mature_holding_coverage_ge_80pct=bool(hold.coverage >= .8))
     status = dict(experiment=root.name, days=12, forecast_origins_per_day=51,
-        policy_changed=False, matches_frozen_controls=True, archived_controls=controls.count("v35_archive"),
+        policy_changed=False, matches_frozen_controls=True, raw_common_clocks_match_v43=True,
+        archived_controls=controls.count("v35_archive"),
         new_unobserved_controls=controls.count("same_seed_unobserved_replay"), gates=gates,
         forecast_screen_pass=all(all(g.values()) for g in gates.values()),
         source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"),

@@ -25,6 +25,17 @@ eight regression days. Add four fresh-demand days: actors 12011/933013 x
 19511021/19511027, each checked against an unobserved same-seed frozen replay.
 Freeze the calibrator before examining those fresh labels.
 
+V44: source `c1a005ca3b`, 23 tests and full-day smoke `t155545` pass; eight
+exact V35 replays `t155546-t155549`, aggregate `t155557` / `7f78c88577`.
+Travel MAE 36.0/35.5 s vs service 3.87/3.80 s; holding-pipeline MAE 12.6/12.9 s.
+At 15-30 min, arrival-clock MAE 110/87 s, follower-gap MAE 107/90 s.
+All eight days have zero nonzero actions without departure evidence; geometry
+and target headways are aligned. The suspected missing-action defect is absent
+on this cohort. Remaining propagation error is primarily travel timing, with
+substantial downstream headway error; these diagnostics do not prove a unique
+causal attribution among the coupled dynamics. Initial acquisition smokes
+`t155530/t155535` failed on frozen-recorder API differences; retries cancelled.
+
 ## Limitations And Next Step
 Calibration of cumulative endpoints does not fix state propagation or establish
 correct counterfactual action response. No main-policy switch. Diagnose and fix
