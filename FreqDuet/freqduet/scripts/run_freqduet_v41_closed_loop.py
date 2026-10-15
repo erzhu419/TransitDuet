@@ -16,6 +16,21 @@ from freqduet_fleet_pool_forecast import freeze_pool
 import run_freqduet_v40_uncertainty as uncertainty
 
 
+def holding_observation(runner, key, previous):
+    bus = runner._bus_for_agent(key)
+    context = runner._pending_lower_action_context[int(key)]
+    if (runner._lower_terminal_action_masked(bus) or not context.evidence_valid
+            or runner._fixed_expert_active):
+        return None
+    return dict(forward_gap_s=float(context.forward_headway_s or 0.0),
+                target_headway_s=float(context.target_headway_s),
+                follower_gap_s=float(context.follower_departure_gap_s or 0.0),
+                follower_valid=bool(context.follower_evidence_valid),
+                load_ratio=len(bus.passengers) / float(bus.capacity), previous_hold_s=float(previous),
+                station_phase=bus.effective_station.index(bus.last_station) / (len(bus.effective_station) - 1),
+                direction=bool(bus.direction), time_s=float(runner.env.current_time))
+
+
 class ClosedLoopObserver(uncertainty.IntervalObserver):
     def __init__(self, target, detailed):
         super().__init__(target, detailed)
@@ -83,17 +98,8 @@ class ClosedLoopObserver(uncertainty.IntervalObserver):
         super().observe(runner, obs, key, previous, action)
         for stage in set(self.decisions) - existing:
             self.capture_flow(runner, stage, self.decisions[stage]["fleet_pool"])
-        bus = runner._bus_for_agent(key)
-        context = runner._pending_lower_action_context[int(key)]
-        if (not runner._lower_terminal_action_masked(bus) and context.evidence_valid
-                and not runner._fixed_expert_active):
-            values = dict(forward_gap_s=float(context.forward_headway_s or 0.0),
-                          target_headway_s=float(context.target_headway_s),
-                          follower_gap_s=float(context.follower_departure_gap_s or 0.0),
-                          follower_valid=bool(context.follower_evidence_valid),
-                          load_ratio=len(bus.passengers) / float(bus.capacity), previous_hold_s=float(previous),
-                          station_phase=bus.effective_station.index(bus.last_station) / (len(bus.effective_station) - 1),
-                          direction=bool(bus.direction), time_s=float(runner.env.current_time))
+        values = holding_observation(runner, key, previous)
+        if values is not None:
             self.holding_history.record(values["time_s"], values, float(np.asarray(action).item()))
 
 

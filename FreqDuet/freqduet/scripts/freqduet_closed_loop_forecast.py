@@ -81,7 +81,7 @@ def response_action(model, values, historical):
     return float(ACTIONS[np.argmin(np.abs(ACTIONS - predicted))])
 
 
-def fluid_rollout(observed, horizon_s, holding_mode):
+def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
     """Propagate service, queues, onboard loads, holding and physical reuse."""
     now, dt = observed["time_s"], observed["dt_s"]
     end, clock = now + horizon_s, now
@@ -255,7 +255,10 @@ def fluid_rollout(observed, horizon_s, holding_mode):
                               load_ratio=vehicle["load"] / vehicle["capacity"], previous_hold_s=vehicle["previous_hold_s"],
                               station_phase=station / (len(route["station_ids"]) - 1), direction=vehicle["direction"], time_s=time)
                 historical = route["hold_s"][station]
-                action = historical if holding_mode == "historical" else response_action(observed["holding_model"], values, historical)
+                if action_predictor is not None:
+                    action = action_predictor(values)
+                else:
+                    action = historical if holding_mode == "historical" else response_action(observed["holding_model"], values, historical)
             execute_hold(vehicle, time, action)
     integrate(end)
     backlog = sum(max(0, min(row["time_s"], end) - max(now, row["scheduled_s"])) for row in launches)
