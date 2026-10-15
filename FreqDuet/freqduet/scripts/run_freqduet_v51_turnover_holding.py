@@ -32,6 +32,12 @@ def read_day(base, seed, scenario):
     captures = json.loads((bank / "forecasts.json").read_text())
     labels = identify_holding(json.loads((bank / "teacher.json").read_text()), pd.read_csv(bank / "holds.csv"),
         pd.read_csv(telemetry / "actual_events.csv"), captures["clock_3600"]["pool"]["routes"])
+    residuals = []
+    for row in labels.itertuples():
+        clock = issued_origin(previous.CLOCKS, row.time_s)
+        residuals.append(row.action_s - float(probabilities_from_features(
+            captures[f"clock_{clock}"]["distribution_model"], row.features) @ ACTIONS) if clock is not None else np.nan)
+    labels["residual_s"] = residuals
     launches, terminals = pd.read_csv(telemetry / "launches.csv"), pd.read_csv(telemetry / "terminals.csv")
     return label, captures, augment_labels(labels, launches, terminals), launches, terminals
 

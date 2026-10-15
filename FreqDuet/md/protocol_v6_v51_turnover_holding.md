@@ -27,3 +27,12 @@ matured predictions issued before each historical decision, not in-sample
 probabilities refit at the current origin. With no matured predictions the
 correction is zero. Keep the same turnover features, prefix gate and four-cell
 comparison; retain V51's negative results in its separate experiment directory.
+
+## V51C Residual Context
+V51B also failed: MAE delta +0.0126 s and NLL +0.000305 [0.000131,0.000466].
+Keep that negative result. V51C changes the two action-memory coordinates to
+previous completed-trip mean/last prequential innovations (actual minus the
+strictly earlier issued base prediction). The physical turnover features and
+seven-coefficient tilt stay fixed. Forecast returns carry sampled action minus
+the base conditional mean into the next trip; no future observed residual is
+read. Missing early-day issued predictions have no scored residual memory.

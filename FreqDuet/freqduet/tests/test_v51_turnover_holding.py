@@ -10,7 +10,7 @@ from freqduet_turnover_holding import augment_labels, freeze_turnover, turnover_
 
 
 def data():
-    labels = pd.DataFrame([dict(time_s=t, bus_id=0, trip_id=trip, action_s=hold, features=[0.] * 12)
+    labels = pd.DataFrame([dict(time_s=t, bus_id=0, trip_id=trip, action_s=hold, residual_s=hold, features=[0.] * 12)
                           for t, trip, hold in [(20, 1, 10), (100, 2, 5)]])
     launches = pd.DataFrame([dict(time_s=t, bus_id=0, trip_id=trip, scheduled_s=scheduled)
                             for t, trip, scheduled in [(0, 1, 0), (60, 2, 55)]])
@@ -38,7 +38,7 @@ class TurnoverHoldingTest(unittest.TestCase):
     def test_future_completed_trip_cannot_change_earlier_context(self):
         labels, launches, terminals = data()
         expected = augment_labels(labels, launches, terminals).augmented_features.tolist()
-        future_labels = pd.DataFrame([dict(time_s=250, bus_id=0, trip_id=3, action_s=45, features=[0.] * 12)])
+        future_labels = pd.DataFrame([dict(time_s=250, bus_id=0, trip_id=3, action_s=45, residual_s=20, features=[0.] * 12)])
         future_launches = pd.DataFrame([dict(time_s=200, bus_id=0, trip_id=3, scheduled_s=200)])
         future_terminals = pd.DataFrame([dict(time_s=300, bus_id=0, trip_id=3)])
         actual = augment_labels(pd.concat([labels, future_labels]), pd.concat([launches, future_launches]),
@@ -50,7 +50,14 @@ class TurnoverHoldingTest(unittest.TestCase):
         history = freeze_turnover(labels, launches, terminals, dict(time_s=100,
             vehicles=[dict(bus_id=0, trip_id=2, on_route=True)]))
         self.assertEqual(history["0"]["current"]["count"], 0)
-        self.assertEqual(history["0"]["previous"]["mean_hold_s"], 10)
+        self.assertEqual(history["0"]["previous"]["mean_residual_s"], 10)
+
+    def test_large_correctly_predicted_action_is_not_residual_memory(self):
+        labels, launches, terminals = data()
+        labels.loc[labels.trip_id == 1, ["action_s", "residual_s"]] = [45, 0]
+        history = freeze_turnover(labels, launches, terminals, dict(time_s=100,
+            vehicles=[dict(bus_id=0, trip_id=2, on_route=True)]))
+        self.assertEqual(history["0"]["previous"]["mean_residual_s"], 0)
 
     def test_cold_start_context_and_observed_launch_delay(self):
         context = turnover_features(None, dict(launch_s=10, scheduled_s=5), 20)
@@ -70,11 +77,12 @@ class TurnoverHoldingTest(unittest.TestCase):
         context = turnover_features(state["previous"], state["current"], 220)
         self.assertEqual(context[0], 1)
         self.assertAlmostEqual(context[4], 100 / 3600)
+        state["current"]["base_mean_s"] = 2.
         response.observe(dict(stage="action", bus_id=0, trip_id=2, direction=False, station_id=1,
             time_s=220, launch_time_s=200, scheduled_launch_s=190, action_s=5, evidence_valid=True))
         response.observe(dict(stage="arrival", bus_id=0, trip_id=2, direction=False, station_id=0,
             time_s=300, launch_time_s=200, scheduled_launch_s=190))
-        self.assertEqual(response.history["0"]["previous"]["mean_hold_s"], 5)
+        self.assertEqual(response.history["0"]["previous"]["mean_residual_s"], 3)
         self.assertEqual(history["0"]["current"]["total"], 10)
 
 

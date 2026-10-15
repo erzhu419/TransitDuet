@@ -51,9 +51,10 @@ def turnover_features(previous, current, time):
     elapsed = max(0.0, time - current["launch_s"])
     memory = math.exp(-elapsed / 900)
     known = previous is not None
-    return np.array([float(known),
-        memory * previous["mean_hold_s"] / 45 if known else 0,
-        memory * previous["last_hold_s"] / 45 if known else 0,
+    scored = known and previous["scored_count"] > 0
+    return np.array([float(scored),
+        memory * previous["mean_residual_s"] / 45 if scored else 0,
+        memory * previous["last_residual_s"] / 45 if scored else 0,
         memory * previous["duration_s"] / 3600 if known else 0,
         max(0, current["launch_s"] - previous["end_s"]) / 3600 if known else 0,
         max(0, current["launch_s"] - current["scheduled_s"]) / 3600, elapsed / 3600])
@@ -63,11 +64,11 @@ def completed_profiles(labels, launches, terminals):
     launch = launches.set_index("trip_id").to_dict("index")
     profiles = {}
     for row in terminals.sort_values("time_s").itertuples():
-        past = labels.loc[(labels.trip_id == row.trip_id) & (labels.time_s < row.time_s)]
+        past = labels.loc[(labels.trip_id == row.trip_id) & (labels.time_s < row.time_s)].dropna(subset=["residual_s"])
         entry = dict(trip_id=int(row.trip_id), end_s=float(row.time_s),
             duration_s=float(row.time_s - launch[row.trip_id]["time_s"]),
-            mean_hold_s=float(past.action_s.mean()) if len(past) else 0.,
-            last_hold_s=float(past.action_s.iloc[-1]) if len(past) else 0.)
+            scored_count=len(past), mean_residual_s=float(past.residual_s.mean()) if len(past) else 0.,
+            last_residual_s=float(past.residual_s.iloc[-1]) if len(past) else 0.)
         profiles.setdefault(int(row.bus_id), []).append(entry)
     return launch, profiles
 
@@ -101,9 +102,9 @@ def freeze_turnover(labels, launches, terminals, observed):
         current = None
         if vehicle["on_route"]:
             entry = launch[trip]
-            holds = labels.loc[labels.trip_id == trip]
+            holds = labels.loc[labels.trip_id == trip].dropna(subset=["residual_s"])
             current = dict(trip_id=trip, launch_s=entry["time_s"], scheduled_s=entry["scheduled_s"],
-                count=len(holds), total=float(holds.action_s.sum()), last=float(holds.action_s.iloc[-1]) if len(holds) else 0.)
+                count=len(holds), total=float(holds.residual_s.sum()), last=float(holds.residual_s.iloc[-1]) if len(holds) else 0.)
         result[str(bus)] = dict(previous=past[-1] if past else None, current=current)
     return result
 
@@ -123,7 +124,10 @@ class TurnoverResponse:
     def __call__(self, values):
         state = self.current(values)
         context = turnover_features(state["previous"], state["current"], values["time_s"])
-        probabilities = tilted_probabilities(self.model["base"], holding_features(values), context, self.model["correction"])
+        features = holding_features(values)
+        base = probabilities_from_features(self.model["base"], features)
+        state["current"]["base_mean_s"] = float(base @ ACTIONS)
+        probabilities = tilted_probabilities(self.model["base"], features, context, self.model["correction"])
         return sample_action(probabilities, self.rng.random())
 
     def observe(self, row):
@@ -131,12 +135,14 @@ class TurnoverResponse:
         current = state["current"]
         if row["stage"] == "action" and row["evidence_valid"]:
             current["count"] += 1
-            current["total"] += row["action_s"]
-            current["last"] = row["action_s"]
+            residual = row["action_s"] - current["base_mean_s"]
+            current["total"] += residual
+            current["last"] = residual
         terminal = self.routes[str(row["direction"])]["station_ids"][-1]
         if row["stage"] == "arrival" and row["station_id"] == terminal:
             state["previous"] = dict(trip_id=current["trip_id"], end_s=row["time_s"],
                 duration_s=row["time_s"] - current["launch_s"],
-                mean_hold_s=current["total"] / current["count"] if current["count"] else 0.,
-                last_hold_s=current["last"])
+                scored_count=current["count"],
+                mean_residual_s=current["total"] / current["count"] if current["count"] else 0.,
+                last_residual_s=current["last"])
             state["current"] = None
