@@ -23,3 +23,15 @@ event-clock errors versus V48 and historical; use demand clusters, not overlappi
 windows, for inference. Preserve passenger mass and unchanged actual controls.
 After travel validation, add turnover-conditioned seven-bin holding response as
 a separate diagnostic, not a controller replacement. Retrieve summaries only.
+
+## Results
+db11ed4a0c: smoke t155875; preparation t155876-t155880; 612-origin matrix
+t155882-t155886 (306 workers). Paired aggregation t155912 repairs only the CLI
+entrypoint omitted in t155892; forecasts were not rerun. Single-leg MAE delta
+-3.87 s [-3.99,-3.69], coverage +12.8 percentage points. Shared-model 30-minute
+holding MAE 409/446/405 -> 329/334/357 s (development/reused/formerly-fresh).
+Demand-cluster MAE deltas: holding -80 [-101,-59] s, backlog -55 [-78,-38]
+trip-seconds; passenger intervals cross zero. Raw holding coverage remains
+58-67%; late arrival-clock MAE regresses 91/84/88 -> 101/87/96 s. Mean-only
+holding forecasts also regress. Retain V48 as a timing/uncertainty reference;
+V50 is an endpoint-accuracy candidate, not a qualified controller replacement.
