@@ -1,0 +1,48 @@
+{
+  "contract": {
+    "actions": "Stage252_selected_keys_full_actions_and_cached_inner_candidate_actions_verbatim_both_filters_all_six_protocols",
+    "boundary": "post_confirmation_development_diagnostic_reused_training_crossfit_futures_no_CI_no_tuning_no_default_change; Stage248_outcomes_and_Stage169_reserves_closed",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "inner_reconstruction_solves": 0,
+      "new_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_prefixes": 0,
+      "new_raw_reference_fits": 0
+    },
+    "cohort": "same32_cells4_views_two_banks_60_seen_states20_prefix_half_blocks_per_cell_bank",
+    "confirmation_run": "native_transit_selector_confirmation_stage253_20261015_r1",
+    "controls": "reproduce_Stage252_full_train60_cost_wait_service_fleet_and_selected_OOF_validation_cost_wait_by_root",
+    "data": "old_A2_or_new2_new8_validation_vs_common_opposite16_Stage249_futures_for_inner_and_full; never_impute_missing_Stage253_sparse_actions",
+    "decomposition": "OOF_future_minus_validation_optimism; full_future_correction_minus_OOF_future_correction; full_raw_minus_inner_raw_reference; selected_action_gap=sum_last_two",
+    "references": "cached_prefix_excluded_inner_vs_full_reference_inference_only; intentional_CV_difference_not_presumed_bug",
+    "report": "both_banks_all_four_views_prefix_and_scenario_means; raw_choice_gate_and_selected_action_disagreement",
+    "source_protocol": "native_transit_selector_information_stage252_v1",
+    "source_run": "native_transit_selector_information_stage252_20261015_r1",
+    "storage": "cached_actions_labels_and_references_server_only_small_scalar_summary_pull",
+    "strata": [
+      "all",
+      "raw_same",
+      "raw_different",
+      "gate_same",
+      "gate_different"
+    ]
+  },
+  "protocol": "native_transit_selector_bridge_stage254_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "49de47599b1bc424dcb0c1a5d4a5d5b4a0623ba5"
+}
