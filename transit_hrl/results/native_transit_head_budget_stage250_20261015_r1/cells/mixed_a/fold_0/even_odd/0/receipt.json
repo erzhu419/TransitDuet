@@ -1,0 +1,68 @@
+{
+  "contract": {
+    "arms": [
+      "frozen_old",
+      "free_old",
+      "frozen_train",
+      "free_train"
+    ],
+    "boundary": "development_factorial_not_new_prefix_confirmation_not_end_to_end_HRL_no_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "fit_tasks": 32,
+      "new_native_episodes": 0,
+      "new_prefixes": 0,
+      "new_quadratic_solves": 16128,
+      "new_raw_reference_fits": 0,
+      "report_tasks": 1
+    },
+    "budget_factor": "cached_A_radius_vs_max_A_radius_norm_of_OLS_projection_of_shrunk_training_head_sum_no_validation_or_eval_calibration",
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "contrasts": [
+      "free_old-frozen_old",
+      "frozen_train-frozen_old",
+      "free_train-frozen_train",
+      "free_train-free_old",
+      "free_train-free_old-frozen_train+frozen_old"
+    ],
+    "controls": "Stage249_expanded_frozen_old_and_Stage247_old_cached_models_selections_actions_no_control_refits",
+    "evaluation": "opposite16_bank_train60_and_held60; both_reciprocal_directions_and_four_views",
+    "frozen": "raw_references_198_features_TSVD_ranks_scale_state_GLS_shrinkage_precision_A2_OOF_selector_17_candidates_actions_suffix",
+    "head_factor": "cached_difference_vs_free_difference_profiled_in_same_subspace_total_df_k_component_df_k_vs_2k",
+    "label_boundary": "Stage248_not_read; Stage249_is_now_development_data_not_fresh_confirmation; Stage169_reserved_cohorts_closed",
+    "policy": "pooled_safe_primary_half_safe_secondary_old_A2_OOF_only_no_arm_or_scenario_gate",
+    "primary_diagnostic": "held60_mixed_pooled_fleet_nonanchor_MSE_and_feasible_pair_MSE_each_bank_separate_no_winner_selection",
+    "rank_diagnostic": "all_four_registered_ranks_at_alpha1_training_bank_seen_prefix_new_future_and_held_prefix_new_future",
+    "source_protocol": "native_transit_training_information_stage249_v1",
+    "source_run": "native_transit_training_information_stage249_20261015_r1",
+    "storage": "server_only_panels_models_actions_aggregates_small_fit_receipts_and_compact_report_pull",
+    "training": "Stage249_expanded_only_8_inner_16_full_same_banks_same_state_folds",
+    "variants": [
+      "raw",
+      "old_pooled_safe",
+      "old_half_safe",
+      "frozen_old_pooled_safe",
+      "frozen_old_half_safe",
+      "free_old_pooled_safe",
+      "free_old_half_safe",
+      "frozen_train_pooled_safe",
+      "frozen_train_half_safe",
+      "free_train_pooled_safe",
+      "free_train_half_safe"
+    ]
+  },
+  "coverage_qualified": true,
+  "frozen_reproduction": {
+    "action_exposures_compared": 1200,
+    "mismatches": 0
+  },
+  "key": [
+    "mixed_a",
+    0,
+    "even_odd",
+    0
+  ],
+  "new_native_episodes": 0,
+  "new_raw_reference_fits": 0,
+  "protocol": "native_transit_head_budget_stage250_v1"
+}
