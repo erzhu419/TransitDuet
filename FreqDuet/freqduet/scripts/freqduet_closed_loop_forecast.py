@@ -110,7 +110,7 @@ def projected_follower(vehicle, vehicles, routes, time, dt):
         service_dwell_proxy_s=vehicle["last_service_dwell_s"], vehicles=snapshots)
 
 
-def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
+def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, event_sink=None):
     """Propagate service, queues, onboard loads, holding and physical reuse."""
     now, dt = observed["time_s"], observed["dt_s"]
     end, clock = now + horizon_s, now
@@ -146,6 +146,12 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
     def route_of(vehicle):
         return observed["routes"][str(vehicle["direction"])]
 
+    def emit(stage, vehicle, time, **values):
+        if event_sink is not None:
+            event_sink(dict(stage=stage, time_s=time, bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
+                direction=vehicle["direction"], station_id=route_of(vehicle)["station_ids"][vehicle["station_index"]],
+                load=vehicle["load"], **values))
+
     def integrate(time):
         nonlocal clock, waiting, onboard
         duration = time - clock
@@ -168,13 +174,16 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
                        start_progress_m=vehicle["progress_m"], end_progress_m=sum(route["lengths_m"][:station + 1]))
         schedule(time + travel, "arrival", vehicle["bus_id"])
 
-    def execute_hold(vehicle, time, action):
+    def execute_hold(vehicle, time, action, values=None):
         nonlocal holding
         action = float(max(action, 0))
         commands.append(dict(time_s=time, bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
                              direction=vehicle["direction"], station_id=route_of(vehicle)["station_ids"][vehicle["station_index"]],
                              action_s=action))
         holding += min(action, max(end - dt - time, 0))
+        emit("action", vehicle, time, action_s=action, evidence_valid=values is not None,
+             forward_gap_s=None if values is None else values["forward_gap_s"],
+             follower_gap_s=None if values is None or not values["follower_valid"] else values["follower_gap_s"])
         vehicle.update(previous_hold_s=action, phase="commanded_hold")
         schedule(time + max(action, dt), "departure", vehicle["bus_id"])
 
@@ -235,6 +244,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
             heapq.heappush(pools[vehicle["direction"]], (vehicle["ready_since_s"], bus_id))
             schedule(time, "dispatch")
         elif kind == "departure":
+            emit("departure", vehicle, time)
             departures[key(vehicle["direction"], route["station_ids"][station])] = dict(time_s=time, trip_id=vehicle["trip_id"])
             begin_travel(vehicle, time)
         elif kind == "arrival":
@@ -251,6 +261,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
             alighted_total += alight
             max_load = max(max_load, vehicle["load"])
             stop["queue"] -= board
+            emit("arrival", vehicle, time)
             if station == len(route["station_ids"]) - 1:
                 returns.append(dict(time_s=time, trip_id=vehicle["trip_id"], bus_id=bus_id))
                 vehicle.update(on_route=False, load=0.0, direction=not vehicle["direction"], ready_since_s=time)
@@ -261,12 +272,13 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
                 vehicle["last_service_dwell_s"] = dwell
                 schedule(time + dwell + dt, "hold", bus_id)
         elif kind == "hold":
+            emit("ready", vehicle, time - dt)
             station_key = key(vehicle["direction"], route["station_ids"][station])
             predecessor = vehicle["predecessor_trip"]
             departure = departures.get(station_key)
             valid = (station > 0 and not route["holding_mask"][station]
                      and departure is not None and departure["trip_id"] == predecessor)
-            action = 0.0
+            action, values = 0.0, None
             if valid:
                 follower = projected_follower(vehicle, vehicles, observed["routes"], time, dt)
                 values = dict(forward_gap_s=time - departure["time_s"], target_headway_s=vehicle["target_headway_s"],
@@ -278,7 +290,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None):
                     action = action_predictor(values)
                 else:
                     action = historical if holding_mode == "historical" else response_action(observed["holding_model"], values, historical)
-            execute_hold(vehicle, time, action)
+            execute_hold(vehicle, time, action, values)
     integrate(end)
     backlog = sum(max(0, min(row["time_s"], end) - max(now, row["scheduled_s"])) for row in launches)
     backlog += sum(max(0, end - max(now, row["scheduled_s"])) for row in pending.values())

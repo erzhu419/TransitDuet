@@ -69,14 +69,15 @@ def sample_action(probs, uniform):
     return float(ACTIONS[min(np.searchsorted(np.cumsum(probs), uniform, side="right"), len(ACTIONS) - 1)])
 
 
-def ensemble(observed, horizon, model, draws=DRAWS):
+def ensemble(observed, horizon, model, draws=DRAWS, event_sink=None):
     metrics = {metric: [] for metric in METRICS}
     returns = {str(vehicle["trip_id"]): [] for vehicle in observed["vehicles"] if vehicle["on_route"]}
     for draw in range(draws):
         # Never consume the simulator/actor RNG or use demand seeds as features.
         rng = np.random.default_rng(20261015 + draw)
         forecast = fluid_rollout(observed, horizon, "response",
-                                 lambda values: sample_action(probabilities(model, values), rng.random()))
+                                 lambda values: sample_action(probabilities(model, values), rng.random()),
+                                 None if event_sink is None else lambda row: event_sink(draw, row))
         for metric in metrics:
             metrics[metric].append(forecast[metric])
         times = {str(row["trip_id"]): row["time_s"] for row in forecast["returns"]}

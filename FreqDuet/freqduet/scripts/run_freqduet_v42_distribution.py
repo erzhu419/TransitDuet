@@ -38,8 +38,12 @@ class DistributionObserver(previous.ClosedLoopObserver):
         model = fit_distribution(self.holding_history.rows, pool["time_s"])
         capture = self.closed_snapshots[label]
         capture["distribution_model"] = model
-        capture["ensemble"] = {str(horizon): ensemble(pool, horizon, model) for horizon in (900, 1800)}
+        capture["ensemble"] = {str(horizon): ensemble(pool, horizon, model,
+            event_sink=self.forecast_event_sink(label, horizon)) for horizon in (900, 1800)}
         print(f"DISTRIBUTION_ORIGIN {label} samples={model['samples']} draws={DRAWS}", flush=True)
+
+    def forecast_event_sink(self, label, horizon):
+        return None
 
     def observe(self, runner, obs, key, previous_action, action):
         super().observe(runner, obs, key, previous_action, action)
