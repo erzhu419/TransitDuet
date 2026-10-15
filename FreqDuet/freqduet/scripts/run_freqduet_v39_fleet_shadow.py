@@ -97,7 +97,7 @@ def batch(root, v37, start, end, workers):
 
 
 def aggregate(root):
-    return_rows, launch_rows, identity_rows, resource_rows = [], [], [], []
+    return_rows, launch_rows, identity_rows, resource_rows, target_rows = [], [], [], [], []
     for seed, scenario, target, arm in items():
         label = f"seed{seed}_eval{scenario}_t{target}_{arm}"
         cell = root / "observed" / label
@@ -110,6 +110,13 @@ def aggregate(root):
             snapshot = capture["fleet_pool"]
             current = {row["trip_id"] for row in snapshot["vehicles"] if row["on_route"]}
             meta = dict(train_seed=seed, eval_seed=scenario, target_time_s=target, arm=arm, stage=stage)
+            target_trip = capture["identity"]["trip_id"]
+            target_actual = actual_returns.loc[target_trip].time_s
+            target_predicted = next(row["time_s"] for row in capture["pool_forecasts"]["3600"]["returns"]
+                                    if row["trip_id"] == target_trip)
+            target_rows.append(dict(meta,
+                pooled_error_s=float(target_predicted - target_actual),
+                v38_proxy_error_s=float(snapshot["time_s"] + capture["features"]["return_eta_proxy_s"] - target_actual)))
             for horizon, forecast in capture["pool_forecasts"].items():
                 for row in forecast["returns"]:
                     if row["trip_id"] in current:
@@ -133,7 +140,7 @@ def aggregate(root):
                 for row in capture["joint_resource_grid"]:
                     predicted_second = row.pop("predicted_second")
                     resource_rows.append(dict(meta, **row))
-                    if row["first_action_s"] == capture["identity"].get("actor_action_s", snapshot["decision"]["actor_action_s"]) and row["second_action_s"] == 0:
+                    if row["first_action_s"] == snapshot["decision"]["actor_action_s"] and row["second_action_s"] == 0:
                         actual_second = record["decisions"]["second"]["identity"]
                         identity_rows.append(dict(meta, predicted=predicted_second, actual=actual_second,
                             matches=predicted_second is not None and all(predicted_second[field] == actual_second[field]
@@ -153,6 +160,10 @@ def aggregate(root):
                                  mae_s=float(np.abs(error).mean()), p90_abs_s=float(np.quantile(np.abs(error), .9)),
                                  within_45s=float((np.abs(error) <= 45).mean())))
     pd.DataFrame(return_groups).to_csv(summary / "return_calibration.csv", index=False)
+    target_frame = pd.DataFrame(target_rows)
+    target_frame.loc[target_frame.arm == "reference"].groupby("train_seed")[
+        ["pooled_error_s", "v38_proxy_error_s"]].agg(["mean", lambda values: values.abs().mean()]).to_csv(
+            summary / "target_return_comparison.csv")
     launch_summary = ref_launches.groupby("horizon_s").apply(lambda frame: pd.Series(dict(
         count=len(frame), launch_window_accuracy=(frame.predicted_launched == frame.actual_launched).mean(),
         predicted_missing=(~frame.predicted_launched).sum(), mae_s=frame.error_s.abs().mean(),
@@ -174,6 +185,7 @@ def aggregate(root):
     returns.to_csv(audit / "returns.csv", index=False)
     launches.to_csv(audit / "launches.csv", index=False)
     pd.DataFrame(resource_rows).to_csv(audit / "joint_resource_grid.csv", index=False)
+    target_frame.to_csv(audit / "target_returns.csv", index=False)
     print(json.dumps(status), flush=True)
     print(pd.DataFrame(return_groups).to_string(index=False), flush=True)
     print(launch_summary.to_string(), flush=True)
