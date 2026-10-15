@@ -67,6 +67,23 @@ class SystemStateEncoder:
         return result
 
 
+class ExtendedInputProjection(torch.nn.Module):
+    """Keep the original GEMM shape while learning an additive observable projection."""
+
+    def __init__(self, layer, local_dim):
+        super().__init__()
+        # Retain the Parameter objects already registered with the optimizer.
+        self.weight, self.bias = layer.weight, layer.bias
+        self.local_dim = local_dim
+
+    def forward(self, state):
+        local = torch.nn.functional.linear(state[..., :self.local_dim].contiguous(),
+                                           self.weight[:, :self.local_dim].contiguous(), self.bias)
+        extra = torch.nn.functional.linear(state[..., self.local_dim:].contiguous(),
+                                           self.weight[:, self.local_dim:].contiguous())
+        return local + extra
+
+
 def warm_start_actor(old, new, local_dim):
     """Preserve the old categorical policy; new observable inputs start at zero weight."""
     weights = new.state_dict()
@@ -77,6 +94,7 @@ def warm_start_actor(old, new, local_dim):
         else:
             weights[name].copy_(value)
     new.load_state_dict(weights)
+    new.fc1 = ExtendedInputProjection(new.fc1, local_dim)
 
 
 def finite_day_target(immediate, done, continuation):

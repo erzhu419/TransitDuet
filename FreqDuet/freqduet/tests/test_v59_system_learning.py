@@ -78,7 +78,28 @@ class SystemLearningTest(unittest.TestCase):
         with torch.no_grad():
             a = old.policy_net.dist_info(torch.tensor([[.2, .3]]))[0]
             b = new.policy_net.dist_info(torch.from_numpy(encoded)[None, :])[0]
-        torch.testing.assert_close(a, b, atol=1e-7, rtol=1e-6)
+        torch.testing.assert_close(a, b, atol=0, rtol=0)
+
+    def test_frozen_42_to_233_extension_is_bit_exact(self):
+        old, new = trainer(42), trainer(233)
+        warm_start_actor(old.policy_net, new.policy_net, 42)
+        features = torch.randn(64, 233) * 10
+        with torch.no_grad():
+            a = old.policy_net.dist_info(features[:, :42].contiguous())[0]
+            b = new.policy_net.dist_info(features)[0]
+        torch.testing.assert_close(a, b, atol=0, rtol=0)
+
+    def test_extended_projection_remains_connected_to_the_optimizer(self):
+        old, new = trainer(2), trainer(5)
+        parameter = new.policy_net.fc1.weight
+        warm_start_actor(old.policy_net, new.policy_net, 2)
+        self.assertIs(parameter, new.policy_net.fc1.weight)
+        replay = CostReplayBuffer(seed=1)
+        for index in range(16):
+            replay.push([.2, .3, 1, index / 16, 1], [0 if index % 2 else 45],
+                        -.1, .01, [.2, .3, 1, .2, 1], index == 15, 0)
+        SystemSAC(new).update(replay, 16)
+        self.assertGreater(float(new.policy_net.fc1.weight[:, 2:].abs().max()), 0)
 
     def test_replay_conserves_physical_reward_and_signed_cv_increments(self):
         stream = SystemCreditStream()

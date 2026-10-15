@@ -8,7 +8,8 @@ Reuse the four V58 development days (two training seeds by two demand seeds).
 This is a learning/interface smoke, not a policy-effectiveness confirmation.
 
 - Holding remains `{0,5,10,15,20,30,45}` seconds; fleet and upper actor are fixed.
-- Start from B200 deployment, zero-pad the actor input layer, and reset critics
+- Start from B200 deployment, preserve the old actor projection and add a
+  zero-initialized projection for new features, and reset critics
   and optimizer state because the old critics have different targets.
 - Actor inputs are existing causal local features, current identity/time,
   published target, current terminal readiness, completed AVL headway moments,
@@ -34,7 +35,8 @@ This is a learning/interface smoke, not a policy-effectiveness confirmation.
 
 ## Smoke
 
-Each case performs a deterministic warm-start day, requiring exact original
+Each case performs a deterministic warm-start day, requiring bit-exact initial
+categorical probabilities and exact original
 holding path and episode metrics, followed by 32 SAC updates. Then run one
 stochastic collection day and another 32 updates. Keep batch size and neural
 network learning rates from the frozen configuration. Check conservation,

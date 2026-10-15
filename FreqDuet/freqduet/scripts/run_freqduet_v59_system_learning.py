@@ -89,7 +89,7 @@ def smoke(root, v56_root, case_index, updates):
                         before = self.lower_trainer.policy_net.dist_info(
                             torch.tensor(decision.local_state, dtype=torch.float32)[None, :])[0]
                         after = learner.trainer.policy_net.dist_info(torch.from_numpy(encoded)[None, :])[0]
-                    torch.testing.assert_close(before, after, rtol=1e-6, atol=1e-7)
+                    torch.testing.assert_close(before, after, rtol=0, atol=0)
                 action = learner.trainer.policy_net.get_action(encoded, deterministic=(day == 0))
                 if day == 0:
                     original = super()._lower_policy_action(obs, last_action, deterministic=True)
