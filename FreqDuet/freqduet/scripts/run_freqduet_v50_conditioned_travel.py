@@ -177,7 +177,7 @@ if __name__ == "__main__":
     if args.command == "prepare-summary":
         prepare_summary(args.out_root)
     elif args.command == "aggregate":
-        previous.aggregate(args.out_root, args.data_base / "protocol_v6_v45_completed_calibration", modes=("passenger_joint", *MODES))
+        aggregate(args.out_root, args.data_base)
     elif args.command in ("prepare", "batch"):
         batch(args.out_root, args.data_base, args.start, args.end, args.workers, args.command == "prepare")
     else:
