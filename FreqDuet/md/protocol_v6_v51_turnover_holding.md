@@ -50,6 +50,19 @@ post-audit development revision; the original gate and fresh-validation need sta
 V51D smoke t160149 passes 85 tests and the exact V48 draw replay. Preparation
 t160150-t160154 and gate t160155 pass all three reused-demand cohorts: overall
 single-decision MAE delta -0.0101 s [-0.0135,-0.0065], NLL delta -0.000825
-[-0.001096,-0.000555] (six demand clusters). Four-cell forecasts t160157-t160161
-are submitted with dependent aggregation; closed-loop qualification is pending.
-These are forecast improvements on development data, not actual policy gains.
+[-0.001096,-0.000555] (six demand clusters).
+
+Four-cell forecasts t160157-t160161 complete all 612 origins; aggregation
+t160162 retains the mixed result. Holding-only 30-minute cumulative holding MAE
+delta versus V48 is -1.27 s [-1.86,-0.72], but backlog MAE rises 0.137
+trip-seconds [0.021,0.248]. Adding the response to V50 gives holding MAE delta
++0.97 s [-0.17,1.95]; passenger deltas cross zero. Joint holding MAE versus V48
+is -79.08 s [-99.91,-57.23], essentially the travel-only gain, not an extra
+turnover benefit. Raw holding coverage remains 58-67%; late arrival-clock MAE
+is 101/86/95 s versus V48's 91/84/88 (development/reused/formerly-fresh).
+
+Keep V50 as an endpoint-accuracy candidate and V48 as the timing reference;
+do not make V51D the default forecast or change the real controller. These are
+development forecast results, not actual policy gains. Next address late-window
+clock propagation and path uncertainty, and align the holding surrogate with
+the actual lower-policy observable inputs before further action-response use.
