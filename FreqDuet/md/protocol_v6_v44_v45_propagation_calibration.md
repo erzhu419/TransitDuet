@@ -14,7 +14,9 @@ windows before correction; warmup stays explicitly unavailable. Mean raw
 residual corrects the point forecast. Nominal 90% bands expand the bias-shifted
 Monte Carlo band by the finite-sample 90% quantile of past prequential
 nonconformity scores, computed using the bias that was available at each issue
-time. No future labels, across-seed pooling or gate tuning.
+time. Calibrate only holding, onboard exposure and dispatch backlog; waiting
+exposure needs latent simulator queues and remains an uncorrected prediction.
+No future labels, across-seed pooling or gate tuning.
 
 Keep V42/V43 engineering thresholds: 30-min holding MAE <= historical, absolute
 bias <=5%, passenger MAE <=105% of historical, holding coverage >=80%. Report
@@ -41,3 +43,7 @@ Calibration of cumulative endpoints does not fix state propagation or establish
 correct counterfactual action response. No main-policy switch. Diagnose and fix
 supported timing-contract defects first; then evaluate frozen calibration on
 new demand contexts before considering any deployment change.
+The original V45 record also contains simulator-only waiting calibration.
+Operational aggregation discards that channel and chronologically recomputes
+the three observable channels, checking they equal the recorded predictions.
+The channels are independent; raw forecasts and actual trajectories are reused.

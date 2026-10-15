@@ -4,9 +4,20 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from freqduet_completed_window_calibration import CompletedWindows
+from run_freqduet_v45_completed_calibration import observable_draws
 
 
 class CompletedWindowTest(unittest.TestCase):
+    def test_latent_waiting_label_is_not_a_calibration_channel(self):
+        draws = dict(waiting_person_seconds=[999], onboard_person_seconds=[10],
+                     backlog_trip_seconds=[20], holding_vehicle_seconds=[30])
+        calibration = CompletedWindows()
+        calibration.issue(0, 10, observable_draws(draws))
+        self.assertNotIn("waiting_person_seconds", calibration.pending[0]["metrics"])
+        calibration.release(11, lambda *args: dict(onboard_person_seconds=15,
+            backlog_trip_seconds=25, holding_vehicle_seconds=35))
+        self.assertEqual(len(calibration.history), 3)
+
     def test_partial_and_simultaneously_completed_windows_do_not_read_labels(self):
         calibration = CompletedWindows()
         calibration.issue(0, 10, {"hold": [10, 10]})

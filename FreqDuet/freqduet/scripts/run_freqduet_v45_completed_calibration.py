@@ -19,6 +19,12 @@ from freqduet_holding_distribution import METRICS
 import run_freqduet_v42_distribution as distribution
 from run_freqduet_v44_segment_audit import SegmentObserver
 
+OBSERVABLE_METRICS = METRICS[1:]
+
+
+def observable_draws(draws):
+    return {metric: draws[metric] for metric in OBSERVABLE_METRICS}
+
 
 def items():
     return distribution.items() + [(seed, scenario, "fresh_demand")
@@ -46,7 +52,7 @@ class CalibrationObserver(SegmentObserver):
         super().capture_flow(runner, label, pool)
         capture = self.closed_snapshots[label]
         capture["calibrated"] = {str(horizon): self.calibration.issue(now, horizon,
-            capture["ensemble"][str(horizon)]["draws"]) for horizon in (900, 1800)}
+            observable_draws(capture["ensemble"][str(horizon)]["draws"])) for horizon in (900, 1800)}
 
     def forecast_event_sink(self, label, horizon):
         return super().forecast_event_sink(label, horizon) if label in ("clock_7200", "clock_21600", "clock_36000") else None
@@ -109,15 +115,30 @@ def aggregate(root):
             raise ValueError("missing periodic forecast windows")
         timeline = np.load(cell / "exposure.npz")["timeline"]
         holds = pd.read_csv(cell / "holds.csv")
-        for origin, capture in captures.items():
+        replay_calibration = CompletedWindows()
+        for origin, capture in sorted(captures.items(), key=lambda item: item[1]["pool"]["time_s"]):
             now = capture["pool"]["time_s"]
+            replay_calibration.release(now, lambda clock, horizon: outcomes(timeline, holds, clock, horizon))
             for horizon in (900, 1800):
                 truth = outcomes(timeline, holds, now, horizon)
+                observed = replay_calibration.issue(now, horizon,
+                    observable_draws(capture["ensemble"][str(horizon)]["draws"]))
+                # Prove channel independence before reusing the recorded runs.
+                for metric, corrected in observed.items():
+                    saved = capture["calibrated"][str(horizon)][metric]
+                    for key in corrected:
+                        if corrected[key] is None or isinstance(corrected[key], bool):
+                            if corrected[key] != saved[key]:
+                                raise ValueError("observable recalibration changed recorded maturity")
+                        else:
+                            np.testing.assert_allclose(corrected[key], saved[key], rtol=1e-12, atol=1e-8)
                 for metric in METRICS:
-                    corrected = capture["calibrated"][str(horizon)][metric]
+                    raw_draws = capture["ensemble"][str(horizon)]["draws"][metric]
+                    corrected = observed[metric] if metric in observed else dict(
+                        point=float(np.mean(raw_draws)), low=None, high=None,
+                        mature=False, samples=0, latest_completion=None)
                     if corrected["latest_completion"] is not None and corrected["latest_completion"] >= now:
                         raise ValueError("partial-window calibration leakage")
-                    raw_draws = capture["ensemble"][str(horizon)]["draws"][metric]
                     for mode in ("raw", "calibrated", "historical"):
                         if mode == "raw":
                             point, (lo, hi) = float(np.mean(raw_draws)), np.quantile(raw_draws, [.05, .95])
@@ -169,6 +190,8 @@ def aggregate(root):
         policy_changed=False, matches_frozen_controls=True, raw_common_clocks_match_v43=True,
         archived_controls=controls.count("v35_archive"),
         new_unobserved_controls=controls.count("same_seed_unobserved_replay"), gates=gates,
+        observable_calibration_metrics=list(OBSERVABLE_METRICS), waiting_calibrated=False,
+        observable_recalibration_matches_recorded=True,
         forecast_screen_pass=all(all(g.values()) for g in gates.values()),
         source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"),
         scope="Endpoint calibration only; not a validation of counterfactual action response")
