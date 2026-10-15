@@ -3,7 +3,8 @@
 Replace the V41 mean-to-nearest-bin continuation with probabilities over
 0/5/10/15/20/30/45 s. Fit a 12-feature multinomial logistic model to at most
 4096 strictly earlier observed decisions, using the existing Torch LBFGS
-optimizer, ridge coefficient 10 on non-intercepts and 0.5 pseudo-count per bin.
+optimizer, ridge coefficient 10 on non-intercepts and 0.5 pseudo-count per bin
+at the prefix mean feature vector.
 Do not class-balance: the observed action frequencies and first moment matter.
 Fewer than 32 labels use the smoothed empirical prefix distribution.
 

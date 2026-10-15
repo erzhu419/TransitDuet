@@ -45,6 +45,13 @@ class HoldingDistributionTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             fit_distribution([(0, holding_features(values()), 22 / 45)], 1)
 
+    def test_fit_works_inside_read_only_actor_evaluation(self):
+        import torch
+        with torch.no_grad():
+            model = fit_distribution([(i, holding_features(values()), 1) for i in range(40)], 100)
+        self.assertIsNotNone(model["coef"])
+        self.assertTrue(np.all(np.isfinite(model["coef"])))
+
     def test_fit_and_ensemble_do_not_consume_simulator_rng(self):
         import torch
         np_before, torch_before = np.random.get_state(), torch.random.get_rng_state().clone()

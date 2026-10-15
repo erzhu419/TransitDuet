@@ -26,6 +26,7 @@ def fit_distribution(rows, now):
     design = np.stack([row[1] for row in past])
     scale = np.maximum(np.sqrt(np.mean(design * design, axis=0)), 1e-8)
     x = torch.as_tensor(design / scale, dtype=torch.float64)
+    center = x.mean(dim=0)
     y = torch.as_tensor(labels, dtype=torch.long)
     weights = torch.zeros((x.shape[1], len(ACTIONS)), dtype=torch.float64, requires_grad=True)
     with torch.no_grad():
@@ -41,7 +42,7 @@ def fit_distribution(rows, now):
             # per bin keeps finite probabilities without inventing balanced classes.
             loss = (torch.nn.functional.cross_entropy(logits, y, reduction="sum")
                     + 5 * weights[1:].square().sum()
-                    - .5 * torch.log_softmax(weights[0], dim=0).sum())
+                    - .5 * torch.log_softmax(center @ weights, dim=0).sum())
             loss.backward()
         return loss
 
