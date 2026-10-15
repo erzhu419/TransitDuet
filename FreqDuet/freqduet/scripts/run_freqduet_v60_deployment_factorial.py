@@ -51,7 +51,7 @@ def make_policy(old, encoder, seed, checkpoint=None):
     return policy.eval()
 
 
-def collect(root, v59_root, v56_root, index):
+def collect(root, v59_root, v56_root, index, decision_audit=None):
     label = item_name(index)
     marker = root / "ready" / f"{label}.json"
     if marker.exists():
@@ -95,6 +95,9 @@ def collect(root, v59_root, v56_root, index):
                 expected_hold.append(float((probs * policy.action_bins.flatten()).sum()))
                 zero_probability.append(float(probs[0, 0]))
                 action = policy.get_action(encoded, deterministic=(mode == "deterministic"))
+            if decision_audit is not None:
+                decision_audit.decision(encoded, decision, moments.cv_squared,
+                                        float(np.asarray(action).item()), probs[0].cpu().numpy())
             if actor == "initial" and mode == "deterministic":
                 original = super()._lower_policy_action(obs, last_action, deterministic=True)
                 np.testing.assert_array_equal(np.asarray(action).reshape(-1), np.asarray(original).reshape(-1))
@@ -154,6 +157,8 @@ def collect(root, v59_root, v56_root, index):
                action_counts={str(a): sum(h["action_s"] == a for h in observer.holds) for a in joint.ACTIONS},
                upper_actor_unchanged=True, training_updates=0, stream_audit=audit,
                diagnostic_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))
+    if decision_audit is not None:
+        row["decision_audit"] = decision_audit.finish(row, observer.stream)
     marker.parent.mkdir(parents=True, exist_ok=True)
     marker.write_text(json.dumps(row, indent=2) + "\n")
     print("V60_ITEM_DONE " + json.dumps({k: v for k, v in row.items() if k != "stream_audit"}), flush=True)
