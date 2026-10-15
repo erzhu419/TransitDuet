@@ -37,3 +37,15 @@ must address tail/cross-trip credit. Otherwise compare action-difference predict
 against these matched outcomes before choosing which prediction component to fix.
 V55 is closed as a failed calibration candidate; its pending alignment audit only
 explains the negative result. No retrospective attenuation or main-policy switch.
+
+## Execution
+
+Implementation commit `2235bb48c4`; frozen diagnostic source directory
+`source/v56_timing_20261015` under the server-side V56 result root. Scheduler
+`t162169` runs V37/V38 regressions, seven timing tests and plan preparation.
+`t162170` waits for its small preparation marker, then validates cached dominant
+accounting and one missing intervened full-day arm. Both allow only node001-node006.
+At submission, preparation waits for CPU capacity and smoke waits for preparation.
+Neither has passed yet. Submit missing-arm CPU batches only after smoke passes,
+using the unique missing-arm count in `prepare_export/done.json`; aggregate only
+after all batch completion markers. Do not count queued work as replay evidence.

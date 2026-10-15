@@ -26,5 +26,7 @@ Alignment audit t162150 is queued on node001-node006, which are currently full.
 It compares effective corrections with actual-minus-issued V54 errors and
 decomposes MSE change into correction energy minus twice correction/error
 alignment. This is diagnostic only; no future-fitted attenuation is deployed.
-Keep V54 as the stronger mean candidate while checking whether old residuals
-transfer across model updates and hour regimes before further calibration.
+Close V55 promotion and retain V54 as the stronger forecast candidate, not a
+passed long-horizon model. The alignment audit explains this negative result;
+it does not authorize retrospective attenuation or another bias patch. The
+next experiment is V56 benefit timing on the original V37/V38 action bank.
