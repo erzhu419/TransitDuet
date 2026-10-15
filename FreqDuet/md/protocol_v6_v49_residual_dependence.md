@@ -28,3 +28,11 @@ Separate mean misspecification from dependence; correlations alone do not prove
 causal propagation. Smoke tests cover identity, strict issue time, covariance
 arithmetic and independent/correlated controls before the 12-day audit. No policy
 promotion or new counterfactual superiority claim from this diagnostic.
+
+Centering control: 200 fixed-seed within-day/direction/stop/hour label permutations
+retain stratum distributions and sampling geometry. Compare lag-one event pairs,
+nonoverlapping window-sum correlations/MSE, and incoming travel/holding residuals
+with this null. Recompute centering on the preserved strata. Null quantiles are
+shuffle reference ranges, not population CIs; demand-cluster bootstrap summarizes
+observed-minus-null effects. This controls mechanically induced negative
+dependence, particularly the two half-hour windows sharing an hourly mean.

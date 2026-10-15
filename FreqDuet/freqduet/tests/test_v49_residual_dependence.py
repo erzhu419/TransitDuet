@@ -102,6 +102,19 @@ class ResidualDependenceTest(unittest.TestCase):
         self.assertEqual(result.demand_clusters.iloc[0], 2)
         self.assertEqual(result["mean"].iloc[0], 3.)
 
+    def test_permutation_control_exposes_negative_correlation_from_centering(self):
+        from run_freqduet_v49_centering_null import permutation_audit
+        frame = records().assign(bus_id=[1, 2, 3, 4], trip_id=[10, 20, 30, 40], hour=1,
+            time_s=[3700, 3800, 3900, 4000], station_id=1,
+            residual=[-1.5, -.5, .5, 1.5], centered=[-1.5, -.5, .5, 1.5])
+        travel = frame.assign(station_id=0, arrival_station_id=1)
+        result = permutation_audit(travel, frame)
+        selected = result.loc[(result.component == "holding") &
+            (result.relation == "same_directed_stop_different_bus") & (result["transform"] == "centered")]
+        self.assertEqual(selected.observed.iloc[0], 1)
+        self.assertLess(selected.permutation_mean.iloc[0], -.1)
+        self.assertEqual(selected.permutations.iloc[0], 200)
+
 
 if __name__ == "__main__":
     unittest.main()
