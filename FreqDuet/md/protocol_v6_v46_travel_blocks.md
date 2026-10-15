@@ -39,5 +39,22 @@ scheduler on node001-node006. Aggregate on a server; retrieve small summaries.
 ## Run Status
 `4f30a3798b`: final smoke `t155611` passed 40 tests and exact V45 path replay.
 Matrix `t155612-t155616`: 612 origins, 307 workers planned across node001/002/
-004/005/006; full node003 excluded by live capacity. Results pending. Earlier
-smoke `t155609` passed 39 tests before adding premature-event scoring.
+004/005/006; full node003 excluded by live capacity. All completed, exit 0.
+Aggregation `t155649` completed, exit 0. Earlier smoke `t155609` passed 39 tests.
+
+All-origin 30-minute holding MAE (development / reused demand / formerly fresh
+demand): V45 raw 700/767/739 s, completed_mean 532/590/507 s, independent
+409/449/408 s, shared_block 415/453/406 s, historical 491/526/484 s. Shared
+blocks improve all 12 day-level MAEs versus V45. Holding CRPS is better than
+independent sampling in each cohort, but point and stop-clock gains are mixed;
+this supports stochastic travel, not unique identification of shared dependence.
+Raw shared-block holding coverage is only 60.3/57.8/65.2%. Reused-demand waiting
+MAE is 86,514 person-seconds versus historical 80,630, exceeding the 5% gate.
+No variant passes the complete screen. Mature calibrated holding coverage is
+93.4/86.0/94.9%, with widths 2,266/2,072/2,405 s; it does not establish reliable
+passenger prediction. Canonical small outputs: `protocol_v6_v46_travel_blocks/summary`.
+
+Next: complete terminal-first/last travel observations (four directed legs
+currently use fallback), then diagnose APC arrival-rate/left-behind queue
+propagation. Keep the actual controller frozen and require new-context and
+counterfactual validation before any strategy switch.
