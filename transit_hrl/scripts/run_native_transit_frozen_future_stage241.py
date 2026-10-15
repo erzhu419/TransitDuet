@@ -103,12 +103,17 @@ def qualify_draw(cell):
     key = cell["root"], cell["scenario"], cell["replica"], cell["probe_index"], cell["draw"]
     if not (key in cells() and cell["protocol"] == EXPERIMENT_PROTOCOL and cell["contract"] == contract()
             and cell["software_qualified"] and cell["scene_seed"] == coverage.noise.source.scene_seed(*key[:3])
-            and cell["continuation_seed"] == continuation_seed(*key)
-            and cell["original_source_reproductions"] == cell["exact_resampled_identities"] == 1
+            and cell["continuation_seed"] == continuation_seed(*key)):
+        raise ValueError("Changed independent future, prefix pairing, weights or native budget")
+    qualify_physical_draw(cell)
+
+
+def qualify_physical_draw(cell):
+    if not (cell["original_source_reproductions"] == cell["exact_resampled_identities"] == 1
             and cell["prefix_state_rng_matches"] == 7 and cell["frozen_weight_qualified_episodes"] == 8
             and cell["window_ledger_qualified_episodes"] == 8 and cell["continuation_qualified"]
             and cell["native_clock_ticks"] == 8*61380 and cell["training_updates"] == 0):
-        raise ValueError("Changed independent future, prefix pairing, weights or native budget")
+        raise ValueError("Changed physical prefix pairing, frozen weights or native budget")
     for labels in (cell["labels"], cell["existing_labels"]):
         if [l["candidate"] for l in labels] != list(range(6)):
             raise ValueError("Missing paired candidate labels")

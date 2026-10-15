@@ -1,0 +1,571 @@
+{
+  "mixed_cells": 16,
+  "state_exposures": 960,
+  "changed_state_exposures": 19,
+  "states": [
+    {
+      "state": [
+        397,
+        913970101,
+        9
+      ],
+      "key": [
+        397,
+        "high_noise",
+        1,
+        9
+      ],
+      "weighted_contribution": {
+        "cost": -1.3120117187500335e-06,
+        "fleet": 1.3563368055555556e-05,
+        "nonfleet": -1.4875379774305588e-05,
+        "wait_min": -0.00013844401041666706
+      },
+      "fleet_benefit_draws": 2,
+      "fleet_harm_draws": 4,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0,
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970201,
+        22
+      ],
+      "key": [
+        397,
+        "hour_burst",
+        1,
+        22
+      ],
+      "weighted_contribution": {
+        "cost": -4.4099934895832424e-07,
+        "fleet": 0.0,
+        "nonfleet": -4.4099934895832393e-07,
+        "wait_min": 4.850260416666785e-06
+      },
+      "fleet_benefit_draws": 2,
+      "fleet_harm_draws": 2,
+      "nonfleet_improves": true,
+      "wait_improves": false,
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667,
+        -0.0010416666666666667,
+        0.0
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010303,
+        8
+      ],
+      "key": [
+        401,
+        "persistent_shift",
+        3,
+        8
+      ],
+      "weighted_contribution": {
+        "cost": -4.827727864583325e-05,
+        "fleet": -2.0345052083333336e-05,
+        "nonfleet": -2.7932226562499928e-05,
+        "wait_min": -0.00023557942708333417
+      },
+      "fleet_benefit_draws": 7,
+      "fleet_harm_draws": 4,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010303,
+        23
+      ],
+      "key": [
+        401,
+        "persistent_shift",
+        3,
+        23
+      ],
+      "weighted_contribution": {
+        "cost": -1.9073567708333304e-05,
+        "fleet": 0.0,
+        "nonfleet": -1.9073567708333304e-05,
+        "wait_min": -0.00016888020833333317
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010403,
+        23
+      ],
+      "key": [
+        401,
+        "ood_period",
+        3,
+        23
+      ],
+      "weighted_contribution": {
+        "cost": 1.594296875e-05,
+        "fleet": 1.3563368055555558e-05,
+        "nonfleet": 2.3796006944444397e-06,
+        "wait_min": 2.6855468749999973e-05
+      },
+      "fleet_benefit_draws": 3,
+      "fleet_harm_draws": 5,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0010416666666666667,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970000,
+        9
+      ],
+      "key": [
+        397,
+        "low_noise",
+        0,
+        9
+      ],
+      "weighted_contribution": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "nonfleet": 0.0,
+        "wait_min": 0.0
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970300,
+        36
+      ],
+      "key": [
+        397,
+        "persistent_shift",
+        0,
+        36
+      ],
+      "weighted_contribution": {
+        "cost": -1.192480468749932e-06,
+        "fleet": 0.0,
+        "nonfleet": -1.192480468749932e-06,
+        "wait_min": -1.036783854166667e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970300,
+        37
+      ],
+      "key": [
+        397,
+        "persistent_shift",
+        0,
+        37
+      ],
+      "weighted_contribution": {
+        "cost": -2.2740885416666164e-06,
+        "fleet": 0.0,
+        "nonfleet": -2.2740885416666164e-06,
+        "wait_min": -2.0393880208333103e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667,
+        0.0
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010002,
+        36
+      ],
+      "key": [
+        401,
+        "low_noise",
+        2,
+        36
+      ],
+      "weighted_contribution": {
+        "cost": -4.121093749999244e-08,
+        "fleet": 0.0,
+        "nonfleet": -4.121093749999244e-08,
+        "wait_min": 3.255208333333194e-07
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": false,
+      "coefficients": [
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010102,
+        9
+      ],
+      "key": [
+        401,
+        "high_noise",
+        2,
+        9
+      ],
+      "weighted_contribution": {
+        "cost": 5.572900390624949e-06,
+        "fleet": 6.781684027777778e-06,
+        "nonfleet": -1.2087836371528306e-06,
+        "wait_min": -1.2223307291666776e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 1,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010202,
+        9
+      ],
+      "key": [
+        401,
+        "hour_burst",
+        2,
+        9
+      ],
+      "weighted_contribution": {
+        "cost": -1.907535807291664e-06,
+        "fleet": 0.0,
+        "nonfleet": -1.907535807291664e-06,
+        "wait_min": -1.741536458333342e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010302,
+        36
+      ],
+      "key": [
+        401,
+        "persistent_shift",
+        2,
+        36
+      ],
+      "weighted_contribution": {
+        "cost": 2.793196614583332e-06,
+        "fleet": 0.0,
+        "nonfleet": 2.793196614583332e-06,
+        "wait_min": 2.2802734375000047e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        0.0,
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010402,
+        23
+      ],
+      "key": [
+        401,
+        "ood_period",
+        2,
+        23
+      ],
+      "weighted_contribution": {
+        "cost": 7.722916666666672e-06,
+        "fleet": 6.781684027777778e-06,
+        "nonfleet": 9.412326388888927e-07,
+        "wait_min": 6.7382812499999525e-06
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 1,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970203,
+        36
+      ],
+      "key": [
+        397,
+        "hour_burst",
+        3,
+        36
+      ],
+      "weighted_contribution": {
+        "cost": -3.246028645833369e-06,
+        "fleet": 0.0,
+        "nonfleet": -3.246028645833369e-06,
+        "wait_min": -3.185221354166674e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        -0.0010416666666666667,
+        0.0,
+        0.0020833333333333333
+      ]
+    },
+    {
+      "state": [
+        397,
+        913970303,
+        23
+      ],
+      "key": [
+        397,
+        "persistent_shift",
+        3,
+        23
+      ],
+      "weighted_contribution": {
+        "cost": 2.98893229166734e-07,
+        "fleet": 0.0,
+        "nonfleet": 2.988932291667324e-07,
+        "wait_min": 9.765625000002702e-07
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        -0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010001,
+        37
+      ],
+      "key": [
+        401,
+        "low_noise",
+        1,
+        37
+      ],
+      "weighted_contribution": {
+        "cost": -6.223958333332328e-08,
+        "fleet": 0.0,
+        "nonfleet": -6.223958333332328e-08,
+        "wait_min": -1.3020833333330454e-07
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010401,
+        37
+      ],
+      "key": [
+        401,
+        "ood_period",
+        1,
+        37
+      ],
+      "weighted_contribution": {
+        "cost": -9.031070963541677e-06,
+        "fleet": -6.781684027777778e-06,
+        "nonfleet": -2.249386935763897e-06,
+        "wait_min": -2.303059895833335e-05
+      },
+      "fleet_benefit_draws": 1,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": true,
+      "wait_improves": true,
+      "coefficients": [
+        0.0,
+        0.0,
+        -0.0010416666666666667,
+        0.0,
+        0.0010416666666666667,
+        0.0
+      ]
+    },
+    {
+      "state": [
+        401,
+        914010400,
+        23
+      ],
+      "key": [
+        401,
+        "ood_period",
+        0,
+        23
+      ],
+      "weighted_contribution": {
+        "cost": 2.418408203125001e-06,
+        "fleet": 0.0,
+        "nonfleet": 2.418408203125001e-06,
+        "wait_min": 2.519531250000002e-05
+      },
+      "fleet_benefit_draws": 0,
+      "fleet_harm_draws": 0,
+      "nonfleet_improves": false,
+      "wait_improves": false,
+      "coefficients": [
+        0.0010416666666666667,
+        0.0,
+        0.0,
+        0.0,
+        -0.0010416666666666667,
+        0.0
+      ]
+    }
+  ],
+  "summed_contributions": {
+    "cost": -5.2109228515624824e-05,
+    "fleet": 1.3563368055555558e-05,
+    "nonfleet": -6.567259657118036e-05,
+    "wait_min": -0.0005705729166666675
+  }
+}
