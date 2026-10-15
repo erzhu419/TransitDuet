@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from freqduet_boundary_apc import boundary_events
+from freqduet_conditioned_travel import road_key
 from freqduet_holding_distribution import DRAWS, METRICS
 from freqduet_passenger_distribution import passenger_ensemble
 from freqduet_travel_distribution import score_draws
@@ -190,9 +191,62 @@ def aggregate(root):
     print(result.to_string(index=False), flush=True)
 
 
+def leg_mean_scores(legs, observed, old, new):
+    now = observed["time_s"]
+    movements = {road_key(direction, station): value
+        for direction, route in observed["routes"].items()
+        for station, value in zip(route["station_ids"][:-1], route["travel_s"])}
+    rows = []
+    # Future completed legs are labels only, including arrivals beyond the horizon.
+    # Filtering on their end times would select unusually fast late-window trips.
+    for row in legs.loc[(legs.start_s > now) & (legs.start_s <= now + 1800)].itertuples():
+        key = road_key(row.direction, row.station_id)
+        values = dict(passenger_joint=old["means"][key], conditioned=new["means"][key],
+            observable_movement=movements[key])
+        for mode, mean in values.items():
+            error = mean - row.duration_s
+            rows.append(dict(mode=mode, road=key, lead="0-900" if row.start_s <= now + 900 else "900-1800",
+                hour_crossed=row.start_s // 3600 > now // 3600,
+                error=error, mae=abs(error), mse=error ** 2))
+    return pd.DataFrame(rows)
+
+
+def teacher_audit(root, base):
+    rows = []
+    for seed, scenario, cohort in previous.previous.items():
+        label = f"seed{seed}_eval{scenario}"
+        captures = json.loads((base / "protocol_v6_v45_completed_calibration" / "observed" / label /
+            "forecasts.json").read_text())
+        legs = pd.read_csv(base / "protocol_v6_v47_boundary_apc" / "observed" / label /
+            "completed_legs.csv", dtype={"direction": str})
+        for clock in sorted({item[-1] for item in items()}):
+            old = json.loads((base / "protocol_v6_v48_passenger_uncertainty" / "origins" / label /
+                f"clock_{clock}" / "forecasts.json").read_text())["travel_model"]
+            new = json.loads((base / "protocol_v6_v50_conditioned_travel" / "origins" / label /
+                f"clock_{clock}" / "forecasts.json").read_text())["travel_model"]
+            if old["latest_completion_s"] >= clock or new["latest_completion_s"] >= clock:
+                raise ValueError("teacher audit received a non-prefix mean model")
+            rows.append(leg_mean_scores(legs, captures[f"clock_{clock}"]["pool"], old, new).assign(
+                train_seed=seed, eval_seed=scenario, cohort=cohort, clock=clock))
+    frame = pd.concat(rows, ignore_index=True)
+    out = root / "teacher_summary"
+    out.mkdir(parents=True, exist_ok=True)
+    summary = frame.groupby(["mode", "lead", "hour_crossed"])[["mae", "error", "mse"]].mean()
+    summary.to_csv(out / "leg_means.csv")
+    frame.groupby(["mode", "road", "lead"])[["mae", "error", "mse"]].mean().to_csv(out / "road_means.csv")
+    day = frame.groupby(["train_seed", "eval_seed", "mode", "lead"])[["mae", "error"]].mean().reset_index()
+    old = day.loc[day["mode"] == "conditioned", ["train_seed", "eval_seed", "lead", "mae", "error"]]
+    paired = day.merge(old, on=["train_seed", "eval_seed", "lead"], suffixes=("", "_v50"), validate="many_to_one")
+    paired["mae_delta"], paired["bias_delta"] = paired.mae - paired.mae_v50, paired.error - paired.error_v50
+    result = cluster_summary(paired, ["mode", "lead"], ["mae_delta", "bias_delta"])
+    result.to_csv(out / "paired_clusters.csv", index=False)
+    print(summary.to_string(), flush=True)
+    print(result.to_string(index=False), flush=True)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("smoke", "batch", "aggregate"))
+    parser.add_argument("command", choices=("smoke", "batch", "aggregate", "teacher-audit"))
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--data-base", type=Path, required=True)
     parser.add_argument("--start", type=int, default=0)
@@ -201,6 +255,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.command == "aggregate":
         aggregate(args.out_root)
+    elif args.command == "teacher-audit":
+        suite = unittest.defaultTestLoader.discover(str(Path(__file__).resolve().parents[1] / "tests"), pattern="test_v52*.py")
+        if not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful():
+            raise SystemExit(1)
+        teacher_audit(args.out_root, args.data_base)
     else:
         if args.command == "smoke":
             suite = unittest.defaultTestLoader.discover(str(Path(__file__).resolve().parents[1] / "tests"), pattern="test_v52*.py")

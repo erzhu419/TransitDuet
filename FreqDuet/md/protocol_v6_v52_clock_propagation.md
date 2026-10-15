@@ -20,3 +20,9 @@ surrogate also omits actual-policy observables such as service dwell, absolute
 target headway and the full route-speed vector. Neither is yet established as
 the main cause of late-clock error. Computation stays scheduler-only on the
 Linux CPU nodes; retrieve summaries, not raw traces or checkpoints.
+
+Teacher-forced extension compares V48/V50 completed-leg means with frozen
+observable AVL movement means on the same future departures. Future arrivals
+serve only as labels, even beyond the forecast horizon, avoiding completion-time
+selection of fast late-window legs. This extension diagnoses mean mismatch;
+it neither supplies future labels to forecasts nor changes their distributions.

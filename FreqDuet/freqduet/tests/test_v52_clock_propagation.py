@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from run_freqduet_v52_clock_propagation import COMPONENTS, arrival_scores, decompose, items, previous
+from run_freqduet_v52_clock_propagation import COMPONENTS, arrival_scores, decompose, items, previous, leg_mean_scores
 
 
 class ClockPropagationTests(unittest.TestCase):
@@ -58,6 +58,16 @@ class ClockPropagationTests(unittest.TestCase):
         self.assertTrue(row["available"])
         self.assertFalse(row["complete_chain"])
         self.assertTrue(np.isnan(row["service"]))
+
+    def test_teacher_scores_keep_slow_late_completions_as_labels(self):
+        observed = dict(time_s=100, routes={"True": dict(station_ids=[0, 1], travel_s=[8.])})
+        old, new = dict(means={"True:0": 10.}), dict(means={"True:0": 9.})
+        legs = pd.DataFrame([dict(direction="True", station_id=0, start_s=start, end_s=start+20, duration_s=20.)
+            for start in (100., 101., 1899., 1901.)])
+        scores = leg_mean_scores(legs, observed, old, new)
+        self.assertEqual(len(scores), 6)
+        self.assertEqual(len(scores.loc[scores.lead == "900-1800"]), 3)
+        self.assertEqual(scores.loc[scores['mode'] == 'conditioned'].error.tolist(), [-11., -11.])
 
 
 if __name__ == "__main__":
