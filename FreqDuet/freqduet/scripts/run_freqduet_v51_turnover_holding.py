@@ -105,6 +105,42 @@ def prepare_summary(root):
     print(f"TURNOVER_PREQUENTIAL_PASS={passed}", flush=True)
 
 
+def phase_audit(root, base):
+    days = []
+    for seed, scenario, cohort in previous.previous.items():
+        label, captures, labels, _, _ = read_day(base, seed, scenario)
+        models = json.loads((root / "prepared" / label / "models.json").read_text())
+        labels["decision_index"] = labels.groupby("trip_id").cumcount()
+        rows = []
+        for row in labels.itertuples():
+            clock = issued_origin(previous.CLOCKS, row.time_s)
+            if clock is None:
+                continue
+            context = row.augmented_features[12:]
+            phase = ("no_scored_previous" if not context[0] else
+                     "first_after_turnover" if row.decision_index == 0 else "later_in_trip")
+            model = models[str(clock)]["model"]
+            for mode, probabilities in (("legacy", probabilities_from_features(model["base"], row.features)),
+                    ("turnover", tilted_probabilities(model["base"], row.features, context, model["correction"]))):
+                score = score_action(probabilities, row.action_s)
+                rows.append(dict(phase=phase, mode=mode, abs_error=abs(score["error"]), nll=score["nll"]))
+        day = pd.DataFrame(rows).groupby(["phase", "mode"]).agg(
+            events=("nll", "size"), mae=("abs_error", "mean"), nll=("nll", "mean")).reset_index()
+        days.append(day.assign(train_seed=seed, eval_seed=scenario, cohort=cohort))
+    frame = pd.concat(days, ignore_index=True)
+    old = frame.loc[frame["mode"] == "legacy", ["train_seed", "eval_seed", "phase", "mae", "nll"]]
+    paired = frame.loc[frame["mode"] == "turnover"].merge(old,
+        on=["train_seed", "eval_seed", "phase"], suffixes=("", "_legacy"), validate="one_to_one")
+    paired["mae_delta"], paired["nll_delta"] = paired.mae - paired.mae_legacy, paired.nll - paired.nll_legacy
+    result = cluster_summary(paired, ["phase"], ["mae_delta", "nll_delta"])
+    out = root / "phase_summary"
+    out.mkdir(parents=True, exist_ok=True)
+    paired.to_csv(out / "day_paired.csv", index=False)
+    result.to_csv(out / "cluster.csv", index=False)
+    print(paired.groupby("phase").events.sum().to_string(), flush=True)
+    print(result.to_string(index=False), flush=True)
+
+
 def ensemble(observed, horizon, response, travel, passengers, mode, event_sink=None):
     metrics, errors = {metric: [] for metric in METRICS}, []
     for draw in range(DRAWS):
@@ -176,7 +212,7 @@ def aggregate(root, base):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["smoke", "prepare", "prepare-summary", "batch", "aggregate"])
+    parser.add_argument("command", choices=["smoke", "prepare", "prepare-summary", "phase-audit", "batch", "aggregate"])
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--data-base", type=Path, required=True)
     parser.add_argument("--start", type=int, default=0)
@@ -185,6 +221,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.command == "prepare-summary":
         prepare_summary(args.out_root)
+    elif args.command == "phase-audit":
+        phase_audit(args.out_root, args.data_base)
     elif args.command == "aggregate":
         aggregate(args.out_root, args.data_base)
     elif args.command in ("prepare", "batch"):
