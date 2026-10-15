@@ -11,6 +11,7 @@ from freq_hrl.domains.transit import native_training_information as learning
 from scripts import run_native_transit_training_information_stage249 as spec
 from scripts import run_native_transit_frozen_confirmation_stage248 as confirmation
 from scripts import submit_native_transit_training_information_stage249_scheduleurm as submit
+from scripts import analyze_native_transit_training_information_stage249 as analysis
 from tests import test_native_transit_balanced_critic_stage247 as fixtures
 
 
@@ -127,6 +128,36 @@ class TrainingInformationTest(unittest.TestCase):
             self.assertNotIn("_raw", task["result_dir"])
             self.assertFalse(any("/results/" in p for p in task["stage_input_paths"]))
         self.assertEqual(spec.contract(), json.loads(json.dumps(spec.contract())))
+
+    def test_compact_summary_preserves_bank_means_and_own_fit_exposure(self):
+        def diagnostic(value):
+            errors = {name: {"nonanchor_mse": value} for name in ("cost", "fleet", "service")}
+            return {"evaluation_mc_noise": errors, "zero_prediction_error": errors, "target_mean_error": errors,
+                "predictor_error": {v: errors for v in learning.VARIANTS},
+                "predictor_error_on_training_bank": {v: {"fleet": {"nonanchor_mse": value+1}} for v in learning.VARIANTS},
+                "unselected_rank_error": {"predictor_error": {"1": errors}}}
+        record = {"banks": [{"bank": b, "selection": {arm: {"pooled_safe": "rank1" if b else None}
+            for arm in learning.ARMS}, "diagnostics": {"train60": {arm: diagnostic(2.+2*b)
+            for arm in ("matched", "expanded")}}} for b in (0, 1)]}
+        result = analysis.summarize_diagnostics([record], "train60")
+        self.assertEqual(result["models"]["expanded_pooled_safe"]["evaluation"]["fleet"]["nonanchor_mse"], 3.)
+        self.assertEqual(result["models"]["expanded_pooled_safe"]["training_bank"]["fleet"]["nonanchor_mse"], 4.)
+        self.assertNotIn("training_bank", result["models"]["old_pooled_safe"])
+        self.assertEqual(result["admitted"]["expanded"], 1)
+        self.assertEqual(analysis.summarize_diagnostics([record], "train60", 0)["model_bank_exposures"], 1)
+
+    def test_frozen_action_check_detects_drift_without_refitting(self):
+        old = [{"scope": s, "states": [[397, 1, 8]], "choices": {"raw": [0],
+            "state_gls_pooled_safe": [1], "state_gls_half_safe": [0]}} for s in ("train60", "held60")]
+        current = [{"scope": s, "bank": b, "states": [[397, 1, 8]], "choices": {"raw": [0],
+            "old_pooled_safe": [1], "old_half_safe": [0]}} for s in ("train60", "held60") for b in (0, 1)]
+        with patch.object(spec, "KEYS", [spec.KEYS[0]]), patch.object(spec.Path, "read_text",
+                side_effect=[json.dumps(old), json.dumps(current)]):
+            self.assertEqual(analysis.verify_frozen_actions("unit_info")["action_exposures_compared"], 12)
+        current[0]["choices"]["old_pooled_safe"] = [2]
+        with patch.object(spec, "KEYS", [spec.KEYS[0]]), patch.object(spec.Path, "read_text",
+                side_effect=[json.dumps(old), json.dumps(current)]):
+            with self.assertRaisesRegex(ValueError, "Frozen reference"): analysis.verify_frozen_actions("unit_info")
 
     def test_bulk_fast_path_cannot_bypass_phase_or_resubmit_remaining(self):
         registered = {"contract": spec.contract(), "coverage_qualified": True}
