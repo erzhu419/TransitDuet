@@ -1,0 +1,1259 @@
+{
+  "conclusions": [
+    "Expanded8 improves held mixed-pooled cost and wait versus matched2 in both banks within both model families.",
+    "Fresh matched2 alone does not improve pooled outcomes over old_A2; more validation information matters for these realized futures.",
+    "Full critics were unchanged; selected-predictor fleet MSE does not improve. This does not establish accurate peak-fleet expectations.",
+    "Free expanded8 worsens both metrics versus old_A2 in bank0; bank1 improves both.",
+    "Seen-prefix wait worsens versus matched2. Dedicated root401 free expanded8 worsens cost and wait versus matched2.",
+    "Shrunk expanded8 harms raw cost and wait in mixed_b; free expanded8 does not jointly dominate Stage247.",
+    "No compared arm is promoted to default; no new-prefix or end-to-end learned HRL evidence."
+  ],
+  "default_changed": false,
+  "held_mixed_pooled": {
+    "bank0": {
+      "admitted": {
+        "free_old_expanded8": 5,
+        "free_old_matched2": 6,
+        "free_old_old_A2": 9,
+        "shrunk_expanded8": 5,
+        "shrunk_matched2": 5,
+        "shrunk_old_A2": 7
+      },
+      "contrasts": {
+        "free_old_expanded8-matched2": {
+          "delta_cost": -0.00019947135416666637,
+          "delta_risk": -0.0001681857638888889,
+          "delta_service": -3.128559027777749e-05,
+          "delta_wait_min": -0.00020976562500000145
+        },
+        "free_old_expanded8-old_A2": {
+          "delta_cost": 2.3894010416666714e-05,
+          "delta_risk": -2.7126736111111123e-05,
+          "delta_service": 5.1020746527777824e-05,
+          "delta_wait_min": 0.000474414062500002
+        },
+        "free_old_matched2-old_A2": {
+          "delta_cost": 0.0002233653645833331,
+          "delta_risk": 0.00014105902777777776,
+          "delta_service": 8.230633680555532e-05,
+          "delta_wait_min": 0.0006841796875000035
+        },
+        "shrunk_expanded8-matched2": {
+          "delta_cost": -0.00015403841145833318,
+          "delta_risk": -0.0001410590277777778,
+          "delta_service": -1.2979383680555396e-05,
+          "delta_wait_min": -3.828125000000096e-05
+        },
+        "shrunk_expanded8-old_A2": {
+          "delta_cost": -5.216236979166676e-05,
+          "delta_risk": -5.425347222222222e-05,
+          "delta_service": 2.0911024305554667e-06,
+          "delta_wait_min": 4.1927083333333696e-05
+        },
+        "shrunk_matched2-old_A2": {
+          "delta_cost": 0.00010187604166666641,
+          "delta_risk": 8.680555555555557e-05,
+          "delta_service": 1.5070486111110862e-05,
+          "delta_wait_min": 8.020833333333466e-05
+        }
+      },
+      "outcomes": {
+        "free_old_expanded8": {
+          "changed_rate": 0.015625,
+          "delta_cost": -0.00020133684895833298,
+          "delta_risk": -0.00018446180555555555,
+          "delta_service": -1.6875043402777425e-05,
+          "delta_wait_min": -0.00010944010416666853,
+          "risk_mse": 0.0009375021299058919,
+          "service_mse": 9.160650861573998e-05
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.00625,
+          "delta_cost": -1.8654947916665993e-06,
+          "delta_risk": -1.6276041666666666e-05,
+          "delta_service": 1.4410546875000067e-05,
+          "delta_wait_min": 0.00010032552083333292,
+          "risk_mse": 0.0009101554771720044,
+          "service_mse": 9.481388884176664e-05
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.027083333333333334,
+          "delta_cost": -0.0002252308593749997,
+          "delta_risk": -0.00015733506944444443,
+          "delta_service": -6.789578993055525e-05,
+          "delta_wait_min": -0.0005838541666666706,
+          "risk_mse": 0.0009281605734540039,
+          "service_mse": 0.00012294198302025244
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.016666666666666666,
+          "delta_cost": -0.00015590390624999978,
+          "delta_risk": -0.00015733506944444445,
+          "delta_service": 1.4311631944446712e-06,
+          "delta_wait_min": 6.204427083333196e-05,
+          "risk_mse": 0.00091607324538792,
+          "service_mse": 8.59528597685225e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.00625,
+          "delta_cost": -1.8654947916665993e-06,
+          "delta_risk": -1.6276041666666666e-05,
+          "delta_service": 1.4410546875000067e-05,
+          "delta_wait_min": 0.00010032552083333292,
+          "risk_mse": 0.0009122381198425109,
+          "service_mse": 8.312890599467291e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.020833333333333332,
+          "delta_cost": -0.00010374153645833302,
+          "delta_risk": -0.00010308159722222224,
+          "delta_service": -6.599392361107956e-07,
+          "delta_wait_min": 2.0117187499998266e-05,
+          "risk_mse": 0.0009054548581709518,
+          "service_mse": 8.24014928463374e-05
+        }
+      },
+      "selection_counts": {
+        "free_old_expanded8": {
+          "16@0.25": 1,
+          "16@0.5": 1,
+          "16@0.75": 1,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 0,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 11
+        },
+        "free_old_matched2": {
+          "16@0.25": 1,
+          "16@0.5": 0,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 2,
+          "1@1": 1,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 0,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 10
+        },
+        "free_old_old_A2": {
+          "16@0.25": 2,
+          "16@0.5": 1,
+          "16@0.75": 1,
+          "16@1": 1,
+          "1@0.25": 0,
+          "1@0.5": 1,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 1,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 7
+        },
+        "shrunk_expanded8": {
+          "16@0.25": 1,
+          "16@0.5": 1,
+          "16@0.75": 1,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 0,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 11
+        },
+        "shrunk_matched2": {
+          "16@0.25": 1,
+          "16@0.5": 0,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 2,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 0,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 11
+        },
+        "shrunk_old_A2": {
+          "16@0.25": 2,
+          "16@0.5": 0,
+          "16@0.75": 1,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 1,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 1,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 9
+        }
+      }
+    },
+    "bank1": {
+      "admitted": {
+        "free_old_expanded8": 9,
+        "free_old_matched2": 6,
+        "free_old_old_A2": 7,
+        "shrunk_expanded8": 10,
+        "shrunk_matched2": 7,
+        "shrunk_old_A2": 7
+      },
+      "contrasts": {
+        "free_old_expanded8-matched2": {
+          "delta_cost": -0.00044638535156249986,
+          "delta_risk": -0.00032552083333333337,
+          "delta_service": -0.00012086451822916653,
+          "delta_wait_min": -0.000997070312500002
+        },
+        "free_old_expanded8-old_A2": {
+          "delta_cost": -0.0004444850260416665,
+          "delta_risk": -0.00032552083333333337,
+          "delta_service": -0.00011896419270833315,
+          "delta_wait_min": -0.001004101562500002
+        },
+        "free_old_matched2-old_A2": {
+          "delta_cost": 1.9003255208333844e-06,
+          "delta_risk": 0.0,
+          "delta_service": 1.9003255208333852e-06,
+          "delta_wait_min": -7.031249999999832e-06
+        },
+        "shrunk_expanded8-matched2": {
+          "delta_cost": -0.000375605859375,
+          "delta_risk": -0.00026584201388888887,
+          "delta_service": -0.0001097638454861111,
+          "delta_wait_min": -0.0008877604166666686
+        },
+        "shrunk_expanded8-old_A2": {
+          "delta_cost": -0.00037361132812499987,
+          "delta_risk": -0.00026584201388888887,
+          "delta_service": -0.00010776931423611101,
+          "delta_wait_min": -0.0008850260416666684
+        },
+        "shrunk_matched2-old_A2": {
+          "delta_cost": 1.9945312500000777e-06,
+          "delta_risk": 0.0,
+          "delta_service": 1.9945312500000794e-06,
+          "delta_wait_min": 2.7343750000002206e-06
+        }
+      },
+      "outcomes": {
+        "free_old_expanded8": {
+          "changed_rate": 0.021875,
+          "delta_cost": -0.0004718665364583332,
+          "delta_risk": -0.0003526475694444445,
+          "delta_service": -0.00011921896701388876,
+          "delta_wait_min": -0.0009826822916666686,
+          "risk_mse": 0.0010413599883022742,
+          "service_mse": 0.00014736968073798327
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.003125,
+          "delta_cost": -2.5481184895833333e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": 1.6455512152777763e-06,
+          "delta_wait_min": 1.438802083333351e-05,
+          "risk_mse": 0.0010003494841719699,
+          "service_mse": 0.00010713986224523923
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.008333333333333333,
+          "delta_cost": -2.7381510416666717e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": -2.547743055556089e-07,
+          "delta_wait_min": 2.1419270833333343e-05,
+          "risk_mse": 0.0009856941476797036,
+          "service_mse": 0.0001106459480524142
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.020833333333333336,
+          "delta_cost": -0.00040138307291666663,
+          "delta_risk": -0.00029296875,
+          "delta_service": -0.00010841432291666664,
+          "delta_wait_min": -0.0008732421875000018,
+          "risk_mse": 0.0009850374343861193,
+          "service_mse": 9.766954834779752e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.0020833333333333333,
+          "delta_cost": -2.577721354166666e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": 1.3495225694444524e-06,
+          "delta_wait_min": 1.451822916666683e-05,
+          "risk_mse": 0.0009854136361856316,
+          "service_mse": 9.429732008284362e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.011458333333333334,
+          "delta_cost": -2.7771744791666738e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": -6.450086805556268e-07,
+          "delta_wait_min": 1.1783854166666609e-05,
+          "risk_mse": 0.0009685537845742095,
+          "service_mse": 9.120575989626976e-05
+        }
+      },
+      "selection_counts": {
+        "free_old_expanded8": {
+          "16@0.25": 1,
+          "16@0.5": 2,
+          "16@0.75": 0,
+          "16@1": 3,
+          "1@0.25": 1,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 7
+        },
+        "free_old_matched2": {
+          "16@0.25": 1,
+          "16@0.5": 1,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 2,
+          "3@0.75": 0,
+          "3@1": 1,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 10
+        },
+        "free_old_old_A2": {
+          "16@0.25": 0,
+          "16@0.5": 1,
+          "16@0.75": 1,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 2,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 9
+        },
+        "shrunk_expanded8": {
+          "16@0.25": 1,
+          "16@0.5": 2,
+          "16@0.75": 2,
+          "16@1": 2,
+          "1@0.25": 1,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 6
+        },
+        "shrunk_matched2": {
+          "16@0.25": 1,
+          "16@0.5": 2,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 2,
+          "3@0.75": 0,
+          "3@1": 1,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 9
+        },
+        "shrunk_old_A2": {
+          "16@0.25": 0,
+          "16@0.5": 1,
+          "16@0.75": 0,
+          "16@1": 1,
+          "1@0.25": 0,
+          "1@0.5": 2,
+          "1@0.75": 0,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 1,
+          "zero": 9
+        }
+      }
+    },
+    "pooled": {
+      "admitted": {
+        "free_old_expanded8": 14,
+        "free_old_matched2": 12,
+        "free_old_old_A2": 16,
+        "shrunk_expanded8": 15,
+        "shrunk_matched2": 12,
+        "shrunk_old_A2": 14
+      },
+      "contrasts": {
+        "free_old_expanded8-matched2": {
+          "delta_cost": -0.0003229283528645832,
+          "delta_risk": -0.00024685329861111116,
+          "delta_service": -7.607505425347201e-05,
+          "delta_wait_min": -0.0006034179687500017
+        },
+        "free_old_expanded8-old_A2": {
+          "delta_cost": -0.00021029550781249994,
+          "delta_risk": -0.00017632378472222225,
+          "delta_service": -3.397172309027767e-05,
+          "delta_wait_min": -0.00026484375
+        },
+        "free_old_matched2-old_A2": {
+          "delta_cost": 0.00011263284505208323,
+          "delta_risk": 7.05295138888889e-05,
+          "delta_service": 4.210333116319435e-05,
+          "delta_wait_min": 0.00033857421875000174
+        },
+        "shrunk_expanded8-matched2": {
+          "delta_cost": -0.00026482213541666666,
+          "delta_risk": -0.00020345052083333334,
+          "delta_service": -6.137161458333325e-05,
+          "delta_wait_min": -0.00046302083333333476
+        },
+        "shrunk_expanded8-old_A2": {
+          "delta_cost": -0.0002128868489583334,
+          "delta_risk": -0.00016004774305555556,
+          "delta_service": -5.283910590277777e-05,
+          "delta_wait_min": -0.00042154947916666735
+        },
+        "shrunk_matched2-old_A2": {
+          "delta_cost": 5.193528645833325e-05,
+          "delta_risk": 4.3402777777777786e-05,
+          "delta_service": 8.53250868055547e-06,
+          "delta_wait_min": 4.147135416666744e-05
+        }
+      },
+      "outcomes": {
+        "free_old_expanded8": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.00033660169270833314,
+          "delta_risk": -0.0002685546875,
+          "delta_service": -6.80470052083331e-05,
+          "delta_wait_min": -0.0005460611979166685,
+          "risk_mse": 0.000989431059104083,
+          "service_mse": 0.00011948809467686162
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.004687500000000001,
+          "delta_cost": -1.3673339843749966e-05,
+          "delta_risk": -2.170138888888889e-05,
+          "delta_service": 8.028049045138922e-06,
+          "delta_wait_min": 5.735677083333322e-05,
+          "risk_mse": 0.0009552524806719871,
+          "service_mse": 0.00010097687554350294
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": -0.0001263061848958332,
+          "delta_risk": -9.223090277777779e-05,
+          "delta_service": -3.407528211805543e-05,
+          "delta_wait_min": -0.00028121744791666855,
+          "risk_mse": 0.0009569273605668537,
+          "service_mse": 0.0001167939655363333
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.00027864348958333326,
+          "delta_risk": -0.00022515190972222224,
+          "delta_service": -5.3491579861110984e-05,
+          "delta_wait_min": -0.0004055989583333349,
+          "risk_mse": 0.0009505553398870195,
+          "service_mse": 9.181120405816e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.0041666666666666675,
+          "delta_cost": -1.3821354166666631e-05,
+          "delta_risk": -2.170138888888889e-05,
+          "delta_service": 7.88003472222226e-06,
+          "delta_wait_min": 5.7421874999999876e-05,
+          "risk_mse": 0.0009488258780140713,
+          "service_mse": 8.871311303875826e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.016145833333333335,
+          "delta_cost": -6.575664062499988e-05,
+          "delta_risk": -6.510416666666668e-05,
+          "delta_service": -6.524739583332104e-07,
+          "delta_wait_min": 1.5950520833332437e-05,
+          "risk_mse": 0.0009370043213725806,
+          "service_mse": 8.680362637130358e-05
+        }
+      },
+      "selection_counts": {
+        "free_old_expanded8": {
+          "16@0.25": 2,
+          "16@0.5": 3,
+          "16@0.75": 1,
+          "16@1": 3,
+          "1@0.25": 1,
+          "1@0.5": 0,
+          "1@0.75": 2,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 18
+        },
+        "free_old_matched2": {
+          "16@0.25": 2,
+          "16@0.5": 1,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 3,
+          "1@1": 1,
+          "3@0.25": 1,
+          "3@0.5": 2,
+          "3@0.75": 0,
+          "3@1": 1,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 20
+        },
+        "free_old_old_A2": {
+          "16@0.25": 2,
+          "16@0.5": 2,
+          "16@0.75": 2,
+          "16@1": 1,
+          "1@0.25": 0,
+          "1@0.5": 3,
+          "1@0.75": 2,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 1,
+          "3@0.75": 2,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 16
+        },
+        "shrunk_expanded8": {
+          "16@0.25": 2,
+          "16@0.5": 3,
+          "16@0.75": 3,
+          "16@1": 2,
+          "1@0.25": 1,
+          "1@0.5": 0,
+          "1@0.75": 2,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 0,
+          "3@0.75": 1,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 0,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 17
+        },
+        "shrunk_matched2": {
+          "16@0.25": 2,
+          "16@0.5": 2,
+          "16@0.75": 0,
+          "16@1": 0,
+          "1@0.25": 0,
+          "1@0.5": 0,
+          "1@0.75": 3,
+          "1@1": 0,
+          "3@0.25": 1,
+          "3@0.5": 2,
+          "3@0.75": 0,
+          "3@1": 1,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 0,
+          "zero": 20
+        },
+        "shrunk_old_A2": {
+          "16@0.25": 2,
+          "16@0.5": 1,
+          "16@0.75": 1,
+          "16@1": 1,
+          "1@0.25": 0,
+          "1@0.5": 3,
+          "1@0.75": 1,
+          "1@1": 0,
+          "3@0.25": 0,
+          "3@0.5": 1,
+          "3@0.75": 2,
+          "3@1": 0,
+          "8@0.25": 0,
+          "8@0.5": 1,
+          "8@0.75": 0,
+          "8@1": 1,
+          "zero": 18
+        }
+      }
+    }
+  },
+  "next": "Freeze all six protocols and Stage247 control for fresh paired-future confirmation; retain fleet-event and prefix attribution; diagnose OOF-to-full transfer separately.",
+  "next_stage_submitted": false,
+  "protocol": "native_transit_selector_information_stage252_v1",
+  "scope": "descriptive development crossfit; pooled_safe within-family contrasts; no independent CI",
+  "stage247_control": {
+    "changed_rate": 0.019791666666666666,
+    "delta_cost": -0.00022737242838541678,
+    "delta_risk": -0.00013563368055555556,
+    "delta_service": -9.173874782986122e-05,
+    "delta_wait_min": -0.0007667317708333347,
+    "risk_mse": 0.000919561269376034,
+    "service_mse": 9.216437671131863e-05
+  },
+  "view_and_seen_boundaries": {
+    "mixed_a": {
+      "held60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.02291666666666667,
+          "delta_cost": -0.0005793461588541663,
+          "delta_risk": -0.0004611545138888889,
+          "delta_service": -0.00011819164496527735,
+          "delta_wait_min": -0.0009749348958333373,
+          "risk_mse": 0.0009869912400061074,
+          "service_mse": 0.00014561683113331823
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.0062499999999999995,
+          "delta_cost": -2.0283007812499968e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": 6.84372829861114e-06,
+          "delta_wait_min": 4.8763020833333045e-05,
+          "risk_mse": 0.0009346791369195179,
+          "service_mse": 0.00010604650224233046
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.015625,
+          "delta_cost": -0.00017964212239583323,
+          "delta_risk": -0.00013563368055555556,
+          "delta_service": -4.400844184027768e-05,
+          "delta_wait_min": -0.0003638671875000036,
+          "risk_mse": 0.0009472326258433248,
+          "service_mse": 0.0001312995959016441
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.019791666666666666,
+          "delta_cost": -0.0005793117838541663,
+          "delta_risk": -0.0004611545138888889,
+          "delta_service": -0.00011815726996527735,
+          "delta_wait_min": -0.0009747395833333372,
+          "risk_mse": 0.0009507322490023887,
+          "service_mse": 0.0001119109791503986
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.005208333333333333,
+          "delta_cost": -2.0579036458333294e-05,
+          "delta_risk": -2.7126736111111113e-05,
+          "delta_service": 6.547699652777817e-06,
+          "delta_wait_min": 4.8893229166666364e-05,
+          "risk_mse": 0.0009381572025488307,
+          "service_mse": 0.00010627290101079831
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.008333333333333333,
+          "delta_cost": -0.00010358574218749978,
+          "delta_risk": -0.00010850694444444445,
+          "delta_service": 4.921202256944676e-06,
+          "delta_wait_min": 6.861979166666465e-05,
+          "risk_mse": 0.0009379355179639743,
+          "service_mse": 0.00010252199475005403
+        }
+      },
+      "train60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.02395833333333333,
+          "delta_cost": -0.0001171289713541668,
+          "delta_risk": -0.00010850694444444445,
+          "delta_service": -8.622026909722351e-06,
+          "delta_wait_min": -7.734374999999842e-05,
+          "risk_mse": 0.0008533826320467305,
+          "service_mse": 0.00013688946091650089
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.008333333333333333,
+          "delta_cost": 9.69173177083334e-05,
+          "delta_risk": 9.223090277777779e-05,
+          "delta_service": 4.686414930555618e-06,
+          "delta_wait_min": 4.374999999999917e-05,
+          "risk_mse": 0.0008167863537166093,
+          "service_mse": 9.479294741473467e-05
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": -2.7069466145833475e-05,
+          "delta_risk": -1.6276041666666663e-05,
+          "delta_service": -1.0793424479166806e-05,
+          "delta_wait_min": -0.0001153645833333345,
+          "risk_mse": 0.0008134102947921445,
+          "service_mse": 0.00010671384514827902
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.025,
+          "delta_cost": 2.2317903645832963e-05,
+          "delta_risk": 1.6276041666666656e-05,
+          "delta_service": 6.041861979166289e-06,
+          "delta_wait_min": 7.441406250000094e-05,
+          "risk_mse": 0.0008070153605948152,
+          "service_mse": 9.554290686620747e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.011458333333333333,
+          "delta_cost": 7.148046874999986e-05,
+          "delta_risk": 6.510416666666668e-05,
+          "delta_service": 6.376302083333201e-06,
+          "delta_wait_min": 4.0690104166666116e-05,
+          "risk_mse": 0.0008130550228326476,
+          "service_mse": 9.405599993827359e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.004166666666666667,
+          "delta_cost": 3.0000260416666696e-05,
+          "delta_risk": 1.6276041666666666e-05,
+          "delta_service": 1.3724218750000028e-05,
+          "delta_wait_min": 0.00016419270833333246,
+          "risk_mse": 0.0008072993478393444,
+          "service_mse": 9.234281118335554e-05
+        }
+      }
+    },
+    "mixed_b": {
+      "held60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.014583333333333334,
+          "delta_cost": -9.385722656249994e-05,
+          "delta_risk": -7.595486111111111e-05,
+          "delta_service": -1.790236545138883e-05,
+          "delta_wait_min": -0.00011718749999999994,
+          "risk_mse": 0.0009918708782020585,
+          "service_mse": 9.335935822040502e-05
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.003125,
+          "delta_cost": -7.063671874999963e-06,
+          "delta_risk": -1.6276041666666666e-05,
+          "delta_service": 9.212369791666703e-06,
+          "delta_wait_min": 6.595052083333339e-05,
+          "risk_mse": 0.0009758258244244564,
+          "service_mse": 9.590724884467542e-05
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.019791666666666666,
+          "delta_cost": -7.297024739583318e-05,
+          "delta_risk": -4.8828125e-05,
+          "delta_service": -2.414212239583317e-05,
+          "delta_wait_min": -0.00019856770833333355,
+          "risk_mse": 0.0009666220952903827,
+          "service_mse": 0.00010228833517102255
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": 2.2024804687499818e-05,
+          "delta_risk": 1.0850694444444453e-05,
+          "delta_service": 1.1174110243055372e-05,
+          "delta_wait_min": 0.00016354166666666757,
+          "risk_mse": 0.0009503784307716505,
+          "service_mse": 7.17114289659214e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.003125,
+          "delta_cost": -7.063671874999963e-06,
+          "delta_risk": -1.6276041666666666e-05,
+          "delta_service": 9.212369791666703e-06,
+          "delta_wait_min": 6.595052083333339e-05,
+          "risk_mse": 0.000959494553479312,
+          "service_mse": 7.115332506671821e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.023958333333333335,
+          "delta_cost": -2.7927539062499983e-05,
+          "delta_risk": -2.1701388888888886e-05,
+          "delta_service": -6.226150173611097e-06,
+          "delta_wait_min": -3.671874999999978e-05,
+          "risk_mse": 0.000936073124781187,
+          "service_mse": 7.108525799255313e-05
+        }
+      },
+      "train60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.011458333333333334,
+          "delta_cost": -7.895716145833331e-05,
+          "delta_risk": -0.00011393229166666667,
+          "delta_service": 3.497513020833337e-05,
+          "delta_wait_min": 0.0003580078125000002,
+          "risk_mse": 0.000740419458386843,
+          "service_mse": 0.00012221015416354704
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.004166666666666667,
+          "delta_cost": 3.0069075520833405e-05,
+          "delta_risk": 3.255208333333333e-05,
+          "delta_service": -2.48300781249993e-06,
+          "delta_wait_min": -8.65885416666658e-06,
+          "risk_mse": 0.0007426138667268482,
+          "service_mse": 0.00010986270506627469
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.015625,
+          "delta_cost": -4.832975260416657e-05,
+          "delta_risk": -8.138020833333334e-05,
+          "delta_service": 3.305045572916676e-05,
+          "delta_wait_min": 0.0003492838541666669,
+          "risk_mse": 0.0007432767871184479,
+          "service_mse": 0.00012455787951231359
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.013541666666666667,
+          "delta_cost": -4.979453124999994e-05,
+          "delta_risk": -8.138020833333333e-05,
+          "delta_service": 3.15856770833334e-05,
+          "delta_wait_min": 0.00032552083333333315,
+          "risk_mse": 0.000695059900688279,
+          "service_mse": 6.0798993693090793e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.004166666666666667,
+          "delta_cost": 3.0069075520833405e-05,
+          "delta_risk": 3.255208333333333e-05,
+          "delta_service": -2.48300781249993e-06,
+          "delta_wait_min": -8.65885416666658e-06,
+          "risk_mse": 0.0006792882436445776,
+          "service_mse": 5.1530494738337825e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.014583333333333334,
+          "delta_cost": -1.6109440104166548e-05,
+          "delta_risk": -4.8828124999999996e-05,
+          "delta_service": 3.2718684895833455e-05,
+          "delta_wait_min": 0.0003406250000000002,
+          "risk_mse": 0.0006809961393704389,
+          "service_mse": 5.908417423133557e-05
+        }
+      }
+    },
+    "mixed_pooled": {
+      "held60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.00033660169270833314,
+          "delta_risk": -0.0002685546875,
+          "delta_service": -6.80470052083331e-05,
+          "delta_wait_min": -0.0005460611979166685,
+          "risk_mse": 0.000989431059104083,
+          "service_mse": 0.00011948809467686162
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.004687500000000001,
+          "delta_cost": -1.3673339843749966e-05,
+          "delta_risk": -2.170138888888889e-05,
+          "delta_service": 8.028049045138922e-06,
+          "delta_wait_min": 5.735677083333322e-05,
+          "risk_mse": 0.0009552524806719871,
+          "service_mse": 0.00010097687554350294
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": -0.0001263061848958332,
+          "delta_risk": -9.223090277777779e-05,
+          "delta_service": -3.407528211805543e-05,
+          "delta_wait_min": -0.00028121744791666855,
+          "risk_mse": 0.0009569273605668537,
+          "service_mse": 0.0001167939655363333
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.00027864348958333326,
+          "delta_risk": -0.00022515190972222224,
+          "delta_service": -5.3491579861110984e-05,
+          "delta_wait_min": -0.0004055989583333349,
+          "risk_mse": 0.0009505553398870195,
+          "service_mse": 9.181120405816e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.0041666666666666675,
+          "delta_cost": -1.3821354166666631e-05,
+          "delta_risk": -2.170138888888889e-05,
+          "delta_service": 7.88003472222226e-06,
+          "delta_wait_min": 5.7421874999999876e-05,
+          "risk_mse": 0.0009488258780140713,
+          "service_mse": 8.871311303875826e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.016145833333333335,
+          "delta_cost": -6.575664062499988e-05,
+          "delta_risk": -6.510416666666668e-05,
+          "delta_service": -6.524739583332104e-07,
+          "delta_wait_min": 1.5950520833332437e-05,
+          "risk_mse": 0.0009370043213725806,
+          "service_mse": 8.680362637130358e-05
+        }
+      },
+      "train60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": -9.804306640625007e-05,
+          "delta_risk": -0.00011121961805555557,
+          "delta_service": 1.3176551649305507e-05,
+          "delta_wait_min": 0.0001403320312500009,
+          "risk_mse": 0.0007969010452167867,
+          "service_mse": 0.000129549807540024
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.00625,
+          "delta_cost": 6.34931966145834e-05,
+          "delta_risk": 6.239149305555556e-05,
+          "delta_service": 1.1017035590278437e-06,
+          "delta_wait_min": 1.7545572916666296e-05,
+          "risk_mse": 0.0007797001102217288,
+          "service_mse": 0.00010232782624050467
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.016666666666666666,
+          "delta_cost": -3.7699609375000024e-05,
+          "delta_risk": -4.882812500000001e-05,
+          "delta_service": 1.1128515624999978e-05,
+          "delta_wait_min": 0.0001169596354166662,
+          "risk_mse": 0.0007783435409552961,
+          "service_mse": 0.00011563586233029631
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.019270833333333334,
+          "delta_cost": -1.3738313802083493e-05,
+          "delta_risk": -3.255208333333334e-05,
+          "delta_service": 1.8813769531249843e-05,
+          "delta_wait_min": 0.00019996744791666709,
+          "risk_mse": 0.0007510376306415471,
+          "service_mse": 7.817095027964912e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.0078125,
+          "delta_cost": 5.077477213541664e-05,
+          "delta_risk": 4.8828125e-05,
+          "delta_service": 1.9466471354166357e-06,
+          "delta_wait_min": 1.6015624999999768e-05,
+          "risk_mse": 0.0007461716332386126,
+          "service_mse": 7.279324733830571e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.009375,
+          "delta_cost": 6.945410156250074e-06,
+          "delta_risk": -1.6276041666666663e-05,
+          "delta_service": 2.322145182291674e-05,
+          "delta_wait_min": 0.00025240885416666635,
+          "risk_mse": 0.0007441477436048918,
+          "service_mse": 7.571349270734556e-05
+        }
+      }
+    },
+    "root_397": {
+      "held60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.042708333333333334,
+          "delta_cost": -3.169212239583294e-05,
+          "delta_risk": 1.3552527156068805e-20,
+          "delta_service": -3.169212239583295e-05,
+          "delta_wait_min": -0.0003685546874999999,
+          "risk_mse": 0.0007985836832255263,
+          "service_mse": 7.014002514845995e-05
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.025,
+          "delta_cost": 0.00011225416666666657,
+          "delta_risk": 9.765625e-05,
+          "delta_service": 1.459791666666656e-05,
+          "delta_wait_min": 0.00014524739583333466,
+          "risk_mse": 0.0007710725364205345,
+          "service_mse": 7.069181512067284e-05
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.040624999999999994,
+          "delta_cost": -1.2406835937499468e-05,
+          "delta_risk": 4.3402777777777786e-05,
+          "delta_service": -5.580961371527725e-05,
+          "delta_wait_min": -0.0005151692708333328,
+          "risk_mse": 0.0008167054292946034,
+          "service_mse": 0.00013227924995900733
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.03958333333333333,
+          "delta_cost": -9.31308593749964e-06,
+          "delta_risk": 2.7126736111111096e-05,
+          "delta_service": -3.643982204861076e-05,
+          "delta_wait_min": -0.0003878906249999993,
+          "risk_mse": 0.0007736259223163487,
+          "service_mse": 6.267160296558426e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.029166666666666667,
+          "delta_cost": 0.0001264063802083331,
+          "delta_risk": 0.00011393229166666667,
+          "delta_service": 1.2474088541666442e-05,
+          "delta_wait_min": 4.479166666666924e-05,
+          "risk_mse": 0.0007776631219442318,
+          "service_mse": 6.769042002038797e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.030208333333333334,
+          "delta_cost": -8.229641927083294e-05,
+          "delta_risk": -6.510416666666665e-05,
+          "delta_service": -1.7192252604166257e-05,
+          "delta_wait_min": -0.00016009114583333,
+          "risk_mse": 0.0007635584017244627,
+          "service_mse": 7.333401811012463e-05
+        }
+      },
+      "train60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.03645833333333333,
+          "delta_cost": 3.3296419270833554e-05,
+          "delta_risk": -1.6276041666666677e-05,
+          "delta_service": 4.957246093750023e-05,
+          "delta_wait_min": 0.000471549479166668,
+          "risk_mse": 0.0006837320607240469,
+          "service_mse": 6.086872246983031e-05
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.026041666666666668,
+          "delta_cost": 2.481770833336789e-07,
+          "delta_risk": -1.6276041666666666e-05,
+          "delta_service": 1.6524218750000345e-05,
+          "delta_wait_min": 0.00022356770833333373,
+          "risk_mse": 0.0006661388164782141,
+          "service_mse": 5.822281883595789e-05
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.03125,
+          "delta_cost": -6.757102864583312e-05,
+          "delta_risk": -7.05295138888889e-05,
+          "delta_service": 2.958485243055753e-06,
+          "delta_wait_min": 2.5520833333334832e-05,
+          "risk_mse": 0.000800046155357151,
+          "service_mse": 0.00017070871618970725
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.03229166666666666,
+          "delta_cost": 3.7720052083333555e-05,
+          "delta_risk": -1.6276041666666677e-05,
+          "delta_service": 5.39960937500002e-05,
+          "delta_wait_min": 0.0004527994791666686,
+          "risk_mse": 0.0006663596216447739,
+          "service_mse": 5.23793042640185e-05
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.034375,
+          "delta_cost": -4.607421874994118e-07,
+          "delta_risk": -1.6276041666666677e-05,
+          "delta_service": 1.5815299479167238e-05,
+          "delta_wait_min": 0.00019765625000000428,
+          "risk_mse": 0.0006720523431255072,
+          "service_mse": 5.562087793040974e-05
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.028125,
+          "delta_cost": -4.1450455729166865e-05,
+          "delta_risk": -4.3402777777777786e-05,
+          "delta_service": 1.952322048610895e-06,
+          "delta_wait_min": 0.00010058593750000002,
+          "risk_mse": 0.0006850352652220206,
+          "service_mse": 7.443286962988425e-05
+        }
+      }
+    },
+    "root_401": {
+      "held60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.075,
+          "delta_cost": -0.0002458603515625003,
+          "delta_risk": -0.0002712673611111111,
+          "delta_service": 2.5407009548610836e-05,
+          "delta_wait_min": 0.0005056640624999957,
+          "risk_mse": 0.0011750803451960612,
+          "service_mse": 0.0005221805588749753
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.06562499999999999,
+          "delta_cost": -0.0002517735677083335,
+          "delta_risk": -0.00021701388888888893,
+          "delta_service": -3.475967881944468e-05,
+          "delta_wait_min": -0.00013723958333333811,
+          "risk_mse": 0.0011674868768588183,
+          "service_mse": 0.0004144114863267069
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.128125,
+          "delta_cost": -0.000293357552083334,
+          "delta_risk": -0.0002712673611111111,
+          "delta_service": -2.2090190972222865e-05,
+          "delta_wait_min": 7.304687499999575e-05,
+          "risk_mse": 0.0015696529183708632,
+          "service_mse": 0.0007335795184479799
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.08854166666666666,
+          "delta_cost": -0.0002974906250000009,
+          "delta_risk": -0.0002712673611111112,
+          "delta_service": -2.62232638888898e-05,
+          "delta_wait_min": 5.872395833332578e-05,
+          "risk_mse": 0.000992228311384264,
+          "service_mse": 0.00021109428696476206
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.06979166666666667,
+          "delta_cost": -0.00017311002604166728,
+          "delta_risk": -0.0001356336805555556,
+          "delta_service": -3.747634548611167e-05,
+          "delta_wait_min": -0.00014648437500000588,
+          "risk_mse": 0.0009466260945782737,
+          "service_mse": 0.00012902950471522503
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.11041666666666666,
+          "delta_cost": -0.0002970067708333342,
+          "delta_risk": -0.0002712673611111111,
+          "delta_service": -2.573940972222306e-05,
+          "delta_wait_min": 3.626302083332636e-05,
+          "risk_mse": 0.0009708831177745877,
+          "service_mse": 0.00016223379664612062
+        }
+      },
+      "train60": {
+        "free_old_expanded8": {
+          "changed_rate": 0.04895833333333333,
+          "delta_cost": -0.000110301171875,
+          "delta_risk": 1.0850694444444447e-05,
+          "delta_service": -0.00012115186631944444,
+          "delta_wait_min": -0.0012624348958333352,
+          "risk_mse": 0.0011519736129782933,
+          "service_mse": 0.00038048740487413063
+        },
+        "free_old_matched2": {
+          "changed_rate": 0.05,
+          "delta_cost": -0.0003413777343749997,
+          "delta_risk": -0.00023328993055555562,
+          "delta_service": -0.00010808780381944418,
+          "delta_wait_min": -0.0009915364583333347,
+          "risk_mse": 0.0014563879886053132,
+          "service_mse": 0.0004565211009146918
+        },
+        "free_old_old_A2": {
+          "changed_rate": 0.08854166666666666,
+          "delta_cost": -0.0006414065104166664,
+          "delta_risk": -0.00023328993055555554,
+          "delta_service": -0.00040811657986111077,
+          "delta_wait_min": -0.003869856770833337,
+          "risk_mse": 0.0014893985237555626,
+          "service_mse": 0.0004894147938830422
+        },
+        "shrunk_expanded8": {
+          "changed_rate": 0.06666666666666667,
+          "delta_cost": -0.00010414824218749972,
+          "delta_risk": 3.7977430555555556e-05,
+          "delta_service": -0.0001421256727430553,
+          "delta_wait_min": -0.0013738281250000042,
+          "risk_mse": 0.000832675031054135,
+          "service_mse": 0.00011767980802652519
+        },
+        "shrunk_matched2": {
+          "changed_rate": 0.04791666666666666,
+          "delta_cost": -0.00012945709635416583,
+          "delta_risk": -7.052951388888888e-05,
+          "delta_service": -5.892758246527698e-05,
+          "delta_wait_min": -0.00046751302083333443,
+          "risk_mse": 0.000835348882360968,
+          "service_mse": 0.0001089407903402362
+        },
+        "shrunk_old_A2": {
+          "changed_rate": 0.078125,
+          "delta_cost": -0.00031762239583333273,
+          "delta_risk": -9.765624999999998e-05,
+          "delta_service": -0.00021996614583333273,
+          "delta_wait_min": -0.002071679687500003,
+          "risk_mse": 0.0008435255238982773,
+          "service_mse": 0.0001144153779383261
+        }
+      }
+    }
+  }
+}
