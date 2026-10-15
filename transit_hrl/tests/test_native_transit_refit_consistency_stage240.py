@@ -32,6 +32,8 @@ class RefitConsistencyTest(unittest.TestCase):
                 patch.object(learning.previous, 'fit_paths', side_effect=fit):
             result, models = learning.fit_cell(*self.args)
         self.assertEqual(len(result['blocks']), 6)
+        self.assertEqual(result, json.loads(json.dumps(result)))
+        self.assertEqual(models, json.loads(json.dumps(models)))
         self.assertEqual(len(models), 8)
         self.assertEqual(len(calls), 20)
         for i in (0, 4):
@@ -83,6 +85,7 @@ class RefitConsistencyTest(unittest.TestCase):
                 blocks.append({'held_group': [397, group], 'half': h, 'scales': {a: [1., 1.] for a in learning.joint.ANCHORS},
                     'curves': {'raw': {'rank_regret': {'1@1': stats}}}})
         result = learning.prefix_diagnostics({'selection': selection, 'blocks': blocks})['joint_raw_half_safe']
+        self.assertEqual(result, json.loads(json.dumps(result)))
         self.assertEqual(sum(not d['eligible'] for d in result['deletions']), 1)
         self.assertEqual(result['concentration']['397']['cost_sum']['top1_benefit_share'], 1.)
         self.assertEqual(result['concentration']['397']['cost_sum']['improving_prefixes'], 1)

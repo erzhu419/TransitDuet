@@ -33,7 +33,7 @@ def prefix_diagnostics(source):
                     halves = [summary([b for b in keep if b["half"] == h]) for h in (0, 1)]
                     eligible = pooled["score"] < -previous.TOL and previous.nonharm(pooled) and (
                         mode != "half_safe" or all(previous.nonharm(h) for h in halves))
-                    deletions.append({"removed_group": list(group), "eligible": eligible, "pooled": pooled, "halves": halves})
+                    deletions.append({"removed_group": list(group), "eligible": bool(eligible), "pooled": pooled, "halves": halves})
                 concentration = {}
                 for root in roots:
                     concentration[root] = {}
