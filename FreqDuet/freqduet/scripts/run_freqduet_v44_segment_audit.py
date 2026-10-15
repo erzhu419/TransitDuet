@@ -7,6 +7,7 @@ import json
 from multiprocessing import get_context
 import os
 from pathlib import Path
+import sys
 import unittest
 
 import numpy as np
@@ -19,6 +20,7 @@ class SegmentObserver(distribution.DistributionObserver):
     def __init__(self, *args):
         super().__init__(*args)
         self.actual_events, self.forecast_events, self.requested_actions = [], [], []
+        self.restorers = []
 
     def attach(self, runner):
         super().attach(runner)
@@ -51,15 +53,29 @@ class SegmentObserver(distribution.DistributionObserver):
             return wrapped
 
         recorder.record = wrap("arrival", recorder.record)
-        recorder.record_action_ready = wrap("ready", recorder.record_action_ready)
         recorder.record_departure = wrap("departure", recorder.record_departure)
-        original_action = recorder.record_executed_holding_action
+        bus_class = vars(sys.modules[type(env).__module__])["Bus"]
+        original_prepare, original_start = bus_class._prepare_for_action, bus_class._start_dwelling
 
-        def action(station, direction, trip, seconds):
-            record("action", station, direction, env.current_time, trip, action_s=float(seconds))
-            return original_action(station, direction, trip, seconds)
+        def prepare(bus, time, buses, debug):
+            result = original_prepare(bus, time, buses, debug)
+            record("ready", int(bus.last_station.station_id), bool(bus.direction), time, bus.trip_id)
+            if bus.state.name == "DWELLING":
+                record("action", int(bus.last_station.station_id), bool(bus.direction), time, bus.trip_id, action_s=0.0)
+            return result
 
-        recorder.record_executed_holding_action = action
+        def start(bus, action, current_time=None):
+            result = original_start(bus, action, current_time)
+            record("action", int(bus.last_station.station_id), bool(bus.direction), current_time,
+                   bus.trip_id, action_s=float(bus.dwelling_time or 0.0))
+            return result
+
+        bus_class._prepare_for_action, bus_class._start_dwelling = prepare, start
+        self.restorers.append((bus_class, original_prepare, original_start))
+
+    def close(self):
+        for bus_class, prepare, start in reversed(self.restorers):
+            bus_class._prepare_for_action, bus_class._start_dwelling = prepare, start
 
     def forecast_event_sink(self, label, horizon):
         if horizon != 1800:
@@ -92,6 +108,8 @@ def run_day(arguments):
         label = distribution.run_day(arguments)
     finally:
         distribution.DistributionObserver = original
+        for observer in captured:
+            observer.close()
     cell = root / "observed" / label
     if {row["stage"] for row in captured[0].actual_events} != {"arrival", "ready", "action", "departure"}:
         raise ValueError("reset lost the actual stop-clock instrumentation")
