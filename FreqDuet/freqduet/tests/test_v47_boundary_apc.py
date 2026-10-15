@@ -1,4 +1,5 @@
 from pathlib import Path
+from io import StringIO
 import sys
 import unittest
 
@@ -22,6 +23,8 @@ class BoundaryAPCTest(unittest.TestCase):
         observed = observation()
         observed["time_s"] = 1800
         self.assertEqual(fit_travel(legs, observed)["counts"]["True:0"], 1)
+        restored = pd.read_csv(StringIO(legs.to_csv(index=False)), dtype={"direction": str})
+        self.assertEqual(fit_travel(restored, observed)["counts"], fit_travel(legs, observed)["counts"])
 
     def test_reverse_terminal_uses_direction_not_reused_bus(self):
         routes = {"True": dict(station_ids=[0, 1, 2]), "False": dict(station_ids=[2, 1, 0])}

@@ -98,7 +98,9 @@ def forecast(arguments):
         raise ValueError("acquisition/prefix verification is incomplete")
     capture = json.loads((bank / "observed" / cell.name / "forecasts.json").read_text())[f"clock_{clock}"]
     observed = capture["pool"]
-    model = fit_travel(pd.read_csv(cell / "completed_legs.csv"), observed)
+    model = fit_travel(pd.read_csv(cell / "completed_legs.csv", dtype={"direction": str}), observed)
+    if clock == 36000 and any(count == 0 for count in model["counts"].values()):
+        raise ValueError("CSV replay lost the directed-leg support verified during acquisition")
     traces = []
     results = {str(horizon): travel_ensemble(observed, horizon, capture["distribution_model"], model, "shared_block",
         event_sink=(lambda draw, row: traces.append(dict(draw=draw, **row)))
@@ -204,7 +206,7 @@ def aggregate(root, bank, v46):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["smoke", "acquire", "forecast", "aggregate"])
+    parser.add_argument("command", choices=["smoke", "forecast-smoke", "acquire", "forecast", "aggregate"])
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--input-bank", type=Path, required=True)
     parser.add_argument("--v46-root", type=Path, required=True)
@@ -212,13 +214,14 @@ if __name__ == "__main__":
     parser.add_argument("--end", type=int, default=12)
     parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
-    if args.command == "smoke":
+    if args.command in ("smoke", "forecast-smoke"):
         tests = Path(__file__).resolve().parents[1] / "tests"
         suite = unittest.defaultTestLoader.discover(str(tests), pattern="test_v4[124567]*.py")
         if not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful():
             raise SystemExit(1)
         entry = calibration_protocol.items()[0]
-        acquire((args.out_root, args.input_bank, *entry))
+        if args.command == "smoke":
+            acquire((args.out_root, args.input_bank, *entry))
         forecast((args.out_root, args.input_bank, *entry, 36000))
         export = args.out_root / "exports"
         export.mkdir(parents=True, exist_ok=True)
