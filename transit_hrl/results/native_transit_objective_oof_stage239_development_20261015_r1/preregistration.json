@@ -1,0 +1,208 @@
+{
+  "contract": {
+    "boundary": "development_reused240_states8_draws_not_new_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "fit_tasks": 32,
+      "inner_blocks": 640,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "objective_solves": 16128,
+      "raw_wait_updates": 0,
+      "report_tasks": 1,
+      "residual_SVDs": 2688,
+      "rl_actor_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "all640_cached_clean_OOF_raw_blocks_and_all_Stage234_allMSE_inner_curves_and6_selected_keys_reproduce",
+    "evaluation": "freeze_OOF_selection_then_refit_same_objectives_full60_4_under_cached_outer_reference_train_same_other_held_same_other",
+    "filters": [
+      "pooled_safe",
+      "half_safe"
+    ],
+    "gate": "cached_predicted_raw_gate_unchanged_true_wait_only_for_evaluation",
+    "grid": {
+      "16@0.25": {
+        "alpha": 0.25,
+        "level": "16"
+      },
+      "16@0.5": {
+        "alpha": 0.5,
+        "level": "16"
+      },
+      "16@0.75": {
+        "alpha": 0.75,
+        "level": "16"
+      },
+      "16@1": {
+        "alpha": 1.0,
+        "level": "16"
+      },
+      "1@0.25": {
+        "alpha": 0.25,
+        "level": "1"
+      },
+      "1@0.5": {
+        "alpha": 0.5,
+        "level": "1"
+      },
+      "1@0.75": {
+        "alpha": 0.75,
+        "level": "1"
+      },
+      "1@1": {
+        "alpha": 1.0,
+        "level": "1"
+      },
+      "3@0.25": {
+        "alpha": 0.25,
+        "level": "3"
+      },
+      "3@0.5": {
+        "alpha": 0.5,
+        "level": "3"
+      },
+      "3@0.75": {
+        "alpha": 0.75,
+        "level": "3"
+      },
+      "3@1": {
+        "alpha": 1.0,
+        "level": "3"
+      },
+      "8@0.25": {
+        "alpha": 0.25,
+        "level": "8"
+      },
+      "8@0.5": {
+        "alpha": 0.5,
+        "level": "8"
+      },
+      "8@0.75": {
+        "alpha": 0.75,
+        "level": "8"
+      },
+      "8@1": {
+        "alpha": 1.0,
+        "level": "8"
+      },
+      "zero": {
+        "alpha": 0.0,
+        "level": "zero"
+      }
+    },
+    "half_safe": "pooled_safe_plus_each_source_each_inner_future_direction_cost_wait_nonharm_and_risk_nonincrease",
+    "inner": "10_complete_prefix_folds_x2_future_directions_train54states_2draws_validate6states_opposite2draws",
+    "limitation": "reused_development_data_OOF_selection_is_not_fresh_CI_or_per_state_safety_guarantee",
+    "metrics": "actual_physical_cost_wait_unsafe_own_raw_deltas_and_gate_regret_score_MSE_not_cost_calibration_for_wait_rank",
+    "model_run": "native_transit_lowrank_joint_stage230_development_20261014_r1",
+    "objectives": [
+      "all_mse",
+      "feasible_mse",
+      "rank_regret",
+      "wait_rank"
+    ],
+    "optimizer": {
+      "acceptance": "best_of_initial_and_projected_candidate_actual_KKT_le1e-8_and_loss_increase_le1e-12",
+      "actual_KKT_limit": 1e-08,
+      "alpha": "same_frozen_postfit_alpha_no_new_strength_selection",
+      "dual_root_xtol": 1e-14,
+      "dual_stationarity_limit": 1e-09,
+      "feasible_mse_solver": "analytic_quadratic_ball_eigendecomposition_SciPy_brentq",
+      "initial": "cached_all_MSE_coefficients",
+      "max_root_evaluations_per_dual_solve": 400,
+      "rank_solver": "ball_Lagrangian_dual_SciPy_hybr_stationarity_root_analytic_Hessian_and_brentq",
+      "stationarity_root_xtol": 1e-10
+    },
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "pooled_safe": "per_source_cost_wait_nonharm_risk_nonincrease_pooled_worst_scaled_cost_wait_strictly_negative",
+    "reference": "Stage237_changing_native_x_inner_references_and_paths_cached_no_raw_refit",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "representation": "same198_causal_features_TSVD_basis_rank_and_all_MSE_RMS_ball_per_cached_reference",
+    "scopes": [
+      "train_same",
+      "train_other",
+      "held_same",
+      "held_other"
+    ],
+    "selection": "independently_each_objective_and_joint_across_objectives_each_anchor_same17_keys_no_outer_labels",
+    "source_protocol": "native_transit_cost_objectives_stage238_v3",
+    "source_run": "native_transit_cost_objectives_stage238_development_20261015_r3",
+    "storage": "remote_models_and_inner_curves_pull_small_aggregate_only",
+    "tie_break": "minimum_pooled_worst_scaled_cost_wait_then_fixed_objective_grid_order_no_candidate_means_raw",
+    "tolerance": {
+      "physical_nonharm": 1e-12,
+      "strict_scaled_improvement": 1e-12,
+      "unsafe": 0.0
+    },
+    "variants": [
+      "raw",
+      "all_mse_original_pooled_safe",
+      "all_mse_original_half_safe",
+      "all_mse_raw_pooled_safe",
+      "all_mse_raw_half_safe",
+      "feasible_mse_original_pooled_safe",
+      "feasible_mse_original_half_safe",
+      "feasible_mse_raw_pooled_safe",
+      "feasible_mse_raw_half_safe",
+      "rank_regret_original_pooled_safe",
+      "rank_regret_original_half_safe",
+      "rank_regret_raw_pooled_safe",
+      "rank_regret_raw_half_safe",
+      "wait_rank_original_pooled_safe",
+      "wait_rank_original_half_safe",
+      "wait_rank_raw_pooled_safe",
+      "wait_rank_raw_half_safe",
+      "joint_original_pooled_safe",
+      "joint_original_half_safe",
+      "joint_raw_pooled_safe",
+      "joint_raw_half_safe"
+    ],
+    "wait_rank": "feasible_pair_gap_weighted_logistic_ranking_of_cost/cached_cost_scale_plus_wait/cached_wait_scale_fixed_weight1_same_cost_score_offset"
+  },
+  "protocol": "native_transit_objective_oof_stage239_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "8a391fae99849d02ad51df686b813ea3e2513fd8"
+}
