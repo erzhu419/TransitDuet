@@ -130,13 +130,18 @@ def collect(root, v59_root, v56_root, index):
         pd.testing.assert_frame_equal(pd.DataFrame(observer.holds), reference["holds"], check_exact=True)
     audit = observer.stream.audit()
     cv = float(runner.env.headway_events.summary()["headway_cv"])
+    moments.observe(runner.env.headway_events.headways_s)
+    cv_squared = moments.cv_squared
+    np.testing.assert_allclose(cv_squared, cv ** 2, atol=1e-10, rtol=0)
+    if actor == "initial" and mode == "deterministic":
+        np.testing.assert_equal(cv_squared, v59_marker["episodes"][0]["cv_squared"])
     total = observer.stream.total
     row = dict(index=index, label=label, train_seed=seed, scenario_seed=scenario,
                actor=actor, mode=mode, rep=rep, sampler_seed=sampler_seed(seed, rep),
                actor_updates=64 if actor == "updated" else 0,
                journey_min=float(episode["restricted_total_journey_horizon_min"]),
                waiting_min=float(episode["restricted_wait_horizon_min"]),
-               onboard_min=float(episode["restricted_in_vehicle_horizon_min"]), cv=cv, cv_squared=cv ** 2,
+               onboard_min=float(episode["restricted_in_vehicle_horizon_min"]), cv=cv, cv_squared=cv_squared,
                holding_s_per_trip=float(episode["holding_vehicle_seconds_per_launched_trip"]),
                readiness_delay_s=float(episode["fleet_readiness_delay_mean_s"]),
                passenger_hours=float((total[0] + total[1]) / 3600), backlog_trip_s=float(total[4]),
@@ -180,7 +185,7 @@ def factorial_summary(rows):
                           mean_cv_squared_feasible={f"{a}_{mode}": v["cv_squared"] <= selected[0]["cv_budget_squared"]
                                                     for (a, mode), v in groups.items()},
                           updated_cv_budget_violations=sum(r["actor"] == "updated"
-                              and r["cv"] ** 2 > r["cv_budget_squared"] for r in selected)))
+                              and r["cv_squared"] > r["cv_budget_squared"] for r in selected)))
     return dict(cases=cases, mean_effects={name: {m: float(np.mean([
         c["effects"][name][m] for c in cases])) for m in METRICS} for name in cases[0]["effects"]})
 

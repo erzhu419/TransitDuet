@@ -25,7 +25,8 @@ each actor, and their interaction. Average sampling replicates inside each
 train/demand context before averaging the four contexts. Report journey,
 wait/onboard, unrounded CV and mean squared CV, holding, readiness, passenger
 exposure and backlog. Average squared CV directly for the constraint, rather
-than squaring the averaged CV.
+than squaring the averaged CV. Calculate each rollout's squared CV with V59's
+completed-arrival moment accumulator, including its original reference budget.
 Keep CV feasibility relative to the original deterministic reference separate
 from improvement over the same-mode initial actor. Use the result to decide
 whether to repair the learning update, constraint value/dual, or deployment mode.
