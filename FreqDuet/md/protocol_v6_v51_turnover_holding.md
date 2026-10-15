@@ -46,3 +46,10 @@ Fit only those active prefix rows, retaining the existing ridge and seven
 coefficients. Later decisions use the base probabilities; all eligible predicted
 actions still update the next completed-trip residual history. This is a
 post-audit development revision; the original gate and fresh-validation need stay.
+
+V51D smoke t160149 passes 85 tests and the exact V48 draw replay. Preparation
+t160150-t160154 and gate t160155 pass all three reused-demand cohorts: overall
+single-decision MAE delta -0.0101 s [-0.0135,-0.0065], NLL delta -0.000825
+[-0.001096,-0.000555] (six demand clusters). Four-cell forecasts t160157-t160161
+are submitted with dependent aggregation; closed-loop qualification is pending.
+These are forecast improvements on development data, not actual policy gains.
