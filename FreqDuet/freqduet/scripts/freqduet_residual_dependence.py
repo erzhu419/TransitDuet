@@ -191,7 +191,8 @@ def pair_audit(frame, deviations=None, lengths=None):
         n, covariance = model_stats[(relation, lag)]
         rows.append(dict(relation=relation, lag=lag, transform=transform, pair_scope=scope,
             mean_lag_s=values[6] / values[0], **describe_moments(values[:6]),
-            same_origin_pairs=int(n), same_origin_model_covariance=covariance / n if n else np.nan))
+            same_origin_pairs=int(n),
+            same_origin_model_covariance=covariance / n if n and transform == "residual" else np.nan))
     return pd.DataFrame(rows)
 
 

@@ -68,14 +68,14 @@ class ResidualDependenceTest(unittest.TestCase):
         result = pair_audit(frame, np.tile([-1., 1.], (4, 1)), np.full(4, 2))
         serial = result.loc[(result.relation == "same_bus_same_trip") & (result.lag == "1")]
         self.assertTrue((serial.same_origin_pairs == 0).all())
-        adjacent = result.loc[result.relation == "same_directed_stop_different_bus"]
+        adjacent = result.loc[(result.relation == "same_directed_stop_different_bus") & (result["transform"] == "residual")]
         self.assertTrue((adjacent.same_origin_model_covariance == 1).all())
 
     def test_windows_do_not_duplicate_endpoint_labels(self):
         frame = records()
         frame.loc[1, "time_s"] = 4500
         windows, _ = window_audit(frame)
-        first = windows.loc[(windows.horizon_s == 900) & (windows.transform == "residual")]
+        first = windows.loc[(windows.horizon_s == 900) & (windows["transform"] == "residual")]
         self.assertEqual(first.events.sum(), len(frame))
         self.assertEqual(first.events.iloc[0], 2)
 
