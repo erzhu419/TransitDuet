@@ -24,6 +24,11 @@ Smoke t160188 passes 16 tests. Preparation t160189-t160193 completes all 12 days
 gate t160195 fails: short-lead MAE delta versus V50 -1.345 s [-1.725,-1.021],
 long-lead delta versus V48 +1.163 s [0.947,1.361], six demand clusters. The
 long-lead gap narrows from V53's +2.019 s, but every cohort still fails. No
-closed-loop matrix or real-policy promotion is launched. Preserve this partial
-repair and inspect the remaining road/time residuals before choosing a further
-model change; the short-lead gain is not full forecast qualification.
+closed-loop matrix or real-policy promotion is launched. The short-lead gain
+is not full forecast qualification.
+
+Read-only audit t160216 finds same-sign V48/V50 mean biases in 81.25% of late
+day/road/time cells (descriptive cell averages, not event-weighted inference).
+For False:10 / 0:0, their biases are -17.40/-29.01 s and V54 remains -26.52 s.
+This motivates testing completed-prequential conditional residual bias alongside
+persistence next; the cell averages alone do not establish a query-level bound.
