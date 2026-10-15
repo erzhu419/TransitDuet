@@ -9,24 +9,24 @@ PRIMARY = VARIANTS[-1]
 FIELDS = ("actual_cost_delta", "fleet_cost_delta", "nonfleet_cost_delta", "wait_delta_min")
 
 
-def action_union(cells):
+def action_union(cells, *, variants=VARIANTS):
     choices, active = {}, set()
     for cell in cells:
         for block in cell["blocks"]:
             n = len(block["states"])
-            if set(block["choices"]) != set(VARIANTS) or any(len(x) != n for x in block["choices"].values()):
+            if set(block["choices"]) != set(variants) or any(len(x) != n for x in block["choices"].values()):
                 raise ValueError("Changed frozen action coverage")
             for i, row in enumerate(block["states"]):
                 key = state_key(row)
-                cs = {block["choices"][v][i] for v in VARIANTS}
+                cs = {block["choices"][v][i] for v in variants}
                 if not cs <= set(range(6)): raise ValueError("Invalid frozen candidate")
                 choices.setdefault(key, set()).update(cs)
                 if len(cs) > 1: active.add(key)
     return {key: sorted(choices[key]) for key in sorted(active)}
 
 
-def sparse_panels(cells, draws, load):
-    union = action_union(cells)
+def sparse_panels(cells, draws, load, *, variants=VARIANTS):
+    union = action_union(cells, variants=variants)
     keys = {state_key(r) for c in cells for b in c["blocks"] for r in b["states"]}
     panels = {k: {"values": np.zeros((len(draws), 6, 4))} for k in keys}
     for key, candidates in union.items():
@@ -41,11 +41,11 @@ def sparse_panels(cells, draws, load):
     return panels
 
 
-def summarize(cells, panels, *, baseline="raw"):
+def summarize(cells, panels, *, baseline="raw", variants=VARIANTS):
     paired = [{"blocks": [{"states": b["states"],
-        "choices": {"raw": b["choices"][baseline], **{v: b["choices"][v] for v in VARIANTS if v != "raw"}}}
+        "choices": {"raw": b["choices"][baseline], **{v: b["choices"][v] for v in variants if v != "raw"}}}
         for b in c["blocks"]]} for c in cells]
-    result = conditional_mc(paired, panels, variants=VARIANTS)
+    result = conditional_mc(paired, panels, variants=variants)
     result["baseline"] = baseline
     if baseline != "raw": del result["variants"]["raw"]
     for variant in result["variants"].values():

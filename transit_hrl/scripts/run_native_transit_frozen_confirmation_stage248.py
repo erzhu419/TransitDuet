@@ -137,10 +137,9 @@ def labels_from_rollouts(baseline, branches, historical_peak):
     return result
 
 
-def collect(run, key):
+def replay_draw(key, item, seed, output):
+    """Replay a sealed action union with the native source and identity controls."""
     started = time.monotonic()
-    frozen = load_seal(run)
-    item = next(a for a in frozen["active"] if tuple(a["key"]) == key[:4])
     root, scenario, replica, probe, draw = key
     bank = json.loads(coverage.source.bank_path(coverage.SOURCE_RUN).read_text())
     registered = next(r for r in bank["training_data"] if learning.state_key(r) == tuple(item["state"]))
@@ -153,8 +152,7 @@ def collect(run, key):
     torch.set_num_threads(1)
     source.shared.source.incumbent.source.distributional.validate_model(model)
     _, checkpoint = source.native.load_source(root)
-    scene, seed = source.scene_seed(root, scenario, replica), continuation_seed(*key)
-    output, raw = draw_path(run, *key), raw_directory(draw_path(run, *key))
+    scene, raw = source.scene_seed(root, scenario, replica), raw_directory(output)
     original, original_plan = source.shared.episode(root, scenario, scene, raw/"original", checkpoint, model,
         probe, plan_class=NativeTimetableContextAudit)
     prior = json.loads(coverage.noise.source_path(ROOT/"results"/coverage.noise.COLLECTION_RUN, *key[:4]).read_text())
@@ -188,26 +186,42 @@ def collect(run, key):
     baseline["policy_trace"] = source.shared.policy_trace(baseline["supply"])
     source.validate_continuations(baseline, branches, candidates=item["candidates"])
     n = 2+len(branches)
-    result = {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "key": list(key), "software_qualified": True,
+    result = {"key": list(key), "software_qualified": True,
         "continuation_seed": seed, "original_choice": registered["original_choice"], "candidates": item["candidates"],
         "labels": labels_from_rollouts(baseline, branches, context["historical_peak"]),
         "original_source_reproductions": 1, "exact_resampled_identities": 1, "prefix_state_rng_matches": n-1,
         "frozen_weight_qualified_episodes": n, "window_ledger_qualified_episodes": n, "continuation_qualified": True,
         "native_clock_ticks": n*61380, "training_updates": 0,
         "wall_seconds": time.monotonic()-started, "peak_process_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024.}
-    qualify_draw(result, key, item)
+    qualify_physical_draw(result, key, item, seed)
     write_json(raw/"paired_rollouts.json", {"original": original, "observer": baseline, "branches": branches,
         "context": context, "snapshot": original_plan.snapshot})
+    return result
+
+
+def collect(run, key):
+    frozen = load_seal(run)
+    item = next(a for a in frozen["active"] if tuple(a["key"]) == key[:4])
+    output = draw_path(run, *key)
+    result = {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(),
+        **replay_draw(key, item, continuation_seed(*key), output)}
+    qualify_draw(result, key, item)
+    raw = raw_directory(output)
     write_json(raw/"result.json", result)
     write_json(output, {k: v for k, v in result.items() if k != "labels"})
     print("FROZEN_CONFIRMATION_DRAW_COMPLETE", flush=True)
 
 
 def qualify_draw(r, key, item):
+    if r["protocol"] != EXPERIMENT_PROTOCOL or r["contract"] != contract() or key[-1] not in DRAWS:
+        raise ValueError("Changed frozen replay protocol")
+    qualify_physical_draw(r, key, item, continuation_seed(*key))
+
+
+def qualify_physical_draw(r, key, item, seed):
     n = 2+len(item["candidates"])
-    if not (r["protocol"] == EXPERIMENT_PROTOCOL and r["contract"] == contract() and tuple(r["key"]) == key
-            and r["software_qualified"] and key[-1] in DRAWS and tuple(item["key"]) == key[:4]
-            and r["continuation_seed"] == continuation_seed(*key) and r["candidates"] == item["candidates"]
+    if not (tuple(r["key"]) == key and r["software_qualified"] and tuple(item["key"]) == key[:4]
+            and r["continuation_seed"] == seed and r["candidates"] == item["candidates"]
             and r["original_source_reproductions"] == r["exact_resampled_identities"] == 1
             and r["prefix_state_rng_matches"] == n-1 and r["frozen_weight_qualified_episodes"] == n
             and r["window_ledger_qualified_episodes"] == n and r["continuation_qualified"]
