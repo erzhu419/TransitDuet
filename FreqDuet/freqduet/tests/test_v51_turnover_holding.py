@@ -21,9 +21,10 @@ def data():
 class TurnoverHoldingTest(unittest.TestCase):
     def test_zero_correction_preserves_base_distribution_and_seven_actions(self):
         prior = np.arange(1., 8.) / 28
-        model = dict(coef=None, prior=prior.tolist())
         correction = dict(coef=[0.] * 7, scale=[1.] * 7)
-        np.testing.assert_allclose(tilted_probabilities(model, [], np.ones(7), correction), prior, atol=1e-12)
+        np.testing.assert_array_equal(tilted_probabilities(prior, np.ones(7), correction), prior)
+        correction["coef"] = [1.] * 7
+        np.testing.assert_array_equal(tilted_probabilities(prior, np.zeros(7), correction), prior)
 
     def test_tilt_fit_excludes_future_and_has_zero_cold_start(self):
         rows = pd.DataFrame([dict(time_s=t, action_s=y, context=np.ones(7), base_probabilities=np.ones(7) / 7)

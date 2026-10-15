@@ -40,8 +40,10 @@ def fit_turnover_tilt(rows, now):
     return result
 
 
-def tilted_probabilities(base_model, features, context, correction):
-    probabilities = probabilities_from_features(base_model, features)
+def tilted_probabilities(probabilities, context, correction):
+    probabilities = np.asarray(probabilities)
+    if not np.any(context) or not np.any(correction["coef"]):
+        return probabilities
     tilt = np.asarray(context) / np.asarray(correction["scale"]) @ np.asarray(correction["coef"])
     logits = tilt * ACTIONS / 45
     mass = probabilities * np.exp(logits - logits.max())
@@ -134,7 +136,7 @@ class TurnoverResponse:
         features = holding_features(values)
         base = probabilities_from_features(self.model["base"], features)
         state["current"]["base_mean_s"] = float(base @ ACTIONS)
-        probabilities = tilted_probabilities(self.model["base"], features, context, self.model["correction"])
+        probabilities = tilted_probabilities(base, context, self.model["correction"])
         return sample_action(probabilities, self.rng.random())
 
     def observe(self, row):

@@ -71,7 +71,7 @@ def prepare_day(arguments):
             continue
         model = models[clock]["model"]
         base_probs = probabilities_from_features(model["base"], row.features)
-        new_probs = tilted_probabilities(model["base"], row.features, row.augmented_features[12:], model["correction"])
+        new_probs = tilted_probabilities(base_probs, row.augmented_features[12:], model["correction"])
         for mode, probabilities in (("legacy", base_probs), ("turnover", new_probs)):
             scores.append(dict(mode=mode, **score_action(probabilities, row.action_s)))
     output = root / "prepared" / label
@@ -120,8 +120,9 @@ def phase_audit(root, base):
             phase = ("no_scored_previous" if not row.has_scored_previous else
                      "first_after_turnover" if row.decision_index == 0 else "later_in_trip")
             model = models[str(clock)]["model"]
-            for mode, probabilities in (("legacy", probabilities_from_features(model["base"], row.features)),
-                    ("turnover", tilted_probabilities(model["base"], row.features, context, model["correction"]))):
+            base_probs = probabilities_from_features(model["base"], row.features)
+            for mode, probabilities in (("legacy", base_probs),
+                    ("turnover", tilted_probabilities(base_probs, context, model["correction"]))):
                 score = score_action(probabilities, row.action_s)
                 rows.append(dict(phase=phase, mode=mode, abs_error=abs(score["error"]), nll=score["nll"]))
         day = pd.DataFrame(rows).groupby(["phase", "mode"]).agg(
