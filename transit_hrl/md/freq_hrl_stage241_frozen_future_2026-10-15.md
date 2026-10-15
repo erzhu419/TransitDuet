@@ -29,12 +29,14 @@ Six focused fixture tests pass. Seal t153586 completed on node004 with exit zero
 Mixed joint/raw/half-safe cost delta: old OOF -0.00007526, unused futures -0.00022560.
 Wait delta: -0.00057839 -> -0.00006302 min; root397 unused wait is +0.00008073 min.
 Thus cached cost improvement survives, but source-wise wait nonharm already fails.
-The dispatcher now reads actual terminal records, since results summaries omit exit codes;
-the first preflight registration was blocked before creating tasks, with no experiment rerun.
-Native preflights t153587-t153596 are running on node001/004/005/006, one CPU each.
-The other 1,910 draw tasks and report remain unsubmitted until all ten pass.
-Their full result will distinguish future-selection noise from prefix-transfer failure.
-Only the 51,089-byte seal aggregate was pulled; checkpoints/actions/rollouts remain remote.
+Native preflights t153587-t153596 completed with exit zero: 80 episodes, 10 exact
+resampled identities, 70 prefix/RNG matches, 80 frozen-weight and window-ledger checks.
+Duration 185-214 seconds/task; measured peak RSS <=702 MB. No training updates.
+The remaining 1,910 draws are registered as t153597-t155506 for node001-node006,
+one CPU/task without node binding; scheduler dispatch is expanding the active pool.
+The report is submitted only after all 1,920 draws complete with exit zero.
+The full result will distinguish future-selection noise from prefix-transfer failure.
+Only aggregate evidence and compact receipts are kept locally; checkpoints/actions/rollouts remain remote.
 
 ## Limitations
 

@@ -1,0 +1,239 @@
+{
+  "cell_keys": [
+    [
+      397,
+      "low_noise",
+      1,
+      9,
+      0
+    ],
+    [
+      397,
+      "high_noise",
+      1,
+      9,
+      0
+    ],
+    [
+      397,
+      "hour_burst",
+      1,
+      9,
+      0
+    ],
+    [
+      397,
+      "persistent_shift",
+      1,
+      9,
+      0
+    ],
+    [
+      397,
+      "ood_period",
+      1,
+      9,
+      0
+    ],
+    [
+      401,
+      "low_noise",
+      1,
+      9,
+      0
+    ],
+    [
+      401,
+      "high_noise",
+      1,
+      9,
+      0
+    ],
+    [
+      401,
+      "hour_burst",
+      1,
+      9,
+      0
+    ],
+    [
+      401,
+      "persistent_shift",
+      1,
+      9,
+      0
+    ],
+    [
+      401,
+      "ood_period",
+      1,
+      9,
+      0
+    ]
+  ],
+  "contract": {
+    "actions": "seal_all21_action_vectors_on6_state_inner_validation_batches_reproduce12800_selected_OOF_records",
+    "aggregation": "equal20_blocks_then_equal_cells_with_source_admitted_only_and_prefix_concentration_breakdowns",
+    "boundary": "conditional_future_replication_on_reused_development_prefixes_not_fresh_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "collection_tasks": 1920,
+      "new_native_clock_ticks": 942796800,
+      "new_native_episodes": 15360,
+      "new_prefix_scenes": 0,
+      "new_raw_reference_fits": 0,
+      "new_residual_fits": 0,
+      "report_tasks": 1,
+      "seal_tasks": 1,
+      "training_updates": 0
+    },
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "confirmation": "Stage169_reserved_third_fourth_cohorts_remain_closed_default_unchanged",
+    "controls": "one_exact_original_observer_plus_resampled_observer_six_actions_including_exact_resampled_identity",
+    "draws": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "future_seed": "1241000000+root_index*100000+regime_index*10000+replica*1000+probe*10+draw",
+    "futures": "eight_new_postprobe_ScenarioTape_seeds_shared_across_all_six_actions_and_all32_diagnostic_cells",
+    "metrics": "paired_cost_wait_delta_mean_label_wait_harm_and_draw_wait_harm_rate_gate_regret_fixed_action_switch",
+    "preflight": "both_roots_all5regimes_replica1_probe9_draw0_then1910_remaining",
+    "previous_run": "native_transit_refit_consistency_stage240_development_20261015_r2",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "retained": "all_prefix_physics_cost_RNG_and_episode_demand_profile_peak_phase_OD_multipliers_lower_weights_duration_prior",
+    "scopes": [
+      "old_oof2",
+      "old_unused4",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "selection": "all20_Stage239_candidates_and_640_inner_models_fixed_before_new_futures_no_reselection_or_refits",
+    "source_protocol": "native_transit_objective_oof_stage239_v1",
+    "source_run": "native_transit_objective_oof_stage239_development_20261015_r1",
+    "storage": "sealed_actions_draw_labels_rollouts_and_models_server_only_small_receipts_and_aggregate_sync",
+    "variants": [
+      "raw",
+      "all_mse_original_pooled_safe",
+      "all_mse_original_half_safe",
+      "all_mse_raw_pooled_safe",
+      "all_mse_raw_half_safe",
+      "feasible_mse_original_pooled_safe",
+      "feasible_mse_original_half_safe",
+      "feasible_mse_raw_pooled_safe",
+      "feasible_mse_raw_half_safe",
+      "rank_regret_original_pooled_safe",
+      "rank_regret_original_half_safe",
+      "rank_regret_raw_pooled_safe",
+      "rank_regret_raw_half_safe",
+      "wait_rank_original_pooled_safe",
+      "wait_rank_original_half_safe",
+      "wait_rank_raw_pooled_safe",
+      "wait_rank_raw_half_safe",
+      "joint_original_pooled_safe",
+      "joint_original_half_safe",
+      "joint_raw_pooled_safe",
+      "joint_raw_half_safe"
+    ]
+  },
+  "duration_seconds": {
+    "maximum": 213.09138298034668,
+    "mean": 194.09220671653748,
+    "minimum": 185.16385173797607
+  },
+  "exact_resampled_identities": 10,
+  "frozen_weight_qualified_episodes": 80,
+  "interpretation": "software_and_pairing_preflight_not_selected_policy_performance_evidence",
+  "native_clock_ticks": 4910400,
+  "native_episodes": 80,
+  "observed_at": "2026-10-15T01:35:39.527373+00:00",
+  "original_source_reproductions": 10,
+  "peak_ram_mb_max": 702,
+  "prefix_state_rng_matches": 70,
+  "preflight_cells": 10,
+  "protocol": "native_transit_frozen_future_stage241_v1",
+  "qualification": "server_qualify_draw_on_all10_raw_results_and_exact_receipt_key_matches",
+  "remote_available_disk_bytes": 125043835109376,
+  "remote_preflight_disk_bytes": 83096120,
+  "scheduler_preflight_done_zero": 10,
+  "software_qualified": true,
+  "tasks": [
+    {
+      "exit_code": 0,
+      "id": "t153587",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/low_noise/397/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153588",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/high_noise/397/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153589",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/hour_burst/397/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153590",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/persistent_shift/397/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153591",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/ood_period/397/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153592",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/low_noise/401/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153593",
+      "node": "node005",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/high_noise/401/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153594",
+      "node": "node001",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/hour_burst/401/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153595",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/persistent_shift/401/1/9/0",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t153596",
+      "node": "node006",
+      "signature": "Freq-HRL/native_transit_frozen_future_stage241_v1/native_transit_frozen_future_stage241_development_20261015_r1/draw/ood_period/401/1/9/0",
+      "status": "done"
+    }
+  ],
+  "training_updates": 0,
+  "window_ledger_qualified_episodes": 80
+}
