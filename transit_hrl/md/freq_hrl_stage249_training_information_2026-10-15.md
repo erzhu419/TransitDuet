@@ -29,3 +29,9 @@ Only small receipts/aggregates are pulled; panels, models and rollouts stay remo
 Next: freeze all three arms, then pre-register genuinely new prefixes for transfer.
 Current crossfit is conditional on existing development prefixes, not a seed-level
 performance CI or proof of full learned HRL. No default changes are planned here.
+
+Preflight t160200-t160209 and summary t160218 completed with exit zero: 80 qualified
+episodes, maximum draw time 221 s, peak RSS 734 MB, zero training updates. Seven new
+tests and 11 existing regressions passed. Only the 2,835-byte summary was pulled.
+Remaining collection is t160223-t162142 (1,920 chunks, 7,670 draws excluding the
+ten preflights). Fits await complete qualified panels; no new performance claim.
