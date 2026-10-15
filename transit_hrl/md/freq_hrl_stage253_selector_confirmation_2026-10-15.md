@@ -30,7 +30,8 @@ Repeated model exposures do not multiply event counts or conditional MC precisio
 
 Limitations: fixed development prefixes, independent conditional futures, not
 training-seed CI, new-prefix transfer or complete learned HRL. Normal intervals
-do not certify rare tails. Stage248 outcomes and Stage169 reserves remain closed.
+do not certify rare tails. Secondary analyses are descriptive. Stage248 outcomes
+and Stage169 reserves remain closed.
 No default/deployment change. Pull only small seal/preflight/final summaries.
 
 Registration: `native_transit_selector_confirmation_stage253_20261015_r1`.
@@ -38,3 +39,7 @@ Seal t162435 completed on node004 with exit 0: 128 frozen model/bank/scope cells
 240 states, 176 active states, 11,264 futures, 67,136 native episodes and 2,816
 four-future chunks (preflight draws are excluded from their chunks). Eighteen
 focused tests passed, including the unchanged Stage248 and Stage252 paths.
+Preflight t162442-t162451 and report t162454 all completed with exit 0: 10 futures,
+61 episodes, max wall time 205.39 s and max process RSS 722.91 MB. All 2,816
+remaining chunks were submitted as t162456-t165271; execution has started.
+Final report remains gated on all collection attempts completing successfully.

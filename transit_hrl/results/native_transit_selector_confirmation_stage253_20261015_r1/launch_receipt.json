@@ -1,0 +1,68 @@
+{
+  "budget": {
+    "active_states": 176,
+    "collection_chunks": 2816,
+    "collection_draws": 11264,
+    "fixed_states": 240,
+    "frozen_cells": 128,
+    "native_episodes": 67136
+  },
+  "default_changed": false,
+  "final_report_submitted": false,
+  "focused_tests_passed": 18,
+  "local_pulls": {
+    "preflight_report_bytes": 4158,
+    "raw_models_panels_actions_or_rollouts_pulled": false,
+    "seal_bytes": 45714
+  },
+  "performance_confirmation_complete": false,
+  "preflight": {
+    "coverage_qualified": true,
+    "draws": 10,
+    "native_episodes": 61,
+    "peak_process_rss_mb_max": 722.91015625,
+    "protocol": "native_transit_selector_confirmation_stage253_v1",
+    "training_updates": 0,
+    "wall_seconds_max": 205.38882444612682
+  },
+  "protocol": "native_transit_selector_confirmation_stage253_v1",
+  "recorded_at_utc": "2026-10-15T16:11:47.594168+00:00",
+  "registered_source_revision": "b12307b769af496d19d261f709012fefb7924265",
+  "run_name": "native_transit_selector_confirmation_stage253_20261015_r1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "assigned_node_counts": {
+      "node002": 41,
+      "node004": 101,
+      "node005": 96,
+      "node006": 99
+    },
+    "native_cpu_per_task": 1,
+    "native_ram_mb_per_task": 1536,
+    "phase_counts": {
+      "collect": 2816,
+      "preflight": 10,
+      "preflight_report": 1,
+      "seal": 1
+    },
+    "preflight": "t162442-t162451",
+    "preflight_report": "t162454",
+    "records": 2828,
+    "remaining_chunks": "t162456-t165271",
+    "require_node": null,
+    "retry_count_sum": 0,
+    "seal": "t162435",
+    "status_counts": {
+      "done": 12,
+      "queued": 2491,
+      "running": 325
+    }
+  }
+}
