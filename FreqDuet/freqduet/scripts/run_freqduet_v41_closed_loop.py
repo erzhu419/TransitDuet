@@ -144,7 +144,7 @@ def at(timeline, clock):
 
 
 def aggregate(root):
-    rows, dominant_prefix = [], None
+    rows, return_rows, command_rows, dominant_prefix = [], [], [], None
     for seed, scenario, arm in items():
         cell = root / "observed" / f"seed{seed}_eval{scenario}_{arm}"
         snapshots = json.loads((cell / "closed_snapshots.json").read_text())
@@ -155,6 +155,7 @@ def aggregate(root):
             dominant_prefix = snapshots["clock_7200"]
         timeline = np.load(cell / "exposure.npz")["timeline"]
         holds = pd.read_csv(cell / "holds.csv")
+        actual_returns = pd.read_csv(cell / "terminals.csv").set_index("trip_id")
         for label, capture in snapshots.items():
             now = capture["pool"]["time_s"]
             model = capture["pool"]["holding_model"]
@@ -170,6 +171,24 @@ def aggregate(root):
                                 backlog_trip_seconds=actual[2], holding_vehicle_seconds=float(actual_hold))
                 row = dict(train_seed=seed, eval_seed=scenario, arm=arm, origin=label,
                            origin_s=now, horizon_s=horizon, mode=mode, holding_samples=model["samples"])
+                if arm == "reference" and label.startswith("clock_"):
+                    predicted_returns = {entry["trip_id"]: entry["time_s"] for entry in forecast["returns"]}
+                    for vehicle in capture["pool"]["vehicles"]:
+                        if vehicle["on_route"]:
+                            trip = vehicle["trip_id"]
+                            truth = float(actual_returns.loc[trip].time_s)
+                            predicted = predicted_returns.get(trip)
+                            return_rows.append(dict(mode=mode, horizon_s=horizon, trip_id=trip,
+                                returned_predicted=predicted is not None, returned_actual=truth <= now + horizon,
+                                error_s=predicted - truth if predicted is not None else np.nan))
+                    predicted_commands = {(entry["trip_id"], entry["station_id"]): entry["action_s"]
+                                          for entry in forecast["commands"] if now <= entry["time_s"] < now + horizon}
+                    actual_commands = holds.loc[(holds.time_s >= now) & (holds.time_s < now + horizon)]
+                    for entry in actual_commands.itertuples():
+                        predicted = predicted_commands.get((entry.trip_id, entry.station_id))
+                        command_rows.append(dict(mode=mode, horizon_s=horizon, matched=predicted is not None,
+                            absolute_error_s=abs(predicted - entry.action_s) if predicted is not None else np.nan,
+                            exact=predicted == entry.action_s if predicted is not None else False))
                 for metric, truth in outcomes.items():
                     row[f"actual_{metric}"] = float(truth)
                     row[f"predicted_{metric}"] = forecast[metric]
@@ -188,6 +207,17 @@ def aggregate(root):
                                bias=float(group[f"error_{metric}"].mean()),
                                mean_actual=float(group[f"actual_{metric}"].mean())))
     pd.DataFrame(result).to_csv(summary / "prediction_errors.csv", index=False)
+    return_frame = pd.DataFrame(return_rows)
+    return_frame["window_correct"] = return_frame.returned_predicted == return_frame.returned_actual
+    return_frame["abs_error_s"] = return_frame.error_s.abs()
+    return_frame.groupby(["mode", "horizon_s"]).agg(
+        count=("trip_id", "size"), window_accuracy=("window_correct", "mean"),
+        predicted_return_fraction=("returned_predicted", "mean"),
+        predicted_return_mae_s=("abs_error_s", "mean")).to_csv(summary / "return_accuracy.csv")
+    pd.DataFrame(command_rows).groupby(["mode", "horizon_s"]).agg(
+        actual_commands=("matched", "size"), matched_fraction=("matched", "mean"),
+        matched_mae_s=("absolute_error_s", "mean"), exact_fraction=("exact", "mean")).to_csv(
+            summary / "holding_action_accuracy.csv")
     record = root / "calibration_records"
     record.mkdir(parents=True, exist_ok=True)
     frame.to_csv(record / "closed_predictions.csv", index=False)
