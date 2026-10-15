@@ -29,3 +29,26 @@ interventions as diagnostics, not new independent scenarios. Validate unchanged
 V37 outcomes, prefix timing, passenger mass and capacity before interpreting
 model accuracy. No tail value is learned and no controller is promoted here.
 All computation uses scheduler on node001-node006; only small summaries return.
+
+## Outcome and next step
+
+V40 smoke `t153486` and final V41 smoke `t153573` pass; the latter passes 15
+tests. Seven formal replays (`t153578-t153582`, source `2d230fa317`) exactly
+match V37. Aggregations `t153583/t153584` and operational audit `t153585`
+(analysis `4a25148f3f`) retain all four reference days and three diagnostic arms.
+
+Across 1044/1028/953 short/medium/long forecasts, 952/913/830 have calibrated
+intervals. Coverage is 88.2/89.2/91.2%, with mean widths 292/531/657 s.
+This describes uncertainty but does not resolve actions separated by 15-45 s.
+The intervals calibrate the pooled ETA model, not the fluid response model.
+
+At 15 min, response vs historical holding predicts matched local actions with
+MAE 10.79 vs 15.33 s; waiting/onboard exposure MAEs are 23051/18936 vs
+23470/20711 person-seconds. Yet total holding MAE worsens from 213 to 367 s;
+at 30 min it worsens from 337 to 675 s, and onboard exposure also worsens.
+Thirty-minute predicted-return MAE improves from 122.63 to 103.42 s (predicted
+returns only; window accuracy 85.7 to 90.7%). The response surrogate is not
+accepted for action selection. Next replace mean-regression-plus-rounding with
+a categorical holding distribution, validate trajectory accumulation on fresh
+contexts, and calibrate the resulting return trajectories before learning tail
+value. No gate tuning or controller promotion on this development cohort.

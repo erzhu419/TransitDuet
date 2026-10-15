@@ -43,6 +43,7 @@ class ClosedLoopObserver(uncertainty.IntervalObserver):
             for (station, direction), time in recorder._last_arrival.items()}
         pool["last_departures"] = {f"{direction}:{station}": dict(entry)
                                    for (station, direction), entry in recorder._last_departure.items()}
+        # These intervals calibrate pooled ETA, not the fluid return trajectories.
         intervals = {}
         for vehicle in pool["vehicles"]:
             if vehicle["on_route"]:
