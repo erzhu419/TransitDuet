@@ -1,0 +1,81 @@
+{
+  "contract": {
+    "alignment": "full_past_reference_feature_coordinates_TSVD_basis_historical_all_MSE_initialization_scale_and_full_RMS_cap_fixed_for_every_inner_fold",
+    "boundary": "bundled_alignment_not_reference_only_causal_effect; reused_development_means_not_fresh_confirmation_seed_CI_or_end_to_end_HRL; no_default_change",
+    "bridge_run": "native_transit_selector_bridge_stage254_20261016_r1",
+    "budget": {
+      "actor_updates": 0,
+      "fit_tasks": 32,
+      "inner_solves": 10240,
+      "new_full_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_prefixes": 0,
+      "new_raw_reference_fits": 0,
+      "report_tasks": 1
+    },
+    "bundles": [
+      "prefix_refit",
+      "fixed_bundle"
+    ],
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "conditioning": "incremental_crossfit_conditional_on_pretrained_bundle_not_OOF_validation_of_entire_learner; outer_held_prefixes_unseen_by_bundle",
+    "contrast": "fixed_bundle_minus_prefix_refit_separately_for_each_model_selector_filter_no_winner_selection",
+    "controls": "Stage252_new2_new8_full_actions_and_all_outcome_fields_reproduce; Stage254_old_bridge_verbatim",
+    "diagnostics": "validation_to_inner_independent_to_full_independent_bridge; aligned_raw_gate_disagreement_must_be_zero; selector_key_coverage_and_fleet_service_wait",
+    "evaluation": "opposite16_Stage249_development_futures; freeze_all_full_actions_before_outcome_access; both_banks_four_views_seen_and_held",
+    "frozen": "same198_features_ranks17_candidates_GLS_reliability_penalty_rules; unchanged_selector_point_nonharm_half_safe_and_historical_fold_score_scales",
+    "full": "Stage251_models_verbatim_for_both_bundles; only_selected_candidate_key_can_change_full_actions",
+    "inner": "exclude_current_prefix_and_use_same8_new_training_futures; no_new_raw_fit_or_full_critic_fit",
+    "label_boundary": "no_Stage253_Stage248_outcomes_or_Stage169_reserved_prefixes; no_evaluation_selection",
+    "models": [
+      "free_old",
+      "shrunk"
+    ],
+    "selectors": [
+      "matched2",
+      "expanded8"
+    ],
+    "source_protocol": "native_transit_selector_information_stage252_v1",
+    "source_run": "native_transit_selector_information_stage252_20261015_r1",
+    "storage": "server_cached_panels_models_inner_actions_and_fit_ledgers; only_receipts_and_scalar_report_pulled",
+    "validation": "new2_and_new8_only_other_half_of_training_bank; no_old_A2_because_past_bundle_saw_old_A_labels",
+    "variants": [
+      "raw",
+      "prefix_refit_free_old_matched2_pooled_safe",
+      "prefix_refit_free_old_matched2_half_safe",
+      "prefix_refit_free_old_expanded8_pooled_safe",
+      "prefix_refit_free_old_expanded8_half_safe",
+      "prefix_refit_shrunk_matched2_pooled_safe",
+      "prefix_refit_shrunk_matched2_half_safe",
+      "prefix_refit_shrunk_expanded8_pooled_safe",
+      "prefix_refit_shrunk_expanded8_half_safe",
+      "fixed_bundle_free_old_matched2_pooled_safe",
+      "fixed_bundle_free_old_matched2_half_safe",
+      "fixed_bundle_free_old_expanded8_pooled_safe",
+      "fixed_bundle_free_old_expanded8_half_safe",
+      "fixed_bundle_shrunk_matched2_pooled_safe",
+      "fixed_bundle_shrunk_matched2_half_safe",
+      "fixed_bundle_shrunk_expanded8_pooled_safe",
+      "fixed_bundle_shrunk_expanded8_half_safe"
+    ]
+  },
+  "coverage_qualified": true,
+  "fits": {
+    "inner_solves": 320,
+    "max_kkt": 5.553283527470754e-15,
+    "radius_max_excess": 1.3877787807814457e-17,
+    "subspace_max_abs_difference": 9.854030597256345e-18
+  },
+  "key": [
+    "mixed_a",
+    0,
+    "even_odd",
+    0
+  ],
+  "protocol": "native_transit_deployment_bundle_stage255_v1",
+  "reproduction": {
+    "action_exposures": 2160,
+    "max_abs_difference": 0.0,
+    "mismatches": 0
+  }
+}

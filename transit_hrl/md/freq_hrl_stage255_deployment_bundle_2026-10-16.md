@@ -24,3 +24,28 @@ bundle, not OOF validation of the entire learner. It changes the whole bundle,
 not just the reference. Inner/full still differ in training prefixes and future
 count. Stage249 is reused development data, with no fresh confirmation or seed CI.
 Stage253/248 outcomes and Stage169 reserves are not read. No default change.
+
+## Results And Next
+
+All 33 scheduler records completed exit 0, zero retries (node004/005/006).
+10,240 inner solves; 69,120 control action-state exposures and all control metrics
+reproduced exactly. Six focused tests passed. Only a 1,807,585-byte scalar report
+and the small preflight receipt were pulled; no raw data or models.
+
+Mixed held-prefix new8 / pooled-safe development means relative to full raw:
+
+| Family | Prefix-Refit Cost / Wait (min) | Fixed-Bundle Cost / Wait (min) |
+|---|---:|---:|
+| free_old | -0.000336602 / -0.000546061 | -0.000013383 / +0.000004069 |
+| shrunk | -0.000278643 / -0.000405599 | -0.000056902 / -0.000142057 |
+
+Aligned raw/gate disagreement is exactly zero. Seen-prefix wait correction-transfer
+gaps shrink from +0.000275993/+0.000445508 to +0.000045964/+0.000033333,
+but validation utility and admission also shrink: new8 admits 14->6 / 15->7 of
+32 mixed bank-cell exposures. Smaller gaps do not establish better performance.
+New2 improves pooled held cost/wait for both families, but remains an exploratory
+mean, not grounds to select it after seeing these outcomes. Results vary by view.
+
+Next: use cached per-cell keys/outcomes to separate lost admission from changed
+key quality. Then compare point and uncertainty-aware selection on both frozen
+bundles; do not assume more conservative filtering will recover rejected gains.

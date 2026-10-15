@@ -1,0 +1,399 @@
+{
+  "admitted": {
+    "fixed_bundle": {
+      "free_old_expanded8": {
+        "half_safe": 3,
+        "pooled_safe": 6
+      },
+      "free_old_matched2": {
+        "half_safe": 3,
+        "pooled_safe": 8
+      },
+      "shrunk_expanded8": {
+        "half_safe": 4,
+        "pooled_safe": 7
+      },
+      "shrunk_matched2": {
+        "half_safe": 4,
+        "pooled_safe": 10
+      }
+    },
+    "prefix_refit": {
+      "free_old_expanded8": {
+        "half_safe": 10,
+        "pooled_safe": 14
+      },
+      "free_old_matched2": {
+        "half_safe": 9,
+        "pooled_safe": 12
+      },
+      "shrunk_expanded8": {
+        "half_safe": 10,
+        "pooled_safe": 15
+      },
+      "shrunk_matched2": {
+        "half_safe": 8,
+        "pooled_safe": 12
+      }
+    }
+  },
+  "boundary": "bundled_alignment_not_reference_only_causal_effect; reused_development_means_not_fresh_confirmation_seed_CI_or_end_to_end_HRL; no_default_change",
+  "expanded8_bridge": {
+    "fixed_bundle": {
+      "free_old": {
+        "cases": 3840,
+        "means": {
+          "correction_transfer": {
+            "cost": 1.8219270833333397e-05,
+            "fleet": 1.3563368055555555e-05,
+            "nonfleet": 4.655902777777843e-06,
+            "wait_min": 4.596354166666787e-05
+          },
+          "full_future": {
+            "cost": -9.277018229166626e-06,
+            "fleet": -1.3563368055555556e-05,
+            "nonfleet": 4.2863498263889305e-06,
+            "wait_min": 2.7701822916667864e-05
+          },
+          "oof_future": {
+            "cost": -2.7496289062500023e-05,
+            "fleet": -2.7126736111111113e-05,
+            "nonfleet": -3.695529513889127e-07,
+            "wait_min": -1.8261718750000005e-05
+          },
+          "optimism": {
+            "cost": -1.4748893229166612e-05,
+            "fleet": -2.7126736111111113e-05,
+            "nonfleet": 1.23778428819445e-05,
+            "wait_min": 0.00010319010416666665
+          },
+          "raw_reference": {
+            "cost": 0.0,
+            "fleet": 0.0,
+            "nonfleet": 0.0,
+            "wait_min": 0.0
+          },
+          "selected_action_transfer": {
+            "cost": 1.8219270833333397e-05,
+            "fleet": 1.3563368055555555e-05,
+            "nonfleet": 4.655902777777843e-06,
+            "wait_min": 4.596354166666787e-05
+          },
+          "validation": {
+            "cost": -1.2747395833333415e-05,
+            "fleet": 0.0,
+            "nonfleet": -1.2747395833333415e-05,
+            "wait_min": -0.00012145182291666665
+          }
+        },
+        "rates": {
+          "feasible_action_disagreement": 0.0,
+          "feasible_mask_disagreement": 0.0,
+          "full_changed": 0.009375,
+          "full_choice_infeasible_under_inner": 0.0,
+          "inner_changed": 0.013541666666666667,
+          "inner_choice_infeasible_under_full": 0.0,
+          "raw_action_disagreement": 0.0,
+          "selected_action_disagreement": 0.007291666666666667
+        }
+      },
+      "shrunk": {
+        "cases": 3840,
+        "means": {
+          "correction_transfer": {
+            "cost": 3.1403938802083446e-05,
+            "fleet": 2.7126736111111113e-05,
+            "nonfleet": 4.277202690972329e-06,
+            "wait_min": 3.333333333333431e-05
+          },
+          "full_future": {
+            "cost": -7.883463541666586e-06,
+            "fleet": -1.3563368055555556e-05,
+            "nonfleet": 5.679904513888971e-06,
+            "wait_min": 3.395182291666776e-05
+          },
+          "oof_future": {
+            "cost": -3.9287402343750024e-05,
+            "fleet": -4.0690104166666664e-05,
+            "nonfleet": 1.402701822916641e-06,
+            "wait_min": 6.18489583333446e-07
+          },
+          "optimism": {
+            "cost": -2.545205078124989e-05,
+            "fleet": -4.0690104166666664e-05,
+            "nonfleet": 1.5238053385416778e-05,
+            "wait_min": 0.0001283203125000005
+          },
+          "raw_reference": {
+            "cost": 0.0,
+            "fleet": 0.0,
+            "nonfleet": 0.0,
+            "wait_min": 0.0
+          },
+          "selected_action_transfer": {
+            "cost": 3.1403938802083446e-05,
+            "fleet": 2.7126736111111113e-05,
+            "nonfleet": 4.277202690972329e-06,
+            "wait_min": 3.333333333333431e-05
+          },
+          "validation": {
+            "cost": -1.3835351562500134e-05,
+            "fleet": 0.0,
+            "nonfleet": -1.3835351562500134e-05,
+            "wait_min": -0.00012770182291666705
+          }
+        },
+        "rates": {
+          "feasible_action_disagreement": 0.0,
+          "feasible_mask_disagreement": 0.0,
+          "full_changed": 0.011979166666666667,
+          "full_choice_infeasible_under_inner": 0.0,
+          "inner_changed": 0.013802083333333333,
+          "inner_choice_infeasible_under_full": 0.0,
+          "raw_action_disagreement": 0.0,
+          "selected_action_disagreement": 0.00859375
+        }
+      }
+    },
+    "prefix_refit": {
+      "free_old": {
+        "cases": 3840,
+        "means": {
+          "correction_transfer": {
+            "cost": 7.130452473958415e-06,
+            "fleet": -2.0345052083333346e-05,
+            "nonfleet": 2.747550455729176e-05,
+            "wait_min": 0.0002759928385416685
+          },
+          "full_future": {
+            "cost": -9.804306640625004e-05,
+            "fleet": -0.00011121961805555555,
+            "nonfleet": 1.3176551649305507e-05,
+            "wait_min": 0.0001403320312500009
+          },
+          "oof_future": {
+            "cost": -0.00010517351888020853,
+            "fleet": -9.087456597222221e-05,
+            "nonfleet": -1.429895290798624e-05,
+            "wait_min": -0.00013566080729166758
+          },
+          "optimism": {
+            "cost": 0.00023488738606770813,
+            "fleet": 0.00018853081597222223,
+            "nonfleet": 4.6356570095486004e-05,
+            "wait_min": 0.0004023925781249982
+          },
+          "raw_reference": {
+            "cost": -0.0021678515462239586,
+            "fleet": -0.0013481987847222224,
+            "nonfleet": -0.0008196527615017363,
+            "wait_min": -0.007231022135416669
+          },
+          "selected_action_transfer": {
+            "cost": -0.0021607210937500012,
+            "fleet": -0.0013685438368055557,
+            "nonfleet": -0.0007921772569444442,
+            "wait_min": -0.0069550292968749965
+          },
+          "validation": {
+            "cost": -0.00034006090494791656,
+            "fleet": -0.0002794053819444445,
+            "nonfleet": -6.0655523003472224e-05,
+            "wait_min": -0.0005380533854166656
+          }
+        },
+        "rates": {
+          "feasible_action_disagreement": 0.33619791666666643,
+          "feasible_mask_disagreement": 0.7265625,
+          "full_changed": 0.017708333333333333,
+          "full_choice_infeasible_under_inner": 0.17760416666666667,
+          "inner_changed": 0.028385416666666666,
+          "inner_choice_infeasible_under_full": 0.20416666666666666,
+          "raw_action_disagreement": 0.45,
+          "selected_action_disagreement": 0.446875
+        }
+      },
+      "shrunk": {
+        "cases": 3840,
+        "means": {
+          "correction_transfer": {
+            "cost": 8.836079101562499e-05,
+            "fleet": 4.4759114583333323e-05,
+            "nonfleet": 4.360167643229166e-05,
+            "wait_min": 0.00044550781250000113
+          },
+          "full_future": {
+            "cost": -1.3738313802083496e-05,
+            "fleet": -3.255208333333333e-05,
+            "nonfleet": 1.8813769531249843e-05,
+            "wait_min": 0.00019996744791666709
+          },
+          "oof_future": {
+            "cost": -0.00010209910481770854,
+            "fleet": -7.731119791666665e-05,
+            "nonfleet": -2.4787906901041804e-05,
+            "wait_min": -0.0002455403645833341
+          },
+          "optimism": {
+            "cost": 0.000248134130859375,
+            "fleet": 0.00020209418402777776,
+            "nonfleet": 4.603994683159722e-05,
+            "wait_min": 0.0003903971354166641
+          },
+          "raw_reference": {
+            "cost": -0.0021678515462239586,
+            "fleet": -0.0013481987847222224,
+            "nonfleet": -0.0008196527615017363,
+            "wait_min": -0.007231022135416669
+          },
+          "selected_action_transfer": {
+            "cost": -0.002079490755208335,
+            "fleet": -0.001303439670138889,
+            "nonfleet": -0.0007760510850694444,
+            "wait_min": -0.006785514322916663
+          },
+          "validation": {
+            "cost": -0.00035023323567708324,
+            "fleet": -0.0002794053819444445,
+            "nonfleet": -7.082785373263899e-05,
+            "wait_min": -0.0006359374999999983
+          }
+        },
+        "rates": {
+          "feasible_action_disagreement": 0.33619791666666643,
+          "feasible_mask_disagreement": 0.7265625,
+          "full_changed": 0.019270833333333334,
+          "full_choice_infeasible_under_inner": 0.17890625,
+          "inner_changed": 0.027864583333333335,
+          "inner_choice_infeasible_under_full": 0.20416666666666666,
+          "raw_action_disagreement": 0.45,
+          "selected_action_disagreement": 0.44583333333333336
+        }
+      }
+    }
+  },
+  "judgment": "alignment_correct_but_no_joint_performance_success; new8_loses_held_utility; do_not_select_new2_posthoc",
+  "mixed_held_pooled": {
+    "fixed_bundle_free_old_expanded8_half_safe": {
+      "changed_rate": 0.0015625,
+      "delta_cost": -2.671497395833333e-05,
+      "delta_risk": -2.7126736111111113e-05,
+      "delta_service": 4.117621527777801e-07,
+      "delta_wait_min": 1.3997395833333655e-06
+    },
+    "fixed_bundle_free_old_expanded8_pooled_safe": {
+      "changed_rate": 0.00625,
+      "delta_cost": -1.3383398437499984e-05,
+      "delta_risk": -1.3563368055555556e-05,
+      "delta_service": 1.7996961805557053e-07,
+      "delta_wait_min": 4.06901041666612e-06
+    },
+    "fixed_bundle_free_old_matched2_half_safe": {
+      "changed_rate": 0.0020833333333333333,
+      "delta_cost": -5.363102213541661e-05,
+      "delta_risk": -5.4253472222222226e-05,
+      "delta_service": 6.224500868056146e-07,
+      "delta_wait_min": -3.515625000000639e-06
+    },
+    "fixed_bundle_free_old_matched2_pooled_safe": {
+      "changed_rate": 0.009375,
+      "delta_cost": -7.950410156249976e-05,
+      "delta_risk": -7.595486111111111e-05,
+      "delta_service": -3.5492404513886485e-06,
+      "delta_wait_min": -5.8561197916667766e-05
+    },
+    "fixed_bundle_shrunk_expanded8_half_safe": {
+      "changed_rate": 0.005208333333333334,
+      "delta_cost": -5.353336588541658e-05,
+      "delta_risk": -4.069010416666667e-05,
+      "delta_service": -1.2843261718749912e-05,
+      "delta_wait_min": -0.00011490885416666733
+    },
+    "fixed_bundle_shrunk_expanded8_pooled_safe": {
+      "changed_rate": 0.008854166666666666,
+      "delta_cost": -5.6902311197916664e-05,
+      "delta_risk": -4.069010416666667e-05,
+      "delta_service": -1.621220703125e-05,
+      "delta_wait_min": -0.0001420572916666675
+    },
+    "fixed_bundle_shrunk_matched2_half_safe": {
+      "changed_rate": 0.003125,
+      "delta_cost": -6.769928385416664e-05,
+      "delta_risk": -6.781684027777778e-05,
+      "delta_service": 1.1755642361113347e-07,
+      "delta_wait_min": -6.250000000001031e-06
+    },
+    "fixed_bundle_shrunk_matched2_pooled_safe": {
+      "changed_rate": 0.009895833333333333,
+      "delta_cost": -0.00019008470052083335,
+      "delta_risk": -0.00014919704861111112,
+      "delta_service": -4.0887651909722246e-05,
+      "delta_wait_min": -0.00036653645833333465
+    },
+    "prefix_refit_free_old_expanded8_half_safe": {
+      "changed_rate": 0.00625,
+      "delta_cost": -0.00014497174479166669,
+      "delta_risk": -0.00011664496527777777,
+      "delta_service": -2.8326779513888906e-05,
+      "delta_wait_min": -0.00021474609374999942
+    },
+    "prefix_refit_free_old_expanded8_pooled_safe": {
+      "changed_rate": 0.01875,
+      "delta_cost": -0.00033660169270833314,
+      "delta_risk": -0.0002685546875,
+      "delta_service": -6.80470052083331e-05,
+      "delta_wait_min": -0.0005460611979166685
+    },
+    "prefix_refit_free_old_matched2_half_safe": {
+      "changed_rate": 0.003125,
+      "delta_cost": -9.327473958332996e-07,
+      "delta_risk": -8.138020833333333e-06,
+      "delta_service": 7.205273437500034e-06,
+      "delta_wait_min": 5.016276041666646e-05
+    },
+    "prefix_refit_free_old_matched2_pooled_safe": {
+      "changed_rate": 0.004687500000000001,
+      "delta_cost": -1.3673339843749966e-05,
+      "delta_risk": -2.170138888888889e-05,
+      "delta_service": 8.028049045138922e-06,
+      "delta_wait_min": 5.735677083333322e-05
+    },
+    "prefix_refit_shrunk_expanded8_half_safe": {
+      "changed_rate": 0.007291666666666668,
+      "delta_cost": -0.00010974720052083341,
+      "delta_risk": -8.680555555555555e-05,
+      "delta_service": -2.2941644965277857e-05,
+      "delta_wait_min": -0.00016012369791666592
+    },
+    "prefix_refit_shrunk_expanded8_pooled_safe": {
+      "changed_rate": 0.01875,
+      "delta_cost": -0.00027864348958333326,
+      "delta_risk": -0.00022515190972222224,
+      "delta_service": -5.3491579861110984e-05,
+      "delta_wait_min": -0.0004055989583333349
+    },
+    "prefix_refit_shrunk_matched2_half_safe": {
+      "changed_rate": 0.002604166666666667,
+      "delta_cost": -2.496549479166614e-06,
+      "delta_risk": -8.138020833333333e-06,
+      "delta_service": 5.641471354166719e-06,
+      "delta_wait_min": 3.369140625000002e-05
+    },
+    "prefix_refit_shrunk_matched2_pooled_safe": {
+      "changed_rate": 0.0041666666666666675,
+      "delta_cost": -1.3821354166666631e-05,
+      "delta_risk": -2.170138888888889e-05,
+      "delta_service": 7.88003472222226e-06,
+      "delta_wait_min": 5.7421874999999876e-05
+    },
+    "raw": {
+      "changed_rate": 0.0,
+      "delta_cost": 0.0,
+      "delta_risk": 0.0,
+      "delta_service": 0.0,
+      "delta_wait_min": 0.0
+    }
+  },
+  "next": "decompose_old_only_admission_new_only_admission_changed_and_same_keys_from_cached_cell_metrics; then_test_selection_uncertainty_without_new_fits",
+  "protocol": "native_transit_deployment_bundle_stage255_v1"
+}
