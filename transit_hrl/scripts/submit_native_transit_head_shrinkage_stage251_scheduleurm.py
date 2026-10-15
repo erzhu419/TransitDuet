@@ -18,24 +18,27 @@ from scripts.submit_pointmaze_timing_pair_stage11_scheduleurm import inventory
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
 
-def task_specification(run, key=None):
-    operation = "fit" if key else "report"
+def task_specification(run, key=None, *, operation=None):
+    operation = operation or ("fit" if key else "report")
     task = base_task(run, key)
-    suffix = f"fit/{key[0]}/{key[1]}/{key[2]}/{key[3]}" if key else "report"
-    command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/run_native_transit_head_shrinkage_stage251.py",
-        "--run-name", run, "--operation", operation]
+    suffix = f"fit/{key[0]}/{key[1]}/{key[2]}/{key[3]}" if key else operation
+    script = "analyze_native_transit_head_shrinkage_stage251.py" if operation == "analysis" else "run_native_transit_head_shrinkage_stage251.py"
+    command = [DEFAULT_LINUX_PYTHON, "-u", f"scripts/{script}", "--run-name", run]
+    if operation != "analysis": command += ["--operation", operation]
     if key: command += ["--view", key[0], "--fold", str(key[1]), "--partition", key[2], "--direction", str(key[3])]
     task.update(project=spec.EXPERIMENT_PROTOCOL, description=f"Freq-HRL head shrinkage {suffix}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run}/{suffix}", resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/offline",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command),
         cpu_training_justification="Training-only covariance and small head-shrinkage solves in existing caches; no native replay, raw-reference fitting or actor update.")
+    if operation == "analysis":
+        task.update(result_dir=str(ROOT/"results"/run/operation), local_result_dir=str(ROOT/"results"/run/operation))
     return task
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name", required=True)
-    p.add_argument("--phase", choices=("preflight", "remaining", "report"), required=True)
+    p.add_argument("--phase", choices=("preflight", "remaining", "report", "analysis"), required=True)
     args = p.parse_args()
     run, phase = args.run_name, args.phase
     directory = ROOT/"results"/run
@@ -58,13 +61,14 @@ def main():
         if json.loads((directory/"preregistration.json").read_text())["contract"] != spec.contract():
             raise SystemExit("Changed registered head shrinkage")
         preceding = [first] if phase == "remaining" else [task_specification(run, k) for k in spec.KEYS]
+        if phase == "analysis": preceding.append(task_specification(run))
         sys.path.insert(0, str(SCHEDULER.parent))
         import scheduler
         records = {t["id"]: t for t in scheduler.load_state()["tasks"]}
         missing = {t["id"] for t in existing}-records.keys()
         if missing: records.update({t["id"]: t for t in scheduler.load_archive_tasks() if t["id"] in missing})
         require_completed_attempts(existing, preceding, records)
-        tasks = [task_specification(run, k) for k in spec.KEYS if k != spec.PREFLIGHT] if phase == "remaining" else [task_specification(run)]
+        tasks = [task_specification(run, k) for k in spec.KEYS if k != spec.PREFLIGHT] if phase == "remaining" else [task_specification(run, operation=phase)]
         for task in tasks: task["allow_duplicate"] = True
     execute_bulk(tasks, dry_run=False, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{run}")
 

@@ -11,6 +11,7 @@ from scipy.optimize import check_grad, minimize
 from freq_hrl.domains.transit import native_head_shrinkage as learning
 from scripts import run_native_transit_head_shrinkage_stage251 as spec
 from scripts import submit_native_transit_head_shrinkage_stage251_scheduleurm as submit
+from scripts import analyze_native_transit_head_shrinkage_stage251 as analysis
 from tests import test_native_transit_balanced_critic_stage247 as fixtures
 
 
@@ -137,6 +138,22 @@ class HeadShrinkageTest(unittest.TestCase):
             records.append({**tasks[0], 'id': 't1', 'status': 'queued'})
             with self.assertRaises(SystemExit): submit.main()
             bulk.assert_not_called()
+
+    def test_cached_selection_swap_decomposition_and_analysis_task(self):
+        paths = {a: {'zero': a+'0', '1': a+'1'} for a in ('free_old', 'shrunk')}
+        predictions = analysis.selection_swap(paths, {'free_old': {'pooled_safe': '1'}, 'shrunk': {'pooled_safe': None}})
+        self.assertEqual(predictions['shrunk_on_free_old'], 'shrunk1')
+        self.assertEqual(predictions['free_old_on_shrunk'], 'free_old0')
+        fields = ('delta_cost', 'delta_wait_min', 'delta_risk', 'delta_service')
+        swaps = {name: dict.fromkeys(fields, value) for name, value in
+            (('free_old_on_free_old', 2.), ('shrunk_on_free_old', 5.), ('free_old_on_shrunk', 4.), ('shrunk_on_shrunk', 6.))}
+        d = analysis.decompose(swaps)
+        self.assertEqual(d['model_at_free_selected_key']['delta_cost'], 3.)
+        self.assertEqual(d['key_change_on_shrunk_model']['delta_cost'], 1.)
+        self.assertEqual(d['total']['delta_cost'], 4.)
+        task = submit.task_specification('unit_head_shrinkage', operation='analysis')
+        self.assertIn('/analysis', task['result_dir'])
+        self.assertIn('analyze_native_transit_head_shrinkage_stage251.py', task['cmd'])
 
 
 if __name__ == '__main__': unittest.main()
