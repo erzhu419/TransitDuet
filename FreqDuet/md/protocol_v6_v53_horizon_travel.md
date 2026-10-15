@@ -18,3 +18,12 @@ require cohort short-lead MAE no worse than V50 and long-lead MAE no worse than
 V48. Do not weaken this screen after viewing results. Only a passing model
 proceeds to closed-loop forecasts; the real controller remains frozen. All
 six demand seeds are development data, not new independent confirmation.
+
+## Results
+Smoke t160180 passes ten tests. Preparation t160181-t160185 and gate t160186
+complete all 12 days: short-lead MAE delta versus V50 -0.519 s [-0.628,-0.404],
+long-lead delta versus V48 +2.019 s [1.753,2.389]. All three cohorts fail the
+long-lead threshold. No closed-loop matrix or controller promotion is launched.
+The two global coefficients partly repair horizon mismatch but do not recover
+the strong historical reference. Next investigate road/time-conditioned
+persistence with completed-prefix residuals rather than loosening this gate.
