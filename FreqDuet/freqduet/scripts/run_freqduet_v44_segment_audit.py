@@ -150,10 +150,11 @@ def segment_rows(predicted, actual, routes, now):
                         rows.append(dict(metric=name, lead=lead, error=left - right))
     pp = predicted.pivot(index=["trip_id", "station_id"], columns="stage", values="time_s")
     aa = actual.pivot(index=["trip_id", "station_id"], columns="stage", values="time_s")
+    scored_stops = aa.loc[(aa.arrival > now) & (aa.arrival <= now + 1800)]
     for route in routes.values():
         ids = route["station_ids"]
-        for (trip, station), truth in aa.iterrows():
-            if station not in ids or pd.isna(truth.get("arrival")) or not now < truth.arrival <= now + 1800:
+        for (trip, station), truth in scored_stops.iterrows():
+            if station not in ids:
                 continue
             if (trip, station) not in pp.index:
                 continue
