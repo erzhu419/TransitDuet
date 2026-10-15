@@ -1,0 +1,76 @@
+{
+  "active_definition": "norm >= radius - 1e-10",
+  "expanded_definition": "training_radius > old_radius + 1e-12",
+  "interpretation": "training cap expands 40/128 full mixed fits, not an unrestricted-radius test; free_old continues to use old cap regardless of calibration",
+  "max_kkt_including_profiled_difference": 1.7427862945102943e-12,
+  "protocol": "native_transit_head_budget_stage250_v1",
+  "ranks": {
+    "1": {
+      "active_caps": {
+        "free_old": 21,
+        "free_train": 15,
+        "frozen_train": 15
+      },
+      "calibrated_caps_expanded": 16,
+      "difference_change_rms": {
+        "free_old": 0.055468809035729004,
+        "free_train": 0.05340891305123384,
+        "frozen_train": 0.0
+      },
+      "fits_per_arm": 32,
+      "old_radius_mean": 0.051558138357695155,
+      "training_radius_mean": 0.06836967841059982
+    },
+    "16": {
+      "active_caps": {
+        "free_old": 30,
+        "free_train": 30,
+        "frozen_train": 26
+      },
+      "calibrated_caps_expanded": 4,
+      "difference_change_rms": {
+        "free_old": 0.7341101229641653,
+        "free_train": 0.7342770266845504,
+        "frozen_train": 0.0
+      },
+      "fits_per_arm": 32,
+      "old_radius_mean": 0.24047104449390258,
+      "training_radius_mean": 0.25462709631877156
+    },
+    "3": {
+      "active_caps": {
+        "free_old": 23,
+        "free_train": 22,
+        "frozen_train": 22
+      },
+      "calibrated_caps_expanded": 14,
+      "difference_change_rms": {
+        "free_old": 0.19758091929615768,
+        "free_train": 0.19240962200772146,
+        "frozen_train": 0.0
+      },
+      "fits_per_arm": 32,
+      "old_radius_mean": 0.08627935539492926,
+      "training_radius_mean": 0.09999473628343114
+    },
+    "8": {
+      "active_caps": {
+        "free_old": 31,
+        "free_train": 31,
+        "frozen_train": 31
+      },
+      "calibrated_caps_expanded": 6,
+      "difference_change_rms": {
+        "free_old": 0.44234797188102637,
+        "free_train": 0.4407475070776094,
+        "frozen_train": 0.0
+      },
+      "fits_per_arm": 32,
+      "old_radius_mean": 0.14941068155874862,
+      "training_radius_mean": 0.15656302024439075
+    }
+  },
+  "scope": "mixed_a/mixed_b, full fits, both banks",
+  "source": "remote cells/mixed_*/fold_*/*/*_raw/aggregate.json full_fit.fits",
+  "timing": "post_hoc_diagnostic_after_all32_fits_not_used_for_selection"
+}

@@ -33,6 +33,42 @@ raw-reference fits, actor updates or new prefixes. One end-to-end fit preflight
 must pass before remaining 31. Scheduler node001-node006, one core/task, unbound.
 Pull only receipts and compact report; models/panels/actions stay on the server.
 
+## Outcome
+
+All 33 tasks done/0: preflight t162258, remaining fits t162264-t162294, report
+t162295. All 38,400 frozen control action exposures reproduce exactly. Twenty-two
+tests passed. Only the 2,319,659-byte report and small scalar receipts were pulled.
+
+Mixed-pooled held-prefix policy deltas versus raw (negative is better):
+
+| Arm | Cost | Wait / min |
+|---|---:|---:|
+| Stage247 frozen old | -0.000227372 | -0.000766732 |
+| frozen_old / Stage249 expanded | -0.000064318 | +0.000030924 |
+| free_old | -0.000126306 | -0.000281217 |
+| frozen_train | -0.000082327 | -0.000132617 |
+| free_train | -0.000100512 | -0.000673275 |
+
+Free_old improves cost/wait point means versus frozen_old in both banks, but
+bank1 wait versus raw remains positive. Free_train bank1 cost is positive. Neither
+arm surpasses Stage247 on both pooled outcomes. No winner/default is promoted.
+
+Selected free_old fleet nonanchor MSE worsens 1.48%, while feasible-pair MSE
+improves 0.61%. At fixed rank16, feasible-pair error improves 8.80% on training-bank
+seen prefixes, only 0.59% on new futures at those prefixes, and worsens 3.48% on
+held prefixes. Nonanchor errors worsen even on seen prefixes, not just transfer.
+Head freedom helps some decisions but also exposes fitting noise and extrapolation.
+
+Training calibration expands only 40/128 mixed full-fit caps, including 4/32 at
+rank16. Frozen_train improves fleet nonanchor MSE 0.48% but worsens pair MSE 0.36%.
+This is not evidence about unrestricted caps. Maximum sum/difference KKT < 2e-12.
+
+Next: a fixed-cache contrast of cached, fully free and training-shrunk head
+differences under the old total RMS cap. Control variance/cancelling head errors
+before new-prefix confirmation; do not simply add futures or relax total caps.
+Receipts, exact derived quantities and constraint counts are in this run's
+`completion_receipt.json`, `findings.json` and `constraint_summary.json`.
+
 Limitations: existing development prefixes and reused Stage249 futures, not fresh
 confirmation or independent seed CI. Stage248 is not read; Stage169 reserves stay
 closed. Independent-head benefit is not presumed; cap relaxation may worsen transfer.

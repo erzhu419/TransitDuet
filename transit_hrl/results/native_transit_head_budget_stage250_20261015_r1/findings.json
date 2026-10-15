@@ -1,0 +1,123 @@
+{
+  "interpretation": "descriptive diagnostic, no winner selection or CI; next test shrinkage of learned head-difference rather than unrestricted budget relaxation",
+  "per_bank_head_old_vs_frozen_old_policy_contrast": {
+    "bank0": {
+      "delta_cost": -0.0001225393880208333,
+      "delta_risk": -5.425347222222219e-05,
+      "delta_service": -6.828591579861107e-05,
+      "delta_wait_min": -0.00060904947916667
+    },
+    "bank1": {
+      "delta_cost": -1.4360677083333022e-06,
+      "delta_risk": 0.0,
+      "delta_service": -1.4360677083333056e-06,
+      "delta_wait_min": -1.5234374999999965e-05
+    }
+  },
+  "pooled_held_outcomes": {
+    "free_old": {
+      "changed_harm_rate": 0.007291666666666667,
+      "changed_rate": 0.017708333333333333,
+      "cost_mse": 0.0011563137701959447,
+      "delta_cost": -0.0001263061848958332,
+      "delta_risk": -9.223090277777779e-05,
+      "delta_service": -3.407528211805543e-05,
+      "delta_unsafe": 0.0005208333333333332,
+      "delta_wait_min": -0.00028121744791666855,
+      "feasible_cost_mse": 0.0006448469902652776,
+      "feasible_margin_mse": 0.0005553031608407657,
+      "feasible_pair_sign_error": 0.22631448412698413,
+      "gate_cost_regret": 0.0046804806640625,
+      "risk_mse": 0.0009569273605668537,
+      "service_mse": 0.0001167939655363333
+    },
+    "free_train": {
+      "changed_harm_rate": 0.010416666666666668,
+      "changed_rate": 0.026041666666666664,
+      "cost_mse": 0.0011522194775473139,
+      "delta_cost": -0.0001005116861979167,
+      "delta_risk": -2.4414062500000008e-05,
+      "delta_service": -7.609762369791673e-05,
+      "delta_unsafe": -0.002083333333333333,
+      "delta_wait_min": -0.0006732747395833352,
+      "feasible_cost_mse": 0.0006385657944707988,
+      "feasible_margin_mse": 0.0005525386946888393,
+      "feasible_pair_sign_error": 0.2260714285714286,
+      "gate_cost_regret": 0.0047062751627604165,
+      "risk_mse": 0.0009552951916567212,
+      "service_mse": 0.0001273191352614848
+    },
+    "frozen_old": {
+      "changed_harm_rate": 0.005729166666666667,
+      "changed_rate": 0.014583333333333334,
+      "cost_mse": 0.0011672413355706623,
+      "delta_cost": -6.431845703124991e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": 7.857096354167566e-07,
+      "delta_unsafe": 0.0015625,
+      "delta_wait_min": 3.0924479166666385e-05,
+      "feasible_cost_mse": 0.0006523021638985116,
+      "feasible_margin_mse": 0.0005597075104850199,
+      "feasible_pair_sign_error": 0.22617807539682538,
+      "gate_cost_regret": 0.004742468391927084,
+      "risk_mse": 0.0009429377620844407,
+      "service_mse": 8.847922218824362e-05
+    },
+    "frozen_train": {
+      "changed_harm_rate": 0.0067708333333333336,
+      "changed_rate": 0.01875,
+      "cost_mse": 0.0011639361575036286,
+      "delta_cost": -8.232682291666675e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": -1.722265625000006e-05,
+      "delta_unsafe": -0.0015624999999999997,
+      "delta_wait_min": -0.00013261718750000027,
+      "feasible_cost_mse": 0.0006543763335292562,
+      "feasible_margin_mse": 0.0005622996078687726,
+      "feasible_pair_sign_error": 0.2255704365079365,
+      "gate_cost_regret": 0.004724460026041667,
+      "risk_mse": 0.0009384444628516818,
+      "service_mse": 8.820094034991428e-05
+    },
+    "old": {
+      "changed_harm_rate": 0.004166666666666667,
+      "changed_rate": 0.019791666666666666,
+      "cost_mse": 0.0011307750084175601,
+      "delta_cost": -0.00022737242838541678,
+      "delta_risk": -0.00013563368055555556,
+      "delta_service": -9.173874782986122e-05,
+      "delta_unsafe": 0.0010416666666666669,
+      "delta_wait_min": -0.0007667317708333347,
+      "feasible_cost_mse": 0.0006458139088736451,
+      "feasible_margin_mse": 0.0005576386541557911,
+      "feasible_pair_sign_error": 0.22511656746031747,
+      "gate_cost_regret": 0.004579414420572916,
+      "risk_mse": 0.000919561269376034,
+      "service_mse": 9.216437671131863e-05
+    }
+  },
+  "protocol": "native_transit_head_budget_stage250_v1",
+  "rank16_free_old_vs_frozen_old_fleet_mse_relative_pct": {
+    "held_new_future_nonanchor": 82.73660215480108,
+    "held_new_future_pair": 3.4792432758335545,
+    "seen_new_future_nonanchor": 61.476279508135704,
+    "seen_new_future_pair": -0.5858790814214809,
+    "seen_training_bank_pair": -8.802520344520804
+  },
+  "scope": "mixed_pooled, held60 unless specified",
+  "selected_fleet_mse_relative_pct": {
+    "free_old-frozen_old": {
+      "feasible_pair_mse": -0.6100891191639146,
+      "nonanchor_mse": 1.483618436437184
+    },
+    "free_train-frozen_train": {
+      "feasible_pair_mse": -1.6796644960214935,
+      "nonanchor_mse": 1.79560213439105
+    },
+    "frozen_train-frozen_old": {
+      "feasible_pair_mse": 0.36145433029692864,
+      "nonanchor_mse": -0.4765212947698827
+    }
+  },
+  "source": "report/result.json"
+}
