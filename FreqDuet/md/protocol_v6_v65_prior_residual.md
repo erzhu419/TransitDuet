@@ -32,3 +32,35 @@ Freeze all fitted weights before the formal collection; reuse the smoke day.
 Use node001-node006 only. Raw states and models stay on server; pull logs,
 completion markers and compact summary JSON only. Record outcome and next step
 here without retuning on the 16 confirmation days.
+
+## Outcome / Next Step
+
+33 server tests passed; eight residual fits and all 64 fresh rollouts completed
+(332,800 held-out decisions). Source: `6d2cfa64eb`. Scheduler records:
+t165373-t165376 (smoke/fits), t165378-t165382 (data), t165383-t165387 (evaluation/summary).
+
+| Predictor | MAE | RMSE |
+| --- | --- | --- |
+| 32-day causal prior | 0.009055 | 0.009055 |
+| Linear residual, 237 parameters | 0.007619 | 0.010301 |
+| Nonlinear residual, 19,393 parameters | 0.007369 | 0.008531 |
+| V64 large direct | 0.011279 | 0.013885 |
+| V64 large factored | 0.010102 | 0.011204 |
+
+Linear-minus-prior MAE: -0.001436, 95% CI [-0.003099, 0.000215].
+MLP-minus-prior MAE: -0.001685 [-0.003360, 0.000221].
+Linear-minus-V64 direct/factored MAE: -0.003660 [-0.005522, -0.001806] /
+-0.002483 [-0.003895, -0.001065]. MLP-minus-linear RMSE:
+-0.001771 [-0.002472, -0.001047]. Both residuals worsen mean MAE versus the
+prior on the same four of 16 demand days (averaging actors within each day).
+Training MSE: prior 0.0002421, linear 0.0001879, MLP 0.0001388;
+V64 direct/factored 0.0002656/0.0002648. Training gains exist, but reliable
+superiority over the prior is not established. Both strict gates remain 0/4;
+no action audit/control admission, actor/dual updates or main-policy change.
+
+V64 comparisons change centering, prefix features and normalization together;
+only linear-versus-MLP isolates capacity. Smaller capacity is not the supported
+remedy here. Next estimate residual shrinkage with whole-day cross-fitting on
+V64 training days, freeze that calibration, then confirm on new demand days.
+These 16 V65 days are consumed; do not fit coefficients or gates on them.
+Compact result: `results_freqduet/protocol_v6_v65_prior_residual/summary/status.json`.
