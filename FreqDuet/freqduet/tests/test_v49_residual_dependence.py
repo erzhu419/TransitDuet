@@ -111,7 +111,7 @@ class ResidualDependenceTest(unittest.TestCase):
         result = permutation_audit(travel, frame)
         selected = result.loc[(result.component == "holding") &
             (result.relation == "same_directed_stop_different_bus") & (result["transform"] == "centered")]
-        self.assertEqual(selected.observed.iloc[0], 1)
+        self.assertAlmostEqual(selected.observed.iloc[0], 1)
         self.assertLess(selected.permutation_mean.iloc[0], -.1)
         self.assertEqual(selected.permutations.iloc[0], 200)
 
