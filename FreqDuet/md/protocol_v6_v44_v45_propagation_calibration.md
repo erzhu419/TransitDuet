@@ -20,7 +20,10 @@ Keep V42/V43 engineering thresholds: 30-min holding MAE <= historical, absolute
 bias <=5%, passenger MAE <=105% of historical, holding coverage >=80%. Report
 all origins and the common clocks separately, warmup/mature counts and widths.
 Use scheduler on node001-node006 for tests, full-day replays and aggregation;
-retrieve only small summaries. Validate exact archived V35 outcomes first.
+retrieve only small summaries. Validate exact archived V35 outcomes for the
+eight regression days. Add four fresh-demand days: actors 12011/933013 x
+19511021/19511027, each checked against an unobserved same-seed frozen replay.
+Freeze the calibrator before examining those fresh labels.
 
 ## Limitations And Next Step
 Calibration of cumulative endpoints does not fix state propagation or establish
