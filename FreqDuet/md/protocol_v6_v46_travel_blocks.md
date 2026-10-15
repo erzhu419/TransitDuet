@@ -35,3 +35,9 @@ Smoke: focused causal/physics tests, exact reproduction of the stored V45
 64-path forecast with the untouched travel mode, then all three new modes at
 one origin. Only after smoke passes dispatch the 612 independent origins via
 scheduler on node001-node006. Aggregate on a server; retrieve small summaries.
+
+## Run Status
+`4f30a3798b`: final smoke `t155611` passed 40 tests and exact V45 path replay.
+Matrix `t155612-t155616`: 612 origins, 307 workers planned across node001/002/
+004/005/006; full node003 excluded by live capacity. Results pending. Earlier
+smoke `t155609` passed 39 tests before adding premature-event scoring.
