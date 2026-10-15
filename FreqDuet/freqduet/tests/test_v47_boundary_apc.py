@@ -18,7 +18,7 @@ class BoundaryAPCTest(unittest.TestCase):
         launch = pd.DataFrame([dict(trip_id=1, bus_id=7, direction=True, time_s=5)])
         terminal = pd.DataFrame([dict(trip_id=1, bus_id=7, direction=True, time_s=50)])
         legs = completed_legs(boundary_events(events, launch, terminal, routes), routes)
-        self.assertEqual(legs.duration_s.tolist(), [15, 20])
+        self.assertEqual(legs.sort_values("station_id").duration_s.tolist(), [15, 20])
         observed = observation()
         observed["time_s"] = 1800
         self.assertEqual(fit_travel(legs, observed)["counts"]["True:0"], 1)
