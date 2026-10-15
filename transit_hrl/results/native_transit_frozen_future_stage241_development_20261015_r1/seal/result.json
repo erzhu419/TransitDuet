@@ -1,0 +1,1134 @@
+{
+  "contract": {
+    "actions": "seal_all21_action_vectors_on6_state_inner_validation_batches_reproduce12800_selected_OOF_records",
+    "aggregation": "equal20_blocks_then_equal_cells_with_source_admitted_only_and_prefix_concentration_breakdowns",
+    "boundary": "conditional_future_replication_on_reused_development_prefixes_not_fresh_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "collection_tasks": 1920,
+      "new_native_clock_ticks": 942796800,
+      "new_native_episodes": 15360,
+      "new_prefix_scenes": 0,
+      "new_raw_reference_fits": 0,
+      "new_residual_fits": 0,
+      "report_tasks": 1,
+      "seal_tasks": 1,
+      "training_updates": 0
+    },
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "confirmation": "Stage169_reserved_third_fourth_cohorts_remain_closed_default_unchanged",
+    "controls": "one_exact_original_observer_plus_resampled_observer_six_actions_including_exact_resampled_identity",
+    "draws": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "future_seed": "1241000000+root_index*100000+regime_index*10000+replica*1000+probe*10+draw",
+    "futures": "eight_new_postprobe_ScenarioTape_seeds_shared_across_all_six_actions_and_all32_diagnostic_cells",
+    "metrics": "paired_cost_wait_delta_mean_label_wait_harm_and_draw_wait_harm_rate_gate_regret_fixed_action_switch",
+    "preflight": "both_roots_all5regimes_replica1_probe9_draw0_then1910_remaining",
+    "previous_run": "native_transit_refit_consistency_stage240_development_20261015_r2",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "retained": "all_prefix_physics_cost_RNG_and_episode_demand_profile_peak_phase_OD_multipliers_lower_weights_duration_prior",
+    "scopes": [
+      "old_oof2",
+      "old_unused4",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "selection": "all20_Stage239_candidates_and_640_inner_models_fixed_before_new_futures_no_reselection_or_refits",
+    "source_protocol": "native_transit_objective_oof_stage239_v1",
+    "source_run": "native_transit_objective_oof_stage239_development_20261015_r1",
+    "storage": "sealed_actions_draw_labels_rollouts_and_models_server_only_small_receipts_and_aggregate_sync",
+    "variants": [
+      "raw",
+      "all_mse_original_pooled_safe",
+      "all_mse_original_half_safe",
+      "all_mse_raw_pooled_safe",
+      "all_mse_raw_half_safe",
+      "feasible_mse_original_pooled_safe",
+      "feasible_mse_original_half_safe",
+      "feasible_mse_raw_pooled_safe",
+      "feasible_mse_raw_half_safe",
+      "rank_regret_original_pooled_safe",
+      "rank_regret_original_half_safe",
+      "rank_regret_raw_pooled_safe",
+      "rank_regret_raw_half_safe",
+      "wait_rank_original_pooled_safe",
+      "wait_rank_original_half_safe",
+      "wait_rank_raw_pooled_safe",
+      "wait_rank_raw_half_safe",
+      "joint_original_pooled_safe",
+      "joint_original_half_safe",
+      "joint_raw_pooled_safe",
+      "joint_raw_half_safe"
+    ]
+  },
+  "max_abs_difference": 0.0,
+  "mixed_cached": {
+    "old_oof2": {
+      "all": {
+        "matched_blocks": 320,
+        "mean_cases": 6.0,
+        "variants": {
+          "all_mse_original_half_safe": {
+            "delta_cost": -0.00018672083333333333,
+            "delta_draw_wait_harm_rate": -0.0028645833333333327,
+            "delta_unsafe": -0.005208333333333333,
+            "delta_wait_min": -0.00069947916666667,
+            "gate_cost_regret": 0.010777240885416667,
+            "switch_raw": 0.017708333333333333
+          },
+          "all_mse_original_pooled_safe": {
+            "delta_cost": -0.000393449479166667,
+            "delta_draw_wait_harm_rate": -0.009375,
+            "delta_unsafe": -0.0125,
+            "delta_wait_min": -0.0009169270833333393,
+            "gate_cost_regret": 0.010570512239583333,
+            "switch_raw": 0.04583333333333333
+          },
+          "all_mse_raw_half_safe": {
+            "delta_cost": -4.296067708333349e-05,
+            "delta_draw_wait_harm_rate": -0.0033854166666666663,
+            "delta_unsafe": -0.004166666666666667,
+            "delta_wait_min": -0.00034062500000000184,
+            "gate_cost_regret": 0.010921001041666666,
+            "switch_raw": 0.0078125
+          },
+          "all_mse_raw_pooled_safe": {
+            "delta_cost": -0.0002650846354166672,
+            "delta_draw_wait_harm_rate": -0.008854166666666666,
+            "delta_unsafe": -0.0109375,
+            "delta_wait_min": -0.0007057291666666656,
+            "gate_cost_regret": 0.010698877083333332,
+            "switch_raw": 0.04375
+          },
+          "feasible_mse_original_half_safe": {
+            "delta_cost": -0.0003100179687500008,
+            "delta_draw_wait_harm_rate": -0.0031249999999999997,
+            "delta_unsafe": -0.005729166666666666,
+            "delta_wait_min": -0.0007906249999999986,
+            "gate_cost_regret": 0.010653943749999999,
+            "switch_raw": 0.02239583333333333
+          },
+          "feasible_mse_original_pooled_safe": {
+            "delta_cost": -0.00024872994791666763,
+            "delta_draw_wait_harm_rate": -0.004947916666666666,
+            "delta_unsafe": -0.0078125,
+            "delta_wait_min": -0.0011750000000000003,
+            "gate_cost_regret": 0.01071523177083333,
+            "switch_raw": 0.029166666666666664
+          },
+          "feasible_mse_raw_half_safe": {
+            "delta_cost": -3.888567708333381e-05,
+            "delta_draw_wait_harm_rate": -0.0028645833333333327,
+            "delta_unsafe": -0.005729166666666666,
+            "delta_wait_min": -0.00023020833333333088,
+            "gate_cost_regret": 0.010925076041666665,
+            "switch_raw": 0.011458333333333333
+          },
+          "feasible_mse_raw_pooled_safe": {
+            "delta_cost": -0.00023277187500000087,
+            "delta_draw_wait_harm_rate": -0.009114583333333332,
+            "delta_unsafe": -0.0140625,
+            "delta_wait_min": -0.0009809895833333398,
+            "gate_cost_regret": 0.010731189843749999,
+            "switch_raw": 0.035416666666666666
+          },
+          "joint_original_half_safe": {
+            "delta_cost": -0.0004559101562500008,
+            "delta_draw_wait_harm_rate": -0.0046875,
+            "delta_unsafe": -0.0078125,
+            "delta_wait_min": -0.0011291666666666676,
+            "gate_cost_regret": 0.010508051562499999,
+            "switch_raw": 0.028645833333333332
+          },
+          "joint_original_pooled_safe": {
+            "delta_cost": -0.00048546093750000114,
+            "delta_draw_wait_harm_rate": -0.011197916666666665,
+            "delta_unsafe": -0.014583333333333332,
+            "delta_wait_min": -0.0016260416666666645,
+            "gate_cost_regret": 0.01047850078125,
+            "switch_raw": 0.05208333333333333
+          },
+          "joint_raw_half_safe": {
+            "delta_cost": -7.525781250000081e-05,
+            "delta_draw_wait_harm_rate": -0.005729166666666666,
+            "delta_unsafe": -0.007291666666666666,
+            "delta_wait_min": -0.0005783854166666651,
+            "gate_cost_regret": 0.010888703906249998,
+            "switch_raw": 0.015104166666666665
+          },
+          "joint_raw_pooled_safe": {
+            "delta_cost": -0.0006843690104166681,
+            "delta_draw_wait_harm_rate": -0.01145833333333333,
+            "delta_unsafe": -0.016666666666666666,
+            "delta_wait_min": -0.0014645833333333355,
+            "gate_cost_regret": 0.010279592708333332,
+            "switch_raw": 0.0671875
+          },
+          "rank_regret_original_half_safe": {
+            "delta_cost": -1.9348177083333466e-05,
+            "delta_draw_wait_harm_rate": -0.0005208333333333334,
+            "delta_unsafe": -0.0015625,
+            "delta_wait_min": -0.00011614583333333038,
+            "gate_cost_regret": 0.010944613541666667,
+            "switch_raw": 0.00625
+          },
+          "rank_regret_original_pooled_safe": {
+            "delta_cost": -9.861536458333357e-05,
+            "delta_draw_wait_harm_rate": -0.0028645833333333336,
+            "delta_unsafe": -0.0046875,
+            "delta_wait_min": -0.0008161458333333316,
+            "gate_cost_regret": 0.010865346354166666,
+            "switch_raw": 0.019791666666666666
+          },
+          "rank_regret_raw_half_safe": {
+            "delta_cost": -3.264270833333409e-05,
+            "delta_draw_wait_harm_rate": -0.0013020833333333333,
+            "delta_unsafe": -0.0026041666666666665,
+            "delta_wait_min": -0.0002283854166666622,
+            "gate_cost_regret": 0.010931319010416666,
+            "switch_raw": 0.006770833333333333
+          },
+          "rank_regret_raw_pooled_safe": {
+            "delta_cost": -0.000500935156250001,
+            "delta_draw_wait_harm_rate": -0.003385416666666667,
+            "delta_unsafe": -0.007291666666666667,
+            "delta_wait_min": -0.0008744791666666669,
+            "gate_cost_regret": 0.010463026562499998,
+            "switch_raw": 0.03906249999999999
+          },
+          "raw": {
+            "delta_cost": 0.0,
+            "delta_draw_wait_harm_rate": 0.0,
+            "delta_unsafe": 0.0,
+            "delta_wait_min": 0.0,
+            "gate_cost_regret": 0.01096396171875,
+            "switch_raw": 0.0
+          },
+          "wait_rank_original_half_safe": {
+            "delta_cost": -7.924479166666512e-06,
+            "delta_draw_wait_harm_rate": -0.0002604166666666667,
+            "delta_unsafe": -0.0010416666666666667,
+            "delta_wait_min": -5.755208333333381e-05,
+            "gate_cost_regret": 0.010956037239583332,
+            "switch_raw": 0.005208333333333333
+          },
+          "wait_rank_original_pooled_safe": {
+            "delta_cost": -1.4767708333332926e-05,
+            "delta_draw_wait_harm_rate": 0.0002604166666666666,
+            "delta_unsafe": -0.0010416666666666667,
+            "delta_wait_min": -0.00013072916666666672,
+            "gate_cost_regret": 0.010949194010416666,
+            "switch_raw": 0.010416666666666666
+          },
+          "wait_rank_raw_half_safe": {
+            "delta_cost": -3.673697916666546e-06,
+            "delta_draw_wait_harm_rate": -0.0010416666666666667,
+            "delta_unsafe": -0.0010416666666666667,
+            "delta_wait_min": -3.0468750000001273e-05,
+            "gate_cost_regret": 0.010960288020833332,
+            "switch_raw": 0.0020833333333333333
+          },
+          "wait_rank_raw_pooled_safe": {
+            "delta_cost": -0.00015724661458333314,
+            "delta_draw_wait_harm_rate": -0.0020833333333333333,
+            "delta_unsafe": -0.0026041666666666665,
+            "delta_wait_min": -0.0005127604166666664,
+            "gate_cost_regret": 0.010806715104166666,
+            "switch_raw": 0.021874999999999995
+          }
+        }
+      },
+      "by_root": {
+        "397": {
+          "matched_blocks": 160,
+          "mean_cases": 6.0,
+          "variants": {
+            "all_mse_original_half_safe": {
+              "delta_cost": -3.4317708333332876e-05,
+              "delta_draw_wait_harm_rate": -0.0005208333333333333,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": -0.00031458333333333154,
+              "gate_cost_regret": 0.0122464828125,
+              "switch_raw": 0.019791666666666662
+            },
+            "all_mse_original_pooled_safe": {
+              "delta_cost": -0.00020915364583333381,
+              "delta_draw_wait_harm_rate": -0.007812499999999998,
+              "delta_unsafe": -0.0125,
+              "delta_wait_min": -0.0006598958333333321,
+              "gate_cost_regret": 0.012071646875,
+              "switch_raw": 0.051041666666666666
+            },
+            "all_mse_raw_half_safe": {
+              "delta_cost": -2.3087500000000246e-05,
+              "delta_draw_wait_harm_rate": -0.0020833333333333337,
+              "delta_unsafe": -0.003125,
+              "delta_wait_min": -0.00010156250000000176,
+              "gate_cost_regret": 0.012257713020833333,
+              "switch_raw": 0.008333333333333333
+            },
+            "all_mse_raw_pooled_safe": {
+              "delta_cost": -0.00016873958333333427,
+              "delta_draw_wait_harm_rate": -0.007291666666666666,
+              "delta_unsafe": -0.010416666666666666,
+              "delta_wait_min": -0.00027239583333333483,
+              "gate_cost_regret": 0.012112060937499999,
+              "switch_raw": 0.041666666666666664
+            },
+            "feasible_mse_original_half_safe": {
+              "delta_cost": -0.00031818854166666786,
+              "delta_draw_wait_harm_rate": -0.0010416666666666669,
+              "delta_unsafe": -0.005208333333333334,
+              "delta_wait_min": -0.0007395833333333272,
+              "gate_cost_regret": 0.011962611979166666,
+              "switch_raw": 0.025
+            },
+            "feasible_mse_original_pooled_safe": {
+              "delta_cost": -0.0003446572916666681,
+              "delta_draw_wait_harm_rate": -0.003645833333333333,
+              "delta_unsafe": -0.008333333333333335,
+              "delta_wait_min": -0.0010744791666666617,
+              "gate_cost_regret": 0.011936143229166665,
+              "switch_raw": 0.03020833333333333
+            },
+            "feasible_mse_raw_half_safe": {
+              "delta_cost": -7.441145833333417e-05,
+              "delta_draw_wait_harm_rate": -0.0020833333333333337,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.0004135416666666605,
+              "gate_cost_regret": 0.0122063890625,
+              "switch_raw": 0.015625
+            },
+            "feasible_mse_raw_pooled_safe": {
+              "delta_cost": -0.0003248135416666683,
+              "delta_draw_wait_harm_rate": -0.008333333333333335,
+              "delta_unsafe": -0.015625,
+              "delta_wait_min": -0.0007406250000000015,
+              "gate_cost_regret": 0.011955986979166666,
+              "switch_raw": 0.041666666666666664
+            },
+            "joint_original_half_safe": {
+              "delta_cost": -0.00033321250000000103,
+              "delta_draw_wait_harm_rate": -0.0015625,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.0009218749999999918,
+              "gate_cost_regret": 0.011947588020833334,
+              "switch_raw": 0.03125
+            },
+            "joint_original_pooled_safe": {
+              "delta_cost": -0.0005270750000000021,
+              "delta_draw_wait_harm_rate": -0.008333333333333333,
+              "delta_unsafe": -0.015625,
+              "delta_wait_min": -0.001523437499999987,
+              "gate_cost_regret": 0.011753725520833331,
+              "switch_raw": 0.06145833333333332
+            },
+            "joint_raw_half_safe": {
+              "delta_cost": -6.37510416666684e-05,
+              "delta_draw_wait_harm_rate": -0.004166666666666667,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.0003911458333333287,
+              "gate_cost_regret": 0.012217049479166665,
+              "switch_raw": 0.016666666666666666
+            },
+            "joint_raw_pooled_safe": {
+              "delta_cost": -0.0009058536458333348,
+              "delta_draw_wait_harm_rate": -0.011458333333333334,
+              "delta_unsafe": -0.019791666666666666,
+              "delta_wait_min": -0.0008838541666666654,
+              "gate_cost_regret": 0.011374946874999996,
+              "switch_raw": 0.06770833333333333
+            },
+            "rank_regret_original_half_safe": {
+              "delta_cost": -1.5727083333333568e-05,
+              "delta_draw_wait_harm_rate": -0.0005208333333333333,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -6.197916666666124e-05,
+              "gate_cost_regret": 0.0122650734375,
+              "switch_raw": 0.008333333333333333
+            },
+            "rank_regret_original_pooled_safe": {
+              "delta_cost": -8.918750000000067e-05,
+              "delta_draw_wait_harm_rate": -0.003125,
+              "delta_unsafe": -0.005208333333333333,
+              "delta_wait_min": -0.0006979166666666608,
+              "gate_cost_regret": 0.012191613020833332,
+              "switch_raw": 0.019791666666666662
+            },
+            "rank_regret_raw_half_safe": {
+              "delta_cost": -4.510104166666814e-05,
+              "delta_draw_wait_harm_rate": -0.0005208333333333333,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.0002859374999999919,
+              "gate_cost_regret": 0.012235699479166664,
+              "switch_raw": 0.009375
+            },
+            "rank_regret_raw_pooled_safe": {
+              "delta_cost": -0.0008373953125000012,
+              "delta_draw_wait_harm_rate": -0.0015625,
+              "delta_unsafe": -0.007291666666666666,
+              "delta_wait_min": -0.00044583333333332863,
+              "gate_cost_regret": 0.011443405208333332,
+              "switch_raw": 0.04583333333333334
+            },
+            "raw": {
+              "delta_cost": 0.0,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0,
+              "gate_cost_regret": 0.012280800520833333,
+              "switch_raw": 0.0
+            },
+            "wait_rank_original_half_safe": {
+              "delta_cost": -4.588020833333252e-06,
+              "delta_draw_wait_harm_rate": -0.0005208333333333333,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -3.541666666666693e-05,
+              "gate_cost_regret": 0.0122762125,
+              "switch_raw": 0.005208333333333333
+            },
+            "wait_rank_original_pooled_safe": {
+              "delta_cost": -5.752083333332609e-06,
+              "delta_draw_wait_harm_rate": 0.0005208333333333334,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -5.2604166666665495e-05,
+              "gate_cost_regret": 0.012275048437500002,
+              "switch_raw": 0.0125
+            },
+            "wait_rank_raw_half_safe": {
+              "delta_cost": -6.932291666666517e-07,
+              "delta_draw_wait_harm_rate": -0.0010416666666666667,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -4.687500000002028e-06,
+              "gate_cost_regret": 0.012280107291666665,
+              "switch_raw": 0.0010416666666666667
+            },
+            "wait_rank_raw_pooled_safe": {
+              "delta_cost": -0.00023234947916666646,
+              "delta_draw_wait_harm_rate": -0.0005208333333333334,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.0002812499999999998,
+              "gate_cost_regret": 0.012048451041666667,
+              "switch_raw": 0.022916666666666665
+            }
+          }
+        },
+        "401": {
+          "matched_blocks": 160,
+          "mean_cases": 6.0,
+          "variants": {
+            "all_mse_original_half_safe": {
+              "delta_cost": -0.0003391239583333338,
+              "delta_draw_wait_harm_rate": -0.005208333333333333,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.0010843750000000083,
+              "gate_cost_regret": 0.009307998958333332,
+              "switch_raw": 0.015625
+            },
+            "all_mse_original_pooled_safe": {
+              "delta_cost": -0.0005777453125000002,
+              "delta_draw_wait_harm_rate": -0.0109375,
+              "delta_unsafe": -0.012499999999999999,
+              "delta_wait_min": -0.0011739583333333463,
+              "gate_cost_regret": 0.009069377604166668,
+              "switch_raw": 0.040625
+            },
+            "all_mse_raw_half_safe": {
+              "delta_cost": -6.283385416666672e-05,
+              "delta_draw_wait_harm_rate": -0.004687499999999999,
+              "delta_unsafe": -0.005208333333333333,
+              "delta_wait_min": -0.0005796875000000019,
+              "gate_cost_regret": 0.009584289062500001,
+              "switch_raw": 0.007291666666666666
+            },
+            "all_mse_raw_pooled_safe": {
+              "delta_cost": -0.0003614296875000002,
+              "delta_draw_wait_harm_rate": -0.010416666666666666,
+              "delta_unsafe": -0.011458333333333333,
+              "delta_wait_min": -0.0011390624999999964,
+              "gate_cost_regret": 0.009285693229166666,
+              "switch_raw": 0.04583333333333332
+            },
+            "feasible_mse_original_half_safe": {
+              "delta_cost": -0.0003018473958333337,
+              "delta_draw_wait_harm_rate": -0.005208333333333333,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.0008416666666666699,
+              "gate_cost_regret": 0.009345275520833335,
+              "switch_raw": 0.019791666666666666
+            },
+            "feasible_mse_original_pooled_safe": {
+              "delta_cost": -0.0001528026041666672,
+              "delta_draw_wait_harm_rate": -0.00625,
+              "delta_unsafe": -0.007291666666666666,
+              "delta_wait_min": -0.001275520833333339,
+              "gate_cost_regret": 0.0094943203125,
+              "switch_raw": 0.028125
+            },
+            "feasible_mse_raw_half_safe": {
+              "delta_cost": -3.3598958333334407e-06,
+              "delta_draw_wait_harm_rate": -0.003645833333333333,
+              "delta_unsafe": -0.005208333333333333,
+              "delta_wait_min": -4.687500000000131e-05,
+              "gate_cost_regret": 0.009643763020833333,
+              "switch_raw": 0.007291666666666666
+            },
+            "feasible_mse_raw_pooled_safe": {
+              "delta_cost": -0.00014073020833333346,
+              "delta_draw_wait_harm_rate": -0.009895833333333333,
+              "delta_unsafe": -0.012499999999999999,
+              "delta_wait_min": -0.001221354166666678,
+              "gate_cost_regret": 0.009506392708333334,
+              "switch_raw": 0.029166666666666664
+            },
+            "joint_original_half_safe": {
+              "delta_cost": -0.0005786078125000004,
+              "delta_draw_wait_harm_rate": -0.0078125,
+              "delta_unsafe": -0.009375,
+              "delta_wait_min": -0.0013364583333333436,
+              "gate_cost_regret": 0.009068515104166666,
+              "switch_raw": 0.026041666666666664
+            },
+            "joint_original_pooled_safe": {
+              "delta_cost": -0.0004438468750000002,
+              "delta_draw_wait_harm_rate": -0.0140625,
+              "delta_unsafe": -0.013541666666666665,
+              "delta_wait_min": -0.0017286458333333429,
+              "gate_cost_regret": 0.009203276041666666,
+              "switch_raw": 0.042708333333333334
+            },
+            "joint_raw_half_safe": {
+              "delta_cost": -8.67645833333332e-05,
+              "delta_draw_wait_harm_rate": -0.007291666666666666,
+              "delta_unsafe": -0.008333333333333333,
+              "delta_wait_min": -0.0007656250000000015,
+              "gate_cost_regret": 0.009560358333333335,
+              "switch_raw": 0.013541666666666665
+            },
+            "joint_raw_pooled_safe": {
+              "delta_cost": -0.0004628843750000013,
+              "delta_draw_wait_harm_rate": -0.01145833333333333,
+              "delta_unsafe": -0.013541666666666665,
+              "delta_wait_min": -0.002045312500000006,
+              "gate_cost_regret": 0.009184238541666667,
+              "switch_raw": 0.06666666666666667
+            },
+            "rank_regret_original_half_safe": {
+              "delta_cost": -2.2969270833333363e-05,
+              "delta_draw_wait_harm_rate": -0.0005208333333333333,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -0.0001703124999999995,
+              "gate_cost_regret": 0.009624153645833333,
+              "switch_raw": 0.004166666666666667
+            },
+            "rank_regret_original_pooled_safe": {
+              "delta_cost": -0.00010804322916666646,
+              "delta_draw_wait_harm_rate": -0.0026041666666666665,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": -0.0009343750000000024,
+              "gate_cost_regret": 0.0095390796875,
+              "switch_raw": 0.019791666666666666
+            },
+            "rank_regret_raw_half_safe": {
+              "delta_cost": -2.0184375000000035e-05,
+              "delta_draw_wait_harm_rate": -0.0020833333333333333,
+              "delta_unsafe": -0.003125,
+              "delta_wait_min": -0.00017083333333333257,
+              "gate_cost_regret": 0.009626938541666668,
+              "switch_raw": 0.004166666666666667
+            },
+            "rank_regret_raw_pooled_safe": {
+              "delta_cost": -0.00016447500000000057,
+              "delta_draw_wait_harm_rate": -0.005208333333333333,
+              "delta_unsafe": -0.007291666666666667,
+              "delta_wait_min": -0.001303125000000005,
+              "gate_cost_regret": 0.009482647916666666,
+              "switch_raw": 0.03229166666666666
+            },
+            "raw": {
+              "delta_cost": 0.0,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0,
+              "gate_cost_regret": 0.009647122916666667,
+              "switch_raw": 0.0
+            },
+            "wait_rank_original_half_safe": {
+              "delta_cost": -1.126093749999977e-05,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -7.968750000000071e-05,
+              "gate_cost_regret": 0.009635861979166667,
+              "switch_raw": 0.005208333333333333
+            },
+            "wait_rank_original_pooled_safe": {
+              "delta_cost": -2.3783333333333235e-05,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -0.00020885416666666795,
+              "gate_cost_regret": 0.009623339583333335,
+              "switch_raw": 0.008333333333333333
+            },
+            "wait_rank_raw_half_safe": {
+              "delta_cost": -6.65416666666644e-06,
+              "delta_draw_wait_harm_rate": -0.0010416666666666667,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -5.6250000000000513e-05,
+              "gate_cost_regret": 0.00964046875,
+              "switch_raw": 0.003125
+            },
+            "wait_rank_raw_pooled_safe": {
+              "delta_cost": -8.214374999999984e-05,
+              "delta_draw_wait_harm_rate": -0.0036458333333333334,
+              "delta_unsafe": -0.003125,
+              "delta_wait_min": -0.0007442708333333328,
+              "gate_cost_regret": 0.009564979166666668,
+              "switch_raw": 0.020833333333333332
+            }
+          }
+        }
+      }
+    },
+    "old_unused4": {
+      "all": {
+        "matched_blocks": 320,
+        "mean_cases": 6.0,
+        "variants": {
+          "all_mse_original_half_safe": {
+            "delta_cost": -0.0001280263020833331,
+            "delta_draw_wait_harm_rate": -0.00013020833333333339,
+            "delta_unsafe": 0.0015625,
+            "delta_wait_min": -0.00020690104166666223,
+            "gate_cost_regret": 0.010476070572916664,
+            "switch_raw": 0.017708333333333333
+          },
+          "all_mse_original_pooled_safe": {
+            "delta_cost": -0.00030912578124999985,
+            "delta_draw_wait_harm_rate": -0.005078125,
+            "delta_unsafe": -0.0062499999999999995,
+            "delta_wait_min": -0.00023919270833332564,
+            "gate_cost_regret": 0.010294971093749997,
+            "switch_raw": 0.04583333333333333
+          },
+          "all_mse_raw_half_safe": {
+            "delta_cost": -0.00016452786458333305,
+            "delta_draw_wait_harm_rate": -0.0018229166666666665,
+            "delta_unsafe": -0.0015625,
+            "delta_wait_min": -8.723958333333533e-06,
+            "gate_cost_regret": 0.010439569010416665,
+            "switch_raw": 0.0078125
+          },
+          "all_mse_raw_pooled_safe": {
+            "delta_cost": -0.0005365940104166662,
+            "delta_draw_wait_harm_rate": -0.007682291666666667,
+            "delta_unsafe": -0.008333333333333331,
+            "delta_wait_min": -0.00034231770833333206,
+            "gate_cost_regret": 0.010067502864583331,
+            "switch_raw": 0.04375
+          },
+          "feasible_mse_original_half_safe": {
+            "delta_cost": -0.0001636143229166665,
+            "delta_draw_wait_harm_rate": 0.00026041666666666677,
+            "delta_unsafe": -0.0010416666666666667,
+            "delta_wait_min": -4.9999999999994276e-05,
+            "gate_cost_regret": 0.01044048255208333,
+            "switch_raw": 0.02239583333333333
+          },
+          "feasible_mse_original_pooled_safe": {
+            "delta_cost": -0.0003677680989583335,
+            "delta_draw_wait_harm_rate": 0.00013020833333333322,
+            "delta_unsafe": -0.0015625,
+            "delta_wait_min": -0.00020820312499999347,
+            "gate_cost_regret": 0.010236328776041664,
+            "switch_raw": 0.029166666666666664
+          },
+          "feasible_mse_raw_half_safe": {
+            "delta_cost": -5.276731770833328e-05,
+            "delta_draw_wait_harm_rate": -0.0022135416666666666,
+            "delta_unsafe": -0.003645833333333333,
+            "delta_wait_min": -3.47656249999985e-05,
+            "gate_cost_regret": 0.010551329557291664,
+            "switch_raw": 0.011458333333333333
+          },
+          "feasible_mse_raw_pooled_safe": {
+            "delta_cost": -0.0002778731770833335,
+            "delta_draw_wait_harm_rate": -0.005729166666666666,
+            "delta_unsafe": -0.007291666666666666,
+            "delta_wait_min": -0.00016080729166666392,
+            "gate_cost_regret": 0.010326223697916663,
+            "switch_raw": 0.035416666666666666
+          },
+          "joint_original_half_safe": {
+            "delta_cost": -0.0001925709635416662,
+            "delta_draw_wait_harm_rate": -0.000911458333333333,
+            "delta_unsafe": -0.0010416666666666664,
+            "delta_wait_min": -0.00035403645833332497,
+            "gate_cost_regret": 0.010411525911458334,
+            "switch_raw": 0.028645833333333332
+          },
+          "joint_original_pooled_safe": {
+            "delta_cost": -0.0004319378906250004,
+            "delta_draw_wait_harm_rate": -0.004296875,
+            "delta_unsafe": -0.005729166666666666,
+            "delta_wait_min": -0.00048346354166665576,
+            "gate_cost_regret": 0.010172158984374997,
+            "switch_raw": 0.05208333333333333
+          },
+          "joint_raw_half_safe": {
+            "delta_cost": -0.00022560390624999966,
+            "delta_draw_wait_harm_rate": -0.004036458333333333,
+            "delta_unsafe": -0.005208333333333333,
+            "delta_wait_min": -6.302083333333286e-05,
+            "gate_cost_regret": 0.010378492968749996,
+            "switch_raw": 0.015104166666666665
+          },
+          "joint_raw_pooled_safe": {
+            "delta_cost": -0.00035670559895833304,
+            "delta_draw_wait_harm_rate": -0.004557291666666667,
+            "delta_unsafe": -0.00625,
+            "delta_wait_min": -0.00039999999999999725,
+            "gate_cost_regret": 0.010247391276041665,
+            "switch_raw": 0.0671875
+          },
+          "rank_regret_original_half_safe": {
+            "delta_cost": -6.633854166666661e-05,
+            "delta_draw_wait_harm_rate": -0.00078125,
+            "delta_unsafe": -0.0005208333333333333,
+            "delta_wait_min": -0.00011523437499999895,
+            "gate_cost_regret": 0.010537758333333331,
+            "switch_raw": 0.00625
+          },
+          "rank_regret_original_pooled_safe": {
+            "delta_cost": -0.00011696145833333329,
+            "delta_draw_wait_harm_rate": -0.0022135416666666666,
+            "delta_unsafe": -0.0031249999999999997,
+            "delta_wait_min": -0.0004294270833333313,
+            "gate_cost_regret": 0.010487135416666665,
+            "switch_raw": 0.019791666666666666
+          },
+          "rank_regret_raw_half_safe": {
+            "delta_cost": -0.0001141309895833333,
+            "delta_draw_wait_harm_rate": -0.0014322916666666663,
+            "delta_unsafe": -0.0020833333333333333,
+            "delta_wait_min": -5.3645833333333226e-05,
+            "gate_cost_regret": 0.010489965885416666,
+            "switch_raw": 0.006770833333333333
+          },
+          "rank_regret_raw_pooled_safe": {
+            "delta_cost": -1.733776041666661e-05,
+            "delta_draw_wait_harm_rate": -0.0010416666666666664,
+            "delta_unsafe": -0.0020833333333333337,
+            "delta_wait_min": -0.00028255208333333143,
+            "gate_cost_regret": 0.010586759114583332,
+            "switch_raw": 0.03906249999999999
+          },
+          "raw": {
+            "delta_cost": 0.0,
+            "delta_draw_wait_harm_rate": 0.0,
+            "delta_unsafe": 0.0,
+            "delta_wait_min": 0.0,
+            "gate_cost_regret": 0.010604096874999998,
+            "switch_raw": 0.0
+          },
+          "wait_rank_original_half_safe": {
+            "delta_cost": -5.3333333333333435e-05,
+            "delta_draw_wait_harm_rate": 0.0002604166666666667,
+            "delta_unsafe": 0.0,
+            "delta_wait_min": 1.0026041666668625e-05,
+            "gate_cost_regret": 0.010550763541666664,
+            "switch_raw": 0.005208333333333333
+          },
+          "wait_rank_original_pooled_safe": {
+            "delta_cost": -4.691054687499994e-05,
+            "delta_draw_wait_harm_rate": 0.001171875,
+            "delta_unsafe": 0.0010416666666666669,
+            "delta_wait_min": 6.536458333333596e-05,
+            "gate_cost_regret": 0.010557186328124999,
+            "switch_raw": 0.010416666666666666
+          },
+          "wait_rank_raw_half_safe": {
+            "delta_cost": 1.0781250000000664e-07,
+            "delta_draw_wait_harm_rate": -0.0005208333333333333,
+            "delta_unsafe": -0.0010416666666666667,
+            "delta_wait_min": 4.687500000000698e-06,
+            "gate_cost_regret": 0.010604204687499997,
+            "switch_raw": 0.0020833333333333333
+          },
+          "wait_rank_raw_pooled_safe": {
+            "delta_cost": 0.00021045703124999965,
+            "delta_draw_wait_harm_rate": 0.0005208333333333338,
+            "delta_unsafe": 0.0005208333333333334,
+            "delta_wait_min": -0.0002779947916666633,
+            "gate_cost_regret": 0.010814553906249998,
+            "switch_raw": 0.021874999999999995
+          }
+        }
+      },
+      "by_root": {
+        "397": {
+          "matched_blocks": 160,
+          "mean_cases": 6.0,
+          "variants": {
+            "all_mse_original_half_safe": {
+              "delta_cost": -0.00022033515624999986,
+              "delta_draw_wait_harm_rate": 0.00234375,
+              "delta_unsafe": 0.005208333333333333,
+              "delta_wait_min": -0.00011510416666665876,
+              "gate_cost_regret": 0.011673674479166663,
+              "switch_raw": 0.019791666666666662
+            },
+            "all_mse_original_pooled_safe": {
+              "delta_cost": -0.0006626635416666663,
+              "delta_draw_wait_harm_rate": -0.0031249999999999997,
+              "delta_unsafe": -0.0010416666666666669,
+              "delta_wait_min": -4.661458333332243e-05,
+              "gate_cost_regret": 0.011231346093749997,
+              "switch_raw": 0.051041666666666666
+            },
+            "all_mse_raw_half_safe": {
+              "delta_cost": -0.00021935885416666644,
+              "delta_draw_wait_harm_rate": -0.001302083333333333,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -2.4739583333333038e-05,
+              "gate_cost_regret": 0.011674650781249995,
+              "switch_raw": 0.008333333333333333
+            },
+            "all_mse_raw_pooled_safe": {
+              "delta_cost": -0.0004497989583333326,
+              "delta_draw_wait_harm_rate": -0.00703125,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -5.807291666666443e-05,
+              "gate_cost_regret": 0.01144421067708333,
+              "switch_raw": 0.041666666666666664
+            },
+            "feasible_mse_original_half_safe": {
+              "delta_cost": -0.00030740182291666646,
+              "delta_draw_wait_harm_rate": 0.0036458333333333334,
+              "delta_unsafe": 0.002083333333333333,
+              "delta_wait_min": 2.916666666667746e-05,
+              "gate_cost_regret": 0.011586607812499995,
+              "switch_raw": 0.025
+            },
+            "feasible_mse_original_pooled_safe": {
+              "delta_cost": -0.0003797869791666673,
+              "delta_draw_wait_harm_rate": 0.0031250000000000006,
+              "delta_unsafe": 0.0010416666666666664,
+              "delta_wait_min": -0.00010677083333331938,
+              "gate_cost_regret": 0.011514222656249995,
+              "switch_raw": 0.03020833333333333
+            },
+            "feasible_mse_raw_half_safe": {
+              "delta_cost": -0.0001034059895833332,
+              "delta_draw_wait_harm_rate": -0.0007812499999999998,
+              "delta_unsafe": -0.0020833333333333337,
+              "delta_wait_min": -4.427083333333045e-05,
+              "gate_cost_regret": 0.011790603645833331,
+              "switch_raw": 0.015625
+            },
+            "feasible_mse_raw_pooled_safe": {
+              "delta_cost": -0.00031434557291666707,
+              "delta_draw_wait_harm_rate": -0.0028645833333333327,
+              "delta_unsafe": -0.003125,
+              "delta_wait_min": -3.0208333333329745e-05,
+              "gate_cost_regret": 0.011579664062499996,
+              "switch_raw": 0.041666666666666664
+            },
+            "joint_original_half_safe": {
+              "delta_cost": -0.0003247760416666662,
+              "delta_draw_wait_harm_rate": 0.0020833333333333333,
+              "delta_unsafe": 0.0020833333333333337,
+              "delta_wait_min": -0.00020572916666665198,
+              "gate_cost_regret": 0.011569233593749997,
+              "switch_raw": 0.03125
+            },
+            "joint_original_pooled_safe": {
+              "delta_cost": -0.0004503369791666673,
+              "delta_draw_wait_harm_rate": -0.0015624999999999992,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.00022552083333331462,
+              "gate_cost_regret": 0.011443672656249996,
+              "switch_raw": 0.06145833333333332
+            },
+            "joint_raw_half_safe": {
+              "delta_cost": -0.000420759895833333,
+              "delta_draw_wait_harm_rate": -0.003125,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": 8.072916666666771e-05,
+              "gate_cost_regret": 0.01147324973958333,
+              "switch_raw": 0.016666666666666666
+            },
+            "joint_raw_pooled_safe": {
+              "delta_cost": -0.00036252317708333336,
+              "delta_draw_wait_harm_rate": -0.0013020833333333322,
+              "delta_unsafe": -0.002083333333333333,
+              "delta_wait_min": 0.0003036458333333402,
+              "gate_cost_regret": 0.01153148645833333,
+              "switch_raw": 0.06770833333333333
+            },
+            "rank_regret_original_half_safe": {
+              "delta_cost": -0.0001073622395833332,
+              "delta_draw_wait_harm_rate": -0.0007812499999999998,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": -3.541666666666415e-05,
+              "gate_cost_regret": 0.01178664739583333,
+              "switch_raw": 0.008333333333333333
+            },
+            "rank_regret_original_pooled_safe": {
+              "delta_cost": -0.00012370078125000005,
+              "delta_draw_wait_harm_rate": -0.0010416666666666664,
+              "delta_unsafe": -0.0010416666666666669,
+              "delta_wait_min": 0.00013411458333333661,
+              "gate_cost_regret": 0.011770308854166663,
+              "switch_raw": 0.019791666666666662
+            },
+            "rank_regret_raw_half_safe": {
+              "delta_cost": -0.0002007218749999999,
+              "delta_draw_wait_harm_rate": -0.001041666666666667,
+              "delta_unsafe": -0.0020833333333333337,
+              "delta_wait_min": 0.00010729166666666713,
+              "gate_cost_regret": 0.011693287760416662,
+              "switch_raw": 0.009375
+            },
+            "rank_regret_raw_pooled_safe": {
+              "delta_cost": 9.216875000000046e-05,
+              "delta_draw_wait_harm_rate": 0.0015624999999999992,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0004156250000000021,
+              "gate_cost_regret": 0.011986178385416664,
+              "switch_raw": 0.04583333333333334
+            },
+            "raw": {
+              "delta_cost": 0.0,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0,
+              "gate_cost_regret": 0.011894009635416663,
+              "switch_raw": 0.0
+            },
+            "wait_rank_original_half_safe": {
+              "delta_cost": -0.0001084710937500001,
+              "delta_draw_wait_harm_rate": 0.0002604166666666666,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": -4.166666666663779e-06,
+              "gate_cost_regret": 0.011785538541666663,
+              "switch_raw": 0.005208333333333333
+            },
+            "wait_rank_original_pooled_safe": {
+              "delta_cost": -9.960026041666628e-05,
+              "delta_draw_wait_harm_rate": 0.002083333333333333,
+              "delta_unsafe": 0.0020833333333333337,
+              "delta_wait_min": 9.427083333333718e-05,
+              "gate_cost_regret": 0.011794409374999997,
+              "switch_raw": 0.0125
+            },
+            "wait_rank_raw_half_safe": {
+              "delta_cost": -3.072916666668295e-08,
+              "delta_draw_wait_harm_rate": -0.00078125,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -1.822916666666119e-06,
+              "gate_cost_regret": 0.011893978906249995,
+              "switch_raw": 0.0010416666666666667
+            },
+            "wait_rank_raw_pooled_safe": {
+              "delta_cost": 0.00037577447916666636,
+              "delta_draw_wait_harm_rate": 0.0020833333333333333,
+              "delta_unsafe": 0.0031249999999999997,
+              "delta_wait_min": 4.036458333333964e-05,
+              "gate_cost_regret": 0.01226978411458333,
+              "switch_raw": 0.022916666666666665
+            }
+          }
+        },
+        "401": {
+          "matched_blocks": 160,
+          "mean_cases": 6.0,
+          "variants": {
+            "all_mse_original_half_safe": {
+              "delta_cost": -3.57174479166664e-05,
+              "delta_draw_wait_harm_rate": -0.0026041666666666665,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.0002986979166666657,
+              "gate_cost_regret": 0.009278466666666665,
+              "switch_raw": 0.015625
+            },
+            "all_mse_original_pooled_safe": {
+              "delta_cost": 4.441197916666656e-05,
+              "delta_draw_wait_harm_rate": -0.00703125,
+              "delta_unsafe": -0.011458333333333333,
+              "delta_wait_min": -0.0004317708333333288,
+              "gate_cost_regret": 0.00935859609375,
+              "switch_raw": 0.040625
+            },
+            "all_mse_raw_half_safe": {
+              "delta_cost": -0.00010969687499999966,
+              "delta_draw_wait_harm_rate": -0.0023437499999999995,
+              "delta_unsafe": -0.0020833333333333337,
+              "delta_wait_min": 7.291666666665974e-06,
+              "gate_cost_regret": 0.009204487239583333,
+              "switch_raw": 0.007291666666666666
+            },
+            "all_mse_raw_pooled_safe": {
+              "delta_cost": -0.0006233890625,
+              "delta_draw_wait_harm_rate": -0.008333333333333333,
+              "delta_unsafe": -0.010416666666666666,
+              "delta_wait_min": -0.0006265624999999997,
+              "gate_cost_regret": 0.008690795052083334,
+              "switch_raw": 0.04583333333333332
+            },
+            "feasible_mse_original_half_safe": {
+              "delta_cost": -1.9826822916666477e-05,
+              "delta_draw_wait_harm_rate": -0.003125,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": -0.00012916666666666602,
+              "gate_cost_regret": 0.009294357291666666,
+              "switch_raw": 0.019791666666666666
+            },
+            "feasible_mse_original_pooled_safe": {
+              "delta_cost": -0.0003557492187499996,
+              "delta_draw_wait_harm_rate": -0.0028645833333333327,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": -0.0003096354166666675,
+              "gate_cost_regret": 0.008958434895833334,
+              "switch_raw": 0.028125
+            },
+            "feasible_mse_raw_half_safe": {
+              "delta_cost": -2.128645833333337e-06,
+              "delta_draw_wait_harm_rate": -0.003645833333333333,
+              "delta_unsafe": -0.005208333333333333,
+              "delta_wait_min": -2.5260416666666548e-05,
+              "gate_cost_regret": 0.00931205546875,
+              "switch_raw": 0.007291666666666666
+            },
+            "feasible_mse_raw_pooled_safe": {
+              "delta_cost": -0.00024140078124999993,
+              "delta_draw_wait_harm_rate": -0.00859375,
+              "delta_unsafe": -0.011458333333333333,
+              "delta_wait_min": -0.00029140624999999816,
+              "gate_cost_regret": 0.009072783333333334,
+              "switch_raw": 0.029166666666666664
+            },
+            "joint_original_half_safe": {
+              "delta_cost": -6.0365885416666155e-05,
+              "delta_draw_wait_harm_rate": -0.003906249999999999,
+              "delta_unsafe": -0.004166666666666667,
+              "delta_wait_min": -0.0005023437499999979,
+              "gate_cost_regret": 0.009253818229166665,
+              "switch_raw": 0.026041666666666664
+            },
+            "joint_original_pooled_safe": {
+              "delta_cost": -0.00041353880208333337,
+              "delta_draw_wait_harm_rate": -0.0070312499999999984,
+              "delta_unsafe": -0.009375,
+              "delta_wait_min": -0.0007414062499999971,
+              "gate_cost_regret": 0.0089006453125,
+              "switch_raw": 0.042708333333333334
+            },
+            "joint_raw_half_safe": {
+              "delta_cost": -3.0447916666666298e-05,
+              "delta_draw_wait_harm_rate": -0.0049479166666666664,
+              "delta_unsafe": -0.00625,
+              "delta_wait_min": -0.00020677083333333338,
+              "gate_cost_regret": 0.009283736197916666,
+              "switch_raw": 0.013541666666666665
+            },
+            "joint_raw_pooled_safe": {
+              "delta_cost": -0.0003508880208333327,
+              "delta_draw_wait_harm_rate": -0.007812499999999998,
+              "delta_unsafe": -0.010416666666666666,
+              "delta_wait_min": -0.0011036458333333345,
+              "gate_cost_regret": 0.00896329609375,
+              "switch_raw": 0.06666666666666667
+            },
+            "rank_regret_original_half_safe": {
+              "delta_cost": -2.5314843749999995e-05,
+              "delta_draw_wait_harm_rate": -0.00078125,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": -0.00019505208333333373,
+              "gate_cost_regret": 0.009288869270833333,
+              "switch_raw": 0.004166666666666667
+            },
+            "rank_regret_original_pooled_safe": {
+              "delta_cost": -0.0001102221354166665,
+              "delta_draw_wait_harm_rate": -0.0033854166666666663,
+              "delta_unsafe": -0.005208333333333333,
+              "delta_wait_min": -0.000992968749999999,
+              "gate_cost_regret": 0.009203961979166666,
+              "switch_raw": 0.019791666666666666
+            },
+            "rank_regret_raw_half_safe": {
+              "delta_cost": -2.75401041666667e-05,
+              "delta_draw_wait_harm_rate": -0.0018229166666666667,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.00021458333333333355,
+              "gate_cost_regret": 0.009286644010416668,
+              "switch_raw": 0.004166666666666667
+            },
+            "rank_regret_raw_pooled_safe": {
+              "delta_cost": -0.00012684427083333377,
+              "delta_draw_wait_harm_rate": -0.003645833333333333,
+              "delta_unsafe": -0.004166666666666666,
+              "delta_wait_min": -0.0009807291666666651,
+              "gate_cost_regret": 0.009187339843749998,
+              "switch_raw": 0.03229166666666666
+            },
+            "raw": {
+              "delta_cost": 0.0,
+              "delta_draw_wait_harm_rate": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0,
+              "gate_cost_regret": 0.009314184114583332,
+              "switch_raw": 0.0
+            },
+            "wait_rank_original_half_safe": {
+              "delta_cost": 1.8044270833332369e-06,
+              "delta_draw_wait_harm_rate": 0.00026041666666666666,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 2.4218750000001033e-05,
+              "gate_cost_regret": 0.009315988541666665,
+              "switch_raw": 0.005208333333333333
+            },
+            "wait_rank_original_pooled_safe": {
+              "delta_cost": 5.779166666666404e-06,
+              "delta_draw_wait_harm_rate": 0.00026041666666666666,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 3.645833333333475e-05,
+              "gate_cost_regret": 0.00931996328125,
+              "switch_raw": 0.008333333333333333
+            },
+            "wait_rank_raw_half_safe": {
+              "delta_cost": 2.463541666666962e-07,
+              "delta_draw_wait_harm_rate": -0.00026041666666666666,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": 1.1197916666667515e-05,
+              "gate_cost_regret": 0.00931443046875,
+              "switch_raw": 0.003125
+            },
+            "wait_rank_raw_pooled_safe": {
+              "delta_cost": 4.51395833333329e-05,
+              "delta_draw_wait_harm_rate": -0.0010416666666666662,
+              "delta_unsafe": -0.002083333333333333,
+              "delta_wait_min": -0.0005963541666666663,
+              "gate_cost_regret": 0.009359323697916666,
+              "switch_raw": 0.020833333333333332
+            }
+          }
+        }
+      }
+    }
+  },
+  "prefixes": 40,
+  "protocol": "native_transit_frozen_future_stage241_v1",
+  "sealed_cells": 32,
+  "selected_oof_records": 12800,
+  "software_qualified": true,
+  "states": 240,
+  "training_updates": 0
+}
