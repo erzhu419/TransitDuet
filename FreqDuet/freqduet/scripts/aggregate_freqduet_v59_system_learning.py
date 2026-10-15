@@ -26,6 +26,15 @@ def aggregate(root):
                   exact_reference_days=len(cases), main_policy_changed=False,
                   policy_effectiveness_established=False,
                   diagnostic_commits=sorted({c["diagnostic_commit"] for c in cases}))
+    result["descriptive_rollouts"] = [
+        dict(case=c["case"],
+             journey_min=[d["journey_min"] for d in c["episodes"]],
+             cv_squared=[d["cv_squared"] for d in c["episodes"]],
+             holding_s_per_trip=[d["holding_s_per_trip"] for d in c["episodes"]],
+             readiness_delay_s=[d["readiness_delay_s"] for d in c["episodes"]])
+        for c in cases]
+    result["stochastic_day_constraint_violations"] = sum(
+        c["episodes"][1]["cv_squared"] > c["episodes"][1]["regularity_budget_cv_squared"] for c in cases)
     summary = root / "summary"
     summary.mkdir(exist_ok=True)
     (summary / "status.json").write_text(json.dumps(result, indent=2) + "\n")
