@@ -45,7 +45,23 @@ Implementation commit `2235bb48c4`; frozen diagnostic source directory
 `t162169` runs V37/V38 regressions, seven timing tests and plan preparation.
 `t162170` waits for its small preparation marker, then validates cached dominant
 accounting and one missing intervened full-day arm. Both allow only node001-node006.
-At submission, preparation waits for CPU capacity and smoke waits for preparation.
-Neither has passed yet. Submit missing-arm CPU batches only after smoke passes,
-using the unique missing-arm count in `prepare_export/done.json`; aggregate only
-after all batch completion markers. Do not count queued work as replay evidence.
+Preparation passed: 32 unique arms, four cached traces and 28 missing replays.
+Smoke `t162170` and retry `t162185` failed before any new replay because the audit
+incorrectly required equal service-clearance clocks. Retry `t162186` was cancelled.
+All four cached arms have `service_cleared`, zero unserved passengers, and end
+clocks 50684/50708/50688/50455 s. Commit `4995dc915f` uses the fixed configured
+evaluation horizon instead; after verified service clearance only remaining
+unserved waiting exposure can increase. Truncated traces still fail. Replacement
+`t162188` passed 26 tests, then exposed the second loader error: this dataset
+derives its clock through EpisodeProtocol and has no JSON `max_time` field. It
+was cancelled before another retry. Commit `bcd5768e3a` initializes the original
+frozen environment protocol directly. Replacement `t162189` runs the original
+regressions, twelve timing tests and full-day smoke from
+`source/v56_protocol_clock_20261015`. All 27 tests and full-day smoke passed:
+the replayed seed12011/eval45007/t36000 first-only arm exactly matches V37,
+and all four cached dominant arms pass fixed-clock exposure accounting. The
+smoke arm is reusable, leaving 27 new full-day replays in the 28-item batch plan.
+Submit missing-arm CPU batches only after smoke passes, using the missing-arm
+count above; aggregate only after all completion markers. Earlier failed attempts
+remain in scheduler history; the result's `failed_arm_attempts` counts replay-arm
+failures specifically, not pre-replay smoke failures.
