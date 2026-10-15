@@ -34,3 +34,37 @@ Limitations: coefficient-fitting OOF errors are not confirmation evidence;
 24-day fold residual scales may transfer imperfectly to 32-day full models.
 Intervals condition on the fitting set, calibration and four actors (two
 original training seeds). Prediction gains do not establish action effects.
+Positive scalar shrinkage rescales, but does not repair, action rankings.
+
+## Outcome / Next Step
+
+40 server tests passed. All 32 OOF fits and 128 fresh rollouts completed
+(665,600 held-out decisions), scheduler t165395-t165425, source `31869db714`.
+
+| Predictor | MAE | RMSE |
+| --- | --- | --- |
+| 32-day causal prior | 0.010258 | 0.010258 |
+| V65 raw MLP | 0.006895 | 0.008179 |
+| Cross-fitted shrunk MLP | 0.006918 | 0.008104 |
+| V65 raw linear | 0.007400 | 0.010637 |
+| Cross-fitted shrunk linear | 0.007651 | 0.009618 |
+
+Primary shrunk-MLP-minus-prior MAE: -0.003340, 95% CI
+[-0.006377, -0.000919]; RMSE: -0.002154 [-0.004744, 0.000014].
+MLP shrinkage itself: MAE +0.000022 [-0.000112, 0.000194],
+RMSE -0.000074 [-0.000172, 0.000035]; no reliable added benefit.
+Linear shrinkage reduces RMSE by 0.001019, CI [-0.001492, -0.000433].
+Linear alphas: 0.6906/0.8172/0.8206/0.6014; MLP:
+0.9476/0.9334/0.8934/1.0000 (case order). Both strict gates remain 0/4.
+The alpha=1 MLP context ties its raw control by construction and cannot pass
+a strict superiority comparison; this is not evidence of degradation.
+MAE improvement over the prior is confirmed for the calibrated MLP on these
+new days, but cannot be attributed to shrinkage rather than V65's base values.
+No action-audit/control admission, actor/dual or production-value updates.
+
+Stop scalar-shrinkage iterations. Next collect fixed-design, matched seven-action
+full-day counterfactual labels with frozen actors/main: terminal CV-squared and
+passenger-time differences from the same observable prefix and matched futures.
+This is a new causal supervision experiment, not promotion of V66 as a controller.
+Keep these 32 confirmation days consumed; no coefficient/gate retuning on them.
+Compact result: `results_freqduet/protocol_v6_v66_crossfit_shrinkage/summary/status.json`.
