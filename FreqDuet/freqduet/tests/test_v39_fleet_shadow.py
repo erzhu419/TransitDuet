@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from freqduet_fleet_pool_forecast import (
     PastFleetTelemetry, forecast_pool, forecast_second_identity, freeze_pool, remaining_trip_s,
 )
+from run_freqduet_v39_fleet_shadow import holding_components
 
 
 def observation():
@@ -78,6 +79,16 @@ class FleetRolloutTest(unittest.TestCase):
         obs.update(future_returns=object(), seed=9999, future_journey=object())
         obs["vehicles"][0]["actual_return_s"] = 999999
         self.assertEqual(before, forecast_pool(obs, 60))
+
+    def test_holding_labels_count_only_seconds_after_the_snapshot(self):
+        obs = observation()
+        obs["time_s"] = 10
+        vehicle = obs["vehicles"][0]
+        vehicle.update(phase="commanded_hold", remaining_stop_s=8)
+        commands = [dict(time_s=0, action_s=4), dict(time_s=5, action_s=11), dict(time_s=20, action_s=5)]
+        predicted, actual = holding_components(obs, vehicle, commands, actual_return=30)
+        self.assertEqual(predicted, 7)
+        self.assertEqual(actual, 12)
 
 
 class ObservablePoolTest(unittest.TestCase):

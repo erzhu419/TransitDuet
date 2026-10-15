@@ -96,6 +96,22 @@ def batch(root, v37, start, end, workers):
         source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))) + "\n")
 
 
+def holding_components(snapshot, vehicle, commands, actual_return):
+    route = snapshot["routes"][str(vehicle["direction"])]
+    station, now = vehicle["station_index"], snapshot["time_s"]
+    current = 0.0
+    if vehicle["phase"] == "current_decision":
+        current = snapshot["decision"]["actor_action_s"]
+    elif vehicle["phase"] == "commanded_hold":
+        current = max(vehicle["remaining_stop_s"] - snapshot["dt_s"], 0.0)
+    elif vehicle["phase"] == "service":
+        current = route["hold_s"][station]
+    predicted = current + sum(route["hold_s"][station + 1:-1])
+    actual = sum(max(0.0, min(actual_return, row["time_s"] + row["action_s"])
+                     - max(now - snapshot["dt_s"], row["time_s"])) for row in commands)
+    return float(predicted), float(actual)
+
+
 def aggregate(root):
     return_rows, launch_rows, identity_rows, resource_rows, target_rows = [], [], [], [], []
     dominant_first, source_commits = None, set()
@@ -111,11 +127,13 @@ def aggregate(root):
             dominant_first = first_pool
         actual_returns = pd.read_csv(cell / "terminals.csv").set_index("trip_id")
         actual_launches = pd.read_csv(cell / "launches.csv").set_index("trip_id")
+        holding = pd.read_csv(cell / "holds.csv")
+        commands = {trip: group.to_dict("records") for trip, group in holding.groupby("trip_id")}
         for stage, capture in record["decisions"].items():
             if not record["matches_v37"]:
                 raise ValueError("shadow instrumentation differs from frozen V37")
             snapshot = capture["fleet_pool"]
-            current = {row["trip_id"] for row in snapshot["vehicles"] if row["on_route"]}
+            current = {row["trip_id"]: row for row in snapshot["vehicles"] if row["on_route"]}
             meta = dict(train_seed=seed, eval_seed=scenario, target_time_s=target, arm=arm, stage=stage)
             target_trip = capture["identity"]["trip_id"]
             target_actual = actual_returns.loc[target_trip].time_s
@@ -128,7 +146,14 @@ def aggregate(root):
                 for row in forecast["returns"]:
                     if row["trip_id"] in current:
                         actual = actual_returns.loc[row["trip_id"]]
+                        vehicle = current[row["trip_id"]]
+                        predicted_hold, actual_hold = holding_components(
+                            snapshot, vehicle, commands[row["trip_id"]], float(actual.time_s))
                         return_rows.append(dict(meta, horizon_s=int(horizon), trip_id=row["trip_id"],
+                            direction=vehicle["direction"], phase=vehicle["phase"],
+                            predicted_hold_s=predicted_hold, actual_hold_s=actual_hold,
+                            holding_error_s=predicted_hold - actual_hold,
+                            nonholding_error_s=float(row["time_s"] - actual.time_s) - predicted_hold + actual_hold,
                             remaining_actual_s=float(actual.time_s - snapshot["time_s"]),
                             error_s=float(row["time_s"] - actual.time_s)))
                 for row in snapshot["commitments"]:
@@ -168,9 +193,18 @@ def aggregate(root):
                                  within_45s=float((np.abs(error) <= 45).mean())))
     pd.DataFrame(return_groups).to_csv(summary / "return_calibration.csv", index=False)
     target_frame = pd.DataFrame(target_rows)
-    target_frame.loc[target_frame.arm == "reference"].groupby("train_seed")[
-        ["pooled_error_s", "v38_proxy_error_s"]].agg(["mean", lambda values: values.abs().mean()]).to_csv(
-            summary / "target_return_comparison.csv")
+    target_comparison = target_frame.loc[target_frame.arm == "reference"].groupby("train_seed").agg(
+        pooled_bias_s=("pooled_error_s", "mean"), pooled_mae_s=("pooled_error_s", lambda values: values.abs().mean()),
+        v38_bias_s=("v38_proxy_error_s", "mean"), v38_mae_s=("v38_proxy_error_s", lambda values: values.abs().mean()))
+    target_comparison.to_csv(summary / "target_return_comparison.csv")
+    component_rows = []
+    for name, group in (("all_current", ref_returns), ("actual_remaining_le_900", short_returns)):
+        for component in ("holding_error_s", "nonholding_error_s"):
+            component_rows.append(dict(group=name, component=component, bias_s=float(group[component].mean()),
+                                       mae_s=float(group[component].abs().mean())))
+    pd.DataFrame(component_rows).to_csv(summary / "error_components.csv", index=False)
+    worst = ref_returns.assign(abs_error=ref_returns.error_s.abs()).nlargest(8, "abs_error")
+    (summary / "largest_errors.json").write_text(worst.drop(columns="abs_error").to_json(orient="records", indent=2) + "\n")
     launch_summary = ref_launches.groupby("horizon_s").apply(lambda frame: pd.Series(dict(
         count=len(frame), launch_window_accuracy=(frame.predicted_launched == frame.actual_launched).mean(),
         predicted_missing=(~frame.predicted_launched).sum(), mae_s=frame.error_s.abs().mean(),
@@ -197,6 +231,7 @@ def aggregate(root):
     print(json.dumps(status), flush=True)
     print(pd.DataFrame(return_groups).to_string(index=False), flush=True)
     print(launch_summary.to_string(), flush=True)
+    print(pd.DataFrame(component_rows).to_string(index=False), flush=True)
 
 
 if __name__ == "__main__":
