@@ -55,6 +55,16 @@ class DistributionObserver(previous.ClosedLoopObserver):
 
 def run_day(arguments):
     root, seed, scenario, cohort = arguments
+    archive = joint.TRAIN_ROOT.parent / "protocol_v6_v35_actor_cross_b200/cells" / (
+        f"{joint.CURRENT}_seed{seed}_U200_L200/evaluation/evaluation.csv")
+    bank = pd.read_csv(archive).set_index("eval_seed")
+    if scenario in bank.index:
+        old = bank.loc[scenario].to_dict()
+        old["eval_seed"] = scenario
+        control_source = "v35_archive"
+    else:
+        old = joint.run_branch(root, seed, scenario, 7200, f"seed{seed}_eval{scenario}_unobserved")["episode"]
+        control_source = "same_seed_unobserved_replay"
     observer = DistributionObserver(7200, True)
     original = joint.optimized_runtime
 
@@ -79,10 +89,6 @@ def run_day(arguments):
         branch = joint.run_branch(root, seed, scenario, 7200, label)
     finally:
         joint.optimized_runtime = original
-    archive = joint.TRAIN_ROOT.parent / "protocol_v6_v35_actor_cross_b200/cells" / (
-        f"{joint.CURRENT}_seed{seed}_U200_L200/evaluation/evaluation.csv")
-    old = pd.read_csv(archive).set_index("eval_seed").loc[scenario].to_dict()
-    old["eval_seed"] = scenario
     joint.check_unchanged(branch["episode"], old)
     cell = root / "observed" / label
     cell.mkdir(parents=True, exist_ok=True)
@@ -91,9 +97,10 @@ def run_day(arguments):
     for name in ("holds", "terminals"):
         pd.DataFrame(getattr(observer, name)).to_csv(cell / f"{name}.csv", index=False)
     np.savez_compressed(cell / "exposure.npz", timeline=np.asarray(observer.timeline))
-    (cell / "done.json").write_text(json.dumps(dict(cohort=cohort, matches_v35=True,
+    (cell / "done.json").write_text(json.dumps(dict(cohort=cohort, matches_v35=control_source == "v35_archive",
+        matches_frozen_control=True, control_source=control_source,
         source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"))) + "\n")
-    print(f"DISTRIBUTION_DAY_DONE {label} cohort={cohort} matches_v35=True", flush=True)
+    print(f"DISTRIBUTION_DAY_DONE {label} cohort={cohort} matches_frozen_control=True control={control_source}", flush=True)
     return label
 
 
