@@ -31,6 +31,13 @@ def task_specification(run_name, key=None):
     return task
 
 
+def require_completed_attempts(existing, tasks, records):
+    parents = {records[t["id"]].get("parent_id") for t in existing}
+    leaves = [t for t in existing if t["id"] not in parents]
+    if len(leaves) != len(tasks): raise SystemExit("Need exactly one terminal attempt per preceding task")
+    require_completed(leaves, tasks, records)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name", required=True)
@@ -56,7 +63,7 @@ def main():
         records = {t["id"]: t for t in scheduler.load_state()["tasks"]}
         missing = {t["id"] for t in existing}-records.keys()
         if missing: records.update({t["id"]: t for t in scheduler.load_archive_tasks() if t["id"] in missing})
-        require_completed(existing, preceding, records)
+        require_completed_attempts(existing, preceding, records)
         tasks = [task_specification(args.run_name, k) for k in spec.KEYS if k != spec.PREFLIGHT] if args.phase == "remaining" else [task_specification(args.run_name)]
     execute_bulk(tasks, dry_run=False, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{args.run_name}")
 

@@ -77,8 +77,9 @@ def quadratic_fit(loss, hessian, initial, *, radius=None):
     if np.linalg.norm(theta) > radius:
         high = max(float(eigenvalues.max()), float(np.linalg.norm(beta)/radius), 1e-12)
         while np.linalg.norm(solution(high)) > radius: high *= 2
-        multiplier, solved = brentq(lambda m: np.linalg.norm(solution(m))-radius, 0., high, xtol=1e-14, full_output=True)
-        theta, iterations = solution(multiplier), solved.iterations
+        # Scale the dual bracket so small physical losses retain the same KKT accuracy.
+        multiplier, solved = brentq(lambda m: np.linalg.norm(solution(high*m))-radius, 0., 1., xtol=1e-14, full_output=True)
+        theta, iterations = solution(high*multiplier), solved.iterations
     if loss(initial)[0] < loss(theta)[0]: theta = initial.copy()
     return finish_fit(loss, initial, theta, iterations, radius=radius)
 

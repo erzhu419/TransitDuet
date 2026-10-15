@@ -8,7 +8,7 @@ from scipy.optimize import check_grad
 
 from freq_hrl.domains.transit import native_pair_critic as learning
 from scripts import run_native_transit_pair_critic_stage246 as spec
-from scripts.submit_native_transit_pair_critic_stage246_scheduleurm import task_specification
+from scripts.submit_native_transit_pair_critic_stage246_scheduleurm import task_specification, require_completed_attempts
 from tests import test_native_transit_feasible_critic_stage245 as fixture_module
 
 
@@ -18,6 +18,27 @@ class PairCriticTest(unittest.TestCase):
         fixture.setUp()
         self.rows, self.data, self.draws = fixture.rows, fixture.data, fixture.draws
         self.cached, self.fit = learning.previous.fit_paths(self.rows, self.data, self.draws, fixture.cached)
+
+    def test_small_loss_scale_preserves_dual_accuracy(self):
+        points = []
+        for scale in (1., 1e-12):
+            matrix = scale*np.array([[3., .4], [.4, 1.]])
+            def loss(t):
+                d = t-np.array([2., -1.])
+                return float(d@matrix@d/2), matrix@d
+            theta, fit = learning.optimizer.quadratic_fit(loss, lambda t: matrix, np.array([.2, .1]), radius=.5)
+            self.assertLessEqual(fit["optimality"], 1e-8)
+            points.append(theta)
+        np.testing.assert_allclose(*points, atol=1e-12)
+
+    def test_recovery_gate_keeps_failed_attempts_and_requires_successful_leaf(self):
+        records = {"old": {"id": "old", "signature": "cell", "status": "failed", "exit_code": 1},
+            "cancel": {"id": "cancel", "signature": "cell", "status": "cancelled", "parent_id": "old"},
+            "fixed": {"id": "fixed", "signature": "cell", "status": "done", "exit_code": 0, "parent_id": "cancel"}}
+        before = copy.deepcopy(records)
+        require_completed_attempts(list(records.values()), [{"signature": "cell"}], records)
+        self.assertEqual(records, before)
+        with self.assertRaises(SystemExit): require_completed_attempts([records["old"], records["cancel"]], [{"signature": "cell"}], records)
 
     def test_pair_gradient_hessian_and_ineligible_labels(self):
         rng = np.random.default_rng(246)
