@@ -1,0 +1,69 @@
+{
+  "contract": {
+    "arms": [
+      "frozen_old",
+      "free_old",
+      "shrunk"
+    ],
+    "boundary": "development_diagnostic_not_fresh_confirmation_or_end_to_end_HRL_no_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "auxiliary_free_solves": 5376,
+      "fit_tasks": 32,
+      "new_native_episodes": 0,
+      "new_prefixes": 0,
+      "new_raw_reference_fits": 0,
+      "new_shrunk_solves": 5376,
+      "report_tasks": 1
+    },
+    "capacity": "same198_features_TSVD_ranks_total_df_k_component_df_max2k_no_extra_rank_or_strength_grid",
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "contrasts": [
+      "shrunk-frozen_old",
+      "shrunk-free_old",
+      "shrunk-old"
+    ],
+    "controls": "Stage250_old_frozen_old_free_old_models_selections_and_actions_verbatim; auxiliary_free_solves_only_for_penalty_estimation",
+    "data_run": "native_transit_training_information_stage249_20261015_r1",
+    "evaluation": "opposite16_bank_train60_and_held60; both_reciprocal_directions_and_four_views",
+    "frozen": "raw_references_198_features_TSVD_ranks_scale_state_GLS_shrinkage_precision_A2_OOF_selector_17_candidates_actions_suffix",
+    "interpretation": "plugin_conditional_noise_not_full_fit_covariance_or_empirical_Bayes_guarantee; retain_service_risk_and_action_CRN_covariance",
+    "label_boundary": "Stage249_futures_reused_development; no_Stage248_reads_no_Stage169_reserved_prefixes_no_arm_winner_selection",
+    "new_fit": "state_GLS_plus_half_lambda_squared_norm_of_new_head_difference_around_cached_difference",
+    "noise": "sum_state_covariance_of_per_future_paired_service_minus_risk_scores_divided_by_D; hold_training_precision_reliability_and_total_fixed; H_pinv_cov_H_pinv",
+    "penalty": "signal=max_squared_auxiliary_free_difference_increment_minus_trace_noise_0; lambda=trace_H_noise_over_signal; no_positive_signal_freezes_difference",
+    "policy": "pooled_safe_primary_half_safe_secondary_old_A2_OOF_only_no_arm_or_scenario_gate",
+    "primary_diagnostic": "mixed_pooled_held60_fleet_feasible_pair_MSE_both_banks; nonanchor_MSE_and_head_difference_MSE_also_reported",
+    "rank_diagnostic": "all_four_registered_ranks_at_alpha1_training_bank_seen_prefix_new_future_and_held_prefix_new_future",
+    "source_protocol": "native_transit_head_budget_stage250_v1",
+    "source_run": "native_transit_head_budget_stage250_20261015_r1",
+    "storage": "server_only_panels_models_actions_aggregates_small_fit_receipts_and_compact_report_pull",
+    "total_cap": "cached_A_radius_only_no_training_expansion",
+    "training": "Stage249_expanded_only_8_inner_16_full_same_banks_same_state_folds",
+    "variants": [
+      "raw",
+      "old_pooled_safe",
+      "old_half_safe",
+      "frozen_old_pooled_safe",
+      "frozen_old_half_safe",
+      "free_old_pooled_safe",
+      "free_old_half_safe",
+      "shrunk_pooled_safe",
+      "shrunk_half_safe"
+    ]
+  },
+  "coverage_qualified": true,
+  "frozen_reproduction": {
+    "action_exposures_compared": 1680,
+    "mismatches": 0
+  },
+  "key": [
+    "mixed_a",
+    0,
+    "even_odd",
+    0
+  ],
+  "new_native_episodes": 0,
+  "new_raw_reference_fits": 0,
+  "protocol": "native_transit_head_shrinkage_stage251_v1"
+}
