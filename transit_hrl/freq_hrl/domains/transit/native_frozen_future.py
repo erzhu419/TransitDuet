@@ -119,3 +119,32 @@ def prefix_effects(cell):
                                 "top1_benefit_share": max(benefits)/sum(benefits) if sum(benefits) else None}
                     output[name][scope] = {"prefixes": xs, "concentration": concentration}
     return output
+
+
+def conditional_mc(cells, panels):
+    """Fixed-prefix sampling SE; shared state/future outcomes count only once."""
+    keys = sorted({state_key(r) for c in cells for b in c["blocks"] for r in b["states"]})
+    index = {k: i for i, k in enumerate(keys)}
+    draws = panels[keys[0]]["values"].shape[0]
+    output = {}
+    for name in VARIANTS:
+        effects = np.zeros((len(keys), draws, 4))
+        changed, fleet_events = set(), set()
+        for cell in cells:
+            for block in cell["blocks"]:
+                weight = 1./(len(cells)*len(cell["blocks"])*len(block["states"]))
+                for row, chosen, raw in zip(block["states"], block["choices"][name], block["choices"]["raw"]):
+                    key = state_key(row)
+                    values = panels[key]["values"]
+                    effects[index[key]] += weight*(values[:, chosen]-values[:, raw])
+                    if chosen != raw: changed.add(key)
+                    fleet_events.update((key, int(d)) for d in np.flatnonzero(values[:, chosen, 1] != values[:, raw, 1]))
+        means = effects.mean(axis=1).sum(axis=0)
+        se = np.sqrt(effects.var(axis=1, ddof=1).sum(axis=0)/draws)
+        output[name] = {"changed_states": len(changed), "sampled_fleet_event_state_draws": len(fleet_events),
+            "fields": {f: {"mean": float(means[i]), "conditional_mc_se": float(se[i]),
+                "mean_over_mc_se": float(means[i]/se[i]) if se[i] else None}
+                for i, f in enumerate(("cost", "fleet", "nonfleet", "wait_min"))}}
+    return {"fixed_states": len(keys), "draws_per_state": draws,
+        "state_exposures": sum(len(b["states"]) for c in cells for b in c["blocks"]), "variants": output,
+        "boundary": "conditional_innovation_sampling_SE_not_training_seed_CI_or_unobserved_tail_guarantee"}
