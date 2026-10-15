@@ -26,3 +26,14 @@ observable AVL movement means on the same future departures. Future arrivals
 serve only as labels, even beyond the forecast horizon, avoiding completion-time
 selection of fast late-window legs. This extension diagnoses mean mismatch;
 it neither supplies future labels to forecasts nor changes their distributions.
+
+## Results
+Smoke t160169 and 72-origin matrix t160170-t160174 pass exact replay; summary
+t160175. Shared-model late MAE delta versus V48 is +2.24 s [-0.63,5.29]. On
+complete matched late chains, travel/service/holding bias contributions are
+-28.32/+0.75/+7.78 s. At whole-hour origins, late MAE 94.88 versus 88.06 s
+despite larger path spread (70.10 versus 60.04 s): noise inflation alone is not
+supported. Teacher audit t160179 passes six tests and finds V48's long-lead
+leg MAE 4.32 s lower than V50 [-4.74,-3.94]; observable movement means give
+no long-lead gain. V53 therefore tests prefix-learned horizon mean reversion
+before changing holding inputs or the real controller.
