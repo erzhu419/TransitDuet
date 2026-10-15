@@ -151,7 +151,8 @@ def aggregate(root):
     result = dict(status="terminal_value_factorization_complete", fresh_rollouts=len(days),
                   validation_demand_seeds=VALIDATION_SEEDS, contexts=len(cases),
                   decisions=sum(d["factored"]["count"] for d in days),
-                  passed_cases=sum(c["gate_pass"] for c in cases), control_admitted=all(c["gate_pass"] for c in cases),
+                  passed_cases=sum(c["gate_pass"] for c in cases),
+                  action_audit_admitted=all(c["gate_pass"] for c in cases), control_admitted=False,
                   actor_updates=0, dual_updates=0, main_policy_changed=False,
                   mean_metrics={name: {metric: float(np.mean([d[name][metric] for d in days]))
                                        for metric in ("mae", "rmse", "bias")}
