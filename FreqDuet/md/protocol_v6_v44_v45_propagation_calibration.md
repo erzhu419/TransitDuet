@@ -16,7 +16,8 @@ Keep V42/V43 common-clock thresholds: holding MAE <= historical, absolute bias
 V44 `c1a005ca3b`: 23 tests/smoke `t155545`; eight exact V35 replays
 `t155546-t155549`; aggregate `t155557` / `7f78c88577`. Travel MAE 36.0/35.5 s,
 service 3.87/3.80 s, holding pipeline 12.6/12.9 s. At 15-30 min, arrival clocks
-err by 110/87 s and follower gaps by 107/90 s. No missing nonzero actions;
+err by 110/87 s and follower gaps by 107/90 s. No nonzero requested actions
+lack predecessor-departure evidence;
 geometry and target headways align. Acquisition smokes `t155530/t155535` failed
 on recorder API differences; their retries were cancelled.
 
