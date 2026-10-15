@@ -37,26 +37,35 @@ def information_error(train_draws, evaluation_draws, data, predictions):
     anchor = data["originals"]
     ix = np.arange(len(anchor))
     def relative(draws):
-        mean = draws.mean(axis=1)
-        return mean-mean[ix, anchor][:, None]
-    target, truth = relative(train_draws), relative(evaluation_draws)
+        return draws-draws[ix, :, anchor][:, :, None]
+    train_paired, evaluation_paired = relative(train_draws), relative(evaluation_draws)
+    target, truth = train_paired.mean(axis=1), evaluation_paired.mean(axis=1)
     eligible = data["raw_logits"] <= 0
     lo, hi = previous.previous.LO, previous.previous.HI
     feasible = eligible[:, lo] & eligible[:, hi]
     pair_weights = feasible/np.maximum(feasible.sum(axis=1, keepdims=True), 1)
     nonanchor = np.arange(6)[None, :] != anchor[:, None]
-    def errors(predicted):
+    def errors(predicted, expected=truth):
         result = {}
         for name, column in (("cost", 0), ("fleet", 1), ("service", 2)):
-            a, b = predicted[..., column], truth[..., column]
+            a, b = predicted[..., column], expected[..., column]
             margin_a, margin_b = a[:, hi]-a[:, lo], b[:, hi]-b[:, lo]
             result[name] = {"nonanchor_mse": float(((a-b)**2)[nonanchor].mean()),
                 "feasible_pair_mse": float((pair_weights*(margin_a-margin_b)**2).sum(axis=1).mean()),
                 "feasible_pair_sign_error": float((pair_weights*(np.sign(margin_a) != np.sign(margin_b))).sum(axis=1).mean())}
         return result
+    predicted = {name: np.stack((p["cost"], p["components"][..., 1], p["components"][..., 0],
+        np.zeros_like(p["cost"])), axis=-1) for name, p in predictions.items()}
+    noise = {}
+    for name, column in (("cost", 0), ("fleet", 1), ("service", 2)):
+        v = evaluation_paired[..., column]
+        variance = v.var(axis=1, ddof=1)/v.shape[1]
+        pair_variance = (v[:, :, hi]-v[:, :, lo]).var(axis=1, ddof=1)/v.shape[1]
+        noise[name] = {"nonanchor_mse": float(variance[nonanchor].mean()),
+            "feasible_pair_mse": float((pair_weights*pair_variance).sum(axis=1).mean())}
     return {"training_draws": train_draws.shape[1], "evaluation_draws": evaluation_draws.shape[1],
-        "target_mean_error": errors(target), "predictor_error": {name: errors(np.stack((p["cost"],
-            p["components"][..., 1], p["components"][..., 0], np.zeros_like(p["cost"])), axis=-1))
-            for name, p in predictions.items()},
+        "target_mean_error": errors(target), "predictor_error": {name: errors(p) for name, p in predicted.items()},
+        "predictor_error_on_training_bank": {name: errors(p, target) for name, p in predicted.items()},
+        "zero_prediction_error": errors(np.zeros_like(truth)), "evaluation_mc_noise": noise,
         "training_fleet_events": int(np.count_nonzero(train_draws[..., 1])),
         "evaluation_fleet_events": int(np.count_nonzero(evaluation_draws[..., 1]))}

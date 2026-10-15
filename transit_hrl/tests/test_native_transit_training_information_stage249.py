@@ -97,6 +97,25 @@ class TrainingInformationTest(unittest.TestCase):
         r["native_clock_ticks"] -= 1
         with self.assertRaisesRegex(ValueError, "native budget"): spec.qualify_draw(r)
 
+    def test_training_bank_error_noise_floor_and_zero_fleet_baseline(self):
+        train, evaluation = np.zeros((1, 4, 6, 4)), np.zeros((1, 4, 6, 4))
+        train[:, :, 1, (0, 1)] = 2.
+        evaluation[0, :, 1, 0] = evaluation[0, :, 1, 1] = [0., 2., 4., 6.]
+        cost = np.zeros((1, 6))
+        cost[0, 1] = 2.
+        predictions = {"matched_pooled_safe": {"cost": cost, "components": np.stack((np.zeros_like(cost), cost), axis=-1)}}
+        data = {"originals": np.array([0]), "raw_logits": np.zeros((1, 6))}
+        stats = learning.information_error(train, evaluation, data, predictions)
+        metric = "nonanchor_mse"
+        self.assertEqual(stats["predictor_error_on_training_bank"]["matched_pooled_safe"]["fleet"][metric], 0.)
+        self.assertAlmostEqual(stats["predictor_error"]["matched_pooled_safe"]["fleet"][metric], 1/5)
+        self.assertAlmostEqual(stats["zero_prediction_error"]["fleet"][metric], 9/5)
+        self.assertAlmostEqual(stats["evaluation_mc_noise"]["fleet"][metric], 1/3)
+        # Common action noise cancels before estimating pair-mean sampling variance.
+        evaluation[..., :2] += np.arange(4)[None, :, None, None]
+        other = learning.information_error(train, evaluation, data, predictions)
+        self.assertEqual(stats["evaluation_mc_noise"], other["evaluation_mc_noise"])
+
     def test_scheduler_is_unbound_cpu_and_never_syncs_raw_panels(self):
         for operation, key in (("preflight", spec.preflight_keys()[0]), ("collect", spec.chunk_keys()[0]),
                 ("fit", spec.previous.PREFLIGHT), ("prepare", None)):
