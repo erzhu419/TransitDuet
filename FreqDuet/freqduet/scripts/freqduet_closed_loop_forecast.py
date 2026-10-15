@@ -110,7 +110,8 @@ def projected_follower(vehicle, vehicles, routes, time, dt):
         service_dwell_proxy_s=vehicle["last_service_dwell_s"], vehicles=snapshots)
 
 
-def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, event_sink=None):
+def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, event_sink=None,
+                  travel_predictor=None):
     """Propagate service, queues, onboard loads, holding and physical reuse."""
     now, dt = observed["time_s"], observed["dt_s"]
     end, clock = now + horizon_s, now
@@ -171,6 +172,8 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             end_position = sum(route["lengths_m"][:station + 1])
             fraction = np.clip((end_position - vehicle["progress_m"]) / route["lengths_m"][station], 0, 1)
         travel = max(float(fraction) * route["travel_s"][station], dt)
+        if travel_predictor is not None:
+            travel = max(float(travel_predictor(vehicle, time, float(fraction))), dt)
         vehicle.update(phase="travel", travel_start_s=time, travel_end_s=time + travel,
                        start_progress_m=vehicle["progress_m"], end_progress_m=sum(route["lengths_m"][:station + 1]))
         schedule(time + travel, "arrival", vehicle["bus_id"])
