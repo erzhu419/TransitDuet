@@ -1,0 +1,169 @@
+{
+  "contract": {
+    "anchor": "original",
+    "boundary": "reused_development_futures_not_new_confirmation_or_training_seed_CI_Stage169_reserves_closed",
+    "budget": {
+      "critic_subspace_fits": 672,
+      "fit_tasks": 32,
+      "inner_blocks": 640,
+      "new_native_episodes": 0,
+      "new_objective_solves": 5376,
+      "new_raw_reference_fits": 0,
+      "report_tasks": 1,
+      "rl_actor_updates": 0
+    },
+    "budget_constraint": "explicit_A_MSE_RMS_radius_not_the_smaller_cached_BB_initial_norm",
+    "capacity": "same198_features_same_TSVD_subspace_same_k_cost_sum_dimensions_cached_head_difference_frozen",
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "component_allocation": "each_new_sum_update_split_equally_between_heads_cached_head_difference_unchanged_not_independent_head_retraining",
+    "controls": "all_Stage246_objectives_models_selected_keys_and_old_metrics_frozen_no_refits",
+    "data": "fixed_Stage244_B_target_and_B_variance_signal_calibration_2_inner_4_full_draws_no_extra_labels",
+    "diagnostic": "feasible_pair_sign_error_margin_MSE_changed_harm_rate_and_fleet_MC_events_no_fresh_selection",
+    "filters": [
+      "pooled_safe",
+      "half_safe"
+    ],
+    "gate": "frozen_cached_raw_wait_gate_no_new_safety_threshold",
+    "grid": {
+      "16@0.25": {
+        "alpha": 0.25,
+        "level": "16"
+      },
+      "16@0.5": {
+        "alpha": 0.5,
+        "level": "16"
+      },
+      "16@0.75": {
+        "alpha": 0.75,
+        "level": "16"
+      },
+      "16@1": {
+        "alpha": 1.0,
+        "level": "16"
+      },
+      "1@0.25": {
+        "alpha": 0.25,
+        "level": "1"
+      },
+      "1@0.5": {
+        "alpha": 0.5,
+        "level": "1"
+      },
+      "1@0.75": {
+        "alpha": 0.75,
+        "level": "1"
+      },
+      "1@1": {
+        "alpha": 1.0,
+        "level": "1"
+      },
+      "3@0.25": {
+        "alpha": 0.25,
+        "level": "3"
+      },
+      "3@0.5": {
+        "alpha": 0.5,
+        "level": "3"
+      },
+      "3@0.75": {
+        "alpha": 0.75,
+        "level": "3"
+      },
+      "3@1": {
+        "alpha": 1.0,
+        "level": "3"
+      },
+      "8@0.25": {
+        "alpha": 0.25,
+        "level": "8"
+      },
+      "8@0.5": {
+        "alpha": 0.5,
+        "level": "8"
+      },
+      "8@0.75": {
+        "alpha": 0.75,
+        "level": "8"
+      },
+      "8@1": {
+        "alpha": 1.0,
+        "level": "8"
+      },
+      "zero": {
+        "alpha": 0.0,
+        "level": "zero"
+      }
+    },
+    "inner": "same20_prefix_future_blocks_54states_fit2_draws_validate6held_states_opposite_A2",
+    "label_exposure": "OOF_old_same_inner_A2_old_other_opposite_A2_full_old_same_A4_old_other_B4_B_is_fit_exposed_only_on_training_prefixes",
+    "labels": [
+      "old_same",
+      "old_other",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "objectives": [
+      "all_mse",
+      "feasible_mse",
+      "rank_regret",
+      "pair_mse",
+      "pair_gls",
+      "state_gls",
+      "state_head_gls"
+    ],
+    "optimizer": "existing_quadratic_ball_solver_explicit_frozen_A_radius_KKT_1e-8",
+    "outer": "same60_training_prefix_states_4draws_then60_outer_held_states",
+    "paired_comparison": "each_new_arm_minus_frozen_pair_gls_shared_state_draw_conditional_MC",
+    "precision": "variance_of_same_future_action_difference_not_sum_of_action_variances_all15_pairs_prefix_pool_normalized_per_head",
+    "primary": "state_gls_pooled_safe",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "sampling": "shared_state_future_effects_accumulated_before_conditional_MC_SE_for_mixed_OOF_and_full_held_no_training_seed_CI",
+    "scopes": [
+      "oof6",
+      "train60",
+      "held60"
+    ],
+    "selection": "unchanged_prefix_future_OOF_rules_each_objective_separately_no_joint_objective_search",
+    "source_protocol": "native_transit_pair_critic_stage246_v1",
+    "source_run": "native_transit_pair_critic_stage246_development_20261015_r1",
+    "state_gls": "normalize_total_effective_weight_to_two_per_active_state_preserve_all_within_state_pair_and_head_ratios",
+    "state_head_gls": "normalize_each_state_head_effective_weight_to_one_preserve_within_head_pair_ratios",
+    "storage": "reuse_remote_panels_and_models_pull_small_aggregate_only",
+    "variance_pool": "same_group_plus_global_prior_half_then_half_with_pair_variance_no_new_strength_parameter",
+    "variants": [
+      "raw",
+      "all_mse_pooled_safe",
+      "all_mse_half_safe",
+      "feasible_mse_pooled_safe",
+      "feasible_mse_half_safe",
+      "rank_regret_pooled_safe",
+      "rank_regret_half_safe",
+      "pair_mse_pooled_safe",
+      "pair_mse_half_safe",
+      "pair_gls_pooled_safe",
+      "pair_gls_half_safe",
+      "state_gls_pooled_safe",
+      "state_gls_half_safe",
+      "state_head_gls_pooled_safe",
+      "state_head_gls_half_safe"
+    ],
+    "zero_variance": "unit_precision_for_head_with_no_observed_variance_not_zero_tail_risk_claim"
+  },
+  "protocol": "native_transit_balanced_critic_stage247_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "60e55e782662bd183f4fd0f0a51bad75e27db182"
+}
