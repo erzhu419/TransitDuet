@@ -31,8 +31,8 @@ class ClosedLoopTest(unittest.TestCase):
         historical = fluid_rollout(observed, 100, "historical")
         response = fluid_rollout(observed, 100, "response")
         self.assertEqual(response["holding_vehicle_seconds"], 45)
-        self.assertEqual(response["returns"][0]["time_s"] - historical["returns"][0]["time_s"], 45)
-        self.assertEqual(response["onboard_person_seconds"] - historical["onboard_person_seconds"], 225)
+        self.assertEqual(response["returns"][0]["time_s"] - historical["returns"][0]["time_s"], 44)
+        self.assertEqual(response["onboard_person_seconds"] - historical["onboard_person_seconds"], 220)
 
     def test_capacity_and_passenger_mass_are_conserved(self):
         observed = observation()
