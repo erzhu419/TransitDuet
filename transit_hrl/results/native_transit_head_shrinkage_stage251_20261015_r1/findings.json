@@ -1,0 +1,179 @@
+{
+  "bank_decompositions": {
+    "bank0": {
+      "key_change_on_shrunk_model": {
+        "delta_cost": 0.00010380670572916674,
+        "delta_risk": 5.4253472222222246e-05,
+        "delta_service": 4.9553233506944545e-05,
+        "delta_wait_min": 0.0004357421875000018
+      },
+      "model_at_free_selected_key": {
+        "delta_cost": 1.768261718749993e-05,
+        "delta_risk": -5.421010862427522e-20,
+        "delta_service": 1.768261718749991e-05,
+        "delta_wait_min": 0.00016822916666666706
+      },
+      "total": {
+        "delta_cost": 0.00012148932291666667,
+        "delta_risk": 5.425347222222219e-05,
+        "delta_service": 6.723585069444446e-05,
+        "delta_wait_min": 0.0006039713541666688
+      }
+    },
+    "bank1": {
+      "key_change_on_shrunk_model": {
+        "delta_cost": -3.902343750000203e-07,
+        "delta_risk": 0.0,
+        "delta_service": -3.9023437500001796e-07,
+        "delta_wait_min": -9.635416666666734e-06
+      },
+      "model_at_free_selected_key": {
+        "delta_cost": 0.0,
+        "delta_risk": 0.0,
+        "delta_service": 0.0,
+        "delta_wait_min": 0.0
+      },
+      "total": {
+        "delta_cost": -3.902343750000203e-07,
+        "delta_risk": 0.0,
+        "delta_service": -3.9023437500001796e-07,
+        "delta_wait_min": -9.635416666666734e-06
+      }
+    }
+  },
+  "interpretation": "decomposition changes model before selector and is path-dependent descriptive attribution; not a proof of globally faulty selection, candidate superiority or CI",
+  "key_change_share_of_regression_pct": {
+    "delta_cost": 85.39822437935541,
+    "delta_wait_min": 71.69459962756055
+  },
+  "next": "freeze models and candidate grid; compare old A2, matched new 2 and expanded new 8 OOF validation futures excluded from inner-fit prefix and draw half; never use opposite16 evaluation bank for selection",
+  "post_hoc_decomposition": {
+    "key_change_on_shrunk_model": {
+      "delta_cost": 5.1708235677083386e-05,
+      "delta_risk": 2.712673611111111e-05,
+      "delta_service": 2.458149956597227e-05,
+      "delta_wait_min": 0.00021305338541666746
+    },
+    "model_at_free_selected_key": {
+      "delta_cost": 8.841308593749938e-06,
+      "delta_risk": 0.0,
+      "delta_service": 8.841308593749948e-06,
+      "delta_wait_min": 8.411458333333353e-05
+    },
+    "total": {
+      "delta_cost": 6.0549544270833324e-05,
+      "delta_risk": 2.712673611111111e-05,
+      "delta_service": 3.3422808159722214e-05,
+      "delta_wait_min": 0.000297167968750001
+    }
+  },
+  "post_hoc_swaps": {
+    "free_old_on_free_old": {
+      "changed_rate": 0.017708333333333333,
+      "delta_cost": -0.0001263061848958332,
+      "delta_risk": -9.223090277777779e-05,
+      "delta_service": -3.407528211805543e-05,
+      "delta_wait_min": -0.00028121744791666855
+    },
+    "free_old_on_shrunk": {
+      "changed_rate": 0.015625,
+      "delta_cost": -8.847311197916648e-05,
+      "delta_risk": -7.866753472222223e-05,
+      "delta_service": -9.805577256944258e-06,
+      "delta_wait_min": -6.979166666666782e-05
+    },
+    "shrunk_on_free_old": {
+      "changed_rate": 0.017708333333333333,
+      "delta_cost": -0.00011746487630208326,
+      "delta_risk": -9.223090277777779e-05,
+      "delta_service": -2.523397352430548e-05,
+      "delta_wait_min": -0.00019710286458333502
+    },
+    "shrunk_on_shrunk": {
+      "changed_rate": 0.016145833333333335,
+      "delta_cost": -6.575664062499988e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": -6.524739583332104e-07,
+      "delta_wait_min": 1.5950520833332437e-05
+    }
+  },
+  "protocol": "native_transit_head_shrinkage_stage251_v1",
+  "rank16_full_fit_frozen_difference": 16,
+  "rank16_mean_difference_rms_reduction_pct": 73.2211510632047,
+  "scope": "mixed_pooled held60 unless specified",
+  "selected_difference_nonanchor_mse_change_vs_free_pct": -11.058588790550806,
+  "selected_fleet_mse_change_vs_free_pct": {
+    "feasible_pair_mse": 0.6675133383057474,
+    "nonanchor_mse": -2.0819803064750175
+  },
+  "selected_policy_outcomes": {
+    "free_old": {
+      "changed_harm_rate": 0.007291666666666667,
+      "changed_rate": 0.017708333333333333,
+      "cost_mse": 0.0011563137701959447,
+      "delta_cost": -0.0001263061848958332,
+      "delta_risk": -9.223090277777779e-05,
+      "delta_service": -3.407528211805543e-05,
+      "delta_unsafe": 0.0005208333333333332,
+      "delta_wait_min": -0.00028121744791666855,
+      "feasible_cost_mse": 0.0006448469902652776,
+      "feasible_margin_mse": 0.0005553031608407657,
+      "feasible_pair_sign_error": 0.22631448412698413,
+      "gate_cost_regret": 0.0046804806640625,
+      "risk_mse": 0.0009569273605668537,
+      "service_mse": 0.0001167939655363333
+    },
+    "frozen_old": {
+      "changed_harm_rate": 0.005729166666666667,
+      "changed_rate": 0.014583333333333334,
+      "cost_mse": 0.0011672413355706623,
+      "delta_cost": -6.431845703124991e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": 7.857096354167566e-07,
+      "delta_unsafe": 0.0015625,
+      "delta_wait_min": 3.0924479166666385e-05,
+      "feasible_cost_mse": 0.0006523021638985116,
+      "feasible_margin_mse": 0.0005597075104850199,
+      "feasible_pair_sign_error": 0.22617807539682538,
+      "gate_cost_regret": 0.004742468391927084,
+      "risk_mse": 0.0009429377620844407,
+      "service_mse": 8.847922218824362e-05
+    },
+    "old": {
+      "changed_harm_rate": 0.004166666666666667,
+      "changed_rate": 0.019791666666666666,
+      "cost_mse": 0.0011307750084175601,
+      "delta_cost": -0.00022737242838541678,
+      "delta_risk": -0.00013563368055555556,
+      "delta_service": -9.173874782986122e-05,
+      "delta_unsafe": 0.0010416666666666669,
+      "delta_wait_min": -0.0007667317708333347,
+      "feasible_cost_mse": 0.0006458139088736451,
+      "feasible_margin_mse": 0.0005576386541557911,
+      "feasible_pair_sign_error": 0.22511656746031747,
+      "gate_cost_regret": 0.004579414420572916,
+      "risk_mse": 0.000919561269376034,
+      "service_mse": 9.216437671131863e-05
+    },
+    "shrunk": {
+      "changed_harm_rate": 0.00625,
+      "changed_rate": 0.016145833333333335,
+      "cost_mse": 0.001166091880923256,
+      "delta_cost": -6.575664062499988e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": -6.524739583332104e-07,
+      "delta_unsafe": 0.0015625,
+      "delta_wait_min": 1.5950520833332437e-05,
+      "feasible_cost_mse": 0.000652424691733888,
+      "feasible_margin_mse": 0.0005600837089131865,
+      "feasible_pair_sign_error": 0.2266765873015873,
+      "gate_cost_regret": 0.0047410302083333335,
+      "risk_mse": 0.0009370043213725806,
+      "service_mse": 8.680362637130358e-05
+    }
+  },
+  "source": [
+    "report/result.json",
+    "analysis/result.json"
+  ]
+}

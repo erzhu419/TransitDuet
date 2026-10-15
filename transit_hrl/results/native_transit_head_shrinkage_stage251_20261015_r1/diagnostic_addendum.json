@@ -1,0 +1,21 @@
+{
+  "additional_critic_fits": 0,
+  "additional_native_episodes": 0,
+  "additional_scheduler_analysis_tasks": 1,
+  "diagnostic": "all17 registered candidates plus free/shrunk model by free/shrunk selected-key cross; point-mean decomposition only",
+  "interpretation": "post_hoc diagnosis, not arm/candidate reselection or confirmation",
+  "protocol": "native_transit_head_shrinkage_stage251_v1",
+  "reason": "selected nonanchor fleet MSE improved but feasible-pair error and control worsened versus free; distinguish model changes from candidate-key changes",
+  "source_revision": "8e6c133afb3faab9ed8d5e568fc914c89027bdfc",
+  "tests_passed": 24,
+  "timing": "after_all32_fits_and_registered_report_before_selection_swap_analysis",
+  "unchanged": [
+    "registered_training_contract",
+    "models",
+    "data_assignment",
+    "penalty_rule",
+    "OOF_selector",
+    "selected_keys",
+    "defaults"
+  ]
+}
