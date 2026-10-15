@@ -129,9 +129,12 @@ class ConditionedTravelPath:
         steps = int(np.ceil(model["horizon_s"] / model["bin_s"]))
         self.shared = self.rng.standard_normal((steps, len(self.indices))) @ np.asarray(model["shared_factor"]).T
 
+    def mean(self, key, time):
+        return self.model["means"][key]
+
     def __call__(self, vehicle, time, fraction):
         key = road_key(vehicle["direction"], vehicle["travel_station_id"])
-        duration = self.model["means"][key]
+        duration = self.mean(key, time)
         if self.mode != "conditioned_mean":
             z = float(self.rng.standard_normal())
             if self.mode == "conditioned_shared":
