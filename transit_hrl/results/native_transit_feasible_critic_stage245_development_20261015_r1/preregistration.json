@@ -1,0 +1,154 @@
+{
+  "contract": {
+    "all_mse": "frozen_Stage244_disjoint_variance_group_component_GLS_no_refit",
+    "anchor": "original",
+    "boundary": "reused_development_futures_not_new_confirmation_or_training_seed_CI_Stage169_reserves_closed",
+    "budget": {
+      "critic_subspace_fits": 672,
+      "fit_tasks": 32,
+      "inner_blocks": 640,
+      "new_native_episodes": 0,
+      "new_objective_solves": 5376,
+      "new_raw_reference_fits": 0,
+      "report_tasks": 1,
+      "rl_actor_updates": 0
+    },
+    "budget_constraint": "explicit_A_MSE_RMS_radius_not_the_smaller_cached_BB_initial_norm",
+    "capacity": "same198_features_same_TSVD_subspace_same_k_cost_sum_dimensions_cached_head_difference_frozen",
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "component_allocation": "each_new_sum_update_split_equally_between_heads_cached_head_difference_unchanged_not_independent_head_retraining",
+    "controls": "all_Stage244_BB_GLS_OOF_selected_keys_and_raw_all_mse_metrics_reproduce",
+    "data": "fixed_Stage244_B_target_and_B_variance_signal_calibration_2_inner_4_full_draws_no_extra_labels",
+    "diagnostic": "root401_cost_wait_and_feasible_MSE_diagnostic_only_no_root_ID_parameters_or_posthoc_gate",
+    "feasible_mse": "equal_state_feasible_nonanchor_component_MSE_frozen_B_precision_and_shrunk_service_risk_targets",
+    "filters": [
+      "pooled_safe",
+      "half_safe"
+    ],
+    "gate": "frozen_cached_raw_wait_gate_no_new_safety_threshold",
+    "grid": {
+      "16@0.25": {
+        "alpha": 0.25,
+        "level": "16"
+      },
+      "16@0.5": {
+        "alpha": 0.5,
+        "level": "16"
+      },
+      "16@0.75": {
+        "alpha": 0.75,
+        "level": "16"
+      },
+      "16@1": {
+        "alpha": 1.0,
+        "level": "16"
+      },
+      "1@0.25": {
+        "alpha": 0.25,
+        "level": "1"
+      },
+      "1@0.5": {
+        "alpha": 0.5,
+        "level": "1"
+      },
+      "1@0.75": {
+        "alpha": 0.75,
+        "level": "1"
+      },
+      "1@1": {
+        "alpha": 1.0,
+        "level": "1"
+      },
+      "3@0.25": {
+        "alpha": 0.25,
+        "level": "3"
+      },
+      "3@0.5": {
+        "alpha": 0.5,
+        "level": "3"
+      },
+      "3@0.75": {
+        "alpha": 0.75,
+        "level": "3"
+      },
+      "3@1": {
+        "alpha": 1.0,
+        "level": "3"
+      },
+      "8@0.25": {
+        "alpha": 0.25,
+        "level": "8"
+      },
+      "8@0.5": {
+        "alpha": 0.5,
+        "level": "8"
+      },
+      "8@0.75": {
+        "alpha": 0.75,
+        "level": "8"
+      },
+      "8@1": {
+        "alpha": 1.0,
+        "level": "8"
+      },
+      "zero": {
+        "alpha": 0.0,
+        "level": "zero"
+      }
+    },
+    "inner": "same20_prefix_future_blocks_54states_fit2_draws_validate6held_states_opposite_A2",
+    "label_exposure": "OOF_old_same_inner_A2_old_other_opposite_A2_full_old_same_A4_old_other_B4_B_is_fit_exposed_only_on_training_prefixes",
+    "labels": [
+      "old_same",
+      "old_other",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "objectives": [
+      "all_mse",
+      "feasible_mse",
+      "rank_regret"
+    ],
+    "optimizer": "existing_convex_quadratic_or_logistic_dual_ball_solver_explicit_radius_KKT_1e-8",
+    "outer": "same60_training_prefix_states_4draws_then60_outer_held_states",
+    "primary": "rank_regret_pooled_safe",
+    "rank_regret": "same_shrunk_physical_service_plus_risk_target_gap_weighted_feasible_pair_logistic_loss_fixed_A_scale",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "sampling": "shared_state_future_effects_accumulated_before_conditional_MC_SE_for_mixed_OOF_and_full_held_no_training_seed_CI",
+    "scopes": [
+      "oof6",
+      "train60",
+      "held60"
+    ],
+    "selection": "unchanged_prefix_future_OOF_rules_each_objective_separately_no_joint_objective_search",
+    "source_protocol": "native_transit_disjoint_critic_stage244_v1",
+    "source_run": "native_transit_disjoint_critic_stage244_development_20261015_r1",
+    "storage": "reuse_remote_panels_and_models_pull_small_aggregate_only",
+    "variants": [
+      "raw",
+      "all_mse_pooled_safe",
+      "all_mse_half_safe",
+      "feasible_mse_pooled_safe",
+      "feasible_mse_half_safe",
+      "rank_regret_pooled_safe",
+      "rank_regret_half_safe"
+    ]
+  },
+  "protocol": "native_transit_feasible_critic_stage245_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "eb43713bc5e56740a33c95c83c4cb9b84b3a6ae8"
+}
