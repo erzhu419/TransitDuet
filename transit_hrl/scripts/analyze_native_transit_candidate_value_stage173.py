@@ -28,12 +28,12 @@ def ranking_pairs(predicted, actual):
     return counts
 
 
-def validate_continuations(baseline, branches):
+def validate_continuations(baseline, branches, *, candidates=spec.CANDIDATES):
     base = baseline["probe"]
     index = base["index"]
-    if [r["probe"]["selected"] for r in branches] != list(spec.CANDIDATES):
+    if [r["probe"]["selected"] for r in branches] != list(candidates):
         raise ValueError("Incomplete or duplicate native candidate continuations")
-    for candidate, row in enumerate(branches):
+    for candidate, row in zip(candidates, branches):
         probe = row["probe"]
         same = {k: v for k, v in probe.items() if k not in {"selected", "physical_state_matched", "rng_matched"}}
         ref = {k: v for k, v in base.items() if k not in {"selected", "physical_state_matched", "rng_matched"}}
