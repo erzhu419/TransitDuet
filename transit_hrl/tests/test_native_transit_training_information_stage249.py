@@ -120,7 +120,7 @@ class TrainingInformationTest(unittest.TestCase):
 
     def test_scheduler_is_unbound_cpu_and_never_syncs_raw_panels(self):
         for operation, key in (("preflight", spec.preflight_keys()[0]), ("collect", spec.chunk_keys()[0]),
-                ("fit", spec.previous.PREFLIGHT), ("prepare", None)):
+                ("fit", spec.previous.PREFLIGHT), ("prepare", None), ("analysis", None)):
             task = submit.task_specification("unit_info", operation=operation, key=key)
             self.assertEqual(task["cpu"], 1)
             self.assertIsNone(task["require_node"])

@@ -32,7 +32,8 @@ def task_specification(run, *, operation, key=None):
         suffix, result = f"fit/{key[0]}/{key[1]}/{key[2]}/{key[3]}", spec.result_path(run, *key).parent
         args += ["--view", key[0], "--fold", str(key[1]), "--partition", key[2], "--direction", str(key[3])]
     else: suffix, result = operation, ROOT/"results"/run/operation
-    command = [DEFAULT_LINUX_PYTHON, "-u", "scripts/run_native_transit_training_information_stage249.py", "--run-name", run, *args]
+    script = "analyze_native_transit_training_information_stage249.py" if operation == "analysis" else "run_native_transit_training_information_stage249.py"
+    command = [DEFAULT_LINUX_PYTHON, "-u", f"scripts/{script}", "--run-name", run, *([] if operation == "analysis" else args)]
     task.update(project=spec.EXPERIMENT_PROTOCOL, description=f"Freq-HRL training information {suffix}",
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run}/{suffix}",
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{'native' if native else 'offline'}",
@@ -46,7 +47,7 @@ def task_specification(run, *, operation, key=None):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name", required=True)
-    p.add_argument("--phase", choices=("preflight", "preflight_report", "remaining", "prepare", "fit_preflight", "fits", "report"), required=True)
+    p.add_argument("--phase", choices=("preflight", "preflight_report", "remaining", "prepare", "fit_preflight", "fits", "report", "analysis"), required=True)
     args = p.parse_args()
     run, phase = args.run_name, args.phase
     directory = ROOT/"results"/run
@@ -66,12 +67,13 @@ def main():
         if json.loads((directory/"preregistration.json").read_text())["contract"] != spec.contract(): raise SystemExit("Changed registered information comparison")
         preceding = list(first)
         if phase != "preflight_report": preceding.append(task_specification(run, operation="preflight_report"))
-        if phase in ("prepare", "fit_preflight", "fits", "report"):
+        if phase in ("prepare", "fit_preflight", "fits", "report", "analysis"):
             preceding.extend(task_specification(run, operation="collect", key=k) for k in spec.chunk_keys())
-        if phase in ("fit_preflight", "fits", "report"): preceding.append(task_specification(run, operation="prepare"))
-        if phase in ("fits", "report"):
-            fit_keys = spec.KEYS if phase == "report" else (spec.previous.PREFLIGHT,)
+        if phase in ("fit_preflight", "fits", "report", "analysis"): preceding.append(task_specification(run, operation="prepare"))
+        if phase in ("fits", "report", "analysis"):
+            fit_keys = spec.KEYS if phase in ("report", "analysis") else (spec.previous.PREFLIGHT,)
             preceding.extend(task_specification(run, operation="fit", key=k) for k in fit_keys)
+        if phase == "analysis": preceding.append(task_specification(run, operation="report"))
         sys.path.insert(0, str(SCHEDULER.parent))
         import scheduler
         records = {t["id"]: t for t in scheduler.load_state()["tasks"]}
