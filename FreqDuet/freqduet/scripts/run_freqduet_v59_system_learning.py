@@ -36,9 +36,34 @@ def smoke(root, v56_root, case_index, updates):
         observer = CreditObserver()
         states, potentials = [], []
         moments = ArrivalMoments()
+        encoder, actor_before = None, None
 
         class LearningRunner(Runner):
             def _lower_policy_action(self, obs, last_action=0.0, deterministic=False):
+                nonlocal encoder, learner, actor_before
+                if encoder is None:
+                    # reset() constructs the day's protocol and geometry.
+                    env = self.env
+                    encoder = SystemStateEncoder(self.lower_state_dim, env.max_agent_num,
+                                                 len(env.timetables), len(env.stations),
+                                                 env.protocol.evaluation_end_time_s)
+                    if learner is None:
+                        cfg, old = config["lower"], self.lower_trainer
+                        if (self.lower_terminal_action_mode != "transition"
+                                or self.lower_causal_guard_policy_mask_enabled):
+                            raise ValueError("V59 requires the frozen unmasked main action contract")
+                        trainer = RESACLagrangianTrainer(
+                            state_dim=encoder.dimension, hidden_dim=cfg["hidden_dim"],
+                            action_range=cfg["action_range"], ensemble_size=old.ensemble_size,
+                            beta=old.beta, beta_ood=old.beta_ood, weight_reg=old.weight_reg,
+                            weight_reg_mode=old.weight_reg_mode, lr=cfg["lr"], lambda_lr=cfg["lambda_lr"],
+                            gamma=1.0, soft_tau=old.soft_tau, auto_entropy=False, action_bins=joint.ACTIONS,
+                            policy_sample_seed=seed + 59000, critic_aggregation=old.critic_aggregation,
+                            action_limit_feature_index=old.action_limit_feature_index, device="cpu")
+                        trainer.alpha = 1e-5
+                        warm_start_actor(old.policy_net, trainer.policy_net, encoder.local_dim)
+                        learner = SystemSAC(trainer)
+                    actor_before = copy.deepcopy(learner.trainer.policy_net.state_dict())
                 # Capture the same current causal evidence that the base runner
                 # captures after choosing an action, so no old context is read.
                 key = self._system_agent
@@ -75,27 +100,7 @@ def smoke(root, v56_root, case_index, updates):
         checkpoints = joint.TRAIN_ROOT / "logs" / f"{joint.CURRENT}_seed{seed}/checkpoints"
         runner.load_checkpoint(checkpoints, ep=joint.BASE_EP, require_deployment_state=True)
         env = runner.env
-        encoder = SystemStateEncoder(runner.lower_state_dim, env.max_agent_num,
-                                     len(env.timetables), len(env.stations), env.protocol.evaluation_end_time_s)
-        if learner is None:
-            cfg = config["lower"]
-            old = runner.lower_trainer
-            if (runner.lower_terminal_action_mode != "transition"
-                    or runner.lower_causal_guard_policy_mask_enabled):
-                raise ValueError("V59 smoke requires the frozen unmasked main action contract")
-            trainer = RESACLagrangianTrainer(
-                state_dim=encoder.dimension, hidden_dim=cfg["hidden_dim"], action_range=cfg["action_range"],
-                ensemble_size=old.ensemble_size, beta=old.beta, beta_ood=old.beta_ood,
-                weight_reg=old.weight_reg, weight_reg_mode=old.weight_reg_mode,
-                lr=cfg["lr"], lambda_lr=cfg["lambda_lr"], gamma=1.0, soft_tau=old.soft_tau,
-                auto_entropy=False, action_bins=joint.ACTIONS, policy_sample_seed=seed + 59000,
-                critic_aggregation=old.critic_aggregation,
-                action_limit_feature_index=old.action_limit_feature_index, device="cpu")
-            trainer.alpha = 1e-5
-            warm_start_actor(old.policy_net, trainer.policy_net, encoder.local_dim)
-            learner = SystemSAC(trainer)
         upper_before = copy.deepcopy(runner.upper_trainer.policy_net.state_dict())
-        actor_before = copy.deepcopy(learner.trainer.policy_net.state_dict())
         observer.attach(runner)
         # The deployment runner stays in frozen-evaluation mode. Only the new
         # learner below receives global replay and optimizer steps.
@@ -127,6 +132,7 @@ def smoke(root, v56_root, case_index, updates):
         rows.append(dict(day=day, stochastic_actions=bool(day), **inserted,
                          journey_min=float(episode["restricted_total_journey_horizon_min"]),
                          holding_s_per_trip=float(episode["holding_vehicle_seconds_per_launched_trip"]),
+                         readiness_delay_s=float(episode["fleet_readiness_delay_mean_s"]),
                          regularity_budget_cv_squared=budget, lambda_before=lam_before, lambda_after=lam_after,
                          actor_parameter_max_change=change, upper_actor_unchanged=True,
                          legacy_replay_size=0, stream_audit=audit))
@@ -134,6 +140,7 @@ def smoke(root, v56_root, case_index, updates):
     cell.mkdir(parents=True, exist_ok=True)
     torch.save(dict(policy=learner.trainer.policy_net.state_dict(),
                     trainer=learner.trainer.training_state_dict(),
+                    format="freqduet-system-learning-v59", objective="finite_day_passenger_time_cv_constraint",
                     encoder=encoder.__dict__, steps=learner.updates), cell / "learning_smoke.pt")
     (cell / "updates.json").write_text(json.dumps(update_rows, indent=2) + "\n")
     result = dict(status="learning_smoke_pass", case=label, episodes=rows,
