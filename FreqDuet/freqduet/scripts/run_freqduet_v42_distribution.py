@@ -102,7 +102,7 @@ def batch(root, start, end, workers):
 
 
 def aggregate(root):
-    rows, teacher_rows, teacher_totals, return_rows = [], [], [], []
+    rows, teacher_rows, teacher_totals, return_rows, gradients = [], [], [], [], []
     for seed, scenario, cohort in items():
         cell = root / "observed" / f"seed{seed}_eval{scenario}"
         if not json.loads((cell / "done.json").read_text())["matches_v35"]:
@@ -116,6 +116,7 @@ def aggregate(root):
         teacher = json.loads((cell / "teacher.json").read_text())
         for origin, capture in snapshots.items():
             now, model = capture["pool"]["time_s"], capture["distribution_model"]
+            gradients.append(model["gradient_max"])
             if model["latest_time_s"] >= now:
                 raise ValueError("categorical model used simultaneous/future actions")
             for horizon in (900, 1800):
@@ -200,9 +201,12 @@ def aggregate(root):
             passenger_mae_within_5pct=bool(all(cat.loc[m].mae <= 1.05 * base.loc[m].mae
                 for m in ("waiting_person_seconds", "onboard_person_seconds"))),
             holding_band_coverage_ge_80pct=bool(holding.coverage >= .8))
-    status = dict(status="complete_distribution_shadow", days=8, draws=DRAWS, policy_changed=False,
+    status = dict(status="complete_distribution_shadow", experiment=root.name,
+        source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"),
+        days=8, draws=DRAWS, policy_changed=False, independent_confirmation=False,
+        fit_gradient_max=max(gradients),
         matches_v35=True, gates=gates, forecast_screen_pass=all(all(g.values()) for g in gates.values()),
-        new_demand_scope="Two unused V41 demand seeds crossed with the same two frozen actors; not new policy seeds",
+        new_demand_scope="Second cohort unused by V41; after V42 it is regression only, with the same two frozen actors",
         uncertainty_scope="Holding sampling only; flow/travel and future upper replanning uncertainty remain unmodelled")
     (summary / "status.json").write_text(json.dumps(status, indent=2) + "\n")
     print(json.dumps(status), flush=True)
