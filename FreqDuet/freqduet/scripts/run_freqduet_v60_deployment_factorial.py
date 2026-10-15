@@ -51,20 +51,27 @@ def make_policy(old, encoder, seed, checkpoint=None):
     return policy.eval()
 
 
-def collect(root, v59_root, v56_root, index, decision_audit=None):
+def collect(root, v59_root, v56_root, index, decision_audit=None,
+            scenario_seed=None, private_sampler_seed=None):
     label = item_name(index)
+    case, (actor, mode, rep) = ITEMS[index]
+    seed, actor_scenario = CASES[case]
+    scenario = actor_scenario if scenario_seed is None else scenario_seed
+    sample_seed = sampler_seed(seed, rep) if private_sampler_seed is None else private_sampler_seed
+    if (scenario, sample_seed) != (actor_scenario, sampler_seed(seed, rep)):
+        if actor != "updated":
+            raise ValueError("alternate demand days require a frozen V59 updated actor")
+        label += f"_demand{scenario}_sampler{sample_seed}"
     marker = root / "ready" / f"{label}.json"
     if marker.exists():
         return label
-    case, (actor, mode, rep) = ITEMS[index]
-    seed, scenario = CASES[case]
     _, Runner, load_config, torch = joint.optimized_runtime(root)
-    v59_marker = json.loads((v59_root / "exports" / case_name(seed, scenario) / "done.json").read_text())
+    v59_marker = json.loads((v59_root / "exports" / case_name(seed, actor_scenario) / "done.json").read_text())
     if v59_marker["status"] != "learning_smoke_pass":
         raise ValueError("V59 learning/checkpoint prerequisite is incomplete")
     payload = None
     if actor == "updated":
-        payload = torch.load(v59_root / "cells" / case_name(seed, scenario) / "learning_smoke.pt",
+        payload = torch.load(v59_root / "cells" / case_name(seed, actor_scenario) / "learning_smoke.pt",
                              map_location="cpu", weights_only=False)
     observer, moments = CreditObserver(), ArrivalMoments()
     encoder, policy = None, None
@@ -78,7 +85,7 @@ def collect(root, v59_root, v56_root, index, decision_audit=None):
                 encoder = SystemStateEncoder(self.lower_state_dim, env.max_agent_num,
                                              len(env.timetables), len(env.stations),
                                              env.protocol.evaluation_end_time_s)
-                policy = make_policy(self.lower_trainer.policy_net, encoder, sampler_seed(seed, rep), payload)
+                policy = make_policy(self.lower_trainer.policy_net, encoder, sample_seed, payload)
             key = self._factorial_agent
             self._capture_lower_action_context(key, self._bus_for_agent(key))
             decision = observable_decision(self, obs, key, last_action)
@@ -140,7 +147,7 @@ def collect(root, v59_root, v56_root, index, decision_audit=None):
         np.testing.assert_equal(cv_squared, v59_marker["episodes"][0]["cv_squared"])
     total = observer.stream.total
     row = dict(index=index, label=label, train_seed=seed, scenario_seed=scenario,
-               actor=actor, mode=mode, rep=rep, sampler_seed=sampler_seed(seed, rep),
+               actor=actor, mode=mode, rep=rep, sampler_seed=sample_seed,
                actor_updates=64 if actor == "updated" else 0,
                journey_min=float(episode["restricted_total_journey_horizon_min"]),
                waiting_min=float(episode["restricted_wait_horizon_min"]),
