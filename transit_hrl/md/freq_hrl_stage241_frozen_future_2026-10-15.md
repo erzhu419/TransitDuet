@@ -24,19 +24,30 @@ future-selection noise from reproducible effects confined to known prefixes.
 
 ## Status And Next Step
 
-Six focused fixture tests pass. Seal t153586 completed on node004 with exit zero:
-32 cells, 240 states, 40 prefixes and 12,800 reproduced records, exact difference 0.
-Mixed joint/raw/half-safe cost delta: old OOF -0.00007526, unused futures -0.00022560.
-Wait delta: -0.00057839 -> -0.00006302 min; root397 unused wait is +0.00008073 min.
-Thus cached cost improvement survives, but source-wise wait nonharm already fails.
-Native preflights t153587-t153596 completed with exit zero: 80 episodes, 10 exact
-resampled identities, 70 prefix/RNG matches, 80 frozen-weight and window-ledger checks.
-Duration 185-214 seconds/task; measured peak RSS <=702 MB. No training updates.
-The remaining 1,910 draws are registered as t153597-t155506 for node001-node006,
-one CPU/task without node binding; scheduler dispatch is expanding the active pool.
-The report is submitted only after all 1,920 draws complete with exit zero.
-The full result will distinguish future-selection noise from prefix-transfer failure.
-Only aggregate evidence and compact receipts are kept locally; checkpoints/actions/rollouts remain remote.
+All 1,922 tasks completed with exit zero, including aggregate t155529. No retries.
+All 1,920 draws qualified: 15,360 frozen episodes, 1,920 exact identities and
+13,440 prefix/RNG matches. All 12,800 cached OOF records reproduce exactly.
+Only the 9,101,988-byte aggregate was pulled; models/panels/rollouts remain remote.
+
+Mixed pooled joint/raw/half-safe; negative is better, wait is in minutes:
+
+| Futures | Cost delta | Wait delta |
+|---|---:|---:|
+| Old OOF2 | -0.000075258 | -0.000578385 |
+| Old unused4 | -0.000225604 | -0.000063021 |
+| Fresh half0 | -0.000025337 | -0.000214974 |
+| Fresh half1 | +0.000046963 | -0.000116406 |
+| Fresh8 | +0.000010813 | -0.000165690 |
+
+Joint cost improvement is future-unstable even without refits. Root397 fresh cost
+improves (-0.000053348), root401 worsens (+0.000074973); admitted-only signs agree.
+All-MSE/original/pooled is a positive secondary result: both roots in both fresh
+halves have cost/wait/risk nonharm. Its pooled fresh cost/wait are -0.000078987/-0.000710547.
+The regression cell improves pooled fresh cost/wait, but root397 worsens both;
+root401 still gets 96.3% of its cost benefit from one prefix. This is not a clean repair.
+
+Next: reuse all fresh panels and cached models to compare seen and held prefixes
+under fixed 54/2 and full 60/4 endpoints, with no new training or native episodes.
 
 ## Limitations
 
