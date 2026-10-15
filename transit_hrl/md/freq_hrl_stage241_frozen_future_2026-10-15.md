@@ -46,8 +46,15 @@ halves have cost/wait/risk nonharm. Its pooled fresh cost/wait are -0.000078987/
 The regression cell improves pooled fresh cost/wait, but root397 worsens both;
 root401 still gets 96.3% of its cost benefit from one prefix. This is not a clean repair.
 
-Next: reuse all fresh panels and cached models to compare seen and held prefixes
-under fixed 54/2 and full 60/4 endpoints, with no new training or native episodes.
+The post-hoc shared-outcome MC adjunct t155599 is done/0. Joint cost sampling SE
+is0.000061418, versus mean +0.000010813 (0.18 SE); only5 unique state/draw fleet
+events were sampled. The secondary total-cost SE is0.000116258, exceeding its
+0.000078987 benefit; its nonfleet/wait effects are about4.28/4.44 MC SE. These are
+fixed-prefix innovation diagnostics, not independent training-seed confidence intervals.
+
+Stage242 has now reused these panels for all five cached refit endpoints. Next
+prioritize variance-aware, group-regularized critics rather than declare cost failure
+from a sign flip or select the positive secondary as a deployment default.
 
 ## Limitations
 

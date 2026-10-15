@@ -1,0 +1,27 @@
+{
+  "boundary": "fixed_prefix_conditional_innovation_SE_not_independent_training_seed_CI_or_unobserved_tail_guarantee",
+  "budget": {
+    "new_native_episodes": 0,
+    "tasks": 1,
+    "training_updates": 0
+  },
+  "panel_run": "native_transit_fresh_transfer_stage242_development_20261015_r1",
+  "posthoc": true,
+  "protocol": "native_transit_conditional_mc_stage241_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu": 1,
+    "ram_mb": 1536,
+    "require_node": null
+  },
+  "source_revision": "2814f7981cc0bc7bb6054251565d24bdd8df3c84",
+  "source_run": "native_transit_frozen_future_stage241_development_20261015_r1",
+  "task_command": "import json\nfrom pathlib import Path\nfrom scripts import run_native_transit_fresh_transfer_stage242 as transfer\nfrom freq_hrl.domains.transit.native_frozen_future import conditional_mc\nfrom freq_hrl.experiments.pointmaze_root_response import write_json\n_,fresh=transfer.learning.read_panel_cache(transfer.panel_path(\"native_transit_fresh_transfer_stage242_development_20261015_r1\"))\nsealed=transfer.source.load_seal(transfer.SOURCE_RUN)\ncells=[c for c in sealed[\"cells\"] if c[\"key\"][0].startswith(\"mixed\")]\npooled=conditional_mc(cells,fresh)\nby_root={str(root):conditional_mc([{\"blocks\":[b for b in c[\"blocks\"] if b[\"held_group\"][0]==root]} for c in cells],fresh) for root in transfer.source.ROOTS}\nreference=json.loads((transfer.ROOT/\"results\"/transfer.SOURCE_RUN/\"report/result.json\").read_text())\nmaximum=max(abs(pooled[\"variants\"][v][\"fields\"][f][\"mean\"]-reference[\"mixed_pooled\"][\"fresh8\"][\"all\"][\"variants\"][v][g]) for v in transfer.learning.VARIANTS for f,g in ((\"cost\",\"delta_cost\"),(\"wait_min\",\"delta_wait_min\")))\nif maximum>1e-12: raise ValueError(\"Conditional MC duplicate weighting changed pooled mean\")\nreg=next(c for c in cells if tuple(c[\"key\"])==transfer.source.prior.REGRESSION_KEY)\nresult={\"protocol\":\"native_transit_conditional_mc_stage241_v1\",\"software_qualified\":True,\"posthoc\":True,\"source_run\":transfer.SOURCE_RUN,\"panel_run\":\"native_transit_fresh_transfer_stage242_development_20261015_r1\",\"mixed_pooled\":pooled,\"by_root\":by_root,\"regression_case\":conditional_mc([reg],fresh),\"mean_reproduction_max_abs_difference\":maximum,\"new_native_episodes\":0,\"training_updates\":0,\"default_changed\":False}\nwrite_json(transfer.ROOT/\"results\"/\"native_transit_conditional_mc_stage241_development_20261015_r1\"/\"report/result.json\",result)\nprint(\"CONDITIONAL_MC_COMPLETE\",flush=True)\n"
+}

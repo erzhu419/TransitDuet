@@ -1,11 +1,12 @@
 {
   "counts": {
-    "done": 33
+    "done": 34
   },
+  "full_aggregate_storage": "remote_report_raw/result.json",
   "new_native_episodes": 0,
   "new_raw_reference_fits": 0,
   "new_residual_fits": 0,
-  "observed_at": "2026-10-15T02:53:47.828690+00:00",
+  "observed_at": "2026-10-15T03:12:04.355034+00:00",
   "panel_cache": {
     "bytes": 218484,
     "prefixes": 40,
@@ -18,11 +19,19 @@
     "states": 240,
     "storage": "remote_prepare_raw/panels.npz"
   },
+  "pooled_old_metric_max_abs_difference": 1.1102230246251565e-16,
+  "pooled_old_metric_scalar_checks": 8640,
+  "reduced_aggregate_bytes": 7471791,
   "registration_note": "first_evaluate_request_blocked_while_prepare_was_still_running_no_tasks_created_then_registered_after_done_zero",
-  "report_tasks_not_registered": 1,
+  "report_tasks_not_registered": 0,
+  "reproduction": {
+    "max_abs_difference": 0.0,
+    "metric_records": 470400,
+    "sealed_action_records": 80640
+  },
   "row_or_model_or_rollout_downloads": 0,
   "source_revision": "28aa62b9f0",
-  "status": "evaluations_dispatched_aggregate_pending",
+  "status": "complete",
   "tasks": [
     {
       "exit_code": 0,
@@ -253,6 +262,13 @@
       "id": "t155589",
       "node": "node001",
       "signature": "Freq-HRL/native_transit_fresh_transfer_stage242_v1/native_transit_fresh_transfer_stage242_development_20261015_r1/evaluate/mixed_b/1/even_odd/1",
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "id": "t155597",
+      "node": "node004",
+      "signature": "Freq-HRL/native_transit_fresh_transfer_stage242_v1/native_transit_fresh_transfer_stage242_development_20261015_r1/report",
       "status": "done"
     }
   ],
