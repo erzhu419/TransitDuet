@@ -4,6 +4,7 @@
 import argparse
 from concurrent.futures import ProcessPoolExecutor
 import json
+from inspect import signature
 from multiprocessing import get_context
 import os
 from pathlib import Path
@@ -14,6 +15,18 @@ import numpy as np
 import pandas as pd
 
 import run_freqduet_v42_distribution as distribution
+
+
+def traced_event(original, stage, record):
+    call_signature = signature(original)
+    clock = "arrival_time_s" if stage == "arrival" else "departure_time_s"
+
+    def wrapped(*args, **kwargs):
+        values = call_signature.bind(*args, **kwargs).arguments
+        record(stage, values["station_id"], values["direction"], values[clock], values["trip_id"])
+        return original(*args, **kwargs)
+
+    return wrapped
 
 
 class SegmentObserver(distribution.DistributionObserver):
@@ -42,18 +55,13 @@ class SegmentObserver(distribution.DistributionObserver):
             valid = departure is not None and departure["trip_id"] == bus.forward_predecessor_trip_id
             self.actual_events.append(dict(stage=stage, station_id=station, direction=direction,
                 time_s=float(time), trip_id=int(trip), bus_id=int(bus.bus_id), load=len(bus.passengers),
+                progress_m=float(bus.travel_distance), target_headway_s=float(bus._target_headway),
                 forward_gap_s=float(time - departure["time_s"]) if valid else None,
                 follower_gap_s=bus.pre_action_follower_departure_gap if stage == "action" else None,
                 evidence_valid=valid, **values))
 
-        def wrap(stage, original):
-            def wrapped(station, direction, time, trip, *args, **kwargs):
-                record(stage, station, direction, time, trip)
-                return original(station, direction, time, trip, *args, **kwargs)
-            return wrapped
-
-        recorder.record = wrap("arrival", recorder.record)
-        recorder.record_departure = wrap("departure", recorder.record_departure)
+        recorder.record = traced_event(recorder.record, "arrival", record)
+        recorder.record_departure = traced_event(recorder.record_departure, "departure", record)
         bus_class = vars(sys.modules[type(env).__module__])["Bus"]
         original_prepare, original_start = bus_class._prepare_for_action, bus_class._start_dwelling
 
@@ -136,7 +144,7 @@ def segment_rows(predicted, actual, routes, now):
             lead = "0-300" if row.time_s_true <= now + 300 else "300-900" if row.time_s_true <= now + 900 else "900-1800"
             rows.append(dict(metric=row.stage + "_clock_s", lead=lead, error=row.time_s_pred - row.time_s_true))
             if row.stage == "action":
-                for name in ("forward_gap_s", "follower_gap_s", "load", "action_s"):
+                for name in ("forward_gap_s", "follower_gap_s", "load", "action_s", "progress_m", "target_headway_s"):
                     left, right = getattr(row, name + "_pred"), getattr(row, name + "_true")
                     if pd.notna(left) and pd.notna(right):
                         rows.append(dict(metric=name, lead=lead, error=left - right))

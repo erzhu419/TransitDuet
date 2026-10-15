@@ -5,9 +5,23 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from freqduet_closed_loop_forecast import fluid_rollout
 from test_v41_closed_loop import observation
+from run_freqduet_v44_segment_audit import traced_event
 
 
 class SegmentTraceTest(unittest.TestCase):
+    def test_real_recorder_positional_and_keyword_interfaces_are_preserved(self):
+        calls, rows = [], []
+
+        def arrival(station_id, direction, arrival_time_s, trip_id, target_headway_s=None):
+            calls.append((station_id, direction, arrival_time_s, trip_id, target_headway_s))
+            return 123
+
+        wrapped = traced_event(arrival, "arrival", lambda *args: rows.append(args))
+        self.assertEqual(wrapped(station_id=3, direction=True, arrival_time_s=10, trip_id=2, target_headway_s=360), 123)
+        wrapped(3, True, 20, 4, 360)
+        self.assertEqual(rows, [("arrival", 3, True, 10, 2), ("arrival", 3, True, 20, 4)])
+        self.assertEqual(len(calls), 2)
+
     def test_trace_does_not_change_physics(self):
         observed, rows = observation(), []
         expected = fluid_rollout(observed, 100, "response")

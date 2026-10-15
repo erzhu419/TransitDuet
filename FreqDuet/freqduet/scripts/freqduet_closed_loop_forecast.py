@@ -150,7 +150,8 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
         if event_sink is not None:
             event_sink(dict(stage=stage, time_s=time, bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
                 direction=vehicle["direction"], station_id=route_of(vehicle)["station_ids"][vehicle["station_index"]],
-                load=vehicle["load"], **values))
+                load=vehicle["load"], progress_m=vehicle["progress_m"],
+                target_headway_s=vehicle["target_headway_s"], **values))
 
     def integrate(time):
         nonlocal clock, waiting, onboard
