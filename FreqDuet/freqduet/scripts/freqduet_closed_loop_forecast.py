@@ -331,7 +331,8 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
     if passenger_process is not None:
         residual = result["final_queue"] + result["final_onboard"] + alighted_total - initial_mass - generated
         if abs(residual) > 1e-6 or max_load > max(vehicle["capacity"] for vehicle in vehicles.values()):
-            raise ValueError("passenger forecast lost mass or exceeded capacity")
+            raise ValueError(f"passenger invariant: mass_error={residual!r} max_load={max_load!r} "
+                             f"mode={passenger_process.mode} origin={now} horizon={horizon_s}")
         passenger_process.check_final(flows, vehicles)
         result.update(initial_passengers=initial_mass, generated_passengers=generated, passenger_mass_error=residual)
     return result
