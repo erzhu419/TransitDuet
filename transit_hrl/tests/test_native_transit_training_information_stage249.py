@@ -68,6 +68,7 @@ class TrainingInformationTest(unittest.TestCase):
         f.setUp()
         models, _ = learning.previous.fit_paths(f.rows, f.data, f.draws, f.cached, f.fit)
         paths = {arm: learning.previous.base.candidates(f.data, models["state_gls"]) for arm in learning.ARMS}
+        self.assertEqual(set(learning.rank_predictions(paths["matched"])), {"1", "3", "8", "16"})
         curves = {arm: {c: learning.previous.base.curve(f.data, f.draws, p) for c, p in ps.items()} for arm, ps in paths.items()}
         blocks = [{"held_group": [r, 0], "half": h, "scales": [.1, .1], "curves": curves} for r in (397, 401) for h in (0, 1)]
         selected, _ = learning.select(blocks)

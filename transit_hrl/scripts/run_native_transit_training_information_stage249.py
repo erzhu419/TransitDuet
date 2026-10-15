@@ -199,13 +199,14 @@ def fit_cell(run, key, views):
         frozen = []
         for scope, rows in (("train60", train), ("held60", held)):
             d = data if scope == "train60" else learning.previous.base.causal_data(rows, reference)
-            pred = learning.predict({arm: learning.previous.base.candidates(d, m) for arm, m in models.items()}, selected)
+            paths = {arm: learning.previous.base.candidates(d, m) for arm, m in models.items()}
+            pred = learning.predict(paths, selected)
             actions.append({"bank": bank, "scope": scope, "states": [list(old_future.learning.state_key(r)) for r in rows],
                 "choices": {v: p["chosen"].tolist() for v, p in pred.items()}})
-            frozen.append((scope, rows, d, pred))
+            frozen.append((scope, rows, d, pred, paths))
         write_json(raw_directory(result_path(run, *key))/"actions.json", actions)
         matrix, diagnostic = {}, {}
-        for scope, rows, d, pred in frozen:
+        for scope, rows, d, pred, paths in frozen:
             _, evaluation = learning.draw_assignment(bank, "expanded")
             values = learning.previous.base.training_draws(rows, panels, evaluation)
             matrix[scope] = learning.previous.metrics(d, values, pred)
@@ -214,6 +215,10 @@ def fit_cell(run, key, views):
                 ds, _ = learning.draw_assignment(bank, arm)
                 diagnostic[scope][arm] = learning.information_error(
                     learning.previous.base.training_draws(rows, panels, ds), values, d, pred)
+                rank_error = learning.information_error(learning.previous.base.training_draws(rows, panels, ds),
+                    values, d, learning.rank_predictions(paths[arm]))
+                diagnostic[scope][arm]["unselected_rank_error"] = {k: rank_error[k] for k in
+                    ("predictor_error", "predictor_error_on_training_bank")}
         output.append({"bank": bank, "selection": selected, "summaries": summaries, "matrix": matrix,
             "information_error": diagnostic, "full_fits": full_fits})
         print(f"TRAINING_INFORMATION_FIT_BANK_COMPLETE {key}/{bank}", flush=True)

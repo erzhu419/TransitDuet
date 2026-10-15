@@ -32,6 +32,11 @@ def predict(paths, selection):
         for arm in ARMS for f in previous.FILTERS}}
 
 
+def rank_predictions(paths):
+    return {previous.strength.CANDIDATES[k]["level"]: p for k, p in paths.items()
+        if previous.strength.CANDIDATES[k]["alpha"] == 1.}
+
+
 def information_error(train_draws, evaluation_draws, data, predictions):
     """Unshrunk target and predictor errors under independent held-out innovations."""
     anchor = data["originals"]
