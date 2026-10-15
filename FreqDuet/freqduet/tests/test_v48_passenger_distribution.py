@@ -85,6 +85,21 @@ class PassengerDistributionTest(unittest.TestCase):
         self.assertEqual(result["generated_passengers"], 3)
         self.assertEqual(result["final_queue"], 5)
 
+    def test_capacity_roundoff_is_tolerated_but_a_real_overflow_is_rejected(self):
+        for board in (np.nextafter(45.0, np.inf), 46.0):
+            observed, model = fixture()
+            model["stops"]["True"][1]["stock"] = 1000
+            process = PassengerProcess(model, "arrival_queue", 0)
+            # A fractional-alighting rollout produced a one-ULP capacity excess.
+            process.exchange = lambda vehicle, stop, terminal: (vehicle["load"], 0) if terminal else (0, board)
+            if board < 46:
+                result = fluid_rollout(observed, 50, "historical", passenger_process=process)
+                self.assertGreater(result["max_load"], 50)
+                self.assertLess(result["max_load"], 50 + 1e-8)
+            else:
+                with self.assertRaisesRegex(ValueError, "passenger invariant"):
+                    fluid_rollout(observed, 50, "historical", passenger_process=process)
+
     def test_private_rng_and_input_snapshot_are_unchanged(self):
         observed, model = fixture()
         before_observed = copy.deepcopy(observed)
