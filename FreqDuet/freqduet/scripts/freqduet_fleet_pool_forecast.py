@@ -74,7 +74,7 @@ def freeze_pool(runner, telemetry, identity, actor):
                 remaining_service = max(0.0, float(bus.last_service_dwell_s) - elapsed)
                 remaining_stop = remaining_service
                 remaining_stop += route["hold_s"][station] + 2 * env.time_step
-        if int(bus.bus_id) == identity["bus_id"]:
+        if identity is not None and int(bus.bus_id) == identity["bus_id"]:
             phase, remaining_stop = "current_decision", float(actor) + 2 * env.time_step
         ready_since = bus.back_to_terminal_time
         vehicles.append(dict(bus_id=int(bus.bus_id), trip_id=int(bus.trip_id), direction=direction,
@@ -99,7 +99,7 @@ def freeze_pool(runner, telemetry, identity, actor):
                                 first_eligible_s=getattr(trip, "_freqduet_first_eligible_time", None),
                                 upper_queried=bool(getattr(trip, "_upper_queried", False))))
     return dict(time_s=now, dt_s=float(env.time_step), routes=routes, vehicles=vehicles,
-                commitments=commitments, decision=dict(identity, actor_action_s=float(actor)),
+                commitments=commitments, decision=None if identity is None else dict(identity, actor_action_s=float(actor)),
                 last_dispatch={str(direction): float(env._last_dispatch_time[direction]) for direction in (True, False)})
 
 
