@@ -1,0 +1,449 @@
+{
+  "additional_fit_attempts": 4,
+  "aggregate_bytes": 2033503,
+  "auto_retry_task_ids": [
+    "t155802",
+    "t155803"
+  ],
+  "cancelled_tasks": 1,
+  "completed_tasks": 33,
+  "default_changed": false,
+  "failed_cancelled_and_single_block_diagnostic_work_not_counted_as_qualified_matrix": true,
+  "failed_tasks": 3,
+  "fit_attempts": 36,
+  "manual_recovery_task_ids": [
+    "t155804",
+    "t155812"
+  ],
+  "manually_pulled_artifacts": [
+    "report/result.json",
+    "paired_mc_comparisons.json"
+  ],
+  "new_native_episodes": 0,
+  "new_raw_reference_fits": 0,
+  "numerical_repair_revision": "5b9515b87e7fb60340a944f8a1d1e6c72bc1a57b",
+  "planned_qualified_objective_solves": 5376,
+  "planned_unique_fit_tasks": 32,
+  "posthoc_weight_audit": {
+    "between_state_weight_mass_is_not_normalized": true,
+    "consistent_root401_downweighting": false,
+    "source": "remote selected six mixed full-fit caches, eligible-pair precision mass by state/head"
+  },
+  "reproduction": {
+    "max_abs_difference": 0.0,
+    "records": 92400
+  },
+  "retries": 4,
+  "source_revision": "f2f8aa51756823e2b850bc1766e413143458a567",
+  "tasks": [
+    {
+      "exit_code": 0,
+      "finished_at": 1792041397.0,
+      "id": "t155768",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/0/even_odd/0",
+      "started_at": 1792041410.4727113,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041591.0,
+      "id": "t155771",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/first_last/0",
+      "started_at": 1792041604.6559982,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155772",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/first_last/1",
+      "started_at": 1792041598.5764668,
+      "status": "done"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1792041590.0,
+      "id": "t155773",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "started_at": 1792041604.6671574,
+      "status": "failed"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155774",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/1",
+      "started_at": 1792041599.3468597,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155775",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/1/first_last/0",
+      "started_at": 1792041598.4079223,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155776",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/1/first_last/1",
+      "started_at": 1792041601.4125636,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155777",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/1/even_odd/0",
+      "started_at": 1792041599.3271039,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155778",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/1/even_odd/1",
+      "started_at": 1792041599.1824803,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155779",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/0/first_last/0",
+      "started_at": 1792041600.8440232,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155780",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/0/first_last/1",
+      "started_at": 1792041600.0003772,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155781",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/0/even_odd/0",
+      "started_at": 1792041598.589717,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041592.0,
+      "id": "t155782",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/0/even_odd/1",
+      "started_at": 1792041604.678767,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155783",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/1/first_last/0",
+      "started_at": 1792041601.531247,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155784",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/1/first_last/1",
+      "started_at": 1792041599.168236,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155785",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/1/even_odd/0",
+      "started_at": 1792041600.6712034,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155786",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_401/1/even_odd/1",
+      "started_at": 1792041600.6308875,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155787",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/0/first_last/0",
+      "started_at": 1792041599.3187935,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155788",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/0/first_last/1",
+      "started_at": 1792041600.0855072,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155789",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/0/even_odd/1",
+      "started_at": 1792041600.780857,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155790",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/1/first_last/0",
+      "started_at": 1792041598.4769757,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155791",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/1/first_last/1",
+      "started_at": 1792041600.8386052,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155792",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/1/even_odd/0",
+      "started_at": 1792041599.9038236,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155793",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_a/1/even_odd/1",
+      "started_at": 1792041600.086408,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041591.0,
+      "id": "t155794",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/0/first_last/0",
+      "started_at": 1792041604.6499438,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041590.0,
+      "id": "t155795",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/0/first_last/1",
+      "started_at": 1792041602.3678024,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155796",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/0/even_odd/0",
+      "started_at": 1792041598.5097106,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155797",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/0/even_odd/1",
+      "started_at": 1792041601.6177764,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155798",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/1/first_last/0",
+      "started_at": 1792041600.040914,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041587.0,
+      "id": "t155799",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/1/first_last/1",
+      "started_at": 1792041598.576007,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041589.0,
+      "id": "t155800",
+      "node": "node005",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/1/even_odd/0",
+      "started_at": 1792041600.7458825,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792041588.0,
+      "id": "t155801",
+      "node": "node004",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/mixed_b/1/even_odd/1",
+      "started_at": 1792041599.2789135,
+      "status": "done"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1792041706.0,
+      "id": "t155802",
+      "node": "node004",
+      "parent_id": "t155773",
+      "retry_count": 1,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "started_at": 1792041720.5474222,
+      "status": "failed"
+    },
+    {
+      "exit_code": null,
+      "finished_at": 1792041846.1393936,
+      "id": "t155803",
+      "node": "node004",
+      "parent_id": "t155802",
+      "retry_count": 2,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "started_at": 1792041795.5936866,
+      "status": "cancelled"
+    },
+    {
+      "exit_code": 1,
+      "finished_at": 1792042222.0,
+      "id": "t155804",
+      "node": "node004",
+      "parent_id": "t155803",
+      "retry_count": 3,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "started_at": 1792042236.8151548,
+      "status": "failed"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792042598.0,
+      "id": "t155812",
+      "node": "node006",
+      "parent_id": "t155804",
+      "retry_count": 4,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/fit/root_397/0/even_odd/0",
+      "started_at": 1792042611.0058823,
+      "status": "done"
+    },
+    {
+      "exit_code": 0,
+      "finished_at": 1792042734.0,
+      "id": "t155819",
+      "node": "node006",
+      "parent_id": null,
+      "retry_count": 0,
+      "signature": "Freq-HRL/native_transit_pair_critic_stage246_v1/native_transit_pair_critic_stage246_development_20261015_r1/report",
+      "started_at": 1792042748.9024725,
+      "status": "done"
+    }
+  ],
+  "tests_passed": 24,
+  "total_attempts": 37
+}

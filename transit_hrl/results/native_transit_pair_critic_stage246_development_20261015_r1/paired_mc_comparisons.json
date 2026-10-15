@@ -1,0 +1,127 @@
+{
+  "boundary": "posthoc_paired_conditional_MC_diagnostic_on_reused_development_data_no_new_seed_CI",
+  "comparisons": {
+    "feasible_mse_pooled_safe": {
+      "boundary": "conditional_innovation_sampling_SE_not_training_seed_CI_or_unobserved_tail_guarantee",
+      "draws_per_state": 8,
+      "fixed_states": 240,
+      "state_exposures": 960,
+      "variants": {
+        "pair_gls_pooled_safe": {
+          "changed_states": 8,
+          "fields": {
+            "cost": {
+              "conditional_mc_se": 9.205992342124247e-07,
+              "mean": -1.1627604166663618e-06,
+              "mean_over_mc_se": -1.2630473429201867
+            },
+            "fleet": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "nonfleet": {
+              "conditional_mc_se": 9.205992342124247e-07,
+              "mean": -1.1627604166663618e-06,
+              "mean_over_mc_se": -1.2630473429201867
+            },
+            "wait_min": {
+              "conditional_mc_se": 8.059855265206166e-06,
+              "mean": -7.682291666666336e-06,
+              "mean_over_mc_se": -0.9531550398715289
+            }
+          },
+          "sampled_fleet_event_state_draws": 0
+        },
+        "raw": {
+          "changed_states": 0,
+          "fields": {
+            "cost": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "fleet": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "nonfleet": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "wait_min": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            }
+          },
+          "sampled_fleet_event_state_draws": 0
+        }
+      }
+    },
+    "pair_mse_pooled_safe": {
+      "boundary": "conditional_innovation_sampling_SE_not_training_seed_CI_or_unobserved_tail_guarantee",
+      "draws_per_state": 8,
+      "fixed_states": 240,
+      "state_exposures": 960,
+      "variants": {
+        "pair_gls_pooled_safe": {
+          "changed_states": 22,
+          "fields": {
+            "cost": {
+              "conditional_mc_se": 0.00010040191404108772,
+              "mean": -0.00018916731770833315,
+              "mean_over_mc_se": -1.8841007117744761
+            },
+            "fleet": {
+              "conditional_mc_se": 9.396977037591567e-05,
+              "mean": -0.00016276041666666668,
+              "mean_over_mc_se": -1.7320508075688772
+            },
+            "nonfleet": {
+              "conditional_mc_se": 1.892881187370181e-05,
+              "mean": -2.640690104166641e-05,
+              "mean_over_mc_se": -1.39506384330197
+            },
+            "wait_min": {
+              "conditional_mc_se": 0.00018236223788100004,
+              "mean": -0.0002842447916666644,
+              "mean_over_mc_se": -1.558682296123979
+            }
+          },
+          "sampled_fleet_event_state_draws": 3
+        },
+        "raw": {
+          "changed_states": 0,
+          "fields": {
+            "cost": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "fleet": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "nonfleet": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            },
+            "wait_min": {
+              "conditional_mc_se": 0.0,
+              "mean": 0.0,
+              "mean_over_mc_se": null
+            }
+          },
+          "sampled_fleet_event_state_draws": 0
+        }
+      }
+    }
+  },
+  "primary": "pair_gls_pooled_safe",
+  "scope": "mixed_held60_fresh8"
+}

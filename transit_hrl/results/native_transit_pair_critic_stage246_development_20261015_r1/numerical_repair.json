@@ -1,0 +1,44 @@
+{
+  "actual_failure_diagnostic": {
+    "false_normalized_KKT": 1.0247243744642597e-08,
+    "gradient_inf_norm": 1.5154046858192215e-19,
+    "optimum_norm": 0.00020341319350877598,
+    "radius": 0.4904035460894898
+  },
+  "cancelled_attempts": [
+    "t155803"
+  ],
+  "cell": [
+    "root_397",
+    0,
+    "even_odd",
+    0
+  ],
+  "failed_attempts": [
+    "t155773",
+    "t155802",
+    "t155804"
+  ],
+  "failure": "normalized_KKT_1.0247243744642597e-8_exceeded_1e-8_at_loss_9.449870171484411e-9",
+  "first_repair_recovery": {
+    "exit_code": 1,
+    "id": "t155804",
+    "reason": "same_false_KKT_interior_multiplier_not_dual_root_error",
+    "status": "failed"
+  },
+  "first_repair_revision": "954a561f213d36031dfc59e70157d5a1d8f24c70",
+  "fix": "inactive_ball_constraint_uses_zero_multiplier_no_fit_solution_loss_budget_or_KKT_threshold_change",
+  "parent_id": "t155804",
+  "performance_outcomes_inspected_before_repair": false,
+  "preserved_successful_cells": 31,
+  "regression": "24_tests_passed_including_interior_roundoff_and_small_loss_scaling",
+  "retry_count": 4,
+  "source_revision": "5b9515b87e7fb60340a944f8a1d1e6c72bc1a57b",
+  "successful_recovery": {
+    "exit_code": 0,
+    "id": "t155812",
+    "parent_id": "t155804",
+    "retry_count": 4,
+    "status": "done"
+  }
+}
