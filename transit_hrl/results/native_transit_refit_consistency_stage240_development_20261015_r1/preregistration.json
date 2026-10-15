@@ -1,0 +1,124 @@
+{
+  "contract": {
+    "averaging": "equal20_matched_blocks_then_equal_cells_reused60/4_endpoint_not20_independent_replicates",
+    "boundary": "development_reused240_states8_draws_not_new_seed_CI_or_end_to_end_HRL",
+    "budget": {
+      "fit_tasks": 32,
+      "matched_blocks": 640,
+      "new_all_MSE_paths": 1408,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "objective_solves": 18432,
+      "raw_wait_updates": 0,
+      "report_tasks": 1,
+      "residual_SVDs": 4480,
+      "rl_actor_updates": 0
+    },
+    "cohort": "original240_states40_prefixes_same8_conditional_futures_no_additional360",
+    "controls": "selected54/2_probe_outcomes_counts_and60/4_full_metrics_reproduce_Stage239",
+    "draw_expansion": "60/2_native_to60/4_residual_refit_under_same60/2_reference_then60/4_cached_native_reference",
+    "endpoints": [
+      "54_2_cached",
+      "60_2_fixed54ref",
+      "60_2_native",
+      "60_4_fixed60ref",
+      "60_4_native"
+    ],
+    "limitation": "paired_refit_diagnosis_includes_basis_scale_RMS_changes_reused_development_data_not_CI_or_clean_probe_performance_comparison",
+    "metrics": "physical_cost_wait_risk_vs_own_and_common_raw_gate_regret_action_switch_vs54/2_and_preceding_endpoint",
+    "outer": "two_complementary_folds_per_view60_train60_held10_prefixes_each_balanced_regimes_and_mixed_roots",
+    "paired_design": "20_prefix_future_blocks_per_cell_same_probe_and_common_full_raw_baseline_at_all5_endpoints",
+    "partitions": {
+      "even_odd": [
+        [
+          0,
+          2,
+          4,
+          6
+        ],
+        [
+          1,
+          3,
+          5,
+          7
+        ]
+      ],
+      "first_last": [
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          4,
+          5,
+          6,
+          7
+        ]
+      ]
+    },
+    "prefix_diagnostic": "delete_one_validation_prefix_from_existing_curves_frozen_candidate_fixed_scales_no_refit_or_new_filter",
+    "probe_label_exposure": {
+      "54_2_cached": "prefix_unseen_future_unseen",
+      "60_2_fixed54ref": "residual_prefix_seen_future_unseen",
+      "60_2_native": "prefix_seen_future_unseen",
+      "60_4_fixed60ref": "residual_prefix_and_future_seen",
+      "60_4_native": "prefix_and_future_seen"
+    },
+    "reference": "all_raw_references_from_Stage237_and_Stage226_zero_new_raw_training",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "residual": "same_four_objectives_rank_strength_keys_198features_TSVD_rank_RMS_rule_each_fit_uses_own_training_scales_basis",
+    "scopes": [
+      "prefix_probe",
+      "train_same",
+      "train_other",
+      "held_same",
+      "held_other"
+    ],
+    "selection": "all20_Stage239_objective_anchor_filter_candidates_frozen_no_reselection_or_admission",
+    "source_protocol": "native_transit_objective_oof_stage239_v1",
+    "source_run": "native_transit_objective_oof_stage239_development_20261015_r1",
+    "state_expansion": "54/2_cached_to60/2_residual_refit_under_same54/2_reference_then60/2_cached_native_reference",
+    "storage": "remote_model_and_block_caches_pull_aggregate_only",
+    "variants": [
+      "raw",
+      "all_mse_original_pooled_safe",
+      "all_mse_original_half_safe",
+      "all_mse_raw_pooled_safe",
+      "all_mse_raw_half_safe",
+      "feasible_mse_original_pooled_safe",
+      "feasible_mse_original_half_safe",
+      "feasible_mse_raw_pooled_safe",
+      "feasible_mse_raw_half_safe",
+      "rank_regret_original_pooled_safe",
+      "rank_regret_original_half_safe",
+      "rank_regret_raw_pooled_safe",
+      "rank_regret_raw_half_safe",
+      "wait_rank_original_pooled_safe",
+      "wait_rank_original_half_safe",
+      "wait_rank_raw_pooled_safe",
+      "wait_rank_raw_half_safe",
+      "joint_original_pooled_safe",
+      "joint_original_half_safe",
+      "joint_raw_pooled_safe",
+      "joint_raw_half_safe"
+    ]
+  },
+  "protocol": "native_transit_refit_consistency_stage240_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "c421845f12473ddd8d329fac4b9fff1ac3b2cb79"
+}
