@@ -158,7 +158,8 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             event_sink(dict(stage=stage, time_s=time, bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
                 direction=vehicle["direction"], station_id=route_of(vehicle)["station_ids"][vehicle["station_index"]],
                 load=vehicle["load"], progress_m=vehicle["progress_m"],
-                target_headway_s=vehicle["target_headway_s"], **values))
+                target_headway_s=vehicle["target_headway_s"],
+                launch_time_s=vehicle.get("launch_time_s"), scheduled_launch_s=vehicle.get("scheduled_launch_s"), **values))
 
     def integrate(time):
         nonlocal clock, waiting, onboard, generated
@@ -220,7 +221,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             vehicle = vehicles[bus_id]
             vehicle.update(direction=direction, trip_id=trip_id, on_route=True, load=0.0,
                            station_index=0, progress_m=0.0, previous_hold_s=0.0,
-                           launch_time_s=time, last_service_dwell_s=0.0,
+                           launch_time_s=time, scheduled_launch_s=trip["scheduled_s"], last_service_dwell_s=0.0,
                            target_headway_s=trip["target_headway_s"], phase="service", predecessor_trip=None)
             launches.append(dict(time_s=time, trip_id=trip_id, bus_id=bus_id, direction=direction,
                                  scheduled_s=trip["scheduled_s"], readiness_s=time - trip["first_eligible_s"]))
@@ -312,7 +313,9 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
                 values = dict(forward_gap_s=time - departure["time_s"], target_headway_s=vehicle["target_headway_s"],
                               follower_gap_s=follower.departure_gap_s or 0.0, follower_valid=follower.valid,
                               load_ratio=vehicle["load"] / vehicle["capacity"], previous_hold_s=vehicle["previous_hold_s"],
-                              station_phase=station / (len(route["station_ids"]) - 1), direction=vehicle["direction"], time_s=time)
+                              station_phase=station / (len(route["station_ids"]) - 1), direction=vehicle["direction"], time_s=time,
+                              bus_id=vehicle["bus_id"], trip_id=vehicle["trip_id"],
+                              launch_time_s=vehicle["launch_time_s"], scheduled_launch_s=vehicle.get("scheduled_launch_s"))
                 historical = route["hold_s"][station]
                 if action_predictor is not None:
                     action = action_predictor(values)
