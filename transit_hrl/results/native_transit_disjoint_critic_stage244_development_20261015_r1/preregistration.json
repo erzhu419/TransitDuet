@@ -1,0 +1,207 @@
+{
+  "contract": {
+    "A": "old_futures_used_to_train_cached_raw_reference_2_inner_or4_full",
+    "B": "matched_half_of_old_outer_unused4_for_inner_or_all4_full_same_training_prefixes_not_held_or_Stage241_futures",
+    "anchor": "original",
+    "arms": [
+      "combined",
+      "split",
+      "variance",
+      "group",
+      "variance_group"
+    ],
+    "boundary": "reused_development_old_and_Stage241_futures_not_new_confirmation_two_Transit_mixtures_Stage169_reserves_closed",
+    "budget": {
+      "critic_subspace_fits": 672,
+      "fit_tasks": 32,
+      "inner_blocks": 640,
+      "new_component_quadratic_solves": 40320,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "report_tasks": 1,
+      "rl_actor_updates": 0
+    },
+    "capacity": "fixed198_features_TSVD_subspace_and_A_scale_A_MSE_sum_RMS_cap_every_mode_and_arm",
+    "cohort": "same240_development_states_40_prefixes_roots397_401_five_regimes_replicas0to3_six_probes",
+    "combined": "B_MSE_recomputed_analytically_and_projected_to_A_ball_same_and_calibration_only_cost_match_cached_A",
+    "controls": "all_Stage243_same_models_selections_and9_metric_fields_reproduce_full_matrix_no_refitting_same_mode",
+    "exposure": "old_same_is_A_old_other_is_B_target_fit_exposure_depends_on_mode_not_uniform_across_modes",
+    "factorial": "target_A_orB_cross_calibration_A_orB_matched_counts_per_estimate_not_matched_unique_raw_plus_critic_draw_union",
+    "filters": [
+      "pooled_safe",
+      "half_safe"
+    ],
+    "gate": "frozen_cached_raw_wait_gate_no_new_safety_threshold",
+    "grid": {
+      "16@0.25": {
+        "alpha": 0.25,
+        "level": "16"
+      },
+      "16@0.5": {
+        "alpha": 0.5,
+        "level": "16"
+      },
+      "16@0.75": {
+        "alpha": 0.75,
+        "level": "16"
+      },
+      "16@1": {
+        "alpha": 1.0,
+        "level": "16"
+      },
+      "1@0.25": {
+        "alpha": 0.25,
+        "level": "1"
+      },
+      "1@0.5": {
+        "alpha": 0.5,
+        "level": "1"
+      },
+      "1@0.75": {
+        "alpha": 0.75,
+        "level": "1"
+      },
+      "1@1": {
+        "alpha": 1.0,
+        "level": "1"
+      },
+      "3@0.25": {
+        "alpha": 0.25,
+        "level": "3"
+      },
+      "3@0.5": {
+        "alpha": 0.5,
+        "level": "3"
+      },
+      "3@0.75": {
+        "alpha": 0.75,
+        "level": "3"
+      },
+      "3@1": {
+        "alpha": 1.0,
+        "level": "3"
+      },
+      "8@0.25": {
+        "alpha": 0.25,
+        "level": "8"
+      },
+      "8@0.5": {
+        "alpha": 0.5,
+        "level": "8"
+      },
+      "8@0.75": {
+        "alpha": 0.75,
+        "level": "8"
+      },
+      "8@1": {
+        "alpha": 1.0,
+        "level": "8"
+      },
+      "zero": {
+        "alpha": 0.0,
+        "level": "zero"
+      }
+    },
+    "inner": "same20_prefix_future_blocks_54states_fit2_draws_validate6held_states_opposite_A2",
+    "labels": [
+      "old_same",
+      "old_other",
+      "fresh_half0",
+      "fresh_half1",
+      "fresh8"
+    ],
+    "metrics": "physical_cost_wait_service_fleet_unsafe_score_MSE_plus_equal_state_feasible_cost_MSE_and_gate_regret",
+    "modes": {
+      "calibration_only": [
+        "A",
+        "B"
+      ],
+      "disjoint": [
+        "B",
+        "B"
+      ],
+      "same": [
+        "A",
+        "A"
+      ],
+      "target_only": [
+        "B",
+        "A"
+      ]
+    },
+    "optimizer": "two_head_convex_GLS_dual_sum_ball_solve_KKT_1e-8_no_gradient_training",
+    "outer": "same60_training_prefix_states_4draws_then60_outer_held_states",
+    "primary": "disjoint_variance_group_pooled_safe",
+    "reference_run": "native_transit_joint_advantage_stage226_development_20261014_r1",
+    "refit_run": "native_transit_refit_matrix_stage237_development_20261015_r1",
+    "sampling": "shared_state_future_effects_accumulated_before_conditional_MC_SE_for_mixed_OOF_and_full_held_no_training_seed_CI",
+    "scopes": [
+      "oof6",
+      "train60",
+      "held60"
+    ],
+    "selection": "unchanged_OOF_rules_each_mode_arm_separately_no_joint_mode_selection",
+    "source_protocol": "native_transit_variance_critic_stage243_v1",
+    "source_run": "native_transit_variance_critic_stage243_development_20261015_r1",
+    "storage": "reuse_remote_panels_and_models_pull_pooled_filter_matrix_plus_all_registered_fresh8_aggregate_only",
+    "variance_shrinkage": "equal_prefix_pooled_variance_group_half_pooled_then_state_half_group_prior_no_tuned_hyperparameters;prefix_residual_vector_raw_centred_pseudo_target_signal_energy_from_other_training_prefixes_minus_MC_variance_clamped_at_zero",
+    "variants": [
+      "raw",
+      "same_combined_pooled_safe",
+      "same_combined_half_safe",
+      "same_split_pooled_safe",
+      "same_split_half_safe",
+      "same_variance_pooled_safe",
+      "same_variance_half_safe",
+      "same_group_pooled_safe",
+      "same_group_half_safe",
+      "same_variance_group_pooled_safe",
+      "same_variance_group_half_safe",
+      "calibration_only_combined_pooled_safe",
+      "calibration_only_combined_half_safe",
+      "calibration_only_split_pooled_safe",
+      "calibration_only_split_half_safe",
+      "calibration_only_variance_pooled_safe",
+      "calibration_only_variance_half_safe",
+      "calibration_only_group_pooled_safe",
+      "calibration_only_group_half_safe",
+      "calibration_only_variance_group_pooled_safe",
+      "calibration_only_variance_group_half_safe",
+      "target_only_combined_pooled_safe",
+      "target_only_combined_half_safe",
+      "target_only_split_pooled_safe",
+      "target_only_split_half_safe",
+      "target_only_variance_pooled_safe",
+      "target_only_variance_half_safe",
+      "target_only_group_pooled_safe",
+      "target_only_group_half_safe",
+      "target_only_variance_group_pooled_safe",
+      "target_only_variance_group_half_safe",
+      "disjoint_combined_pooled_safe",
+      "disjoint_combined_half_safe",
+      "disjoint_split_pooled_safe",
+      "disjoint_split_half_safe",
+      "disjoint_variance_pooled_safe",
+      "disjoint_variance_half_safe",
+      "disjoint_group_pooled_safe",
+      "disjoint_group_half_safe",
+      "disjoint_variance_group_pooled_safe",
+      "disjoint_variance_group_half_safe"
+    ]
+  },
+  "protocol": "native_transit_disjoint_critic_stage244_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 3072,
+    "require_node": null
+  },
+  "source_revision": "84ccecf0683351cb00a63091e7b870999d33ec34"
+}
