@@ -134,20 +134,28 @@ def aggregate(root):
                             error=point[metric] - truth, low=lo, high=hi,
                             covered=float(lo <= truth <= hi) if draws is not None else np.nan,
                             mc_se=float(np.std(draws, ddof=1) / np.sqrt(len(draws))) if draws is not None else np.nan))
+                # Future observed states/times are used only for teacher-forced
+                # error attribution, never for fitting or closed-loop forecasts.
                 future = [row for row in teacher if now <= row["time_s"] < now + horizon]
-                predicted_sum = 0.0
+                predicted_sum, expected_future_exposure = 0.0, 0.0
                 for row in future:
                     probs = probabilities_from_features(model, row["features"])
                     label = int(np.argmin(abs(ACTIONS - row["action_s"])))
                     expected = float(probs @ ACTIONS)
                     predicted_sum += expected
+                    expected_future_exposure += float(probs @ np.minimum(ACTIONS,
+                        max(now + horizon - 1 - row["time_s"], 0)))
                     teacher_rows.append(dict(cohort=cohort, horizon_s=horizon, brier=float(
                         np.sum((probs - np.eye(7)[label]) ** 2)), nll=float(-np.log(max(probs[label], 1e-300))),
                         mean_error_s=expected - row["action_s"]))
+                carry = holds.loc[holds.time_s < now]
+                carry_exposure = np.maximum(0, np.minimum(now + horizon - 1, carry.time_s + carry.action_s)
+                                            - np.maximum(now - 1, carry.time_s)).sum()
                 teacher_totals.append(dict(train_seed=seed, eval_seed=scenario, cohort=cohort,
                     origin=origin, horizon_s=horizon, commands=len(future),
                     actual=sum(row["action_s"] for row in future), predicted=predicted_sum,
-                    error=predicted_sum - sum(row["action_s"] for row in future)))
+                    error=predicted_sum - sum(row["action_s"] for row in future),
+                    exposure_error=expected_future_exposure + carry_exposure - actual_hold))
                 for trip, times in sampled["returns"].items():
                     truth = float(terminals.loc[int(trip)].time_s)
                     returned = np.array([time is not None for time in times])
@@ -176,7 +184,8 @@ def aggregate(root):
     pd.DataFrame(teacher_rows).groupby(["cohort", "horizon_s"]).mean().to_csv(summary / "teacher_accuracy.csv")
     pd.DataFrame(teacher_totals).groupby(["cohort", "horizon_s"]).agg(
         contexts=("error", "size"), commands=("commands", "mean"), actual=("actual", "mean"),
-        predicted=("predicted", "mean"), bias=("error", "mean")).to_csv(summary / "teacher_accumulation.csv")
+        predicted=("predicted", "mean"), bias=("error", "mean"),
+        exposure_bias=("exposure_error", "mean")).to_csv(summary / "teacher_accumulation.csv")
     returned = pd.DataFrame(return_rows)
     returned["brier"] = (returned.return_probability - returned.returned_actual) ** 2
     returned.groupby(["cohort", "horizon_s"]).mean().to_csv(summary / "return_uncertainty.csv")
