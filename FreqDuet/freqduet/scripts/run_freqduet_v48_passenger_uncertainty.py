@@ -99,18 +99,18 @@ def aggregate(root, bank):
     print("PASSENGER_AGGREGATE_DONE", flush=True)
 
 
-def smoke(root, bank, v46, telemetry):
+def smoke(root, bank, v46, telemetry, index=0):
     tests = Path(__file__).resolve().parents[1] / "tests"
     suite = unittest.defaultTestLoader.discover(str(tests), pattern="test_v4[1245678]*.py")
     if not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful():
         raise SystemExit(1)
-    seed, scenario, cohort = previous.previous.items()[0]
-    capture = json.loads((bank / "observed" / f"seed{seed}_eval{scenario}" / "forecasts.json").read_text())["clock_36000"]
-    base = json.loads((v46 / "origins" / f"seed{seed}_eval{scenario}" / "clock_36000" / "forecasts.json").read_text())
+    seed, scenario, cohort, clock = previous.items()[index]
+    capture = json.loads((bank / "observed" / f"seed{seed}_eval{scenario}" / "forecasts.json").read_text())[f"clock_{clock}"]
+    base = json.loads((v46 / "origins" / f"seed{seed}_eval{scenario}" / f"clock_{clock}" / "forecasts.json").read_text())
     legacy = travel_ensemble(capture["pool"], 1800, capture["distribution_model"], base["travel_model"], "shared_block")
     for metric in METRICS:
         np.testing.assert_allclose(legacy["draws"][metric], base["forecasts"]["shared_block"]["1800"]["draws"][metric], rtol=1e-12, atol=1e-8)
-    run_origin((root, bank, v46, telemetry, seed, scenario, cohort, 36000))
+    run_origin((root, bank, v46, telemetry, seed, scenario, cohort, clock))
     output = root / "exports"
     output.mkdir(parents=True, exist_ok=True)
     (output / "done.json").write_text('{"v46_exact": true, "passenger_modes_complete": true}\n')
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
     if args.command == "smoke":
-        smoke(args.out_root, args.input_bank, args.v46_root, args.telemetry_root)
+        smoke(args.out_root, args.input_bank, args.v46_root, args.telemetry_root, args.start)
     elif args.command == "batch":
         batch(args.out_root, args.input_bank, args.v46_root, args.telemetry_root, args.start, args.end, args.workers)
     else:
