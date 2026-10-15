@@ -19,10 +19,24 @@ every baseline on every validation day, for all four actors. No actor or dual
 updates, relaxed gates or main switch. All compute through server scheduler;
 state arrays and checkpoints remain there.
 
+## Outcome
+
+Source `bb914b42f0`; 21 tests/smoke `t165292`, fits `t165294`-`t165297`,
+data `t165298`-`t165301`, evaluation `t165303`-`t165306`, aggregate `t165307`:
+all exit 0. Sixteen fresh rollouts, 83,200 decisions, gate **0/4**.
+On this same fresh matrix, MAE is **0.014428** factored, **0.010763** direct V62,
+**0.012523** zero, **0.013672** causal final-mean, **0.137168** frozen V59.
+The factorization is correct but its learned terminal component does not improve
+calibration over the direct model or historical mean. No action-audit/control
+admission; actor, dual and main unchanged.
+
 ## Limitations / Next Step
 
 The four demand days are shared across actors (two original training seeds).
 Chosen-action calibration is not unexecuted-action evidence or control benefit.
 Record seven-action prediction spread without treating it as counterfactual
-truth. Only after calibration passes, test matched action differences before
-changing the control policy. Preserve V62's negative result.
+truth. Each actor was fitted to four terminal outcomes; repeated decision labels
+are not independent terminal targets. A data-scarcity explanation is not isolated
+yet. Next increase independent fitting days with matched direct/factored training
+budgets and newly reserved validation days. Keep V63 unpromoted and its gate
+closed; action-difference validation remains a later step.
