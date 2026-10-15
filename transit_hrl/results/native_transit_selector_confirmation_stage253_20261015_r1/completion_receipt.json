@@ -1,0 +1,57 @@
+{
+  "confirmation": {
+    "families": {
+      "free_old": {
+        "primary": {
+          "cost": false,
+          "wait_min": true
+        },
+        "versus_raw": {
+          "cost": false,
+          "wait_min": true
+        }
+      },
+      "shrunk": {
+        "primary": {
+          "cost": false,
+          "wait_min": true
+        },
+        "versus_raw": {
+          "cost": false,
+          "wait_min": true
+        }
+      }
+    },
+    "joint_pass": false,
+    "rule": "all_families_cost_and_wait_paired_and_vs_raw_upper95_negative_both_halves_and_banks_negative; conjunction_not_best_arm_selection"
+  },
+  "coverage_qualified": true,
+  "default_changed": false,
+  "draws": 11264,
+  "local_pulls": {
+    "additional_report_bytes": 5217886,
+    "raw_models_panels_actions_or_rollouts_pulled": false
+  },
+  "native_deployment_eligible": false,
+  "native_episodes": 67136,
+  "protocol": "native_transit_selector_confirmation_stage253_v1",
+  "registered_source_revision": "b12307b769af496d19d261f709012fefb7924265",
+  "run_name": "native_transit_selector_confirmation_stage253_20261015_r1",
+  "scheduler": {
+    "actual_node_counts": {
+      "node002": 383,
+      "node004": 822,
+      "node005": 811,
+      "node006": 813
+    },
+    "exit_code_counts": {
+      "0": 2829
+    },
+    "records": 2829,
+    "report": "t165368",
+    "retry_count_sum": 0,
+    "status_counts": {
+      "done": 2829
+    }
+  }
+}

@@ -43,3 +43,35 @@ Preflight t162442-t162451 and report t162454 all completed with exit 0: 10 futur
 61 episodes, max wall time 205.39 s and max process RSS 722.91 MB. All 2,816
 remaining chunks were submitted as t162456-t165271; execution has started.
 Final report remains gated on all collection attempts completing successfully.
+
+## Results And Next
+
+All 2,829 records, including report t165368, completed exit 0 without retries.
+All 11,264 futures / 67,136 episodes qualified. Only the 5,217,886-byte scalar
+report was additionally pulled. The preregistered joint test failed on cost;
+waiting passed within both model families, versus matched2 and versus raw.
+
+Held mixed-pooled expanded8-minus-matched2 conditional MC results:
+
+| Model | Cost Mean / Normal95 | Wait Mean / Normal95 (min) |
+|---|---|---|
+| free_old | -0.000063141 [-0.000122907, -0.000003375] | -0.000416398 [-0.000514742, -0.000318055] |
+| shrunk | -0.000019965 [-0.000086563, +0.000046633] | -0.000287801 [-0.000390935, -0.000184667] |
+
+Free pooled cost clears zero, but bank0 cost worsens in both future halves;
+bank0 fleet cost has a positive interval. Shrunk bank0 total cost also has a
+positive interval. Bank1 improves: pooled precision cannot resolve this conflict.
+Free expanded8 retains 69.6% of Stage252 wait gain but only 20.6% of cost gain
+and 9.6% of fleet gain. Net weighted fleet events versus raw are 45 beneficial,
+43 harmful. Prefix 401/914010303 contributes 93.6% of the net free cost gain.
+Removing it descriptively leaves cost -0.000004531 and wait -0.000212649 min.
+
+Expanded8 waiting is worse than Stage247 in both families; those paired intervals
+exclude zero. Seen-prefix wait remains a positive point mean with an interval
+crossing zero. OOD wait and nonfleet cost worsen, with positive descriptive
+intervals. No arm is promoted, and the conditional/single-action boundary holds.
+
+Next: a cached OOF-to-full bridge diagnostic. Separate validation optimism,
+independent-future correction transfer and raw-reference action changes, including
+feasible-mask differences. Use common opposite16 Stage249 outcomes, not mismatched
+Stage253 sparse coverage. No new episodes, fits, tuning or additional seeds.
