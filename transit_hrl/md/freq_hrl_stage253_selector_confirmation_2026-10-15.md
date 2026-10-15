@@ -32,3 +32,9 @@ Limitations: fixed development prefixes, independent conditional futures, not
 training-seed CI, new-prefix transfer or complete learned HRL. Normal intervals
 do not certify rare tails. Stage248 outcomes and Stage169 reserves remain closed.
 No default/deployment change. Pull only small seal/preflight/final summaries.
+
+Registration: `native_transit_selector_confirmation_stage253_20261015_r1`.
+Seal t162435 completed on node004 with exit 0: 128 frozen model/bank/scope cells,
+240 states, 176 active states, 11,264 futures, 67,136 native episodes and 2,816
+four-future chunks (preflight draws are excluded from their chunks). Eighteen
+focused tests passed, including the unchanged Stage248 and Stage252 paths.

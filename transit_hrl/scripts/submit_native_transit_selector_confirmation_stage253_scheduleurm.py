@@ -36,7 +36,7 @@ def task_specification(run, *, operation="seal", key=None):
         result_dir=str(result), local_result_dir=str(result),
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 "
             "FREQDUET_TORCH_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command),
-        cpu_training_justification="New paired frozen-action futures with native source and identity controls; no fitting, inference or policy selection.")
+        cpu_training_justification="New paired frozen-action futures with native source and identity controls; frozen suffix execution, no critic refitting or reselection.")
     return task
 
 
