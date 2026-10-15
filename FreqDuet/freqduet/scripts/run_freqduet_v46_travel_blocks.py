@@ -96,14 +96,14 @@ def batch(root, bank, start, end, workers):
     (output / "done.json").write_text(json.dumps(dict(completed=completed)) + "\n")
 
 
-def aggregate(root, bank):
+def aggregate(root, bank, modes=MODES):
     rows, states, supports = [], [], []
     for seed, scenario, cohort in previous.items():
         cell = bank / "observed" / f"seed{seed}_eval{scenario}"
         captures = json.loads((cell / "forecasts.json").read_text())
         holds = pd.read_csv(cell / "holds.csv")
         timeline = np.load(cell / "exposure.npz")["timeline"]
-        calibrations = {mode: CompletedWindows() for mode in ("legacy", *MODES)}
+        calibrations = {mode: CompletedWindows() for mode in ("legacy", *modes)}
         for clock in CLOCKS:
             capture = captures[f"clock_{clock}"]
             origin = root / "origins" / f"seed{seed}_eval{scenario}" / f"clock_{clock}"
@@ -164,7 +164,7 @@ def aggregate(root, bank):
     paired = paired.merge(legacy, on=["train_seed", "eval_seed", "metric"], validate="many_to_one")
     paired["mae_delta_vs_legacy"] = paired.mae - paired.legacy_mae
     gates = {}
-    for mode in MODES:
+    for mode in modes:
         gates[mode] = {}
         for cohort in errors.cohort.unique():
             data = errors.loc[(errors.scope == "all_origins") & (errors.horizon_s == 1800) & (errors.cohort == cohort)]
@@ -186,7 +186,7 @@ def aggregate(root, bank):
     pd.DataFrame(supports).groupby("clock").agg(min_samples=("samples", "min"),
         max_legs_without_history=("legs_without_history", "max")).to_csv(output / "support.csv")
     frame.to_csv(root / "prediction_records.csv", index=False)
-    status = dict(days=12, origins_per_day=51, origins=len(items()), modes=list(MODES), gates=gates,
+    status = dict(days=12, origins_per_day=51, origins=len(items()), modes=list(modes), gates=gates,
         policy_changed=False, input_bank=bank.name, all_demand_seeds_previously_examined=True,
         waiting_calibrated=False, source_commit=os.environ.get("FREQDUET_DIAGNOSTIC_COMMIT"),
         scope="Engineering regression on certified snapshots; fresh demand and counterfactual validation remain required")

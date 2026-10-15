@@ -111,12 +111,18 @@ def projected_follower(vehicle, vehicles, routes, time, dt):
 
 
 def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, event_sink=None,
-                  travel_predictor=None):
+                  travel_predictor=None, passenger_process=None):
     """Propagate service, queues, onboard loads, holding and physical reuse."""
     now, dt = observed["time_s"], observed["dt_s"]
     end, clock = now + horizon_s, now
     vehicles = {row["bus_id"]: dict(row) for row in observed["vehicles"]}
     flows = copy.deepcopy(observed["flows"])
+    if passenger_process is not None:
+        passenger_process.initialize(flows, vehicles)
+    discrete_arrivals = passenger_process is not None and not passenger_process.continuous_arrivals
+    queued_total = sum(stop["queue"] for stops in flows.values() for stop in stops)
+    onboard_total = sum(vehicle["load"] for vehicle in vehicles.values() if vehicle["on_route"])
+    initial_mass, generated = queued_total + onboard_total, 0.0
     pending = {row["trip_id"]: dict(row) for row in observed["commitments"]}
     pools, events, wakes = {True: [], False: []}, [], set()
     last_dispatch = {direction: observed["last_dispatch"][str(direction)] for direction in pools}
@@ -137,7 +143,7 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             if time in wakes:
                 return
             wakes.add(time)
-        priority = 0 if kind == "available" else 1 if kind == "dispatch" else 2
+        priority = -1 if kind == "passenger" else 0 if kind == "available" else 1 if kind == "dispatch" else 2
         heapq.heappush(events, (time, priority, serial, kind, bus_id))
         serial += 1
 
@@ -155,13 +161,18 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
                 target_headway_s=vehicle["target_headway_s"], **values))
 
     def integrate(time):
-        nonlocal clock, waiting, onboard
+        nonlocal clock, waiting, onboard, generated
         duration = time - clock
-        for route_flows in flows.values():
-            for stop in route_flows:
-                waiting += stop["queue"] * duration + .5 * stop["rate_per_s"] * duration * duration
-                stop["queue"] += stop["rate_per_s"] * duration
-        onboard += sum(vehicle["load"] for vehicle in vehicles.values() if vehicle["on_route"]) * duration
+        if discrete_arrivals:
+            waiting += queued_total * duration
+            onboard += onboard_total * duration
+        else:
+            for route_flows in flows.values():
+                for stop in route_flows:
+                    waiting += stop["queue"] * duration + .5 * stop["rate_per_s"] * duration * duration
+                    stop["queue"] += stop["rate_per_s"] * duration
+                    generated += stop["rate_per_s"] * duration
+            onboard += sum(vehicle["load"] for vehicle in vehicles.values() if vehicle["on_route"]) * duration
         clock = time
 
     def begin_travel(vehicle, time, partial=False):
@@ -217,6 +228,9 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             schedule(time + dt, "hold", bus_id)
             del pending[trip_id]
 
+    if passenger_process is not None:
+        for time, direction, station, count in passenger_process.arrival_events(end):
+            schedule(time, "passenger", (direction, station, count))
     for vehicle in vehicles.values():
         if not vehicle["on_route"]:
             heapq.heappush(pools[vehicle["direction"]], (vehicle["ready_since_s"], vehicle["bus_id"]))
@@ -237,6 +251,12 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
         if time > end:
             break
         integrate(time)
+        if kind == "passenger":
+            direction, station, count = bus_id
+            flows[direction][station]["queue"] += count
+            queued_total += count
+            generated += count
+            continue
         if kind == "dispatch":
             wakes.remove(time)
             dispatch(time)
@@ -261,7 +281,11 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
             alight = vehicle["load"] if station == len(route["station_ids"]) - 1 else vehicle["load"] * stop["alight_fraction"]
             board = 0.0 if station == len(route["station_ids"]) - 1 else min(
                 stop["queue"], vehicle["capacity"] - vehicle["load"] + alight)
+            if passenger_process is not None:
+                alight, board = passenger_process.exchange(vehicle, stop, station == len(route["station_ids"]) - 1)
             vehicle["load"] += board - alight
+            onboard_total += board - alight
+            queued_total -= board
             alighted_total += alight
             max_load = max(max_load, vehicle["load"])
             stop["queue"] -= board
@@ -298,9 +322,16 @@ def fluid_rollout(observed, horizon_s, holding_mode, action_predictor=None, even
     integrate(end)
     backlog = sum(max(0, min(row["time_s"], end) - max(now, row["scheduled_s"])) for row in launches)
     backlog += sum(max(0, end - max(now, row["scheduled_s"])) for row in pending.values())
-    return dict(waiting_person_seconds=waiting, onboard_person_seconds=onboard,
+    result = dict(waiting_person_seconds=waiting, onboard_person_seconds=onboard,
                 holding_vehicle_seconds=holding, backlog_trip_seconds=backlog,
                 launches=launches, returns=returns, commands=commands,
                 vehicles_created=0, max_load=max_load, alighted_total=alighted_total,
                 final_queue=sum(stop["queue"] for rows in flows.values() for stop in rows),
                 final_onboard=sum(vehicle["load"] for vehicle in vehicles.values() if vehicle["on_route"]))
+    if passenger_process is not None:
+        residual = result["final_queue"] + result["final_onboard"] + alighted_total - initial_mass - generated
+        if abs(residual) > 1e-6 or max_load > max(vehicle["capacity"] for vehicle in vehicles.values()):
+            raise ValueError("passenger forecast lost mass or exceeded capacity")
+        passenger_process.check_final(flows, vehicles)
+        result.update(initial_passengers=initial_mass, generated_passengers=generated, passenger_mass_error=residual)
+    return result
