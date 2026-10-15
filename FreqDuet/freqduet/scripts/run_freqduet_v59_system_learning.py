@@ -3,7 +3,9 @@
 
 import argparse
 import copy
+import csv
 from dataclasses import replace
+import io
 import json
 import os
 from pathlib import Path
@@ -16,6 +18,16 @@ from freqduet_system_learner import (ArrivalMoments, SystemStateEncoder, SystemS
                                     ingest_day, warm_start_actor)
 import run_freqduet_v37_joint_lower as joint
 from run_freqduet_v58_system_credit import CASES, CreditObserver, case_name, reference_trace
+
+
+def csv_episode(row):
+    """Use evaluate()'s CSV round trip before exact historical row comparison."""
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=list(row))
+    writer.writeheader()
+    writer.writerow(row)
+    output.seek(0)
+    return pd.read_csv(output).iloc[0].to_dict()
 
 
 def smoke(root, v56_root, case_index, updates):
@@ -113,8 +125,12 @@ def smoke(root, v56_root, case_index, updates):
         if day == 0:
             expected = dict(reference["snapshot"]["episode"])
             # run_episode does not add evaluate()'s seed/checkpoint metadata.
-            joint.check_unchanged(episode, expected)
             pd.testing.assert_frame_equal(pd.DataFrame(observer.holds), reference["holds"], check_exact=True)
+            differences = {name: [value, expected[name]] for name, value in episode.items()
+                           if name in expected and isinstance(value, (float, int)) and value != expected[name]
+                           and not name.startswith("wall_")}
+            print("V59_NATIVE_CSV_DIFFERENCES " + json.dumps(differences), flush=True)
+            joint.check_unchanged(csv_episode(episode), expected)
         if any(hold["action_s"] not in joint.ACTIONS for hold in observer.holds):
             raise AssertionError("learning emitted an action outside the registered seven bins")
         moments.observe(env.headway_events.headways_s)
