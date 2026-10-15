@@ -1,0 +1,66 @@
+{
+  "contract": {
+    "arms": [
+      "old",
+      "matched",
+      "expanded"
+    ],
+    "boundary": "training_information_diagnostic_conditional_future_crossfit_not_new_prefix_confirmation_or_complete_HRL",
+    "budget": {
+      "draws": 7680,
+      "draws_per_chunk": 4,
+      "fit_tasks": 32,
+      "native_clock_ticks": 3771187200,
+      "native_episodes": 61440,
+      "new_prefix_scenes": 0,
+      "new_raw_reference_fits": 0,
+      "preflight_tasks": 10,
+      "remaining_chunk_tasks": 1920,
+      "rl_actor_updates": 0,
+      "states": 240
+    },
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "controls": "old_Stage247_state_GLS_models_and_selections_read_verbatim_no_raw_reference_refitting",
+    "diagnostics": "train60_vs_held60_cost_wait_service_fleet_MSE_feasible_pair_sign_error_target_mean_error_and_fleet_events",
+    "evaluation": "opposite16_bank_only_independent_per_fit_no_new_future_labels_in_OOF_selection",
+    "fit": "same_state_balanced_GLS_noise_shrinkage_precision_reestimated_only_from_assigned_training_futures",
+    "frozen": "raw_references_198features_TSVD_ranks_A_scale_A_RMS_radius_cached_head_difference_model_capacity_and_loss",
+    "future_seed": "1490000000+Stage195_state_index*32+draw_disjoint_from_all_previous_training_and_confirmation",
+    "futures": "32_new_independent_futures_per_state_all6_actions_CRN_two16_future_banks_crossfit",
+    "label_boundary": "never_read_Stage248_labels_or_reports_for_training_selection_or_evaluation_no_scenario_gate",
+    "nesting": "each_bank_two8_blocks_matched_first2_each_inner_full_union4_expanded8_each_inner_full16",
+    "next": "freeze_all_arms_before_collecting_genuinely_new_prefix_control_outcomes",
+    "primary_contrast": "expanded_pooled_safe_minus_matched_pooled_safe_no_arm_selection",
+    "selector": "Stage247_pooled_and_half_safe_old_A_validation2_curves_same17_candidates_per_arm",
+    "source_protocol": "native_transit_balanced_critic_stage247_v1",
+    "source_run": "native_transit_balanced_critic_stage247_development_20261015_r1",
+    "storage": "all_native_rollouts_labels_panels_models_server_only_small_receipts_and_aggregate_pull",
+    "training_counts": {
+      "expanded": {
+        "full": 16,
+        "inner": 8
+      },
+      "matched": {
+        "full": 4,
+        "inner": 2
+      }
+    },
+    "variants": [
+      "raw",
+      "old_pooled_safe",
+      "old_half_safe",
+      "matched_pooled_safe",
+      "matched_half_safe",
+      "expanded_pooled_safe",
+      "expanded_half_safe"
+    ]
+  },
+  "coverage_qualified": true,
+  "draws": 7680,
+  "native_clock_ticks": 3771187200,
+  "native_episodes": 61440,
+  "peak_process_rss_mb_max": 743.4453125,
+  "protocol": "native_transit_training_information_stage249_v1",
+  "training_updates": 0,
+  "wall_seconds_max": 561.688660335727
+}

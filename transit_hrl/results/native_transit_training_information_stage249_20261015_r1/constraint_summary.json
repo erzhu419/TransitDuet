@@ -1,0 +1,73 @@
+{
+  "cap_active_definition": "coefficient_norm >= radius - 1e-10",
+  "fits": {
+    "expanded:1": {
+      "active_caps": 21,
+      "fit_count": 32,
+      "max_kkt_error": 4.929635363030391e-16,
+      "mean_loss_after": 0.02474151783017863,
+      "mean_loss_before": 0.0249330438852945,
+      "mean_norm_over_radius": 0.7316843915884422
+    },
+    "expanded:16": {
+      "active_caps": 26,
+      "fit_count": 32,
+      "max_kkt_error": 4.5480327517893883e-14,
+      "mean_loss_after": 0.019746864110344355,
+      "mean_loss_before": 0.023695930392984836,
+      "mean_norm_over_radius": 0.9593158545343634
+    },
+    "expanded:3": {
+      "active_caps": 23,
+      "fit_count": 32,
+      "max_kkt_error": 1.5137623430423694e-15,
+      "mean_loss_after": 0.02383021284265579,
+      "mean_loss_before": 0.024456291774785976,
+      "mean_norm_over_radius": 0.8617965547009097
+    },
+    "expanded:8": {
+      "active_caps": 31,
+      "fit_count": 32,
+      "max_kkt_error": 1.7427862945102943e-12,
+      "mean_loss_after": 0.021747171901553123,
+      "mean_loss_before": 0.02399023208279801,
+      "mean_norm_over_radius": 0.9862901738480454
+    },
+    "matched:1": {
+      "active_caps": 22,
+      "fit_count": 32,
+      "max_kkt_error": 4.750372037205791e-16,
+      "mean_loss_after": 0.015969188776197275,
+      "mean_loss_before": 0.016187275766925635,
+      "mean_norm_over_radius": 0.7391565259543115
+    },
+    "matched:16": {
+      "active_caps": 20,
+      "fit_count": 32,
+      "max_kkt_error": 7.671178552407995e-13,
+      "mean_loss_after": 0.012942392282307676,
+      "mean_loss_before": 0.015344566420994707,
+      "mean_norm_over_radius": 0.8416153917136535
+    },
+    "matched:3": {
+      "active_caps": 19,
+      "fit_count": 32,
+      "max_kkt_error": 1.9285941663426378e-15,
+      "mean_loss_after": 0.015429275877637936,
+      "mean_loss_before": 0.015874516594845352,
+      "mean_norm_over_radius": 0.7743466903587509
+    },
+    "matched:8": {
+      "active_caps": 25,
+      "fit_count": 32,
+      "max_kkt_error": 6.106096531177663e-14,
+      "mean_loss_after": 0.014127824269794876,
+      "mean_loss_before": 0.01557064051349344,
+      "mean_norm_over_radius": 0.9015592032999781
+    }
+  },
+  "interpretation": "loss scales differ between arms; compare decreases within a fit, not absolute loss across arms; no cap relaxation selected",
+  "protocol": "native_transit_training_information_stage249_v1",
+  "source": "remote cells/*/fold_*/*/*_raw/aggregate.json full_fit objective state_gls; mixed_a/mixed_b",
+  "timing": "post_hoc_diagnostic_not_used_for_selection"
+}

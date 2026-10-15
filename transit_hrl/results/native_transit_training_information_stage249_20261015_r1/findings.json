@@ -1,0 +1,46 @@
+{
+  "evaluation_mc_noise_floor_estimate": 0.0004363569094810958,
+  "expanded_vs_zero_feasible_pair_mse_reduction_pct": 10.435827157875577,
+  "expanded_vs_zero_nonanchor_mse_increase_pct": 7.466408671442326,
+  "fixed_rank_head_difference_mse_max_abs_change": 6.505213034913027e-19,
+  "held_policy_outcomes": {
+    "expanded_pooled_safe": {
+      "changed_rate": 0.014583333333333334,
+      "delta_cost": -6.431845703124991e-05,
+      "delta_risk": -6.510416666666668e-05,
+      "delta_service": 7.857096354167566e-07,
+      "delta_wait_min": 3.0924479166666385e-05
+    },
+    "matched_pooled_safe": {
+      "changed_rate": 0.013541666666666667,
+      "delta_cost": 5.8079427083332865e-06,
+      "delta_risk": -8.138020833333333e-06,
+      "delta_service": 1.394596354166662e-05,
+      "delta_wait_min": 0.00015455729166666626
+    },
+    "old_pooled_safe": {
+      "changed_rate": 0.019791666666666666,
+      "delta_cost": -0.00022737242838541678,
+      "delta_risk": -0.00013563368055555556,
+      "delta_service": -9.173874782986122e-05,
+      "delta_wait_min": -0.0007667317708333347
+    },
+    "raw": {
+      "changed_rate": 0.0,
+      "delta_cost": 0.0,
+      "delta_risk": 0.0,
+      "delta_service": 0.0,
+      "delta_wait_min": 0.0
+    }
+  },
+  "interpretation": "diagnostic point means; no CI, reselection or new-prefix confirmation",
+  "protocol": "native_transit_training_information_stage249_v1",
+  "rank16_held_prefix_mse_increase_pct": 6.858148623343041,
+  "rank16_seen_prefix_mse_reduction_pct": 1.041023378506356,
+  "sample_mean_mse_reduction_pct": 64.29533151979776,
+  "sample_mean_noise_floor_subtracted_reduction_pct": 81.60984270716301,
+  "scope": "mixed_pooled; held60 unless named otherwise",
+  "selected_held_prefix_mse_reduction_pct": 0.13133692012591291,
+  "selected_seen_prefix_mse_reduction_pct": 0.36768928305217496,
+  "source": "analysis/result.json"
+}
