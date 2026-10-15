@@ -59,14 +59,20 @@ class TurnoverHoldingTest(unittest.TestCase):
             vehicles=[dict(bus_id=0, trip_id=2, on_route=True)]))
         self.assertEqual(history["0"]["previous"]["mean_residual_s"], 0)
 
-    def test_cold_start_context_and_observed_launch_delay(self):
+    def test_cold_start_has_no_turnover_correction(self):
         context = turnover_features(None, dict(launch_s=10, scheduled_s=5), 20)
-        np.testing.assert_array_equal(context[:5], np.zeros(5))
-        self.assertAlmostEqual(context[5], 5 / 3600)
+        np.testing.assert_array_equal(context, np.zeros(7))
+
+    def test_turnover_context_expires_after_first_eligible_action(self):
+        previous = dict(scored_count=1, mean_residual_s=10, last_residual_s=10, duration_s=100, end_s=100)
+        current = dict(launch_s=200, scheduled_s=190, decisions=0)
+        self.assertTrue(np.any(turnover_features(previous, current, 220)))
+        current["decisions"] = 1
+        np.testing.assert_array_equal(turnover_features(previous, current, 230), np.zeros(7))
 
     def test_predicted_return_updates_next_trip_context(self):
         history = {"0": dict(previous=None, current=dict(trip_id=1, launch_s=0, scheduled_s=0,
-            count=1, total=10., last=10.))}
+            decisions=1, count=1, total=10., last=10.))}
         response = TurnoverResponse(dict(coef=None, prior=[0, 1, 0, 0, 0, 0, 0]), history,
             {"True": dict(station_ids=[0, 1, 2]), "False": dict(station_ids=[2, 1, 0])}, 0)
         response.observe(dict(stage="arrival", bus_id=0, trip_id=1, direction=True, station_id=2,
@@ -80,6 +86,7 @@ class TurnoverHoldingTest(unittest.TestCase):
         state["current"]["base_mean_s"] = 2.
         response.observe(dict(stage="action", bus_id=0, trip_id=2, direction=False, station_id=1,
             time_s=220, launch_time_s=200, scheduled_launch_s=190, action_s=5, evidence_valid=True))
+        np.testing.assert_array_equal(turnover_features(state["previous"], state["current"], 230), np.zeros(7))
         response.observe(dict(stage="arrival", bus_id=0, trip_id=2, direction=False, station_id=0,
             time_s=300, launch_time_s=200, scheduled_launch_s=190))
         self.assertEqual(response.history["0"]["previous"]["mean_residual_s"], 3)

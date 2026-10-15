@@ -13,6 +13,7 @@ def fit_turnover_tilt(rows, now):
     import torch
 
     past = rows.loc[rows.time_s < now].tail(4096)
+    past = past.loc[past.context.map(lambda values: bool(np.any(values)))]
     result = dict(coef=[0.] * 7, scale=[1.] * 7, samples=len(past),
         latest_time_s=float(past.time_s.max()) if len(past) else None)
     if not len(past):
@@ -52,6 +53,8 @@ def turnover_features(previous, current, time):
     memory = math.exp(-elapsed / 900)
     known = previous is not None
     scored = known and previous["scored_count"] > 0
+    if not scored or current["decisions"] != 0:
+        return np.zeros(7)
     return np.array([float(scored),
         memory * previous["mean_residual_s"] / 45 if scored else 0,
         memory * previous["last_residual_s"] / 45 if scored else 0,
@@ -75,17 +78,20 @@ def completed_profiles(labels, launches, terminals):
 
 def augment_labels(labels, launches, terminals):
     launch, profiles = completed_profiles(labels, launches, terminals)
-    features = []
-    for row in labels.itertuples():
+    features, has_previous = [], []
+    ordinals = labels.groupby("trip_id").cumcount()
+    for row, ordinal in zip(labels.itertuples(), ordinals):
         current = launch[row.trip_id]
         if current["time_s"] >= row.time_s:
             raise ValueError("holding context precedes its observed launch")
         past = [entry for entry in profiles.get(row.bus_id, []) if entry["end_s"] < row.time_s]
         previous = past[-1] if past else None
-        context = turnover_features(previous, dict(launch_s=current["time_s"], scheduled_s=current["scheduled_s"]), row.time_s)
+        has_previous.append(previous is not None and previous["scored_count"] > 0)
+        context = turnover_features(previous, dict(launch_s=current["time_s"], scheduled_s=current["scheduled_s"], decisions=int(ordinal)), row.time_s)
         features.append(np.r_[row.features, context].tolist())
     result = labels.copy()
     result["augmented_features"] = features
+    result["has_scored_previous"] = has_previous
     return result
 
 
@@ -102,9 +108,10 @@ def freeze_turnover(labels, launches, terminals, observed):
         current = None
         if vehicle["on_route"]:
             entry = launch[trip]
-            holds = labels.loc[labels.trip_id == trip].dropna(subset=["residual_s"])
+            all_holds = labels.loc[labels.trip_id == trip]
+            holds = all_holds.dropna(subset=["residual_s"])
             current = dict(trip_id=trip, launch_s=entry["time_s"], scheduled_s=entry["scheduled_s"],
-                count=len(holds), total=float(holds.residual_s.sum()), last=float(holds.residual_s.iloc[-1]) if len(holds) else 0.)
+                decisions=len(all_holds), count=len(holds), total=float(holds.residual_s.sum()), last=float(holds.residual_s.iloc[-1]) if len(holds) else 0.)
         result[str(bus)] = dict(previous=past[-1] if past else None, current=current)
     return result
 
@@ -118,7 +125,7 @@ class TurnoverResponse:
         state = self.history[str(row["bus_id"])]
         if state["current"] is None or state["current"]["trip_id"] != row["trip_id"]:
             state["current"] = dict(trip_id=row["trip_id"], launch_s=row["launch_time_s"],
-                scheduled_s=row["scheduled_launch_s"], count=0, total=0., last=0.)
+                scheduled_s=row["scheduled_launch_s"], decisions=0, count=0, total=0., last=0.)
         return state
 
     def __call__(self, values):
@@ -134,6 +141,7 @@ class TurnoverResponse:
         state = self.current(row)
         current = state["current"]
         if row["stage"] == "action" and row["evidence_valid"]:
+            current["decisions"] += 1
             current["count"] += 1
             residual = row["action_s"] - current["base_mean_s"]
             current["total"] += residual

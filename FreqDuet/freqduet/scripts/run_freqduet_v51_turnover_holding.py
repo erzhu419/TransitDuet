@@ -117,7 +117,7 @@ def phase_audit(root, base):
             if clock is None:
                 continue
             context = row.augmented_features[12:]
-            phase = ("no_scored_previous" if not context[0] else
+            phase = ("no_scored_previous" if not row.has_scored_previous else
                      "first_after_turnover" if row.decision_index == 0 else "later_in_trip")
             model = models[str(clock)]["model"]
             for mode, probabilities in (("legacy", probabilities_from_features(model["base"], row.features)),

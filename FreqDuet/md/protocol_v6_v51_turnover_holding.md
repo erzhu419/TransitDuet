@@ -36,3 +36,13 @@ strictly earlier issued base prediction). The physical turnover features and
 seven-coefficient tilt stay fixed. Forecast returns carry sampled action minus
 the base conditional mean into the next trip; no future observed residual is
 read. Missing early-day issued predictions have no scored residual memory.
+
+## V51D Boundary Response
+V51C's overall gate failed. Phase audit t160148 separates 2,872 first decisions
+from 54,162 later decisions: first-decision MAE/NLL deltas -0.130/-0.0106,
+later deltas +0.0233/+0.00101. V51D exposes the same residual/physical context
+only before the first eligible holding after a completed, scored previous trip.
+Fit only those active prefix rows, retaining the existing ridge and seven
+coefficients. Later decisions use the base probabilities; all eligible predicted
+actions still update the next completed-trip residual history. This is a
+post-audit development revision; the original gate and fresh-validation need stay.
