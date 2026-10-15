@@ -22,6 +22,16 @@ class SegmentObserver(distribution.DistributionObserver):
 
     def attach(self, runner):
         super().attach(runner)
+        original_reset = runner.env.reset
+
+        def reset(*args, **kwargs):
+            result = original_reset(*args, **kwargs)
+            self.attach_recorder(runner)
+            return result
+
+        runner.env.reset = reset
+
+    def attach_recorder(self, runner):
         env, recorder = runner.env, runner.env.headway_events
 
         def record(stage, station, direction, time, trip, **values):
@@ -83,6 +93,8 @@ def run_day(arguments):
     finally:
         distribution.DistributionObserver = original
     cell = root / "observed" / label
+    if {row["stage"] for row in captured[0].actual_events} != {"arrival", "ready", "action", "departure"}:
+        raise ValueError("reset lost the actual stop-clock instrumentation")
     for name in ("actual_events", "forecast_events", "requested_actions"):
         pd.DataFrame(getattr(captured[0], name)).to_csv(cell / f"{name}.csv", index=False)
     print(f"SEGMENT_DAY_DONE {label}", flush=True)
