@@ -1,35 +1,39 @@
 # V58: finite-day system credit contract
 
-Build a shadow lower SMDP stream before changing learning. Replay the unchanged
-U200/L200/B200 main on training seeds 12011/933013 and demand seeds 45007/934011:
-four days, reusing the first passed smoke. Require exact V56 reference episodes,
-complete commanded-action paths and total wait/onboard/backlog exposure.
+Shadow the frozen U200/L200/B200 main on training seeds 12011/933013 and demand
+seeds 45007/934011. Charge physical intervals once, separating the uncontrolled
+prefix before the first lower decision. Retain total/LF exposure (HF is their
+difference) and censored waiting to the original horizon. Use passenger-hours
+and finite-day discount one; vehicle returns do not terminate the system chain.
 
-Charge each physical interval once along the chronological lower decision stream.
-Keep the pre-first-decision uncontrolled prefix separate. Retain total and frozen
-LF passenger exposure; HF is their difference. Include censored waiting after
-service clearance until the original evaluation horizon. Vehicle returns never
-close this system stream. Use undiscounted finite-day continuation (discount one
-except at the true day terminal) and passenger-hours as a fixed reward unit.
+Same-clock states retain every earlier chosen, unexecuted holding command in
+original decision order. Zero-time links have zero cost. Check proposed versus
+executed commands. State uses existing encoded observations, published target,
+current terminal-ready counts and known pending commands; global queues and
+future return/outcome labels stay outside state. No LF forecast is added.
 
-Same-clock decisions are serialized in the original runner order. Their states
-retain the complete list of earlier chosen, not-yet-executed holding commands;
-zero-time links receive zero elapsed cost. Require proposed commands to match
-physical execution. Preserve the existing encoded actor observation and published
-target, adding only current terminal-ready counts and known pending commands.
-Global queues, realized future returns and future outcomes are reward/audit labels,
-not state inputs. No LF forecast is added to the lower actor.
+## Execution
 
-Unit tests and a single end-to-end smoke precede the remaining three replays,
-all through scheduler on node001-node006. Only small summaries/markers return.
-Raw transitions and checkpoints remain on the server. The next learning step
-must encode the full pending-command state and specify regularity constraints
-without reintroducing duplicated interval cost or per-trip termination.
+Source `c23f414db6`; smoke `t162247` passed 11 tests and the first day. Batches
+`t162259-t162262` reused that day and replayed the other three on Linux CPU nodes;
+aggregation `t162263` completed with exit code zero. Across 20800 decisions:
+all four reference episodes, complete holding paths and total exposures match
+exactly; maximum credit conservation error is 4.6566e-10 person/trip-seconds.
+There are 997 same-clock and 1022 return-crossing bootstrap links. The old local
+stream has 1040 trip terminals; the shadow system stream has four day terminals.
+Only small markers/status JSON returned; raw transitions and checkpoints remain
+on the server. No real replay buffer or policy was changed.
+
+## Next
+
+Encode the complete pending-command state per physical vehicle, including a
+presence mask so zero hold differs from no command. Connect the learner to the
+once-only system stream and specify an independent regularity constraint: the
+current two-sided incremental regularity is a reward bonus, not a cost channel.
+Verify a small learning smoke before matched 40/200 trajectories and fresh seeds.
 
 ## Limitations
 
-This is a verified credit/transition candidate, not a trained controller or
-policy improvement. Raw shared passenger cost is not yet a validated HF marginal
-advantage; LF/HF ownership is retained for that subsequent design. Old upper and
-frequency modules, actions and fleet remain unchanged, and no shadow transitions
-are inserted into the real replay buffer during this stage.
+This validates accounting and transition semantics, not a trained controller or
+policy gain. Raw shared passenger cost is not yet a validated HF marginal
+advantage; preserved LF/HF ownership is available for that subsequent design.
