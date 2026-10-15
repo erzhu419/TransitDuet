@@ -1,49 +1,51 @@
-# V44/V45: segment propagation, then completed-window calibration
+# V44/V45: propagation audit and completed-window calibration
 
-V44 preserves V43 predictions and the frozen U200/L200 controller. Attach
-read-only arrival/ready/action/departure clocks to the real event recorder and
-to eight of the 64 forecast paths at 2/6/10 h. Match by trip/stop/stage, report
-missing events, 0-5/5-15/15-30 min clock errors, and travel/service/holding-pipeline
-duration errors. Inspect forward/follower gaps, load and nonzero actions without
-matched predecessor-departure evidence. All eight existing days are regressions.
+## Protocol
+V44 retains V43 and frozen U200/L200 control. Trace arrival/ready/action/departure
+at 2/6/10 h for eight of 64 paths; match trip/stop/stage and retain missing counts.
+V45 issues 15/30-min forecasts every 15 min, from 1 to 13.5 h (51 origins/day).
+Per day/horizon, retain 16 nonoverlapping windows ending strictly before issue;
+require eight for correction. Mean raw residual shifts the point; past
+prequential nonconformity scores expand nominal 90% bands using ceil(.9*(n+1)).
+Only holding, APC onboard exposure and dispatch backlog are calibrated. Waiting
+exposure remains raw. No across-seed pooling, gate tuning or controller change.
+Keep V42/V43 common-clock thresholds: holding MAE <= historical, absolute bias
+<=5%, passenger MAE <=105% of historical, mature holding coverage >=80%.
 
-V45 will issue 15/30 min cumulative forecasts every 15 min from 1 h. Per day,
-horizon and metric, admit only windows whose end is strictly before the forecast
-origin, and retain the last 16 nonoverlapping windows. Require eight completed
-windows before correction; warmup stays explicitly unavailable. Mean raw
-residual corrects the point forecast. Nominal 90% bands expand the bias-shifted
-Monte Carlo band by the finite-sample 90% quantile of past prequential
-nonconformity scores, computed using the bias that was available at each issue
-time. Calibrate only holding, onboard exposure and dispatch backlog; waiting
-exposure needs latent simulator queues and remains an uncorrected prediction.
-No future labels, across-seed pooling or gate tuning.
+## Evidence
+V44 `c1a005ca3b`: 23 tests/smoke `t155545`; eight exact V35 replays
+`t155546-t155549`; aggregate `t155557` / `7f78c88577`. Travel MAE 36.0/35.5 s,
+service 3.87/3.80 s, holding pipeline 12.6/12.9 s. At 15-30 min, arrival clocks
+err by 110/87 s and follower gaps by 107/90 s. No missing nonzero actions;
+geometry and target headways align. Acquisition smokes `t155530/t155535` failed
+on recorder API differences; their retries were cancelled.
 
-Keep V42/V43 engineering thresholds: 30-min holding MAE <= historical, absolute
-bias <=5%, passenger MAE <=105% of historical, holding coverage >=80%. Report
-all origins and the common clocks separately, warmup/mature counts and widths.
-Use scheduler on node001-node006 for tests, full-day replays and aggregation;
-retrieve only small summaries. Validate exact archived V35 outcomes for the
-eight regression days. Add four fresh-demand days: actors 12011/933013 x
-19511021/19511027, each checked against an unobserved same-seed frozen replay.
-Freeze the calibrator before examining those fresh labels.
+V45 recorded source `718b366ee2`: smoke `t155591`, 12 days `t155592-t155596`.
+Eight exact archived controls plus four fresh-demand controls (actors
+12011/933013 x demand 19511021/19511027), each matched to an unobserved replay.
+Final observable aggregation `t155600` / `dfd8cb4fef`: 29 tests pass; raw common
+forecasts equal V43; observable-channel recomputation equals recorded results.
+All computation used scheduler on node001-node006; only small summaries return.
 
-V44: source `c1a005ca3b`, 23 tests and full-day smoke `t155545` pass; eight
-exact V35 replays `t155546-t155549`, aggregate `t155557` / `7f78c88577`.
-Travel MAE 36.0/35.5 s vs service 3.87/3.80 s; holding-pipeline MAE 12.6/12.9 s.
-At 15-30 min, arrival-clock MAE 110/87 s, follower-gap MAE 107/90 s.
-All eight days have zero nonzero actions without departure evidence; geometry
-and target headways are aligned. The suspected missing-action defect is absent
-on this cohort. Remaining propagation error is primarily travel timing, with
-substantial downstream headway error; these diagnostics do not prove a unique
-causal attribution among the coupled dynamics. Initial acquisition smokes
-`t155530/t155535` failed on frozen-recorder API differences; retries cancelled.
+Common-clock 30-min holding MAE, seconds (warmup included):
+
+| Cohort | Raw | Calibrated | Historical |
+| --- | ---: | ---: | ---: |
+| Development | 783 | 378 | 337 |
+| Reused demand | 690 | 269 | 333 |
+| Fresh demand | 617 | 327 | 207 |
+
+Fresh-demand all-origin holding MAE is 739 -> 498 s (historical 484); residual
+bias -237 s, about -8.3%. Onboard MAE worsens: all origins 58,870 -> 61,723
+person-seconds; common clocks 52,626 -> 63,333. Mature holding coverage is
+99.3% over all origins, but average band width is 3,355 s. All joint screens fail.
+Canonical results: `protocol_v6_v45_completed_calibration/observable_summary`.
 
 ## Limitations And Next Step
-Calibration of cumulative endpoints does not fix state propagation or establish
-correct counterfactual action response. No main-policy switch. Diagnose and fix
-supported timing-contract defects first; then evaluate frozen calibration on
-new demand contexts before considering any deployment change.
-The original V45 record also contains simulator-only waiting calibration.
-Operational aggregation discards that channel and chronologically recomputes
-the three observable channels, checking they equal the recorded predictions.
-The channels are independent; raw forecasts and actual trajectories are reused.
+Original records also contain simulator-only waiting calibration; operational
+aggregation discards it. Only three independent observable channels are reused,
+with strict chronological replay and equality checks. Endpoint calibration does
+not fix transition physics or validate counterfactual action response. No main
+policy promotion. Next model completed-leg travel-time distributions and their
+cross-vehicle/temporal dependence, preserving headway variation inside rollouts,
+then validate holding/passenger coupling on new contexts without retuning gates.
