@@ -14,3 +14,17 @@ Smoke must preserve V54 draws exactly for zero correction. The unchanged gate
 requires each cohort's short-lead MAE <= V50 and long-lead MAE <= V48 at the six
 V52 clocks. Only a passing prefix model proceeds to a 72-origin closed-loop
 screen; no main-policy switch. All six demand seeds remain development data.
+
+## Results
+Smoke t160222 passes 21 tests; preparation t162143-t162147 covers all 12 days.
+Gate t162148 fails in every cohort. Short-lead MAE delta versus V50 +2.190 s
+[1.755,2.678], versus V54 +3.535 s [3.282,3.791]; long-lead delta versus V48
++6.604 s [6.122,7.067], versus V54 +5.441 s [5.081,5.812]. There are 17 physical
+floor predictions. No closed-loop matrix or policy promotion is launched.
+
+Alignment audit t162150 is queued on node001-node006, which are currently full.
+It compares effective corrections with actual-minus-issued V54 errors and
+decomposes MSE change into correction energy minus twice correction/error
+alignment. This is diagnostic only; no future-fitted attenuation is deployed.
+Keep V54 as the stronger mean candidate while checking whether old residuals
+transfer across model updates and hour regimes before further calibration.
