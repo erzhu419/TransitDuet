@@ -121,13 +121,13 @@ def prefix_effects(cell):
     return output
 
 
-def conditional_mc(cells, panels):
+def conditional_mc(cells, panels, *, variants=VARIANTS):
     """Fixed-prefix sampling SE; shared state/future outcomes count only once."""
     keys = sorted({state_key(r) for c in cells for b in c["blocks"] for r in b["states"]})
     index = {k: i for i, k in enumerate(keys)}
     draws = panels[keys[0]]["values"].shape[0]
     output = {}
-    for name in VARIANTS:
+    for name in variants:
         effects = np.zeros((len(keys), draws, 4))
         changed, fleet_events = set(), set()
         for cell in cells:
