@@ -104,7 +104,7 @@ def aggregate(root):
                            mean_width_s=float(calibrated.width_s.mean()),
                            interval_score_s=float(calibrated.interval_score_s.mean()),
                            point_mae_s=float(resolved.residual_s.abs().mean())))
-    summary = root / "summary"
+    summary = root / "uncertainty_summary"
     summary.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(output).to_csv(summary / "intervals.csv", index=False)
     pd.DataFrame(summaries).to_csv(summary / "per_day.csv", index=False)

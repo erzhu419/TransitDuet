@@ -121,6 +121,7 @@ def run_item(arguments):
     cell = root / "observed" / label
     (cell / "closed_snapshots.json").write_text(json.dumps(instance[0].closed_snapshots) + "\n")
     pd.DataFrame(instance[0].intervals.rows).to_csv(cell / "interval_predictions.csv", index=False)
+    (cell / "interval_summary.json").write_text(json.dumps(uncertainty.interval_summary(instance[0].intervals.rows)) + "\n")
     return label
 
 
@@ -139,10 +140,15 @@ def at(timeline, clock):
 
 
 def aggregate(root):
-    rows = []
+    rows, dominant_prefix = [], None
     for seed, scenario, arm in items():
         cell = root / "observed" / f"seed{seed}_eval{scenario}_{arm}"
         snapshots = json.loads((cell / "closed_snapshots.json").read_text())
+        if (seed, scenario) == (933013, 45007):
+            if dominant_prefix is not None:
+                uncertainty.shadow.joint.assert_same_state(dominant_prefix, snapshots["clock_7200"],
+                                                            "closed forecast before interventions")
+            dominant_prefix = snapshots["clock_7200"]
         timeline = np.load(cell / "exposure.npz")["timeline"]
         holds = pd.read_csv(cell / "holds.csv")
         for label, capture in snapshots.items():
