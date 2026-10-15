@@ -76,6 +76,15 @@ class TravelDistributionTest(unittest.TestCase):
         self.assertEqual(score["paths"], 1)
         self.assertAlmostEqual(score["error"], (20 + 63 * 1800) / 64 - 10)
 
+    def test_premature_events_are_not_dropped_from_clock_scores(self):
+        from run_freqduet_v46_travel_blocks import state_scores
+        predicted = pd.DataFrame([dict(trip_id=1, station_id=1, stage="arrival", draw=i, time_s=20)
+                                  for i in range(64)])
+        actual = pd.DataFrame([dict(trip_id=1, station_id=1, stage="arrival", time_s=2000)])
+        score = state_scores(predicted, actual, 0, "shared_block")[0]
+        self.assertEqual(score["lead"], "later_than_horizon")
+        self.assertEqual(score["error"], -1780)
+
     def test_partial_leg_uses_remaining_distance_and_tick_floor(self):
         observed = observation()
         observed["vehicles"][0]["progress_m"] = 50

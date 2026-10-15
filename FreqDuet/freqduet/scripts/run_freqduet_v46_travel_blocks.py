@@ -29,18 +29,24 @@ def state_scores(predicted, actual, now, mode):
     rows = []
     grouped = dict(tuple(predicted.groupby(["trip_id", "station_id", "stage"])))
     empty = predicted.iloc[:0]
-    for truth in actual.loc[(actual.time_s > now) & (actual.time_s <= now + 1800)].itertuples():
-        selected = grouped.get((truth.trip_id, truth.station_id, truth.stage), empty)
+    emitted = set(grouped)
+    for truth in actual.itertuples():
+        key = (truth.trip_id, truth.station_id, truth.stage)
+        if not now < truth.time_s <= now + 1800 and key not in emitted:
+            continue
+        selected = grouped.get(key, empty)
         if selected.draw.duplicated().any():
             raise ValueError("duplicate predicted trip/stop/stage")
         # An absent event has not happened by the horizon. Score its capped
         # clock instead of silently discarding slow/censored trajectories.
         clocks = np.full(DRAWS, now + 1800.0)
-        clocks[selected.draw.to_numpy(dtype=int)] = np.minimum(selected.time_s, now + 1800)
+        clocks[selected.draw.to_numpy(dtype=int)] = np.clip(selected.time_s, now, now + 1800)
+        target = float(np.clip(truth.time_s, now, now + 1800))
+        lead = ("previously_completed" if truth.time_s <= now else "later_than_horizon" if truth.time_s > now + 1800
+                else "0-900" if truth.time_s <= now + 900 else "900-1800")
         rows.append(dict(mode=mode, metric=truth.stage + "_capped_clock_s",
-                         lead="0-900" if truth.time_s <= now + 900 else "900-1800",
-                         paths=len(selected), **score_draws(clocks, truth.time_s)))
-        if truth.stage == "action":
+                         lead=lead, paths=len(selected), **score_draws(clocks, target)))
+        if truth.stage == "action" and now < truth.time_s <= now + 1800:
             for metric in ("forward_gap_s", "follower_gap_s", "action_s", "load"):
                 value = getattr(truth, metric)
                 values = selected[metric].dropna().to_numpy()
@@ -201,7 +207,9 @@ def smoke(root, bank):
     for metric in METRICS:
         np.testing.assert_allclose(legacy["draws"][metric], capture["ensemble"]["1800"]["draws"][metric], rtol=1e-12, atol=1e-8)
     run_origin((root, bank, seed, scenario, cohort, 36000))
-    (root / "done.json").write_text('{"legacy_exact": true, "new_modes_complete": true}\n')
+    output = root / "exports"
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "done.json").write_text('{"legacy_exact": true, "new_modes_complete": true}\n')
     print("TRAVEL_SMOKE_PASS legacy_exact=True", flush=True)
 
 
