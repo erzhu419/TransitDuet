@@ -148,7 +148,7 @@ def aggregate(root):
                         actual = actual_returns.loc[row["trip_id"]]
                         vehicle = current[row["trip_id"]]
                         predicted_hold, actual_hold = holding_components(
-                            snapshot, vehicle, commands[row["trip_id"]], float(actual.time_s))
+                            snapshot, vehicle, commands.get(row["trip_id"], []), float(actual.time_s))
                         return_rows.append(dict(meta, horizon_s=int(horizon), trip_id=row["trip_id"],
                             direction=vehicle["direction"], phase=vehicle["phase"],
                             predicted_hold_s=predicted_hold, actual_hold_s=actual_hold,
