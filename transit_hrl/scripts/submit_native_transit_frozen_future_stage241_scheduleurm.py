@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT))
 from scripts import run_native_transit_frozen_future_stage241 as spec
 from scripts.submit_native_transit_mean_coverage_stage195_scheduleurm import task_specification as native_task
 from scripts.submit_native_transit_objective_oof_stage239_scheduleurm import task_specification as offline_task
-from scripts.submit_hyperparameter_pilot_scheduleurm import DEFAULT_LINUX_PYTHON, execute_bulk
+from scripts.submit_hyperparameter_pilot_scheduleurm import DEFAULT_LINUX_PYTHON, SCHEDULER, execute_bulk
 from scripts.submit_pointmaze_timing_pair_stage11_scheduleurm import inventory
 from freq_hrl.experiments.pointmaze_root_response import write_json
 
@@ -40,9 +40,9 @@ def task_specification(run_name, *, key=None, operation="seal"):
     return task
 
 
-def require_completed(existing, tasks):
+def require_completed(existing, tasks, records):
     if {t["signature"] for t in existing} != {t["signature"] for t in tasks} or any(
-            t["status"] != "done" or t.get("exit_code") != 0 for t in existing):
+            records[t["id"]]["status"] != "done" or records[t["id"]].get("exit_code") != 0 for t in existing):
         raise SystemExit("Complete exactly the preceding phase with exit zero before expanding")
 
 
@@ -71,7 +71,14 @@ def main():
         preceding = [seal_task]
         if args.phase == "remaining": preceding.extend(first)
         elif args.phase == "report": preceding.extend(task_specification(args.run_name, key=k) for k in spec.cells())
-        require_completed(existing, preceding)
+        # The results API omits exit codes; completion lives in queue/archive records.
+        sys.path.insert(0, str(SCHEDULER.parent))
+        import scheduler
+        records = {t["id"]: t for t in scheduler.load_state()["tasks"]}
+        missing = {t["id"] for t in existing}-records.keys()
+        if missing:
+            records.update({t["id"]: t for t in scheduler.load_archive_tasks() if t["id"] in missing})
+        require_completed(existing, preceding, records)
         if args.phase == "preflight": tasks = first
         elif args.phase == "remaining":
             initial = set(spec.cells(preflight=True))

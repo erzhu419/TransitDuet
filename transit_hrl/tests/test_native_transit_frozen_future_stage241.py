@@ -113,9 +113,10 @@ class FrozenFutureTest(unittest.TestCase):
             self.assertEqual(task['allowed_nodes'], [f'node{i:03}' for i in range(1, 7)])
             self.assertNotIn('_raw', task['result_dir'])
             self.assertFalse(any('/results/' in p for p in task['stage_input_paths']))
-        require_completed([{'signature': 'sealed', 'status': 'done', 'exit_code': 0}], [{'signature': 'sealed'}])
+        existing = [{'id': 't1', 'signature': 'sealed', 'status': 'done'}]
+        require_completed(existing, [{'signature': 'sealed'}], {'t1': {'status': 'done', 'exit_code': 0}})
         with self.assertRaises(SystemExit):
-            require_completed([{'signature': 'sealed', 'status': 'done', 'exit_code': 1}], [{'signature': 'sealed'}])
+            require_completed(existing, [{'signature': 'sealed'}], {'t1': {'status': 'done', 'exit_code': 1}})
 
 
 if __name__ == '__main__': unittest.main()
