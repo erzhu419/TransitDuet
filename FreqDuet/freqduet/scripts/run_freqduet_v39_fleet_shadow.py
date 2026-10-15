@@ -98,10 +98,17 @@ def batch(root, v37, start, end, workers):
 
 def aggregate(root):
     return_rows, launch_rows, identity_rows, resource_rows, target_rows = [], [], [], [], []
+    dominant_first, source_commits = None, set()
     for seed, scenario, target, arm in items():
         label = f"seed{seed}_eval{scenario}_t{target}_{arm}"
         cell = root / "observed" / label
         record = json.loads((cell / "snapshot.json").read_text())
+        source_commits.add(record["source_commit"])
+        if (seed, scenario, target) == (933013, 45007, 7200):
+            first_pool = record["decisions"]["first"]["fleet_pool"]
+            if dominant_first is not None:
+                joint.assert_same_state(dominant_first, first_pool, "fleet prefix before any intervention")
+            dominant_first = first_pool
         actual_returns = pd.read_csv(cell / "terminals.csv").set_index("trip_id")
         actual_launches = pd.read_csv(cell / "launches.csv").set_index("trip_id")
         for stage, capture in record["decisions"].items():
@@ -176,6 +183,7 @@ def aggregate(root):
                   short_return_within45_rate=return_groups[1]["within_45s"],
                   short_return_resolution_pass=return_groups[1]["within_45s"] >= .9,
                   second_identity_accuracy=float(np.mean([row["matches"] for row in identities])),
+                  replay_source_commits=sorted(source_commits),
                   model_boundary="current published plan; past speed/dwell/hold and cycle continuation; no future policy cascade")
     (summary / "status.json").write_text(json.dumps(status, indent=2) + "\n")
     (summary / "second_identity.json").write_text(json.dumps(identity_rows, indent=2) + "\n")
