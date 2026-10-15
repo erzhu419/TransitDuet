@@ -25,7 +25,7 @@ MODES = [(actor, mode, rep) for actor in ("initial", "updated")
          for mode in ("deterministic", "stochastic")
          for rep in ((0,) if mode == "deterministic" else range(3))]
 ITEMS = list(itertools.product(range(len(CASES)), MODES))
-METRICS = ("journey_min", "waiting_min", "onboard_min", "cv", "holding_s_per_trip",
+METRICS = ("journey_min", "waiting_min", "onboard_min", "cv", "cv_squared", "holding_s_per_trip",
            "readiness_delay_s", "passenger_hours", "backlog_trip_s")
 
 
@@ -136,7 +136,7 @@ def collect(root, v59_root, v56_root, index):
                actor_updates=64 if actor == "updated" else 0,
                journey_min=float(episode["restricted_total_journey_horizon_min"]),
                waiting_min=float(episode["restricted_wait_horizon_min"]),
-               onboard_min=float(episode["restricted_in_vehicle_horizon_min"]), cv=cv,
+               onboard_min=float(episode["restricted_in_vehicle_horizon_min"]), cv=cv, cv_squared=cv ** 2,
                holding_s_per_trip=float(episode["holding_vehicle_seconds_per_launched_trip"]),
                readiness_delay_s=float(episode["fleet_readiness_delay_mean_s"]),
                passenger_hours=float((total[0] + total[1]) / 3600), backlog_trip_s=float(total[4]),
@@ -176,6 +176,9 @@ def factorial_summary(rows):
         effects["interaction"] = {m: (s1[m] - s0[m]) - (d1[m] - d0[m]) for m in METRICS}
         cases.append(dict(train_seed=seed, scenario_seed=scenario, effects=effects,
                           means={f"{a}_{mode}": v for (a, mode), v in groups.items()},
+                          cv_budget_squared=selected[0]["cv_budget_squared"],
+                          mean_cv_squared_feasible={f"{a}_{mode}": v["cv_squared"] <= selected[0]["cv_budget_squared"]
+                                                    for (a, mode), v in groups.items()},
                           updated_cv_budget_violations=sum(r["actor"] == "updated"
                               and r["cv"] ** 2 > r["cv_budget_squared"] for r in selected)))
     return dict(cases=cases, mean_effects={name: {m: float(np.mean([

@@ -23,7 +23,9 @@ on the server; retrieve only small completion markers and aggregate status.
 Report paired actor effects within each deployment mode, sampling effects within
 each actor, and their interaction. Average sampling replicates inside each
 train/demand context before averaging the four contexts. Report journey,
-wait/onboard, unrounded CV, holding, readiness, passenger exposure and backlog.
+wait/onboard, unrounded CV and mean squared CV, holding, readiness, passenger
+exposure and backlog. Average squared CV directly for the constraint, rather
+than squaring the averaged CV.
 Keep CV feasibility relative to the original deterministic reference separate
 from improvement over the same-mode initial actor. Use the result to decide
 whether to repair the learning update, constraint value/dual, or deployment mode.

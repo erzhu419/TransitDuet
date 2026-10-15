@@ -75,6 +75,16 @@ class DeploymentFactorialTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing or duplicates"):
             factorial_summary(rows + [rows[0]])
 
+    def test_constraint_averages_squared_cv_inside_each_context(self):
+        rows = self.rows()
+        for row in rows:
+            row["cv"] = (row["rep"] + 1) / 10
+            row["cv_squared"] = row["cv"] ** 2
+        result = factorial_summary(rows)
+        values = result["cases"][0]["means"]["initial_stochastic"]
+        self.assertAlmostEqual(values["cv_squared"], (.01 + .04 + .09) / 3)
+        self.assertNotAlmostEqual(values["cv_squared"], values["cv"] ** 2)
+
 
 if __name__ == "__main__":
     torch.set_num_threads(1)
