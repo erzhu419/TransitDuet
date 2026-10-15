@@ -17,3 +17,13 @@ MAE and NLL no worse than the base model in each reused-demand cohort.
 Then compare the four forecast cells: V48, V50 conditioned_shared travel only,
 turnover_legacy holding only, turnover_shared joint. Scheduler-only server runs;
 no main-policy promotion without independent action-response validation.
+
+## V51B Revision
+The 19-feature refit failed the prequential screen: MAE delta -0.0096 s but NLL
+delta +0.0095 [0.0037,0.0207]. No four-cell matrix was launched for that model.
+V51B preserves the original seven-bin probabilities and learns only seven
+regularized coefficients for an ordered-action exponential tilt. Fit these on
+matured predictions issued before each historical decision, not in-sample
+probabilities refit at the current origin. With no matured predictions the
+correction is zero. Keep the same turnover features, prefix gate and four-cell
+comparison; retain V51's negative results in its separate experiment directory.

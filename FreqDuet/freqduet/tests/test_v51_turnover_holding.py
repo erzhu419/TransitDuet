@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from freqduet_turnover_holding import augment_labels, freeze_turnover, turnover_features, TurnoverResponse
+from freqduet_turnover_holding import augment_labels, freeze_turnover, turnover_features, TurnoverResponse, fit_turnover_tilt, tilted_probabilities
 
 
 def data():
@@ -19,6 +19,22 @@ def data():
 
 
 class TurnoverHoldingTest(unittest.TestCase):
+    def test_zero_correction_preserves_base_distribution_and_seven_actions(self):
+        prior = np.arange(1., 8.) / 28
+        model = dict(coef=None, prior=prior.tolist())
+        correction = dict(coef=[0.] * 7, scale=[1.] * 7)
+        np.testing.assert_allclose(tilted_probabilities(model, [], np.ones(7), correction), prior, atol=1e-12)
+
+    def test_tilt_fit_excludes_future_and_has_zero_cold_start(self):
+        rows = pd.DataFrame([dict(time_s=t, action_s=y, context=np.ones(7), base_probabilities=np.ones(7) / 7)
+            for t, y in [(1, 45), (2, 45), (10, 0), (11, 0)]])
+        expected = fit_turnover_tilt(rows.iloc[:2], 10)
+        actual = fit_turnover_tilt(rows, 10)
+        self.assertEqual(expected, actual)
+        self.assertEqual(actual["latest_time_s"], 2)
+        self.assertGreater(sum(actual["coef"]), 0)
+        self.assertEqual(fit_turnover_tilt(rows, 1)["coef"], [0.] * 7)
+
     def test_future_completed_trip_cannot_change_earlier_context(self):
         labels, launches, terminals = data()
         expected = augment_labels(labels, launches, terminals).augmented_features.tolist()

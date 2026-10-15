@@ -14,11 +14,11 @@ import pandas as pd
 
 from freqduet_closed_loop_forecast import fluid_rollout
 from freqduet_conditioned_travel import ConditionedTravelPath
-from freqduet_holding_distribution import ACTIONS, DRAWS, METRICS, fit_distribution, probabilities_from_features
+from freqduet_holding_distribution import ACTIONS, DRAWS, METRICS, probabilities_from_features
 from freqduet_passenger_distribution import PassengerProcess, passenger_ensemble
 from freqduet_residual_dependence import identify_holding, issued_origin
 from freqduet_travel_distribution import TravelPath
-from freqduet_turnover_holding import augment_labels, freeze_turnover, TurnoverResponse
+from freqduet_turnover_holding import augment_labels, freeze_turnover, TurnoverResponse, fit_turnover_tilt, tilted_probabilities
 from run_freqduet_v49_residual_dependence import cluster_summary
 import run_freqduet_v46_travel_blocks as previous
 
@@ -48,17 +48,26 @@ def prepare_day(arguments):
     root, base, seed, scenario, cohort = arguments
     label, captures, labels, launches, terminals = read_day(base, seed, scenario)
     models, scores = {}, []
+    prequential = []
+    for row in labels.itertuples():
+        clock = issued_origin(previous.CLOCKS, row.time_s)
+        if clock is not None:
+            prequential.append(dict(time_s=row.time_s, action_s=row.action_s,
+                context=row.augmented_features[12:], base_probabilities=probabilities_from_features(
+                    captures[f"clock_{clock}"]["distribution_model"], row.features)))
+    prequential = pd.DataFrame(prequential)
     for clock in previous.CLOCKS:
-        past = labels.loc[labels.time_s < clock].tail(4096)
-        model = fit_distribution([(r.time_s, np.asarray(r.augmented_features), r.action_s / 45) for r in past.itertuples()], clock)
+        model = dict(base=captures[f"clock_{clock}"]["distribution_model"], correction=fit_turnover_tilt(prequential, clock))
         models[clock] = dict(model=model, history=freeze_turnover(labels, launches, terminals, captures[f"clock_{clock}"]["pool"]))
     for row in labels.itertuples():
         clock = issued_origin(previous.CLOCKS, row.time_s)
         if clock is None:
             continue
-        for mode, model, features in (("legacy", captures[f"clock_{clock}"]["distribution_model"], row.features),
-                ("turnover", models[clock]["model"], row.augmented_features)):
-            scores.append(dict(mode=mode, **score_action(probabilities_from_features(model, features), row.action_s)))
+        model = models[clock]["model"]
+        base_probs = probabilities_from_features(model["base"], row.features)
+        new_probs = tilted_probabilities(model["base"], row.features, row.augmented_features[12:], model["correction"])
+        for mode, probabilities in (("legacy", base_probs), ("turnover", new_probs)):
+            scores.append(dict(mode=mode, **score_action(probabilities, row.action_s)))
     output = root / "prepared" / label
     output.mkdir(parents=True, exist_ok=True)
     (output / "models.json").write_text(json.dumps(models) + "\n")

@@ -6,7 +6,45 @@ import math
 import numpy as np
 
 from freqduet_closed_loop_forecast import holding_features
-from freqduet_holding_distribution import probabilities_from_features, sample_action
+from freqduet_holding_distribution import ACTIONS, probabilities_from_features, sample_action
+
+
+def fit_turnover_tilt(rows, now):
+    import torch
+
+    past = rows.loc[rows.time_s < now].tail(4096)
+    result = dict(coef=[0.] * 7, scale=[1.] * 7, samples=len(past),
+        latest_time_s=float(past.time_s.max()) if len(past) else None)
+    if not len(past):
+        return result
+    features = np.stack(past.context)
+    scale = np.maximum(np.sqrt(np.mean(features ** 2, axis=0)), 1e-8)
+    x = torch.as_tensor(features / scale, dtype=torch.float64)
+    base = torch.as_tensor(np.log(np.stack(past.base_probabilities)), dtype=torch.float64)
+    actions = torch.as_tensor(ACTIONS / 45, dtype=torch.float64)
+    labels = torch.as_tensor([int(np.argmin(abs(ACTIONS - y))) for y in past.action_s], dtype=torch.long)
+    weights = torch.zeros(7, dtype=torch.float64, requires_grad=True)
+    optimizer = torch.optim.LBFGS([weights], max_iter=100, line_search_fn="strong_wolfe",
+        tolerance_grad=1e-7, tolerance_change=1e-9)
+
+    def closure():
+        optimizer.zero_grad()
+        logits = base + (x @ weights)[:, None] * actions
+        loss = torch.nn.functional.cross_entropy(logits, labels, reduction="sum") + 5 * weights.square().sum()
+        loss.backward()
+        return loss
+
+    optimizer.step(closure)
+    result.update(coef=weights.detach().numpy().tolist(), scale=scale.tolist())
+    return result
+
+
+def tilted_probabilities(base_model, features, context, correction):
+    probabilities = probabilities_from_features(base_model, features)
+    tilt = np.asarray(context) / np.asarray(correction["scale"]) @ np.asarray(correction["coef"])
+    logits = tilt * ACTIONS / 45
+    mass = probabilities * np.exp(logits - logits.max())
+    return mass / mass.sum()
 
 
 def turnover_features(previous, current, time):
@@ -84,8 +122,9 @@ class TurnoverResponse:
 
     def __call__(self, values):
         state = self.current(values)
-        features = np.r_[holding_features(values), turnover_features(state["previous"], state["current"], values["time_s"])]
-        return sample_action(probabilities_from_features(self.model, features), self.rng.random())
+        context = turnover_features(state["previous"], state["current"], values["time_s"])
+        probabilities = tilted_probabilities(self.model["base"], holding_features(values), context, self.model["correction"])
+        return sample_action(probabilities, self.rng.random())
 
     def observe(self, row):
         state = self.current(row)
