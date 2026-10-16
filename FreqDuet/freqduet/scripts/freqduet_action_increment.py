@@ -59,10 +59,19 @@ def fit_model(states, native, targets, days, kind):
     mask = np.arange(len(ACTIONS))[None, :] != native[:, None]
     row_weights = np.broadcast_to(weights[:, None] / (len(ACTIONS) - 1), mask.shape)[mask]
     x, y = x[mask], targets[mask]
-    gram = x.T @ (row_weights[:, None] * x)
-    regularized = gram + RIDGE * np.eye(gram.shape[0])
-    solved = np.linalg.solve(regularized, np.column_stack((x.T @ (row_weights[:, None] * y), gram)))
-    coefficients = solved[:, :y.shape[1]]
+    if x.shape[1] <= x.shape[0]:
+        gram = x.T @ (row_weights[:, None] * x)
+        regularized = gram + RIDGE * np.eye(gram.shape[0])
+        solved = np.linalg.solve(regularized, np.column_stack((x.T @ (row_weights[:, None] * y), gram)))
+        coefficients = solved[:, :y.shape[1]]
+    else:
+        # Full fleet/plan inputs have more columns than training contrasts.
+        # The dual solve is the same ridge objective without a huge P x P matrix.
+        weighted = np.sqrt(row_weights)[:, None] * x
+        gram = weighted @ weighted.T
+        regularized = gram + RIDGE * np.eye(gram.shape[0])
+        solved = np.linalg.solve(regularized, np.column_stack((np.sqrt(row_weights)[:, None] * y, gram)))
+        coefficients = weighted.T @ solved[:, :y.shape[1]]
     return IncrementModel(kind, center, scale, coefficients, float(np.trace(solved[:, y.shape[1]:])))
 
 

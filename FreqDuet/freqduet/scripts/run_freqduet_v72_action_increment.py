@@ -65,6 +65,25 @@ def save_model(path, fitted):
                         metrics=np.asarray(model.METRICS), actions=np.asarray(model.ACTIONS), ridge=model.RIDGE)
 
 
+def score_predictions(data, testing, predictions):
+    truth = model.mean_differences(data["outcomes"], data["native"])
+    targets = truth[:, :, TARGET_COLUMNS]
+    rows = []
+    for local, index in enumerate(testing):
+        native = int(data["native"][index])
+        row = dict(context_index=int(index), scenario_seed=int(data["days"][index]), case_index=int(data["cases"][index]),
+                   target_time_s=int(data["windows"][index]), native_action_s=model.ACTIONS[native], channels={})
+        for channel, values in predictions.items():
+            prediction = values[local]
+            np.testing.assert_array_equal(prediction[native], np.zeros(len(model.METRICS)))
+            selected = model.choose_action(prediction, native)
+            row["channels"][channel] = dict(action_s=model.ACTIONS[selected], changed=selected != native,
+                effects={m: float(truth[index, selected, i]) for i, m in enumerate(OUTCOMES)},
+                errors={m: model.error_statistics(prediction[:, i], targets[index, :, i], native) for i, m in enumerate(PRIMARY)})
+        rows.append(row)
+    return rows
+
+
 def fit_fold(root, held_day):
     destination = root / "folds" / str(held_day)
     if (destination / "done.json").exists():
@@ -78,19 +97,7 @@ def fit_fold(root, held_day):
               for kind in model.KINDS}
     predictions = {kind: fitted[kind].predict(data["states"][testing], data["native"][testing]) for kind in model.KINDS}
     predictions["zero"] = np.zeros_like(predictions[model.KINDS[0]])
-    rows = []
-    for local, index in enumerate(testing):
-        native = int(data["native"][index])
-        row = dict(context_index=int(index), scenario_seed=int(held_day), case_index=int(data["cases"][index]),
-                   target_time_s=int(data["windows"][index]), native_action_s=model.ACTIONS[native], channels={})
-        for channel in CHANNELS:
-            prediction = predictions[channel][local]
-            np.testing.assert_array_equal(prediction[native], np.zeros(len(model.METRICS)))
-            selected = model.choose_action(prediction, native)
-            row["channels"][channel] = dict(action_s=model.ACTIONS[selected], changed=selected != native,
-                effects={m: float(truth[index, selected, i]) for i, m in enumerate(OUTCOMES)},
-                errors={m: model.error_statistics(prediction[:, i], targets[index, :, i], native) for i, m in enumerate(PRIMARY)})
-        rows.append(row)
+    rows = score_predictions(data, testing, {channel: predictions[channel] for channel in CHANNELS})
     for kind, fitted_model in fitted.items():
         save_model(destination / f"{kind}.npz", fitted_model)
     result = dict(held_day=int(held_day), fitting_days=sorted(set(data["days"].tolist()) - {int(held_day)}), rows=rows,
