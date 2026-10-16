@@ -1,0 +1,41 @@
+{
+  "protocol": "native_transit_risk_alignment_stage274_v1",
+  "run_name": "native_transit_risk_alignment_stage274_20261016_r1",
+  "registered_source_revision": "862f4aefa36e88b5c9a2f27df1693b74a14d1f63",
+  "scheduler": {
+    "analysis": "t165984",
+    "records": 1,
+    "status_counts": {"done": 1},
+    "exit_code_counts": {"0": 1},
+    "node_counts": {"node006": 1},
+    "retry_count_sum": 0,
+    "runtime_seconds": 9.466312408447266
+  },
+  "budget": {
+    "analysis_tasks": 1,
+    "cached_cells": 32,
+    "cached_prefix_contexts": 1920,
+    "new_fits": 0,
+    "new_solver_calls": 0,
+    "new_model_inferences": 0,
+    "new_native_episodes": 0,
+    "actor_updates": 0,
+    "action_selections": 0
+  },
+  "focused_tests_passed": 15,
+  "cold_entrypoints_passed": 2,
+  "coverage_qualified": true,
+  "reproduction": {
+    "cell_metric_max_abs_error": 2.6020852139652106e-18,
+    "group_metric_max_abs_error": 1.5178830414797062e-18,
+    "pointwise_identity_max_abs_error": 4.683753385137379e-17,
+    "group_identity_max_abs_error": 2.710505431213761e-18
+  },
+  "local_pulls": {
+    "report_bytes": 1029849,
+    "raw_labels_models_features_predictions_queries_or_error_ledgers_pulled": false
+  },
+  "policy_outcomes_evaluated": false,
+  "default_changed": false,
+  "native_deployment_eligible": false
+}

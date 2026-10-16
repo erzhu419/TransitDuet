@@ -1,0 +1,37 @@
+{
+  "protocol": "native_transit_risk_alignment_stage274_v1",
+  "primary": {
+    "group": "mixed_pooled", "bank": "pooled", "penalty": 0.01,
+    "future": "opposite", "arm": "raw_bounded_clip",
+    "natural_gap": {
+      "correction_squared": 1.8940138274637703e-07,
+      "alignment": 3.409992139080305e-05,
+      "delta_MSE": 3.4289322773549435e-05,
+      "alignment_share_pct": 99.44763743513626
+    },
+    "paired_gap": {
+      "correction_squared": 5.758238092987628e-07,
+      "alignment": 5.204132440604899e-05,
+      "delta_MSE": 5.2617148215347745e-05,
+      "alignment_share_pct": 98.90563470497857
+    },
+    "natural_delta_MSE_pct_raw": {"excluded": 1.35327000258397, "matched_held": -2.8394953556954734},
+    "paired_delta_MSE_pct_raw": {"excluded": 0.06938465040109051, "held": -4.978724540338928},
+    "paired_units": 608,
+    "attempted_mixed_state_pairs": 1920,
+    "paired_coverage_fraction": 0.31666666666666665
+  },
+  "robustness": {
+    "mixed_pooled_alignment_gap_positive_both_fit_banks_both_future_banks_all_three_penalties": true,
+    "same_future_natural_alignment_gap": 3.4040855e-05,
+    "opposite_future_natural_alignment_gap_by_penalty_x1e6": {"0.001": 32.808745, "0.01": 34.099921, "0.1": 33.628899},
+    "opposite_future_natural_alignment_gap_by_fit_bank_x1e6": [39.576943, 28.6229],
+    "mixed_a_natural_alignment_x1e6": {"excluded": 25.156565, "matched_held": -30.101032},
+    "mixed_b_natural_alignment_x1e6": {"excluded": -53.38494, "matched_held": -68.165864}
+  },
+  "interpretation": "For the frozen primary clipped head, the excluded/held incremental-error gap is almost entirely in residual alignment rather than correction energy. This survives same-model, condition, probe and common-action pairing. Mixed_a actively misaligns on excluded queries; mixed_b remains beneficial. These are exact descriptive error decompositions, not causal identification.",
+  "next": "Stage275: localize fixed-head alignment-gap contributions by prefix/regime/probe and compare the same heads under both cached future banks; assess concentration before further representation/loss changes. No new fitting, simulation or gate.",
+  "limitations": "Common-action pairs retain 31.7% of mixed comparison exposures; populations remain different states, with historical raw-reference conditioning and repeated development exposures. Not seed CI, causal transfer or native policy gain. Stage253/248/169 remain closed.",
+  "default_changed": false,
+  "native_deployment_eligible": false
+}
