@@ -31,3 +31,7 @@ between independent halves, repair its estimation before control learning.
 If it transfers but the finite closed-loop effect reverses, test the local
 approximation separately. This audit cannot establish which mechanism dominates
 merely from the sign disagreement, nor justify a new long-training sweep.
+
+Source `253877ccd2`; scheduler smoke `t166150` passed all four tests on node004.
+Seed diagnostics `t166151/t166152` use node004/node005 preferentially; aggregate
+`t166153` waits for their small JSON files. All are restricted to node001-node006.
