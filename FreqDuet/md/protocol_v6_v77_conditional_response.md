@@ -59,3 +59,26 @@ four 11-worker shards `t166101-t166104` to preferred node002/004/005/006;
 all remain eligible only for node001-node006. Aggregate `t166105` waits for
 their four small completion markers. Reuse the smoke fold, add no rollouts,
 and retain checkpoints/predictions/labels on the server.
+
+## Outcome / Next
+
+All 44 LODO folds and aggregation completed. Only 178,700 bytes of summary
+and 219 bytes of completion markers were retrieved. The fixed primary fails
+both the native joint gate and this development stage: selected passenger
+effect +190.14 [4.72,341.41] person-s per intervention; readiness delay
++0.00759 [0.00211,0.01398] s; CV-squared +3.81e-6 [-3.28e-6,1.13e-5].
+It changes 168/528 actions (107 longer, 61 shorter), with 61 passenger gains,
+102 harms and 5 ties; 84 overrides harm in both fixed future halves.
+Its predicted effect is -1315.48, versus actual +190.14. Mean in-sample
+actual/predicted effects across folds are -382.49/-422.82: fitting improves,
+but transfer fails. Passenger MAE is 2576.01 versus pooled linear 1628.59.
+Actor conditioning minus pooled nonlinear selected passenger effect is -9.78
+[-200.17,158.43], not a demonstrated repair. Action-only improves passengers
+but fails to establish CV non-harm; do not select it after seeing these results.
+
+Stop expanding this selector family. Return to system-credit regularity-
+constraint learning and physically grounded holding permissions, with a small
+paired whole-day closed-loop test before any 40-to-200 campaign. Keep the
+original actor/dual/main frozen until that separate candidate is specified.
+This result neither establishes missing history nor proves nonlinear models
+in general impossible; it rejects this fixed candidate, not the system objective.
