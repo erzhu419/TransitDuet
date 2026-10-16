@@ -78,3 +78,25 @@ Held-out tasks `t166142-t166145` cover all 128 pairs in one wave on
 node002/004/005/006, 32 workers each. Server aggregation `t166146` waits for all
 four small shard markers and applies the unchanged joint gates separately by mode.
 Main remains frozen; no held-out outcome is claimed at dispatch.
+
+## Outcome / Next
+
+All four evaluation shards and aggregation completed, exit 0/retry 0. Retrieved
+only the 44,477-byte summary. Both joint gates fail on CV-squared non-harm:
+
+| Candidate minus original B200 | Stochastic, mean [95% CI] | Deterministic, mean [95% CI] |
+| --- | --- | --- |
+| Journey, min | -.09151 [-.13513,-.05195] | -.17222 [-.24798,-.10190] |
+| CV-squared | +.001122 [-.000302,.002474] | +.001423 [-.000113,.002904] |
+| Readiness delay, s | -37.22 [-41.85,-32.55] | -48.30 [-57.66,-39.75] |
+| Holding, s/trip | -4.36 [-4.98,-3.79] | -5.68 [-7.21,-4.15] |
+
+Passenger total exposure also improves in both modes; unlaunched/incomplete
+trip differences are zero. Both original seeds improve passenger time, but
+seed 933013's stochastic CV-squared worsens +.002293 [.001223,.003398], opposite
+its fitted negative directional cost. Matched stochastic events have zero
+uniform mismatches. Do not describe an interval crossing zero as non-harm.
+
+Retain the passenger/readiness partial positive, reject candidate promotion.
+V79 first diagnoses score-gradient uncertainty and transfer between training
+halves, plus complete-path overlap; no step-size rescue or new training sweep.
