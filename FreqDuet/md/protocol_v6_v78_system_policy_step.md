@@ -55,3 +55,13 @@ training. Only a repeatable joint improvement merits a separately specified
 multi-step learner/physical-permission study. Limitations: one local step, only
 two original training seeds, noisy episodic gradients, approximate AVL feature;
 stochastic feasibility does not establish deterministic feasibility or convergence.
+
+## Execution
+
+Source `c742fa1894`; smoke `t166129` passed six tests, exact historical B200
+episode/holding identity and a nonzero full-day collection. Prototype integration
+failures (JSON integer type, runtime-only interface assumptions, native action
+quantization accounting) were fixed before formal collection; obsolete queued
+tasks were cancelled. Four 16-worker training shards `t166131-t166134` use only
+node001-node006, preferred node002/004/005/006. No held-out policy effect has
+been evaluated yet; main remains frozen.
