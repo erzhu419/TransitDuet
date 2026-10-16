@@ -1,0 +1,84 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "analysis_tasks": 1,
+    "cached_cells": 32,
+    "cached_prefix_fits": 640,
+    "new_critic_fits": 0,
+    "new_native_episodes": 0,
+    "new_raw_reference_fits": 0,
+    "prefix_model_records": 1280
+  },
+  "combined_attempt_accounting": {
+    "analysis_tasks_executed": 2,
+    "exit_code_counts": {
+      "0": 1,
+      "1": 1
+    },
+    "retry_count_sum": 0,
+    "runtime_seconds": 140.80399417877197,
+    "status_counts": {
+      "done": 1,
+      "failed": 1
+    }
+  },
+  "coverage_qualified": true,
+  "default_changed": false,
+  "focused_tests_passed": 20,
+  "held_outcomes_evaluated": false,
+  "local_pulls": {
+    "raw_models_labels_calibrations_panels_covariance_matrices_cell_ledgers_or_full_band_aggregates_pulled": false,
+    "report_bytes": 2590392,
+    "selected_report_scalar_lookup_stdout_bytes": 18429,
+    "small_parent_scalar_metadata_lookup": true
+  },
+  "native_deployment_eligible": false,
+  "numerical_correction": "Exact 1D strictly-active zero tangent; primitive sums/RMS replay at unchanged 1e-9 tolerance. Stage266 report retained unchanged; numerical-zero derived ratios are not primitive replay controls.",
+  "posthoc_operations": "Scalar aggregation only; no data removal, fitting, simulation, reselection or tuning.",
+  "previous_attempts": [
+    {
+      "exit_code": 1,
+      "failure_phase": "grouped_derived_ratio_reproduction_after_all_32_cell_calculations",
+      "receipt": "../native_transit_coupled_noise_stage267_20261016_r1/failure_receipt.json",
+      "retry_count": 0,
+      "run_name": "native_transit_coupled_noise_stage267_20261016_r1",
+      "status": "failed",
+      "task": "t165732"
+    }
+  ],
+  "protocol": "native_transit_coupled_noise_stage267_v1",
+  "registered_source_revision": "f7c14b82f5f3f84111ded135dcf10daf9a48c0c0",
+  "reproduction": {
+    "baseline_cell_max_relative_difference": 5.052132757282779e-14,
+    "baseline_group_max_relative_difference": 2.0539125955565396e-14,
+    "cached_cells": 32,
+    "covariance_residual": 9.7400980308579e-15,
+    "direct_gradient_residual": 2.6055269053415486e-12,
+    "endpoint_optimality_residual": 1.138319039722946e-13,
+    "prefix_model_records": 1280,
+    "query_decomposition_residual": 5.467848396278896e-14,
+    "response_identity_residual": 1.482147737874584e-14,
+    "tangent_equation_max_residual": 8.559204560387723e-12,
+    "target_max_abs_difference": 0.0,
+    "zero_dimensional_tangent_prefix_models": {
+      "full": 70,
+      "prefix": 82
+    }
+  },
+  "run_name": "native_transit_coupled_noise_stage267_20261016_r2",
+  "scheduler": {
+    "analysis": "t165743",
+    "exit_code_counts": {
+      "0": 1
+    },
+    "node_counts": {
+      "node006": 1
+    },
+    "records": 1,
+    "retry_count_sum": 0,
+    "runtime_seconds": 73.96195864677429,
+    "status_counts": {
+      "done": 1
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "actor_updates": 0,
+  "correction": "Exact zero-dimensional tangent in Stage267; compare primitive sums and RMS at unchanged 1e-9 replay tolerance, not ratios formed at numerical zero. Save cell ledger before aggregation. Original failed registration retained.",
+  "diagnosis": "Stage266 one-dimensional strictly-active tangent should be zero; roundoff variances near 1e-37 yielded unstable observed/noise ratios. Cached parent has 82 active rank-one records and 18 numerical-zero ratio summaries.",
+  "failure_phase": "grouped_derived_ratio_reproduction_after_all_32_cell_calculations",
+  "new_critic_fits": 0,
+  "new_native_episodes": 0,
+  "new_raw_reference_fits": 0,
+  "protocol": "native_transit_coupled_noise_stage267_v1",
+  "raw_arrays_pulled": false,
+  "registered_source_revision": "71a92682469fee5922b751696eccc7a12dd5ea2c",
+  "replacement_run": "native_transit_coupled_noise_stage267_20261016_r2",
+  "run_name": "native_transit_coupled_noise_stage267_20261016_r1",
+  "runtime_seconds": 66.84203553199768,
+  "scheduler": {
+    "backend_finished_at": 1792140148.0,
+    "exit_code": 1,
+    "id": "t165732",
+    "last_block_reason": "launcher exit-status sentinel recorded rc=1; err_pattern: Traceback (most recent call, Error:",
+    "node": "node006",
+    "retry_count": 0,
+    "started_at": 1792140081.1579645,
+    "status": "failed"
+  }
+}

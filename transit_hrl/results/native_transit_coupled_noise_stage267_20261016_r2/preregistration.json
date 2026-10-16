@@ -1,0 +1,55 @@
+{
+  "contract": {
+    "boundary": "conditional_frozen_calibration_joint_local_refit_response_not_finite_refit_error_ground_truth_accuracy_performance_pvalues_or_seed_CI; report_response_over_radius_not_assume_small_noise; Stage253_248_169_closed; no_selection_or_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_prefix_fits": 640,
+      "new_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "prefix_model_records": 1280
+    },
+    "categories": [
+      "all",
+      "removed"
+    ],
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "controls": "reproduce_Stage266_one_ended_all_cells_regions_bands_primitive_covariance_sums_observed_sums_RMS_and_counts; derived_observed_over_noise_ratios_not_replay_controls_at_numerical_zero; exact_zero_1D_strictly_active_tangent; direct_existing_gradient_factory_each_endpoint_KKT_and_both_decompositions",
+    "covariance": "shared_state_future_label_scores_propagated_before_statewise_within_bank_covariance; direct_Gram_of_sum; also_direct_signed_endpoint_and_operator_change_cross_terms; never_independent_endpoint_sum",
+    "focus_basis": "unchanged_Stage263_designation; separate_contexts_and_constraint_activity_not_matched_rank_ablation",
+    "focus_prefix": [
+      397,
+      913970203
+    ],
+    "frozen": "anchor_bank_full_coefficients_keys_basis_prior_scale_reliability_lambda_prefix_mu_and_cap; same_prefix_and_fixed_A_for_all_contrasts",
+    "independence": "conditional_state_future_seed_blocks_Stage249_1490000000+state_index*32+draw; sum_state_covariances_not_covariance_of_aligned_draw_index_state_sums",
+    "noise": "per_state_service_risk_action_paired_score_covariance_centered_within_each_assigned16_bank; covariance_of_two16_mean_difference=sum_state(C_bank0/16+C_bank1/16); no_between_bank_mean_term",
+    "primary": [
+      "free_old_expanded8_pooled_safe",
+      "shrunk_expanded8_pooled_safe"
+    ],
+    "query": "unchanged_Stage266_feasible_queries_and_prefix_H_low_basis; retain_head_population_and_low_rest_cross_terms; scales_are_cost_function_response_not_outcome_improvement",
+    "response": "delta=u_prefix-u_full; d_delta=-T_prefix*d_g_prefix+T_full*d_g_full; each_T_uses_own_cached_H_mu_u_and_same_fixed_radius",
+    "source_protocol": "native_transit_tangent_noise_stage266_v1",
+    "source_run": "native_transit_tangent_noise_stage266_20261016_r1",
+    "storage": "raw_labels_models_covariances_cell_ledgers_and_full_band_aggregate_server_only; pull_full_query_scalar_report_with_signed_cross_terms",
+    "terms": "prefix=-Tp*gp; minus_full=+Tf*gf; coupled=prefix+minus_full; one_ended=-Tp*(gp-gf); operator_change=(Tf-Tp)*gf; coupled=one_ended+operator_change"
+  },
+  "protocol": "native_transit_coupled_noise_stage267_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "f7c14b82f5f3f84111ded135dcf10daf9a48c0c0"
+}

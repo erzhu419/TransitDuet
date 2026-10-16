@@ -1,0 +1,431 @@
+{
+  "conclusion": "One-ended force propagation overstated service-response instability and focal concentration. Shared endpoint noise strongly cancels. Risk-label response remains substantial; uniform curvature-direction shrinkage is not justified by these diagnostics.",
+  "focal_contexts": [
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "held_coupled_observed_over_noise_RMS": {
+        "joint": 1.122250908855915,
+        "risk": 0.7718024604734361,
+        "service": 1.0612043189901776
+      },
+      "held_coupled_over_one_ended_variance": {
+        "joint": 0.08224283909237758,
+        "risk": 1.6439064785962665,
+        "service": 0.022592191252547755
+      },
+      "noise_norm_RMS_over_radius": {
+        "coupled": 1.003731197965123,
+        "minus_full": 0.724933766566596,
+        "one_ended": 4.318298362372298,
+        "operator_change": 4.341604895587621,
+        "prefix": 1.362756551568391
+      },
+      "old_key": "16@1",
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "held_coupled_observed_over_noise_RMS": {
+        "joint": 1.4857517572124226,
+        "risk": 0.8777519008621677,
+        "service": 1.5065816630978996
+      },
+      "held_coupled_over_one_ended_variance": {
+        "joint": 0.1429962753190819,
+        "risk": 1.6040916797455278,
+        "service": 0.05022444757089451
+      },
+      "noise_norm_RMS_over_radius": {
+        "coupled": 0.767347889503878,
+        "minus_full": 0.6125227569723972,
+        "one_ended": 2.9405996662926546,
+        "operator_change": 2.98044102084829,
+        "prefix": 1.0405773578474007
+      },
+      "old_key": "16@1",
+      "variant": "shrunk_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "held_coupled_observed_over_noise_RMS": {
+        "joint": 0.5529955286211304,
+        "risk": 0.5798080851344768,
+        "service": 0.12851897850458857
+      },
+      "held_coupled_over_one_ended_variance": {
+        "joint": 5.062256660867718,
+        "risk": 5.106108784809453,
+        "service": 0.594255322386142
+      },
+      "noise_norm_RMS_over_radius": {
+        "coupled": 0.2693914631708388,
+        "minus_full": 0.1880791627144746,
+        "one_ended": 0.11973241681000597,
+        "operator_change": 0.1579622651936235,
+        "prefix": 0.454965977106129
+      },
+      "old_key": "1@0.25",
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "held_coupled_observed_over_noise_RMS": {
+        "joint": 0.5220311158045271,
+        "risk": 0.5758138855233021,
+        "service": 0.29939901804313634
+      },
+      "held_coupled_over_one_ended_variance": {
+        "joint": 6.377204430031933,
+        "risk": 6.691907945467292,
+        "service": 0.7410454145352247
+      },
+      "noise_norm_RMS_over_radius": {
+        "coupled": 0.24413551781292714,
+        "minus_full": 0.189892604938981,
+        "one_ended": 0.09667535986228569,
+        "operator_change": 0.15661562764508904,
+        "prefix": 0.4316661904358304
+      },
+      "old_key": "1@0.25",
+      "variant": "shrunk_expanded8_pooled_safe"
+    }
+  ],
+  "limitations": "Conditional plug-in first-order noise of a two16-bank contrast; not finite-refit accuracy, performance, p-values or training-seed CI. Focal joint response/radius remains near 1/.77, and endpoint response can be larger; not a uniformly small perturbation. Risk/joint variance ratio is descriptive, not a causal share. Stage253/248/169 remain closed.",
+  "mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "above_radius_prefix_models": {
+        "coupled": 9,
+        "minus_full": 30,
+        "one_ended": 15,
+        "operator_change": 17,
+        "prefix": 32
+      },
+      "activity_pairs": {
+        "interior/interior": 10,
+        "strictly_active/interior": 3,
+        "strictly_active/strictly_active": 107
+      },
+      "focal_held": {
+        "coupled_observed_over_noise_RMS": {
+          "joint": 1.1204790241928122,
+          "risk": 0.7706541059202386,
+          "service": 1.0611234827668505
+        },
+        "coupled_over_one_ended_variance": {
+          "joint": 0.08258136743817185,
+          "risk": 1.6515501676500732,
+          "service": 0.022595551934541665
+        },
+        "share_of_joint_noise_variance": 0.10393450011278808,
+        "share_of_service_noise_variance": 0.24326430436089125
+      },
+      "held": {
+        "coupled": {
+          "noise_RMS": {
+            "joint": 0.001930395129585146,
+            "risk": 0.001812011207222169,
+            "service": 0.0006532681544025179
+          },
+          "noise_squared_sum": {
+            "cross_sr": 0.00019635440363034384,
+            "excluded_cross_sr": -7.871301659305628e-05,
+            "excluded_joint": 0.014863357744827688,
+            "excluded_risk": 0.013816966990543297,
+            "excluded_service": 0.0011251037708774406,
+            "joint": 0.04494068979729219,
+            "retained_cross_sr": 0.0002750674202233989,
+            "retained_joint": 0.030077332052464642,
+            "retained_risk": 0.02578065146754753,
+            "retained_service": 0.00402161316469361,
+            "risk": 0.03959761845809083,
+            "service": 0.005146716935571053
+          },
+          "observed_RMS": {
+            "joint": 0.0018863110882242785,
+            "risk": 0.0015856911302622682,
+            "service": 0.0007494222492687987
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.977163203177817,
+            "risk": 0.8751000677822232,
+            "service": 1.1471893191460154
+          },
+          "observed_squared_sum": {
+            "joint": 0.04291152442998781,
+            "risk": 0.030323861308744697,
+            "service": 0.00677330251485121
+          }
+        },
+        "coupled_over_independent_endpoint_variance": {
+          "joint": 0.13601051635765496,
+          "risk": 0.12982131851939357,
+          "service": 0.18960972523966815
+        },
+        "coupled_over_one_ended_variance": {
+          "joint": 0.37298337069012033,
+          "risk": 0.6895054829137588,
+          "service": 0.08271984008842637
+        },
+        "one_ended": {
+          "noise_RMS": {
+            "joint": 0.003160832473178309,
+            "risk": 0.0021821872674394074,
+            "service": 0.0022713635105882793
+          },
+          "noise_squared_sum": {
+            "cross_sr": 0.0008421311804693486,
+            "excluded_cross_sr": 0.0004532128973350022,
+            "excluded_joint": 0.11096978988903915,
+            "excluded_risk": 0.04906679164830711,
+            "excluded_service": 0.06144978534339695,
+            "joint": 0.120489794797392,
+            "retained_cross_sr": 0.0003889182831343446,
+            "retained_joint": 0.009520004908354045,
+            "retained_risk": 0.008362220069999413,
+            "retained_service": 0.0007688665552202952,
+            "risk": 0.05742901171830649,
+            "service": 0.06221865189861687
+          },
+          "observed_RMS": {
+            "joint": 0.003629293655375717,
+            "risk": 0.0017877448915926428,
+            "service": 0.002926991375094207
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.1482081654667247,
+            "risk": 0.8192444884395254,
+            "service": 1.2886494660364254
+          },
+          "observed_squared_sum": {
+            "joint": 0.1588515755896222,
+            "risk": 0.03854414347683202,
+            "service": 0.10332137882910306
+          }
+        },
+        "risk_single_head_variance_over_joint": 0.8811083816625508,
+        "signed_cross": {
+          "endpoints": {
+            "noise_squared_sum": {
+              "joint": -0.28548000854867667,
+              "risk": -0.2654186832533684,
+              "service": -0.021997022284901815
+            },
+            "observed_squared_sum": {
+              "joint": -0.18246036725778678,
+              "risk": -0.18766683681475727,
+              "service": -0.010967658253563916
+            }
+          },
+          "operator_change": {
+            "noise_squared_sum": {
+              "joint": -0.17244958991004947,
+              "risk": -0.054578243739469866,
+              "service": -0.1164603972181456
+            },
+            "observed_squared_sum": {
+              "joint": -0.21701273320817652,
+              "risk": -0.03238112524586616,
+              "service": -0.18036999606408485
+            }
+          }
+        }
+      },
+      "noise_norm_RMS_over_radius_RMS": {
+        "coupled": 0.8783709443507738,
+        "minus_full": 1.049061736374109,
+        "one_ended": 1.3240718772733946,
+        "operator_change": 1.4150238302579738,
+        "prefix": 1.3003678251731141
+      },
+      "parameter_noise_energy": {
+        "coupled": 3.568229367407562,
+        "minus_full": 5.089779102014107,
+        "one_ended": 8.10811618904902,
+        "operator_change": 9.260284899660734,
+        "prefix": 7.820405476376151
+      },
+      "prefix_model_exposures": 120
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "above_radius_prefix_models": {
+        "coupled": 16,
+        "minus_full": 30,
+        "one_ended": 17,
+        "operator_change": 24,
+        "prefix": 34
+      },
+      "activity_pairs": {
+        "interior/interior": 12,
+        "interior/strictly_active": 8,
+        "strictly_active/interior": 1,
+        "strictly_active/strictly_active": 99
+      },
+      "focal_held": {
+        "coupled_observed_over_noise_RMS": {
+          "joint": 1.4833591588317323,
+          "risk": 0.8760550577324093,
+          "service": 1.5064705834441114
+        },
+        "coupled_over_one_ended_variance": {
+          "joint": 0.14351134443828772,
+          "risk": 1.6124040780340787,
+          "service": 0.0502316363163841
+        },
+        "share_of_joint_noise_variance": 0.08514353673869715,
+        "share_of_service_noise_variance": 0.2528984659123348
+      },
+      "held": {
+        "coupled": {
+          "noise_RMS": {
+            "joint": 0.0020591903981254747,
+            "risk": 0.0019423199629897592,
+            "service": 0.0006950142837808665
+          },
+          "noise_squared_sum": {
+            "cross_sr": -0.00018556236652357287,
+            "excluded_cross_sr": -0.0002531386196012057,
+            "excluded_joint": 0.016869375103602733,
+            "excluded_risk": 0.015981705806585342,
+            "excluded_service": 0.0011408079166185894,
+            "joint": 0.051137597054529735,
+            "retained_cross_sr": 6.757625307763405e-05,
+            "retained_joint": 0.034268221950926964,
+            "retained_risk": 0.02951593266727482,
+            "retained_service": 0.004684713030574152,
+            "risk": 0.04549763847386019,
+            "service": 0.005825520947192736
+          },
+          "observed_RMS": {
+            "joint": 0.0018842196735945186,
+            "risk": 0.0016258918907652471,
+            "service": 0.0009772815960915565
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.9150293607185447,
+            "risk": 0.83708756628468,
+            "service": 1.4061316708128075
+          },
+          "observed_squared_sum": {
+            "joint": 0.04281642236702925,
+            "risk": 0.031880904751901654,
+            "service": 0.011518256575794679
+          }
+        },
+        "coupled_over_independent_endpoint_variance": {
+          "joint": 0.1396742594363934,
+          "risk": 0.13254240539657297,
+          "service": 0.207192109606567
+        },
+        "coupled_over_one_ended_variance": {
+          "joint": 0.49642033360720633,
+          "risk": 0.7050673376172285,
+          "service": 0.15853707822621002
+        },
+        "one_ended": {
+          "noise_RMS": {
+            "joint": 0.0029226157705378344,
+            "risk": 0.002313158945013039,
+            "service": 0.0017455339703949149
+          },
+          "noise_squared_sum": {
+            "cross_sr": 0.0017377229337296608,
+            "excluded_cross_sr": 0.001621917948648285,
+            "excluded_joint": 0.09644622303317428,
+            "excluded_risk": 0.05834958433984916,
+            "excluded_service": 0.036474720744676725,
+            "joint": 0.10301269628288931,
+            "retained_cross_sr": 0.00011580498508137798,
+            "retained_joint": 0.006566473249715408,
+            "retained_risk": 0.006179909577170322,
+            "retained_service": 0.00027075868746370853,
+            "risk": 0.06452949391701965,
+            "service": 0.03674547943213979
+          },
+          "observed_RMS": {
+            "joint": 0.0034306878734915633,
+            "risk": 0.0022988094694620246,
+            "service": 0.0022165314387819286
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.1738415662008936,
+            "risk": 0.9937965890403034,
+            "service": 1.269830021285953
+          },
+          "observed_squared_sum": {
+            "joint": 0.14194160858098412,
+            "risk": 0.0637313712212726,
+            "service": 0.05925092012645077
+          }
+        },
+        "risk_single_head_variance_over_joint": 0.8897101368557566,
+        "signed_cross": {
+          "endpoints": {
+            "noise_squared_sum": {
+              "joint": -0.31498281239584236,
+              "risk": -0.2977709051875373,
+              "service": -0.022290998346204655
+            },
+            "observed_squared_sum": {
+              "joint": -0.2595657659908948,
+              "risk": -0.2695553359980743,
+              "service": -0.007956237633995238
+            }
+          },
+          "operator_change": {
+            "noise_squared_sum": {
+              "joint": -0.1458558243823939,
+              "risk": -0.07583257952780476,
+              "service": -0.06647316281229367
+            },
+            "observed_squared_sum": {
+              "joint": -0.18863221143618383,
+              "risk": -0.08517525762737686,
+              "service": -0.08472598342842472
+            }
+          }
+        }
+      },
+      "noise_norm_RMS_over_radius_RMS": {
+        "coupled": 0.9491161251979209,
+        "minus_full": 1.2617774709879728,
+        "one_ended": 1.290283361707114,
+        "operator_change": 1.4346596370380573,
+        "prefix": 1.2837532583242919
+      },
+      "parameter_noise_energy": {
+        "coupled": 4.166156160414426,
+        "minus_full": 7.363128474552686,
+        "one_ended": 7.699579982282778,
+        "operator_change": 9.519071755045069,
+        "prefix": 7.621842294521791
+      },
+      "prefix_model_exposures": 120
+    }
+  },
+  "next": "Stage268: cached paired fleet-risk event and per-future influence decomposition of coupled response. Distinguish rare action-relative fleet jumps, retained/excluded populations and operator changes while preserving covariance; no new fits, simulation, action selection or tuning.",
+  "scope": "Frozen calibration, labels, representation and selection; coupled full/prefix local KKT response, not finite refits or outcomes."
+}
