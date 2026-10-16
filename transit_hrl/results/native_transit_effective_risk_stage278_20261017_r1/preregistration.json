@@ -1,0 +1,52 @@
+{
+  "contract": {
+    "arms": [
+      "raw_prior",
+      "raw_bounded_clip",
+      "raw_linear_clip",
+      "action_context",
+      "action_context_clip",
+      "observed_context",
+      "observed_context_clip",
+      "action_context_df",
+      "action_context_df_clip",
+      "observed_context_df",
+      "observed_context_df_clip"
+    ],
+    "boundary": "EDF_controls_training_design_sensitivity_not_OOD_capacity_or_correlated_simulator_noise; changed_penalty_not_changed_observations; development_diagnostic_not_policy_gain_or_seed_CI; Stage253_248_169_closed; no_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "cached_cells": 32,
+      "cached_contexts": 704,
+      "fit_tasks": 1,
+      "new_native_episodes": 0,
+      "new_raw_cold_prior_fits": 0,
+      "new_residual_head_fits": 1408
+    },
+    "clip": "same_Stage272_cached_radius_per_fit; original_action_correction0; no_query_rescaling_or_selection",
+    "cohort": "unchanged32_cells_four_views_two_outer_folds_two_partitions_two_directions; full60_prefix54_both_banks_assigned16; all_development_states_no_selected_subgroups",
+    "controls": "reproduce_all_Stage277_cached_predictions_for_both73_maps; all7_old_arm_error_sums; frozen_query_ids_masks_fit_indices_banks_radii; predictions_written_before_evaluation",
+    "evaluation": "cached_assigned_and_opposite16; full_train_held_prefix_retained_excluded_plus_same_prefix54_heads_on_outer_held; predictions_written_before_evaluation; primary_mixed_pooled_excluded_opposite_and_held_opposite",
+    "fit": "two_new_residual_heads_per_context; same_raw_prior_assigned16_physicalMSE_weights_and_anchors; no_raw_prior_cold_reference_or_basis_refit",
+    "representation": "reuse_each_Stage277_73_coefficient_map_and_all_training_normalizers_verbatim",
+    "rule": "train_feature_only_weighted_centered_Gram_eigenvalues; df=1+sum_eigen_over_eigen_plus_lambda; match_each73_head_to_same_subset_Linear9_df_at_lambda0.01; lambda_at_least0.01; no_label_selection_or_search_grid",
+    "source_protocol": "native_transit_state_risk_stage277_v1",
+    "source_run": "native_transit_state_risk_stage277_20261017_r2",
+    "storage": "models_predictions_and_error_ledgers_remote_only; pull_scalar_report"
+  },
+  "protocol": "native_transit_effective_risk_stage278_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "a26e444438e1f6c2228a1b26d98c323d4a1b1a5d"
+}

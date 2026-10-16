@@ -10,5 +10,5 @@
 - Budget: one unpinned scheduler task, 1 CPU / 3072 MiB, any node001-node006; 1,408 residual fits, no raw/prior refit, simulation, action selection or actor update.
 - Read caches remotely; pull scalar report only.
 - Verification: five focused tests, including weighted hat-trace identity, label-independent penalties, exact df matching, clip/original anchors, cached-cell/group replay and completed-parent gate; both cold CLI startups passed.
-- Status: source ready; scheduler submission pending.
+- Status: submitted as `t166106`; source `a26e444438` pushed. Completion and results pending.
 - Limitations: df matches in-sample linear sensitivity, not OOD capacity or correlated simulator-noise amplification. This is development prediction validation, not seed-CI or native control improvement. Stage253/248/169 remain closed.
