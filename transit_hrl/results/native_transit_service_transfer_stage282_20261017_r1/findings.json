@@ -1,0 +1,565 @@
+{
+  "interpretation": "Training-opposite service MSE improves, prefix-excluded MSE worsens, and outer-held MSE is near raw. Some policy gains survive but Stage281 service/wait gains do not transfer in magnitude or consistently across views, banks and risk controls. Clipping alone does not explain the gap.",
+  "next_step": "Stage283: frozen intercept offset versus feature slopes ablations, exact MSE cross terms and original/nonoriginal switch contributions; no new fitting or native simulation.",
+  "primary": {
+    "excluded_opposite": {
+      "observed_context_df_clip": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.0001355517578125,
+            "delta_fleet": -7.595486111111103e-05,
+            "delta_service": -5.959689670138901e-05,
+            "delta_wait_min": -0.00047255859375000303
+          },
+          "first8": {
+            "delta_cost": -9.521666666666666e-05,
+            "delta_fleet": -4.340277777777778e-05,
+            "delta_service": -5.181388888888874e-05,
+            "delta_wait_min": -0.00042239583333333745
+          },
+          "last8": {
+            "delta_cost": -0.00017588684895833385,
+            "delta_fleet": -0.00010850694444444447,
+            "delta_service": -6.737990451388928e-05,
+            "delta_wait_min": -0.0005227213541666686
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -0.000247698404947916,
+            "delta_fleet": -0.00023600260416666661,
+            "delta_service": -1.1695800781249613e-05,
+            "delta_wait_min": -0.00012223307291666806
+          },
+          "first8": {
+            "delta_cost": -0.0003293249348958325,
+            "delta_fleet": -0.000341796875,
+            "delta_service": 1.2471940104167503e-05,
+            "delta_wait_min": 5.533854166663455e-06
+          },
+          "last8": {
+            "delta_cost": -0.0001660718749999999,
+            "delta_fleet": -0.0001302083333333334,
+            "delta_service": -3.5863541666666726e-05,
+            "delta_wait_min": -0.00024999999999999957
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.0005015849934895836,
+            "delta_fleet": 0.0004801432291666662,
+            "delta_service": -0.0009817282226562507,
+            "delta_wait_min": -0.009835221354166668
+          },
+          "first8": {
+            "delta_cost": -0.000654095898437501,
+            "delta_fleet": 0.00020616319444444444,
+            "delta_service": -0.0008602590928819456,
+            "delta_wait_min": -0.00871054687500001
+          },
+          "last8": {
+            "delta_cost": -0.0003490740885416665,
+            "delta_fleet": 0.000754123263888889,
+            "delta_service": -0.0011031973524305554,
+            "delta_wait_min": -0.010959895833333339
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.0002003446614583333,
+            "delta_fleet": -0.0001844618055555555,
+            "delta_service": -1.58828559027779e-05,
+            "delta_wait_min": -0.0001781250000000028
+          },
+          "first8": {
+            "delta_cost": -0.0003032377604166668,
+            "delta_fleet": -0.00031467013888888886,
+            "delta_service": 1.1432378472222253e-05,
+            "delta_wait_min": 2.578124999999342e-05
+          },
+          "last8": {
+            "delta_cost": -9.745156250000027e-05,
+            "delta_fleet": -5.42534722222223e-05,
+            "delta_service": -4.319809027777804e-05,
+            "delta_wait_min": -0.0003820312499999992
+          }
+        }
+      },
+      "raw_linear_clip": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.00012506845703125,
+            "delta_fleet": -9.494357638888899e-05,
+            "delta_service": -3.0124880642361183e-05,
+            "delta_wait_min": -0.00030882161458333705
+          },
+          "first8": {
+            "delta_cost": -8.328398437500017e-05,
+            "delta_fleet": -4.340277777777773e-05,
+            "delta_service": -3.9881206597222396e-05,
+            "delta_wait_min": -0.00044498697916667236
+          },
+          "last8": {
+            "delta_cost": -0.0001668529296875002,
+            "delta_fleet": -0.000146484375,
+            "delta_service": -2.0368554687499954e-05,
+            "delta_wait_min": -0.00017265625000000234
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -0.00024380768229166654,
+            "delta_fleet": -0.0002305772569444445,
+            "delta_service": -1.3230425347222113e-05,
+            "delta_wait_min": -0.0002977213541666704
+          },
+          "first8": {
+            "delta_cost": -0.0002712289062499996,
+            "delta_fleet": -0.00026041666666666666,
+            "delta_service": -1.0812239583333081e-05,
+            "delta_wait_min": -0.0003236979166666738
+          },
+          "last8": {
+            "delta_cost": -0.00021638645833333363,
+            "delta_fleet": -0.0002007378472222222,
+            "delta_service": -1.5648611111111158e-05,
+            "delta_wait_min": -0.0002717447916666682
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.0005217845052083334,
+            "delta_fleet": 0.00047743055555555505,
+            "delta_service": -0.0009992150607638901,
+            "delta_wait_min": -0.010112988281250013
+          },
+          "first8": {
+            "delta_cost": -0.0006063762369791677,
+            "delta_fleet": 0.0002983940972222224,
+            "delta_service": -0.0009047703342013904,
+            "delta_wait_min": -0.00925071614583335
+          },
+          "last8": {
+            "delta_cost": -0.00043719277343749925,
+            "delta_fleet": 0.0006564670138888885,
+            "delta_service": -0.0010936597873263875,
+            "delta_wait_min": -0.01097526041666666
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -1.5012076822916556e-05,
+            "delta_fleet": 2.710505431213761e-20,
+            "delta_service": -1.5012076822916748e-05,
+            "delta_wait_min": -0.00022910156250000228
+          },
+          "first8": {
+            "delta_cost": 1.784257812500007e-05,
+            "delta_fleet": 2.7126736111111096e-05,
+            "delta_service": -9.28415798611099e-06,
+            "delta_wait_min": -0.00016100260416667108
+          },
+          "last8": {
+            "delta_cost": -4.7866731770833794e-05,
+            "delta_fleet": -2.712673611111107e-05,
+            "delta_service": -2.0739995659722532e-05,
+            "delta_wait_min": -0.000297200520833334
+          }
+        }
+      },
+      "raw_prior": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": -5.7631510416666836e-05,
+            "delta_fleet": -4.06901041666667e-05,
+            "delta_service": -1.6941406250000128e-05,
+            "delta_wait_min": -0.00015589192708333725
+          },
+          "first8": {
+            "delta_cost": -0.0001546902343750002,
+            "delta_fleet": -0.00015190972222222222,
+            "delta_service": -2.780512152777995e-06,
+            "delta_wait_min": -5.709635416667113e-05
+          },
+          "last8": {
+            "delta_cost": 3.942721354166659e-05,
+            "delta_fleet": 7.052951388888888e-05,
+            "delta_service": -3.1102300347222267e-05,
+            "delta_wait_min": -0.00025468750000000334
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -8.192802734375032e-05,
+            "delta_fleet": -0.00010850694444444447,
+            "delta_service": 2.6578917100694095e-05,
+            "delta_wait_min": 8.94531249999955e-05
+          },
+          "first8": {
+            "delta_cost": -0.00026089980468749967,
+            "delta_fleet": -0.00030381944444444445,
+            "delta_service": 4.291963975694483e-05,
+            "delta_wait_min": 0.00016992187499999465
+          },
+          "last8": {
+            "delta_cost": 9.704374999999897e-05,
+            "delta_fleet": 8.680555555555556e-05,
+            "delta_service": 1.0238194444443375e-05,
+            "delta_wait_min": 8.984374999996207e-06
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.0002887891276041671,
+            "delta_fleet": 0.0006863064236111108,
+            "delta_service": -0.000975095551215279,
+            "delta_wait_min": -0.009911718749999998
+          },
+          "first8": {
+            "delta_cost": -0.0004717471354166676,
+            "delta_fleet": 0.00039062500000000013,
+            "delta_service": -0.0008623721354166674,
+            "delta_wait_min": -0.00880807291666668
+          },
+          "last8": {
+            "delta_cost": -0.00010583111979166637,
+            "delta_fleet": 0.0009819878472222218,
+            "delta_service": -0.0010878189670138884,
+            "delta_wait_min": -0.011015364583333341
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -2.9163411458356263e-07,
+            "delta_fleet": -3.526475694444446e-05,
+            "delta_service": 3.4973122829860864e-05,
+            "delta_wait_min": 0.0002020507812499984
+          },
+          "first8": {
+            "delta_cost": -0.00021250279947916662,
+            "delta_fleet": -0.0002495659722222222,
+            "delta_service": 3.706317274305561e-05,
+            "delta_wait_min": 0.00020598958333333233
+          },
+          "last8": {
+            "delta_cost": 0.00021191953124999961,
+            "delta_fleet": 0.00017903645833333337,
+            "delta_service": 3.288307291666614e-05,
+            "delta_wait_min": 0.0001981119791666645
+          }
+        }
+      }
+    },
+    "held_opposite": {
+      "observed_context_df_clip": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": 1.1409798177083007e-05,
+            "delta_fleet": 6.239149305555566e-05,
+            "delta_service": -5.098169487847264e-05,
+            "delta_wait_min": -0.0003846679687499994
+          },
+          "first8": {
+            "delta_cost": -5.5979101562500435e-05,
+            "delta_fleet": -1.627604166666661e-05,
+            "delta_service": -3.9703059895833785e-05,
+            "delta_wait_min": -0.00041106770833333674
+          },
+          "last8": {
+            "delta_cost": 7.879869791666637e-05,
+            "delta_fleet": 0.00014105902777777774,
+            "delta_service": -6.226032986111126e-05,
+            "delta_wait_min": -0.0003582682291666621
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -0.00010079990234375055,
+            "delta_fleet": 8.138020833333142e-06,
+            "delta_service": -0.0001089379231770837,
+            "delta_wait_min": -0.001003938802083337
+          },
+          "first8": {
+            "delta_cost": -0.00012469863281250055,
+            "delta_fleet": -1.0850694444444406e-05,
+            "delta_service": -0.0001138479383680559,
+            "delta_wait_min": -0.0011921875000000053
+          },
+          "last8": {
+            "delta_cost": -7.690117187500017e-05,
+            "delta_fleet": 2.7126736111111096e-05,
+            "delta_service": -0.00010402790798611137,
+            "delta_wait_min": -0.0008156901041666675
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.00038196269531250095,
+            "delta_fleet": 0.00045301649305555557,
+            "delta_service": -0.0008349791883680564,
+            "delta_wait_min": -0.008102539062500002
+          },
+          "first8": {
+            "delta_cost": -0.000543270963541668,
+            "delta_fleet": 0.00026041666666666666,
+            "delta_service": -0.0008036876302083345,
+            "delta_wait_min": -0.00803053385416667
+          },
+          "last8": {
+            "delta_cost": -0.0002206544270833339,
+            "delta_fleet": 0.0006456163194444446,
+            "delta_service": -0.0008662707465277783,
+            "delta_wait_min": -0.008174544270833332
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -3.4793359375000004e-05,
+            "delta_fleet": 7.59548611111112e-05,
+            "delta_service": -0.00011074822048611118,
+            "delta_wait_min": -0.0010326497395833326
+          },
+          "first8": {
+            "delta_cost": -0.00019109537760416653,
+            "delta_fleet": -7.052951388888896e-05,
+            "delta_service": -0.00012056586371527776,
+            "delta_wait_min": -0.0011656901041666675
+          },
+          "last8": {
+            "delta_cost": 0.00012150865885416669,
+            "delta_fleet": 0.00022243923611111116,
+            "delta_service": -0.00010093057725694453,
+            "delta_wait_min": -0.0008996093749999985
+          }
+        }
+      },
+      "raw_linear_clip": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": -9.620699869791646e-05,
+            "delta_fleet": -9.494357638888915e-05,
+            "delta_service": -1.2634223090277183e-06,
+            "delta_wait_min": 7.604166666666762e-05
+          },
+          "first8": {
+            "delta_cost": -0.0002022341145833332,
+            "delta_fleet": -0.00022243923611111108,
+            "delta_service": 2.0205121527777615e-05,
+            "delta_wait_min": 0.0001890625000000015
+          },
+          "last8": {
+            "delta_cost": 9.820117187500437e-06,
+            "delta_fleet": 3.255208333333337e-05,
+            "delta_service": -2.273196614583289e-05,
+            "delta_wait_min": -3.697916666666476e-05
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -5.167786458333269e-05,
+            "delta_fleet": -3.255208333333338e-05,
+            "delta_service": -1.912578124999958e-05,
+            "delta_wait_min": -0.00023046874999999955
+          },
+          "first8": {
+            "delta_cost": -0.0002663013020833331,
+            "delta_fleet": -0.0002387152777777777,
+            "delta_service": -2.7586024305555388e-05,
+            "delta_wait_min": -0.00040292968749999856
+          },
+          "last8": {
+            "delta_cost": 0.00016294557291666748,
+            "delta_fleet": 0.00017361111111111114,
+            "delta_service": -1.0665538194443635e-05,
+            "delta_wait_min": -5.800781249999968e-05
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.0003307433593750002,
+            "delta_fleet": 0.0005208333333333333,
+            "delta_service": -0.0008515766927083338,
+            "delta_wait_min": -0.008443880208333338
+          },
+          "first8": {
+            "delta_cost": -0.0005355177734375007,
+            "delta_fleet": 0.00027126736111111107,
+            "delta_service": -0.0008067851345486119,
+            "delta_wait_min": -0.008247591145833344
+          },
+          "last8": {
+            "delta_cost": -0.00012596894531249987,
+            "delta_fleet": 0.0007703993055555559,
+            "delta_service": -0.0008963682508680557,
+            "delta_wait_min": -0.008640169270833335
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.00012524524739583267,
+            "delta_fleet": -3.255208333333338e-05,
+            "delta_service": -9.269316406249962e-05,
+            "delta_wait_min": -0.0008648111979166683
+          },
+          "first8": {
+            "delta_cost": -0.00030177434895833357,
+            "delta_fleet": -0.00021158854166666667,
+            "delta_service": -9.018580729166682e-05,
+            "delta_wait_min": -0.0008975911458333349
+          },
+          "last8": {
+            "delta_cost": 5.128385416666759e-05,
+            "delta_fleet": 0.00014648437500000002,
+            "delta_service": -9.520052083333236e-05,
+            "delta_wait_min": -0.0008320312500000003
+          }
+        }
+      },
+      "raw_prior": {
+        "action_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.0001899977864583336,
+            "delta_fleet": -0.0001274956597222222,
+            "delta_service": -6.25021267361113e-05,
+            "delta_wait_min": -0.00044326171875000165
+          },
+          "first8": {
+            "delta_cost": -0.00029650527343750015,
+            "delta_fleet": -0.00024414062499999997,
+            "delta_service": -5.236464843750003e-05,
+            "delta_wait_min": -0.0004057942708333353
+          },
+          "last8": {
+            "delta_cost": -8.34902994791669e-05,
+            "delta_fleet": -1.0850694444444421e-05,
+            "delta_service": -7.263960503472262e-05,
+            "delta_wait_min": -0.0004807291666666683
+          }
+        },
+        "linear_clip": {
+          "all16": {
+            "delta_cost": -0.0002526000325520829,
+            "delta_fleet": -0.00015190972222222217,
+            "delta_service": -0.00010069031032986086,
+            "delta_wait_min": -0.0009185546875000039
+          },
+          "first8": {
+            "delta_cost": -0.0003936472656249994,
+            "delta_fleet": -0.0002821180555555556,
+            "delta_service": -0.00011152921006944401,
+            "delta_wait_min": -0.0010575520833333392
+          },
+          "last8": {
+            "delta_cost": -0.00011155279947916666,
+            "delta_fleet": -2.1701388888888846e-05,
+            "delta_service": -8.985141059027774e-05,
+            "delta_wait_min": -0.0007795572916666691
+          }
+        },
+        "mc": {
+          "all16": {
+            "delta_cost": -0.0006436587239583342,
+            "delta_fleet": 0.0003173828125,
+            "delta_service": -0.0009610415364583342,
+            "delta_wait_min": -0.009253255208333335
+          },
+          "first8": {
+            "delta_cost": -0.0009422980468750009,
+            "delta_fleet": -1.0842021724855045e-20,
+            "delta_service": -0.000942298046875001,
+            "delta_wait_min": -0.009251888020833342
+          },
+          "last8": {
+            "delta_cost": -0.0003450194010416673,
+            "delta_fleet": 0.0006347656250000002,
+            "delta_service": -0.000979785026041667,
+            "delta_wait_min": -0.009254622395833334
+          }
+        },
+        "observed_context_df_clip": {
+          "all16": {
+            "delta_cost": -0.0001431790364583332,
+            "delta_fleet": -8.680555555555556e-05,
+            "delta_service": -5.6373480902777605e-05,
+            "delta_wait_min": -0.0004998372395833366
+          },
+          "first8": {
+            "delta_cost": -0.00021068828124999953,
+            "delta_fleet": -0.00016276041666666666,
+            "delta_service": -4.7927864583332896e-05,
+            "delta_wait_min": -0.0004742187500000034
+          },
+          "last8": {
+            "delta_cost": -7.56697916666668e-05,
+            "delta_fleet": -1.0850694444444435e-05,
+            "delta_service": -6.481909722222237e-05,
+            "delta_wait_min": -0.0005254557291666697
+          }
+        }
+      }
+    }
+  },
+  "protocol": "native_transit_service_transfer_stage282_v1",
+  "service_MSE": {
+    "excluded_opposite": {
+      "action_context_df": 8.035345907458848e-05,
+      "action_context_df_clip": 7.651370009842195e-05,
+      "linear": 0.00011616201770999866,
+      "linear_clip": 7.916018239569246e-05,
+      "mc": 3.504984423871473e-05,
+      "observed_context_df": 7.683339891458702e-05,
+      "observed_context_df_clip": 7.48336574514703e-05,
+      "raw": 7.149176378759798e-05
+    },
+    "held_opposite": {
+      "action_context_df": 0.00011164107878913942,
+      "action_context_df_clip": 0.00011189341257408582,
+      "linear": 0.0001532494325614275,
+      "linear_clip": 0.00011515688182575134,
+      "mc": 4.112766266788855e-05,
+      "observed_context_df": 0.00011090331492180714,
+      "observed_context_df_clip": 0.00011181297982701536,
+      "raw": 0.00011184606982813241
+    },
+    "matched_held_opposite": {
+      "action_context_df": 0.00011319580763673112,
+      "action_context_df_clip": 0.0001127696355183001,
+      "linear": 0.0001619717608483517,
+      "linear_clip": 0.00011707193667846543,
+      "mc": 4.112766266788855e-05,
+      "observed_context_df": 0.0001122783953791033,
+      "observed_context_df_clip": 0.00011289095518777502,
+      "raw": 0.00011184606982813221
+    },
+    "retained_opposite": {
+      "action_context_df": 5.087858092579805e-05,
+      "action_context_df_clip": 5.3824865334429964e-05,
+      "linear": 5.246209219765429e-05,
+      "linear_clip": 5.694972788284681e-05,
+      "mc": 3.504984423871482e-05,
+      "observed_context_df": 5.0761015286876864e-05,
+      "observed_context_df_clip": 5.352683383909454e-05,
+      "raw": 7.149176378759809e-05
+    },
+    "train_opposite": {
+      "action_context_df": 5.237767668567348e-05,
+      "action_context_df_clip": 5.490538977804354e-05,
+      "linear": 5.327091007444424e-05,
+      "linear_clip": 5.750311357872889e-05,
+      "mc": 3.504984423871475e-05,
+      "observed_context_df": 5.2282503144244284e-05,
+      "observed_context_df_clip": 5.460660521353632e-05,
+      "raw": 7.149176378759804e-05
+    },
+    "train_same": {
+      "action_context_df": 4.7156314257040096e-05,
+      "action_context_df_clip": 5.05505753532939e-05,
+      "linear": 4.8714292449231845e-05,
+      "linear_clip": 5.381730689622525e-05,
+      "mc": 0.0,
+      "observed_context_df": 4.6370579176717895e-05,
+      "observed_context_df_clip": 4.935200828025336e-05,
+      "raw": 7.149176378759803e-05
+    }
+  }
+}
