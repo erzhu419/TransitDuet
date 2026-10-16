@@ -35,3 +35,12 @@ demand-day clusters after averaging actors/windows. Hindsight joint passenger,
 CV and readiness opportunities are descriptive, not policy gains. No fitting,
 model promotion or controller confirmation. These development labels cannot
 serve as held-out evidence for a subsequently trained action-effect model.
+
+## Execution
+
+Source `5dd43f49d9`, remote snapshot `source/v67_labels_20261016`.
+Smoke `t165468`: 45 tests passed; native V60 and complete seven-action/no-op
+replays passed. References `t165475-t165479`: 32 days completed, no retries.
+Interventions `t165481-t165485`: 337 planned workers over two waves on
+node001/002/004/005/006; aggregate `t165486` waits for all shard markers.
+Actor, dual, value and main remain frozen; full labels stay on the server.
