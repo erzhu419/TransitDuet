@@ -51,7 +51,8 @@ def due_at_return(env, direction):
     return count
 
 
-def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_training=False):
+def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_training=False,
+            training_path=None):
     _, Runner, load_config, runtime_torch = joint.optimized_runtime(root)
     observer, moments = CreditObserver(), ArrivalMoments()
     uniforms = event.EventUniforms(sampler_seed)
@@ -135,7 +136,7 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
         exposures = np.asarray([t.exposure[0] + t.exposure[1] for t in observer.stream.transitions])
         remaining = np.cumsum(exposures[::-1])[::-1]
         np.testing.assert_allclose(remaining[0] + observer.stream.prefix[:2].sum(), row["passenger_person_s"], rtol=0, atol=1e-7)
-        path = root / "training" / f"seed{seed}_day{scenario}.npz"
+        path = training_path if training_path is not None else root / "training" / f"seed{seed}_day{scenario}.npz"
         path.parent.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(path, times=[r["time_s"] for r in records],
             features=[r["features"] for r in records], probabilities=[r["probabilities"] for r in records],

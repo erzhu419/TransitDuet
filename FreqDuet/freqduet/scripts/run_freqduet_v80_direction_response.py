@@ -42,11 +42,11 @@ def run_item(root, v78_root, index):
     seed, day, rep = ITEMS[index]
     theta = np.asarray(json.loads((v78_root / "adapters" / f"seed{seed}.json").read_text())["theta"])
     sampler = 180000000 + seed + 100 * (day - DAYS[0]) + rep
-    cell = root / "cells" / f"i{index}"
     results, records, alignments = {}, None, {}
     for label, scale in SCALES.items():
-        row, events, _, _ = pilot.rollout(cell, seed, day, "stochastic", sampler,
-            theta * scale, label, save_training=label == "reference")
+        row, events, _, _ = pilot.rollout(root, seed, day, "stochastic", sampler,
+            theta * scale, f"i{index}_{label}", save_training=label == "reference",
+            training_path=root / "baseline" / f"i{index}.npz")
         results[label] = row
         if label == "reference":
             records = events
@@ -64,7 +64,7 @@ def score_direction(root, seed, theta):
         days = []
         for day in DAYS:
             index = ITEMS.index((seed, day, rep))
-            with np.load(root / "cells" / f"i{index}" / "training" / f"seed{seed}_day{day}.npz") as saved:
+            with np.load(root / "baseline" / f"i{index}.npz") as saved:
                 days.append(dict(saved))
         mean, pseudo = audit.jackknife_gradients(days)
         means.append((mean @ theta) * UNITS)
@@ -127,8 +127,9 @@ def main():
     args = parser.parse_args()
     torch.set_num_threads(1)
     if args.command == "smoke":
-        subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
-            str(Path(__file__).resolve().parents[1] / "tests"), "-p", "test_v80_*.py", "-v"], check=True)
+        for pattern in ("test_v78_*.py", "test_v80_*.py"):
+            subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
+                str(Path(__file__).resolve().parents[1] / "tests"), "-p", pattern, "-v"], check=True)
         run_item(args.out_root, args.v78_root, 0)
         pilot.write_json(args.out_root / "smoke" / "done.json", dict(status="tests_and_full_paired_cell_passed"))
     elif args.command == "run":
