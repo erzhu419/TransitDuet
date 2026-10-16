@@ -48,9 +48,9 @@ jointly nonworse points. Exposure +12.66 [-66.60,98.77] person-seconds;
 actual holding +4.32 [2.23,6.30] seconds/day. Both registered gates fail.
 No fresh confirmation, production update or policy switch.
 
-Next: use fixed cached fits to separate fitting error from excluded-day error
-and inspect day/actor feature support before choosing structured lower-dimensional
-resource features or more independent training days. Do not tune ridge/gates on V70.
+V74 completed the fixed-fit error/support diagnosis; see
+`protocol_v6_v74_fit_gap.md` for the next structural-feature/data-budget step.
+Do not tune ridge/gates on V70.
 
 Limitations: consumed 12-day development data, two original training seeds and
 no capacity isolation. The primary has 4127 inputs / 41280 coefficients and

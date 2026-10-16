@@ -22,9 +22,25 @@ Run focused loader/pairing/support tests, actual first-fold cached reproduction,
 twelve parallel read-only folds and aggregation via scheduler on node001-node006.
 Pull only small summary JSON. V70/V73 development gates remain failed.
 
-Next: distinguish insufficient fitting from in-sample optimism/support shift,
-then choose structural features or independent training-day expansion.
+## Outcome / Next
 
-Limitations: same consumed 32-future mean labels and overlapping fits. This
+Source `aff0f5ead7`, scheduler `t165771` on node004, 12 workers, exit 0/no retry.
+Four tests and all 144 cached held-prefix error/choice identities pass.
+Passenger MAE (in-sample / excluded day): original 1652.58 / 1997.77;
+fleet+plan 1439.20 / 2262.90 person-seconds. Primary-minus-original is -213.38
+[-455.45,-43.29] in-sample but +265.12 [145.96,383.25] excluded-day.
+Excluded MAE worsens on 10/12 days, all four actors and all three windows.
+Plan nearest RMS rises 0.261 to 0.305; fleet 0.923 to 0.941. Matched-range
+violations/novel-constant counts do not increase overall, with the unequal
+reference counts noted above. Geometry does not establish absence of shift.
+Only 131193 bytes of summary JSON were collected; no fits or rollouts added.
+
+Next: use fixed low-dimensional, controlled-vehicle-linked turnover/dispatch
+commitment features and more independent training days. The current evidence
+favors in-sample optimism over failure to fit, not a single anomalous context.
+Keep actor/dual/main frozen and preserve failed gates; no posthoc winner.
+
+Limitations: same consumed 32-future mean labels and overlapping fits. Day CIs
+are descriptive conditional on saved fits, not retrained-bootstrap inference. This
 cannot separately identify label noise, model misspecification and finite-day
 estimation error, and is not new-day or controller confirmation.
