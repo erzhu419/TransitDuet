@@ -1,0 +1,492 @@
+{
+  "all_unique_eligible": {
+    "action_future_keys": 25120,
+    "actions_with_both_signs_observed": 124,
+    "actions_with_no_event_in_either_bank": 392,
+    "bank_mean_sign_reversals": 41,
+    "direct_mean_sum_by_bank": [
+      1.2604166666666685,
+      1.395833333333337
+    ],
+    "gap_gram": [
+      [
+        0.24102858555169768,
+        0.0002456476658950546,
+        -0.009087456597222222,
+        0.0
+      ],
+      [
+        0.0002456476658950546,
+        0.0010202666859567904,
+        0.0013834635416666674,
+        0.0
+      ],
+      [
+        -0.009087456597222222,
+        0.0013834635416666674,
+        0.4395887586805558,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "gap_parts_squared_sum": {
+      "amplitude": 0.0010202666859567904,
+      "near_zero": 0.0,
+      "one_sided_support": 0.4395887586805558,
+      "probability": 0.24102858555169768
+    },
+    "gap_signed_cross_sum": -0.014916690779321007,
+    "observed_gap_RMS": 0.029143198398867993,
+    "observed_gap_squared_sum": 0.6667209201388888,
+    "observed_over_plugin_noise_RMS": 1.0034270905246452,
+    "plugin_noise_RMS": 0.029043663136133165,
+    "plugin_two_bank_mean_variance_sum": 0.6621744791666667,
+    "saved_added_signed_noise_cross_sum": 0.024804687500000026,
+    "scatter_fraction": {
+      "near_zero": 0.0,
+      "occurrence": 0.9984414657504861,
+      "within_event": 0.0015585342495184203
+    },
+    "scatter_signed_cross_sum": 0.0,
+    "scatter_variance": {
+      "near_zero": 0.0,
+      "occurrence": 0.6611424575617314,
+      "within_event": 0.0010320216049382717
+    },
+    "signs": {
+      "added_fleet": {
+        "both_banks_supported_actions": 100,
+        "both_supported_amplitude_gap_RMS": 0.0216951379886296,
+        "both_supported_amplitude_gap_over_midpoint_RMS": 0.05293624836498438,
+        "both_supported_equal_amplitude_actions": 97,
+        "event_draws": 584,
+        "neither_bank_supported_actions": 497,
+        "one_bank_supported_actions": 188,
+        "one_event_action_banks": 266,
+        "probability_gap_RMS": 0.0521244529825121,
+        "unsigned_mean_sum_by_bank": [
+          7.760416666666679,
+          7.093750000000014
+        ],
+        "zero_event_action_banks": 1182
+      },
+      "saved_fleet": {
+        "both_banks_supported_actions": 80,
+        "both_supported_amplitude_gap_RMS": 0.03359274061791063,
+        "both_supported_amplitude_gap_over_midpoint_RMS": 0.08236554799436634,
+        "both_supported_equal_amplitude_actions": 76,
+        "event_draws": 482,
+        "neither_bank_supported_actions": 556,
+        "one_bank_supported_actions": 149,
+        "one_event_action_banks": 208,
+        "probability_gap_RMS": 0.04742577170332657,
+        "unsigned_mean_sum_by_bank": [
+          6.500000000000007,
+          5.697916666666664
+        ],
+        "zero_event_action_banks": 1261
+      }
+    },
+    "unique_state_actions": 785,
+    "zero_any_event_action_banks": 987
+  },
+  "focus_mixed_active_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "action_future_keys": 544,
+      "actions_with_both_signs_observed": 1,
+      "actions_with_no_event_in_either_bank": 13,
+      "bank_mean_sign_reversals": 0,
+      "direct_mean_sum_by_bank": [
+        -0.052083333333333336,
+        -0.026041666666666668
+      ],
+      "gap_gram": [
+        [
+          0.0006781684027777779,
+          0.0,
+          0.0006781684027777779,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0006781684027777779,
+          0.0,
+          0.0027126736111111114,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gap_parts_squared_sum": {
+        "amplitude": 0.0,
+        "near_zero": 0.0,
+        "one_sided_support": 0.0027126736111111114,
+        "probability": 0.0006781684027777779
+      },
+      "gap_signed_cross_sum": 0.0013563368055555555,
+      "observed_gap_RMS": 0.0167106496854101,
+      "observed_gap_squared_sum": 0.004747178819444445,
+      "observed_over_plugin_noise_RMS": 1.0,
+      "plugin_noise_RMS": 0.0167106496854101,
+      "plugin_two_bank_mean_variance_sum": 0.004747178819444445,
+      "saved_added_signed_noise_cross_sum": 9.042245370370371e-05,
+      "scatter_fraction": {
+        "near_zero": 0.0,
+        "occurrence": 1.0000000000000004,
+        "within_event": 0.0
+      },
+      "scatter_signed_cross_sum": 0.0,
+      "scatter_variance": {
+        "near_zero": 0.0,
+        "occurrence": 0.004747178819444447,
+        "within_event": 0.0
+      },
+      "signs": {
+        "added_fleet": {
+          "both_banks_supported_actions": 0,
+          "both_supported_amplitude_gap_RMS": null,
+          "both_supported_amplitude_gap_over_midpoint_RMS": null,
+          "both_supported_equal_amplitude_actions": 0,
+          "event_draws": 2,
+          "neither_bank_supported_actions": 15,
+          "one_bank_supported_actions": 2,
+          "one_event_action_banks": 2,
+          "probability_gap_RMS": 0.021437323142813606,
+          "unsigned_mean_sum_by_bank": [
+            0.026041666666666668,
+            0.026041666666666668
+          ],
+          "zero_event_action_banks": 32
+        },
+        "saved_fleet": {
+          "both_banks_supported_actions": 1,
+          "both_supported_amplitude_gap_RMS": 0.0,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.0,
+          "both_supported_equal_amplitude_actions": 1,
+          "event_draws": 5,
+          "neither_bank_supported_actions": 14,
+          "one_bank_supported_actions": 2,
+          "one_event_action_banks": 3,
+          "probability_gap_RMS": 0.026255251575525183,
+          "unsigned_mean_sum_by_bank": [
+            0.078125,
+            0.052083333333333336
+          ],
+          "zero_event_action_banks": 30
+        }
+      },
+      "unique_state_actions": 17,
+      "zero_any_event_action_banks": 29
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "action_future_keys": 544,
+      "actions_with_both_signs_observed": 1,
+      "actions_with_no_event_in_either_bank": 13,
+      "bank_mean_sign_reversals": 0,
+      "direct_mean_sum_by_bank": [
+        -0.052083333333333336,
+        -0.026041666666666668
+      ],
+      "gap_gram": [
+        [
+          0.0006781684027777779,
+          0.0,
+          0.0006781684027777779,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0006781684027777779,
+          0.0,
+          0.0027126736111111114,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gap_parts_squared_sum": {
+        "amplitude": 0.0,
+        "near_zero": 0.0,
+        "one_sided_support": 0.0027126736111111114,
+        "probability": 0.0006781684027777779
+      },
+      "gap_signed_cross_sum": 0.0013563368055555555,
+      "observed_gap_RMS": 0.0167106496854101,
+      "observed_gap_squared_sum": 0.004747178819444445,
+      "observed_over_plugin_noise_RMS": 1.0,
+      "plugin_noise_RMS": 0.0167106496854101,
+      "plugin_two_bank_mean_variance_sum": 0.004747178819444445,
+      "saved_added_signed_noise_cross_sum": 9.042245370370371e-05,
+      "scatter_fraction": {
+        "near_zero": 0.0,
+        "occurrence": 1.0000000000000004,
+        "within_event": 0.0
+      },
+      "scatter_signed_cross_sum": 0.0,
+      "scatter_variance": {
+        "near_zero": 0.0,
+        "occurrence": 0.004747178819444447,
+        "within_event": 0.0
+      },
+      "signs": {
+        "added_fleet": {
+          "both_banks_supported_actions": 0,
+          "both_supported_amplitude_gap_RMS": null,
+          "both_supported_amplitude_gap_over_midpoint_RMS": null,
+          "both_supported_equal_amplitude_actions": 0,
+          "event_draws": 2,
+          "neither_bank_supported_actions": 15,
+          "one_bank_supported_actions": 2,
+          "one_event_action_banks": 2,
+          "probability_gap_RMS": 0.021437323142813606,
+          "unsigned_mean_sum_by_bank": [
+            0.026041666666666668,
+            0.026041666666666668
+          ],
+          "zero_event_action_banks": 32
+        },
+        "saved_fleet": {
+          "both_banks_supported_actions": 1,
+          "both_supported_amplitude_gap_RMS": 0.0,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.0,
+          "both_supported_equal_amplitude_actions": 1,
+          "event_draws": 5,
+          "neither_bank_supported_actions": 14,
+          "one_bank_supported_actions": 2,
+          "one_event_action_banks": 3,
+          "probability_gap_RMS": 0.026255251575525183,
+          "unsigned_mean_sum_by_bank": [
+            0.078125,
+            0.052083333333333336
+          ],
+          "zero_event_action_banks": 30
+        }
+      },
+      "unique_state_actions": 17,
+      "zero_any_event_action_banks": 29
+    }
+  },
+  "interpretation": "Raw action-level label noise is predominantly occurrence. Stage268 grouped frozen KKT responses by any eligible action-pair event, so its within-event scatter also contains action/sign-pattern variation; these are different estimands. Empty empirical support does not identify true risk. Factorization alone reproduces, rather than improves, direct means.",
+  "limits": "Reused development labels; unique eligibility unions are descriptive. No new fits or simulations, no independent training-seed or policy-performance claim, no default change.",
+  "mixed_active_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "action_future_keys": 20928,
+      "actions_with_both_signs_observed": 108,
+      "actions_with_no_event_in_either_bank": 322,
+      "bank_mean_sign_reversals": 37,
+      "direct_mean_sum_by_bank": [
+        0.6510416666666669,
+        0.6302083333333353
+      ],
+      "gap_gram": [
+        [
+          0.2247525438850309,
+          0.0002456476658950546,
+          -0.008409288194444444,
+          0.0
+        ],
+        [
+          0.0002456476658950546,
+          0.0010202666859567902,
+          0.0013834635416666674,
+          0.0
+        ],
+        [
+          -0.008409288194444444,
+          0.0013834635416666674,
+          0.39569769965277823,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gap_parts_squared_sum": {
+        "amplitude": 0.0010202666859567902,
+        "near_zero": 0.0,
+        "one_sided_support": 0.39569769965277823,
+        "probability": 0.2247525438850309
+      },
+      "gap_signed_cross_sum": -0.013560353973765316,
+      "observed_gap_RMS": 0.03048813265515232,
+      "observed_gap_squared_sum": 0.6079101562500001,
+      "observed_over_plugin_noise_RMS": 1.0339192348294937,
+      "plugin_noise_RMS": 0.02948792480892397,
+      "plugin_two_bank_mean_variance_sum": 0.5686776620370371,
+      "saved_added_signed_noise_cross_sum": 0.021368634259259278,
+      "scatter_fraction": {
+        "near_zero": 0.0,
+        "occurrence": 0.9981852257019572,
+        "within_event": 0.0018147742980469976
+      },
+      "scatter_signed_cross_sum": 0.0,
+      "scatter_variance": {
+        "near_zero": 0.0,
+        "occurrence": 0.5676456404321012,
+        "within_event": 0.0010320216049382717
+      },
+      "signs": {
+        "added_fleet": {
+          "both_banks_supported_actions": 83,
+          "both_supported_amplitude_gap_RMS": 0.02381350766696147,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.05830614971501624,
+          "both_supported_equal_amplitude_actions": 80,
+          "event_draws": 485,
+          "neither_bank_supported_actions": 418,
+          "one_bank_supported_actions": 153,
+          "one_event_action_banks": 217,
+          "probability_gap_RMS": 0.05359986321243215,
+          "unsigned_mean_sum_by_bank": [
+            6.484375000000004,
+            5.833333333333343
+          ],
+          "zero_event_action_banks": 989
+        },
+        "saved_fleet": {
+          "both_banks_supported_actions": 70,
+          "both_supported_amplitude_gap_RMS": 0.03591215030713894,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.08832865043473667,
+          "both_supported_equal_amplitude_actions": 66,
+          "event_draws": 437,
+          "neither_bank_supported_actions": 450,
+          "one_bank_supported_actions": 134,
+          "one_event_action_banks": 180,
+          "probability_gap_RMS": 0.050264495376088715,
+          "unsigned_mean_sum_by_bank": [
+            5.833333333333336,
+            5.203124999999995
+          ],
+          "zero_event_action_banks": 1034
+        }
+      },
+      "unique_state_actions": 654,
+      "zero_any_event_action_banks": 814
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "action_future_keys": 20928,
+      "actions_with_both_signs_observed": 108,
+      "actions_with_no_event_in_either_bank": 322,
+      "bank_mean_sign_reversals": 37,
+      "direct_mean_sum_by_bank": [
+        0.6510416666666669,
+        0.6302083333333353
+      ],
+      "gap_gram": [
+        [
+          0.2247525438850309,
+          0.0002456476658950546,
+          -0.008409288194444444,
+          0.0
+        ],
+        [
+          0.0002456476658950546,
+          0.0010202666859567902,
+          0.0013834635416666674,
+          0.0
+        ],
+        [
+          -0.008409288194444444,
+          0.0013834635416666674,
+          0.39569769965277823,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "gap_parts_squared_sum": {
+        "amplitude": 0.0010202666859567902,
+        "near_zero": 0.0,
+        "one_sided_support": 0.39569769965277823,
+        "probability": 0.2247525438850309
+      },
+      "gap_signed_cross_sum": -0.013560353973765316,
+      "observed_gap_RMS": 0.03048813265515232,
+      "observed_gap_squared_sum": 0.6079101562500001,
+      "observed_over_plugin_noise_RMS": 1.0339192348294937,
+      "plugin_noise_RMS": 0.02948792480892397,
+      "plugin_two_bank_mean_variance_sum": 0.5686776620370371,
+      "saved_added_signed_noise_cross_sum": 0.021368634259259278,
+      "scatter_fraction": {
+        "near_zero": 0.0,
+        "occurrence": 0.9981852257019572,
+        "within_event": 0.0018147742980469976
+      },
+      "scatter_signed_cross_sum": 0.0,
+      "scatter_variance": {
+        "near_zero": 0.0,
+        "occurrence": 0.5676456404321012,
+        "within_event": 0.0010320216049382717
+      },
+      "signs": {
+        "added_fleet": {
+          "both_banks_supported_actions": 83,
+          "both_supported_amplitude_gap_RMS": 0.02381350766696147,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.05830614971501624,
+          "both_supported_equal_amplitude_actions": 80,
+          "event_draws": 485,
+          "neither_bank_supported_actions": 418,
+          "one_bank_supported_actions": 153,
+          "one_event_action_banks": 217,
+          "probability_gap_RMS": 0.05359986321243215,
+          "unsigned_mean_sum_by_bank": [
+            6.484375000000004,
+            5.833333333333343
+          ],
+          "zero_event_action_banks": 989
+        },
+        "saved_fleet": {
+          "both_banks_supported_actions": 70,
+          "both_supported_amplitude_gap_RMS": 0.03591215030713894,
+          "both_supported_amplitude_gap_over_midpoint_RMS": 0.08832865043473667,
+          "both_supported_equal_amplitude_actions": 66,
+          "event_draws": 437,
+          "neither_bank_supported_actions": 450,
+          "one_bank_supported_actions": 134,
+          "one_event_action_banks": 180,
+          "probability_gap_RMS": 0.050264495376088715,
+          "unsigned_mean_sum_by_bank": [
+            5.833333333333336,
+            5.203124999999995
+          ],
+          "zero_event_action_banks": 1034
+        }
+      },
+      "unique_state_actions": 654,
+      "zero_any_event_action_banks": 814
+    }
+  },
+  "next_step": "Controlled cache-only shared-risk-head fitting comparison: fixed causal representation and training draws; direct mean-risk regression versus action-conditioned signed occurrence/amplitude model, matched capacity or explicit parameter-count control. Service path, reference, action space, original anchor and selection contract frozen. Prefix OOF and opposite-bank label accuracy in both directions before any policy claim; no tail deletion or hidden-event imputation.",
+  "one_sided_supported_action_sign_combinations": 337,
+  "protocol": "native_transit_signed_risk_stage269_v1",
+  "supported_action_sign_combinations": 517
+}
