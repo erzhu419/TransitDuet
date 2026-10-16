@@ -1,0 +1,766 @@
+{
+  "boundary": "posthoc_development_accounting_not_causal_identification_fresh_confirmation_or_policy_selection; Stage253_248_outcomes_and_169_reserves_closed; no_default_change",
+  "expanded8": {
+    "free_old": {
+      "held": {
+        "after": {
+          "changed_rate": 0.00625,
+          "delta_cost": -1.3383398437499986e-05,
+          "delta_risk": -1.3563368055555556e-05,
+          "delta_service": 1.7996961805557058e-07,
+          "delta_unsafe": 0.0015625,
+          "delta_wait_min": 4.069010416666119e-06
+        },
+        "bank_cell_exposures": 32,
+        "before": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.0003366016927083331,
+          "delta_risk": -0.00026855468749999997,
+          "delta_service": -6.80470052083331e-05,
+          "delta_unsafe": 0.0010416666666666667,
+          "delta_wait_min": -0.0005460611979166685
+        },
+        "categories": {
+          "added": {
+            "after_conditional_mean": {
+              "changed_rate": 0.029166666666666667,
+              "delta_cost": -3.113177083333291e-05,
+              "delta_risk": 0.0,
+              "delta_service": -3.113177083333291e-05,
+              "delta_unsafe": 0.008333333333333333,
+              "delta_wait_min": -0.00024869791666666817
+            },
+            "bank_cell_exposures": 4,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0036458333333333334,
+              "delta_cost": -3.891471354166614e-06,
+              "delta_risk": 0.0,
+              "delta_service": -3.891471354166614e-06,
+              "delta_unsafe": 0.0010416666666666667,
+              "delta_wait_min": -3.108723958333352e-05
+            },
+            "fraction": 0.125,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          },
+          "rekey": {
+            "after_conditional_mean": {
+              "changed_rate": 0.04166666666666667,
+              "delta_cost": -0.00015187083333333395,
+              "delta_risk": -0.0002170138888888889,
+              "delta_service": 6.514305555555494e-05,
+              "delta_unsafe": 0.008333333333333333,
+              "delta_wait_min": 0.0005624999999999942
+            },
+            "bank_cell_exposures": 2,
+            "before_conditional_mean": {
+              "changed_rate": 0.049999999999999996,
+              "delta_cost": -0.0010922109374999992,
+              "delta_risk": -0.0010850694444444445,
+              "delta_service": -7.141493055554721e-06,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": -0.0001911458333333435
+            },
+            "contribution": {
+              "changed_rate": -0.000520833333333333,
+              "delta_cost": 5.877125651041658e-05,
+              "delta_risk": 5.4253472222222226e-05,
+              "delta_service": 4.517784288194354e-06,
+              "delta_unsafe": 0.0005208333333333333,
+              "delta_wait_min": 4.710286458333361e-05
+            },
+            "fraction": 0.0625,
+            "nonharm_some_gain": 1,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 1,
+              "strict_gain|pooled:397:delta_unsafe|pooled:401:delta_cost": 1
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 2,
+            "strict_gain_only": 1
+          },
+          "removed": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 12,
+            "before_conditional_mean": {
+              "changed_rate": 0.041666666666666664,
+              "delta_cost": -0.0007155693576388883,
+              "delta_risk": -0.0005353009259259259,
+              "delta_service": -0.00018026843171296247,
+              "delta_unsafe": 0.002777777777777778,
+              "delta_wait_min": -0.0014243055555555589
+            },
+            "contribution": {
+              "changed_rate": -0.015625,
+              "delta_cost": 0.00026833850911458314,
+              "delta_risk": 0.00020073784722222221,
+              "delta_service": 6.760066189236092e-05,
+              "delta_unsafe": -0.0010416666666666667,
+              "delta_wait_min": 0.0005341145833333346
+            },
+            "fraction": 0.375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 4,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:401:delta_cost": 2,
+              "strict_gain|pooled:401:delta_cost": 1
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 4
+          },
+          "unchanged": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 14,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "fraction": 0.4375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          }
+        },
+        "change": {
+          "changed_rate": -0.012499999999999999,
+          "delta_cost": 0.0003232182942708331,
+          "delta_risk": 0.0002549913194444444,
+          "delta_service": 6.822697482638866e-05,
+          "delta_unsafe": 0.0005208333333333334,
+          "delta_wait_min": 0.0005501302083333347
+        },
+        "decomposition_max_abs_difference": 1.0842021724855044e-19,
+        "gate_candidates": {
+          "fixed_bundle": {
+            "candidate_exposures": 512,
+            "eligible": 9,
+            "nonharm_some_gain": 38,
+            "strict_gain_only": 229
+          },
+          "prefix_refit": {
+            "candidate_exposures": 512,
+            "eligible": 38,
+            "nonharm_some_gain": 52,
+            "strict_gain_only": 121
+          }
+        }
+      },
+      "removed_fraction_of_net_cost_loss": 0.8302082953563739,
+      "seen": {
+        "after": {
+          "changed_rate": 0.009375,
+          "delta_cost": -9.277018229166626e-06,
+          "delta_risk": -1.3563368055555556e-05,
+          "delta_service": 4.2863498263889305e-06,
+          "delta_unsafe": 0.0,
+          "delta_wait_min": 2.7701822916667864e-05
+        },
+        "bank_cell_exposures": 32,
+        "before": {
+          "changed_rate": 0.017708333333333333,
+          "delta_cost": -9.804306640625007e-05,
+          "delta_risk": -0.00011121961805555557,
+          "delta_service": 1.3176551649305507e-05,
+          "delta_unsafe": 0.0005208333333333333,
+          "delta_wait_min": 0.00014033203125000086
+        },
+        "categories": {
+          "added": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0375,
+              "delta_cost": -8.310156249999965e-05,
+              "delta_risk": -0.00010850694444444445,
+              "delta_service": 2.5405381944444796e-05,
+              "delta_unsafe": 0.004166666666666667,
+              "delta_wait_min": 0.0003252604166666735
+            },
+            "bank_cell_exposures": 4,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0046875,
+              "delta_cost": -1.0387695312499957e-05,
+              "delta_risk": -1.3563368055555556e-05,
+              "delta_service": 3.1756727430555995e-06,
+              "delta_unsafe": 0.0005208333333333333,
+              "delta_wait_min": 4.065755208333419e-05
+            },
+            "fraction": 0.125,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          },
+          "rekey": {
+            "after_conditional_mean": {
+              "changed_rate": 0.075,
+              "delta_cost": 1.7770833333333295e-05,
+              "delta_risk": 0.0,
+              "delta_service": 1.7770833333333295e-05,
+              "delta_unsafe": -0.008333333333333333,
+              "delta_wait_min": -0.00020729166666666118
+            },
+            "bank_cell_exposures": 2,
+            "before_conditional_mean": {
+              "changed_rate": 0.06666666666666667,
+              "delta_cost": 1.9014583333334827e-05,
+              "delta_risk": 0.0,
+              "delta_service": 1.9014583333334827e-05,
+              "delta_unsafe": -0.016666666666666666,
+              "delta_wait_min": 8.854166666676574e-06
+            },
+            "contribution": {
+              "changed_rate": 0.0005208333333333332,
+              "delta_cost": -7.773437500009591e-08,
+              "delta_risk": 0.0,
+              "delta_service": -7.773437500009591e-08,
+              "delta_unsafe": 0.0005208333333333333,
+              "delta_wait_min": -1.350911458333361e-05
+            },
+            "fraction": 0.0625,
+            "nonharm_some_gain": 1,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 1,
+              "strict_gain|pooled:397:delta_unsafe|pooled:401:delta_cost": 1
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 2,
+            "strict_gain_only": 1
+          },
+          "removed": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 12,
+            "before_conditional_mean": {
+              "changed_rate": 0.03611111111111111,
+              "delta_cost": -0.00026461727430555595,
+              "delta_risk": -0.0002965856481481482,
+              "delta_service": 3.1968373842592214e-05,
+              "delta_unsafe": 0.004166666666666666,
+              "delta_wait_min": 0.0003727430555555563
+            },
+            "contribution": {
+              "changed_rate": -0.013541666666666665,
+              "delta_cost": 9.923147786458349e-05,
+              "delta_risk": 0.00011121961805555557,
+              "delta_service": -1.1988140190972081e-05,
+              "delta_unsafe": -0.0015624999999999997,
+              "delta_wait_min": -0.0001397786458333336
+            },
+            "fraction": 0.375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 4,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:401:delta_cost": 2,
+              "strict_gain|pooled:401:delta_cost": 1
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 4
+          },
+          "unchanged": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 14,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "fraction": 0.4375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          }
+        },
+        "change": {
+          "changed_rate": -0.008333333333333333,
+          "delta_cost": 8.876604817708344e-05,
+          "delta_risk": 9.765625e-05,
+          "delta_service": -8.890201822916577e-06,
+          "delta_unsafe": -0.0005208333333333333,
+          "delta_wait_min": -0.00011263020833333299
+        },
+        "decomposition_max_abs_difference": 2.168404344971009e-19,
+        "gate_candidates": {
+          "fixed_bundle": {
+            "candidate_exposures": 512,
+            "eligible": 9,
+            "nonharm_some_gain": 38,
+            "strict_gain_only": 229
+          },
+          "prefix_refit": {
+            "candidate_exposures": 512,
+            "eligible": 38,
+            "nonharm_some_gain": 52,
+            "strict_gain_only": 121
+          }
+        }
+      }
+    },
+    "shrunk": {
+      "held": {
+        "after": {
+          "changed_rate": 0.008854166666666666,
+          "delta_cost": -5.6902311197916664e-05,
+          "delta_risk": -4.069010416666667e-05,
+          "delta_service": -1.621220703125e-05,
+          "delta_unsafe": -0.0010416666666666669,
+          "delta_wait_min": -0.00014205729166666747
+        },
+        "bank_cell_exposures": 32,
+        "before": {
+          "changed_rate": 0.01875,
+          "delta_cost": -0.0002786434895833331,
+          "delta_risk": -0.0002251519097222222,
+          "delta_service": -5.349157986111098e-05,
+          "delta_unsafe": 0.0020833333333333333,
+          "delta_wait_min": -0.0004055989583333349
+        },
+        "categories": {
+          "added": {
+            "after_conditional_mean": {
+              "changed_rate": 0.058333333333333334,
+              "delta_cost": -0.0002443799479166664,
+              "delta_risk": -0.00010850694444444445,
+              "delta_service": -0.000135873003472222,
+              "delta_unsafe": -0.008333333333333335,
+              "delta_wait_min": -0.00119166666666667
+            },
+            "bank_cell_exposures": 4,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.007291666666666667,
+              "delta_cost": -3.05474934895833e-05,
+              "delta_risk": -1.3563368055555556e-05,
+              "delta_service": -1.698412543402775e-05,
+              "delta_unsafe": -0.0010416666666666669,
+              "delta_wait_min": -0.00014895833333333376
+            },
+            "fraction": 0.125,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          },
+          "rekey": {
+            "after_conditional_mean": {
+              "changed_rate": 0.016666666666666666,
+              "delta_cost": -0.0002811180555555559,
+              "delta_risk": -0.0002893518518518519,
+              "delta_service": 8.233796296295999e-06,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 7.3611111111107e-05
+            },
+            "bank_cell_exposures": 3,
+            "before_conditional_mean": {
+              "changed_rate": 0.027777777777777776,
+              "delta_cost": -0.0007275461805555549,
+              "delta_risk": -0.0007233796296296297,
+              "delta_service": -4.1665509259253155e-06,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": -0.00012465277777778442
+            },
+            "contribution": {
+              "changed_rate": -0.0010416666666666669,
+              "delta_cost": 4.1852636718749914e-05,
+              "delta_risk": 4.069010416666667e-05,
+              "delta_service": 1.1625325520832483e-06,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 1.858723958333357e-05
+            },
+            "fraction": 0.09375,
+            "nonharm_some_gain": 1,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 1,
+              "strict_gain|pooled:401:delta_cost|pooled:401:delta_wait_min": 2
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 3,
+            "strict_gain_only": 1
+          },
+          "removed": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 12,
+            "before_conditional_mean": {
+              "changed_rate": 0.04305555555555555,
+              "delta_cost": -0.0005611627604166664,
+              "delta_risk": -0.00041956018518518514,
+              "delta_service": -0.0001416025752314813,
+              "delta_unsafe": 0.005555555555555556,
+              "delta_wait_min": -0.0010504340277777806
+            },
+            "contribution": {
+              "changed_rate": -0.01614583333333333,
+              "delta_cost": 0.00021043603515624992,
+              "delta_risk": 0.00015733506944444443,
+              "delta_service": 5.310096571180548e-05,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": 0.0003939127604166677
+            },
+            "fraction": 0.375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 4,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:401:delta_cost": 2
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 4
+          },
+          "unchanged": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 13,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "fraction": 0.40625,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          }
+        },
+        "change": {
+          "changed_rate": -0.009895833333333333,
+          "delta_cost": 0.00022174117838541643,
+          "delta_risk": 0.00018446180555555555,
+          "delta_service": 3.727937282986098e-05,
+          "delta_unsafe": -0.003125,
+          "delta_wait_min": 0.00026354166666666746
+        },
+        "decomposition_max_abs_difference": 1.734723475976807e-18,
+        "gate_candidates": {
+          "fixed_bundle": {
+            "candidate_exposures": 512,
+            "eligible": 10,
+            "nonharm_some_gain": 33,
+            "strict_gain_only": 223
+          },
+          "prefix_refit": {
+            "candidate_exposures": 512,
+            "eligible": 36,
+            "nonharm_some_gain": 55,
+            "strict_gain_only": 124
+          }
+        }
+      },
+      "removed_fraction_of_net_cost_loss": 0.9490164916075415,
+      "seen": {
+        "after": {
+          "changed_rate": 0.011979166666666667,
+          "delta_cost": -7.883463541666584e-06,
+          "delta_risk": -1.3563368055555556e-05,
+          "delta_service": 5.679904513888971e-06,
+          "delta_unsafe": -0.0020833333333333333,
+          "delta_wait_min": 3.395182291666775e-05
+        },
+        "bank_cell_exposures": 32,
+        "before": {
+          "changed_rate": 0.019270833333333334,
+          "delta_cost": -1.3738313802083491e-05,
+          "delta_risk": -3.255208333333333e-05,
+          "delta_service": 1.881376953124984e-05,
+          "delta_unsafe": 0.0010416666666666664,
+          "delta_wait_min": 0.00019996744791666703
+        },
+        "categories": {
+          "added": {
+            "after_conditional_mean": {
+              "changed_rate": 0.058333333333333334,
+              "delta_cost": -7.195312499999933e-05,
+              "delta_risk": -0.00010850694444444445,
+              "delta_service": 3.655381944444512e-05,
+              "delta_unsafe": -0.0125,
+              "delta_wait_min": 0.0003752604166666726
+            },
+            "bank_cell_exposures": 4,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.007291666666666667,
+              "delta_cost": -8.994140624999916e-06,
+              "delta_risk": -1.3563368055555556e-05,
+              "delta_service": 4.56922743055564e-06,
+              "delta_unsafe": -0.0015625,
+              "delta_wait_min": 4.6907552083334076e-05
+            },
+            "fraction": 0.125,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          },
+          "rekey": {
+            "after_conditional_mean": {
+              "changed_rate": 0.049999999999999996,
+              "delta_cost": 1.1847222222222196e-05,
+              "delta_risk": 0.0,
+              "delta_service": 1.1847222222222196e-05,
+              "delta_unsafe": -0.005555555555555556,
+              "delta_wait_min": -0.0001381944444444408
+            },
+            "bank_cell_exposures": 3,
+            "before_conditional_mean": {
+              "changed_rate": 0.05000000000000001,
+              "delta_cost": -0.00014643993055555598,
+              "delta_risk": -0.00014467592592592594,
+              "delta_service": -1.7640046296300412e-06,
+              "delta_unsafe": -0.011111111111111112,
+              "delta_wait_min": -0.00012048611111110676
+            },
+            "contribution": {
+              "changed_rate": 0.0,
+              "delta_cost": 1.4839420572916703e-05,
+              "delta_risk": 1.3563368055555556e-05,
+              "delta_service": 1.2760525173611473e-06,
+              "delta_unsafe": 0.0005208333333333333,
+              "delta_wait_min": -1.6601562500000645e-06
+            },
+            "fraction": 0.09375,
+            "nonharm_some_gain": 1,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 1,
+              "strict_gain|pooled:401:delta_cost|pooled:401:delta_wait_min": 2
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 3,
+            "strict_gain_only": 1
+          },
+          "removed": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 12,
+            "before_conditional_mean": {
+              "changed_rate": 0.03888888888888888,
+              "delta_cost": -2.552083333364792e-08,
+              "delta_risk": -5.063657407407407e-05,
+              "delta_service": 5.061105324074042e-05,
+              "delta_unsafe": 0.005555555555555556,
+              "delta_wait_min": 0.0005633680555555555
+            },
+            "contribution": {
+              "changed_rate": -0.014583333333333332,
+              "delta_cost": 9.57031250011797e-09,
+              "delta_risk": 1.8988715277777778e-05,
+              "delta_service": -1.897914496527766e-05,
+              "delta_unsafe": -0.0020833333333333333,
+              "delta_wait_min": -0.0002112630208333333
+            },
+            "fraction": 0.375,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {
+              "strict_gain": 4,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_cost|pooled:401:delta_wait_min|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_cost|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:397:delta_unsafe|pooled:401:delta_unsafe": 1,
+              "strict_gain|pooled:397:delta_wait_min|pooled:401:delta_cost": 1,
+              "strict_gain|pooled:401:delta_cost": 2
+            },
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 4
+          },
+          "unchanged": {
+            "after_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "bank_cell_exposures": 13,
+            "before_conditional_mean": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "contribution": {
+              "changed_rate": 0.0,
+              "delta_cost": 0.0,
+              "delta_risk": 0.0,
+              "delta_service": 0.0,
+              "delta_unsafe": 0.0,
+              "delta_wait_min": 0.0
+            },
+            "fraction": 0.40625,
+            "nonharm_some_gain": 0,
+            "old_key_new_gate_patterns": {},
+            "rekey_rank": 0,
+            "rekey_strength": 0,
+            "strict_gain_only": 0
+          }
+        },
+        "change": {
+          "changed_rate": -0.007291666666666667,
+          "delta_cost": 5.854850260416907e-06,
+          "delta_risk": 1.8988715277777778e-05,
+          "delta_service": -1.313386501736087e-05,
+          "delta_unsafe": -0.0031249999999999997,
+          "delta_wait_min": -0.00016601562499999928
+        },
+        "decomposition_max_abs_difference": 1.734723475976807e-18,
+        "gate_candidates": {
+          "fixed_bundle": {
+            "candidate_exposures": 512,
+            "eligible": 10,
+            "nonharm_some_gain": 33,
+            "strict_gain_only": 223
+          },
+          "prefix_refit": {
+            "candidate_exposures": 512,
+            "eligible": 36,
+            "nonharm_some_gain": 55,
+            "strict_gain_only": 124
+          }
+        }
+      }
+    }
+  },
+  "judgment": "new8_held_cost_loss_dominated_by_removed_admission_not_rank_changes; seen_and_held_wait_response_differ; no_policy_restore_or_winner_selection",
+  "next": "frozen_old_key_new_inner_validation_vs_opposite_futures_vs_full_seen_vs_full_held; reuse_action_and_panel_caches_without_refits",
+  "protocol": "native_transit_selection_attribution_stage256_v1"
+}

@@ -20,3 +20,31 @@ identification or independent confirmation. Bank-cell exposures and views reuse
 states/futures; no seed CI. Neither rejected-benefit strata nor a better new2 mean
 authorize deployment or selecting an arm. Stage253/248 outcomes and Stage169
 reserves stay closed. No policy or selector change in this stage.
+
+## Results And Next
+
+Task t165489 completed exit 0 on node004, zero retries. Five tests passed;
+all 32 cached cells reproduced Stage255 means within 1.39e-17. Only the
+1,718,504-byte scalar report was pulled.
+
+New8 / pooled-safe mixed held-prefix cost change (positive is loss):
+
+| Family | Removed | Rekey | Added | Total |
+|---|---:|---:|---:|---:|
+| free_old | +0.000268339 | +0.000058771 | -0.000003891 | +0.000323218 |
+| shrunk | +0.000210436 | +0.000041853 | -0.000030547 | +0.000221741 |
+
+Removal contributes 83%/95% of net cost loss. Each family removes 12 old
+admissions; eight old keys violate new point nonharm guards, four lack strict
+gain and show no improved root/metric mean. Rekey affects two/three exposures,
+all strength changes, not rank. Thus rank expansion is not the next target.
+
+Removal improves seen-prefix wait by -0.000139779/-0.000211263 min, but loses
+held-prefix wait by +0.000534115/+0.000393913 min. These are descriptive means:
+restoring rejected keys based on held outcomes would be inappropriate.
+
+Next: for the frozen old keys, compare new-inner validation, the same inner
+actions on opposite-bank futures, full actions on the same seen states, and full
+held-prefix actions. Reuse candidate-action/panel caches to distinguish validation
+noise, inner-to-full response changes and prefix-response differences. Do this
+before loosening guards or adding uncertainty penalties; no refits are needed.
