@@ -12,6 +12,14 @@ from tests import test_native_transit_future_forcing_stage263 as fixtures
 
 
 class CoupledNoiseTest(unittest.TestCase):
+    def test_active_one_dimensional_tangent_is_exactly_zero_not_roundoff_noise(self):
+        op = learning.endpoint_operator(np.array([[.1]]), np.array([.33748043405522055]), .03, .33748043405522055)
+        np.testing.assert_array_equal(op['tangent'], np.zeros((1, 1)))
+        sf = np.random.default_rng(12).normal(size=(3, 8, 2, 1))
+        terms = learning.response_scores(sf, sf*2, op['tangent'], op['tangent'])
+        for t in learning.TERMS:
+            np.testing.assert_array_equal(terms[t], np.zeros_like(sf))
+
     def test_coupled_scores_equal_two_independent_kkt_saddle_responses(self):
         hf, hp = np.array([[2., .4], [.4, .7]]), np.array([[.9, -.2], [-.2, 1.3]])
         uf, up = np.array([.6, .8]), np.array([.8, .6]);mf, mp = .2, .4
@@ -137,6 +145,16 @@ class CoupledNoiseTest(unittest.TestCase):
         self.assertEqual(spec.scalar_difference(a, copy.deepcopy(a)), 0.)
         b = copy.deepcopy(a);b['noise']['cross_sr'] = 0.
         self.assertGreater(spec.scalar_difference(a, b), .1)
+
+    def test_numerical_zero_ratio_is_not_a_primitive_replay_failure(self):
+        old = {'bands': {'full': {'noise_squared_sum': {'joint': 3.264354982250247e-37},
+            'observed_squared_sum': {'joint': 0.}, 'noise_RMS': {'joint': 1e-20},
+            'observed_RMS': {'joint': 0.}, 'observed_over_noise_RMS': {'joint': 0.}}}}
+        exact = copy.deepcopy(old)
+        exact['bands']['full']['noise_squared_sum']['joint'] = 0.
+        exact['bands']['full']['noise_RMS']['joint'] = 0.
+        exact['bands']['full']['observed_over_noise_RMS']['joint'] = None
+        self.assertLess(spec.scalar_difference(spec.primitive_summary(exact), spec.primitive_summary(old)), 1e-19)
 
     def test_compact_report_retains_full_query_and_signed_cross_without_mutation(self):
         terms = {t: {'bands': {b: {'noise_RMS': {'joint': 1.}} for b in ('full', 'low', 'rest')},

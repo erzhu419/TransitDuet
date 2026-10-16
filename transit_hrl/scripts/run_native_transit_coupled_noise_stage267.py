@@ -30,7 +30,7 @@ def contract():
         "terms": "prefix=-Tp*gp; minus_full=+Tf*gf; coupled=prefix+minus_full; one_ended=-Tp*(gp-gf); operator_change=(Tf-Tp)*gf; coupled=one_ended+operator_change",
         "covariance": "shared_state_future_label_scores_propagated_before_statewise_within_bank_covariance; direct_Gram_of_sum; also_direct_signed_endpoint_and_operator_change_cross_terms; never_independent_endpoint_sum",
         "query": "unchanged_Stage266_feasible_queries_and_prefix_H_low_basis; retain_head_population_and_low_rest_cross_terms; scales_are_cost_function_response_not_outcome_improvement",
-        "controls": "reproduce_Stage266_one_ended_all_cells_regions_bands_component_covariance_sums_observed_sums_and_exposure_counts; direct_existing_gradient_factory; each_endpoint_KKT_and_both_decompositions",
+        "controls": "reproduce_Stage266_one_ended_all_cells_regions_bands_primitive_covariance_sums_observed_sums_RMS_and_counts; derived_observed_over_noise_ratios_not_replay_controls_at_numerical_zero; exact_zero_1D_strictly_active_tangent; direct_existing_gradient_factory_each_endpoint_KKT_and_both_decompositions",
         "focus_prefix": list(FOCUS_PREFIX), "focus_basis": source.contract()["focus_basis"],
         "budget": source.contract()["budget"], "storage": "raw_labels_models_covariances_cell_ledgers_and_full_band_aggregate_server_only; pull_full_query_scalar_report_with_signed_cross_terms",
         "boundary": "conditional_frozen_calibration_joint_local_refit_response_not_finite_refit_error_ground_truth_accuracy_performance_pvalues_or_seed_CI; report_response_over_radius_not_assume_small_noise; Stage253_248_169_closed; no_selection_or_default_change"}
@@ -44,6 +44,10 @@ def scalar_difference(actual, expected):
         if actual is not None: raise ValueError("Changed undefined scalar")
         return 0.
     return abs(actual-expected)/max(1., abs(expected))
+
+
+def primitive_summary(summary):
+    return {**summary, "bands": {b: {k: v for k, v in s.items() if k!="observed_over_noise_RMS"} for b, s in summary["bands"].items()}}
 
 
 def analyze_cell(key, views, panels, before):
@@ -164,7 +168,7 @@ def report(records, expected):
                     for region, old in before["regions"].items():
                         actual = now["regions"][region]
                         if actual["feasible_action_exposures"]!=old["feasible_action_exposures"]: raise ValueError("Changed query exposure")
-                        maximum = max(maximum, scalar_difference(actual["terms"]["one_ended"], old["operators"]["tangent"]))
+                        maximum = max(maximum, scalar_difference(primitive_summary(actual["terms"]["one_ended"]), primitive_summary(old["operators"]["tangent"])))
                     output[group][label][variant][cat] = now
     ps = [p for r in records for p in r["pieces"]]
     if len(records)!=32 or len(ps)!=1280 or maximum>1e-9: raise ValueError("Incomplete Stage267 reproduction")
@@ -177,6 +181,7 @@ def report(records, expected):
             "baseline_group_max_relative_difference": maximum, "target_max_abs_difference": max(r["target_max_abs_difference"] for r in records),
             **{k: max(c[k] for c in active) for k in ("endpoint_optimality_residual", "covariance_residual", "response_identity_residual", "direct_gradient_residual")},
             "tangent_equation_max_residual": max(c[e][k] for c in active for e in ("full", "prefix") for k in ("stationarity_residual", "tangency_residual")),
+            "zero_dimensional_tangent_prefix_models": {e: sum(c["zero_dimensional_tangent"][e] for c in active) for e in ("full", "prefix")},
             "query_decomposition_residual": max(s["decomposition_residual"] for p in ps for s in p["regions"].values())},
         "default_changed": False, "native_deployment_eligible": False}
 
@@ -199,10 +204,10 @@ def main():
     lookup = {tuple(r["key"]): r for r in before}
     if set(lookup)!=set(KEYS) or len(before)!=32: raise ValueError("Incomplete Stage266 cell ledger")
     records = [analyze_cell(key, views, panels, lookup[key]) for key in KEYS]
-    expected = json.loads((ROOT/"results"/SOURCE_RUN/"report/result.json").read_text())
-    payload = report(records, expected)
     path = ROOT/"results"/a.run_name/"report/result.json"
     write_json(raw_directory(path)/"cells.json", records)
+    expected = json.loads((ROOT/"results"/SOURCE_RUN/"report/result.json").read_text())
+    payload = report(records, expected)
     write_json(raw_directory(path)/"aggregate.json", payload)
     write_json(path, compact_report(payload))
     print("COUPLED_NOISE_REPORT_COMPLETE", flush=True)

@@ -11,6 +11,13 @@ TERMS = ("prefix", "minus_full", "coupled", "one_ended", "operator_change")
 PAIRS = {"endpoints": ("prefix", "minus_full"), "operator_change": ("one_ended", "operator_change")}
 
 
+def endpoint_operator(hessian, total, dual, radius):
+    op = previous.operators(hessian, total, dual, radius)
+    # A strictly-active one-dimensional ball has no tangent directions.
+    if len(total)==1 and dual>0: op["tangent"] = np.zeros_like(op["tangent"])
+    return op
+
+
 def response_scores(full, prefix, tf, tp):
     apply = lambda matrix, scores: np.einsum("ij,ndhj->ndhi", matrix, scores)
     p, f = apply(-tp, prefix), apply(tf, full)
@@ -51,7 +58,7 @@ def context(z, c, paired, eligible, prior_heads, full_heads, prefix_heads, indic
     lp, hp, _, _ = factory(z[indices], target[indices], precision[indices], eligible[indices])
     full, prefix = full_heads.sum(axis=0), prefix_heads.sum(axis=0)
     mf, mp = curvature.multiplier(lf, full, radius), curvature.multiplier(lp, prefix, radius)
-    of, op = previous.operators(hf(full), full, mf, radius), previous.operators(hp(prefix), prefix, mp, radius)
+    of, op = endpoint_operator(hf(full), full, mf, radius), endpoint_operator(hp(prefix), prefix, mp, radius)
     tf, tp = of["tangent"], op["tangent"]
     optimum_residual = max(float(np.linalg.norm(loss(u)[1]+mu*u, ord=np.inf)) for loss, u, mu in ((lf, full, mf), (lp, prefix, mp)))
     if optimum_residual>1e-8: raise ValueError("Cached endpoint is not KKT stationary")
@@ -83,7 +90,7 @@ def context(z, c, paired, eligible, prior_heads, full_heads, prefix_heads, indic
         raise ValueError("Coupled score/covariance identities failed")
     energies = {t: max(0., float(np.trace(c["parameter_covariance"]["joint"]))) for t, c in terms.items()}
     return {"terms": terms, "cross_covariance": cross, "diagnostics": {"full": of["diagnostics"], "prefix": op["diagnostics"],
-        "radius": radius, "parameter_noise_energy": energies,
+        "radius": radius, "zero_dimensional_tangent": {"full": len(full)==1 and mf>0, "prefix": len(prefix)==1 and mp>0}, "parameter_noise_energy": energies,
         "noise_norm_RMS_over_radius": {t: float(np.sqrt(e)/radius) for t, e in energies.items()},
         "parameter_noise_cross": {t: float(np.trace(c["joint"])) for t, c in cross.items()},
         "endpoint_optimality_residual": optimum_residual, "covariance_residual": error,
