@@ -35,3 +35,21 @@ merely from the sign disagreement, nor justify a new long-training sweep.
 Source `253877ccd2`; scheduler smoke `t166150` passed all four tests on node004.
 Seed diagnostics `t166151/t166152` use node004/node005 preferentially; aggregate
 `t166153` waits for their small JSON files. All are restricted to node001-node006.
+
+## Outcome / Next
+
+Both seed diagnoses and aggregation completed. Fitted-direction CV-squared
+intervals are [-.008849,.008849] and [-.012740,.007811]; all eight individual
+CV feature-gradient intervals include zero. All four half-training directions
+also have other-half CV intervals crossing zero. These results do not identify
+a reliable constraint-improving direction.
+
+Mean summed state KL is 5.2 for each actor, with path-weight effective days
+1.20/2.75 of 32. This exposes weak path overlap, not proof that nonlinear
+response alone caused the reversal. V78 stochastic passenger improvement
+occurs on 14/16 days; the largest day contributes 20.2% of positive gains.
+Waiting/onboard effects are -74,609/-38,291 person-s, both intervals below zero.
+
+Keep that partial positive and the failed V78 joint gate. V80 measures fresh
+paired symmetric policy-direction responses against the score estimate and
+the original full-scale effect. It is diagnosis, not step selection or admission.
