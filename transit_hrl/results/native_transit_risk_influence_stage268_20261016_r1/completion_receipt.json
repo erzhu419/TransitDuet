@@ -1,0 +1,49 @@
+{
+  "budget": {
+    "actor_updates": 0,
+    "analysis_tasks": 1,
+    "cached_cells": 32,
+    "cached_prefix_fits": 640,
+    "new_critic_fits": 0,
+    "new_native_episodes": 0,
+    "new_raw_reference_fits": 0,
+    "prefix_model_records": 1280
+  },
+  "coverage_qualified": true,
+  "default_changed": false,
+  "focused_tests_passed": 22,
+  "held_outcomes_evaluated": false,
+  "local_pulls": {
+    "raw_models_labels_calibrations_panels_per_future_influence_npz_cell_ledgers_or_full_aggregates_pulled": false,
+    "report_bytes": 2185201
+  },
+  "native_deployment_eligible": false,
+  "posthoc_operations": "Scalar summaries only; no exclusions, model updates, refits, reselection or new labels.",
+  "protocol": "native_transit_risk_influence_stage268_v1",
+  "registered_source_revision": "eaa26187c8e33970a487187af9de806ae1b28615",
+  "reproduction": {
+    "baseline_cell_max_relative_difference": 1.480499750572406e-14,
+    "baseline_group_max_relative_difference": 2.0761170560490427e-14,
+    "cached_cells": 32,
+    "prefix_model_records": 1280,
+    "query_decomposition_residual": 8.154696280821086e-16,
+    "target_max_abs_difference": 0.0
+  },
+  "run_name": "native_transit_risk_influence_stage268_20261016_r1",
+  "scheduler": {
+    "analysis": "t165755",
+    "exit_code_counts": {
+      "0": 1
+    },
+    "node_counts": {
+      "node006": 1
+    },
+    "records": 1,
+    "retry_count_sum": 0,
+    "runtime_seconds": 80.05781650543213,
+    "status_counts": {
+      "done": 1
+    }
+  },
+  "unique_future_accounting": "Global concentration groups repeated model exposures by cached (root, scene_seed, probe_index, draw); energy remains a sum of per-model query risks, not variance of an averaged estimator or independent trials."
+}

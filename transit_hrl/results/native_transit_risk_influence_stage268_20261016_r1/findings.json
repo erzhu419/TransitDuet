@@ -1,0 +1,628 @@
+{
+  "conclusion": "Sparse feasible-action fleet jumps drive the cached risk scatter. Occurrence scatter is the larger pooled component, but within-event amplitude remains substantial and dominates root401. Concentration is not a license to discard genuine tail labels.",
+  "focus": {
+    "free_old_expanded8_pooled_safe": {
+      "event_model_exposure_counts": {
+        "all": {
+          "all_event_state_banks": 0,
+          "event_exposures": 156,
+          "one_event_state_banks": 40,
+          "state_bank_exposures": 240,
+          "state_future_exposures": 3840,
+          "zero_event_state_banks": 161
+        },
+        "excluded": {
+          "all_event_state_banks": 0,
+          "event_exposures": 12,
+          "one_event_state_banks": 2,
+          "state_bank_exposures": 24,
+          "state_future_exposures": 384,
+          "zero_event_state_banks": 18
+        },
+        "retained": {
+          "all_event_state_banks": 0,
+          "event_exposures": 144,
+          "one_event_state_banks": 38,
+          "state_bank_exposures": 216,
+          "state_future_exposures": 3456,
+          "zero_event_state_banks": 143
+        }
+      },
+      "held": {
+        "centered_energy_on_event_draws": 0.0024822249326763254,
+        "centered_energy_on_none_draws": 0.00023329725695126345,
+        "coupled_noise_RMS": 0.0034286305304603976,
+        "coupled_observed_over_noise_RMS": 0.7706541059202417,
+        "coupled_scatter_fractions": {
+          "occurrence": 0.7239383530108505,
+          "within_event": 0.2760616469891493,
+          "within_none": 0.0
+        },
+        "cross": {
+          "endpoints": {
+            "occurrence": -0.003711538830379701,
+            "total": -0.005589782033107434,
+            "within_event": -0.0018782432027277323,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": -0.0004493168479223069,
+            "total": -0.002206319594997677,
+            "within_event": -0.001757002747075369,
+            "within_none": 0.0
+          }
+        },
+        "future_influence": {
+          "max_single_future_observed_squared_reduction_fraction": 0.6313449231094803,
+          "max_single_future_variance_reduction_fraction": 0.13102477224842948,
+          "top_energy_fraction": {
+            "1": 0.12283572398290266,
+            "16": 0.6495654028195018,
+            "4": 0.31674795147400175
+          },
+          "top_futures": [
+            {
+              "draw": 2,
+              "energy": 0.000333563134154542,
+              "event_exposures": 1,
+              "exposures": 2,
+              "observed_squared_delta": -0.001018213947311991,
+              "state": [
+                401,
+                914010001,
+                22
+              ],
+              "variance_delta": -0.0003558006764315115
+            },
+            {
+              "draw": 6,
+              "energy": 0.00020355473822085987,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": -0.0009225988839266949,
+              "state": [
+                401,
+                914010401,
+                22
+              ],
+              "variance_delta": -0.0002171250541022505
+            },
+            {
+              "draw": 24,
+              "energy": 0.00016150910918566634,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": 0.0010856084891584378,
+              "state": [
+                401,
+                914010401,
+                9
+              ],
+              "variance_delta": -0.0001441496267017648
+            },
+            {
+              "draw": 27,
+              "energy": 0.00016150910918566634,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": 0.0010856084891584378,
+              "state": [
+                401,
+                914010401,
+                9
+              ],
+              "variance_delta": -0.0001441496267017648
+            }
+          ],
+          "unique_keys_with_eligible_event": 106,
+          "unique_state_future_keys": 1920
+        },
+        "observed_squared_sum": {
+          "coupled": 0.001612769676355542,
+          "minus_full": 0.0004309580532200291,
+          "one_ended": 0.0006257480719894686,
+          "operator_change": 0.0005280530281140664,
+          "prefix": 0.0015868025065346714
+        },
+        "variance": {
+          "coupled": {
+            "occurrence": 0.0019658706615234157,
+            "total": 0.0027155221896275894,
+            "within_event": 0.0007496515281041734,
+            "within_none": 0.0
+          },
+          "minus_full": {
+            "occurrence": 0.0018007572909635088,
+            "total": 0.003168470349368733,
+            "within_event": 0.0013677130584052245,
+            "within_none": 0.0
+          },
+          "one_ended": {
+            "occurrence": 0.0005866053981792811,
+            "total": 0.0016442262807501707,
+            "within_event": 0.0010576208825708894,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": 0.0018285821112664358,
+            "total": 0.0032776155038750977,
+            "within_event": 0.0014490333926086615,
+            "within_none": 0.0
+          },
+          "prefix": {
+            "occurrence": 0.0038766522009396074,
+            "total": 0.0051368338733662885,
+            "within_event": 0.0012601816724266812,
+            "within_none": 0.0
+          }
+        }
+      },
+      "single_future_observed_squared_response_reduction_fraction": 0.6313449231094803,
+      "single_future_variance_reduction_fraction": 0.13102477224842948
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "event_model_exposure_counts": {
+        "all": {
+          "all_event_state_banks": 0,
+          "event_exposures": 156,
+          "one_event_state_banks": 40,
+          "state_bank_exposures": 240,
+          "state_future_exposures": 3840,
+          "zero_event_state_banks": 161
+        },
+        "excluded": {
+          "all_event_state_banks": 0,
+          "event_exposures": 12,
+          "one_event_state_banks": 2,
+          "state_bank_exposures": 24,
+          "state_future_exposures": 384,
+          "zero_event_state_banks": 18
+        },
+        "retained": {
+          "all_event_state_banks": 0,
+          "event_exposures": 144,
+          "one_event_state_banks": 38,
+          "state_bank_exposures": 216,
+          "state_future_exposures": 3456,
+          "zero_event_state_banks": 143
+        }
+      },
+      "held": {
+        "centered_energy_on_event_draws": 0.0020221092598518187,
+        "centered_energy_on_none_draws": 0.0001889443246702078,
+        "coupled_noise_RMS": 0.003093810036032657,
+        "coupled_observed_over_noise_RMS": 0.8760550577324081,
+        "coupled_scatter_fractions": {
+          "occurrence": 0.7475971065810605,
+          "within_event": 0.25240289341893934,
+          "within_none": 0.0
+        },
+        "cross": {
+          "endpoints": {
+            "occurrence": -0.0018336822612448802,
+            "total": -0.0023352391710598857,
+            "within_event": -0.0005015569098150057,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": -0.0005257899987262475,
+            "total": -0.0024084474811841075,
+            "within_event": -0.0018826574824578582,
+            "within_none": 0.0
+          }
+        },
+        "future_influence": {
+          "max_single_future_observed_squared_reduction_fraction": 0.6856433216668575,
+          "max_single_future_variance_reduction_fraction": 0.17887165836996086,
+          "top_energy_fraction": {
+            "1": 0.16769217972183834,
+            "16": 0.6976963631393664,
+            "4": 0.3499726495687236
+          },
+          "top_futures": [
+            {
+              "draw": 2,
+              "energy": 0.0003707763950702825,
+              "event_exposures": 1,
+              "exposures": 2,
+              "observed_squared_delta": -0.0011634837460840891,
+              "state": [
+                401,
+                914010001,
+                22
+              ],
+              "variance_delta": -0.00039549482140830127
+            },
+            {
+              "draw": 0,
+              "energy": 0.0001378840490371774,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": 0.0006715685254264412,
+              "state": [
+                397,
+                913970203,
+                8
+              ],
+              "variance_delta": -0.00014680359299398693
+            },
+            {
+              "draw": 0,
+              "energy": 0.00013786671736854412,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": -0.0008361584904010228,
+              "state": [
+                397,
+                913970303,
+                22
+              ],
+              "variance_delta": -0.00014705783185978038
+            },
+            {
+              "draw": 6,
+              "energy": 0.00012728111983759328,
+              "event_exposures": 2,
+              "exposures": 2,
+              "observed_squared_delta": -0.0007489805096218819,
+              "state": [
+                401,
+                914010401,
+                22
+              ],
+              "variance_delta": -0.00013576652782676618
+            }
+          ],
+          "unique_keys_with_eligible_event": 106,
+          "unique_state_future_keys": 1920
+        },
+        "observed_squared_sum": {
+          "coupled": 0.0016969227429438978,
+          "minus_full": 0.00025590808452006375,
+          "one_ended": 0.0009972161502471689,
+          "operator_change": 0.0004884896333758309,
+          "prefix": 0.0015348956622562747
+        },
+        "variance": {
+          "coupled": {
+            "occurrence": 0.0016529772622843493,
+            "total": 0.0022110535845220264,
+            "within_event": 0.0005580763222376769,
+            "within_none": 0.0
+          },
+          "minus_full": {
+            "occurrence": 0.0009079087107239293,
+            "total": 0.0014152157821973048,
+            "within_event": 0.0005073070714733755,
+            "within_none": 0.0
+          },
+          "one_ended": {
+            "occurrence": 0.0004221686307392746,
+            "total": 0.0013712775939004973,
+            "within_event": 0.0009491089631612228,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": 0.0017565986302713191,
+            "total": 0.0032482234718056286,
+            "within_event": 0.0014916248415343097,
+            "within_none": 0.0
+          },
+          "prefix": {
+            "occurrence": 0.0025787508128053,
+            "total": 0.0031310769733846073,
+            "within_event": 0.000552326160579307,
+            "within_none": 0.0
+          }
+        }
+      },
+      "single_future_observed_squared_response_reduction_fraction": 0.6856433216668575,
+      "single_future_variance_reduction_fraction": 0.17887165836996086
+    }
+  },
+  "limitations": "Conditional first-order plug-in scatter, not finite-refit accuracy, policy improvement or CI. Event frequencies across model exposures are not independent trials; unique keys union context-specific eligibility. ANOVA components are exact sample scatter partitions, not unseen tail probability estimates. Single-future deletion holds calibration/operators fixed.",
+  "mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "event_exposure_rate": 0.04327256944444444,
+      "event_model_exposure_counts": {
+        "all_event_state_banks": 0,
+        "event_exposures": 9970,
+        "one_event_state_banks": 1580,
+        "state_bank_exposures": 14400,
+        "state_future_exposures": 230400,
+        "zero_event_state_banks": 10350
+      },
+      "held": {
+        "centered_energy_on_event_draws": 0.036354255344328366,
+        "centered_energy_on_none_draws": 0.003243363113762566,
+        "coupled_noise_RMS": 0.0018120112072221716,
+        "coupled_observed_over_noise_RMS": 0.875100067782222,
+        "coupled_scatter_fractions": {
+          "occurrence": 0.6481975983480489,
+          "within_event": 0.3518024016519508,
+          "within_none": 0.0
+        },
+        "cross": {
+          "endpoints": {
+            "occurrence": -0.18638726650222676,
+            "total": -0.2654186832533683,
+            "within_event": -0.07903141675114153,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": -0.0347273064690236,
+            "total": -0.054578243739469894,
+            "within_event": -0.019850937270446258,
+            "within_none": 0.0
+          }
+        },
+        "future_influence": {
+          "max_single_future_observed_squared_reduction_fraction": 0.1198445809299842,
+          "max_single_future_variance_reduction_fraction": 0.08215948978058972,
+          "top_energy_fraction": {
+            "1": 0.07706971310902522,
+            "16": 0.38495729554727215,
+            "4": 0.1987917232710618
+          },
+          "unique_keys_with_eligible_event": 442,
+          "unique_state_future_keys": 7680
+        },
+        "observed_squared_sum": {
+          "coupled": 0.030323861308744704,
+          "minus_full": 0.0984472375364203,
+          "one_ended": 0.038544143476832014,
+          "operator_change": 0.02416084307777895,
+          "prefix": 0.11954346058708165
+        },
+        "variance": {
+          "coupled": {
+            "occurrence": 0.02566708118483692,
+            "total": 0.03959761845809094,
+            "within_event": 0.013930537273254011,
+            "within_none": 0.0
+          },
+          "minus_full": {
+            "occurrence": 0.09783187435385454,
+            "total": 0.13816966990543306,
+            "within_event": 0.04033779555157844,
+            "within_none": 0.0
+          },
+          "one_ended": {
+            "occurrence": 0.03688190842535646,
+            "total": 0.05742901171830652,
+            "within_event": 0.02054710329295007,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": 0.023512479228504087,
+            "total": 0.03674685047925431,
+            "within_event": 0.013234371250750214,
+            "within_none": 0.0
+          },
+          "prefix": {
+            "occurrence": 0.11422247333320919,
+            "total": 0.16684663180602627,
+            "within_event": 0.052624158472817095,
+            "within_none": 0.0
+          }
+        }
+      },
+      "leaders": [
+        {
+          "draw": 0,
+          "energy": 0.0030517770943657104,
+          "event_exposures": 20,
+          "exposures": 20,
+          "observed_squared_delta": 0.005838630556648716,
+          "state": [
+            397,
+            913970203,
+            8
+          ],
+          "variance_delta": -0.0032533201290432137
+        },
+        {
+          "draw": 2,
+          "energy": 0.00199373100085099,
+          "event_exposures": 20,
+          "exposures": 30,
+          "observed_squared_delta": -0.0036341504507254713,
+          "state": [
+            397,
+            913970200,
+            22
+          ],
+          "variance_delta": -0.002126646400907723
+        },
+        {
+          "draw": 1,
+          "energy": 0.0017730661206923814,
+          "event_exposures": 20,
+          "exposures": 20,
+          "observed_squared_delta": -9.08614487079552e-05,
+          "state": [
+            401,
+            914010001,
+            9
+          ],
+          "variance_delta": -0.00189127052873854
+        },
+        {
+          "draw": 8,
+          "energy": 0.00105310459480482,
+          "event_exposures": 20,
+          "exposures": 30,
+          "observed_squared_delta": -0.001987666969476934,
+          "state": [
+            397,
+            913970300,
+            9
+          ],
+          "variance_delta": -0.0009417680850713376
+        }
+      ],
+      "one_event_state_bank_model_fraction": 0.10972222222222222,
+      "prefix_model_exposures": 120,
+      "view_occurrence_fractions": {
+        "mixed_a": 0.7528905827814901,
+        "mixed_b": 0.5736735969561801,
+        "root_397": 0.6241687116097907,
+        "root_401": 0.47137115708061766
+      },
+      "zero_event_state_bank_model_fraction": 0.71875
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "event_exposure_rate": 0.04327256944444444,
+      "event_model_exposure_counts": {
+        "all_event_state_banks": 0,
+        "event_exposures": 9970,
+        "one_event_state_banks": 1580,
+        "state_bank_exposures": 14400,
+        "state_future_exposures": 230400,
+        "zero_event_state_banks": 10350
+      },
+      "held": {
+        "centered_energy_on_event_draws": 0.0422012622840861,
+        "centered_energy_on_none_draws": 0.003296376189774127,
+        "coupled_noise_RMS": 0.0019423199629897603,
+        "coupled_observed_over_noise_RMS": 0.8370875662846795,
+        "coupled_scatter_fractions": {
+          "occurrence": 0.5553725020117105,
+          "within_event": 0.444627497988289,
+          "within_none": 0.0
+        },
+        "cross": {
+          "endpoints": {
+            "occurrence": -0.1794350615075746,
+            "total": -0.29777090518753735,
+            "within_event": -0.1183358436799628,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": -0.06238775814765688,
+            "total": -0.07583257952780473,
+            "within_event": -0.013444821380147824,
+            "within_none": 0.0
+          }
+        },
+        "future_influence": {
+          "max_single_future_observed_squared_reduction_fraction": 0.13806711958707976,
+          "max_single_future_variance_reduction_fraction": 0.048969517501540286,
+          "top_energy_fraction": {
+            "1": 0.04596333497484276,
+            "16": 0.41077160799363477,
+            "4": 0.1556394547713246
+          },
+          "unique_keys_with_eligible_event": 442,
+          "unique_state_future_keys": 7680
+        },
+        "observed_squared_sum": {
+          "coupled": 0.03188090475190166,
+          "minus_full": 0.13926523573032734,
+          "one_ended": 0.0637313712212726,
+          "operator_change": 0.053324791158005896,
+          "prefix": 0.16217100501964846
+        },
+        "variance": {
+          "coupled": {
+            "occurrence": 0.02526813731485202,
+            "total": 0.045497638473860236,
+            "within_event": 0.020229501159008192,
+            "within_none": 0.0
+          },
+          "minus_full": {
+            "occurrence": 0.0952565629212424,
+            "total": 0.15981705806585345,
+            "within_event": 0.06456049514461101,
+            "within_none": 0.0
+          },
+          "one_ended": {
+            "occurrence": 0.04879342469675083,
+            "total": 0.06452949391701951,
+            "within_event": 0.015736069220268684,
+            "within_none": 0.0
+          },
+          "operator_change": {
+            "occurrence": 0.03886247076575806,
+            "total": 0.05680072408464541,
+            "within_event": 0.01793825331888735,
+            "within_none": 0.0
+          },
+          "prefix": {
+            "occurrence": 0.10944663590118424,
+            "total": 0.1834514855955442,
+            "within_event": 0.07400484969435994,
+            "within_none": 0.0
+          }
+        }
+      },
+      "leaders": [
+        {
+          "draw": 0,
+          "energy": 0.0020912231977383315,
+          "event_exposures": 20,
+          "exposures": 20,
+          "observed_squared_delta": 0.002681134706274472,
+          "state": [
+            397,
+            913970203,
+            8
+          ],
+          "variance_delta": -0.0022279974035244515
+        },
+        {
+          "draw": 13,
+          "energy": 0.001851960413585363,
+          "event_exposures": 40,
+          "exposures": 40,
+          "observed_squared_delta": 0.008903657102165952,
+          "state": [
+            401,
+            914010100,
+            9
+          ],
+          "variance_delta": -0.0010556500981848136
+        },
+        {
+          "draw": 0,
+          "energy": 0.001851960413585363,
+          "event_exposures": 40,
+          "exposures": 40,
+          "observed_squared_delta": 0.008903657102165952,
+          "state": [
+            401,
+            914010100,
+            9
+          ],
+          "variance_delta": -0.0010556500981848136
+        },
+        {
+          "draw": 22,
+          "energy": 0.0012860836205453915,
+          "event_exposures": 40,
+          "exposures": 40,
+          "observed_squared_delta": -0.004401704688925106,
+          "state": [
+            401,
+            914010100,
+            9
+          ],
+          "variance_delta": -0.0013718225285817504
+        }
+      ],
+      "one_event_state_bank_model_fraction": 0.10972222222222222,
+      "prefix_model_exposures": 120,
+      "view_occurrence_fractions": {
+        "mixed_a": 0.608007277636144,
+        "mixed_b": 0.5301492101709058,
+        "root_397": 0.6764729432641577,
+        "root_401": 0.40192886681180634
+      },
+      "zero_event_state_bank_model_fraction": 0.71875
+    }
+  },
+  "next": "Stage269: signed action-level occurrence/amplitude target audit and independent-bank support/error decomposition at fixed representation. Verify unregularized hurdle reconstruction equals direct paired means; assess where cross-state statistical sharing is needed before a controlled shared-risk-head fitting comparison. No tuning on Stage253/248/169 or deleting high-influence real events.",
+  "scope": "Stage267 coupled risk-label response at frozen model/calibration/selection, using cached Stage249 futures; no new fits or simulation."
+}
