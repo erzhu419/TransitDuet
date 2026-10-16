@@ -52,5 +52,34 @@ node002/004/005/006 (34/56/56/56 workers, 34/74/74/74 groups).
 The original queued 74-worker shards `t165656-t165658` were canceled before
 launch after live CPU availability fell; replacements preserve every group,
 seed and output path, using two waves where needed. Cached smoke groups are reused.
-Aggregate `t165663` waits for all four completion markers. Only the small
-smoke marker is local; formal variance/repeatability results are pending.
+All four shards and aggregate `t165663` completed with rc=0/retry=0.
+Posthoc signal audit `t165688` (source `3a6c386ce7`) also completed cleanly,
+including two focused tests, without added rollouts. Only 14,214 bytes of
+summary/focused JSON were pulled locally; raw labels and checkpoints remain remote.
+
+## Outcome And Next Step
+
+The predeclared variance gate passed. Event/stream variance ratios (day-cluster
+95% CI): passenger 0.02552 [0.01005,0.04315], CV-squared 0.03011
+[0.00724,0.05419]. All 4,816,320 common event pairs received identical uniforms;
+320,034 changed global order. Prefix/startup checks passed; conservation error
+was at most 4.66e-10.
+
+Corrected signal-squared is positive for passenger and CV-squared. Single-future
+signal/noise ratios are 0.216/0.174; eight-future mean ratios are 1.725
+[0.046,3.208] / 1.390 [0.605,2.043], not confirmed above one. Half-future sign
+agreement is 66.1%/66.7%. Held-future selection passenger delta is -793.62
+person-seconds [-2120.77,83.82]; mean readiness delay increases by 0.00741s
+[0.00021,0.01554]. Of 20 changed half-decisions, 11 improve passenger exposure,
+9 worsen it, and only 3 improve exposure without worsening any constraint.
+
+Retain event coupling for label collection, not controller promotion. Next:
+independent demand days and decision prefixes with all three target windows,
+32 futures per prefix and predeclared 16-select/16-evaluate reversal. Keep the
+readiness and other constraints intact; freeze main/actor/dual/value until
+independent action-effect and joint no-harm evidence supports fitting a scorer.
+
+Posthoc concentration: day 670006 supplies 79.3% of positive passenger
+signal-squared mass and 74.0% of gross held-future improvement. The rotating
+panel ties day to window; independent balanced windows are needed to separate
+those effects. Positive label signal is not demonstrated deployable benefit.
