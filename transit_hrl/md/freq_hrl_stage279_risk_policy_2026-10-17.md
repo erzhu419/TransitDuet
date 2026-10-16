@@ -11,5 +11,20 @@
 - Budget: one unpinned scheduler CPU task, 3072 MiB, any node001-node006; zero new fits, simulations or actor updates. Cached model/state decision exposures: 84,480.
 - Large actions and outcome ledgers stay remote; pull scalar group report only.
 - Verification: five focused tests cover exact raw decisions, original-first ties, feasibility, physical-cost and half identities, zero-fit cell/group replay, action freezing before any outcome access, and the scheduler parent gate; both cold CLI startups passed.
-- Status: submitted as `t166113`; source `144487fd6d` pushed. Completion and results pending.
+- Completed: `t166113`, node006, done/0, no retries. Raw risk, risk-error sums and group risk MSE reproduce exactly; cap excess 1.04e-17. All 84,480 repeated model/state exposures evaluated with zero fits/simulations. Pulled only 1,375,168-byte scalar report.
+
+## Results
+Mixed-pooled opposite16 outcomes relative to frozen raw choices; negative is better. Cost columns x 1e6; wait is minutes.
+
+| Population | Linear9 cost | Observed-df cost | Linear9 wait | Observed-df wait |
+| --- | ---: | ---: | ---: | ---: |
+| Full60 train | +157.907 | +23.195 | -0.000286882 | +0.000151790 |
+| Prefix54 retained | +86.662 | -20.697 | -0.000319922 | +0.000175799 |
+| Prefix54 excluded | +172.546 | +173.864 | -0.000167546 | +0.000206608 |
+| Full60 outer held | -414.689 | -366.298 | -0.001265495 | -0.000706380 |
+| Same prefix54 heads, outer held | -432.667 | -387.227 | -0.001117204 | -0.000899281 |
+
+Observed-df versus Linear9: excluded fleet -32.552e-6 + service +33.870e-6 = cost +1.318e-6; held fleet -27.127e-6 + service +75.517e-6 = cost +48.390e-6. Wait worsens +0.000374154/+0.000559115 min; both future halves agree on service/wait harm. Cost contrast changes sign between halves in both populations.
+Observed-df versus matched-df action context: excluded cost +140.518e-6 (worse), held -276.974e-6 (better). Thus Stage278 MSE gains do not establish policy superiority. Observed-df changes 238/1,920 excluded and 203/1,920 held decisions relative to raw; 1,920 is repeated exposure, not independent seeds.
+Next Stage280: fixed-action predicted-versus-actual service/risk margin attribution; compare both critics on identical disagreement pairs, count fleet events and preserve 8+8 halves. No new fitting, choice changes or simulation.
 - Limitations: cached single-intervention plug-in evaluation on reused development futures; not full-episode HRL, new-prefix confirmation or training-seed CI. No selector/default change. Stage253/248/169 remain closed.
