@@ -40,3 +40,26 @@ the verified runtime root and uses distinct baseline files for sampler repeats.
 Formal tasks `t166162-t166165` cover 128 cells on node002/004/005/006 with 32
 workers each, reusing the smoke cell. Aggregate `t166166` waits for their four
 small completion markers. No response result has been used to select a policy.
+
+## Outcome / Next
+
+All 512 rollouts and aggregation completed, exit 0/retry 0. Only the
+13,231-byte summary was retrieved. CV-squared direction estimates are:
+
+- Score: -.002003 [-.007762,.003755].
+- Paired centered response: +.001809 [-.000619,.004237].
+- Full-scale effect: +.000334 [-.000631,.001299].
+- Full minus centered: -.001475 [-.004091,.001142].
+
+There is no demonstrated local-benefit/full-step-harm reversal, nor evidence
+that the score estimate is systematically biased. Its sign remains unresolved;
+the paired CV standard error is .001191 versus score .002823. Full-scale
+passenger exposure improves -148,524 [-181,765,-115,283] person-s and readiness
+improves -41.77 [-46.64,-36.90] s, but CV non-harm is still unconfirmed. This
+does not rescue V78 or admit a scale. All matched uniforms agree.
+
+Before choosing a new experiment, audit the two existing sampler repeats:
+estimate conditional sampling variance and untruncated between-day covariance,
+preserving complete demand-day pairs in bootstrap intervals. Reproduce the
+existing paired standard errors. No new rollout or learner; this is an ancillary
+measurement-reliability diagnostic, not a changed V80 endpoint or gate.
