@@ -37,3 +37,13 @@ Limitations: fresh prefixes and futures, but the same four actors from two
 original training seeds; not new-training-seed or deployable-controller
 confirmation. Pending arrivals and realized day profiles stay conditional.
 Per-prefix selection uses counterfactual labels, not an online observable scorer.
+
+## Execution
+
+Source `b3259d1997`, immutable snapshot `source/v70_independent_20261016`.
+Smoke `t165690` passed on node004: 31 tests and all 27 replay checks.
+References `t165693`: 48 trajectories, 24 workers; two smoke references reused.
+Matrix `t165694-t165697`: 4,608 grids, planned workers 32/80/80/80 on
+node002/004/005/006, gated on complete reference export; three smoke grids reused.
+Aggregate `t165698` depends on the four matrix completion markers. Scientific
+results remain pending; only the 104-byte smoke marker was pulled locally.
