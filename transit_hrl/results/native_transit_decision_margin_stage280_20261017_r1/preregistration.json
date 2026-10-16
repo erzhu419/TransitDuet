@@ -1,0 +1,62 @@
+{
+  "contract": {
+    "boundary": "descriptive_development_selected_pair_diagnosis_not_causal_feature_attribution_new_prefix_confirmation_or_policy_training; Stage253_248_169_closed; no_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_queries": 2048,
+      "model_state_exposures": 84480,
+      "new_fits": 0,
+      "new_native_episodes": 0,
+      "new_policy_choices": 0
+    },
+    "cohort": "unchanged32_cells_four_views_two_outer_folds_two_partitions_two_directions; full60_prefix54_both_banks_assigned16; all_development_states_no_selected_subgroups",
+    "controls": "all7_cached_choices_replay_exactly; selected_pair_outcomes_reproduce_Stage279_contrasts_per_query_and_group_all_views_banks_scopes_halves; predicted_margins_written_before_label_access",
+    "evaluation": "same_assigned_opposite16_and_fixed8+8_halves; identical_train_retained_excluded_full_held_prefix_held_queries; primary_mixed_excluded_opposite_and_held_opposite",
+    "events": "saved_pair_fleet_add_save_draw_counts_at_existing1e-12_zero_threshold; repeats_and_event_counts_not_independent_seeds",
+    "frozen": "all_Stage279_choices_and_Stage278_risk_predictions; identical_raw_service_wait_gate_samples_and_draw_assignments; replay_only_no_new_action_rule_or_choice_changes",
+    "identity": "actual_cost=predicted_total+fleet_error+service_error_on_same_proposed_minus_control_actions; each_controller_uses_same_service_but_own_risk_prediction; check_opposite_predicted_preferences",
+    "pair_error": "both_risk_heads_evaluated_on_identical_saved_action_pairs; conditional_pair_MSE_and_MC_variance_of_mean_divide_by_disagreement_cases; component_means_divide_by_all_query_states; no_subtracting_noise_or_CI_claim",
+    "pairs": {
+      "linear9_vs_raw": [
+        "raw_linear_clip",
+        "raw_prior"
+      ],
+      "observed_vs_action_df": [
+        "observed_context_df_clip",
+        "action_context_df_clip"
+      ],
+      "observed_vs_bounded": [
+        "observed_context_df_clip",
+        "raw_bounded_clip"
+      ],
+      "observed_vs_linear9": [
+        "observed_context_df_clip",
+        "raw_linear_clip"
+      ],
+      "observed_vs_raw": [
+        "observed_context_df_clip",
+        "raw_prior"
+      ]
+    },
+    "source_protocol": "native_transit_risk_policy_stage279_v1",
+    "source_run": "native_transit_risk_policy_stage279_20261017_r1",
+    "storage": "full_margin_ledgers_and_bank_half_report_remote_only; compact_scalar_pull"
+  },
+  "protocol": "native_transit_decision_margin_stage280_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "03a574416571290b0505d99404723117a916f705"
+}

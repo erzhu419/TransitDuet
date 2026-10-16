@@ -10,5 +10,5 @@
 - Budget: one scheduler task, 1 CPU / 3072 MiB, any node001-node006 without pin; zero fits, new choices, simulations or actor updates. All 84,480 repeated query-state exposures retained.
 - Full margins/half ledgers stay remote. Pull compact scalar report with all16 diagnostics across views/banks and primary mixed held/excluded halves.
 - Verification: four focused tests cover exact head-error decomposition, common-pair MSE, no-disagreement populations, cached cell/group replay before any outcome access, compact-report scope and completed-parent scheduler gate; both cold CLI startups checked.
-- Status: source ready; scheduler submission pending.
+- Status: submitted as `t166128`; source `03a5744165` pushed. Completion and results pending.
 - Limitations: descriptive diagnosis on reused development futures and fixed single-intervention action pairs; not causal attribution, independent training-seed evidence or full HRL validation. No deployment/default change; Stage253/248/169 remain closed.
