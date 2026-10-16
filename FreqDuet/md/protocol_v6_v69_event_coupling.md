@@ -47,7 +47,10 @@ not an established bug or a demonstrated improvement in main-policy service.
 
 Source `1c95900e3f`, immutable snapshot `source/v69_event_20261016`.
 Smoke `t165653` passed on node004: 60 tests and all 17 replay checks.
-Matrix `t165655-t165658`: 256 planned workers, one wave across
-node002/004/005/006 (34/74/74/74 groups); cached smoke groups are reused.
+Matrix `t165655`, `t165674-t165676`: 202 replay workers across
+node002/004/005/006 (34/56/56/56 workers, 34/74/74/74 groups).
+The original queued 74-worker shards `t165656-t165658` were canceled before
+launch after live CPU availability fell; replacements preserve every group,
+seed and output path, using two waves where needed. Cached smoke groups are reused.
 Aggregate `t165663` waits for all four completion markers. Only the small
 smoke marker is local; formal variance/repeatability results are pending.
