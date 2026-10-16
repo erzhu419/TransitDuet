@@ -34,5 +34,25 @@ node001-node006. Arrays/raw snapshots/weights remain server-side; pull only smal
 markers/summary JSON. No actor update or policy switch. This diagnoses missing
 current resource information, not fixed-headway superiority or joint deployment.
 
-Next: server smoke, exact native recapture, day-excluded comparison, then decide
-from the registered gates whether fresh-prefix confirmation is warranted.
+## Outcome / Next
+
+Source `6be3d39249`; scheduler `t165760` smoke, `t165766` 48-worker references
+on node005, `t165767` 12-worker folds and `t165768` aggregate on node004.
+All completed without retries: 19 tests, exact V72 first-fold reproduction,
+48 exact native days / 144 prefixes. Only 46,252 bytes of JSON were collected.
+Passenger MAE: zero 1796.49, original 1997.77, fleet 2187.64, plan 2116.60,
+fleet+plan 2262.90 person-seconds. Primary-minus-original +265.12
+[145.96,383.25]; CV-squared and readiness MAE also worsen. Primary changes
+26/144 actions: eight passenger improvements, 16 worsening, two ties, three
+jointly nonworse points. Exposure +12.66 [-66.60,98.77] person-seconds;
+actual holding +4.32 [2.23,6.30] seconds/day. Both registered gates fail.
+No fresh confirmation, production update or policy switch.
+
+Next: use fixed cached fits to separate fitting error from excluded-day error
+and inspect day/actor feature support before choosing structured lower-dimensional
+resource features or more independent training days. Do not tune ridge/gates on V70.
+
+Limitations: consumed 12-day development data, two original training seeds and
+no capacity isolation. The primary has 4127 inputs / 41280 coefficients and
+effective degrees of freedom 40.1-40.9 per output, versus V72's 11.7-11.9.
+This failure does not establish that current fleet/plan information is irrelevant.
