@@ -1,0 +1,55 @@
+{
+  "contract": {
+    "amplitude": "same_two_training_only_pooled_signed_event_amplitudes_for_signed_MSE_and_event_heads; absent_sign_unidentified_not_imputed; evaluation_oracle_reports_pooling_bias_only",
+    "arms": [
+      "raw_reference",
+      "direct_mse",
+      "signed_mse",
+      "signed_mse_simplex",
+      "signed_hurdle"
+    ],
+    "boundary": "development_label_prediction_test_not_policy_gain_strict_unseen_prefix_seed_CI_or_complete_HRL; no_penalty_selection_or_default_change; Stage253_248_169_closed",
+    "budget": {
+      "actor_updates": 0,
+      "cached_cells": 32,
+      "fit_tasks": 1,
+      "fits_per_bank": 11,
+      "future_banks": 2,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "new_risk_solves": 6336
+    },
+    "capacity": "d_direct_coefficients_vs_2d+2_for_each_signed_arm; same_frozen_features; projected_MSE_reuses_identical_fit; no_claim_equal_function_class_to_linear_regression",
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "controls": "unpenalized_intercept_and_shared_ridge_make_signed_MSE_physical_risk_equal_direct_MSE; verify_on_all_queries; preserve_service_predictions; original_action_zero",
+    "evaluation": "all_models_and_predictions_per_cell_written_before_error_evaluation; assigned_bank_and_opposite_bank_both_reported; independent_for_each_fit_not_globally_new_confirmation_data",
+    "frozen": "raw_reference_service_head_actions_original_anchor_selector_old_keys_and_native_controller; no_policy_choice_or_cap_gate_changes; no_claim_new_heads_satisfy_old_deployment_RMS_caps",
+    "objective": "state_balanced_physical_MSE; same_capacity_signed_two_head_magnitude_MSE_and_simplex_projection_control_vs_three_class_event_CE; CE_scaled3_for_uniform_contrast_curvature; ridge_slopes_only",
+    "penalties": [
+      0.001,
+      0.01,
+      0.1
+    ],
+    "primary_penalty": 0.01,
+    "rank": "8_fixed_full60_causal_198feature_TSVD_plus_intercept; no_label_based_feature_selection",
+    "source_protocol": "native_transit_signed_risk_stage269_v1",
+    "source_run": "native_transit_signed_risk_stage269_20261016_r1",
+    "split": "both_disjoint16_future_directions; full60_train_and_held60; ten_prefix54_label_OOF_fits_and_excluded6; reference_and_feature_geometry_conditioned_on_full60_historical_data",
+    "storage": "models_basis_predictions_action_errors_and_cell_ledgers_server_only; pull_scalar_group_report"
+  },
+  "protocol": "native_transit_shared_risk_stage270_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "7c38bdcab6419be84b3fac8df5c9630b6c8fc50e"
+}
