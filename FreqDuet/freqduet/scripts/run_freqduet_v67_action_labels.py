@@ -60,7 +60,7 @@ def draw_action(policy, state, forced=None):
     return proposed, proposed if forced is None else float(forced)
 
 
-def run_branch(root, v59_root, reference_index, targets, label, forced=None):
+def run_branch(root, v59_root, reference_index, targets, label, forced=None, continuation=None):
     spec = reference_spec(reference_index)
     _, Runner, load_config, _ = joint.optimized_runtime(root)
     source = torch.load(v59_root / "cells" / deployment.case_name(spec["train_seed"], spec["actor_scenario"])
@@ -126,6 +126,8 @@ def run_branch(root, v59_root, reference_index, targets, label, forced=None):
                     raise AssertionError("requested holding label was changed by deployment projection")
                 capture["executed_action_s"] = value
             lower_prefix.append((observation.time_s, int(key), observation.trip_id, observation.station_id, value))
+            if self._label_capture is not None and continuation is not None:
+                captures[self._label_capture]["continuation"] = continuation(self, policy)
             return action
 
     joint.seed_runtime(torch, spec["train_seed"])
