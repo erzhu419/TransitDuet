@@ -3,6 +3,8 @@ from pathlib import Path
 import sys
 import unittest
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import audit_freqduet_v71_fleet as audit
 
@@ -20,6 +22,18 @@ def reference():
 
 
 class FleetAccountingTest(unittest.TestCase):
+    def test_censor_effect_uses_common_clearance_not_different_tail_windows(self):
+        old = dict(timeline=np.array([[0, 0, 0], [5, 10, 0], [20, 40, 0]], dtype=float),
+                   holding=np.array([[0, 0, 0], [1, 0, 0], [5, 0, 0], [20, 0, 0]], dtype=float))
+        new = dict(timeline=np.array([[0, 0, 0], [6, 12, 0], [20, 26, 0]], dtype=float),
+                   holding=np.array([[0, 0, 0], [1, 0, 0], [6, 0, 0], [20, 0, 0]], dtype=float))
+        result = audit.censor_effects(old, new)
+        self.assertEqual(result["service_end_delta_s"], 1)
+        self.assertEqual(result["unserved_delta"], -1)
+        self.assertEqual(result["own_cleared_tail_delta_person_s"], -16)
+        self.assertEqual(result["post_both_cleared_passenger_person_s"], -14)
+        self.assertEqual(result["common_cleared_tail_duration_s"], 14)
+
     def test_readiness_and_plan_changes_are_not_actual_time_changes(self):
         old, new = reference(), reference()
         new["launches"][1]["readiness_s"] += 5

@@ -62,6 +62,32 @@ def fleet_effects(reference, candidate, action):
                 other_vehicle_command_s=float(command_delta[2]))
 
 
+def cleared_tail(data):
+    timeline, holding = data["timeline"], data["holding"]
+    last_dt = timeline[-1, 0] - timeline[-2, 0]
+    physical_dt = holding[1, 0] - holding[0, 0]
+    extension = last_dt > physical_dt
+    if extension:
+        np.testing.assert_equal(timeline[-2, 0], holding[-2, 0])
+        np.testing.assert_array_equal(holding[-1, 1:], holding[-2, 1:])
+    exposure = timeline[-1, 1:] - timeline[-2, 1:]
+    return dict(physical_end_s=float(timeline[-2 if extension else -1, 0]),
+                unserved=float(exposure[0] / last_dt),
+                passenger_person_s=float(exposure[:2].sum()) if extension else 0.)
+
+
+def censor_effects(reference, candidate):
+    old, new = cleared_tail(reference), cleared_tail(candidate)
+    common_end = max(old["physical_end_s"], new["physical_end_s"])
+    total_delta = candidate["timeline"][-1, 1:3].sum() - reference["timeline"][-1, 1:3].sum()
+    at_clear = audit.cumulative(candidate["timeline"], common_end) - audit.cumulative(reference["timeline"], common_end)
+    return dict(reference_service_end_s=old["physical_end_s"], service_end_delta_s=new["physical_end_s"] - old["physical_end_s"],
+                reference_unserved=old["unserved"], candidate_unserved=new["unserved"], unserved_delta=new["unserved"] - old["unserved"],
+                own_cleared_tail_delta_person_s=new["passenger_person_s"] - old["passenger_person_s"],
+                post_both_cleared_passenger_person_s=float(total_delta - at_clear[:2].sum()),
+                common_cleared_tail_duration_s=float(reference["timeline"][-1, 0] - common_end))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-root", type=Path, required=True)
@@ -84,7 +110,7 @@ def main():
                     row["phases"]["day_end"]["other_command_holding_s"], atol=0, rtol=0)
                 np.testing.assert_allclose(physical["target_return_delta_s"], row["target_return_delta_s"], atol=0, rtol=0)
                 phases = row["phases"]
-                effects[action].append(dict(physical=physical,
+                effects[action].append(dict(physical=physical, censor=censor_effects(reference, candidate),
                     elapsed={cut: v["time_s"] - reference["identity"][0] for cut, v in phases.items() if cut != "before"},
                     post_return_passenger_person_s=phases["day_end"]["passenger_person_s"] - phases["reference_return"]["passenger_person_s"],
                     post_30min_passenger_person_s=phases["day_end"]["passenger_person_s"] - phases["min30"]["passenger_person_s"],
@@ -94,6 +120,7 @@ def main():
         for action, rows in effects.items():
             panels.append(dict(context_index=context, native_action_s=native, action_s=action,
                 physical={k: audit.future_interval([r["physical"][k] for r in rows]) for k in rows[0]["physical"]},
+                censor={k: audit.future_interval([r["censor"][k] for r in rows]) for k in rows[0]["censor"]},
                 elapsed_seconds={cut: dict(mean=float(np.mean([r["elapsed"][cut] for r in rows])),
                                           min=min(r["elapsed"][cut] for r in rows), max=max(r["elapsed"][cut] for r in rows))
                                  for cut in ("reference_return", "reference_next_launch", "day_end")},
@@ -104,11 +131,11 @@ def main():
                                      short_tie=sum(r["sign_pairs"][cut][0] == 0 for r in rows),
                                      full_tie=sum(r["sign_pairs"][cut][1] == 0 for r in rows))
                             for cut in ("min15", "min30", "reference_return")}))
-    result = dict(status="fixed_V71_physical_fleet_accounting_complete", panels=panels,
+    result = dict(status="fixed_V71_physical_fleet_and_censor_accounting_complete", panels=panels,
                   interval_unit="32 consumed continuations conditional on each fixed development prefix",
                   rollouts_added=0, actor_updates=0, dual_updates=0, value_updates=0, main_policy_changed=False,
                   causal_mediation_identified=False)
-    output = root / "fleet_summary"
+    output = root / "fleet_tail_summary"
     output.mkdir(exist_ok=True)
     (output / "status.json").write_text(json.dumps(result, indent=2) + "\n")
     print("V71_FLEET_COMPLETE " + json.dumps(dict(panels=len(panels), rollouts_added=0)), flush=True)
