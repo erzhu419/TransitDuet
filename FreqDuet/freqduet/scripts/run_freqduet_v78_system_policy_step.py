@@ -127,7 +127,7 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
         holding_s_per_trip=float(episode["holding_vehicle_seconds_per_launched_trip"]),
         trips_unlaunched=int(runner.env._measurement_details["trips_unlaunched"]),
         trips_incomplete=int(runner.env._measurement_details["trips_incomplete"]),
-        action_counts={str(int(a)): sum(h["action_s"] == a for h in observer.holds) for a in step.ACTIONS},
+        action_counts={str(int(a)): int(sum(h["action_s"] == a for h in observer.holds)) for a in step.ACTIONS},
         stream_audit=audit, theta=list(theta), base_actors_unchanged=True,
         training_updates=0, dual_updates=0, main_policy_changed=False)
     if save_training:
