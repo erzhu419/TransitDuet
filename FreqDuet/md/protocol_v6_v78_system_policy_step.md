@@ -62,6 +62,19 @@ Source `c742fa1894`; smoke `t166129` passed six tests, exact historical B200
 episode/holding identity and a nonzero full-day collection. Prototype integration
 failures (JSON integer type, runtime-only interface assumptions, native action
 quantization accounting) were fixed before formal collection; obsolete queued
-tasks were cancelled. Four 16-worker training shards `t166131-t166134` use only
-node001-node006, preferred node002/004/005/006. No held-out policy effect has
-been evaluated yet; main remains frozen.
+tasks were cancelled. Four 16-worker training shards `t166131-t166134` completed
+all 64 training-day rollouts, exit 0 with no retries. Fits `t166136/t166137`
+froze nonzero coefficients for both original seeds before held-out evaluation:
+
+- Seed 12011: approximately `(0, .127912, 0, .251250)`.
+- Seed 933013: approximately `(0, .357135, 0, 0)`.
+
+Both observed mean state KL values are .001; estimated passenger and readiness
+directional costs decrease while estimated CV-squared costs do not increase.
+These are training estimates, not measured closed-loop improvements. Neither
+fit activates the two-sided-gain or return-backlog coefficient materially.
+
+Held-out tasks `t166142-t166145` cover all 128 pairs in one wave on
+node002/004/005/006, 32 workers each. Server aggregation `t166146` waits for all
+four small shard markers and applies the unchanged joint gates separately by mode.
+Main remains frozen; no held-out outcome is claimed at dispatch.
