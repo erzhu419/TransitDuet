@@ -1,0 +1,44 @@
+{
+  "protocol": "native_transit_alignment_scale_stage276_v1",
+  "run_name": "native_transit_alignment_scale_stage276_20261016_r1",
+  "registered_source_revision": "92418be0639f790e736b79be270bb06a7eda1afc",
+  "scheduler": {
+    "analysis": "t166019",
+    "records": 1,
+    "status_counts": {"done": 1},
+    "exit_code_counts": {"0": 1},
+    "node_counts": {"node002": 1},
+    "retry_count_sum": 0,
+    "started_at": 1792166036.9701762,
+    "finished_at": 1792166023.0,
+    "runtime_seconds": null,
+    "timing_note": "Scheduler end timestamp precedes start; elapsed time unavailable."
+  },
+  "budget": {
+    "analysis_tasks": 1,
+    "cached_cells": 32,
+    "cached_prefix_contexts": 640,
+    "model_probe_rows": 3840,
+    "new_fits": 0,
+    "new_solver_calls": 0,
+    "new_model_inferences": 0,
+    "new_native_episodes": 0,
+    "actor_updates": 0,
+    "policy_action_selections": 0
+  },
+  "focused_tests_passed": 14,
+  "cold_entrypoints_passed": 2,
+  "coverage_qualified": true,
+  "reproduction": {
+    "group_metric_max_abs_error": 0.0,
+    "partition_max_abs_error": 1.6263032587282567e-19,
+    "factorization_max_abs_error": 2.1006417091906648e-19
+  },
+  "local_pulls": {
+    "report_bytes": 535707,
+    "raw_labels_models_features_predictions_queries_or_error_ledgers_pulled": false
+  },
+  "policy_outcomes_evaluated": false,
+  "default_changed": false,
+  "native_deployment_eligible": false
+}

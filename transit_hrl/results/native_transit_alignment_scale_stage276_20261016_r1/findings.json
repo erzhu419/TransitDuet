@@ -1,0 +1,34 @@
+{
+  "protocol": "native_transit_alignment_scale_stage276_v1",
+  "primary": {
+    "group": "mixed_pooled", "bank": "pooled", "future": "opposite", "mode": "paired",
+    "arm": "raw_bounded_clip", "penalty": 0.01,
+    "alignment_gap": 5.2041324406049006e-05,
+    "effects": {
+      "correction_RMS": -5.670237872199795e-07,
+      "normalized_alignment": 4.634404811054896e-05,
+      "population_mass": 0.0,
+      "raw_residual_RMS": 6.2643000827200165e-06
+    },
+    "effect_share_pct": {"normalized_alignment": 89.05239949112858, "raw_residual_RMS": 12.037164991888423, "correction_RMS": -1.0895644830170226, "population_mass": 0.0},
+    "dominant_both": {
+      "units": 28,
+      "rho_excluded": 0.19226384491733253,
+      "rho_held": -0.619474135833988,
+      "global_alignment_gap": 4.148144435774095e-05,
+      "share_of_all_alignment_gap": 0.7970866389580079
+    },
+    "dominant_prefix_other_probe": {
+      "units": 32,
+      "rho_excluded": -0.3299608660272506,
+      "rho_held": -0.32444567691992987,
+      "global_alignment_gap": -8.555331976303019e-07
+    }
+  },
+  "interpretation": "In the primary pooled opposite-bank comparison, normalized alignment dominates the excluded/held alignment gap rather than residual scale or correction energy. The dominant prefix/probe intersection flips alignment sign, whereas the same prefixes at other probes align similarly. This supports prioritizing a controlled causal-state-conditioning test over uniformly stronger amplitude penalties; it does not identify a missing feature or prove a new model improves performance.",
+  "next": "Stage277: matched-capacity causal-state-conditioned residual fit with the same sample populations, masks, assigned/opposite banks, cached priors and pointwise clip; fit normalization on each training subset only. Requires new lightweight residual fits, not raw-reference retraining or simulation. Not started in Stage276; no prefix/probe-ID gate.",
+  "limitations": "Development-selected groups, finite16-future targets, historical raw-reference conditioning and repeated model/probe exposures; not causal, training-seed CI or policy validation. Bank1 assigned-bank scale and alignment contributions are comparable, and root397's small dominant intersection reverses. Symmetric product attribution is descriptive. Stage253/248/169 remain closed.",
+  "known_issue": "Scheduler end timestamp precedes start; elapsed time recorded as null.",
+  "default_changed": false,
+  "native_deployment_eligible": false
+}
