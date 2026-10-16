@@ -77,7 +77,6 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
                 len(bus.passengers) / bus.capacity, self.env._ready_vehicle_count(not bool(bus.direction)),
                 due_at_return(self.env, not bool(bus.direction)), spent[bus.trip_id])
             adjusted = step.probabilities(policy, torch.from_numpy(encoded)[None, :], f, theta)
-            self._ep_lower_policy_entropies.append(float(-(adjusted * torch.log(adjusted + 1e-8)).sum(dim=-1).item()))
             probabilities = adjusted[0].numpy().astype(float)
             probabilities /= probabilities.sum()
             if mode == "deterministic":
