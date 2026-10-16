@@ -85,6 +85,9 @@ def fit_cell(directory, key, views, panels):
                 replay = costs["raw_prior"]+np.clip(delta, -m["radius"], m["radius"])
                 maximum = max(maximum, float(np.max(np.abs(replay-costs["raw_linear_clip"]))))
                 new, clips = learning.predict(model, z[label][ids], observed[label][ids], costs["raw_prior"], mask, data[label]["originals"][ids], m["radius"])
+                for a in ("raw_bounded_clip", "raw_linear_clip"):
+                    uncut = matched[a[:-5]][i] if scope == "matched_held" else saved[f"{i}_{scope}_{a[:-5]}"]
+                    clips[a] = np.abs(uncut-costs["raw_prior"]) > m["radius"]
                 costs.update(new)
                 predictions.append({**q, "bank": m["bank"], "removed": group, "costs": costs, "clips": clips, "radius": m["radius"]})
                 arrays.update({f"{i}_{scope}_{a}": c for a, c in costs.items()})

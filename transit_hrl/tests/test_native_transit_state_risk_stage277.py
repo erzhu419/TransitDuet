@@ -81,10 +81,12 @@ class StateRiskTest(unittest.TestCase):
                     "training_draws": list(range(16*bank, 16*(bank+1))), "radius": .002, "maps": {"linear": linear}})
                 for scope, ii in scopes:
                     queries.append({"index": i, "scope": scope, "label": "held" if scope == "held" else "train", "ids": ii, "eligible": mask[ii].tolist()})
-                    for a in learning.ARMS[:3]: saved[f"{i}_{scope}_{a}"] = np.zeros((len(ii), 6))
+                    for a in (*learning.ARMS[:3], "raw_bounded", "raw_linear"): saved[f"{i}_{scope}_{a}"] = np.zeros((len(ii), 6))
+                    saved[f"{i}_{scope}_raw_bounded"][:, 1:] = .004
+                    saved[f"{i}_{scope}_raw_bounded_clip"][:, 1:] = .002
                     for future, b in (("same", bank), ("opposite", 1-bank)):
-                        stats = learning.base.metrics(np.zeros((len(ii), 6)), np.zeros((len(ii), 6)), values[ii, b*16:(b+1)*16, :, 1], mask[ii], .002)
-                        errors.append({"bank": bank, "removed": group, "penalty": .01, "scope": scope+"_"+future, "metrics": {a: stats for a in learning.ARMS[:3]}})
+                        stats = {a: learning.base.metrics(saved[f"{i}_{scope}_{a}"], np.zeros((len(ii), 6)), values[ii, b*16:(b+1)*16, :, 1], mask[ii], .002) for a in learning.ARMS[:3]}
+                        errors.append({"bank": bank, "removed": group, "penalty": .01, "scope": scope+"_"+future, "metrics": stats})
         class Archive(dict):
             def __enter__(self): return self
             def __exit__(self, *args): return False
@@ -98,7 +100,7 @@ class StateRiskTest(unittest.TestCase):
                 training_calls.append(True)
             return values[[r["scene_seed"]%10*6+r["probe_index"] for r in rs]][:, ds]
         with tempfile.TemporaryDirectory() as tmp, patch.object(spec.Path, "read_text", autospec=True, side_effect=lambda p: json.dumps(files[p.name])), \
-                patch.object(spec.np, "load", side_effect=[Archive(basis=np.eye(198)[:, :8]), Archive(saved), Archive({a: np.zeros((22, 60, 6)) for a in learning.ARMS[:3]})]), \
+                patch.object(spec.np, "load", side_effect=[Archive(basis=np.eye(198)[:, :8]), Archive(saved), Archive({a: np.zeros((22, 60, 6)) for a in (*learning.ARMS[:3], "raw_bounded", "raw_linear")})]), \
                 patch.object(spec, "read_cell", return_value={"reference": {}}), patch.object(spec, "write_json"), \
                 patch.object(spec.np, "savez_compressed", side_effect=lambda *a, **k: frozen.append(True)), \
                 patch.object(spec.cache.cached.training.cohort, "split_rows", return_value=(rows, held)), \
@@ -113,6 +115,10 @@ class StateRiskTest(unittest.TestCase):
         self.assertEqual(len(result["records"]), 128)
         self.assertEqual(result["prediction_error"], 0.)
         self.assertLess(result["metric_error"], 1e-12)
+        for r in result["records"]:
+            if not r["scope"].startswith("matched_held"):
+                stats = r["metrics"]["raw_bounded_clip"]
+                self.assertEqual(stats["clipped_actions"], stats["action_exposures"])
 
     def test_scheduler_cpu_no_pin_small_pull_and_failed_parent_blocks(self):
         task = submit.task_specification("unit_state")
