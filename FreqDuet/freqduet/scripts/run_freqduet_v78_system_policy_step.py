@@ -52,7 +52,7 @@ def due_at_return(env, direction):
 
 
 def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_training=False,
-            training_path=None):
+            training_path=None, probability_rule=step.probabilities):
     _, Runner, load_config, runtime_torch = joint.optimized_runtime(root)
     observer, moments = CreditObserver(), ArrivalMoments()
     uniforms = event.EventUniforms(sampler_seed)
@@ -77,7 +77,7 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
             f = step.action_features(self._pending_lower_action_context[int(key)],
                 len(bus.passengers) / bus.capacity, self.env._ready_vehicle_count(not bool(bus.direction)),
                 due_at_return(self.env, not bool(bus.direction)), spent[bus.trip_id])
-            adjusted = step.probabilities(policy, torch.from_numpy(encoded)[None, :], f, theta)
+            adjusted = probability_rule(policy, torch.from_numpy(encoded)[None, :], f, theta)
             probabilities = adjusted[0].numpy().astype(float)
             probabilities /= probabilities.sum()
             if mode == "deterministic":

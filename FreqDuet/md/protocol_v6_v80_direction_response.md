@@ -58,8 +58,15 @@ passenger exposure improves -148,524 [-181,765,-115,283] person-s and readiness
 improves -41.77 [-46.64,-36.90] s, but CV non-harm is still unconfirmed. This
 does not rescue V78 or admit a scale. All matched uniforms agree.
 
-Before choosing a new experiment, audit the two existing sampler repeats:
-estimate conditional sampling variance and untruncated between-day covariance,
-preserving complete demand-day pairs in bootstrap intervals. Reproduce the
-existing paired standard errors. No new rollout or learner; this is an ancillary
-measurement-reliability diagnostic, not a changed V80 endpoint or gate.
+Ancillary read-only audit `t166174` passed three tests and reproduced all paired
+standard errors. Centered CV responses have opposite signs between repeats on
+16/32 days; between-day covariance is -1.11e-5 [-2.76e-5,5.01e-6]. Full-minus-
+centered CV repeat means also differ in sign (-.005132/+.002183). Thus neither
+state-dependent CV response nor stable curvature is identified. Sampling noise
+is an established obstacle, but this does not apportion the V78 sign reversal
+causally or rule out nonlinearity. No new rollout was needed; only 18,202 bytes
+of additional summary were retrieved.
+
+Keep the failed joint gate. V81 is a separate observable-regularity projection
+hypothesis on fresh days, not another fit to these noisy gradients or a V78
+step-size rescue. Local moment feasibility must still face full-day validation.
