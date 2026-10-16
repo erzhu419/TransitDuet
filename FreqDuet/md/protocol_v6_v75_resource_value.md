@@ -43,3 +43,36 @@ eight tests, exact legacy seven-action/event identity, four forced-native groups
 34 replays and real old-cache fitting (279 primary inputs). No formal validation
 day was used for smoke. Formal native collection and the label matrix are released
 by completion-marker dependencies; actor, dual and main remain frozen.
+
+## Outcome
+
+All 28 tasks completed, exit 0/no retries. On 12 independent validation days
+(144 prefixes, 32 paired futures each), both registered gates fail.
+Passenger MAE for structured old12 / expanded44: 2014.23 / 1725.92 person-s;
+paired improvement -288.30 [-535.79,-69.15]. Expanded original-state MAE is
+1728.21, full-fleet 1834.90, action-only 1649.13, zero 1785.79. Structured
+versus expanded original-state MAE -2.29 [-34.10,26.65], not a demonstrated
+representation gain. Readiness MSE improves versus zero, but not all prediction
+criteria pass. Expanded structured changes 58/144 actions: 9 passenger gains,
+47 harms, 2 ties; 5 jointly nonworse point estimates. Mean exposure increases
+260.11 [111.46,434.48] person-s per single intervention, holding increases
+14.68 [10.43,19.18] seconds, and 11/12 day means worsen. This is not a joint
+deployment/day-total policy effect. Do not promote the candidate or action-only.
+
+Read-only saved-choice diagnosis (`t166084`, source `84d08eb357`) passed two
+tests and reproduced all eight models' validation scores/choices and the primary
+effect summary. Of 58 overrides, 54 increase holding; 52 choose 45 s. Across
+all prefixes, predicted passenger effect is -519.64 [-708.98,-350.48], actual
++260.11 [111.46,434.48]. Of the 54 longer choices, 43 harm passengers, 9 help,
+2 tie. Thirty-six overrides harm in both fixed 16-future halves; only 3 help in
+both. Primary passenger sign/order agreement is about 56.6%. In-sample choice
+errors also persist (200 longer choices, 161 passenger harms), so cross-day
+overfit is not a sufficient explanation. All four actors have positive harm CIs.
+
+Next diagnose seven-action response-shape mismatch and large-tail contributions
+on development labels before another model fit. Data expansion improves global
+error, not decision calibration; do not add days or tune gates as the sole fix.
+Actor/dual/main stay frozen. Limitations: only two original training seeds;
+the same-mean32 best feasible choice is an optimistic, label-selected diagnostic,
+not a validated controller. Validation days are now consumed; later tuning makes
+them development data, not fresh confirmation for the resulting candidate.
