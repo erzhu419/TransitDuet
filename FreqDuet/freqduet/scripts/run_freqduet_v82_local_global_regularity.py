@@ -21,7 +21,8 @@ pilot, step = projection.pilot, projection.pilot.step
 DAYS = projection.DAYS[::8]
 ITEMS = [i for i, (_, day, _) in enumerate(projection.ITEMS) if day in DAYS]
 LOCAL_METRICS = ("predicted_gain_delta", "expected_holding_delta_s", "completed_ready_gain_delta",
-                 "completed_departure_gain_delta", "follower_gap_error_s", "future_follower_holding_s")
+    "completed_departure_gain_delta", "follower_gap_error_s", "future_follower_holding_s",
+    "modal_gain_delta", "modal_holding_delta_s", "completed_ready_modal_gain_delta")
 
 
 def completed_gain(context, gap):
@@ -35,9 +36,14 @@ def local_effect(context, features, base, actual, forecast):
     row = dict(predicted_gain_delta=float(delta @ features[:, 0]),
                expected_holding_delta_s=float(delta @ step.ACTIONS),
                completed_ready_gain_delta=None, completed_departure_gain_delta=None,
-               follower_gap_error_s=None, future_follower_holding_s=None)
+               follower_gap_error_s=None, future_follower_holding_s=None,
+               modal_gain_delta=float(features[np.argmax(actual), 0] - features[np.argmax(base), 0]),
+               modal_holding_delta_s=float(step.ACTIONS[np.argmax(actual)] - step.ACTIONS[np.argmax(base)]),
+               completed_ready_modal_gain_delta=None)
     if context.evidence_valid and context.follower_evidence_valid and forecast and forecast["resolved"]:
         row["completed_ready_gain_delta"] = float(delta @ completed_gain(context, forecast["actual_follower_gap_s"]))
+        gains = completed_gain(context, forecast["actual_follower_gap_s"])
+        row["completed_ready_modal_gain_delta"] = float(gains[np.argmax(actual)] - gains[np.argmax(base)])
         row["follower_gap_error_s"] = float(forecast["raw_gap_prediction_error_s"])
         row["future_follower_holding_s"] = forecast.get("follower_action_s")
         if forecast["follower_departure_time_s"] is not None:

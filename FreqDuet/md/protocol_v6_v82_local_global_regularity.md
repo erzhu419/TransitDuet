@@ -24,6 +24,8 @@ with the same local formula replayed using completed follower gaps; report
 coverage, follower error and subsequent follower holding. Completed-gap replay
 is not a causal alternative-action value: changing current holding could also
 change that follower's future. No completed label enters action selection.
+Report modal action/gain changes separately from distribution means, since
+deterministic argmax deployment does not inherit the expectation constraint.
 
 Decompose measured arrival CV-squared into within/between stop-direction and
 four-hour groups, retaining additive group contributions. This distinguishes
