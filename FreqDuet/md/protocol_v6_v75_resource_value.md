@@ -38,6 +38,8 @@ frozen until a separately validated closed-loop control candidate exists.
 
 Source `3a2617340a`. Scheduler: smoke `t165783`, references `t165784`,
 24 label shards `t165785-t165808` (12 workers each), fixed fits `t165809`,
-validation `t165810`. Allowed nodes are node001-node006 only. Eight focused
-tests passed; smoke replay admission is pending. Completion-marker dependencies
-prevent formal labels/fits/validation from starting before their prerequisites.
+validation `t165810`. Allowed nodes are node001-node006 only. Smoke passed:
+eight tests, exact legacy seven-action/event identity, four forced-native groups,
+34 replays and real old-cache fitting (279 primary inputs). No formal validation
+day was used for smoke. Formal native collection and the label matrix are released
+by completion-marker dependencies; actor, dual and main remain frozen.
