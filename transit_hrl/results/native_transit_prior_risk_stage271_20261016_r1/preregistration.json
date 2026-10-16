@@ -1,0 +1,70 @@
+{
+  "contract": {
+    "arms": [
+      "cold_mse",
+      "raw_prior",
+      "raw_residual",
+      "raw_bounded",
+      "raw_outside_span",
+      "free_old_prior",
+      "free_old_residual",
+      "free_old_bounded",
+      "free_old_outside_span",
+      "shrunk_prior",
+      "shrunk_residual",
+      "shrunk_bounded",
+      "shrunk_outside_span"
+    ],
+    "boundary": "development_label_prediction_not_new_prefix_confirmation_seed_CI_policy_gain_or_proven_no_harm; learned_priors_share_assigned_training_futures; no_selection_or_default_change; Stage253_248_169_closed",
+    "budget": {
+      "actor_updates": 0,
+      "cached_cells": 32,
+      "cached_cold_models": 2112,
+      "constrained_paths": 6336,
+      "fit_tasks": 1,
+      "new_native_episodes": 0,
+      "new_prior_or_raw_reference_fits": 0,
+      "new_residual_ridge_fits": 6336,
+      "prior_projection_solves": 2112
+    },
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "controls": "reproduce_Stage270_raw_and_cold_errors_all_cells_banks_penalties_scopes_groups; identical_states_queries_and_assignments; prefix54_current_bank_excluded_labels_never_enter_prior_or_residual_fit; historical_reference_remains_conditioned",
+    "diagnostic": "training_only_weighted_OLS_projection_of_frozen_prior; prior_residual_minus_cached_cold_equals_outside_span_prior_plus_ridge_shrink_return; outside_span_added_to_cold_is_frozen_information_control; preserve_signed_cross_term",
+    "evaluation": "all_models_and_predictions_per_cell_written_before_error_evaluation; assigned_bank_and_opposite_bank_both_reported; independent_for_each_fit_not_globally_new_confirmation_data",
+    "fit": "same_state_balanced_physical_ridge_on_assigned16_mean_minus_prior; same_trainable_capacity_as_cold; unbounded_and_convex_RMS_constrained_corrections; zero_correction_reproduces_prior",
+    "frozen": "service_predictions_raw_reference_feature_basis_actions_and_selectors; only_risk_label_error_no_native_control",
+    "penalties": [
+      0.001,
+      0.01,
+      0.1
+    ],
+    "prefix_run": "native_transit_training_count_stage258_20261016_r1",
+    "primary_penalty": 0.01,
+    "prior": "raw_reference_or_cached_free_old_shrunk_rank8_alpha1_risk_slice; full60_Stage251_for_full_fit_prefix54_Stage258_for_excluded_fit; no_selector_change_or_new_prior_fit",
+    "priors": [
+      "raw",
+      "free_old",
+      "shrunk"
+    ],
+    "radius": "existing_training_independent_historical_rank8_old_radius_times_cached_physical_scale; same_extra_correction_budget_for_all3_priors; no_query_or_evaluation_rescaling; not_original_joint_service+risk_cap_or_global_safety_bound",
+    "representation": "verbatim_Stage270_rank8_basis_intercept_cold_coefficients_and_queries; no_cold_refit",
+    "source_protocol": "native_transit_shared_risk_stage270_v1",
+    "source_run": "native_transit_shared_risk_stage270_20261016_r1",
+    "storage": "models_predictions_projection_coefficients_and_all_error_ledgers_server_only; pull_compact_scalar_report"
+  },
+  "protocol": "native_transit_prior_risk_stage271_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "31a40f4a63f601c5b302feeb108bdec9446640a9"
+}

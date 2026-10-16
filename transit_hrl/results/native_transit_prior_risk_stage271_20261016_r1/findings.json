@@ -1,0 +1,443 @@
+{
+  "decision": "Do not deploy: all three prior-preserving bounded corrections remain worse than their own priors on mixed OOF and held labels at the declared main penalty.",
+  "interpretation": "Keeping the prior and enforcing the training correction cap improves over cold MSE but does not clear the priors. Merely adding the training-projection residual of the prior barely changes mixed held MSE, so discarded prior information alone is not the solution. Training RMS constraints and replay checks are correct; held corrections exceed the training-average radius. Mixed pooled raw direction has positive empirical alignment but overshoots; mixed_a raw OOF direction has negative alignment in both future directions, so no uniform positive rescaling improves that empirical fixed-direction loss.",
+  "limits": "Development-label accuracy, not seed CI or control performance. Historical references are conditioned; fixed learned risk rank8/alpha1 slices are not selected native policies. Outside-span here means outside the weighted training projection, not a global expressivity lower bound. Training correction caps are not global no-harm constraints. Posthoc loss alignment is descriptive and not used to select a multiplier.",
+  "loss_response_primary": {
+    "excluded_opposite": {
+      "free_old": {
+        "MSE_change": 0.0002442673504953409,
+        "alignment_mean": -3.7185023329374854e-05,
+        "alignment_over_delta_squared": -0.21886764821847762,
+        "delta_squared_mean": 0.0001698973038365912
+      },
+      "raw": {
+        "MSE_change": 0.00013795212163525005,
+        "alignment_mean": 2.194481999787321e-05,
+        "alignment_over_delta_squared": 0.12068085901194069,
+        "delta_squared_mean": 0.00018184176163099647
+      },
+      "shrunk": {
+        "MSE_change": 0.00021542723092382945,
+        "alignment_mean": -1.4237500812070585e-05,
+        "alignment_over_delta_squared": -0.0761558226152392,
+        "delta_squared_mean": 0.00018695222929968828
+      }
+    },
+    "held_opposite": {
+      "free_old": {
+        "MSE_change": 0.0001003017243301833,
+        "alignment_mean": 8.223143668351052e-06,
+        "alignment_over_delta_squared": 0.07043497830022126,
+        "delta_squared_mean": 0.00011674801166688541
+      },
+      "raw": {
+        "MSE_change": 4.17587796702803e-05,
+        "alignment_mean": 4.66508535453826e-05,
+        "alignment_over_delta_squared": 0.3454071184262736,
+        "delta_squared_mean": 0.0001350604867610455
+      },
+      "shrunk": {
+        "MSE_change": 9.255799329784236e-05,
+        "alignment_mean": 1.3920792879745782e-05,
+        "alignment_over_delta_squared": 0.11562160755659072,
+        "delta_squared_mean": 0.00012039957905733393
+      }
+    },
+    "train_opposite": {
+      "free_old": {
+        "MSE_change": -1.9092996374262244e-05,
+        "alignment_mean": 3.568568312314579e-05,
+        "alignment_over_delta_squared": 0.6826089491791674,
+        "delta_squared_mean": 5.227836987202934e-05
+      },
+      "raw": {
+        "MSE_change": -6.0511193362182566e-05,
+        "alignment_mean": 6.214947977489043e-05,
+        "alignment_over_delta_squared": 0.9743166047249607,
+        "delta_squared_mean": 6.37877661875983e-05
+      },
+      "shrunk": {
+        "MSE_change": -2.1919024859136794e-05,
+        "alignment_mean": 3.889326544965002e-05,
+        "alignment_over_delta_squared": 0.6961697094853238,
+        "delta_squared_mean": 5.586750604016325e-05
+      }
+    }
+  },
+  "mixed_a_raw_OOF_alignment_by_bank": {
+    "bank0": {
+      "MSE_change": 0.00022218552656436846,
+      "alignment_mean": -3.711966716917789e-05,
+      "alignment_over_delta_squared": -0.2508997805936861,
+      "delta_squared_mean": 0.00014794619222601268
+    },
+    "bank1": {
+      "MSE_change": 0.00014266254001111254,
+      "alignment_mean": -2.4268633018443225e-05,
+      "alignment_over_delta_squared": -0.2578333320452124,
+      "delta_squared_mean": 9.412527397422609e-05
+    }
+  },
+  "mixed_primary": {
+    "excluded_opposite": {
+      "action_exposures": 3662,
+      "arms": {
+        "cold_mse": {
+          "MSE": 0.0011951540134723887,
+          "bias": -0.0009834581050395899
+        },
+        "free_old_bounded": {
+          "MSE": 0.0009279135722485791,
+          "bias": -0.0002933778728352887
+        },
+        "free_old_outside_span": {
+          "MSE": 0.0011753899256128609,
+          "bias": -0.00020619161675501405
+        },
+        "free_old_prior": {
+          "MSE": 0.0006836462217532382,
+          "bias": -3.444087841248202e-05
+        },
+        "free_old_residual": {
+          "MSE": 0.0011774622769679037,
+          "bias": -0.00027839570759140796
+        },
+        "raw_bounded": {
+          "MSE": 0.0007937579315546259,
+          "bias": -0.0004773709664791877
+        },
+        "raw_outside_span": {
+          "MSE": 0.0011753899256128609,
+          "bias": -0.00020619161675501245
+        },
+        "raw_prior": {
+          "MSE": 0.0006558058099193759,
+          "bias": -0.0002590872059702777
+        },
+        "raw_residual": {
+          "MSE": 0.001130986817623994,
+          "bias": -0.0003194894061321586
+        },
+        "shrunk_bounded": {
+          "MSE": 0.000870342200398146,
+          "bias": -0.0003816617898086855
+        },
+        "shrunk_outside_span": {
+          "MSE": 0.0011753899256128609,
+          "bias": -0.00020619161675501418
+        },
+        "shrunk_prior": {
+          "MSE": 0.0006549149694743165,
+          "bias": -0.0002757660651333168
+        },
+        "shrunk_residual": {
+          "MSE": 0.0011475453875898275,
+          "bias": -0.0002815775615827738
+        }
+      },
+      "responses": {
+        "free_old": {
+          "bounded_delta_over_training_radius_RMS": 1.5312422851051493,
+          "gap_RMS": 0.013556399461474954,
+          "outside_RMS": 0.01478343481410865,
+          "shrink_RMS": 0.005291204068308337,
+          "signed_cross_mean": -6.277081903640395e-05
+        },
+        "raw": {
+          "bounded_delta_over_training_radius_RMS": 1.5841543169057328,
+          "gap_RMS": 0.013046615244399522,
+          "outside_RMS": 0.014783434814108643,
+          "shrink_RMS": 0.006274795065777495,
+          "signed_cross_mean": -8.77088286851071e-05
+        },
+        "shrunk": {
+          "bounded_delta_over_training_radius_RMS": 1.6062605540392063,
+          "gap_RMS": 0.013166461028255532,
+          "outside_RMS": 0.014783434814108647,
+          "shrink_RMS": 0.005961796609599476,
+          "signed_cross_mean": -8.073726770865967e-05
+        }
+      },
+      "state_exposures": 1184
+    },
+    "held_opposite": {
+      "action_exposures": 3156,
+      "arms": {
+        "cold_mse": {
+          "MSE": 0.0010562184812446412,
+          "bias": -0.001932766924936247
+        },
+        "free_old_bounded": {
+          "MSE": 0.0009943270497511422,
+          "bias": -0.0020302361565259033
+        },
+        "free_old_outside_span": {
+          "MSE": 0.0010578833634309534,
+          "bias": -0.0016842215715889253
+        },
+        "free_old_prior": {
+          "MSE": 0.0008940253254209588,
+          "bias": -0.0016112828127295583
+        },
+        "free_old_residual": {
+          "MSE": 0.0010527760900400198,
+          "bias": -0.001845055824561625
+        },
+        "raw_bounded": {
+          "MSE": 0.0009367945620578492,
+          "bias": -0.002040139977776028
+        },
+        "raw_outside_span": {
+          "MSE": 0.0010578833634309532,
+          "bias": -0.0016842215715889251
+        },
+        "raw_prior": {
+          "MSE": 0.0008950357823875689,
+          "bias": -0.0013070166504008645
+        },
+        "raw_residual": {
+          "MSE": 0.0010279081041089319,
+          "bias": -0.0017792108860529387
+        },
+        "shrunk_bounded": {
+          "MSE": 0.0009760683267701542,
+          "bias": -0.0020783248011843496
+        },
+        "shrunk_outside_span": {
+          "MSE": 0.0010578833634309534,
+          "bias": -0.0016842215715889253
+        },
+        "shrunk_prior": {
+          "MSE": 0.0008835103334723118,
+          "bias": -0.0016349249276744484
+        },
+        "shrunk_residual": {
+          "MSE": 0.0010417770610870324,
+          "bias": -0.00183647253220758
+        }
+      },
+      "responses": {
+        "free_old": {
+          "bounded_delta_over_training_radius_RMS": 1.2789123528656887,
+          "gap_RMS": 0.01314669544541103,
+          "outside_RMS": 0.014395827327473153,
+          "shrink_RMS": 0.004128111747988526,
+          "signed_cross_mean": -5.1445549911912643e-05
+        },
+        "raw": {
+          "bounded_delta_over_training_radius_RMS": 1.3755620670361075,
+          "gap_RMS": 0.013100978503397706,
+          "outside_RMS": 0.01439582732747315,
+          "shrink_RMS": 0.004009016137676394,
+          "signed_cross_mean": -5.16764170880837e-05
+        },
+        "shrunk": {
+          "bounded_delta_over_training_radius_RMS": 1.2987588502749836,
+          "gap_RMS": 0.01312790712170813,
+          "outside_RMS": 0.014395827327473153,
+          "shrink_RMS": 0.004016205659470499,
+          "signed_cross_mean": -5.1027806945390646e-05
+        }
+      },
+      "state_exposures": 1072
+    },
+    "train_opposite": {
+      "action_exposures": 3662,
+      "arms": {
+        "cold_mse": {
+          "MSE": 0.0006796915266611159,
+          "bias": 1.2248554272944347e-18
+        },
+        "free_old_bounded": {
+          "MSE": 0.0006058055558909324,
+          "bias": -0.00018917830355318825
+        },
+        "free_old_outside_span": {
+          "MSE": 0.0006350469552487872,
+          "bias": 7.841418955597864e-18
+        },
+        "free_old_prior": {
+          "MSE": 0.0006248985522651947,
+          "bias": -0.00030448772565193463
+        },
+        "free_old_residual": {
+          "MSE": 0.0006357366386256584,
+          "bias": 8.087562151513493e-19
+        },
+        "raw_bounded": {
+          "MSE": 0.0005952946165571945,
+          "bias": -0.0003070535250652182
+        },
+        "raw_outside_span": {
+          "MSE": 0.0006350469552487873,
+          "bias": 8.105143808364609e-18
+        },
+        "raw_prior": {
+          "MSE": 0.0006558058099193771,
+          "bias": -0.0002590872059702774
+        },
+        "raw_residual": {
+          "MSE": 0.0006338060860363499,
+          "bias": 8.087562151513493e-19
+        },
+        "shrunk_bounded": {
+          "MSE": 0.0005994256395553813,
+          "bias": -0.000230088854806763
+        },
+        "shrunk_outside_span": {
+          "MSE": 0.0006350469552487872,
+          "bias": 6.991638874460577e-18
+        },
+        "shrunk_prior": {
+          "MSE": 0.0006213446644145181,
+          "bias": -0.00032635168329705414
+        },
+        "shrunk_residual": {
+          "MSE": 0.0006348641222042919,
+          "bias": 7.091268263283569e-19
+        }
+      },
+      "responses": {
+        "free_old": {
+          "bounded_delta_over_training_radius_RMS": 0.8493988891230468,
+          "gap_RMS": 0.007010343608542502,
+          "outside_RMS": 0.006813319851572746,
+          "shrink_RMS": 0.0016503303033021696,
+          "signed_cross_mean": -8.792259224455533e-22
+        },
+        "raw": {
+          "bounded_delta_over_training_radius_RMS": 0.9382517150845829,
+          "gap_RMS": 0.006995653722078203,
+          "outside_RMS": 0.006813319851572746,
+          "shrink_RMS": 0.001586771438926017,
+          "signed_cross_mean": 3.894276898968567e-21
+        },
+        "shrunk": {
+          "bounded_delta_over_training_radius_RMS": 0.87807237174314,
+          "gap_RMS": 0.006997738993946208,
+          "outside_RMS": 0.006813319851572746,
+          "shrink_RMS": 0.0015959397318069436,
+          "signed_cross_mean": 1.82543111827513e-21
+        }
+      },
+      "state_exposures": 1184
+    }
+  },
+  "next_step": "Stage272: capacity-matched observable-state-conditioned prior residual versus linear residual, with a fixed query-local output bound and frozen clipping control to distinguish bound effects from conditional learning. Retain the historical radius, causal inputs and priors; no seed/scenario-ID gates, no raw/cold/prior refitting or native rollout. Compare both future directions and prefix-label OOF before deployment.",
+  "primary_penalty": 0.01,
+  "protocol": "native_transit_prior_risk_stage271_v1",
+  "relative_MSE": {
+    "excluded_opposite": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -22.36033500380189,
+        "bounded_vs_prior_MSE_percent": 35.73008125005175
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -33.585301759691255,
+        "bounded_vs_prior_MSE_percent": 21.035513798240025
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -27.177402193591583,
+        "bounded_vs_prior_MSE_percent": 32.893923786281356
+      }
+    },
+    "excluded_same": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -23.137779821941006,
+        "bounded_vs_prior_MSE_percent": 35.649538721497606
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -32.645657877503,
+        "bounded_vs_prior_MSE_percent": 17.74459100007664
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -27.446353314541728,
+        "bounded_vs_prior_MSE_percent": 31.132266940066412
+      }
+    },
+    "held_opposite": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -5.859718665457036,
+        "bounded_vs_prior_MSE_percent": 11.219114434253363
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -11.306743946201703,
+        "bounded_vs_prior_MSE_percent": 4.665598905876811
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -7.588406745168719,
+        "bounded_vs_prior_MSE_percent": 10.476164204449901
+      }
+    },
+    "held_same": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -5.658129991062721,
+        "bounded_vs_prior_MSE_percent": 7.620316365112068
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -9.278489800997603,
+        "bounded_vs_prior_MSE_percent": 1.0299803854550094
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -6.891360023107129,
+        "bounded_vs_prior_MSE_percent": 6.703586896254987
+      }
+    },
+    "retained_opposite": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -11.113183048764075,
+        "bounded_vs_prior_MSE_percent": -3.2075167319514764
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -12.56748945843854,
+        "bounded_vs_prior_MSE_percent": -9.463291726297285
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -12.053674173425765,
+        "bounded_vs_prior_MSE_percent": -3.841600939131573
+      }
+    },
+    "retained_same": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -4.76931059986504,
+        "bounded_vs_prior_MSE_percent": -16.583782439367678
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": 2.2495647523256945,
+        "bounded_vs_prior_MSE_percent": -21.583826030569952
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -3.713855311852299,
+        "bounded_vs_prior_MSE_percent": -17.71933295437683
+      }
+    },
+    "train_opposite": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -10.870515207558551,
+        "bounded_vs_prior_MSE_percent": -3.055375357336332
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": -12.41694309748258,
+        "bounded_vs_prior_MSE_percent": -9.226998670478636
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -11.809164004151839,
+        "bounded_vs_prior_MSE_percent": -3.5276757192066133
+      }
+    },
+    "train_same": {
+      "free_old": {
+        "bounded_vs_cold_MSE_percent": -5.814428481656697,
+        "bounded_vs_prior_MSE_percent": -15.414802844765617
+      },
+      "raw": {
+        "bounded_vs_cold_MSE_percent": 0.3377430966517325,
+        "bounded_vs_prior_MSE_percent": -20.613532508812938
+      },
+      "shrunk": {
+        "bounded_vs_cold_MSE_percent": -4.988601148374483,
+        "bounded_vs_prior_MSE_percent": -16.521491041733206
+      }
+    }
+  }
+}
