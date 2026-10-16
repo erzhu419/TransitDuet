@@ -1,0 +1,36 @@
+{
+  "protocol": "native_transit_alignment_localization_stage275_v1",
+  "primary": {
+    "group": "mixed_pooled", "bank": "pooled", "arm": "raw_bounded_clip", "penalty": 0.01,
+    "mode": "paired",
+    "opposite_alignment_gap": 5.2041324406049006e-05,
+    "top3_prefixes_both_ranking_directions": [[401, 914010401], [397, 913970003], [401, 914010303]],
+    "rank_same_evaluate_opposite": {
+      "selected_alignment_contribution": 4.0625911160110644e-05,
+      "share_of_net_gap": 0.7806471419353137,
+      "share_of_absolute_mass": 0.3347516580478035,
+      "remaining_alignment_gap": 1.2665276010092137e-05,
+      "remaining_paired_units": 548
+    },
+    "rank_opposite_evaluate_same": {
+      "selected_alignment_contribution": 4.575141333258775e-05,
+      "share_of_net_gap": 0.9070185197910152,
+      "share_of_absolute_mass": 0.3775844127256489,
+      "remaining_alignment_gap": 5.203647104126059e-06,
+      "remaining_paired_units": 548
+    },
+    "probe8_9_alignment_contribution": 5.447919448129629e-05,
+    "other_probes_alignment_contribution": -2.437870075247287e-06,
+    "same_sign_rows": 453,
+    "nonzero_both_rows": 608,
+    "same_sign_fraction": 0.7450657894736842,
+    "sign_flip_rows": 155,
+    "sign_flip_share_of_net_gap": 0.11784380010448481
+  },
+  "interpretation": "The mixed pooled paired alignment gap is concentrated in a reproducible small prefix set and probes8/9, with substantial positive/negative cancellation. Most fixed-head/probe signs persist under the other future bank, but a quarter flip. This is a partly repeatable pooled pattern rather than uniform failure; concentration is descriptive, not causal.",
+  "next": "Stage276: compare dominant prefixes/probes with remaining groups using fixed-head caches; distinguish raw-residual scale from normalized correction/residual alignment before further loss/representation changes; no prefix/probe-ID gate.",
+  "limitations": "Only 31.7% common-action coverage; repeated development contexts are not independent training seeds. Bank1 alone has different top3 sets and natural weights alter rankings. Cross-future diagnostic ranking is not policy selection or new confirmation. Historical raw-reference conditioning remains; Stage253/248/169 closed.",
+  "known_issue": "Scheduler end timestamp precedes start for this task. Completion is done/0, but runtime is recorded as null rather than a negative duration.",
+  "default_changed": false,
+  "native_deployment_eligible": false
+}

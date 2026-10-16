@@ -1,0 +1,45 @@
+{
+  "protocol": "native_transit_alignment_localization_stage275_v1",
+  "run_name": "native_transit_alignment_localization_stage275_20261016_r1",
+  "registered_source_revision": "e0bfa2ed39cfb36dab9c3686e267c52e5d0cde67",
+  "scheduler": {
+    "analysis": "t165990",
+    "records": 1,
+    "status_counts": {"done": 1},
+    "exit_code_counts": {"0": 1},
+    "node_counts": {"node002": 1},
+    "retry_count_sum": 0,
+    "started_at": 1792164277.6217246,
+    "finished_at": 1792164270.0,
+    "runtime_seconds": null,
+    "timing_note": "Scheduler end timestamp precedes start; elapsed time unavailable."
+  },
+  "budget": {
+    "analysis_tasks": 1,
+    "cached_cells": 32,
+    "cached_prefix_contexts": 640,
+    "model_probe_rows": 3840,
+    "new_fits": 0,
+    "new_solver_calls": 0,
+    "new_model_inferences": 0,
+    "new_native_episodes": 0,
+    "actor_updates": 0,
+    "policy_action_selections": 0
+  },
+  "focused_tests_passed": 14,
+  "cold_entrypoints_passed": 2,
+  "coverage_qualified": true,
+  "reproduction": {
+    "cell_metric_max_abs_error": 1.0408340855860843e-17,
+    "group_metric_max_abs_error": 2.168404344971009e-18,
+    "partition_max_abs_error": 1.8126505071242027e-19,
+    "pointwise_identity_max_abs_error": 9.324138683375338e-18
+  },
+  "local_pulls": {
+    "report_bytes": 740753,
+    "raw_labels_models_features_predictions_queries_or_error_ledgers_pulled": false
+  },
+  "policy_outcomes_evaluated": false,
+  "default_changed": false,
+  "native_deployment_eligible": false
+}
