@@ -33,3 +33,11 @@ scheduler on node001-node006. Only small completion markers/summary return local
 
 Next: adjudicate the fixed primary and same-budget controls once; keep main
 frozen until a separately validated closed-loop control candidate exists.
+
+## Execution
+
+Source `3a2617340a`. Scheduler: smoke `t165783`, references `t165784`,
+24 label shards `t165785-t165808` (12 workers each), fixed fits `t165809`,
+validation `t165810`. Allowed nodes are node001-node006 only. Eight focused
+tests passed; smoke replay admission is pending. Completion-marker dependencies
+prevent formal labels/fits/validation from starting before their prerequisites.
