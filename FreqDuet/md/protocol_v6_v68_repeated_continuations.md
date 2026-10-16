@@ -39,3 +39,11 @@ development prefixes from two original training seeds, not fresh-prefix or
 controller confirmation. No fitting or policy promotion in V68. Use the
 repeatability/noise result to decide whether action-increment learning is
 supported and what uncertainty it must represent; fresh days remain necessary.
+
+## Execution
+
+Source `ea40a3b82f`, snapshot `source/v68_repeated_20261016`.
+Smoke `t165496` passed: 53 tests, V67 no-fork identity, two complete future grids
+and both forced-native identities. Matrix `t165498-t165502`: 257 planned workers
+over three waves on node001/002/004/005/006. Aggregate `t165503` depends on all
+five completion markers. Only the small smoke JSON was pulled locally.
