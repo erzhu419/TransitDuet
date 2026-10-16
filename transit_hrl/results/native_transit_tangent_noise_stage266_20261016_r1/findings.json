@@ -1,0 +1,317 @@
+{
+  "focal_contexts": [
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "constraint_state": "strictly_active",
+      "held_tangent_over_fixed_variance": {
+        "joint": 0.6794125002168828,
+        "risk": 0.9382685676514873,
+        "service": 0.6755739458062168
+      },
+      "old_key": "16@1",
+      "parameter_noise_energy_tangent_over_fixed": 1.4777087857175177,
+      "removed": [
+        397,
+        913970203
+      ],
+      "tangent_held_service_low_rest_cross_over_full": -1.8454263580312869,
+      "tangent_noise_norm_RMS_over_radius": 4.3182983623723015,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "constraint_state": "strictly_active",
+      "held_tangent_over_fixed_variance": {
+        "joint": 0.6557104960802128,
+        "risk": 0.7509270142933266,
+        "service": 0.6528068582169209
+      },
+      "old_key": "16@1",
+      "parameter_noise_energy_tangent_over_fixed": 1.3442534667691008,
+      "removed": [
+        397,
+        913970203
+      ],
+      "tangent_held_service_low_rest_cross_over_full": -1.8354707595594768,
+      "tangent_noise_norm_RMS_over_radius": 2.9405996662926515,
+      "variant": "shrunk_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "constraint_state": "interior",
+      "held_tangent_over_fixed_variance": {
+        "joint": 1.0,
+        "risk": 1.0,
+        "service": 1.0
+      },
+      "old_key": "1@0.25",
+      "parameter_noise_energy_tangent_over_fixed": 1.0,
+      "removed": [
+        397,
+        913970203
+      ],
+      "tangent_held_service_low_rest_cross_over_full": 0.0,
+      "tangent_noise_norm_RMS_over_radius": 0.11973241681000596,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "constraint_state": "interior",
+      "held_tangent_over_fixed_variance": {
+        "joint": 1.0,
+        "risk": 1.0,
+        "service": 1.0
+      },
+      "old_key": "1@0.25",
+      "parameter_noise_energy_tangent_over_fixed": 1.0,
+      "removed": [
+        397,
+        913970203
+      ],
+      "tangent_held_service_low_rest_cross_over_full": 0.0,
+      "tangent_noise_norm_RMS_over_radius": 0.09667535986228568,
+      "variant": "shrunk_expanded8_pooled_safe"
+    }
+  ],
+  "limitations": "Anchor calibration/keys fixed; local plug-in noise and finite forcing contrasts, not actual finite refits, performance, p-values or training-seed CIs. Focal 16@1 and interior 1@0.25 are not a matched rank ablation. Signed cross terms are not causal shares.",
+  "mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "constraint_counts": {
+        "interior": 13,
+        "strictly_active": 107
+      },
+      "directions": {
+        "dual_noise_variance": 0.19705212893242505,
+        "fixed_parameter_noise_energy": 10.977391264408185,
+        "parameter_noise_cross": -2.245752718430538,
+        "radial_parameter_noise_energy": 5.115027793789651,
+        "tangent_parameter_noise_energy": 8.108116189049069
+      },
+      "focal_held_tangent_observed_over_noise_RMS": {
+        "joint": 1.4120273616207957,
+        "risk": 0.6169059618174596,
+        "service": 1.3332469665233053
+      },
+      "focal_held_tangent_over_fixed_variance": {
+        "joint": 0.6794273067735477,
+        "risk": 0.9383964596237603,
+        "service": 0.675575234283246
+      },
+      "focal_share_of_tangent_held_service_noise": 0.890563966494383,
+      "held_fixed": {
+        "noise_RMS": {
+          "joint": 0.0035342675206236768,
+          "risk": 0.002242760562525884,
+          "service": 0.0027259590366177267
+        },
+        "noise_squared_sum": {
+          "cross_sr": 0.0003644447241881881,
+          "excluded_cross_sr": -1.8887758276488597e-05,
+          "excluded_joint": 0.13996882378899297,
+          "excluded_risk": 0.05128304047556903,
+          "excluded_service": 0.08870467107169881,
+          "joint": 0.1506420257024653,
+          "retained_cross_sr": 0.00038333248246441955,
+          "retained_joint": 0.01067320191347482,
+          "retained_risk": 0.009378457310736938,
+          "retained_service": 0.0009114121202732702,
+          "risk": 0.06066149778630631,
+          "service": 0.0896160831919732
+        },
+        "observed_RMS": {
+          "joint": 0.004619973634950202,
+          "risk": 0.001996864319942455,
+          "service": 0.003845872637743505
+        },
+        "observed_over_noise_RMS": {
+          "joint": 1.3071940955207983,
+          "risk": 0.8903600113663086,
+          "service": 1.4108328797615857
+        },
+        "observed_squared_sum": {
+          "joint": 0.25741052603487785,
+          "risk": 0.04808885337384646,
+          "service": 0.17837628032967487
+        }
+      },
+      "held_tangent": {
+        "noise_RMS": {
+          "joint": 0.00316083247317833,
+          "risk": 0.002182187267439376,
+          "service": 0.0022713635105883084
+        },
+        "noise_squared_sum": {
+          "cross_sr": 0.0008421311804693743,
+          "excluded_cross_sr": 0.00045321289733499964,
+          "excluded_joint": 0.1109697898890393,
+          "excluded_risk": 0.049066791648307115,
+          "excluded_service": 0.06144978534339728,
+          "joint": 0.12048979479739357,
+          "retained_cross_sr": 0.0003889182831343399,
+          "retained_joint": 0.009520004908354205,
+          "retained_risk": 0.00836222006999924,
+          "retained_service": 0.0007688665552202945,
+          "risk": 0.05742901171830485,
+          "service": 0.06221865189861845
+        },
+        "observed_RMS": {
+          "joint": 0.003629293655375713,
+          "risk": 0.0017877448915926415,
+          "service": 0.0029269913750942017
+        },
+        "observed_over_noise_RMS": {
+          "joint": 1.148208165466716,
+          "risk": 0.8192444884395363,
+          "service": 1.2886494660364067
+        },
+        "observed_squared_sum": {
+          "joint": 0.15885157558962185,
+          "risk": 0.03854414347683196,
+          "service": 0.10332137882910271
+        }
+      },
+      "held_tangent_over_fixed_variance": {
+        "joint": 0.799841838527678,
+        "risk": 0.9467127224687294,
+        "service": 0.694279973889679
+      },
+      "held_variance_increased_prefix_models": {
+        "joint": 8,
+        "risk": 9,
+        "service": 7
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "constraint_counts": {
+        "interior": 13,
+        "strictly_active": 107
+      },
+      "directions": {
+        "dual_noise_variance": 0.22945208836784298,
+        "fixed_parameter_noise_energy": 10.277694932372613,
+        "parameter_noise_cross": -0.879387101111346,
+        "radial_parameter_noise_energy": 3.457502051201305,
+        "tangent_parameter_noise_energy": 7.699579982282655
+      },
+      "focal_held_tangent_observed_over_noise_RMS": {
+        "joint": 1.4868363919368948,
+        "risk": 0.8527700944040673,
+        "service": 1.3553759923142827
+      },
+      "focal_held_tangent_over_fixed_variance": {
+        "joint": 0.6557291483842523,
+        "risk": 0.751232714719372,
+        "service": 0.6528092167665168
+      },
+      "focal_share_of_tangent_held_service_noise": 0.7981779375272979,
+      "held_fixed": {
+        "noise_RMS": {
+          "joint": 0.003195909546096805,
+          "risk": 0.002379781124887855,
+          "service": 0.002106415772730177
+        },
+        "noise_squared_sum": {
+          "cross_sr": 0.0013687161352546604,
+          "excluded_cross_sr": 0.0012593115958701739,
+          "excluded_joint": 0.11618191562407156,
+          "excluded_risk": 0.06170430300668034,
+          "excluded_service": 0.05321830102152064,
+          "joint": 0.12317888419160221,
+          "retained_cross_sr": 0.00010940453938441892,
+          "retained_joint": 0.006996968567530295,
+          "retained_risk": 0.006595796913932622,
+          "retained_service": 0.0002917671142131881,
+          "risk": 0.0683000999206124,
+          "service": 0.053510068135734015
+        },
+        "observed_RMS": {
+          "joint": 0.004168819957021745,
+          "risk": 0.0025198023082516454,
+          "service": 0.002928728673345459
+        },
+        "observed_over_noise_RMS": {
+          "joint": 1.30442363805733,
+          "risk": 1.058837840967576,
+          "service": 1.3903848951669509
+        },
+        "observed_squared_sum": {
+          "joint": 0.20959146159879713,
+          "risk": 0.07657380829240407,
+          "service": 0.10344406680343479
+        }
+      },
+      "held_tangent": {
+        "noise_RMS": {
+          "joint": 0.0029226157705378323,
+          "risk": 0.0023131589450130093,
+          "service": 0.0017455339703949472
+        },
+        "noise_squared_sum": {
+          "cross_sr": 0.0017377229337297204,
+          "excluded_cross_sr": 0.0016219179486482674,
+          "excluded_joint": 0.09644622303317438,
+          "excluded_risk": 0.05834958433984891,
+          "excluded_service": 0.03647472074467686,
+          "joint": 0.10301269628288916,
+          "retained_cross_sr": 0.00011580498508137863,
+          "retained_joint": 0.006566473249715377,
+          "retained_risk": 0.006179909577170273,
+          "retained_service": 0.0002707586874636829,
+          "risk": 0.064529493917018,
+          "service": 0.03674547943214115
+        },
+        "observed_RMS": {
+          "joint": 0.0034306878734915616,
+          "risk": 0.002298809469462024,
+          "service": 0.0022165314387819278
+        },
+        "observed_over_noise_RMS": {
+          "joint": 1.173841566200894,
+          "risk": 0.9937965890403159,
+          "service": 1.2698300212859288
+        },
+        "observed_squared_sum": {
+          "joint": 0.14194160858098398,
+          "risk": 0.06373137122127258,
+          "service": 0.0592509201264507
+        }
+      },
+      "held_tangent_over_fixed_variance": {
+        "joint": 0.8362853500333307,
+        "risk": 0.9447935506979184,
+        "service": 0.6867021611509129
+      },
+      "held_variance_increased_prefix_models": {
+        "joint": 13,
+        "risk": 13,
+        "service": 9
+      }
+    }
+  },
+  "next": "Stage267: reuse caches for coupled full/prefix local response, d_delta=-T_prefix*d_g_prefix+T_full*d_g_full; retain shared-label covariance and compare with one-ended force diagnostic; report response/radius scale before treating local noise as finite-refit error",
+  "scope": "Stage266 same-force fixed-multiplier versus active-RMS local KKT operator comparison; no outcome validation"
+}

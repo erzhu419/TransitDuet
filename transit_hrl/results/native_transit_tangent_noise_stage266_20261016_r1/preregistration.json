@@ -1,0 +1,54 @@
+{
+  "contract": {
+    "boundary": "conditional_plugin_local_noise_and_finite_forcing_response_not_finite_refit_error_ground_truth_performance_pvalues_or_seed_CI; frozen_anchor_calibration_and_keys; no_selection_or_default_change; Stage253_248_169_closed",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_prefix_fits": 640,
+      "new_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "prefix_model_records": 1280
+    },
+    "categories": [
+      "all",
+      "removed"
+    ],
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "comparison": "same_Stage265_prefix_minus_full_gradient_force_covariance_and_finite_bank_contrast_under_two_operators; not_simultaneous_full_prefix_refit_covariance; fixed_radius_and_active_set_local_derivative",
+    "controls": "reproduce_Stage265_all_group_bank_category_region_band_scalar_sums_counts_and_RMS; verify_KKT_stationarity_tangency_and_covariance_identities; no_fits_or_action_changes",
+    "decomposition": "B_response=tangent+radial; C_fixed=C_tangent+C_radial+signed_cross; retain_service_risk_population_and_low_rest_cross_covariance; query_noise_need_not_decrease",
+    "focus_basis": "unchanged_Stage263_designation; separate_contexts_and_constraint_activity_not_matched_rank_ablation",
+    "focus_prefix": [
+      397,
+      913970203
+    ],
+    "frozen": "anchor_bank_full_coefficients_keys_basis_prior_scale_reliability_lambda_prefix_mu_and_cap; same_prefix_and_fixed_A_for_all_contrasts",
+    "independence": "conditional_state_future_seed_blocks_Stage249_1490000000+state_index*32+draw; sum_state_covariances_not_covariance_of_aligned_draw_index_state_sums",
+    "noise": "per_state_service_risk_action_paired_score_covariance_centered_within_each_assigned16_bank; covariance_of_two16_mean_difference=sum_state(C_bank0/16+C_bank1/16); no_between_bank_mean_term",
+    "operators": "B=pinv(H_prefix+mu_prefix*I); strictly_active_T=B-Bu*Bu.T/(u.T*Bu); interior_T=B; du=-T*dg; dmu=-u.T*B*dg/(u.T*Bu); u=cached_prefix_total",
+    "primary": [
+      "free_old_expanded8_pooled_safe",
+      "shrunk_expanded8_pooled_safe"
+    ],
+    "source_protocol": "native_transit_joint_noise_stage265_v1",
+    "source_run": "native_transit_joint_noise_stage265_20261016_r1",
+    "storage": "all_labels_models_matrices_and_cell_ledgers_server_only; pull_compact_scalar_report"
+  },
+  "protocol": "native_transit_tangent_noise_stage266_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "b091ca2dc79d5d799ea35c7ca28a91e2a08bdba2"
+}
