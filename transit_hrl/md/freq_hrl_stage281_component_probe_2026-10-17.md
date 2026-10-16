@@ -9,4 +9,4 @@
 - One scheduler CPU / 3,072 MiB, any node001-node006; zero new fits, raw-reference training, simulations or actor updates. Full ledgers stay remote; scalar report only.
 - Decision after results: compare component-MSE and physical cost/wait together. Fleet-only benefit points to selected-action risk estimation; service-only benefit points to service ranking; joint-only benefit requires coordinated estimation. No opposite-bank gain means more accurate in-bank sample means alone have not solved the problem.
 - Verification: five focused tests cover component units/anchors, feasibility/ties, future isolation, sample-half stability, error denominators, complete cell/group control replay and the completed-parent gate. Both cold CLI startups passed.
-- Status: pending submission. Stage253/248/169 remain closed; defaults unchanged.
+- Status: submitted as `t166148`, source `c284ff55f5`; cwd and all three declared code inputs staged successfully through scheduler. Completion/results pending. Stage253/248/169 remain closed; defaults unchanged.

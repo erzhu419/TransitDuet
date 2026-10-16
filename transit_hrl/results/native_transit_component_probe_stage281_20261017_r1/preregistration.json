@@ -1,0 +1,59 @@
+{
+  "contract": {
+    "arms": [
+      "raw_prior",
+      "raw_linear_clip",
+      "observed_context_df_clip",
+      "all16__mc_service_raw",
+      "all16__mc_service_linear9",
+      "all16__mc_service_observed",
+      "all16__mc_risk_raw_service",
+      "all16__mc_both",
+      "first8__mc_service_raw",
+      "first8__mc_service_linear9",
+      "first8__mc_service_observed",
+      "first8__mc_risk_raw_service",
+      "first8__mc_both",
+      "last8__mc_service_raw",
+      "last8__mc_service_linear9",
+      "last8__mc_service_observed",
+      "last8__mc_risk_raw_service",
+      "last8__mc_both"
+    ],
+    "boundary": "label_informed_information_diagnostic_not_deployable_oracle_upper_bound_or_policy_validation; finite16_or8_MC_risk_is_noisy; reused_development_futures_not_seed_CI; Stage253_248_169_closed; no_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_queries": 2048,
+      "model_state_exposures": 84480,
+      "new_fits": 0,
+      "new_native_episodes": 0,
+      "new_probe_decisions": 1267200
+    },
+    "cohort": "unchanged32_cells_four_views_two_outer_folds_two_partitions_two_directions; full60_prefix54_both_banks_assigned16; all_development_states_no_selected_subgroups",
+    "controls": "all7_cached_choices_replay_exactly; three_reported_controls_reproduce_Stage279_all_group_bank_scope_half_outcomes; physical_cost=fleet+service; proposal_ledger_written_before_each_query_opposite_outcome_access",
+    "evaluation": "unchanged_full_train_prefix_retained_excluded_full_outer_held_prefix_head_outer_held; primary_mixed_excluded_opposite_and_held_opposite; all_views_banks_reported; policy_denominator_all_states_component_MSE_state_balanced_eligible_actions",
+    "frozen": "reuse_Stage279_queries_and_all7_choices_Stage278_risks_raw_service_wait_logits_original_first_ties_and_feasibility; no_new_gate_clip_or_model_fit",
+    "information": "assigned_bank_only_finite_MC_action_means; fleet_only_raw_service; service_only_cross_raw_Linear9_observed_df_risk; both_components; no_outcome_based_winner_selection",
+    "sample_counts": "MC_components_use_assigned16_or_fixed_first8_or_last8; frozen_model_training_unchanged_not_total_information_matching; exact_same_MC_selection_draws_for_fleet_service_and_joint; opposite16_and_its8+8_halves_never_enter_propose; same_bank_results_are_in_sample_descriptions",
+    "source_protocol": "native_transit_decision_margin_stage280_v1",
+    "source_run": "native_transit_decision_margin_stage280_20261017_r1",
+    "storage": "full_proposals_components_and_outcomes_remote_only; compact_scalar_report_pull"
+  },
+  "protocol": "native_transit_component_probe_stage281_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "c284ff55f56121c490f271225c98410ff6797954"
+}
