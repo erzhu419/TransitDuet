@@ -1,0 +1,339 @@
+{
+  "cached_scalar_lookup_file": "posthoc_focus_duals.json",
+  "conclusion": "Cached bank gaps remain comparable to frozen-operator plug-in MC noise. Broad low-curvature concentration does not fully describe the focal active rank16 context; most focal parameter noise lies outside the predefined low block and query cross-mode cancellation is large.",
+  "context_boundary": "The active 16@1 and interior 1@0.25 contexts are different cells, not a matched capacity ablation. Fixed-multiplier inverse is not full active-constraint refit sensitivity.",
+  "descriptive_focus_complement": {
+    "free_old_expanded8_pooled_safe": {
+      "complement_low_parameter_noise_fraction": 0.9432989499633618,
+      "focus_force_noise_fraction": 0.002749655661702968,
+      "focus_parameter_noise_fraction": 0.13096641415997248,
+      "heads": {
+        "joint": {
+          "complement_gap_over_noise_RMS": 0.9362000015474737,
+          "focus_fraction_of_held_noise": 0.5526221029444756
+        },
+        "risk": {
+          "complement_gap_over_noise_RMS": 0.8938823636441863,
+          "focus_fraction_of_held_noise": 0.028884316538302025
+        },
+        "service": {
+          "complement_gap_over_noise_RMS": 0.8523409891991722,
+          "focus_fraction_of_held_noise": 0.9152211271640199
+        }
+      },
+      "scope": "Descriptive subtraction within the fixed mixed removed group; no training data deleted."
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "complement_low_parameter_noise_fraction": 0.9391057820366061,
+      "focus_force_noise_fraction": 0.0016965629769153901,
+      "focus_parameter_noise_fraction": 0.07131034729347235,
+      "heads": {
+        "joint": {
+          "complement_gap_over_noise_RMS": 1.101148230661622,
+          "focus_fraction_of_held_noise": 0.3756168055563422
+        },
+        "risk": {
+          "complement_gap_over_noise_RMS": 1.064565457635873,
+          "focus_fraction_of_held_noise": 0.026725728271410915
+        },
+        "service": {
+          "complement_gap_over_noise_RMS": 0.9346451619734671,
+          "focus_fraction_of_held_noise": 0.8396182232197413
+        }
+      },
+      "scope": "Descriptive subtraction within the fixed mixed removed group; no training data deleted."
+    }
+  },
+  "next": "Compare the fixed-multiplier inverse with full active-RMS KKT tangent noise propagation using identical cached score covariance; retain joint covariance before choosing directional shrinkage. No new fits or simulations needed.",
+  "primary_mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "directions": {
+        "force_noise_energy": 0.019957002127405,
+        "inverse_KKT_noise_energy_gain": 550.0521167622669,
+        "low_parameter_noise_energy": 9.541012841928765,
+        "low_parameter_noise_fraction": 0.8691512047004678,
+        "mean_dominant_KKT_mode_fraction": 0.6214497149210534,
+        "mean_dominant_covariance_fraction": 0.801800654334288,
+        "mean_low_dimension_fraction": 0.4513888888888889,
+        "parameter_noise_energy": 10.977391264408185,
+        "unsupported_force_noise_energy": 7.397138728371805e-18
+      },
+      "focus_directions": {
+        "force_noise_energy": 5.4874883890237346e-05,
+        "inverse_KKT_noise_energy_gain": 26199.045333858438,
+        "low_parameter_noise_energy": 0.5422033853399458,
+        "low_parameter_noise_fraction": 0.3771404753767079,
+        "mean_dominant_KKT_mode_fraction": 0.8109181199715179,
+        "mean_dominant_covariance_fraction": 0.8898205873456545,
+        "mean_low_dimension_fraction": 0.625,
+        "parameter_noise_energy": 1.4376695707305462,
+        "unsupported_force_noise_energy": 0.0
+      },
+      "focus_regions": {
+        "excluded": {
+          "joint_head_covariance_cross": -0.0005584481372613517,
+          "joint_low_rest_noise_cross": 0.05097280080782862,
+          "noise_RMS": {
+            "joint": 0.14890722370337714,
+            "risk": 0.010759861037592782,
+            "service": 0.14858509763038166
+          },
+          "observed_RMS": {
+            "joint": 0.08504205266116668,
+            "risk": 0.003712034499616943,
+            "service": 0.08172928042125097
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.5711076369979892,
+            "risk": 0.344989074361448,
+            "service": 0.5500503194779307
+          }
+        },
+        "held": {
+          "joint_head_covariance_cross": -0.0005225855392172046,
+          "joint_low_rest_noise_cross": -0.07176135812125652,
+          "noise_RMS": {
+            "joint": 0.018983715171487735,
+            "risk": 0.002754112158655729,
+            "service": 0.01884299824845466
+          },
+          "observed_RMS": {
+            "joint": 0.029302257758489006,
+            "risk": 0.0021000766900335487,
+            "service": 0.027355030925312114
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.5435470609303614,
+            "risk": 0.7625240255497029,
+            "service": 1.4517345151032715
+          }
+        },
+        "retained": {
+          "joint_head_covariance_cross": -7.2141137132114e-06,
+          "joint_low_rest_noise_cross": -3.77724088369575e-05,
+          "noise_RMS": {
+            "joint": 0.0029306544654351977,
+            "risk": 0.0004772684756453441,
+            "service": 0.0028974649817339144
+          },
+          "observed_RMS": {
+            "joint": 0.002054908033630943,
+            "risk": 0.0003275106573807678,
+            "service": 0.0019200190333359846
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.7011771800009156,
+            "risk": 0.6862189188965822,
+            "service": 0.662654784592771
+          }
+        }
+      },
+      "regions": {
+        "excluded": {
+          "joint_head_covariance_cross": 0.0019378637449762354,
+          "joint_low_rest_noise_cross": 0.06628388700938263,
+          "noise_RMS": {
+            "joint": 0.022797259075382884,
+            "risk": 0.006513272532510989,
+            "service": 0.02181377360609105
+          },
+          "observed_RMS": {
+            "joint": 0.015035871769242627,
+            "risk": 0.006234888196391895,
+            "service": 0.012546633311283287
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.6595473481932213,
+            "risk": 0.9572589148190039,
+            "service": 0.5751702359182777
+          }
+        },
+        "held": {
+          "joint_head_covariance_cross": 0.0003644447241881881,
+          "joint_low_rest_noise_cross": -0.07110243344740488,
+          "noise_RMS": {
+            "joint": 0.0035342675206236768,
+            "risk": 0.002242760562525884,
+            "service": 0.0027259590366177267
+          },
+          "observed_RMS": {
+            "joint": 0.004619973634950202,
+            "risk": 0.001996864319942455,
+            "service": 0.003845872637743505
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.3071940955207983,
+            "risk": 0.8903600113663086,
+            "service": 1.4108328797615857
+          }
+        },
+        "retained": {
+          "joint_head_covariance_cross": -4.3256605007680396e-05,
+          "joint_low_rest_noise_cross": 0.00012309638419471006,
+          "noise_RMS": {
+            "joint": 0.0011524974931293045,
+            "risk": 0.0010473885153025888,
+            "service": 0.0004845905348792158
+          },
+          "observed_RMS": {
+            "joint": 0.0010953720486925787,
+            "risk": 0.0010007836123586903,
+            "service": 0.00038411180165475367
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.950433346035646,
+            "risk": 0.9555037101677267,
+            "service": 0.7926522992251459
+          }
+        }
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "directions": {
+        "force_noise_energy": 0.02274742573531314,
+        "inverse_KKT_noise_energy_gain": 451.8179354430204,
+        "low_parameter_noise_energy": 9.274407857073902,
+        "low_parameter_noise_fraction": 0.902382092297898,
+        "mean_dominant_KKT_mode_fraction": 0.6311901088368239,
+        "mean_dominant_covariance_fraction": 0.8017798572197653,
+        "mean_low_dimension_fraction": 0.4513888888888889,
+        "parameter_noise_energy": 10.277694932372613,
+        "unsupported_force_noise_energy": 3.2593827810345477e-18
+      },
+      "focus_directions": {
+        "force_noise_energy": 3.8592440322664614e-05,
+        "inverse_KKT_noise_energy_gain": 18990.921249761705,
+        "low_parameter_noise_energy": 0.31084137767186604,
+        "low_parameter_noise_fraction": 0.4241217561199405,
+        "mean_dominant_KKT_mode_fraction": 0.7874544540291404,
+        "mean_dominant_covariance_fraction": 0.8772667420764751,
+        "mean_low_dimension_fraction": 0.625,
+        "parameter_noise_energy": 0.7329059950038519,
+        "unsupported_force_noise_energy": 0.0
+      },
+      "focus_regions": {
+        "excluded": {
+          "joint_head_covariance_cross": -0.00014577863718720187,
+          "joint_low_rest_noise_cross": 0.01971006586424834,
+          "noise_RMS": {
+            "joint": 0.1016427530759725,
+            "risk": 0.005064931927627695,
+            "service": 0.10154211981897542
+          },
+          "observed_RMS": {
+            "joint": 0.05088371755359074,
+            "risk": 0.0037947278947503597,
+            "service": 0.05330038490688512
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.5006133345833116,
+            "risk": 0.7492159715022524,
+            "service": 0.5249091214749759
+          }
+        },
+        "held": {
+          "joint_head_covariance_cross": -0.0004853392518370648,
+          "joint_low_rest_noise_cross": -0.03925661939219162,
+          "noise_RMS": {
+            "joint": 0.014152548451469339,
+            "risk": 0.0028110557177749196,
+            "service": 0.01394609727289281
+          },
+          "observed_RMS": {
+            "joint": 0.02244135953399507,
+            "risk": 0.002315038787135878,
+            "service": 0.02038027296797799
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.5856762201485468,
+            "risk": 0.8235478124810481,
+            "service": 1.4613603052655713
+          }
+        },
+        "retained": {
+          "joint_head_covariance_cross": -5.2120183886852814e-06,
+          "joint_low_rest_noise_cross": -3.7399839268980944e-05,
+          "noise_RMS": {
+            "joint": 0.001982046325860744,
+            "risk": 0.0003565286687409466,
+            "service": 0.001956071082912921
+          },
+          "observed_RMS": {
+            "joint": 0.0013098557759252105,
+            "risk": 0.0002959995949134878,
+            "service": 0.0012678946404045962
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.6608603234116535,
+            "risk": 0.8302266293445277,
+            "service": 0.6481843382278759
+          }
+        }
+      },
+      "regions": {
+        "excluded": {
+          "joint_head_covariance_cross": 0.007488319748221378,
+          "joint_low_rest_noise_cross": 0.05746153029250696,
+          "noise_RMS": {
+            "joint": 0.018871316721631032,
+            "risk": 0.009286907406635448,
+            "service": 0.016256405425335255
+          },
+          "observed_RMS": {
+            "joint": 0.01736147385862246,
+            "risk": 0.009962919399134067,
+            "service": 0.011812109712951246
+          },
+          "observed_over_noise_RMS": {
+            "joint": 0.9199927124704588,
+            "risk": 1.0727919384676552,
+            "service": 0.7266126430719014
+          }
+        },
+        "held": {
+          "joint_head_covariance_cross": 0.0013687161352546604,
+          "joint_low_rest_noise_cross": -0.046685115093355926,
+          "noise_RMS": {
+            "joint": 0.003195909546096805,
+            "risk": 0.002379781124887855,
+            "service": 0.002106415772730177
+          },
+          "observed_RMS": {
+            "joint": 0.004168819957021745,
+            "risk": 0.0025198023082516454,
+            "service": 0.002928728673345459
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.30442363805733,
+            "risk": 1.058837840967576,
+            "service": 1.3903848951669509
+          }
+        },
+        "retained": {
+          "joint_head_covariance_cross": -3.791966274410568e-06,
+          "joint_low_rest_noise_cross": 0.0001251162057549147,
+          "noise_RMS": {
+            "joint": 0.0014005243235419584,
+            "risk": 0.0013351280878058536,
+            "service": 0.0004233402563786352
+          },
+          "observed_RMS": {
+            "joint": 0.0014567225226151987,
+            "risk": 0.0013634503923107939,
+            "service": 0.00038446674408804766
+          },
+          "observed_over_noise_RMS": {
+            "joint": 1.040126542701603,
+            "risk": 1.021213174049454,
+            "service": 0.9081743072980542
+          }
+        }
+      }
+    }
+  },
+  "protocol": "native_transit_joint_noise_stage265_v1"
+}

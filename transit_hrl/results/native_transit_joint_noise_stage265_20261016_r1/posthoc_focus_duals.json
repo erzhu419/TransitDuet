@@ -1,0 +1,162 @@
+{
+  "noise_profiles": [
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "dominant_KKT_mode_fraction": 0.6218362399430358,
+      "dominant_covariance_fraction": 0.779641174691309,
+      "force_noise_energy": 3.432236526496225e-05,
+      "held_noise_squared": {
+        "joint": 0.08324426816350763,
+        "risk": 0.0017485358575186276,
+        "service": 0.08201820692958775
+      },
+      "low_dimension_fraction": 0.25,
+      "low_parameter_noise_energy": 0.541788171081803,
+      "old_key": "16@1",
+      "parameter_noise_energy": 1.4372543564724034,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "dominant_KKT_mode_fraction": 0.5749089080582809,
+      "dominant_covariance_fraction": 0.7545334841529503,
+      "force_noise_energy": 2.495525551836012e-05,
+      "held_noise_squared": {
+        "joint": 0.04626555236348365,
+        "risk": 0.0018231295385194054,
+        "service": 0.04492772312777964
+      },
+      "low_dimension_fraction": 0.25,
+      "low_parameter_noise_energy": 0.3105706825961875,
+      "old_key": "16@1",
+      "parameter_noise_energy": 0.7326352999281733,
+      "variant": "shrunk_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "dominant_KKT_mode_fraction": 1.0,
+      "dominant_covariance_fraction": 1.0,
+      "force_noise_energy": 2.0552518625275096e-05,
+      "held_noise_squared": {
+        "joint": 3.844872004475459e-06,
+        "risk": 3.6300462285515387e-06,
+        "service": 3.2574139453201094e-07
+      },
+      "low_dimension_fraction": 1.0,
+      "low_parameter_noise_energy": 0.00041521425814282343,
+      "old_key": "1@0.25",
+      "parameter_noise_energy": 0.00041521425814282343,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "dominant_KKT_mode_fraction": 1.0,
+      "dominant_covariance_fraction": 1.0,
+      "force_noise_energy": 1.3637184804304492e-05,
+      "held_noise_squared": {
+        "joint": 2.506628560591986e-06,
+        "risk": 2.2403728690958167e-06,
+        "service": 3.052047126532822e-07
+      },
+      "low_dimension_fraction": 1.0,
+      "low_parameter_noise_energy": 0.00027069507567854795,
+      "old_key": "1@0.25",
+      "parameter_noise_energy": 0.00027069507567854795,
+      "variant": "shrunk_expanded8_pooled_safe"
+    }
+  ],
+  "noise_profiles_stdout_bytes": 2002,
+  "returned_stdout_bytes": 1208,
+  "rows": [
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "full_dual": 8.107614944615144e-05,
+      "full_effective_condition": 31679.991297581164,
+      "low_dimension_fraction": 0.25,
+      "old_key": "16@1",
+      "prefix_dual": 0.00016555859231018612,
+      "prefix_effective_condition": 39038.66396222574,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "first_last",
+        0
+      ],
+      "full_dual": 0.00012606874305982468,
+      "full_effective_condition": 6970.426673372757,
+      "low_dimension_fraction": 0.25,
+      "old_key": "16@1",
+      "prefix_dual": 0.00018632072603939385,
+      "prefix_effective_condition": 5953.336682072353,
+      "variant": "shrunk_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "full_dual": 0.0,
+      "full_effective_condition": 1.1039571533599202,
+      "low_dimension_fraction": 1.0,
+      "old_key": "1@0.25",
+      "prefix_dual": 0.0,
+      "prefix_effective_condition": 1.3732372883935897,
+      "variant": "free_old_expanded8_pooled_safe"
+    },
+    {
+      "bank": 1,
+      "cell": [
+        "mixed_b",
+        1,
+        "even_odd",
+        1
+      ],
+      "full_dual": 0.0,
+      "full_effective_condition": 1.316380585940882,
+      "low_dimension_fraction": 1.0,
+      "old_key": "1@0.25",
+      "prefix_dual": 0.0,
+      "prefix_effective_condition": 1.64907942492048,
+      "variant": "shrunk_expanded8_pooled_safe"
+    }
+  ],
+  "scope": "read_only_cached_Stage261_duals_and_Stage265_scalar_noise_profiles_for_next_step_decision",
+  "source_run": "native_transit_curvature_stage261_20261016_r1"
+}

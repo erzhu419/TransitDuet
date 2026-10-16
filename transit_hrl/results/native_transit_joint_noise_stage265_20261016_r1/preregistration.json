@@ -1,0 +1,54 @@
+{
+  "contract": {
+    "boundary": "frozen_operator_plugin_noise_not_unconditional_refit_covariance_or_ground_truth_error; operator_calibration_and_keys_depend_on_anchor_bank; finite_cache_can_miss_rare_tails; no_held_outcome_evaluation_selection_or_default_change; Stage253_248_169_closed",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_prefix_fits": 640,
+      "new_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "prefix_model_records": 1280
+    },
+    "categories": [
+      "all",
+      "removed"
+    ],
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "comparison": "observed_cached_bank_target_gap_RMS_over_plugin_two_bank_difference_noise_RMS; descriptive_not_pvalue_CI_or_noise_free_claim",
+    "controls": "reproduce_Stage264_service_risk_joint_and_head_population_cross16_RMS_all_groups_banks_categories_three_query_regions_and_low_rest; direct_existing_gradient_factory_and_covariance_identities",
+    "directions": "Stage261_Hessian_low_block; supported_KKT_mode_diagonals_and_dominant_noise_covariance_direction; inverse_gain_is_coordinate_dependent_not_dimensionless_performance",
+    "focus_basis": "unchanged_Stage263_designation; no_training_exclusion_or_gate",
+    "focus_prefix": [
+      397,
+      913970203
+    ],
+    "frozen": "anchor_bank_full_coefficients_keys_basis_prior_scale_reliability_lambda_prefix_mu_and_cap; same_prefix_and_fixed_A_for_all_contrasts",
+    "independence": "conditional_state_future_seed_blocks_Stage249_1490000000+state_index*32+draw; sum_state_covariances_not_covariance_of_aligned_draw_index_state_sums",
+    "noise": "per_state_service_risk_action_paired_score_covariance_centered_within_each_assigned16_bank; covariance_of_two16_mean_difference=sum_state(C_bank0/16+C_bank1/16); no_between_bank_mean_term",
+    "primary": [
+      "free_old_expanded8_pooled_safe",
+      "shrunk_expanded8_pooled_safe"
+    ],
+    "propagation": "A=H_prefix+mu_prefix*I; C_theta=pinv(A)*C_q*pinv(A).T; preserve_head_action_and_mode_cross_covariance; exclude_retained_population_covariance_zero_under_state_seed_assumption",
+    "source_protocol": "native_transit_head_half_forcing_stage264_v1",
+    "source_run": "native_transit_head_half_forcing_stage264_20261016_r1",
+    "storage": "raw_models_labels_covariances_and_direction_profiles_server_only; pull_scalar_report"
+  },
+  "protocol": "native_transit_joint_noise_stage265_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "102819596ea1ebfbc66b14f9961300e5d2c9a329"
+}
