@@ -138,7 +138,8 @@ def evaluate_selection(arrays, native_index, training_futures, evaluation_future
 def signal_noise(differences):
     variance = differences[:, 1:].var(axis=0, ddof=1)
     mean_squared = np.square(differences[:, 1:].mean(axis=0))
-    left, right = differences[:4, 1:].mean(axis=0), differences[4:, 1:].mean(axis=0)
+    middle = len(differences) // 2
+    left, right = differences[:middle, 1:].mean(axis=0), differences[middle:, 1:].mean(axis=0)
     informative = (left != 0) | (right != 0)
     return dict(single_future_noise_variance=float(variance.mean()),
                 mean_effect_squared=float(mean_squared.mean()),
