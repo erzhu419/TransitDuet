@@ -88,7 +88,7 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
                     time_s=float(self.env.current_time), action_s=float(step.ACTIONS[selected]))
             records.append(dict(time_s=float(self.env.current_time), features=f,
                                 probabilities=probabilities, action=selected))
-            return np.asarray([step.ACTIONS[selected]], dtype=np.float32)
+            return self._quantize_lower_action(np.asarray([step.ACTIONS[selected]], dtype=np.float32))
 
         def _lower_action_for_agent(self, obs, key, last_action=0., deterministic=False):
             self._pilot_agent = key
