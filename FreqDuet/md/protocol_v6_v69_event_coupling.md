@@ -42,3 +42,12 @@ Limitations: consumed development prefixes, eight futures and two original
 training seeds; conditional on the fixed realized day profile and already
 sampled pending arrivals. Event-key pairing tests avoidable Monte Carlo noise,
 not an established bug or a demonstrated improvement in main-policy service.
+
+## Execution
+
+Source `1c95900e3f`, immutable snapshot `source/v69_event_20261016`.
+Smoke `t165653` passed on node004: 60 tests and all 17 replay checks.
+Matrix `t165655-t165658`: 256 planned workers, one wave across
+node002/004/005/006 (34/74/74/74 groups); cached smoke groups are reused.
+Aggregate `t165663` waits for all four completion markers. Only the small
+smoke marker is local; formal variance/repeatability results are pending.
