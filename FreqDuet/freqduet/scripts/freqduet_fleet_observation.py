@@ -2,9 +2,6 @@
 
 import numpy as np
 
-from lower.causal_follower_eta import freeze_avl_vehicle_snapshots
-
-
 MOTION = ("HOLDING", "WAITING_ACTION", "DWELLING", "TRAVEL")
 FLEET_FIELDS = ("present", "on_route", "direction", "active_trip", "progress", "speed", "load",
                 "actual_launch", "terminal_return", "terminal_return_seen", "remaining_command_hold",
@@ -15,18 +12,16 @@ PLAN_FIELDS = ("direction", "launched", "upper_queried", "published_eligibility"
 
 
 def capture_fleet(env):
-    vehicles = {int(v.bus_id): v for v in env.bus_all}
     fleet = []
-    for snapshot in freeze_avl_vehicle_snapshots(env.bus_all):
-        vehicle = vehicles[snapshot.bus_id]
-        active = bool(snapshot.on_route)
-        returned = not active and snapshot.trip_id >= 0
+    for vehicle in env.bus_all:
+        active = bool(vehicle.on_route)
+        returned = not active and vehicle.trip_id >= 0
         state = vehicle.state.name if active else "TERMINAL"
-        fleet.append(dict(bus_id=snapshot.bus_id, on_route=active, direction=snapshot.direction,
-                          active_trip_id=snapshot.trip_id if active else None,
-                          progress_m=snapshot.progress_m if active else 0., speed_mps=snapshot.current_speed_mps if active else 0.,
+        fleet.append(dict(bus_id=int(vehicle.bus_id), on_route=active, direction=bool(vehicle.direction),
+                          active_trip_id=int(vehicle.trip_id) if active else None,
+                          progress_m=float(vehicle.travel_distance) if active else 0., speed_mps=float(vehicle.current_speed) if active else 0.,
                           load=len(vehicle.passengers) if active else 0, capacity=float(vehicle.capacity),
-                          actual_launch_s=snapshot.launch_time_s if active else None,
+                          actual_launch_s=float(vehicle.launch_time) if active else None,
                           terminal_return_s=float(vehicle.back_to_terminal_time) if returned else None, state=state,
                           remaining_command_hold_s=float(vehicle.dwelling_time) if state == "DWELLING" else 0.,
                           remaining_service_s=float(vehicle.holding_time) if state == "HOLDING" else 0.))
@@ -47,7 +42,7 @@ def capture_fleet(env):
     middle = len(routes) // 2
     return dict(time_s=float(env.current_time), buses=int(env.max_agent_num), trips=len(plans),
                 horizon_s=float(env.protocol.evaluation_end_time_s),
-                route_lengths_m=[sum(r.distance for r in routes[middle:]), sum(r.distance for r in routes[:middle])],
+                route_lengths_m=[float(sum(r.distance for r in routes[middle:])), float(sum(r.distance for r in routes[:middle]))],
                 fleet=fleet, plans=plans)
 
 
