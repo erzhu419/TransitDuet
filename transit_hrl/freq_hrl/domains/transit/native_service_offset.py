@@ -60,11 +60,11 @@ def summarize_parts(rows):
     return {"eligible_state_exposures": n, **result}
 
 
-def switch_stats(values, choices, originals):
+def switch_stats(values, choices, originals, arm_risk=ARM_RISK):
     ix = np.arange(len(values))
     output = {"all16": {}}
     for a, chosen in choices.items():
-        control = choices[ARM_RISK[a]]
+        control = choices[arm_risk[a]]
         different = chosen != control
         kind = np.zeros(len(ix), int)
         kind[different&(control == originals)] = 1
