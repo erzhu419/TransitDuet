@@ -1,0 +1,548 @@
+{
+  "boundaries": "Not uniform: root397-only held service-probe costs remain positive; mixed-a held bank1 Linear9 service probe also loses cost. Reused development single-intervention outcomes, no seed CI.",
+  "interpretation": "Finite-MC service information improves pooled opposite-bank cost/wait while raw fleet MC overfits rare events. This motivates learning service while freezing risk, not deploying label-informed MC probes.",
+  "next_step": "Stage282: service-only Linear9 and matched-df action/observed residual fitting, frozen risk/feasibility, training-only service clip and uncut controls; no raw/risk refit or new native simulation.",
+  "primary": {
+    "excluded_opposite": {
+      "assigned16_proposals": {
+        "all16": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.39427083333333335,
+            "delta_cost": 1.2486588541666118e-05,
+            "delta_fleet": 0.0008002387152777778,
+            "delta_service": -0.0007877521267361119,
+            "delta_wait_min": -0.008213053385416672,
+            "linear9_disagreement_rate": 0.39427083333333335
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.34010416666666665,
+            "delta_cost": 0.000664945833333333,
+            "delta_fleet": 0.0011067708333333327,
+            "delta_service": -0.00044182500000000094,
+            "delta_wait_min": -0.004985677083333342,
+            "linear9_disagreement_rate": 0.3458333333333333
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.203125,
+            "delta_cost": -0.0003492382812500001,
+            "delta_fleet": 0.0006591796874999995,
+            "delta_service": -0.0010084179687500014,
+            "delta_wait_min": -0.01028053385416668,
+            "linear9_disagreement_rate": 0.1078125
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.18020833333333333,
+            "delta_cost": -0.00032772057291666716,
+            "delta_fleet": 0.0006293402777777773,
+            "delta_service": -0.0009570608506944451,
+            "delta_wait_min": -0.00962861328125,
+            "linear9_disagreement_rate": 0.1875
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.11145833333333334,
+            "delta_cost": -0.0002887891276041671,
+            "delta_fleet": 0.0006863064236111108,
+            "delta_service": -0.000975095551215279,
+            "delta_wait_min": -0.009911718749999998,
+            "linear9_disagreement_rate": 0.209375
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.12395833333333334,
+            "delta_cost": 0.0001738644205729164,
+            "delta_fleet": 0.00014919704861111107,
+            "delta_service": 2.466737196180548e-05,
+            "delta_wait_min": 0.00020660807291666844,
+            "linear9_disagreement_rate": 0.12708333333333333
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.15416666666666667,
+            "delta_cost": 0.00017254622395833323,
+            "delta_fleet": 0.00018174913194444448,
+            "delta_service": -9.202907986111197e-06,
+            "delta_wait_min": -0.0001675455729166669,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.15416666666666667
+          }
+        },
+        "first8": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.39427083333333335,
+            "delta_cost": -0.000539819661458333,
+            "delta_fleet": 1.0850694444444348e-05,
+            "delta_service": -0.0005506703559027779,
+            "delta_wait_min": -0.006087890625000014,
+            "linear9_disagreement_rate": 0.39427083333333335
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.34010416666666665,
+            "delta_cost": -0.00013414205729166674,
+            "delta_fleet": 0.0001681857638888888,
+            "delta_service": -0.0003023278211805558,
+            "delta_wait_min": -0.0036897786458333385,
+            "linear9_disagreement_rate": 0.3458333333333333
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.203125,
+            "delta_cost": -0.0005292313802083338,
+            "delta_fleet": 0.00036892361111111126,
+            "delta_service": -0.0008981549913194454,
+            "delta_wait_min": -0.00922623697916668,
+            "linear9_disagreement_rate": 0.1078125
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.18020833333333333,
+            "delta_cost": -0.0006255679687500005,
+            "delta_fleet": 0.00020073784722222221,
+            "delta_service": -0.000826305815972223,
+            "delta_wait_min": -0.008399479166666671,
+            "linear9_disagreement_rate": 0.1875
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.11145833333333334,
+            "delta_cost": -0.0004717471354166676,
+            "delta_fleet": 0.00039062500000000013,
+            "delta_service": -0.0008623721354166674,
+            "delta_wait_min": -0.00880807291666668,
+            "linear9_disagreement_rate": 0.209375
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.12395833333333334,
+            "delta_cost": 2.8527929687500473e-05,
+            "delta_fleet": -5.425347222222239e-06,
+            "delta_service": 3.39532769097226e-05,
+            "delta_wait_min": 0.00031106770833333843,
+            "linear9_disagreement_rate": 0.12708333333333333
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.15416666666666667,
+            "delta_cost": 7.714485677083382e-05,
+            "delta_fleet": 7.052951388888886e-05,
+            "delta_service": 6.6153428819449246e-06,
+            "delta_wait_min": 2.4479166666668887e-05,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.15416666666666667
+          }
+        },
+        "last8": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.39427083333333335,
+            "delta_cost": 0.0005647928385416662,
+            "delta_fleet": 0.001589626736111112,
+            "delta_service": -0.0010248338975694458,
+            "delta_wait_min": -0.010338216145833327,
+            "linear9_disagreement_rate": 0.39427083333333335
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.34010416666666665,
+            "delta_cost": 0.001464033723958332,
+            "delta_fleet": 0.002045355902777779,
+            "delta_service": -0.0005813221788194454,
+            "delta_wait_min": -0.0062815755208333445,
+            "linear9_disagreement_rate": 0.3458333333333333
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.203125,
+            "delta_cost": -0.0001692451822916663,
+            "delta_fleet": 0.0009494357638888886,
+            "delta_service": -0.0011186809461805548,
+            "delta_wait_min": -0.011334830729166662,
+            "linear9_disagreement_rate": 0.1078125
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.18020833333333333,
+            "delta_cost": -2.9873177083333647e-05,
+            "delta_fleet": 0.0010579427083333335,
+            "delta_service": -0.001087815885416667,
+            "delta_wait_min": -0.010857747395833341,
+            "linear9_disagreement_rate": 0.1875
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.11145833333333334,
+            "delta_cost": -0.00010583111979166637,
+            "delta_fleet": 0.0009819878472222218,
+            "delta_service": -0.0010878189670138884,
+            "delta_wait_min": -0.011015364583333341,
+            "linear9_disagreement_rate": 0.209375
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.12395833333333334,
+            "delta_cost": 0.00031920091145833286,
+            "delta_fleet": 0.0003038194444444445,
+            "delta_service": 1.5381467013888347e-05,
+            "delta_wait_min": 0.00010214843749999847,
+            "linear9_disagreement_rate": 0.12708333333333333
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.15416666666666667,
+            "delta_cost": 0.00026794759114583296,
+            "delta_fleet": 0.00029296875,
+            "delta_service": -2.5021158854167308e-05,
+            "delta_wait_min": -0.00035957031250000225,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.15416666666666667
+          }
+        }
+      },
+      "component_errors": {
+        "MSE": {
+          "risk_mc_all16": 0.0008931630605214596,
+          "risk_mc_first8": 0.0012841370728638795,
+          "risk_mc_last8": 0.001410478013413803,
+          "risk_observed_context_df_clip": 0.0006594550052276639,
+          "risk_raw_linear_clip": 0.0006708991509077884,
+          "risk_raw_prior": 0.0006558058099193759,
+          "service_mc_all16": 3.504984423871473e-05,
+          "service_mc_first8": 5.358355361374373e-05,
+          "service_mc_last8": 5.492352203853302e-05,
+          "service_raw": 7.149176378759798e-05
+        },
+        "eligible_state_exposures": 1184
+      },
+      "fleet_MC_MSE_increase_fraction": 0.3619322168421535,
+      "selection_disagreement_rates": {
+        "mc_both": {
+          "all16_vs_first8": 0.2015625,
+          "all16_vs_last8": 0.1921875,
+          "first8_vs_last8": 0.3578125
+        },
+        "mc_risk_raw_service": {
+          "all16_vs_first8": 0.0875,
+          "all16_vs_last8": 0.09375,
+          "first8_vs_last8": 0.171875
+        },
+        "mc_service_linear9": {
+          "all16_vs_first8": 0.058333333333333334,
+          "all16_vs_last8": 0.06510416666666667,
+          "first8_vs_last8": 0.11614583333333334
+        },
+        "mc_service_observed": {
+          "all16_vs_first8": 0.06197916666666667,
+          "all16_vs_last8": 0.06145833333333333,
+          "first8_vs_last8": 0.11458333333333333
+        },
+        "mc_service_raw": {
+          "all16_vs_first8": 0.050520833333333334,
+          "all16_vs_last8": 0.06927083333333334,
+          "first8_vs_last8": 0.11145833333333334
+        }
+      },
+      "service_MSE_reduction_fraction": 0.5097359138760681
+    },
+    "held_opposite": {
+      "assigned16_proposals": {
+        "all16": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.3255208333333333,
+            "delta_cost": -0.0005883324218749993,
+            "delta_fleet": 0.0002278645833333334,
+            "delta_service": -0.0008161970052083327,
+            "delta_wait_min": -0.007661197916666673,
+            "linear9_disagreement_rate": 0.32760416666666664
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.29270833333333335,
+            "delta_cost": 0.00010979062500000096,
+            "delta_fleet": 0.0004747178819444443,
+            "delta_service": -0.00036492725694444356,
+            "delta_wait_min": -0.003338313802083332,
+            "linear9_disagreement_rate": 0.296875
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.17395833333333333,
+            "delta_cost": -0.0007454320963541673,
+            "delta_fleet": 0.0002631293402777778,
+            "delta_service": -0.0010085614366319453,
+            "delta_wait_min": -0.009709375000000008,
+            "linear9_disagreement_rate": 0.10260416666666666
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.16197916666666667,
+            "delta_cost": -0.0007482611002604177,
+            "delta_fleet": 0.00016818576388888886,
+            "delta_service": -0.0009164468641493065,
+            "delta_wait_min": -0.008808919270833337,
+            "linear9_disagreement_rate": 0.15416666666666667
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.09739583333333333,
+            "delta_cost": -0.0006436587239583342,
+            "delta_fleet": 0.0003173828125,
+            "delta_service": -0.0009610415364583342,
+            "delta_wait_min": -0.009253255208333335,
+            "linear9_disagreement_rate": 0.16770833333333332
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.10572916666666667,
+            "delta_cost": -0.0003662984049479167,
+            "delta_fleet": -0.0002848307291666667,
+            "delta_service": -8.146767578125009e-05,
+            "delta_wait_min": -0.000706380208333335,
+            "linear9_disagreement_rate": 0.115625
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.125,
+            "delta_cost": -0.00041468873697916717,
+            "delta_fleet": -0.0002577039930555555,
+            "delta_service": -0.00015698474392361145,
+            "delta_wait_min": -0.0012654947916666695,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.125
+          }
+        },
+        "first8": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.3255208333333333,
+            "delta_cost": -0.0008445669921874987,
+            "delta_fleet": -0.0001139322916666666,
+            "delta_service": -0.000730634700520832,
+            "delta_wait_min": -0.006893489583333352,
+            "linear9_disagreement_rate": 0.32760416666666664
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.29270833333333335,
+            "delta_cost": 0.00016573854166666854,
+            "delta_fleet": 0.0005099826388888889,
+            "delta_service": -0.0003442440972222206,
+            "delta_wait_min": -0.002963411458333337,
+            "linear9_disagreement_rate": 0.296875
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.17395833333333333,
+            "delta_cost": -0.0012882544270833344,
+            "delta_fleet": -0.0003092447916666667,
+            "delta_service": -0.0009790096354166677,
+            "delta_wait_min": -0.009645052083333354,
+            "linear9_disagreement_rate": 0.10260416666666666
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.16197916666666667,
+            "delta_cost": -0.0010567389973958345,
+            "delta_fleet": -0.0001736111111111111,
+            "delta_service": -0.0008831278862847233,
+            "delta_wait_min": -0.008671289062500009,
+            "linear9_disagreement_rate": 0.15416666666666667
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.09739583333333333,
+            "delta_cost": -0.0009422980468750009,
+            "delta_fleet": -1.0842021724855045e-20,
+            "delta_service": -0.000942298046875001,
+            "delta_wait_min": -0.009251888020833342,
+            "linear9_disagreement_rate": 0.16770833333333332
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.10572916666666667,
+            "delta_cost": -0.0005134680338541665,
+            "delta_fleet": -0.00043402777777777775,
+            "delta_service": -7.944025607638881e-05,
+            "delta_wait_min": -0.0006407552083333377,
+            "linear9_disagreement_rate": 0.115625
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.125,
+            "delta_cost": -0.0007527366536458337,
+            "delta_fleet": -0.0005805121527777778,
+            "delta_service": -0.00017222450086805583,
+            "delta_wait_min": -0.001397460937500009,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.125
+          }
+        },
+        "last8": {
+          "all16__mc_both": {
+            "cases": 1920,
+            "changed_rate": 0.3255208333333333,
+            "delta_cost": -0.0003320978515624996,
+            "delta_fleet": 0.0005696614583333333,
+            "delta_service": -0.0009017593098958329,
+            "delta_wait_min": -0.008428906249999995,
+            "linear9_disagreement_rate": 0.32760416666666664
+          },
+          "all16__mc_risk_raw_service": {
+            "cases": 1920,
+            "changed_rate": 0.29270833333333335,
+            "delta_cost": 5.384270833333362e-05,
+            "delta_fleet": 0.00043945312499999996,
+            "delta_service": -0.00038561041666666655,
+            "delta_wait_min": -0.0037132161458333255,
+            "linear9_disagreement_rate": 0.296875
+          },
+          "all16__mc_service_linear9": {
+            "cases": 1920,
+            "changed_rate": 0.17395833333333333,
+            "delta_cost": -0.00020260976562500033,
+            "delta_fleet": 0.0008355034722222225,
+            "delta_service": -0.0010381132378472228,
+            "delta_wait_min": -0.009773697916666664,
+            "linear9_disagreement_rate": 0.10260416666666666
+          },
+          "all16__mc_service_observed": {
+            "cases": 1920,
+            "changed_rate": 0.16197916666666667,
+            "delta_cost": -0.0004397832031250009,
+            "delta_fleet": 0.0005099826388888891,
+            "delta_service": -0.0009497658420138898,
+            "delta_wait_min": -0.008946549479166665,
+            "linear9_disagreement_rate": 0.15416666666666667
+          },
+          "all16__mc_service_raw": {
+            "cases": 1920,
+            "changed_rate": 0.09739583333333333,
+            "delta_cost": -0.0003450194010416673,
+            "delta_fleet": 0.0006347656250000002,
+            "delta_service": -0.000979785026041667,
+            "delta_wait_min": -0.009254622395833334,
+            "linear9_disagreement_rate": 0.16770833333333332
+          },
+          "observed_context_df_clip": {
+            "cases": 1920,
+            "changed_rate": 0.10572916666666667,
+            "delta_cost": -0.00021912877604166698,
+            "delta_fleet": -0.00013563368055555553,
+            "delta_service": -8.349509548611145e-05,
+            "delta_wait_min": -0.0007720052083333322,
+            "linear9_disagreement_rate": 0.115625
+          },
+          "raw_linear_clip": {
+            "cases": 1920,
+            "changed_rate": 0.125,
+            "delta_cost": -7.664082031250046e-05,
+            "delta_fleet": 6.510416666666667e-05,
+            "delta_service": -0.00014174498697916714,
+            "delta_wait_min": -0.0011335286458333304,
+            "linear9_disagreement_rate": 0.0
+          },
+          "raw_prior": {
+            "cases": 1920,
+            "changed_rate": 0.0,
+            "delta_cost": 0.0,
+            "delta_fleet": 0.0,
+            "delta_service": 0.0,
+            "delta_wait_min": 0.0,
+            "linear9_disagreement_rate": 0.125
+          }
+        }
+      },
+      "component_errors": {
+        "MSE": {
+          "risk_mc_all16": 0.0009579432346729892,
+          "risk_mc_first8": 0.001414006424582815,
+          "risk_mc_last8": 0.0015708252762878319,
+          "risk_observed_context_df_clip": 0.000861331404822134,
+          "risk_raw_linear_clip": 0.0008680477096344402,
+          "risk_raw_prior": 0.0008950357823875689,
+          "service_mc_all16": 4.112766266788855e-05,
+          "service_mc_first8": 5.600343935176247e-05,
+          "service_mc_last8": 6.440127133684214e-05,
+          "service_raw": 0.00011184606982813241
+        },
+        "eligible_state_exposures": 1072
+      },
+      "fleet_MC_MSE_increase_fraction": 0.07028484617409414,
+      "selection_disagreement_rates": {
+        "mc_both": {
+          "all16_vs_first8": 0.16927083333333334,
+          "all16_vs_last8": 0.15885416666666666,
+          "first8_vs_last8": 0.30520833333333336
+        },
+        "mc_risk_raw_service": {
+          "all16_vs_first8": 0.06614583333333333,
+          "all16_vs_last8": 0.07916666666666666,
+          "first8_vs_last8": 0.14010416666666667
+        },
+        "mc_service_linear9": {
+          "all16_vs_first8": 0.0484375,
+          "all16_vs_last8": 0.044270833333333336,
+          "first8_vs_last8": 0.08541666666666667
+        },
+        "mc_service_observed": {
+          "all16_vs_first8": 0.04635416666666667,
+          "all16_vs_last8": 0.04583333333333333,
+          "first8_vs_last8": 0.08802083333333334
+        },
+        "mc_service_raw": {
+          "all16_vs_first8": 0.044270833333333336,
+          "all16_vs_last8": 0.04583333333333333,
+          "first8_vs_last8": 0.08645833333333333
+        }
+      },
+      "service_MSE_reduction_fraction": 0.6322833450376297
+    }
+  },
+  "protocol": "native_transit_component_probe_stage281_v1"
+}

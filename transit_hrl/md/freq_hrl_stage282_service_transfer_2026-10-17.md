@@ -1,0 +1,10 @@
+# Stage282: Learned Service Transfer With Frozen Risk
+
+- Run: `native_transit_service_transfer_stage282_20261017_r1`.
+- Fit only service residuals on each full60/prefix54 model's assigned16 labels. Reuse the exact Linear9 and matched-df action/observed73 feature maps, normalizers and penalties. No raw/risk/prior/basis refitting.
+- One common service correction clip radius per fit: state-balanced RMS of the training-mean service residual. Report both unclipped and clipped predictions; no label-selected penalty, strength or threshold.
+- Cross each learned service with frozen raw / Linear9 / observed-df risk; preserve raw wait feasibility and candidate/tie rules. Zero service update reproduces each frozen controller exactly. Retain the three frozen Stage281 MC-service information benchmarks separately.
+- Primary comparisons: each clipped learned service versus its own unchanged-risk controller on mixed-pooled excluded/opposite and full-held/opposite; compare service MSE and cost/wait together. Report all train/retained/excluded/held/prefix-head-held, views/banks and fixed8+8 evaluation halves without choosing a winner.
+- One unpinned scheduler task, any node001-node006, 1 CPU / 3072 MiB. Budget: 2112 service solves, 32 cells / 704 contexts / 2048 queries / 84480 repeated state exposures. No native simulations or actor updates. Full models/predictions stay remote; scalar pull only.
+- Verification: five tests passed, including exact weighted service solves, frozen geometry/penalties, zero-update controller identity, query clip/benchmark isolation, sparse cached model indices, complete 22-fit-context/64-query replay, group accounting and completed-parent gate. Both cold CLI startups passed. Submission pending; Stage253/248/169 remain closed; no default change.
+- Limitations: reused development single-intervention supervision, not full learned HRL or seed-CI confirmation. Only MC benchmarks use query outcome labels; learned service uses causal features and training-only labels.
