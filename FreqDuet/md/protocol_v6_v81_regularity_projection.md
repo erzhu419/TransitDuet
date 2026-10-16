@@ -39,3 +39,10 @@ small completion markers and summary JSON; keep all checkpoints/traces there.
 No production switch, even if this two-seed pilot passes. A pass supports a
 separate seed/long-run study; failure ends this fixed projection candidate,
 without tuning the moment threshold or choosing another cell after the fact.
+
+Source `4d8d5bf55b`; smoke `t166187` passed all ten tests, exact historical
+B200 zero-tilt episode/holding identity and the first complete three-policy
+cell. Formal shards `t166192-t166195` are assigned to node002/004/005/006
+with 65/63/64/64 workers (256 total). Aggregate `t166196` waits for markers
+`0-65`, `65-128`, `128-192`, `192-256`. The smoke cell is reused; no fresh
+matrix effect has been used to adjust the candidate or promote the main policy.
