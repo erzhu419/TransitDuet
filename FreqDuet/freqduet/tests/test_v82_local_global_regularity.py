@@ -11,6 +11,21 @@ import run_freqduet_v82_local_global_regularity as audit
 
 
 class LocalGlobalTest(unittest.TestCase):
+    def test_departure_capture_survives_episode_recorder_reset(self):
+        from env.evaluation import HeadwayEventRecorder
+
+        original = HeadwayEventRecorder.record_departure
+        observer = audit.LocalGlobalAudit("base")
+        observer.attach(SimpleNamespace(env=SimpleNamespace(headway_events=HeadwayEventRecorder())))
+        try:
+            after_reset = HeadwayEventRecorder()
+            after_reset.record_departure(3, True, 41., 2)
+            self.assertEqual(observer.departures[(2, 3, True)], 41.)
+            self.assertEqual(after_reset.previous_departure_event(3, True)["time_s"], 41.)
+        finally:
+            observer.detach()
+        self.assertIs(HeadwayEventRecorder.record_departure, original)
+
     def test_arrival_variance_between_groups(self):
         events = [dict(headway_s=h, group=g) for h, g in ((100., 0), (100., 0), (300., 1), (300., 1))]
         result = audit.arrival_decomposition(events, lambda e: e["group"])

@@ -89,8 +89,8 @@ class LocalGlobalAudit:
 
         self.bus_type = Bus
         self.original_prepare = Bus._prepare_for_action
-        self.recorder = runner.env.headway_events
-        self.original_departure = self.recorder.record_departure
+        self.recorder_type = type(runner.env.headway_events)
+        self.original_departure = self.recorder_type.record_departure
 
         def prepare(bus, now, buses, debug):
             result = self.original_prepare(bus, now, buses, debug)
@@ -100,16 +100,16 @@ class LocalGlobalAudit:
             self.followers[key] = int(follower.trip_id) if follower is not None else None
             return result
 
-        def depart(station_id, direction, departure_time_s, trip_id):
+        def depart(recorder, station_id, direction, departure_time_s, trip_id):
             self.departures[(int(trip_id), int(station_id), bool(direction))] = float(departure_time_s)
-            return self.original_departure(station_id, direction, departure_time_s, trip_id)
+            return self.original_departure(recorder, station_id, direction, departure_time_s, trip_id)
 
         Bus._prepare_for_action = prepare
-        self.recorder.record_departure = depart
+        self.recorder_type.record_departure = depart
 
     def detach(self):
         self.bus_type._prepare_for_action = self.original_prepare
-        self.recorder.record_departure = self.original_departure
+        self.recorder_type.record_departure = self.original_departure
 
     def __call__(self, policy, states, features, theta):
         before = self.projection.active
@@ -168,6 +168,8 @@ def run_item(root, v81_root, v78_root, index):
             raise AssertionError("trace instrumentation changed an action histogram")
         np.testing.assert_allclose(observer.summary["arrival"]["stop_direction"]["cv_squared"],
                                    row["cv_squared"], rtol=1e-12, atol=1e-12)
+        if not any(g["observed"]["completed_departure_gain_delta"] for g in observer.summary["local"].values()):
+            raise AssertionError("full-day trace contains no completed bilateral follower labels")
         audits[label] = observer.summary
     pilot.write_json(path, dict(original_v81_index=original_index, train_seed=seed, scenario_seed=day,
         mode=mode, rep=rep, audits=audits, all_v81_metrics_and_action_counts_exact=True))

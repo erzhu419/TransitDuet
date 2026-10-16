@@ -46,3 +46,11 @@ rollout: the locked optimized runtime lacks the newer Bus/recorder trace fields.
 Its four gated shards and aggregate were cancelled. Record the original runtime
 calls instead; do not upgrade or modify its physics. Re-smoke the exact three
 original endpoints before releasing replacement tasks.
+
+Replacement smoke `t166225` passed five tests and exactly reproduced all three
+V81 endpoints/action histograms. Coverage inspection then found zero completed
+labels: episode reset replaces the recorder instance. Cancel `t166226-t166230`;
+this attempt is incomplete instrumentation, not valid mechanism evidence.
+Hook the original recorder class method, restore it after each replay, and add
+a reset-survival unit test plus a real completed-label coverage assertion.
+Use a separate completed-events output root so incomplete audits cannot resume.
