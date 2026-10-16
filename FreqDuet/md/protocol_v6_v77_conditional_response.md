@@ -50,3 +50,12 @@ Limitations: development labels were already inspected; overlapping LODO fits
 and only two original training seeds limit inference. A negative width-8 model
 does not prove that current observations lack all usable information. None of
 these development comparisons admits a deployable controller.
+
+## Execution
+
+Source `b6e3e10964`. Scheduler smoke `t166100` completed on node004, exit 0,
+five tests and the full 700001-held-day fold passed. CPU batch planner assigned
+four 11-worker shards `t166101-t166104` to preferred node002/004/005/006;
+all remain eligible only for node001-node006. Aggregate `t166105` waits for
+their four small completion markers. Reuse the smoke fold, add no rollouts,
+and retain checkpoints/predictions/labels on the server.
