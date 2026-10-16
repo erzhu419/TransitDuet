@@ -38,6 +38,30 @@ Server smoke: focused tests, full cache preparation and first held-day fit
 node001-node006. Save all fit/cache arrays only there; pull small JSON/markers.
 Save the all-day development fit separately, never in the production trainer.
 
+## Outcome / Next Step
+
+Source `f3eb5126b6`; scheduler `t165745` smoke (11 tests and actual first fold),
+`t165746` 12-worker folds, `t165747` aggregate on node004. All computations
+completed; 12 whole-day-excluded folds, no new rollout or controller update.
+Only 25,180 bytes of markers/summary JSON were pulled. Primary has 2,420
+coefficients, effective degrees of freedom about 11.7-11.9 per output.
+Passenger MAE: zero 1796.49, action-only 1740.49, state 1997.77 person-seconds.
+State-minus-zero MAE +201.28 [90.32,320.85]; CV-squared MAE also worsens,
++5.77e-6 [1.80e-6,1.10e-5]. Readiness MSE improves versus zero by 0.00794 s^2,
+but its MAE CI spans zero. Both development gates fail. State changes 23/144
+actions: six improve passenger exposure, 16 worsen, one ties; two have jointly
+nonworse point estimates. Mean exposure delta +4.85 [-94.62,97.16]
+person-seconds; omitting evaluation day700006 gives +39.95 [-33.45,120.92].
+Do not start fresh confirmation or promote action-only as a posthoc winner.
+
+Next test causal state sufficiency: recapture current full-fleet AVL and
+published dispatch commitments on the original frozen native references,
+requiring prefix/day identity before reusing their existing action labels.
+Compare with this fixed scorer on whole-day-excluded data, not by tuning ridge
+or gates. Current encoding includes ready counts and pending lower commands,
+not full fleet positions/operating states or complete dispatch commitments;
+whether that omission explains the failure remains a hypothesis.
+
 Limitations: consumed development labels, overlapping cross-fit training sets,
 32-mean label noise and four actors from two original training seeds. This is
 not new-day confirmation or proof of fixed-headway superiority. Current actor
