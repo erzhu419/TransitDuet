@@ -1,0 +1,69 @@
+{
+  "contract": {
+    "arms": [
+      "raw_prior",
+      "raw_linear_clip",
+      "observed_context_df_clip",
+      "linear__raw_prior",
+      "linear__raw_linear_clip",
+      "linear__observed_context_df_clip",
+      "linear_clip__raw_prior",
+      "linear_clip__raw_linear_clip",
+      "linear_clip__observed_context_df_clip",
+      "action_context_df__raw_prior",
+      "action_context_df__raw_linear_clip",
+      "action_context_df__observed_context_df_clip",
+      "action_context_df_clip__raw_prior",
+      "action_context_df_clip__raw_linear_clip",
+      "action_context_df_clip__observed_context_df_clip",
+      "observed_context_df__raw_prior",
+      "observed_context_df__raw_linear_clip",
+      "observed_context_df__observed_context_df_clip",
+      "observed_context_df_clip__raw_prior",
+      "observed_context_df_clip__raw_linear_clip",
+      "observed_context_df_clip__observed_context_df_clip",
+      "mc__raw_prior",
+      "mc__raw_linear_clip",
+      "mc__observed_context_df_clip"
+    ],
+    "benchmarks": "reuse_Stage281_assigned16_MC_service_and_saved_choices_with_all3_risks; benchmark_query_labels_never_enter_learned_predictions_or_fit; not_deployable",
+    "boundary": "development_supervised_single_intervention_service_transfer_not_end_to_end_HRL_new_prefix_confirmation_seed_CI_or_deployment; MC_benchmark_is_information_probe; Stage253_248_169_closed; defaults_unchanged",
+    "budget": {
+      "actor_updates": 0,
+      "cached_cells": 32,
+      "cached_contexts": 704,
+      "cached_queries": 2048,
+      "fit_tasks": 1,
+      "model_state_exposures": 84480,
+      "new_native_episodes": 0,
+      "new_raw_risk_basis_or_prior_fits": 0,
+      "new_service_head_fits": 2112
+    },
+    "clip": "common_service_radius_per_fit=sqrt_state_balanced_training_mean_service_residual_squared; original_correction0; pointwise_plus_minus_radius_and_uncut_controls; no_risk_radius_reuse_or_query_rescaling",
+    "cohort": "unchanged32_cells_four_views_two_outer_folds_two_partitions_two_directions; full60_prefix54_both_banks_assigned16; all_development_states_no_selected_subgroups",
+    "controllers": "cross_each_service_head_with_frozen_raw_Linear9_observed_df_risk; raw_wait_gate_candidates_and_original_first_ties_unchanged; zero_service_update_reproduces_all3_controls",
+    "controls": "frozen_controls_and_MC_service_choices_replay_exactly; per_cell_and_all_group_bank_scope_half_outcomes_and_raw_MC_service_MSE_reproduce_Stage281; all_predictions_actions_saved_before_evaluation",
+    "evaluation": "same64_queries_per_cell_train_retained_excluded_full_held_prefix_head_held; assigned_opposite16_and_fixed8+8_evaluation_halves; primary_mixed_excluded_opposite_and_held_opposite; primary_learned_comparisons_clipped_each_vs_own_frozen_risk_control_no_winner_selection",
+    "fit": "service_only_raw_prior_residual_physical_MSE_assigned16_state_balanced_eligible_actions; full60_or_prefix54_only; no_held_or_opposite_labels_in_fit_or_clip_radius",
+    "geometry": "reuse_Stage278_cached_basis_normalizers_context_stats_and_feature_only_df_matched_penalties; Linear9_lambda0.01_and_both73_maps; no_geometry_or_penalty_selection",
+    "risk_run": "native_transit_effective_risk_stage278_20261017_r1",
+    "source_protocol": "native_transit_component_probe_stage281_v1",
+    "source_run": "native_transit_component_probe_stage281_20261017_r1",
+    "storage": "models_features_service_predictions_and_query_outcomes_server_only; compact_scalar_report_pull"
+  },
+  "protocol": "native_transit_service_transfer_stage282_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "56cca75278c71dff57c5046f94deae3d2f2893e8"
+}
