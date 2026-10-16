@@ -90,7 +90,6 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
             records.append(dict(time_s=float(self.env.current_time), features=f,
                 probabilities=probabilities, action=selected, trip_id=int(bus.trip_id),
                 station_id=int(bus.last_station.station_id), direction=bool(bus.direction),
-                decision_time_s=float(bus.pre_action_time_s),
                 context=self._pending_lower_action_context[int(key)]))
             return self._quantize_lower_action(np.asarray([step.ACTIONS[selected]], dtype=np.float32))
 
@@ -115,7 +114,13 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
     upper_before = copy.deepcopy(runner.upper_trainer.policy_net.state_dict())
     lower_before = copy.deepcopy(runner.lower_trainer.policy_net.state_dict())
     observer.attach(runner)
-    episode = runner.run_episode(joint.BASE_EP, training=False, scenario_seed=scenario, record_diagnostics=False)
+    if trace_observer is not None:
+        trace_observer.attach(runner)
+    try:
+        episode = runner.run_episode(joint.BASE_EP, training=False, scenario_seed=scenario, record_diagnostics=False)
+    finally:
+        if trace_observer is not None:
+            trace_observer.detach()
     for network, before in ((runner.upper_trainer.policy_net, upper_before), (runner.lower_trainer.policy_net, lower_before)):
         for name, value in before.items():
             torch.testing.assert_close(network.state_dict()[name], value, atol=0, rtol=0)
@@ -136,7 +141,7 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
         stream_audit=audit, theta=list(theta), base_actors_unchanged=True,
         training_updates=0, dual_updates=0, main_policy_changed=False)
     if trace_observer is not None:
-        trace_observer(runner, records)
+        trace_observer.finish(runner, records, observer.holds)
     if save_training:
         exposures = np.asarray([t.exposure[0] + t.exposure[1] for t in observer.stream.transitions])
         remaining = np.cumsum(exposures[::-1])[::-1]

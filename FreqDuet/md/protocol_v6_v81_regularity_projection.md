@@ -60,3 +60,13 @@ Projection activates on about 39% of decisions; maximum local moment deficit
 is 1.02e-12. This fixed candidate ends without threshold tuning or promotion.
 Next, read existing pairs on the server for waiting/onboard tradeoffs, gain
 concentration and three-repeat variance; no additional rollout or candidate fit.
+
+Read-only audit `t166205` completed exit 0/retry 0, three tests passed and all
+original means/CIs reproduced. Stochastic waiting/onboard exposure improves
+-44588/-19926 person-s against B200; both intervals exclude zero. Passenger
+improves on 29/32 days, largest day 8.4% of positive gains. Projected-versus-B200
+CV signs differ across repeats on 19/32 days; untruncated between-day variance
+is 3.41e-6 [5.90e-7,6.58e-6]. Noise remains, but day heterogeneity is identified.
+Only 52,584 additional summary bytes were pulled. V82 now diagnoses the local
+surrogate against completed follower events and global arrival CV, without
+changing this failed gate or fitting another controller.

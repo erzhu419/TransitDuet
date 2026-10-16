@@ -76,6 +76,34 @@ class LocalGlobalAudit:
         self.label, self.laws = label, []
         self.projection = RegularityProjection()
         self.summary = None
+        self.ready, self.departures, self.followers = {}, {}, {}
+
+    def attach(self, runner):
+        from env.bus import Bus
+
+        self.bus_type = Bus
+        self.original_prepare = Bus._prepare_for_action
+        self.recorder = runner.env.headway_events
+        self.original_departure = self.recorder.record_departure
+
+        def prepare(bus, now, buses, debug):
+            result = self.original_prepare(bus, now, buses, debug)
+            key = (int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction))
+            self.ready[key] = float(now)
+            follower = next((b for b in buses if b.bus_id == bus.pre_action_follower_bus_id), None)
+            self.followers[key] = int(follower.trip_id) if follower is not None else None
+            return result
+
+        def depart(station_id, direction, departure_time_s, trip_id):
+            self.departures[(int(trip_id), int(station_id), bool(direction))] = float(departure_time_s)
+            return self.original_departure(station_id, direction, departure_time_s, trip_id)
+
+        Bus._prepare_for_action = prepare
+        self.recorder.record_departure = depart
+
+    def detach(self):
+        self.bus_type._prepare_for_action = self.original_prepare
+        self.recorder.record_departure = self.original_departure
 
     def __call__(self, policy, states, features, theta):
         before = self.projection.active
@@ -86,16 +114,24 @@ class LocalGlobalAudit:
         self.laws.append((base / base.sum(), actual / actual.sum(), self.projection.active > before))
         return law
 
-    def finish(self, runner, records):
+    def finish(self, runner, records, holds):
         recorder, groups = runner.env.headway_events, defaultdict(list)
-        forecasts = {(r["current_trip_id"], r["station_id"], r["direction"], r["decision_time_s"]): r
-                     for r in recorder._follower_forecasts}
+        holding = {(r["trip_id"], r["station_id"]): r["action_s"] for r in holds}
         if len(records) != len(self.laws):
             raise AssertionError("trace decisions and probability laws do not align")
         for record, (base, actual, active) in zip(records, self.laws):
             context = record["context"]
-            key = (record["trip_id"], record["station_id"], record["direction"], record["decision_time_s"])
-            effect = local_effect(context, record["features"], base, actual, forecasts.get(key))
+            key = (record["trip_id"], record["station_id"], record["direction"])
+            follower = (self.followers[key], record["station_id"], record["direction"])
+            ready, forecast = self.ready.get(follower), None
+            if ready is not None and key in self.departures:
+                gap = ready - self.ready[key]
+                forecast = dict(resolved=True, actual_follower_gap_s=gap,
+                    raw_gap_prediction_error_s=float(context.follower_departure_gap_s) - gap
+                        if context.follower_evidence_valid else None,
+                    follower_action_s=holding.get(follower[:2]),
+                    follower_departure_time_s=self.departures.get(follower), decision_time_s=self.ready[key])
+            effect = local_effect(context, record["features"], base, actual, forecast)
             bucket = ("bilateral_active" if active else "bilateral_inactive") if (
                 context.evidence_valid and context.follower_evidence_valid) else "missing_bilateral"
             groups[bucket].append(effect)
@@ -119,7 +155,7 @@ def run_item(root, v81_root, v78_root, index):
         observer = LocalGlobalAudit(label)
         row, _, _, _ = pilot.rollout(root, seed, day, mode, sampler,
             [0.] * 4 if label == "base" else theta, f"p{index}_{label}",
-            probability_rule=observer, trace_observer=observer.finish)
+            probability_rule=observer, trace_observer=observer)
         for metric in pilot.METRICS:
             np.testing.assert_equal(row[metric], original["results"][label][metric])
         if row["action_counts"] != original["results"][label]["action_counts"]:

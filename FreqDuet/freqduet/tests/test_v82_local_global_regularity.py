@@ -30,6 +30,21 @@ class LocalGlobalTest(unittest.TestCase):
         self.assertIsNone(result["completed_ready_gain_delta"])
         self.assertIsNone(result["completed_departure_gain_delta"])
 
+    def test_completed_follower_can_reverse_the_local_formula(self):
+        from lower.causal_departure_regularity import CausalDepartureRegularityCost
+
+        context = CausalDepartureRegularityCost().capture(forward_headway_s=150., target_headway_s=300.,
+            evidence_source="matched_departure_event", follower_departure_gap_s=450.,
+            follower_evidence_source="same_time_avl_test")
+        features = audit.step.action_features(context, 0., 0, 0, 0.)
+        base, actual = np.eye(7)[0], np.eye(7)[-1]
+        forecast = dict(resolved=True, actual_follower_gap_s=100., raw_gap_prediction_error_s=350.,
+            follower_action_s=20., follower_departure_time_s=120., decision_time_s=0.)
+        result = audit.local_effect(context, features, base, actual, forecast)
+        self.assertGreater(result["predicted_gain_delta"], 0.)
+        self.assertLess(result["completed_ready_gain_delta"], 0.)
+        self.assertEqual(result["future_follower_holding_s"], 20.)
+
     def test_instrumentation_preserves_each_probability_law(self):
         from lower.resac_lagrangian import CategoricalPolicy
 
