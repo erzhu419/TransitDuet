@@ -76,7 +76,9 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
             f = step.action_features(self._pending_lower_action_context[int(key)],
                 len(bus.passengers) / bus.capacity, self.env._ready_vehicle_count(not bool(bus.direction)),
                 due_at_return(self.env, not bool(bus.direction)), spent[bus.trip_id])
-            probabilities = step.probabilities(policy, torch.from_numpy(encoded)[None, :], f, theta)[0].numpy().astype(float)
+            adjusted = step.probabilities(policy, torch.from_numpy(encoded)[None, :], f, theta)
+            self._ep_lower_policy_entropies.append(float(-(adjusted * torch.log(adjusted + 1e-8)).sum().item()))
+            probabilities = adjusted[0].numpy().astype(float)
             probabilities /= probabilities.sum()
             if mode == "deterministic":
                 selected = int(np.argmax(probabilities))
