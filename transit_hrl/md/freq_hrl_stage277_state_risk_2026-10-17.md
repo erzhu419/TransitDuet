@@ -11,5 +11,5 @@
 - Primary: mixed-pooled excluded/opposite and full60-held/opposite; report both banks and all views without selecting an arm or penalty.
 - Budget: 1 scheduler CPU task, 1,408 lightweight residual fits; zero raw/prior fits, simulations, action selections or actor updates.
 - Large caches, models and predictions remain remote; pull scalar report only.
-- Status: replace queued `t166085` before fitting to include cached-control clip fractions; r2 uses the same fit/evaluation contract. 1 CPU / 3072 MiB, any node001-node006, no pin. Six focused tests and both cold CLI startup checks passed.
+- Status: r2 submitted as `t166087`, source `903b75abeb`. Queued `t166085` was cancelled before fitting to include cached-control clip fractions; no extra fits. 1 CPU / 3072 MiB, any node001-node006, no pin. Six focused tests and both cold CLI startup checks passed.
 - Limits: reused development prefixes/futures and repeated models; equal coefficient count does not guarantee equal effective capacity. Not policy or end-to-end HRL validation. Stage253/248/169 remain closed.
