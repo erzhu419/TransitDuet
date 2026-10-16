@@ -28,6 +28,13 @@ upper-policy and day identity. 13 smoke replays, 7 reused formally.
 All tests, replays and aggregation run via scheduler on node001-node006.
 Only small JSON/markers/logs are pulled; raw trace data remain on servers.
 
+Execution: source `3b4cfe80b6`, server snapshot `source/v71_trace_20261016`.
+Smoke `t165724` on node004 passed 21 tests and all 13 identity replays;
+only its 53-byte completion marker was pulled. Formal shards `t165725`
+(groups 0-80) and `t165726` (80-160) each use 80 workers, with node004/node005
+preferred and node001-node006 allowed. `t165727` aggregates after both exports.
+All 384 formal replay endpoints remain subject to the same V70 equality checks.
+
 Limitations: posthoc consumed development contexts/futures, mainly one demand
 day, and two original training seeds. Per-context future-bootstrap intervals
 describe these conditional continuations; they are not independent-day or
