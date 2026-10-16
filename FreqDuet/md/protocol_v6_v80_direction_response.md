@@ -32,3 +32,11 @@ If the local and full responses differ materially, redesign update locality
 before control learning. If neither resolves, report that rather than launch
 long training. Actor, critic, dual and main remain frozen; pull only small
 markers and the final JSON, not trajectories or checkpoints.
+
+Source `aa4189d2d0`; smoke `t166161` passed nine tests and the complete first
+four-policy cell. An earlier output-root integration error occurred before any
+rollout; that smoke and its five queued dependents were cancelled. The fix keeps
+the verified runtime root and uses distinct baseline files for sampler repeats.
+Formal tasks `t166162-t166165` cover 128 cells on node002/004/005/006 with 32
+workers each, reusing the smoke cell. Aggregate `t166166` waits for their four
+small completion markers. No response result has been used to select a policy.
