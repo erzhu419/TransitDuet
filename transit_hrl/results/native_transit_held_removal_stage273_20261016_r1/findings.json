@@ -1,0 +1,51 @@
+{
+  "protocol": "native_transit_held_removal_stage273_v1",
+  "primary": {
+    "group": "mixed_pooled",
+    "bank": "pooled",
+    "penalty": 0.01,
+    "future": "opposite",
+    "arm": "raw_bounded_clip",
+    "raw_MSE": 0.000895035782387569,
+    "full60_MSE": 0.000865413560858748,
+    "other54_MSE": 0.0008687047999912619,
+    "matched54_MSE": 0.0008696212829148614,
+    "all54_MSE": 0.0008687964482836219,
+    "other_minus_full_raw_pp": 0.3677215142990494,
+    "matched_minus_other_raw_pp": 0.1023962328248666,
+    "matched_minus_full_raw_pp": 0.470117747123916,
+    "matched_minus_other_raw_pp_by_bank": [-0.210636, 0.399907],
+    "same_future_matched_minus_other_raw_pp": -0.022455,
+    "parent_excluded_vs_raw_pct": 1.3532700025842281,
+    "parent_excluded_minus_matched_held_relative_pp": 4.1927653582796935
+  },
+  "controls_matched_minus_other_raw_pp": {
+    "unclipped_raw_RMS": 7.652602982327419,
+    "cold_mse": 25.578309729782966,
+    "linear_clip": -0.094071,
+    "interaction_clip": 0.034008,
+    "raw_prior": 0.0
+  },
+  "primary_clipped_sensitivity": {
+    "opposite_future_matched_minus_other_raw_pp_by_penalty": {
+      "0.001": -0.116664,
+      "0.01": 0.102396,
+      "0.1": 0.558944
+    },
+    "opposite_future_matched_minus_other_raw_pp_by_view": {
+      "mixed_a": -0.341699,
+      "mixed_b": 0.824127,
+      "root_397": 1.189318,
+      "root_401": 1.296524
+    }
+  },
+  "support_after_matching_removal": {
+    "mixed": {"before": 1, "after": 0},
+    "single_root": {"before": 2, "after": 1}
+  },
+  "interpretation": "Missing-condition sensitivity is visible without clipping but largely contained for the frozen primary clipped head. Equal-size removal contrasts are small and direction-dependent in mixed cohorts. Observed same-query removal effects do not reproduce the earlier clipped OOF/held sign flip; the pure count effect remains unidentified.",
+  "next": "Stage274: reuse each frozen prefix54 model and cached predictions/labels to compare excluded versus condition-matched held errors, decomposing correction squared and alignment with raw residual; no new fitting, simulation, selection or gate.",
+  "limitations": "Development labels and repeated model/state exposures; equal-size descriptive deletion contrast, not randomized condition effect or pure sample-count identification; not seed CI or policy improvement. Stage253/248/169 remain closed.",
+  "default_changed": false,
+  "native_deployment_eligible": false
+}
