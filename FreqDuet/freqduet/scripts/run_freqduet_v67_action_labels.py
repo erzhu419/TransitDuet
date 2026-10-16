@@ -64,11 +64,12 @@ def run_branch(root, v59_root, reference_index, targets, label, forced=None, con
     return run_spec(root, v59_root, reference_spec(reference_index), targets, label, forced, continuation)
 
 
-def run_spec(root, v59_root, spec, targets, label, forced=None, continuation=None):
+def run_spec(root, v59_root, spec, targets, label, forced=None, continuation=None, *, observer=None):
     _, Runner, load_config, _ = joint.optimized_runtime(root)
     source = torch.load(v59_root / "cells" / deployment.case_name(spec["train_seed"], spec["actor_scenario"])
                         / "learning_smoke.pt", map_location="cpu", weights_only=False)
-    observer, moments = deployment.CreditObserver(), deployment.ArrivalMoments()
+    observer = deployment.CreditObserver() if observer is None else observer
+    moments = deployment.ArrivalMoments()
     captures, lower_prefix, upper_path = {}, [], []
     encoder, policy = None, None
 
