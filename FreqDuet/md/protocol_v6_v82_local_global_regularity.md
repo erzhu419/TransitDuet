@@ -41,16 +41,18 @@ production dual and main policy remain frozen. Next control design depends on
 whether failure aligns with missing coverage, follower forecast mismatch, or
 downstream/global propagation; no new controller is fitted in V82.
 
-Initial smoke `t166208` passed four unit tests but stopped before completing any
-rollout: the locked optimized runtime lacks the newer Bus/recorder trace fields.
-Its four gated shards and aggregate were cancelled. Record the original runtime
-calls instead; do not upgrade or modify its physics. Re-smoke the exact three
-original endpoints before releasing replacement tasks.
+Initial instrumentation attempts lacked locked-runtime fields (`t166208`) and
+missed departure capture after recorder reset (`t166225`). Their dependents were
+cancelled; their original output root contains incomplete diagnostic data only.
+The corrected class-method observation has a reset-survival test and requires
+actual completed follower labels as well as exact original outcome replication.
 
-Replacement smoke `t166225` passed five tests and exactly reproduced all three
-V81 endpoints/action histograms. Coverage inspection then found zero completed
-labels: episode reset replaces the recorder instance. Cancel `t166226-t166230`;
-this attempt is incomplete instrumentation, not valid mechanism evidence.
-Hook the original recorder class method, restore it after each replay, and add
-a reset-survival unit test plus a real completed-label coverage assertion.
-Use a separate completed-events output root so incomplete audits cannot resume.
+Verified source `9a1519183a`, smoke `t166239`: six tests passed and all three
+original V81 outcomes/action histograms reproduced exactly. Completed follower
+ready/departure labels cover all 4359/4358/4360 bilateral B200/raw/projected
+contexts in the smoke. The physical runtime and policy laws are unchanged.
+Current output is `protocol_v6_v82_local_global_regularity_completed_events`;
+no incomplete old pair is resumed. Shards `t166240-t166243` cover `[0,8)`,
+`[8,16)`, `[16,24)`, `[24,32)` on node002/004/005/006 with eight workers each.
+Reuse smoke cell 0; aggregate `t166244` awaits the four small completion markers.
+V82 mechanism results are pending; no new controller is admitted.
