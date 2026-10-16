@@ -1,0 +1,48 @@
+{
+  "contract": {
+    "boundary": "conditional_directional_stability_not_ground_truth_signal_noise_estimation_accuracy_utility_or_cap_counterfactual; anchor_model_keys_calibration_depend_on_anchor_bank; Stage253_248_169_closed; no_selection_or_default_change",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_prefix_fits": 640,
+      "new_critic_fits": 0,
+      "new_native_episodes": 0,
+      "new_raw_reference_fits": 0,
+      "prefix_model_records": 1280
+    },
+    "categories": [
+      "all",
+      "removed"
+    ],
+    "cohort": "same240_states40_prefixes32_cells4_views_Stage169_reserved_cohorts_closed",
+    "controls": "reproduce_Stage262_anchor_data_full_low_rest_RMS_and_all_removed_exposure_counts; verify_cached_target_and_Stage260_full_fixed_cost_gap",
+    "factorial": "2x2_future_target_bank_and_cached_GLS_precision_bank; target_swap_plus_precision_swap_plus_interaction_equals_joint_swap_at_same_full_point_and_inverse_KKT_operator",
+    "frozen": "anchor_bank_full_coefficients_keys_basis_prior_scale_reliability_lambda_prefix_mu_and_cap; same_prefix_and_fixed_A_for_all_contrasts",
+    "panels": "server_decompresses_existing_Stage249_label_archive_once; only_each_cell_training_state_labels_used; held_state_causal_features_only; no_held_outcome_evaluation",
+    "primary": [
+      "free_old_expanded8_pooled_safe",
+      "shrunk_expanded8_pooled_safe"
+    ],
+    "source_protocol": "native_transit_kkt_response_stage262_v1",
+    "source_run": "native_transit_kkt_response_stage262_20261016_r1",
+    "split": "anchor_data_response=zero_target_design_prior+two_bank_target_mean+two_bank_target_half_contrast; preserve_three_cross_terms",
+    "storage": "models_labels_vectors_and_cell_ledgers_server_only; pull_scalar_report",
+    "targets": "reconstruct_unshrunk_residual_means_from_cached_Stage249_training_state_futures; apply_anchor_reliability_to_both_disjoint16_banks; reproduce_cached_anchor_target"
+  },
+  "protocol": "native_transit_future_forcing_stage263_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "b51909d7547c4e75890b98ec17dee5fee9f03d20"
+}

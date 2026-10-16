@@ -1,0 +1,501 @@
+{
+  "boundary": "Conditional gradient/KKT responses, not unbiased signal/noise estimation, label accuracy, seed CI, utility or a new trained policy.",
+  "conclusion": "Fixed-calibration future-target swaps exceed precision swaps and the original data response; target-only response is more aligned than the cancellation residual. Pooled instability is concentrated in a minority of prefix-model exposures, not universal direction reversal.",
+  "next": "Separate service/risk target forcing and four cached 8-future halves for all prefixes under the same model/calibration/operator/cap; identify fleet-tail versus service-label instability before fitting or gates.",
+  "posthoc_concentration_file": "posthoc_concentration.json",
+  "primary_mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "force_alignment": {
+        "anchor_squared": 0.006120666999681614,
+        "cosine": 0.37434971709198034,
+        "defined_prefix_models": 120,
+        "dot": 0.004247563518941136,
+        "other_squared": 0.021034199745674897,
+        "positive_dot_prefix_models": 99
+      },
+      "regions": {
+        "excluded": {
+          "full": {
+            "RMS": {
+              "anchor": 0.005369531645232561,
+              "design_prior": 0.058610372109530795,
+              "interaction": 0.003211262496384795,
+              "joint_swap": 0.01480389878756578,
+              "other": 0.01142868090281721,
+              "precision_swap": 0.0022706859254754195,
+              "target_contrast": 0.0075179358846200976,
+              "target_mean": 0.06038094322962815,
+              "target_swap": 0.015035871769240195
+            },
+            "anchor_other_cosine": -0.5428910299097283,
+            "design_prior_target_mean_cross": -9.422203150724036,
+            "target_only_response_cosine": 0.9879443615873346,
+            "target_swap_over_anchor_RMS": 2.8002203474468903,
+            "target_swap_over_precision_swap_RMS": 6.621731169664996
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.0016946059732292794,
+              "design_prior": 0.011742317437199428,
+              "interaction": 0.0017632097289719685,
+              "joint_swap": 0.007291159887159526,
+              "other": 0.007162229946211102,
+              "precision_swap": 0.0009269641450687905,
+              "target_contrast": 0.004002931035425914,
+              "target_mean": 0.012093711687651918,
+              "target_swap": 0.008005862070851829
+            },
+            "anchor_other_cosine": -0.40885191483981476,
+            "design_prior_target_mean_cross": -0.36456009714198956,
+            "target_only_response_cosine": 0.802937379725208,
+            "target_swap_over_anchor_RMS": 4.724320695976114,
+            "target_swap_over_precision_swap_RMS": 8.636646965733188
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.004884522008582238,
+              "design_prior": 0.05487176876459564,
+              "interaction": 0.0022674149674153407,
+              "joint_swap": 0.01261590019449442,
+              "other": 0.008421449460145742,
+              "precision_swap": 0.0018714497550628851,
+              "target_contrast": 0.0062761685201568026,
+              "target_mean": 0.05668721102029517,
+              "target_swap": 0.012552337040313605
+            },
+            "anchor_other_cosine": -0.763123526043276,
+            "design_prior_target_mean_cross": -8.298829264217398,
+            "target_only_response_cosine": 0.9989538161256528,
+            "target_swap_over_anchor_RMS": 2.569818913346855,
+            "target_swap_over_precision_swap_RMS": 6.707279747348503
+          }
+        },
+        "held": {
+          "full": {
+            "RMS": {
+              "anchor": 0.0019350977730966694,
+              "design_prior": 0.004014819581088903,
+              "interaction": 0.001723831775062201,
+              "joint_swap": 0.004204331797636748,
+              "other": 0.003966352512176148,
+              "precision_swap": 0.001048787481110131,
+              "target_contrast": 0.0023099868174749965,
+              "target_mean": 0.005087542601473628,
+              "target_swap": 0.004619973634949993
+            },
+            "anchor_other_cosine": -0.12166336383557404,
+            "design_prior_target_mean_cross": -0.453451504831184,
+            "target_only_response_cosine": 0.7259325030195789,
+            "target_swap_over_anchor_RMS": 2.3874626384158413,
+            "target_swap_over_precision_swap_RMS": 4.405061767194053
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.0011324640122687168,
+              "design_prior": 0.004705000781953957,
+              "interaction": 0.0011842562473634575,
+              "joint_swap": 0.002242909516084986,
+              "other": 0.0024727630841298817,
+              "precision_swap": 0.0006252534610532172,
+              "target_contrast": 0.0013437351580584981,
+              "target_mean": 0.00439486438982303,
+              "target_swap": 0.0026874703161169963
+            },
+            "anchor_other_cosine": 0.031163511357971737,
+            "design_prior_target_mean_cross": -0.4770812208135848,
+            "target_only_response_cosine": 0.8775069982402807,
+            "target_swap_over_anchor_RMS": 2.3731176328800636,
+            "target_swap_over_precision_swap_RMS": 4.2982094198887735
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.0012110111626059807,
+              "design_prior": 0.006829572001992672,
+              "interaction": 0.0011584382669368677,
+              "joint_swap": 0.0025241520261121008,
+              "other": 0.0023849935480030862,
+              "precision_swap": 0.000731301924392094,
+              "target_contrast": 0.0013030730679273724,
+              "target_mean": 0.007509579135981978,
+              "target_swap": 0.0026061461358547447
+            },
+            "anchor_other_cosine": 0.0627965204035386,
+            "design_prior_target_mean_cross": -1.2199589774934128,
+            "target_only_response_cosine": 0.9801116552169905,
+            "target_swap_over_anchor_RMS": 2.1520413818866593,
+            "target_swap_over_precision_swap_RMS": 3.5637074769373047
+          }
+        },
+        "held_other_root": {
+          "full": {
+            "RMS": {
+              "anchor": 0.001996308138566255,
+              "design_prior": 0.0038656528719490267,
+              "interaction": 0.002020284713166186,
+              "joint_swap": 0.002394338030835948,
+              "other": 0.002558278237665667,
+              "precision_swap": 0.0013190387111138918,
+              "target_contrast": 0.0012028395746930523,
+              "target_mean": 0.004604265541285966,
+              "target_swap": 0.0024056791493861046
+            },
+            "anchor_other_cosine": 0.4643271838634839,
+            "design_prior_target_mean_cross": -0.19491576706933902,
+            "target_only_response_cosine": 0.8740064975245407,
+            "target_swap_over_anchor_RMS": 1.2050640394192147,
+            "target_swap_over_precision_swap_RMS": 1.8238123939172148
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.001129912191716812,
+              "design_prior": 0.0019408722993833533,
+              "interaction": 0.0012189204983071497,
+              "joint_swap": 0.0017144016786903233,
+              "other": 0.0019971402916589176,
+              "precision_swap": 0.0007170828021660133,
+              "target_contrast": 0.0009423129627152508,
+              "target_mean": 0.0025405643596623155,
+              "target_swap": 0.0018846259254305016
+            },
+            "anchor_other_cosine": 0.3796555032607124,
+            "design_prior_target_mean_cross": -0.05111492801458461,
+            "target_only_response_cosine": 0.7640308134986422,
+            "target_swap_over_anchor_RMS": 1.6679401631793722,
+            "target_swap_over_precision_swap_RMS": 2.6281845272788846
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.0012760351152914897,
+              "design_prior": 0.003465206090018778,
+              "interaction": 0.0012906987357072634,
+              "joint_swap": 0.001685710293618083,
+              "other": 0.0019513582163761237,
+              "precision_swap": 0.0008271341434148029,
+              "target_contrast": 0.0008976648092630069,
+              "target_mean": 0.004104463938852298,
+              "target_swap": 0.0017953296185260138
+            },
+            "anchor_other_cosine": 0.44434832070908287,
+            "design_prior_target_mean_cross": -0.16246054539624316,
+            "target_only_response_cosine": 0.9380481533122577,
+            "target_swap_over_anchor_RMS": 1.4069594143699562,
+            "target_swap_over_precision_swap_RMS": 2.170542266716303
+          }
+        },
+        "retained": {
+          "full": {
+            "RMS": {
+              "anchor": 0.0006487254682957956,
+              "design_prior": 0.0014305749107429487,
+              "interaction": 0.0005659268263547553,
+              "joint_swap": 0.0009827254788386307,
+              "other": 0.0011804970408375419,
+              "precision_swap": 0.00033435494072360376,
+              "target_contrast": 0.0005476860243462842,
+              "target_mean": 0.001723617238693966,
+              "target_swap": 0.0010953720486925685
+            },
+            "anchor_other_cosine": 0.40125569902299374,
+            "design_prior_target_mean_cross": -0.052987975603718304,
+            "target_only_response_cosine": 0.8364488201445706,
+            "target_swap_over_anchor_RMS": 1.6884986056892681,
+            "target_swap_over_precision_swap_RMS": 3.2760755570771227
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.0004241507410401069,
+              "design_prior": 0.0008216568369691587,
+              "interaction": 0.0002884292723302851,
+              "joint_swap": 0.0006585680784499105,
+              "other": 0.0008255720328632622,
+              "precision_swap": 0.00015214326402580194,
+              "target_contrast": 0.0003542872437257611,
+              "target_mean": 0.001051568210309422,
+              "target_swap": 0.0007085744874515222
+            },
+            "anchor_other_cosine": 0.5131769113864061,
+            "design_prior_target_mean_cross": -0.017730518600336517,
+            "target_only_response_cosine": 0.816156219758965,
+            "target_swap_over_anchor_RMS": 1.6705723199114266,
+            "target_swap_over_precision_swap_RMS": 4.657284645420485
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.0004869501937007321,
+              "design_prior": 0.001165910567948057,
+              "interaction": 0.00048816989341732834,
+              "joint_swap": 0.0007137542468920565,
+              "other": 0.0008384828971185346,
+              "precision_swap": 0.0002944215046597564,
+              "target_contrast": 0.0004097592834058562,
+              "target_mean": 0.0013417457028450461,
+              "target_swap": 0.0008195185668117123
+            },
+            "anchor_other_cosine": 0.32888043985235227,
+            "design_prior_target_mean_cross": -0.03433219715664693,
+            "target_only_response_cosine": 0.8465719436833584,
+            "target_swap_over_anchor_RMS": 1.6829617842094315,
+            "target_swap_over_precision_swap_RMS": 2.7834874621633907
+          }
+        }
+      },
+      "target_force_alignment": {
+        "anchor_squared": 0.021002934498274357,
+        "cosine": 0.6771430083925298,
+        "defined_prefix_models": 120,
+        "dot": 0.01800751465021015,
+        "other_squared": 0.03367183450962016,
+        "positive_dot_prefix_models": 103
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "force_alignment": {
+        "anchor_squared": 0.009040466737294467,
+        "cosine": 0.42291679363985524,
+        "defined_prefix_models": 120,
+        "dot": 0.006314967062185844,
+        "other_squared": 0.024662747972085956,
+        "positive_dot_prefix_models": 95
+      },
+      "regions": {
+        "excluded": {
+          "full": {
+            "RMS": {
+              "anchor": 0.005694988890872837,
+              "design_prior": 0.037350513668320456,
+              "interaction": 0.004798135427820221,
+              "joint_swap": 0.015130422836097564,
+              "other": 0.015653009041447424,
+              "precision_swap": 0.006036448548152148,
+              "target_contrast": 0.008680736929311235,
+              "target_mean": 0.037532991622653694,
+              "target_swap": 0.01736147385862247
+            },
+            "anchor_other_cosine": -0.1344524662802308,
+            "design_prior_target_mean_cross": -3.658456334296476,
+            "target_only_response_cosine": 0.91215415001384,
+            "target_swap_over_anchor_RMS": 3.0485527173629974,
+            "target_swap_over_precision_swap_RMS": 2.876107320410623
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.002441608090499441,
+              "design_prior": 0.019488927192695963,
+              "interaction": 0.0036831375637614446,
+              "joint_swap": 0.011645555238843693,
+              "other": 0.014294183728035127,
+              "precision_swap": 0.0055869961294226595,
+              "target_contrast": 0.00744927374562951,
+              "target_mean": 0.021221016666688533,
+              "target_swap": 0.01489854749125902
+            },
+            "anchor_other_cosine": -0.16735405242531584,
+            "design_prior_target_mean_cross": -1.041966086993538,
+            "target_only_response_cosine": 0.7843692777605951,
+            "target_swap_over_anchor_RMS": 6.101940581386041,
+            "target_swap_over_precision_swap_RMS": 2.6666471832330734
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.005113409696650413,
+              "design_prior": 0.02951152385591537,
+              "interaction": 0.0019691743228975635,
+              "joint_swap": 0.009191948203237219,
+              "other": 0.0043543492619627444,
+              "precision_swap": 0.001149447424125844,
+              "target_contrast": 0.004101139771870323,
+              "target_mean": 0.028803496486981932,
+              "target_swap": 0.008202279543740646
+            },
+            "anchor_other_cosine": -0.49785547285443404,
+            "design_prior_target_mean_cross": -2.2626075812215283,
+            "target_only_response_cosine": 0.994796822171994,
+            "target_swap_over_anchor_RMS": 1.6040724350942632,
+            "target_swap_over_precision_swap_RMS": 7.135845773875641
+          }
+        },
+        "held": {
+          "full": {
+            "RMS": {
+              "anchor": 0.0019573935894016464,
+              "design_prior": 0.0035600643663134006,
+              "interaction": 0.0016461299403953756,
+              "joint_swap": 0.0035843291026031576,
+              "other": 0.0036282260106360992,
+              "precision_swap": 0.0011046959137268229,
+              "target_contrast": 0.0020844099785108728,
+              "target_mean": 0.0039653746457252535,
+              "target_swap": 0.0041688199570217455
+            },
+            "anchor_other_cosine": -0.02701023702267288,
+            "design_prior_target_mean_cross": -0.2923984688431915,
+            "target_only_response_cosine": 0.56832934073118,
+            "target_swap_over_anchor_RMS": 2.1297811434521496,
+            "target_swap_over_precision_swap_RMS": 3.7737262401539406
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.001091759758882132,
+              "design_prior": 0.004882853895236175,
+              "interaction": 0.0013020216299939125,
+              "joint_swap": 0.00237746200507353,
+              "other": 0.0027726168679293,
+              "precision_swap": 0.0008931280468649842,
+              "target_contrast": 0.001526104584155833,
+              "target_mean": 0.004644421073718465,
+              "target_swap": 0.003052209168311666
+            },
+            "anchor_other_cosine": -0.07212299183843951,
+            "design_prior_target_mean_cross": -0.5222249256418311,
+            "target_only_response_cosine": 0.8410152440025725,
+            "target_swap_over_anchor_RMS": 2.7956783930531253,
+            "target_swap_over_precision_swap_RMS": 3.4174373753297593
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.0012405328281938205,
+              "design_prior": 0.0036452617453907477,
+              "interaction": 0.0010246162847379712,
+              "joint_swap": 0.0020153810124595817,
+              "other": 0.0019889791844360776,
+              "precision_swap": 0.0005966663221065558,
+              "target_contrast": 0.0010464524265878738,
+              "target_mean": 0.004072947546995101,
+              "target_swap": 0.0020929048531757475
+            },
+            "anchor_other_cosine": 0.22588795744597395,
+            "design_prior_target_mean_cross": -0.34038647682427897,
+            "target_only_response_cosine": 0.9214538721988964,
+            "target_swap_over_anchor_RMS": 1.6871015466982489,
+            "target_swap_over_precision_swap_RMS": 3.5076637906873276
+          }
+        },
+        "held_other_root": {
+          "full": {
+            "RMS": {
+              "anchor": 0.0019989609998227655,
+              "design_prior": 0.0032326266818104923,
+              "interaction": 0.001685918543070512,
+              "joint_swap": 0.0024351447823812446,
+              "other": 0.0029383044409256997,
+              "precision_swap": 0.001118917817940406,
+              "target_contrast": 0.0013791309729819024,
+              "target_mean": 0.004010880774941239,
+              "target_swap": 0.002758261945963805
+            },
+            "anchor_other_cosine": 0.427464139130005,
+            "design_prior_target_mean_cross": -0.13340954746504366,
+            "target_only_response_cosine": 0.788598873654035,
+            "target_swap_over_anchor_RMS": 1.3798478040383786,
+            "target_swap_over_precision_swap_RMS": 2.465115758940136
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.0010457689563584478,
+              "design_prior": 0.002335799043861338,
+              "interaction": 0.0011203695847766633,
+              "joint_swap": 0.0018849125981818002,
+              "other": 0.0022836609318590013,
+              "precision_swap": 0.0007950357497435831,
+              "target_contrast": 0.0011509172714186991,
+              "target_mean": 0.0026644973120119844,
+              "target_swap": 0.0023018345428373983
+            },
+            "anchor_other_cosine": 0.21152027402515636,
+            "design_prior_target_mean_cross": -0.06467623441320196,
+            "target_only_response_cosine": 0.6855228844199419,
+            "target_swap_over_anchor_RMS": 2.2010928215471157,
+            "target_swap_over_precision_swap_RMS": 2.8952591673768024
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.0013000366672953627,
+              "design_prior": 0.001917265200105264,
+              "interaction": 0.001040905459294182,
+              "joint_swap": 0.0014479961807862122,
+              "other": 0.0017781822351589209,
+              "precision_swap": 0.0006185692163456557,
+              "target_contrast": 0.000795991849685231,
+              "target_mean": 0.002618536444025388,
+              "target_swap": 0.001591983699370462
+            },
+            "anchor_other_cosine": 0.5012789692557345,
+            "design_prior_target_mean_cross": -0.05270357654115652,
+            "target_only_response_cosine": 0.8487313544361222,
+            "target_swap_over_anchor_RMS": 1.224568305971304,
+            "target_swap_over_precision_swap_RMS": 2.573654907652022
+          }
+        },
+        "retained": {
+          "full": {
+            "RMS": {
+              "anchor": 0.0006988258406963384,
+              "design_prior": 0.001306488057352113,
+              "interaction": 0.0006835463675738838,
+              "joint_swap": 0.0011709284865223492,
+              "other": 0.001492076022921991,
+              "precision_swap": 0.00042612847437695814,
+              "target_contrast": 0.000728361261307599,
+              "target_mean": 0.0015467406033056,
+              "target_swap": 0.001456722522615198
+            },
+            "anchor_other_cosine": 0.28416954915570225,
+            "design_prior_target_mean_cross": -0.039319129047745524,
+            "target_only_response_cosine": 0.6452593945008437,
+            "target_swap_over_anchor_RMS": 2.084528701977678,
+            "target_swap_over_precision_swap_RMS": 3.4185054747751136
+          },
+          "low": {
+            "RMS": {
+              "anchor": 0.0004546624523055631,
+              "design_prior": 0.00098332460384668,
+              "interaction": 0.00041181552466833845,
+              "joint_swap": 0.0008663274955600632,
+              "other": 0.0011088828466834294,
+              "precision_swap": 0.00027640867112935447,
+              "target_contrast": 0.0005239313084093959,
+              "target_mean": 0.0011399939756374694,
+              "target_swap": 0.0010478626168187919
+            },
+            "anchor_other_cosine": 0.3355265069119393,
+            "design_prior_target_mean_cross": -0.021901518724192114,
+            "target_only_response_cosine": 0.6575802654834182,
+            "target_swap_over_anchor_RMS": 2.304704537410446,
+            "target_swap_over_precision_swap_RMS": 3.7909903930923003
+          },
+          "rest": {
+            "RMS": {
+              "anchor": 0.000527964588089674,
+              "design_prior": 0.0008774549462205011,
+              "interaction": 0.0005379898182099394,
+              "joint_swap": 0.0007788433214841792,
+              "other": 0.0010077366115248205,
+              "precision_swap": 0.0003149601586784534,
+              "target_contrast": 0.0004964667399549224,
+              "target_mean": 0.001014364331037663,
+              "target_swap": 0.0009929334799098448
+            },
+            "anchor_other_cosine": 0.28978782683408855,
+            "design_prior_target_mean_cross": -0.016799391747817468,
+            "target_only_response_cosine": 0.6214566914116104,
+            "target_swap_over_anchor_RMS": 1.8806819667632644,
+            "target_swap_over_precision_swap_RMS": 3.152568515573878
+          }
+        }
+      },
+      "target_force_alignment": {
+        "anchor_squared": 0.02747511166475226,
+        "cosine": 0.690908902602995,
+        "defined_prefix_models": 120,
+        "dot": 0.02249892613804614,
+        "other_squared": 0.038596021196348744,
+        "positive_dot_prefix_models": 103
+      }
+    }
+  },
+  "protocol": "native_transit_future_forcing_stage263_v1"
+}
