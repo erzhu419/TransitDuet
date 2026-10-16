@@ -46,3 +46,17 @@ cell. Formal shards `t166192-t166195` are assigned to node002/004/005/006
 with 65/63/64/64 workers (256 total). Aggregate `t166196` waits for markers
 `0-65`, `65-128`, `128-192`, `192-256`. The smoke cell is reused; no fresh
 matrix effect has been used to adjust the candidate or promote the main policy.
+
+All five formal/aggregate tasks completed, exit 0 without retries. Stochastic
+projected-minus-B200: journey -0.052956 min [-0.068082,-0.037127], readiness
+-23.838 s [-26.282,-21.642], CV-squared +0.000386 [-0.000381,+0.001153].
+Projected-minus-raw: passenger exposure +47114 person-s [23813,72735], CV-squared
+-0.001311 [-0.001799,-0.000795], readiness +18.039 s [15.981,20.312]. Projection
+retains about 58% of raw passenger improvement and 57% of readiness improvement;
+it repairs much of raw regularity harm but does not establish B200 non-harm.
+Deterministic journey/readiness also improve against B200, but its CV contrast
+and projected-minus-raw CV repair both remain unresolved. Both joint gates fail.
+Projection activates on about 39% of decisions; maximum local moment deficit
+is 1.02e-12. This fixed candidate ends without threshold tuning or promotion.
+Next, read existing pairs on the server for waiting/onboard tradeoffs, gain
+concentration and three-repeat variance; no additional rollout or candidate fit.
