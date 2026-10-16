@@ -37,45 +37,27 @@ All 384 formal replay endpoints remain subject to the same V70 equality checks.
 
 ## Outcome / Next Step
 
-Both shards and aggregate completed rc=0/retry=0: 160 groups, 384 cached
-endpoints and prefixes exact, zero event-uniform mismatches. Read-only audits
-`t165730`/`t165733` passed 3/4 tests; no added replays or model updates.
-Only 110,184 bytes of markers/summary JSON were pulled in this collection.
-Mean cumulative passenger exposure deltas (person-seconds; negative is better):
+All shards/aggregate completed rc=0/retry=0: 160 groups, 384 exact V70 endpoints
+and prefixes, zero uniform mismatches. Read-only audits `t165730`/`t165733`
+passed 3/4 tests, adding no replay/update. Pulled 110,184 bytes of small JSON.
+c123 0->45: +15min/day exposure deltas +194.75/-46948.09 person-seconds,
+CIs [77.78,311.35]/[-69594.02,-27171.77]; 20/32 signs reverse at 15min,
+12/32 at 30min. The five strong early-action contrasts realize 95.3-99.0%
+of mean net benefit after reference return, chiefly through waiting.
+For c123 0->45, later commands fall 34.375s on the target trip; actual day
+holding changes -19.531s (CI spans zero). Target return/next launch are both
+9s later; 62.06 actual launch times change versus 161.81 published plans.
+No vehicles reassign. c125 30->0 instead returns 12.78s earlier, next launches
+7s earlier and executes 34.06s less holding; all three conditional cost CIs
+are negative. c51 0->5 exposure CI spans zero; c87 improves exposure despite
+increased holding and a worse CV-squared point estimate. No blanket holding cut.
+Common post-service tail deltas are zero for c15/c123/c125; c87's tail accounts
+for 9.9% of net benefit. Full outputs: `summary`, `fleet_summary` (`6aa2f789b9`),
+`fleet_tail_summary` (`1aed4f6c3d`).
 
-| Context / action seconds | +15 min | +30 min | Day end |
-| --- | ---: | ---: | ---: |
-| c15 5->45 | -30.41 | -698.78 | -34685.50 |
-| c123 0->20 | -23.97 | -181.28 | -28909.09 |
-| c123 0->45 | +194.75 | -83.28 | -46948.09 |
-| c51 0->5 | -26.47 | -155.97 | -1235.19 |
-| c51 0->45 | +48.72 | -876.88 | -36144.19 |
-| c87 0->30 | -40.69 | -808.72 | -26763.16 |
-| c125 30->0 | -593.28 | -1721.81 | -2427.38 |
-
-For the five strong early-action contrasts, 95.3-99.0% of mean net improvement
-occurs after reference return. c123 0->45 has 15-minute/day CIs [77.78,311.35]
-/ [-69594.02,-27171.77]; 20/32 future signs reverse at 15 minutes, 12/32 at 30.
-Its later commands fall 34.375s on the target trip and 64.531s system-wide;
-actual full-day holding changes -19.531s (CI crosses zero), while the target
-return and next launch are both 9s later. Actual launch times change on 62.06
-trips on average, not the 161.81 published-plan changes. No vehicles reassign.
-c125 instead returns 12.78s earlier, next launches 7s earlier, and executes
-34.06s less holding; passenger/CV-squared/readiness conditional CIs are negative.
-c51 0->5 passenger CI crosses zero; c87 improves exposure despite +23.44s
-actual holding and a worse CV-squared point estimate. No blanket holding cut.
-
-Common post-service waiting-tail deltas are zero for c15/c123/c125; c87 has
--2645.44 person-seconds there (9.9% of net benefit), c51 0->45 has +381.59.
-The dominant early-action benefit is not explained by the cleared-service tail
-or an earlier target-vehicle return. Full outputs remain in `summary`,
-`fleet_summary` (source `6aa2f789b9`) and `fleet_tail_summary` (`1aed4f6c3d`).
-
-Next fit a low-capacity full-day action-increment scorer on consumed development
-labels, predicting passenger/CV-squared/readiness differences directly rather
-than absolute return or short-window cost. Exclude whole demand days in offline
-validation, retain zero-delta controls, and reserve fresh days/prefixes for later
-confirmation. No fitting launched here; actor/dual/main and V70 gates unchanged.
+Next: low-capacity full-day passenger/CV-squared/readiness action-increment
+scorer, whole-demand-day exclusion, zero-delta controls, then reserved fresh
+days/prefixes. No fitting launched here; actor/dual/main and V70 gates unchanged.
 
 Limitations: posthoc consumed contexts/futures, all five from demand day
 700006, and two original training seeds. Per-context future-bootstrap intervals
