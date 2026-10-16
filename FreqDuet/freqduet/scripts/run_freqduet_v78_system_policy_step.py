@@ -52,7 +52,7 @@ def due_at_return(env, direction):
 
 
 def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_training=False,
-            training_path=None, probability_rule=step.probabilities):
+            training_path=None, probability_rule=step.probabilities, trace_observer=None):
     _, Runner, load_config, runtime_torch = joint.optimized_runtime(root)
     observer, moments = CreditObserver(), ArrivalMoments()
     uniforms = event.EventUniforms(sampler_seed)
@@ -88,7 +88,10 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
                 uniforms.records[identity] = dict(uniform=uniform, order=len(uniforms.records),
                     time_s=float(self.env.current_time), action_s=float(step.ACTIONS[selected]))
             records.append(dict(time_s=float(self.env.current_time), features=f,
-                                probabilities=probabilities, action=selected))
+                probabilities=probabilities, action=selected, trip_id=int(bus.trip_id),
+                station_id=int(bus.last_station.station_id), direction=bool(bus.direction),
+                decision_time_s=float(bus.pre_action_time_s),
+                context=self._pending_lower_action_context[int(key)]))
             return self._quantize_lower_action(np.asarray([step.ACTIONS[selected]], dtype=np.float32))
 
         def _lower_action_for_agent(self, obs, key, last_action=0., deterministic=False):
@@ -132,6 +135,8 @@ def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_trainin
         action_counts={str(int(a)): int(sum(h["action_s"] == a for h in observer.holds)) for a in step.ACTIONS},
         stream_audit=audit, theta=list(theta), base_actors_unchanged=True,
         training_updates=0, dual_updates=0, main_policy_changed=False)
+    if trace_observer is not None:
+        trace_observer(runner, records)
     if save_training:
         exposures = np.asarray([t.exposure[0] + t.exposure[1] for t in observer.stream.transitions])
         remaining = np.cumsum(exposures[::-1])[::-1]
