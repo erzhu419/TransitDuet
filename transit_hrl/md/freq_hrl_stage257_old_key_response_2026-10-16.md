@@ -1,21 +1,28 @@
 # Stage257: Frozen Old-Key Response Path
 
-Fix Stage252 old selected keys. Trace them through Stage255's aligned inner
-validation, the same inner actions on opposite16 futures, frozen full actions on
-the same seen states/futures, and full actions on held prefixes. Decompose the
-path into validation-to-independent, inner-to-full-seen and seen-to-held changes.
-Split opposite16 into first8/last8; retain pooled rootwise point-guard replication and
-zero-inner-action/nonzero-full-action counts. Compare all admission categories,
-including removed point-harm versus no-strict-gain subgroups, both banks and views.
+Fixed old keys across validation, opposite futures, full seen and full held.
+Task t165497: node006, exit 0, no retries; five tests passed. All 32 cached cells
+reproduced means within 3.47e-18. Pulled only the 3,847,518-byte scalar report;
+no fits, inference, simulation or policy changes.
 
-Reproduce Stage255 validation/full outcomes and Stage256 category counts/means.
-One single-core scheduler task on node001-node006, unbound. No fits, reference
-inference, new episodes or selection. Candidate actions and complete panels stay
-on the server; only scalar summaries are pulled.
+Mixed new8 / pooled-safe removed-category conditional wait means (minutes,
+relative to full raw), 12 bank-cell exposures per family:
 
-Limitations: reused development futures and selection-exposed validation; half
-sign consistency is not CI. Banks/views reuse states and futures. Inner/full also
-changes training prefixes and future count. Seen/held uses different states, not
-a paired causal intervention. This separates response comparisons, not uniquely
-identified causal mechanisms. No restoration, winner selection or default change.
-Stage253/248 outcomes and Stage169 reserves stay closed.
+| Family | Inner Validation | Inner Opposite16 | Full Seen | Full Held |
+|---|---:|---:|---:|---:|
+| free_old | +0.000177691 | +0.000312413 | +0.000372743 | -0.001424306 |
+| shrunk | +0.000776389 | +0.000334722 | +0.000563368 | -0.001050434 |
+
+Both opposite halves retain positive group waiting harm. Only 3/8 point-harm
+exposures repeat the same violation in both halves; none clears all original
+violations in both. Four no-strict-gain exposures change no inner/full-seen
+actions; held cost is +0.000042026 with almost zero wait effect. Looser strict-gain
+filtering is not supported as the remedy.
+
+Limitations: selection-conditioned development strata, not intrinsic domain-shift
+or causal proof. Half signs are not CI. Inner/full changes both training future
+count and prefixes; seen/held is unpaired. Stage253/248/169 remain closed.
+
+Next: freeze keys/full models, compare cached inner8 with prefix-excluded inner16
+in the same full basis/prior/cap, on common opposite16 futures. This isolates
+training count without new selection, raw/full fits or episodes. Stage258 not submitted.
