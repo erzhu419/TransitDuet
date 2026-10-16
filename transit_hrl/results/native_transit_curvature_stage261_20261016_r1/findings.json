@@ -1,0 +1,999 @@
+{
+  "bank_heterogeneity": {
+    "bank0": {
+      "free_old_expanded8_pooled_safe": {
+        "bank_cell_exposures": 4,
+        "regions": {
+          "excluded": {
+            "action_disagreements": 5,
+            "cost_RMS": 0.0021884498007365308,
+            "feasible_action_exposures": 431,
+            "full_factor": {
+              "mean_inverse_curvature": 0.007674673601697133,
+              "unsupported_design_fraction": 1.5095915092474071e-30
+            },
+            "low_RMS": 0.0017131472042335274,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.03764946079987805,
+              "unsupported_design_fraction": 1.5465490599420736e-30
+            },
+            "rest_RMS": 0.0009730864718439484,
+            "squared_response": {
+              "cross": 0.00039115056117779395,
+              "low": 0.0012649304109938282,
+              "rest": 0.00040811272840653813,
+              "total": 0.002064193700578161
+            },
+            "state_model_exposures": 240
+          },
+          "held": {
+            "action_disagreements": 29,
+            "cost_RMS": 0.0007854427151754042,
+            "feasible_action_exposures": 4230,
+            "full_factor": {
+              "mean_inverse_curvature": 0.010607279822328163,
+              "unsupported_design_fraction": 1.5642578046248957e-30
+            },
+            "low_RMS": 0.0005755871093394197,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.011373813535733877,
+              "unsupported_design_fraction": 1.5420071391112691e-30
+            },
+            "rest_RMS": 0.00042680457597628986,
+            "squared_response": {
+              "cross": 0.00043762561547172943,
+              "low": 0.0014014012014515092,
+              "rest": 0.0007705458778942914,
+              "total": 0.00260957269481753
+            },
+            "state_model_exposures": 2400
+          }
+        },
+        "spectral": {
+          "full_constraint_active": 40,
+          "full_dual": 0.17540865509888434,
+          "low_dimension_fraction": 0.4583333333333333,
+          "low_parameter_energy": 0.008725202542537497,
+          "low_parameter_energy_fraction": 0.9141208139965677,
+          "maximum_block_leverage": 0.9930865539934896,
+          "mean_block_data_trace_fraction": 0.1,
+          "mean_block_leverage_maximum": 0.4107802914484395,
+          "mean_full_effective_condition": 1658.2848091787048,
+          "mean_low_cut_to_maximum": 0.2808968324396606,
+          "mean_low_parameter_fraction": 0.5961232954047591,
+          "mean_minimum_positive_to_maximum": 0.2607210062025623,
+          "mean_prefix_effective_condition": 2098.335815609303,
+          "parameter_energy": 0.009544911798245367,
+          "prefix_constraint_active": 40,
+          "prefix_dual": 0.17500706133662486
+        }
+      },
+      "shrunk_expanded8_pooled_safe": {
+        "bank_cell_exposures": 4,
+        "regions": {
+          "excluded": {
+            "action_disagreements": 4,
+            "cost_RMS": 0.002626830408456878,
+            "feasible_action_exposures": 431,
+            "full_factor": {
+              "mean_inverse_curvature": 0.007737289058673607,
+              "unsupported_design_fraction": 1.8885029831870663e-30
+            },
+            "low_RMS": 0.002313461362248107,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.08873783459858729,
+              "unsupported_design_fraction": 1.21394811575704e-30
+            },
+            "rest_RMS": 0.0008222880155084633,
+            "squared_response": {
+              "cross": 0.0003758220610236358,
+              "low": 0.0023067565975590076,
+              "rest": 0.000291423917173453,
+              "total": 0.0029740025757560968
+            },
+            "state_model_exposures": 240
+          },
+          "held": {
+            "action_disagreements": 25,
+            "cost_RMS": 0.0008394859542121598,
+            "feasible_action_exposures": 4230,
+            "full_factor": {
+              "mean_inverse_curvature": 0.011351885545580075,
+              "unsupported_design_fraction": 2.0092059724584608e-30
+            },
+            "low_RMS": 0.0006206582830049208,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.0124176249891259,
+              "unsupported_design_fraction": 1.5608647832577233e-30
+            },
+            "rest_RMS": 0.00044425380034382336,
+            "squared_response": {
+              "cross": 0.0005167305562533175,
+              "low": 0.0016294666590308668,
+              "rest": 0.0008348388874773025,
+              "total": 0.0029810361027614862
+            },
+            "state_model_exposures": 2400
+          }
+        },
+        "spectral": {
+          "full_constraint_active": 30,
+          "full_dual": 0.20290972993321427,
+          "low_dimension_fraction": 0.4583333333333333,
+          "low_parameter_energy": 0.009288223067018094,
+          "low_parameter_energy_fraction": 0.913829110142581,
+          "maximum_block_leverage": 0.9851847368367195,
+          "mean_block_data_trace_fraction": 0.1,
+          "mean_block_leverage_maximum": 0.3387343992993004,
+          "mean_full_effective_condition": 198.9940136695046,
+          "mean_low_cut_to_maximum": 0.2818369941236994,
+          "mean_low_parameter_fraction": 0.6345269022420519,
+          "mean_minimum_positive_to_maximum": 0.26180641255885106,
+          "mean_prefix_effective_condition": 209.19914824097106,
+          "parameter_energy": 0.010164070025706328,
+          "prefix_constraint_active": 38,
+          "prefix_dual": 0.20325182870930086
+        }
+      }
+    },
+    "bank1": {
+      "free_old_expanded8_pooled_safe": {
+        "bank_cell_exposures": 8,
+        "regions": {
+          "excluded": {
+            "action_disagreements": 14,
+            "cost_RMS": 0.006150204058273731,
+            "feasible_action_exposures": 904,
+            "full_factor": {
+              "mean_inverse_curvature": 0.022210353409302195,
+              "unsupported_design_fraction": 1.635872914012613e-30
+            },
+            "low_RMS": 0.0015469282147698936,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.3031613096069741,
+              "unsupported_design_fraction": 1.5613393393074836e-30
+            },
+            "rest_RMS": 0.005830826675887831,
+            "squared_response": {
+              "cross": 0.0012958689325893767,
+              "low": 0.0021632601590926576,
+              "rest": 0.030734679910717596,
+              "total": 0.03419380900239963
+            },
+            "state_model_exposures": 480
+          },
+          "held": {
+            "action_disagreements": 52,
+            "cost_RMS": 0.0021947833805973536,
+            "feasible_action_exposures": 7830,
+            "full_factor": {
+              "mean_inverse_curvature": 0.19762743403610225,
+              "unsupported_design_fraction": 1.983994005344484e-30
+            },
+            "low_RMS": 0.0011881182212724736,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.2536414897016538,
+              "unsupported_design_fraction": 1.5641907166333324e-30
+            },
+            "rest_RMS": 0.0014233636106269977,
+            "squared_response": {
+              "cross": 0.010801369209721627,
+              "low": 0.011053023027444991,
+              "rest": 0.01586329786988728,
+              "total": 0.037717690107053906
+            },
+            "state_model_exposures": 4800
+          }
+        },
+        "spectral": {
+          "full_constraint_active": 70,
+          "full_dual": 0.09624197122629449,
+          "low_dimension_fraction": 0.44791666666666663,
+          "low_parameter_energy": 0.008118755668633185,
+          "low_parameter_energy_fraction": 0.8407972538430898,
+          "maximum_block_leverage": 0.9982890070430303,
+          "mean_block_data_trace_fraction": 0.1,
+          "mean_block_leverage_maximum": 0.4910373995786935,
+          "mean_full_effective_condition": 5534.60061362774,
+          "mean_low_cut_to_maximum": 0.29663106583011734,
+          "mean_low_parameter_fraction": 0.68818068306938,
+          "mean_minimum_positive_to_maximum": 0.27877291100060275,
+          "mean_prefix_effective_condition": 6682.072536742431,
+          "parameter_energy": 0.009656020677427561,
+          "prefix_constraint_active": 67,
+          "prefix_dual": 0.10058715566784353
+        }
+      },
+      "shrunk_expanded8_pooled_safe": {
+        "bank_cell_exposures": 8,
+        "regions": {
+          "excluded": {
+            "action_disagreements": 12,
+            "cost_RMS": 0.0064395458938679255,
+            "feasible_action_exposures": 904,
+            "full_factor": {
+              "mean_inverse_curvature": 0.022135568551678846,
+              "unsupported_design_fraction": 1.1313405414642888e-30
+            },
+            "low_RMS": 0.002304609633010866,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.2956185218328121,
+              "unsupported_design_fraction": 1.3513142748689644e-30
+            },
+            "rest_RMS": 0.0060878407684991165,
+            "squared_response": {
+              "cross": -0.0008183726353973353,
+              "low": 0.004801347906752095,
+              "rest": 0.03350387192123032,
+              "total": 0.03748684719258506
+            },
+            "state_model_exposures": 480
+          },
+          "held": {
+            "action_disagreements": 46,
+            "cost_RMS": 0.002195644538575436,
+            "feasible_action_exposures": 7830,
+            "full_factor": {
+              "mean_inverse_curvature": 0.1652372207171507,
+              "unsupported_design_fraction": 1.1471123144302049e-30
+            },
+            "low_RMS": 0.0011688605780235555,
+            "prefix_factor": {
+              "mean_inverse_curvature": 0.21382280958878877,
+              "unsupported_design_fraction": 1.3958946939829913e-30
+            },
+            "rest_RMS": 0.0013948892018970762,
+            "squared_response": {
+              "cross": 0.011814718346226709,
+              "low": 0.0106976204482147,
+              "rest": 0.015234955384005754,
+              "total": 0.03774729417844717
+            },
+            "state_model_exposures": 4800
+          }
+        },
+        "spectral": {
+          "full_constraint_active": 70,
+          "full_dual": 0.1298402238452484,
+          "low_dimension_fraction": 0.44791666666666663,
+          "low_parameter_energy": 0.0041382416585415815,
+          "low_parameter_energy_fraction": 0.728121181730285,
+          "maximum_block_leverage": 0.9966532178800311,
+          "mean_block_data_trace_fraction": 0.09999999999999999,
+          "mean_block_leverage_maximum": 0.4109086967354898,
+          "mean_full_effective_condition": 1122.1611970941826,
+          "mean_low_cut_to_maximum": 0.29755184711561256,
+          "mean_low_parameter_fraction": 0.7029302528858767,
+          "mean_minimum_positive_to_maximum": 0.2792696342238374,
+          "mean_prefix_effective_condition": 1437.2221113138528,
+          "parameter_energy": 0.005683451824197163,
+          "prefix_constraint_active": 69,
+          "prefix_dual": 0.13460657336456103
+        }
+      }
+    }
+  },
+  "boundary": "conditional_development_geometry_not_accuracy_utility_seed_CI_or_nonlinearity_proof; frozen_calibration_saw_excluded_training_labels; leverage_and_dual_not_constrained_sampling_covariance; Stage253_248_169_closed; no_default_change",
+  "judgement": "low_curvature_enriches_parameter_changes_but_does_not_explain_all_prediction_response; bank_heterogeneity_and_high_prefix_leverage; no_new_policy_validation",
+  "mixed_all": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 140,
+      "bank_cell_exposures": 32,
+      "prefix_model_exposures": 320,
+      "regions": {
+        "excluded": {
+          "action_disagreements": 24,
+          "cost_RMS": 0.0032751443537422094,
+          "feasible_action_exposures": 3662,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017641150806490518,
+            "unsupported_design_fraction": 1.630727316152499e-30
+          },
+          "low_RMS": 0.000975667421878185,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.19052178188475818,
+            "unsupported_design_fraction": 1.5835480771591422e-30
+          },
+          "rest_RMS": 0.0030221057287266664,
+          "squared_response": {
+            "cross": 0.0023492483790932754,
+            "low": 0.0034859563741350213,
+            "rest": 0.033445496556376485,
+            "total": 0.039280701309604774
+          },
+          "state_model_exposures": 1920
+        },
+        "held": {
+          "action_disagreements": 93,
+          "cost_RMS": 0.0011922277746628594,
+          "feasible_action_exposures": 31560,
+          "full_factor": {
+            "mean_inverse_curvature": 0.12662116586696617,
+            "unsupported_design_fraction": 1.8375524501970704e-30
+          },
+          "low_RMS": 0.0006431519290999632,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.1589338717622401,
+            "unsupported_design_fraction": 1.642562522303331e-30
+          },
+          "rest_RMS": 0.0008005470030276933,
+          "squared_response": {
+            "cross": 0.011578958729074693,
+            "low": 0.01305461738724193,
+            "rest": 0.02022603090802698,
+            "total": 0.0448596070243436
+          },
+          "state_model_exposures": 19200
+        },
+        "held_other_root": {
+          "action_disagreements": 45,
+          "cost_RMS": 0.0011897529863318594,
+          "feasible_action_exposures": 15780,
+          "full_factor": {
+            "mean_inverse_curvature": 0.12662116586696626,
+            "unsupported_design_fraction": 1.8238566349324097e-30
+          },
+          "low_RMS": 0.0005883361086374375,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.14705722466644983,
+            "unsupported_design_fraction": 1.6529712863204697e-30
+          },
+          "rest_RMS": 0.000847654138129454,
+          "squared_response": {
+            "cross": 0.005536495906083548,
+            "low": 0.005462079364746422,
+            "rest": 0.011338206747872445,
+            "total": 0.022336782018702414
+          },
+          "state_model_exposures": 9600
+        },
+        "held_same_root": {
+          "action_disagreements": 48,
+          "cost_RMS": 0.001194697436537607,
+          "feasible_action_exposures": 15780,
+          "full_factor": {
+            "mean_inverse_curvature": 0.1266211658669662,
+            "unsupported_design_fraction": 1.82385663493241e-30
+          },
+          "low_RMS": 0.0006936493574446425,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.17081051885803042,
+            "unsupported_design_fraction": 1.6223253370375833e-30
+          },
+          "rest_RMS": 0.0007504888208529529,
+          "squared_response": {
+            "cross": 0.006042462822991147,
+            "low": 0.0075925380224955066,
+            "rest": 0.008887824160154534,
+            "total": 0.02252282500564118
+          },
+          "state_model_exposures": 9600
+        },
+        "retained": {
+          "action_disagreements": 61,
+          "cost_RMS": 0.0004055358589111472,
+          "feasible_action_exposures": 32958,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017641150806490508,
+            "unsupported_design_fraction": 1.636987724232775e-30
+          },
+          "low_RMS": 0.00020684043719090643,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.017444934237903935,
+            "unsupported_design_fraction": 1.623889864858111e-30
+          },
+          "rest_RMS": 0.0003473732148436937,
+          "squared_response": {
+            "cross": 3.3228783410294435e-05,
+            "low": 0.0014100410085005277,
+            "rest": 0.0039769809005814035,
+            "total": 0.005420250692492225
+          },
+          "state_model_exposures": 17280
+        },
+        "retained_other_root": {
+          "action_disagreements": 33,
+          "cost_RMS": 0.0004154679181197546,
+          "feasible_action_exposures": 18310,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01764115080649049,
+            "unsupported_design_fraction": 1.6369877242327794e-30
+          },
+          "low_RMS": 0.0002291082424822106,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.017400438149640266,
+            "unsupported_design_fraction": 1.615374690678603e-30
+          },
+          "rest_RMS": 0.00034923113963516045,
+          "squared_response": {
+            "cross": -3.367913344314456e-05,
+            "low": 0.0009611026438188924,
+            "rest": 0.0022331313405918834,
+            "total": 0.0031605548509676326
+          },
+          "state_model_exposures": 9600
+        },
+        "retained_same_root": {
+          "action_disagreements": 28,
+          "cost_RMS": 0.0003927677560694747,
+          "feasible_action_exposures": 14648,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017641150806490504,
+            "unsupported_design_fraction": 1.6368161902723567e-30
+          },
+          "low_RMS": 0.00017506696165288483,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.01750055434823354,
+            "unsupported_design_fraction": 1.629164185768979e-30
+          },
+          "rest_RMS": 0.00034503674045789005,
+          "squared_response": {
+            "cross": 6.690791685343904e-05,
+            "low": 0.00044893836468163446,
+            "rest": 0.0017438495599895172,
+            "total": 0.0022596958415245926
+          },
+          "state_model_exposures": 7680
+        }
+      },
+      "spectral": {
+        "full_constraint_active": 130,
+        "full_dual": 0.11888952990001252,
+        "low_dimension_fraction": 0.4226190476190476,
+        "low_parameter_energy": 0.007233564115536769,
+        "low_parameter_energy_fraction": 0.8454488909401431,
+        "maximum_block_leverage": 0.9982890070430303,
+        "mean_block_data_trace_fraction": 0.1,
+        "mean_block_leverage_maximum": 0.4974325623889442,
+        "mean_full_effective_condition": 3893.205467772102,
+        "mean_low_cut_to_maximum": 0.2523278546385363,
+        "mean_low_parameter_fraction": 0.6018828011348104,
+        "mean_minimum_positive_to_maximum": 0.23388478338239968,
+        "mean_prefix_effective_condition": 4739.747947069273,
+        "parameter_energy": 0.008555885746674772,
+        "prefix_constraint_active": 127,
+        "prefix_dual": 0.12147069132769003
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 150,
+      "bank_cell_exposures": 32,
+      "prefix_model_exposures": 320,
+      "regions": {
+        "excluded": {
+          "action_disagreements": 23,
+          "cost_RMS": 0.003446636988291703,
+          "feasible_action_exposures": 3662,
+          "full_factor": {
+            "mean_inverse_curvature": 0.018912009844371126,
+            "unsupported_design_fraction": 1.3963798343398303e-30
+          },
+          "low_RMS": 0.0014594333179059609,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.2106650681505979,
+            "unsupported_design_fraction": 1.3608393818720647e-30
+          },
+          "rest_RMS": 0.0031217040082818235,
+          "squared_response": {
+            "cross": 1.583816583340179e-05,
+            "low": 0.007799860821674073,
+            "rest": 0.035686321521912104,
+            "total": 0.04350202050941955
+          },
+          "state_model_exposures": 1920
+        },
+        "held": {
+          "action_disagreements": 86,
+          "cost_RMS": 0.0011950785656867872,
+          "feasible_action_exposures": 31560,
+          "full_factor": {
+            "mean_inverse_curvature": 0.10068438135464046,
+            "unsupported_design_fraction": 1.5115253967553786e-30
+          },
+          "low_RMS": 0.0006557893480086283,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.12821195285053485,
+            "unsupported_design_fraction": 1.5042530893453368e-30
+          },
+          "rest_RMS": 0.0007689297582583541,
+          "squared_response": {
+            "cross": 0.012841768294279438,
+            "low": 0.013572683152427522,
+            "rest": 0.018659943832148522,
+            "total": 0.04507439527885548
+          },
+          "state_model_exposures": 19200
+        },
+        "held_other_root": {
+          "action_disagreements": 42,
+          "cost_RMS": 0.0011902090429973453,
+          "feasible_action_exposures": 15780,
+          "full_factor": {
+            "mean_inverse_curvature": 0.10068438135464047,
+            "unsupported_design_fraction": 1.511208833063373e-30
+          },
+          "low_RMS": 0.0006040382954220883,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.11680231967927876,
+            "unsupported_design_fraction": 1.484541936252453e-30
+          },
+          "rest_RMS": 0.0008051168313821459,
+          "squared_response": {
+            "cross": 0.006367580182207808,
+            "low": 0.0057575264996687385,
+            "rest": 0.010228802910118767,
+            "total": 0.022353909591995316
+          },
+          "state_model_exposures": 9600
+        },
+        "held_same_root": {
+          "action_disagreements": 44,
+          "cost_RMS": 0.0011999283271493012,
+          "feasible_action_exposures": 15780,
+          "full_factor": {
+            "mean_inverse_curvature": 0.1006843813546405,
+            "unsupported_design_fraction": 1.5112088330633734e-30
+          },
+          "low_RMS": 0.0007037450359233388,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.139621586021791,
+            "unsupported_design_fraction": 1.5223258389281433e-30
+          },
+          "rest_RMS": 0.0007309533734074118,
+          "squared_response": {
+            "cross": 0.006474188112071627,
+            "low": 0.007815156652758781,
+            "rest": 0.008431140922029753,
+            "total": 0.02272048568686016
+          },
+          "state_model_exposures": 9600
+        },
+        "retained": {
+          "action_disagreements": 83,
+          "cost_RMS": 0.0004203060644078026,
+          "feasible_action_exposures": 32958,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01891200984437112,
+            "unsupported_design_fraction": 1.4006561672911274e-30
+          },
+          "low_RMS": 0.00023983455530413714,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.018700060900664794,
+            "unsupported_design_fraction": 1.590132230652372e-30
+          },
+          "rest_RMS": 0.0003409712830998987,
+          "squared_response": {
+            "cross": 9.475945608692549e-05,
+            "low": 0.0018957643935072432,
+            "rest": 0.0038317437451923625,
+            "total": 0.005822267594786531
+          },
+          "state_model_exposures": 17280
+        },
+        "retained_other_root": {
+          "action_disagreements": 52,
+          "cost_RMS": 0.00043911291464827484,
+          "feasible_action_exposures": 18310,
+          "full_factor": {
+            "mean_inverse_curvature": 0.018912009844371122,
+            "unsupported_design_fraction": 1.4006561672911293e-30
+          },
+          "low_RMS": 0.00026758050287554905,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.018652049935387813,
+            "unsupported_design_fraction": 1.588293550529952e-30
+          },
+          "rest_RMS": 0.0003435508867621316,
+          "squared_response": {
+            "cross": 5.847508143502518e-05,
+            "low": 0.0013109836502553016,
+            "rest": 0.0021610782479673098,
+            "total": 0.0035305369796576357
+          },
+          "state_model_exposures": 9600
+        },
+        "retained_same_root": {
+          "action_disagreements": 31,
+          "cost_RMS": 0.00039554201134243256,
+          "feasible_action_exposures": 14648,
+          "full_factor": {
+            "mean_inverse_curvature": 0.018912009844371126,
+            "unsupported_design_fraction": 1.400140821133323e-30
+          },
+          "low_RMS": 0.00019980546643281596,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.018760074607261028,
+            "unsupported_design_fraction": 1.591353579360463e-30
+          },
+          "rest_RMS": 0.00033771907116488355,
+          "squared_response": {
+            "cross": 3.6284374651900344e-05,
+            "low": 0.000584780743251942,
+            "rest": 0.0016706654972250534,
+            "total": 0.002291730615128896
+          },
+          "state_model_exposures": 7680
+        }
+      },
+      "spectral": {
+        "full_constraint_active": 130,
+        "full_dual": 0.13792727232823604,
+        "low_dimension_fraction": 0.4111111111111111,
+        "low_parameter_energy": 0.005019476418226644,
+        "low_parameter_energy_fraction": 0.7963523435831376,
+        "maximum_block_leverage": 0.9966532178800311,
+        "mean_block_data_trace_fraction": 0.1,
+        "mean_block_leverage_maximum": 0.4201094347793125,
+        "mean_full_effective_condition": 738.579690577521,
+        "mean_low_cut_to_maximum": 0.23823041831308137,
+        "mean_low_parameter_fraction": 0.639263839194875,
+        "mean_minimum_positive_to_maximum": 0.21892500039477505,
+        "mean_prefix_effective_condition": 927.2935473868939,
+        "parameter_energy": 0.0063030848828067995,
+        "prefix_constraint_active": 137,
+        "prefix_dual": 0.14056260601104797
+      }
+    }
+  },
+  "mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "prefix_model_exposures": 120,
+      "regions": {
+        "excluded": {
+          "action_disagreements": 19,
+          "cost_RMS": 0.005211482762755741,
+          "feasible_action_exposures": 1335,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017517560902127825,
+            "unsupported_design_fraction": 1.5995129923324108e-30
+          },
+          "low_RMS": 0.0016024771484488443,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.2174417539246832,
+            "unsupported_design_fraction": 1.5570808073379147e-30
+          },
+          "rest_RMS": 0.004829900057055184,
+          "squared_response": {
+            "cross": 0.0016870194937671703,
+            "low": 0.0034281905700864865,
+            "rest": 0.03114279263912413,
+            "total": 0.036258002702977785
+          },
+          "state_model_exposures": 720
+        },
+        "held": {
+          "action_disagreements": 81,
+          "cost_RMS": 0.001828629488022916,
+          "feasible_action_exposures": 12060,
+          "full_factor": {
+            "mean_inverse_curvature": 0.13203081278201734,
+            "unsupported_design_fraction": 1.876723237495783e-30
+          },
+          "low_RMS": 0.0010162210192382695,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.1686670062703237,
+            "unsupported_design_fraction": 1.5585213238329414e-30
+          },
+          "rest_RMS": 0.0011744178808474406,
+          "squared_response": {
+            "cross": 0.011238994825193357,
+            "low": 0.012454424228896505,
+            "rest": 0.016633843747781568,
+            "total": 0.04032726280187143
+          },
+          "state_model_exposures": 7200
+        },
+        "held_other_root": {
+          "action_disagreements": 39,
+          "cost_RMS": 0.0018101210007006826,
+          "feasible_action_exposures": 6030,
+          "full_factor": {
+            "mean_inverse_curvature": 0.13203081278201734,
+            "unsupported_design_fraction": 1.8573858979598764e-30
+          },
+          "low_RMS": 0.0009169565700865578,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.1547859363285824,
+            "unsupported_design_fraction": 1.5617672962732652e-30
+          },
+          "rest_RMS": 0.0012261188118018016,
+          "squared_response": {
+            "cross": 0.005622138910943798,
+            "low": 0.0050700803890921745,
+            "rest": 0.009065305064145199,
+            "total": 0.01975752436418117
+          },
+          "state_model_exposures": 3600
+        },
+        "held_same_root": {
+          "action_disagreements": 42,
+          "cost_RMS": 0.0018469525093397126,
+          "feasible_action_exposures": 6030,
+          "full_factor": {
+            "mean_inverse_curvature": 0.13203081278201728,
+            "unsupported_design_fraction": 1.857385897959877e-30
+          },
+          "low_RMS": 0.001106616902301076,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.182548076212065,
+            "unsupported_design_fraction": 1.5413984470160972e-30
+          },
+          "rest_RMS": 0.001120333600787785,
+          "squared_response": {
+            "cross": 0.00561685591424956,
+            "low": 0.007384343839804328,
+            "rest": 0.007568538683636368,
+            "total": 0.020569738437690253
+          },
+          "state_model_exposures": 3600
+        },
+        "retained": {
+          "action_disagreements": 40,
+          "cost_RMS": 0.0005733928275055702,
+          "feasible_action_exposures": 12015,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017517560902127822,
+            "unsupported_design_fraction": 1.6029321657543197e-30
+          },
+          "low_RMS": 0.00034046582963726647,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.01732439100967005,
+            "unsupported_design_fraction": 1.6011393690428055e-30
+          },
+          "rest_RMS": 0.0004592670667681947,
+          "squared_response": {
+            "cross": 2.32624201195427e-05,
+            "low": 0.0013927425285243649,
+            "rest": 0.002534278756993605,
+            "total": 0.0039502837056375134
+          },
+          "state_model_exposures": 6480
+        },
+        "retained_other_root": {
+          "action_disagreements": 21,
+          "cost_RMS": 0.0005851832248298361,
+          "feasible_action_exposures": 6675,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01751756090212782,
+            "unsupported_design_fraction": 1.6029321657543218e-30
+          },
+          "low_RMS": 0.00037755782704261315,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.017260231188055156,
+            "unsupported_design_fraction": 1.612203171085147e-30
+          },
+          "rest_RMS": 0.0004513773428103627,
+          "squared_response": {
+            "cross": -2.571217837409157e-05,
+            "low": 0.0009515206676806079,
+            "rest": 0.0013599745498969792,
+            "total": 0.0022857830392034955
+          },
+          "state_model_exposures": 3600
+        },
+        "retained_same_root": {
+          "action_disagreements": 19,
+          "cost_RMS": 0.0005583047954751642,
+          "feasible_action_exposures": 5340,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01751756090212782,
+            "unsupported_design_fraction": 1.6028987333984568e-30
+          },
+          "low_RMS": 0.00028744706754010825,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.017404590786688684,
+            "unsupported_design_fraction": 1.581014530175345e-30
+          },
+          "rest_RMS": 0.00046894259231488927,
+          "squared_response": {
+            "cross": 4.8974598493634306e-05,
+            "low": 0.0004412218608437563,
+            "rest": 0.0011743042070966252,
+            "total": 0.0016645006664340169
+          },
+          "state_model_exposures": 2880
+        }
+      },
+      "spectral": {
+        "full_constraint_active": 110,
+        "full_dual": 0.12263086585049111,
+        "low_dimension_fraction": 0.4513888888888889,
+        "low_parameter_energy": 0.008320904626601289,
+        "low_parameter_energy_fraction": 0.8650502271450575,
+        "maximum_block_leverage": 0.9982890070430303,
+        "mean_block_data_trace_fraction": 0.10000000000000002,
+        "mean_block_leverage_maximum": 0.46428503020194223,
+        "mean_full_effective_condition": 4242.495345478062,
+        "mean_low_cut_to_maximum": 0.2913863213666318,
+        "mean_low_parameter_fraction": 0.6577549362988695,
+        "mean_minimum_positive_to_maximum": 0.2727556094012559,
+        "mean_prefix_effective_condition": 5154.160296364722,
+        "parameter_energy": 0.00961898438436683,
+        "prefix_constraint_active": 107,
+        "prefix_dual": 0.12539379089077066
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "prefix_model_exposures": 120,
+      "regions": {
+        "excluded": {
+          "action_disagreements": 16,
+          "cost_RMS": 0.005505247736066156,
+          "feasible_action_exposures": 1335,
+          "full_factor": {
+            "mean_inverse_curvature": 0.017487135247195505,
+            "unsupported_design_fraction": 1.3493486253260296e-30
+          },
+          "low_RMS": 0.002307471094005565,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.22882782805157553,
+            "unsupported_design_fraction": 1.3117627447279567e-30
+          },
+          "rest_RMS": 0.005031384336678487,
+          "squared_response": {
+            "cross": -0.0004425505743736998,
+            "low": 0.007108104504311102,
+            "rest": 0.03379529583840378,
+            "total": 0.040460849768341155
+          },
+          "state_model_exposures": 720
+        },
+        "held": {
+          "action_disagreements": 71,
+          "cost_RMS": 0.0018377001426680695,
+          "feasible_action_exposures": 12060,
+          "full_factor": {
+            "mean_inverse_curvature": 0.11126251360473413,
+            "unsupported_design_fraction": 1.3674350993023362e-30
+          },
+          "low_RMS": 0.0010110126242068407,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.14318069260233987,
+            "unsupported_design_fraction": 1.438055622962267e-30
+          },
+          "rest_RMS": 0.0011543340448880687,
+          "squared_response": {
+            "cross": 0.012331448902480027,
+            "low": 0.012327087107245564,
+            "rest": 0.016069794271483053,
+            "total": 0.040728330281208654
+          },
+          "state_model_exposures": 7200
+        },
+        "held_other_root": {
+          "action_disagreements": 35,
+          "cost_RMS": 0.0017949916093249554,
+          "feasible_action_exposures": 6030,
+          "full_factor": {
+            "mean_inverse_curvature": 0.11126251360473424,
+            "unsupported_design_fraction": 1.3669555219745964e-30
+          },
+          "low_RMS": 0.0009001354278569024,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.12755198599743295,
+            "unsupported_design_fraction": 1.3962960961728702e-30
+          },
+          "rest_RMS": 0.0011861630443429016,
+          "squared_response": {
+            "cross": 0.006058752977433236,
+            "low": 0.004885770044553267,
+            "rest": 0.008484106089621865,
+            "total": 0.01942862911160837
+          },
+          "state_model_exposures": 3600
+        },
+        "held_same_root": {
+          "action_disagreements": 36,
+          "cost_RMS": 0.0018794384137761717,
+          "feasible_action_exposures": 6030,
+          "full_factor": {
+            "mean_inverse_curvature": 0.11126251360473423,
+            "unsupported_design_fraction": 1.3669555219745971e-30
+          },
+          "low_RMS": 0.001110877699896832,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.1588093992072468,
+            "unsupported_design_fraction": 1.4773330546884084e-30
+          },
+          "rest_RMS": 0.0011216021605767702,
+          "squared_response": {
+            "cross": 0.006272695925046792,
+            "low": 0.007441317062692299,
+            "rest": 0.0075856881818611895,
+            "total": 0.02129970116960028
+          },
+          "state_model_exposures": 3600
+        },
+        "retained": {
+          "action_disagreements": 64,
+          "cost_RMS": 0.0006290750337537819,
+          "feasible_action_exposures": 12015,
+          "full_factor": {
+            "mean_inverse_curvature": 0.0174871352471955,
+            "unsupported_design_fraction": 1.3554209769061458e-30
+          },
+          "low_RMS": 0.0003783191402754186,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.01721260258993804,
+            "unsupported_design_fraction": 1.6193672432889292e-30
+          },
+          "rest_RMS": 0.0004968880573004731,
+          "squared_response": {
+            "cross": 6.863310073960498e-05,
+            "low": 0.0017196513433632634,
+            "rest": 0.0029664763639763764,
+            "total": 0.004754760808079247
+          },
+          "state_model_exposures": 6480
+        },
+        "retained_other_root": {
+          "action_disagreements": 40,
+          "cost_RMS": 0.000663190500271822,
+          "feasible_action_exposures": 6675,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01748713524719549,
+            "unsupported_design_fraction": 1.3554209769061469e-30
+          },
+          "low_RMS": 0.0004194554923131558,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.01716019555465305,
+            "unsupported_design_fraction": 1.603217572720504e-30
+          },
+          "rest_RMS": 0.0005068201011308442,
+          "squared_response": {
+            "cross": 4.680586568149874e-05,
+            "low": 0.00117441892446141,
+            "rest": 0.0017145846545261138,
+            "total": 0.002935809444669021
+          },
+          "state_model_exposures": 3600
+        },
+        "retained_same_root": {
+          "action_disagreements": 24,
+          "cost_RMS": 0.0005836331006242164,
+          "feasible_action_exposures": 5340,
+          "full_factor": {
+            "mean_inverse_curvature": 0.01748713524719551,
+            "unsupported_design_fraction": 1.3553059682892243e-30
+          },
+          "low_RMS": 0.0003195363034657516,
+          "prefix_factor": {
+            "mean_inverse_curvature": 0.017278111384044295,
+            "unsupported_design_fraction": 1.6386889531367365e-30
+          },
+          "rest_RMS": 0.00048418658563593775,
+          "squared_response": {
+            "cross": 2.1827235058106293e-05,
+            "low": 0.0005452324189018538,
+            "rest": 0.0012518917094502641,
+            "total": 0.001818951363410224
+          },
+          "state_model_exposures": 2880
+        }
+      },
+      "spectral": {
+        "full_constraint_active": 100,
+        "full_dual": 0.15419672587457037,
+        "low_dimension_fraction": 0.4513888888888889,
+        "low_parameter_energy": 0.005854902128033753,
+        "low_parameter_energy_fraction": 0.8157878343063336,
+        "maximum_block_leverage": 0.9966532178800311,
+        "mean_block_data_trace_fraction": 0.1,
+        "mean_block_leverage_maximum": 0.3868505975900934,
+        "mean_full_effective_condition": 814.4388026192901,
+        "mean_low_cut_to_maximum": 0.29231356278497483,
+        "mean_low_parameter_fraction": 0.6801291360046019,
+        "mean_minimum_positive_to_maximum": 0.27344856033550863,
+        "mean_prefix_effective_condition": 1027.8811236228921,
+        "parameter_energy": 0.007176991224700219,
+        "prefix_constraint_active": 107,
+        "prefix_dual": 0.15748832514614097
+      }
+    }
+  },
+  "next": "cached_quadratic_KKT_response_split_into_data_population_forcing_RMS_dual_change_and_any_unsupported_remainder; no_new_fits_raw_reference_training_or_simulation"
+}
