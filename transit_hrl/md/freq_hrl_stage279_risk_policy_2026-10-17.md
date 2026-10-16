@@ -11,5 +11,5 @@
 - Budget: one unpinned scheduler CPU task, 3072 MiB, any node001-node006; zero new fits, simulations or actor updates. Cached model/state decision exposures: 84,480.
 - Large actions and outcome ledgers stay remote; pull scalar group report only.
 - Verification: five focused tests cover exact raw decisions, original-first ties, feasibility, physical-cost and half identities, zero-fit cell/group replay, action freezing before any outcome access, and the scheduler parent gate; both cold CLI startups passed.
-- Status: source ready; scheduler submission pending.
+- Status: submitted as `t166113`; source `144487fd6d` pushed. Completion and results pending.
 - Limitations: cached single-intervention plug-in evaluation on reused development futures; not full-episode HRL, new-prefix confirmation or training-seed CI. No selector/default change. Stage253/248/169 remain closed.
