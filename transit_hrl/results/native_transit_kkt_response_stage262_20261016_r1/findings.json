@@ -1,0 +1,296 @@
+{
+  "conclusion": "Data-population forcing dominates excluded/held remaining-direction response in both banks; multiplier term cancels rather than amplifies in pooled mixed regions. This endpoint split does not identify a cap-change counterfactual.",
+  "next": "Use matched full coefficients, calibration and same-prefix design to compare cached independent-future target forcing before fitting or changing the RMS cap.",
+  "primary_mixed_removed": {
+    "free_old_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "dual_counts": {
+        "dual_decreased": 34,
+        "dual_increased": 76,
+        "full_constraint_active": 110,
+        "prefix_constraint_active": 107
+      },
+      "regions": {
+        "excluded": {
+          "RMS": {
+            "data": 0.005369531645232561,
+            "dual": 0.0007377677498429033,
+            "null": 2.5416913846161053e-18,
+            "residual": 1.7286000693745805e-14,
+            "total": 0.005211482762755741
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.0016946059732292794,
+                "dual": 0.0006042684269868114,
+                "null": 1.0308745998773497e-18,
+                "residual": 1.8367044915982676e-14,
+                "total": 0.001602477148448844
+              },
+              "cross_data_dual": -0.0008929771279587644
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.004884522008582238,
+                "dual": 0.00033442423993856494,
+                "null": 2.203545971006607e-18,
+                "residual": 4.268784301412436e-15,
+                "total": 0.004829900057055184
+              },
+              "cross_data_dual": -0.0008576844517313541
+            }
+          },
+          "cross_data_dual": -0.002959186038503196,
+          "cross_over_actual_squared": -0.08161470069779009
+        },
+        "held": {
+          "RMS": {
+            "data": 0.0019350977730966694,
+            "dual": 0.0005791281128698426,
+            "null": 2.7596681541642867e-18,
+            "residual": 5.025313945825148e-14,
+            "total": 0.0018286294880229157
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.0011324640122687168,
+                "dual": 0.0004947776274807812,
+                "null": 9.461873458878134e-19,
+                "residual": 4.9478509591068755e-14,
+                "total": 0.0010162210192382695
+              },
+              "cross_data_dual": -0.005964568226083919
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.0012110111626059807,
+                "dual": 0.00022989455174360482,
+                "null": 2.7271094843421667e-18,
+                "residual": 1.6116870723259934e-15,
+                "total": 0.0011744178808474406
+              },
+              "cross_data_dual": -0.0016901147151874322
+            }
+          },
+          "cross_data_dual": -0.008877449913744435,
+          "cross_over_actual_squared": -0.2201351963151952
+        },
+        "held_other_root": {
+          "RMS": {
+            "data": 0.001996308138566255,
+            "dual": 0.0006903346122063649,
+            "null": 2.260709550856381e-18,
+            "residual": 6.756918523447908e-14,
+            "total": 0.0018101210007006826
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.001129912191716812,
+                "dual": 0.0005927147693808957,
+                "null": 1.1333737704664128e-18,
+                "residual": 6.643017233399848e-14,
+                "total": 0.0009169565700865576
+              },
+              "cross_data_dual": -0.0047468341343635525
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.0012760351152914897,
+                "dual": 0.00024936946797984833,
+                "null": 2.572559761568491e-18,
+                "residual": 1.7894137725668896e-15,
+                "total": 0.0012261188118018018
+              },
+              "cross_data_dual": -0.0011281129403554054
+            }
+          },
+          "cross_data_dual": -0.0071471782422713025,
+          "cross_over_actual_squared": -0.36174462501124743
+        },
+        "retained": {
+          "RMS": {
+            "data": 0.0006487254682957956,
+            "dual": 0.0002643595254997847,
+            "null": 2.3135089100414824e-18,
+            "residual": 6.184325046818953e-15,
+            "total": 0.0005733928275055702
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.0004241507410401069,
+                "dual": 0.00023073358118532285,
+                "null": 2.3028224360408525e-19,
+                "residual": 6.136329484423471e-15,
+                "total": 0.00034046582963726647
+              },
+              "cross_data_dual": -0.001408456638363963
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.0004869501937007321,
+                "dual": 0.00012339970056867274,
+                "null": 2.3046831898621367e-18,
+                "residual": 8.50416874072956e-16,
+                "total": 0.0004592670667681948
+              },
+              "cross_data_dual": -0.0004976821896116263
+            }
+          },
+          "cross_data_dual": -0.0019458455579996726,
+          "cross_over_actual_squared": -0.4925837491678699
+        }
+      }
+    },
+    "shrunk_expanded8_pooled_safe": {
+      "active_prefix_models": 120,
+      "bank_cell_exposures": 12,
+      "dual_counts": {
+        "dual_decreased": 29,
+        "dual_increased": 79,
+        "full_constraint_active": 100,
+        "prefix_constraint_active": 107
+      },
+      "regions": {
+        "excluded": {
+          "RMS": {
+            "data": 0.005694988890872837,
+            "dual": 0.0010016686134544193,
+            "null": 4.046387063503275e-18,
+            "residual": 1.0608094798435796e-15,
+            "total": 0.005505247736066156
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.002441608090499441,
+                "dual": 0.0005856554796230863,
+                "null": 1.0195428505978851e-18,
+                "residual": 9.405047218085584e-16,
+                "total": 0.002307471094005565
+              },
+              "cross_data_dual": -0.001308326110909812
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.005113409696650413,
+                "dual": 0.0006718992114883277,
+                "null": 4.0524900183994835e-18,
+                "residual": 5.160362256259829e-16,
+                "total": 0.005031384336678487
+              },
+              "cross_data_dual": -0.0017135778753131475
+            }
+          },
+          "cross_data_dual": -0.004176528600243643,
+          "cross_over_actual_squared": -0.10322394670790117
+        },
+        "held": {
+          "RMS": {
+            "data": 0.0019573935894016464,
+            "dual": 0.0007075658093905545,
+            "null": 1.912977517967558e-18,
+            "residual": 5.3042823555901396e-15,
+            "total": 0.0018377001426680697
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.001091759758882132,
+                "dual": 0.00047877031965410776,
+                "null": 6.393156494350907e-19,
+                "residual": 5.326367677807876e-15,
+                "total": 0.0010110126242068407
+              },
+              "cross_data_dual": -0.0048121071973222665
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.0012405328281938205,
+                "dual": 0.0004227431594830263,
+                "null": 1.7028884407911723e-18,
+                "residual": 2.758874415015051e-16,
+                "total": 0.0011543340448880687
+              },
+              "cross_data_dual": -0.0046448654577136775
+            }
+          },
+          "cross_data_dual": -0.01151606052250065,
+          "cross_over_actual_squared": -0.2827530724433837
+        },
+        "held_other_root": {
+          "RMS": {
+            "data": 0.0019989609998227655,
+            "dual": 0.0008673325413920933,
+            "null": 1.7979491186703345e-18,
+            "residual": 2.213424995053036e-15,
+            "total": 0.0017949916093249554
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.0010457689563584478,
+                "dual": 0.000576350549247297,
+                "null": 5.447393684858192e-19,
+                "residual": 2.2595464882021636e-15,
+                "total": 0.0009001354278569024
+              },
+              "cross_data_dual": -0.0037118803296226854
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.0013000366672953627,
+                "dual": 0.0004731598056386704,
+                "null": 1.6603859887326846e-18,
+                "residual": 2.2726242221044636e-16,
+                "total": 0.0011861630443429016
+              },
+              "cross_data_dual": -0.003057166404424182
+            }
+          },
+          "cross_data_dual": -0.009202479109898,
+          "cross_over_actual_squared": -0.4736556067355071
+        },
+        "retained": {
+          "RMS": {
+            "data": 0.0006988258406963384,
+            "dual": 0.0002891876836512684,
+            "null": 1.5172035211715573e-18,
+            "residual": 9.242874593274087e-16,
+            "total": 0.000629075033753782
+          },
+          "bands": {
+            "low": {
+              "RMS": {
+                "data": 0.0004546624523055631,
+                "dual": 0.00023465551839143298,
+                "null": 2.240886975463272e-19,
+                "residual": 8.406186671622789e-16,
+                "total": 0.0003783191402754187
+              },
+              "cross_data_dual": -0.0014256492681812393
+            },
+            "rest": {
+              "RMS": {
+                "data": 0.000527964588089674,
+                "dual": 0.0001689991340177439,
+                "null": 1.4908845189095097e-18,
+                "residual": 2.9482663327140333e-16,
+                "total": 0.0004968880573004731
+              },
+              "cross_data_dual": -0.0007258210086326309
+            }
+          },
+          "cross_data_dual": -0.0021176638620072396,
+          "cross_over_actual_squared": -0.44537757996341765
+        }
+      }
+    }
+  },
+  "protocol": "native_transit_kkt_response_stage262_v1",
+  "subgroup_boundary": "Root397/root401 shrunk excluded cross terms are positive; removed bank cell sets differ. No independent-seed performance or accuracy claim."
+}
