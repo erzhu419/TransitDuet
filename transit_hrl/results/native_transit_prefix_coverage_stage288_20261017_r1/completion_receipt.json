@@ -1,0 +1,41 @@
+{
+  "protocol": "native_transit_prefix_coverage_stage288_v1",
+  "run_name": "native_transit_prefix_coverage_stage288_20261017_r1",
+  "scheduler": {
+    "collection_first": "t169842",
+    "collection_last": "t172961",
+    "collection_status_counts": {"done": 3120},
+    "collection_exit_code_counts": {"0": 3120},
+    "expected_unique_signatures": 3120,
+    "actual_unique_signatures": 3120,
+    "missing_signatures": 0,
+    "unexpected_signatures": 0,
+    "node_counts": {"node002": 781, "node004": 787, "node005": 776, "node006": 776},
+    "fit": {"id": "t173070", "node": "node002", "status": "done", "exit_code": 0},
+    "report": {"id": "t173071", "node": "node006", "status": "done", "exit_code": 0}
+  },
+  "execution": {
+    "main_source_episodes": 100,
+    "main_continuation_episodes": 87360,
+    "qualified_main_chunks": 3120,
+    "active_residual_fits": 96,
+    "max_peak_rss_MiB": 701.40234375,
+    "raw_reference_fits": 0,
+    "actor_updates": 0
+  },
+  "models_and_choices_frozen_before_held_labels": true,
+  "fleet_error_coverage_supported": false,
+  "joint_control_advancement_passed": false,
+  "controller_promoted": false,
+  "coverage_sampling_branch_stopped": true,
+  "new_refits_retained_as_conditional_cost_baselines": true,
+  "report_only_change": "Descriptive training control outcomes from frozen choices; primary fits, actions, error and control tests unchanged.",
+  "changed_report_roundtrip_test_passed": true,
+  "local_pull": {
+    "this_turn_scalar_artifact_bytes": 138071,
+    "cumulative_scalar_artifact_bytes": 143682,
+    "files": {"fit/result.json": 2774, "report/result.json": 13759, "report/prefixes.json": 121538},
+    "models_snapshots_or_rollouts_pulled": false
+  },
+  "further_fits_or_simulations_dispatched": false
+}

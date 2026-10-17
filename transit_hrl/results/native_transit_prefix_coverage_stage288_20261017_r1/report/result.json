@@ -1,0 +1,440 @@
+{
+  "actor_updates": 0,
+  "contract": {
+    "arms": [
+      "raw",
+      "stage247",
+      "dense",
+      "wide"
+    ],
+    "balance": "botharms_same_root_regime_probe_counts_and_same360states_once_across6rotations",
+    "boundary": "fixed_representation_single_intervention_coverage_test_not_end_to_end_HRL_or_training_seed_CI",
+    "budget": {
+      "actor_updates": 0,
+      "main_chunks": 3120,
+      "main_continuation_episodes": 87360,
+      "main_prefixes": 100,
+      "main_states": 600,
+      "new_raw_reference_fits": 0,
+      "pilot_episodes": 150,
+      "residual_fits": 96
+    },
+    "calibration": "precision_and_shrinkage_reestimated_from_each_assigned_training_set_only_coverage_effect_includes_group_calibration",
+    "control_advancement": "wide_minus_dense_raw_and_unchanged247_cost_and_wait_CI_upper_below0_no_model_selection",
+    "coverage_hypothesis": "wide_minus_dense_held_fleet_margin_MSE_CI_upper_below0",
+    "dense": "per_rotation10_prefixes_replica_equal_rotation_each6probes_60states",
+    "error": "paired_feasible_margin_MSE_cost_fleet_service_train_fit16_train_independent8_held16_MC_variance_reported_separately",
+    "fit": "existing_state_GLS_head_sum_only_assigned16futures_precision_shrinkage_recipe_unchanged",
+    "fixed_profiles": 16,
+    "frozen": "old_training_TSVD_whitening_scale_selected_rank_alpha_A_RMS_ball_cached_head_difference_raw_gate_anchor_and_lower",
+    "future_seed": "1958000000+role_index*1000000+root_index*100000+regime_index*10000+replica*1000+probe_index*100+draw",
+    "geometry_source": "native_transit_balanced_critic_stage247_development_20261015_r1",
+    "held": "40fresh_prefixes_4_per_root_regime_all6probes_16futures_shared_by_all_models",
+    "inference": "average_fixed_profiles_rotations_and6probes_before_40prefix_stratified_bootstrap5000_seed288_CI95",
+    "pilot": "10separate_prefixes_oneprobe_covering_all6probe_indices_two_futures_software_only",
+    "raw_models_source": "native_transit_frozen_prefix_stage287_20261017_r1/freeze_raw/models.json_only_no_confirmation_rows_or_labels",
+    "rotations": 6,
+    "scene_seed": "1858000000+role_index*1000000+root_index*100000+regime_index*1000+replica",
+    "training": "60fresh_prefixes_6_per_root_regime_all6probes_16fit_plus8independent_error_futures",
+    "validation": "save_all_models_and_unlabeled_train_held_predictions_before_report_opens_held_labels",
+    "wide": "per_rotation60_prefixes_oneprobe_PROBES[(replica+rotation)%6]_60states",
+    "zero_profiles": "retain_original_zero_selections_no_fits_no_new_selection"
+  },
+  "controller_promoted": false,
+  "controls": {
+    "dense_vs_raw": {
+      "conditional_MC_se": {
+        "cost": 4.8878768629694426e-05,
+        "fleet": 4.8211295835306505e-05,
+        "service": 9.301660461255317e-06,
+        "wait_min": 8.780936174857714e-05
+      },
+      "mean": {
+        "cost": -0.00019518063693576375,
+        "fleet": -0.00021520543981481477,
+        "service": 2.0024802879051013e-05,
+        "wait_min": 0.00025973578559027765
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00032393753099229603,
+          -8.111594590928803e-05
+        ],
+        "fleet": [
+          -0.0003689236111111111,
+          -8.566397207754648e-05
+        ],
+        "service": [
+          -1.5116558928312987e-05,
+          6.329619726110376e-05
+        ],
+        "wait_min": [
+          -9.212592230902762e-05,
+          0.0007029039849175355
+        ]
+      }
+    },
+    "stage247_vs_raw": {
+      "conditional_MC_se": {
+        "cost": 4.430169824243547e-05,
+        "fleet": 4.439457020010572e-05,
+        "service": 6.060257842210902e-06,
+        "wait_min": 5.444954035172865e-05
+      },
+      "mean": {
+        "cost": -0.00012663468424479175,
+        "fleet": -0.00011121961805555555,
+        "service": -1.5415066189236184e-05,
+        "wait_min": -0.00014117838541666627
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00022056706258138017,
+          -4.11367293294272e-05
+        ],
+        "fleet": [
+          -0.00019938151041666666,
+          -2.712673611111111e-05
+        ],
+        "service": [
+          -4.640421440972213e-05,
+          1.0954967854817655e-05
+        ],
+        "wait_min": [
+          -0.00045539143880208395,
+          0.00012771891276041792
+        ]
+      }
+    },
+    "wide_vs_dense": {
+      "conditional_MC_se": {
+        "cost": 2.0708364242829677e-05,
+        "fleet": 2.071345339437804e-05,
+        "service": 3.1696546156893706e-06,
+        "wait_min": 2.7984849748705162e-05
+      },
+      "mean": {
+        "cost": -2.310536838107642e-05,
+        "fleet": -2.1249276620370415e-05,
+        "service": -1.8560917607059559e-06,
+        "wait_min": -3.768717447916673e-05
+      },
+      "prefix_CI95": {
+        "cost": [
+          -7.456235154893656e-05,
+          2.6062033894856606e-05
+        ],
+        "fleet": [
+          -7.324218749999993e-05,
+          2.6448567708333294e-05
+        ],
+        "service": [
+          -1.0700927191840094e-05,
+          6.35416103786897e-06
+        ],
+        "wait_min": [
+          -0.00012773457845052086,
+          4.8587307400173005e-05
+        ]
+      }
+    },
+    "wide_vs_raw": {
+      "conditional_MC_se": {
+        "cost": 4.76758846811477e-05,
+        "fleet": 4.708194503849985e-05,
+        "service": 9.282589824623791e-06,
+        "wait_min": 8.85805691738505e-05
+      },
+      "mean": {
+        "cost": -0.00021828600531684027,
+        "fleet": -0.00023645471643518522,
+        "service": 1.8168711118345053e-05,
+        "wait_min": 0.00022204861111111085
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00034287925055609826,
+          -0.00010350705668131517
+        ],
+        "fleet": [
+          -0.00038497359664351854,
+          -0.00010963722511574081
+        ],
+        "service": [
+          -1.6741835982711144e-05,
+          5.977073079427092e-05
+        ],
+        "wait_min": [
+          -0.000122104966905381,
+          0.000641851942274305
+        ]
+      }
+    },
+    "wide_vs_stage247": {
+      "conditional_MC_se": {
+        "cost": 4.8085399649717865e-05,
+        "fleet": 4.8516653237345104e-05,
+        "service": 9.298039188425218e-06,
+        "wait_min": 8.876300604810473e-05
+      },
+      "mean": {
+        "cost": -9.165132107204853e-05,
+        "fleet": -0.00012523509837962965,
+        "service": 3.358377730758124e-05,
+        "wait_min": 0.00036322699652777715
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00020408858581542961,
+          1.422087259928377e-05
+        ],
+        "fleet": [
+          -0.00025115966796875,
+          -1.2195728443287255e-05
+        ],
+        "service": [
+          -6.609524671766208e-06,
+          7.751568565086106e-05
+        ],
+        "wait_min": [
+          -4.3423461914064196e-05,
+          0.0008123645697699647
+        ]
+      }
+    }
+  },
+  "coverage_qualified": true,
+  "execution": {
+    "continuation_native_episodes": 87360,
+    "main_chunks": 3120,
+    "max_peak_rss_MiB": 701.40234375
+  },
+  "fleet_error_coverage_supported": false,
+  "held_errors": {
+    "dense": {
+      "margin_MSE": {
+        "cost_margin_mse": 0.0005706959762385458,
+        "fleet_margin_mse": 0.000651443415920417,
+        "service_margin_mse": 7.755054110477667e-05
+      },
+      "minus_MC_variance": {
+        "cost_margin_mse": 0.00025149700559833494,
+        "fleet_margin_mse": 0.00032756604207983365,
+        "service_margin_mse": 6.630105915171215e-05
+      }
+    },
+    "raw": {
+      "margin_MSE": {
+        "cost_margin_mse": 0.000583828614554535,
+        "fleet_margin_mse": 0.0006615199496114009,
+        "service_margin_mse": 7.387364192060703e-05
+      },
+      "minus_MC_variance": {
+        "cost_margin_mse": 0.0002646296439143241,
+        "fleet_margin_mse": 0.00033764257577081864,
+        "service_margin_mse": 6.26241599675426e-05
+      }
+    },
+    "stage247": {
+      "margin_MSE": {
+        "cost_margin_mse": 0.0005773440533736242,
+        "fleet_margin_mse": 0.0006584174238559128,
+        "service_margin_mse": 7.390057173681987e-05
+      },
+      "minus_MC_variance": {
+        "cost_margin_mse": 0.00025814508273341337,
+        "fleet_margin_mse": 0.0003345400500153294,
+        "service_margin_mse": 6.26510897837554e-05
+      }
+    },
+    "wide": {
+      "margin_MSE": {
+        "cost_margin_mse": 0.0005697392926620193,
+        "fleet_margin_mse": 0.000651438526269388,
+        "service_margin_mse": 7.707708896754174e-05
+      },
+      "minus_MC_variance": {
+        "cost_margin_mse": 0.00025054032202180825,
+        "fleet_margin_mse": 0.00032756115242880523,
+        "service_margin_mse": 6.582760701447725e-05
+      }
+    }
+  },
+  "held_prefixes": 40,
+  "joint_control_advancement_passed": false,
+  "paired_margin_error": {
+    "dense_vs_raw": {
+      "mean": {
+        "cost_margin_mse": -1.3132638315988988e-05,
+        "fleet_margin_mse": -1.0076533690984934e-05,
+        "service_margin_mse": 3.6768991841695814e-06
+      },
+      "prefix_CI95": {
+        "cost_margin_mse": [
+          -1.84557329904185e-05,
+          -8.373296696183942e-06
+        ],
+        "fleet_margin_mse": [
+          -1.4256221638103612e-05,
+          -6.057672904767942e-06
+        ],
+        "service_margin_mse": [
+          1.8673804294940597e-06,
+          5.554946824132262e-06
+        ]
+      }
+    },
+    "stage247_vs_raw": {
+      "mean": {
+        "cost_margin_mse": -6.48456118091058e-06,
+        "fleet_margin_mse": -3.1025257554889073e-06,
+        "service_margin_mse": 2.692981621282445e-08
+      },
+      "prefix_CI95": {
+        "cost_margin_mse": [
+          -1.437683781628237e-05,
+          1.2584649600494172e-06
+        ],
+        "fleet_margin_mse": [
+          -9.298884198665696e-06,
+          3.1595198401380668e-06
+        ],
+        "service_margin_mse": [
+          -1.0691277536768228e-06,
+          1.0802030478778702e-06
+        ]
+      }
+    },
+    "wide_vs_dense": {
+      "mean": {
+        "cost_margin_mse": -9.566835765266432e-07,
+        "fleet_margin_mse": -4.8896510283900784e-09,
+        "service_margin_mse": -4.734521372349075e-07
+      },
+      "prefix_CI95": {
+        "cost_margin_mse": [
+          -3.1742391976478885e-06,
+          1.1980554043581827e-06
+        ],
+        "fleet_margin_mse": [
+          -1.469977426582904e-06,
+          1.4407768668155557e-06
+        ],
+        "service_margin_mse": [
+          -1.0886540773005595e-06,
+          1.5019069175167376e-07
+        ]
+      }
+    },
+    "wide_vs_raw": {
+      "mean": {
+        "cost_margin_mse": -1.4089321892515633e-05,
+        "fleet_margin_mse": -1.0081423342013325e-05,
+        "service_margin_mse": 3.203447046934674e-06
+      },
+      "prefix_CI95": {
+        "cost_margin_mse": [
+          -1.949893080572159e-05,
+          -8.980893875791498e-06
+        ],
+        "fleet_margin_mse": [
+          -1.5045215892759049e-05,
+          -5.413031944701285e-06
+        ],
+        "service_margin_mse": [
+          1.4181008963472677e-06,
+          5.192375357594751e-06
+        ]
+      }
+    },
+    "wide_vs_stage247": {
+      "mean": {
+        "cost_margin_mse": -7.604760711605049e-06,
+        "fleet_margin_mse": -6.978897586524419e-06,
+        "service_margin_mse": 3.176517230721849e-06
+      },
+      "prefix_CI95": {
+        "cost_margin_mse": [
+          -1.4593568493027781e-05,
+          -1.0270448433331768e-06
+        ],
+        "fleet_margin_mse": [
+          -1.0907574129639534e-05,
+          -3.635827394794876e-06
+        ],
+        "service_margin_mse": [
+          1.7967693532980252e-06,
+          4.629542806461089e-06
+        ]
+      }
+    }
+  },
+  "protocol": "native_transit_prefix_coverage_stage288_v1",
+  "raw_reference_fits": 0,
+  "training_controls_vs_raw": {
+    "dense": {
+      "fit16": {
+        "cost": -0.000343481401909722,
+        "fleet": -0.000292064525462963,
+        "service": -5.141687644675911e-05,
+        "wait_min": -0.0003920572916666654
+      },
+      "independent8": {
+        "cost": -0.0001852394965277776,
+        "fleet": -0.0001392505787037037,
+        "service": -4.5988917824073946e-05,
+        "wait_min": -0.00030542534722222017
+      }
+    },
+    "wide": {
+      "fit16": {
+        "cost": -0.0003200247178819443,
+        "fleet": -0.00026765046296296297,
+        "service": -5.2374254918981286e-05,
+        "wait_min": -0.0004389973958333334
+      },
+      "independent8": {
+        "cost": -0.00015668103298611093,
+        "fleet": -0.00010850694444444444,
+        "service": -4.817408854166648e-05,
+        "wait_min": -0.0002983506944444436
+      }
+    }
+  },
+  "training_errors": {
+    "dense": {
+      "fit16": {
+        "cost_margin_mse": 0.0006539434460886047,
+        "fleet_margin_mse": 0.0006500304451024445,
+        "service_margin_mse": 6.836276947830623e-05
+      },
+      "independent8": {
+        "cost_margin_mse": 0.0011795754994521832,
+        "fleet_margin_mse": 0.0011971174593591622,
+        "service_margin_mse": 9.126573975704111e-05
+      },
+      "independent8_minus_MC_variance": {
+        "cost_margin_mse": 0.0004538497836806277,
+        "fleet_margin_mse": 0.0004666247761144715,
+        "service_margin_mse": 7.04540977394929e-05
+      }
+    },
+    "wide": {
+      "fit16": {
+        "cost_margin_mse": 0.0006555338175414524,
+        "fleet_margin_mse": 0.0006511944796239104,
+        "service_margin_mse": 6.799392068326416e-05
+      },
+      "independent8": {
+        "cost_margin_mse": 0.00118212489912512,
+        "fleet_margin_mse": 0.0011988078521543903,
+        "service_margin_mse": 9.085004679828134e-05
+      },
+      "independent8_minus_MC_variance": {
+        "cost_margin_mse": 0.0004563991833535646,
+        "fleet_margin_mse": 0.00046831516890969983,
+        "service_margin_mse": 7.003840478073314e-05
+      }
+    }
+  }
+}

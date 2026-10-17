@@ -272,6 +272,7 @@ def report(run):
     held_errors = np.zeros((len(learning.VARIANTS), len(rows["held"]), 3))
     held_noise = np.zeros((len(rows["held"]), 3))
     training = {arm: {scope: [] for scope in ("fit16", "independent8", "independent8_minus_MC_variance")} for arm in ("dense", "wide")}
+    training_controls = {arm: {scope: [] for scope in ("fit16", "independent8")} for arm in training}
     for pi, model in enumerate(frozen):
         data = {r: learning.base.base.causal_data(rr, model["reference"]) for r, rr in rows.items()}
         for rotation in range(6):
@@ -285,9 +286,12 @@ def report(run):
                     ix = learning.assignment(rows["train"], variant, rotation)
                     subset = {k: v[ix] for k, v in data["train"].items()}
                     pred = {k: v[pi, rotation, vi, ix] for k, v in predictions["train"].items()}
+                    raw_choices = predictions["train"]["chosen"][pi, rotation, 0, ix]
                     for scope, draws in (("fit16", panels["train"][ix, :16]), ("independent8", panels["train"][ix, 16:])):
                         error, noise = learning.margin_errors(subset, draws, pred)
                         training[variant][scope].append(error.mean(axis=0))
+                        effect = draws[np.arange(len(ix)), :, pred["chosen"]]-draws[np.arange(len(ix)), :, raw_choices]
+                        training_controls[variant][scope].append(effect.mean(axis=(0, 1)))
                         if scope == "independent8":
                             training[variant]["independent8_minus_MC_variance"].append((error-noise).mean(axis=0))
     effects = learning.paired_controls(predictions["held"]["chosen"], panels["held"])
@@ -315,6 +319,7 @@ def report(run):
     write_json(directory(run)/"report/result.json", {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(),
         "coverage_qualified": True, "held_prefixes": len(records), "controls": controls, "paired_margin_error": errors,
         "training_errors": {arm: {scope: dict(zip(error_fields, map(float, np.mean(values, axis=0)))) for scope, values in scopes.items()} for arm, scopes in training.items()},
+        "training_controls_vs_raw": {arm: {scope: dict(zip(learning.FIELDS, map(float, np.mean(values, axis=0)))) for scope, values in scopes.items()} for arm, scopes in training_controls.items()},
         "held_errors": {v: {"margin_MSE": dict(zip(error_fields, map(float, held_errors[i].mean(axis=0)))),
             "minus_MC_variance": dict(zip(error_fields, map(float, (held_errors[i]-held_noise).mean(axis=0))))} for i, v in enumerate(learning.VARIANTS)},
         "fleet_error_coverage_supported": errors["wide_vs_dense"]["prefix_CI95"]["fleet_margin_mse"][1] < 0,

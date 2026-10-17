@@ -1,0 +1,49 @@
+{
+  "active_residual_fits": 96,
+  "actor_updates": 0,
+  "contract": {
+    "arms": [
+      "raw",
+      "stage247",
+      "dense",
+      "wide"
+    ],
+    "balance": "botharms_same_root_regime_probe_counts_and_same360states_once_across6rotations",
+    "boundary": "fixed_representation_single_intervention_coverage_test_not_end_to_end_HRL_or_training_seed_CI",
+    "budget": {
+      "actor_updates": 0,
+      "main_chunks": 3120,
+      "main_continuation_episodes": 87360,
+      "main_prefixes": 100,
+      "main_states": 600,
+      "new_raw_reference_fits": 0,
+      "pilot_episodes": 150,
+      "residual_fits": 96
+    },
+    "calibration": "precision_and_shrinkage_reestimated_from_each_assigned_training_set_only_coverage_effect_includes_group_calibration",
+    "control_advancement": "wide_minus_dense_raw_and_unchanged247_cost_and_wait_CI_upper_below0_no_model_selection",
+    "coverage_hypothesis": "wide_minus_dense_held_fleet_margin_MSE_CI_upper_below0",
+    "dense": "per_rotation10_prefixes_replica_equal_rotation_each6probes_60states",
+    "error": "paired_feasible_margin_MSE_cost_fleet_service_train_fit16_train_independent8_held16_MC_variance_reported_separately",
+    "fit": "existing_state_GLS_head_sum_only_assigned16futures_precision_shrinkage_recipe_unchanged",
+    "fixed_profiles": 16,
+    "frozen": "old_training_TSVD_whitening_scale_selected_rank_alpha_A_RMS_ball_cached_head_difference_raw_gate_anchor_and_lower",
+    "future_seed": "1958000000+role_index*1000000+root_index*100000+regime_index*10000+replica*1000+probe_index*100+draw",
+    "geometry_source": "native_transit_balanced_critic_stage247_development_20261015_r1",
+    "held": "40fresh_prefixes_4_per_root_regime_all6probes_16futures_shared_by_all_models",
+    "inference": "average_fixed_profiles_rotations_and6probes_before_40prefix_stratified_bootstrap5000_seed288_CI95",
+    "pilot": "10separate_prefixes_oneprobe_covering_all6probe_indices_two_futures_software_only",
+    "raw_models_source": "native_transit_frozen_prefix_stage287_20261017_r1/freeze_raw/models.json_only_no_confirmation_rows_or_labels",
+    "rotations": 6,
+    "scene_seed": "1858000000+role_index*1000000+root_index*100000+regime_index*1000+replica",
+    "training": "60fresh_prefixes_6_per_root_regime_all6probes_16fit_plus8independent_error_futures",
+    "validation": "save_all_models_and_unlabeled_train_held_predictions_before_report_opens_held_labels",
+    "wide": "per_rotation60_prefixes_oneprobe_PROBES[(replica+rotation)%6]_60states",
+    "zero_profiles": "retain_original_zero_selections_no_fits_no_new_selection"
+  },
+  "held_labels_read": false,
+  "models_and_choices_frozen": true,
+  "protocol": "native_transit_prefix_coverage_stage288_v1",
+  "raw_reference_fits": 0,
+  "software_qualified": true
+}

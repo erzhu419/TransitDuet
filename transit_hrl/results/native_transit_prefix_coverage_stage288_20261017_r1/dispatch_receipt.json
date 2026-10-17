@@ -19,6 +19,8 @@
   "main_dispatched": true,
   "main_continuations": {"first": "t169842", "last": "t172961", "count": 3120,
     "expected_unique_tasks": 3120, "actual_unique_tasks": 3120, "missing_tasks": 0, "unexpected_tasks": 0,
+    "status_counts": {"done": 3120}, "exit_code_counts": {"0": 3120},
+    "completion_node_counts": {"node002": 781, "node004": 787, "node005": 776, "node006": 776},
     "launch_verified": true,
     "registered_task_input_staging_completed": true,
     "initial_launch_snapshot": {"running": 40, "launching": 370, "queued": 2710},
@@ -32,6 +34,8 @@
   "main_planned_continuation_episodes": 87360,
   "raw_reference_fits": 0,
   "actor_updates": 0,
-  "scientific_results_available": false,
-  "local_pull": {"transport_bytes": 5611, "this_turn_bytes": 2839, "models_snapshots_or_rollouts_pulled": false}
+  "fit": {"id": "t173070", "node": "node002", "status": "done", "exit_code": 0},
+  "report": {"id": "t173071", "node": "node006", "status": "done", "exit_code": 0},
+  "scientific_results_available": true,
+  "local_pull": {"transport_bytes": 143682, "this_turn_bytes": 138071, "models_snapshots_or_rollouts_pulled": false}
 }

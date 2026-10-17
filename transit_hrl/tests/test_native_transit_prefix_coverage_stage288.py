@@ -151,6 +151,19 @@ class PrefixCoverageTest(unittest.TestCase):
             self.assertIn("wide_vs_dense", report["controls"])
             self.assertGreaterEqual(report["controls"]["wide_vs_dense"]["conditional_MC_se"]["cost"], 0.)
             self.assertIn("independent8_minus_MC_variance", report["training_errors"]["wide"])
+            with np.load(root/"fit_raw/train_predictions.npz") as predictions:
+                choices = predictions["chosen"]
+            for arm in ("dense", "wide"):
+                vi = learning.VARIANTS.index(arm)
+                for scope, futures in (("fit16", slice(0, 16)), ("independent8", slice(16, None))):
+                    expected = []
+                    for pi in range(2):
+                        for rotation in range(6):
+                            for i in learning.assignment(rows["train"], arm, rotation):
+                                selected = choices[pi, rotation, vi, i]
+                                raw = choices[pi, rotation, 0, i]
+                                expected.append((panels["train"][i, futures, selected]-panels["train"][i, futures, raw]).mean(axis=0))
+                    np.testing.assert_allclose(list(report["training_controls_vs_raw"][arm][scope].values()), np.mean(expected, axis=0), atol=1e-15)
             self.assertFalse(report["controller_promoted"])
 
     def test_scheduler_gate_excludes_earlier_phases_but_requires_all_captures(self):
