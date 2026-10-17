@@ -45,3 +45,12 @@ change subsequent states and intervention doses; their contrast is not
 natural mediation or a matched-dose subgroup effect. Two fixed actors do not
 establish training-seed generalization. Passing this pilot cannot admit a main
 controller or change the original gate.
+
+Frozen source `0561d3776e`; scheduler smoke `t172971` on node004 passes eight
+focused tests and is running full native/conditional path checks. The initial
+queued smoke was cancelled before launch to fix matched-prefix lookup when
+another departure overwrites the recorder's latest event; no outcomes were read.
+Shards `t172973-t172976` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)` with
+24 workers each, planned on node002/004/005/006. They wait for the exact smoke
+marker. Aggregate `t172978` waits for those four shard markers. No prospective
+result or controller admission is claimed at submission.
