@@ -56,3 +56,23 @@ no incomplete old pair is resumed. Shards `t166240-t166243` cover `[0,8)`,
 `[8,16)`, `[16,24)`, `[24,32)` on node002/004/005/006 with eight workers each.
 Reuse smoke cell 0; aggregate `t166244` awaits the four small completion markers.
 V82 mechanism results are pending; no new controller is admitted.
+
+All 96 replays and aggregation completed, exit 0/retry 0; all original V81
+endpoints/action counts remain exact. Read-only report `t166273` passed three
+variance-decomposition tests and reproduced the source CV means. Only summary
+JSON was retrieved (70,804 + 28,411 bytes); raw traces/checkpoints stay on-server.
+Stochastic projection: 16.02% missing bilateral evidence; the remaining 83.98%
+has complete ready/departure labels. Active-group gap bias is +64.02 s versus
+-17.19 s inactive. Active local expected gain is numerically zero, completed-
+ready replay gain +8.48e-6, completed-departure gain -1.50e-6; 20.85% of active
+states have predicted non-harm but completed-ready replay harm. These are
+visited-state formula audits, not causal alternative-action labels.
+
+On these four consumed days, stochastic projected-minus-B200 CV-squared is
++0.000749: +0.000626 from variance at the reference mean and +0.000124 from
+mean normalization. Within-stop variation contributes +0.000751, between-stop
+means -0.00000150; four-hour within-band variation +0.000721. This locates the
+discrepancy but does not identify downstream propagation causally. Deterministic
+CV improves on this subset but is heterogeneous by actor and does not revise
+the failed 32-day V81 gate. V83 will intervene once and freeze subsequent lower
+commands in one control arm, rather than fit another forecast correction.
