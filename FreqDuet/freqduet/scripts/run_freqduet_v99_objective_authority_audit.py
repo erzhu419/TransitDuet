@@ -161,8 +161,8 @@ def aggregate(root):
         raise AssertionError("passive audit differs from the fixed consumed-day grid")
     flat = [{**{k: r[k] for k in ("seed", "day", "mode", "shadow", "credit")},
         **{f"{name}_{stat}": value for name, d in r["authority"].items() if isinstance(d, dict)
-           for stat, value in d.items()}, upper_callback_count=r["authority"]["upper_callback_count"],
-        plan_decisions=r["authority"]["plan_decisions"]} for r in rows]
+           for stat, value in d.items()}, "upper_callback_count": r["authority"]["upper_callback_count"],
+        "plan_decisions": r["authority"]["plan_decisions"]} for r in rows]
     keys = [k for k, v in flat[0].items() if isinstance(v, (int, float)) and k not in ("seed", "day")]
     result = dict(status="passive_objective_authority_audit_complete", rows=flat,
         upper_by_mode={mode: {k: dict(mean=float(np.mean([r[k] for r in flat if r["mode"] == mode])),
