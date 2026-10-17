@@ -45,3 +45,17 @@ workers. Shards `t166283-t166286` cover `[0,84)`, `[84,168)`, `[168,252)`,
 `[252,336)` on node002/004/005/006 with 84 workers each, gated by reference
 completion. Aggregate `t166287` waits for their four completion markers.
 All results remain diagnostic; the main policy is unchanged.
+
+All references, 336 labelled arms and aggregation completed exit 0/retry 0.
+Only the 79,928-byte result JSON was pulled. Recorded-lower subsequent action
+changes are exactly zero. Projected-versus-B200 single-decision conditional
+CV-squared effects (closed-loop / recorded-lower) are: missing +9.43e-6/-4.20e-4;
+active +1.00e-5/-6.53e-6; inactive +5.14e-5/+7.13e-4. Immediate departure and
+next-stop loss means agree between continuation modes, but full-day effects
+differ. Lower feedback can amplify or suppress effects; it is not uniformly
+harmful. Closed-loop cost increments are concentrated in seed 933013/day 1810009.
+One fixed future per context cannot establish repeatability or policy advantage.
+Next: repeat identical prefixes with independent post-prefix innovations and
+matched policy uniforms, retaining all three strata and both continuation modes.
+Establish repeatable action signal before a system-credit/control update. No
+threshold tuning, blanket lower freeze or policy promotion follows these means.
