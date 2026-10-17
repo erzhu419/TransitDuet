@@ -23,7 +23,8 @@ GROUPS = ("mixed_pooled", *VIEWS)
 
 def contract():
     return {"source_run": SOURCE_RUN, "source_protocol": source.EXPERIMENT_PROTOCOL,
-        "cohort": source.contract()["cohort"], "scopes": list(SCOPES), "arms": list(learning.ARM_RISK), "comparisons": learning.PAIRS,
+        "cohort": source.contract()["cohort"], "scopes": list(SCOPES), "arms": list(learning.ARM_RISK),
+        "comparisons": {name: list(pair) for name, pair in learning.PAIRS.items()},
         "candidate": "best_raw_total_plus_each_frozen_risk_nonoriginal_feasible_action; raw_gate_and_lowest_candidate_index_ties; fixed_without_new_service_or_labels; no_candidate_for_empty_menu; store_predictions_before_evaluation",
         "errors": "service_risk_signed_cross_and_total_margin_MSE_at_same_fixed_candidate_plus_empirical_margin_sign_error; original_relative_targets; eligible_state_denominator; compare_to_Stage285_all_action_errors_without_replacing_objective",
         "paired": "action_level_vs_uniform_observed_level_vs_uniform_observed_vs_action_and_each_frozen_contrast_added_to_observed_level; all_state_cost_fleet_service_wait; all16_fixed8+8; all_views_banks_scopes_no_winner_selection",

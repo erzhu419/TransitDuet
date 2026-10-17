@@ -145,6 +145,7 @@ class ServiceDecisionErrorTest(unittest.TestCase):
         json.dumps(report, allow_nan=False)
 
     def test_scheduler_completed_parent_and_unpinned_cpu(self):
+        self.assertEqual(json.loads(json.dumps(spec.contract())), spec.contract())
         task = submit.task_specification("unit_decision_error")
         self.assertEqual(task["cpu"], 1)
         self.assertEqual(task["ram_mb"], 3072)
