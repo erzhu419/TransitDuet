@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from run_freqduet_v86_feedback_timing import ITEMS, cleared_tail_at, headway_prefix, window_values
+from run_freqduet_v86_feedback_timing import ITEMS, cleared_tail_at, headway_prefix, window_values, vehicle_chain
 
 
 class FeedbackTimingTest(unittest.TestCase):
@@ -27,11 +27,18 @@ class FeedbackTimingTest(unittest.TestCase):
         def sample(t, wait, onboard, cv):
             return dict(time_s=t, waiting_person_s=wait, onboard_person_s=onboard,
                 dispatch_backlog_trip_s=0., holding_vehicle_s=0., holding_person_s=0.,
-                readiness_delay_sum_s=0., headways=dict(cv_squared=cv))
+                readiness_delay_sum_s=0., launched=0, headways=dict(cv_squared=cv, count=0))
         row = dict(target_time_s=100., samples=[sample(100., 10., 20., .1), sample(1000., 110., 70., .2)])
         result = window_values(row, 0, 900)
         self.assertEqual(result["passenger_person_s"], 150.)
         self.assertEqual(result["cumulative_cv_squared"], .2)
+
+    def test_vehicle_next_trip_identity_is_not_assumed_fixed(self):
+        row = dict(target_key=[1, 2, 0], target_bus=4,
+            returns=[dict(trip_id=1, observed_time_s=100., physical_time_s=99.)],
+            launches=[dict(bus_id=4, trip_id=1, time_s=10.), dict(bus_id=5, trip_id=7, time_s=101.),
+                      dict(bus_id=4, trip_id=9, time_s=110.)])
+        self.assertEqual(vehicle_chain(row)["next_launch"]["trip_id"], 9)
 
 
 if __name__ == "__main__":

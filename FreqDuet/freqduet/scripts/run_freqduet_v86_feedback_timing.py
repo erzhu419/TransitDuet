@@ -141,7 +141,16 @@ def window_values(row, start, end):
     result = {k: right[k] - left[k] for k in (*EXPOSURES, "holding_vehicle_s", "holding_person_s", "readiness_delay_sum_s")}
     result["passenger_person_s"] = result["waiting_person_s"] + result["onboard_person_s"]
     result["cumulative_cv_squared"] = right["headways"]["cv_squared"]
+    result["launched_trips"] = right["launched"] - left["launched"]
+    result["cumulative_headway_count"] = right["headways"]["count"]
     return result
+
+
+def vehicle_chain(row):
+    returned = next((r for r in row["returns"] if r["trip_id"] == row["target_key"][0]), None)
+    launched = next((r for r in row["launches"] if r["bus_id"] == row["target_bus"]
+        and returned is not None and r["time_s"] >= returned["observed_time_s"]), None)
+    return dict(returned=returned, next_launch=launched)
 
 
 def aggregate(root):
@@ -150,7 +159,7 @@ def aggregate(root):
     contexts = []
     for ci in range(len(recovery.propagation.CONTEXTS)):
         refs = [ri for ri, (c, _) in enumerate(repeated.REFERENCES) if c == ci]
-        effects = {}
+        effects, chains = {}, {}
         for control in recovery.propagation.MODES:
             effects[control] = {}
             for start, end in windows:
@@ -161,8 +170,24 @@ def aggregate(root):
                     for m in (*EXPOSURES, "holding_vehicle_s", "holding_person_s", "readiness_delay_sum_s"):
                         np.testing.assert_array_equal(values[m], np.zeros(len(refs)))
                 effects[control][f"{start}-{end}"] = {m: repeated.describe(x) for m, x in values.items()}
+            for ri in refs:
+                total = sum(window_values(rows[ri, "recover_900s"], a, b)["passenger_person_s"] -
+                            window_values(rows[ri, control], a, b)["passenger_person_s"] for a, b in windows)
+                np.testing.assert_allclose(total, rows[ri, "recover_900s"]["metrics"]["passenger_person_s"] -
+                    rows[ri, control]["metrics"]["passenger_person_s"], atol=1e-7, rtol=0)
+            pairs = [(vehicle_chain(rows[ri, control]), vehicle_chain(rows[ri, "recover_900s"])) for ri in refs]
+            returns = [b["returned"]["physical_time_s"] - a["returned"]["physical_time_s"]
+                       for a, b in pairs if a["returned"] is not None and b["returned"] is not None]
+            launches = [b["next_launch"]["time_s"] - a["next_launch"]["time_s"]
+                        for a, b in pairs if a["next_launch"] is not None and b["next_launch"] is not None]
+            chains[control] = dict(paired_returns=len(returns), paired_next_launches=len(launches),
+                return_time_s=repeated.describe(returns) if len(returns) == len(refs) else None,
+                same_bus_next_dispatch_s=repeated.describe(launches) if len(launches) == len(refs) else None,
+                same_next_trip=sum(a["next_launch"] is not None and b["next_launch"] is not None and
+                    a["next_launch"]["trip_id"] == b["next_launch"]["trip_id"] for a, b in pairs))
         first = rows[refs[0], "recover_900s"]
-        contexts.append(dict(context_index=ci, seed=first["seed"], day=first["day"], stratum=first["stratum"], effects=effects))
+        contexts.append(dict(context_index=ci, seed=first["seed"], day=first["day"], stratum=first["stratum"],
+                             effects=effects, target_vehicle=chains))
     pilot.write_json(root / "summary/status.json", dict(status="feedback_timing_complete", contexts=contexts,
         labelled_arms=len(ITEMS), action_s=45., actors_updated=False, main_policy_changed=False, controller_fits=0,
         scope="existing consumed prefixes/futures; fixed-45s regime differences, not a new controller",
