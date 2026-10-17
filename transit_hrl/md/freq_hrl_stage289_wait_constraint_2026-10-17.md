@@ -4,34 +4,45 @@ Use only Stage288's 60 training prefixes, 360 states, 24 futures, six actions
 and 16 fixed raw-reference profiles. No held rows/labels, fitting, simulation
 or actor updates. Raw feasibility and native original fallback are unchanged.
 
-- Primary: select on futures 0-15, freeze actions, then open/evaluate 16-23.
-  Controls are saved raw and unchanged Stage247 choices. Information probes
-  minimize finite-MC mean total cost, either unconstrained or subject to mean
-  wait no higher than own raw. No wait margin/grid. Ties prefer raw, then
-  original, then candidate index. Every probe includes the raw fallback.
-- Two fixed 16-to-8 reverse checks hold out futures 0-7 or 8-15. Selection
-  and evaluation never overlap within a query. These checks are not blinded
-  and do not select a winner or replace the primary direction.
-- Report selection16 versus independent8 cost/fleet/service/wait, both
-  evaluation halves, and paired contrasts versus raw, cost-only and Stage247.
-  Average profiles and six probes before a 60-prefix stratified bootstrap
-  (six prefixes/root/regime, 5000 draws, seed289). Shared-future conditional
-  MC standard errors are separate; profiles/directions are not seed replicas.
-- Joint retention requires primary constrained-versus-raw cost and wait
-  CI95 upper bounds below zero and negative cost/wait points in both four-draw
-  evaluation halves. All reverse results are reported without selection.
-- One scheduler analysis task, one CPU/3 GiB, any node001-node006, no pin.
-  Read the 2160 train chunks server-side; keep proposals remote and pull only
-  the compact scalar report. Zero additional native episodes or fits.
-
-Limitations: these reused development futures are independent of each query's
-selection bank, not fresh confirmation data. Label-informed choices measure
-finite-MC information value, not a deployable controller or a guaranteed
-oracle upper bound. New-prefix confirmation remains a separate next decision.
+- Primary: futures 0-15 select actions; freeze before opening 16-23. Compare
+  finite-MC minimum cost with/without mean wait <= own raw, versus saved raw
+  and unchanged Stage247. Zero margin; raw/original/index tie order. Two fixed
+  reverse checks hold out 0-7 or 8-15; no direction/winner selection.
+- Average profiles and six probes before 60-prefix stratified CI95 (six per
+  root/regime, bootstrap5000, seed289); report conditional shared-future MC SE
+  separately. Joint retention requires primary cost/wait upper bounds <0 and
+  negative cost/wait in both four-draw evaluation halves.
 
 Run: `native_transit_wait_constraint_stage289_20261017_r1`.
 
-Six focused tests pass, including independent-bank wait harm correctly failing
-the joint gate, primary-ledger ordering, raw fallback/ties, no model-duplicate
-uncertainty reduction, train-only loading, parent completion and unpinned
-scheduler resources. Both CLI entry points start.
+## Result and next decision
+
+Scheduler `t173090` completed on node002 with exit0. One CPU/3 GiB, no node
+pin. Six focused tests and both CLI startups pass, including independent-bank
+harm failing the gate and no uncertainty reduction from duplicate profiles.
+Only the 46,204-byte scalar report was pulled; action ledgers remain server-side.
+The preregistered joint-retention gate fails. Primary constrained-minus-raw:
+
+| Metric | Selection16 | Independent8 [95% prefix CI] |
+| --- | ---: | ---: |
+| Cost x1e6 | -3710.48 | 116.76 [-755.20, 1269.90] |
+| Fleet x1e6 | -2595.12 | 1038.05 [186.23, 2162.95] |
+| Service x1e6 | -1115.35 | -921.29 [-1280.50, -587.37] |
+| Wait / min | -0.0105798 | -0.0090018 [-0.0124326, -0.0058859] |
+
+Service and wait retain 82.6% and 85.1% of their selection-point gains. Fleet
+flips from predicted savings to an independently evaluated increase. Evaluation
+halves have cost -115.98 and +349.49 x1e6, with wait improving in both.
+The two fixed reverse checks also improve wait, but cost is -860.59
+[-1810.49, 113.84] and +79.27 [-891.82, 1076.80] x1e6: neither supports
+joint gains. Constraining wait additionally improves primary wait versus
+cost-only (-0.0015361 [-0.0024413, -0.0007290] min), without confirmed cost benefit.
+
+Retain the service/wait information signal, not the selector. Next: separate
+proposal, independent fleet-risk screening and independent evaluation, rather
+than another wait threshold or larger prefix budget. No further task dispatched.
+
+Limitations: reused development data; the three directions are not independent
+replications. This finite-MC information diagnostic is not a deployable policy
+or guaranteed oracle bound. Stage288's restricted, single-intervention metrics
+are unchanged; new-prefix confirmation remains separate.
