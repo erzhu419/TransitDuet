@@ -93,7 +93,7 @@ def review(root, v84_root):
                    for m, e in c["effects"].items() if m in repeated.RESPONSE_METRICS}
         print("V85_REVIEW_CONTEXT " + json.dumps(dict(context_index=c["context_index"], seed=c["seed"],
             day=c["day"], stratum=c["stratum"], effects=compact)), flush=True)
-    pilot.write_json(root / "review/done.json", dict(status="compact_review_complete"))
+    pilot.write_json(root / "review_ready/done.json", dict(status="compact_review_complete"))
 
 
 def main():
