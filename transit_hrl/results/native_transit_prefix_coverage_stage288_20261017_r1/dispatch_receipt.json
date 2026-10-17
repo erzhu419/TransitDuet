@@ -1,0 +1,20 @@
+{
+  "protocol": "native_transit_prefix_coverage_stage288_v1",
+  "run_name": "native_transit_prefix_coverage_stage288_20261017_r1",
+  "implementation_commits": ["465c1a8108", "83edcbec00", "a05d2d769c"],
+  "freeze": {"id": "t169665", "status": "done", "exit_code": 0, "software_qualified": true,
+    "profiles": 16, "active_profiles": 8, "max_reconstruction_error": 1.6650368204731384e-16},
+  "pilot_captures": {"first": "t169667", "last": "t169676", "count": 10, "status_counts": {"done": 10}, "exit_code_counts": {"0": 10}},
+  "pilot_continuations": {"first": "t169679", "last": "t169688", "count": 10,
+    "last_status_counts": {"running": 10}, "last_node_counts": {"node002": 3, "node004": 2, "node005": 2, "node006": 3}},
+  "focused_tests_passed": 8,
+  "cold_entrypoints_passed": 2,
+  "main_dispatched": false,
+  "main_requires": "pilot-report/result.json software_qualified after all pilot tasks exit0",
+  "main_planned_chunks": 3120,
+  "main_planned_continuation_episodes": 87360,
+  "raw_reference_fits": 0,
+  "actor_updates": 0,
+  "scientific_results_available": false,
+  "local_pull": {"transport_bytes": 2772, "models_snapshots_or_rollouts_pulled": false}
+}

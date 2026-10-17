@@ -36,8 +36,11 @@ coverage in the fixed simple Stage247 class, not another head/loss variant.
 Run: `native_transit_prefix_coverage_stage288_20261017_r1`.
 
 Execution: eight focused tests passed, including a toy fit/report round trip
-and phase-gate regression; both CLI entry points start. Freeze `t169665` is
-dispatched. Main sampling remains behind the native/solver pilot.
+and phase-gate regression; both CLI entry points start. Freeze `t169665`
+qualified all 16 profiles (eight active), maximum reconstruction error
+`1.67e-16`. Pilot captures `t169667`-`t169676` completed with exit0. Cross-worker
+paired replays `t169679`-`t169688` are running on node002/004/005/006; there is
+no node pin. Main sampling remains behind the native/solver pilot.
 
 Limits: conditional on fixed historical representations and rotations; single
 intervention with frozen lower, not an end-to-end or training-seed HRL claim.
