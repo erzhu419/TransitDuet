@@ -31,3 +31,12 @@ days. All tests, replays and statistics use scheduler on node001-node006 in
 the existing dedicated CPU env. Saved timing primitives and checkpoints remain
 on-server; only small markers and summaries return locally. No controller is
 admitted by this experiment, including if the diagnostic gate passes.
+
+Frozen source `9c6c0a1e3f`; all twelve archived lower-39/lower-199/upper-199
+and runner-199 files are present on-server. Smoke `t172994` is queued for two
+CPU slots. All six allowed nodes are online but live planning reports zero
+free CPU, so no local fallback or forced oversubscription is used. Register
+eight resource-bounded 72-cell shards, 24 workers each: `t172995-t173002`.
+Their exact smoke marker gates fresh-day access; aggregate `t173003` waits
+for all eight shard markers. Tests and smoke have not run while capacity is
+unavailable. Only marker/summary directories are configured for retrieval.
