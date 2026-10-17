@@ -44,3 +44,23 @@ the planner allocates 24 workers each on node002/004/005/006. Smoke cells 0/48
 are reused. Aggregate `t169649` waits for those four small completion markers.
 Only 7,241 bytes of review data and the smoke marker were additionally pulled.
 Formal mechanism results are pending; no controller is admitted.
+
+All 192 replays and aggregation completed, exit 0/retry 0; V89 metrics, action
+counts and contexts are exact. Matched arrivals have zero unmatched identities.
+Only the 79,157-byte mechanism summary was retrieved. Primary CV-squared
+change +0.000749 splits into variance at baseline mean -0.000160,
+CI [-0.003944,+0.003951], and mean normalization +0.000909,
+CI [+0.000811,+0.001016]. Raw dispersion non-harm is unresolved; a clear
+dispersion increase is not established. Four-hour between-band variation
+increases +0.000112, CI [+0.000072,+0.000149].
+
+On candidate-visited primary-group states, follower-ready prediction bias is
+-21.22 s. Early-minus-late local expected gain falls from predicted +0.002363
+to completed-ready +0.001336 and completed-departure +0.000526; both actors
+retain positive pooled means. Completed-ready harm occurs in 36,634/166,267
+such contexts. These are formula audits, not alternative-action values.
+Matched arrival/departure timing advances roughly three minutes, with large
+headway changes, but those changes alone do not establish harmful propagation.
+V91 will distinguish actual release, realized holding and other elapsed-time
+contributions, and test the finite-service-span explanation of the mean shift.
+The original joint gate remains failed; actors, dual and main policy stay frozen.
