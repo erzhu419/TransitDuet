@@ -1,0 +1,34 @@
+{
+  "protocol": "native_transit_abstention_attribution_stage293_v1",
+  "run_name": "native_transit_abstention_attribution_stage293_20261018_r1",
+  "implementation_commit": "389de6243b",
+  "scheduler": {
+    "task_id": "t175903",
+    "node": "node002",
+    "status_counts": {"done": 1},
+    "exit_code_counts": {"0": 1},
+    "allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"],
+    "require_node": null,
+    "cpu_per_task": 1,
+    "ram_mb": 3072
+  },
+  "frozen_statistics_replayed": true,
+  "primary_conclusion_unchanged": {
+    "joint_retention_supported": false,
+    "cost_information_supported": false,
+    "fleet_information_supported": false
+  },
+  "prefixes": 60,
+  "fixed_profiles": 16,
+  "source_state_futures_reused": {"old8": 2880, "new64": 10688},
+  "new_state_futures": 0,
+  "new_fits": 0,
+  "new_native_episodes": 0,
+  "actor_updates": 0,
+  "held_prefixes_read": 0,
+  "focused_and_regression_tests_passed": 22,
+  "cold_entrypoints_passed": 2,
+  "controller_promoted": false,
+  "further_task_dispatched": false,
+  "local_pull": {"scalar_report_bytes": 22646, "this_turn_scalar_report_bytes": 34163, "models_snapshots_or_rollouts_pulled": false}
+}
