@@ -80,3 +80,7 @@ pilot prefixes: all completed with exit0. Report `t168108` qualified all 240
 identity/observer episodes, maximum RSS 696.27 MiB. No outcomes were used for
 selection. Main restart retains the sealed 1,360-task plan. Only small receipts
 and the manifest were pulled, not snapshots, trajectories or checkpoints.
+
+Repaired main confirmation: `t168109`-`t169468` (1,360 tasks), same frozen
+choices and future seeds. Worker startup was verified for bridge/new prefixes;
+the first bridge paired continuation qualified. Performance analysis awaits completion.
