@@ -54,3 +54,27 @@ Shards `t172973-t172976` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)` with
 24 workers each, planned on node002/004/005/006. They wait for the exact smoke
 marker. Aggregate `t172978` waits for those four shard markers. No prospective
 result or controller admission is claimed at submission.
+
+All 384 paths and aggregation complete, exit 0/retry 0. Only the 111,134-byte
+summary was retrieved. The registered preserve-versus-B200 joint gate passes:
+journey -0.29696 min, CI [-0.38760,-0.22441]; CV-squared -0.003102,
+CI [-0.005204,-0.001087]; readiness -97.24 s, CI [-111.56,-83.38]; holding
+-13.47 s/trip. Both original actors separately improve passenger time, CV and
+readiness; unlaunched/incomplete differences are exactly zero. Raw arrival
+variance falls 506.55 s2 and terminal dispatch variance falls 527.04 s2;
+normalization remains positive, so the CV benefit is not a mean-only artifact.
+
+Both-groups minus preserve saves another 0.21831 min and 70.43 readiness
+seconds, but CV-squared +0.000271, CI [-0.001505,+0.001992] is unresolved.
+The release/holding cross term increases +0.003600, CI [+0.001783,+0.005366],
+but actor 12011 has CV -0.001808, CI [-0.003915,+0.000228], while 933013 has
++0.002351, CI [+0.000325,+0.004397]. A positive covariance change alone does
+not establish total CV harm. Both-groups versus B200 also has unresolved CV
+nonharm, despite a better passenger mean; it does not replace the primary.
+
+Keep the positive diagnostic and freeze its rule. Next confirm unchanged
+preserve and both-groups controls on fresh days across all twelve archived
+training seeds, with the ten actors not used in V37-V93 as the primary cohort.
+Retain original-two-actor replication separately and crossed actor/day
+intervals. Main policy stays frozen; this result is not a fixed-policy win or
+a repair of the training procedure's 40-to-200 drift.
