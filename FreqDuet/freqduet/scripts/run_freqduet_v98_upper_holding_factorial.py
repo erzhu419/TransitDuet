@@ -68,6 +68,7 @@ class FactorialAudit(frozen.ReleaseHolding):
 
     def __call__(self, policy, states, features, theta):
         if self.arm.endswith("_zero"):
+            self.count += len(states)
             return zero_law(policy, states)
         return super().__call__(policy, states, features, theta)
 

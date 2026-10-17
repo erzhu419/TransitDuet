@@ -32,6 +32,15 @@ class FactorialTests(unittest.TestCase):
                 return torch.tensor([[True, True, False, False, False, False, False]])
         np.testing.assert_array_equal(experiment.zero_law(Policy(), torch.zeros(1, 2)), [[1, 0, 0, 0, 0, 0, 0]])
 
+    def test_zero_override_counts_actual_decisions_without_actor_scores(self):
+        class Policy:
+            def feasible_action_mask(self, states):
+                return torch.ones(len(states), 7, dtype=torch.bool)
+        audit = experiment.FactorialAudit(12037, "learned_zero")
+        law = audit(Policy(), torch.zeros(1, 2), None, None)
+        self.assertEqual(audit.count, 1)
+        np.testing.assert_array_equal(law, [[1, 0, 0, 0, 0, 0, 0]])
+
 
 if __name__ == "__main__":
     unittest.main()
