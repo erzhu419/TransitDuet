@@ -50,7 +50,8 @@ Retrieved only 58,003 bytes. Group transport in seconds per decision:
 | No more holding | -0.30690 | +0.06341 | -0.24348 |
 
 The no-gain group covers 33.15% of late and 33.47% of early decisions; its
-common-state CI [1.60725,1.65275] is positive for both actors. Missing-evidence
+pooled conditional common-state CI is [1.60725,1.65275], and actor-specific
+effects are positive. Missing-evidence
 net effects have opposite actor signs. Weighted review `t169480` passes four
 tests: no-gain versus gain-up extra-holding-weighted onboard load is 25.90 /
 31.91 passengers, current return pressure 1.333 / 1.423, and prior commanded

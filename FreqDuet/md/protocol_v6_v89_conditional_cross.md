@@ -36,3 +36,12 @@ primary intervention without increasing its instantaneous expected holding or
 reducing its local surrogate. That local property is not a full-day CV promise.
 All tests, smoke, rollouts and statistics use scheduler on node001-node006.
 Keep detailed data/checkpoints server-side and retrieve small summaries only.
+
+Source `b5a39e8d19`; smoke `t169482` passes sixteen tests, exact early/late
+native endpoints/event/actual-holding paths for both actors, and a real primary
+intervention with the registered instantaneous expected-law properties. No
+prospective days were read. It releases the prospective matrix. Shards
+`t169484-t169486` cover `[0,25)`, `[25,63)`, `[63,96)` on node004/005/006 with
+5/8/7 workers. The live planner found only this spare capacity; do not
+oversubscribe busy nodes or move computation local. Aggregate `t169487` waits
+for those exact three markers. No prospective outcome is claimed at dispatch.
