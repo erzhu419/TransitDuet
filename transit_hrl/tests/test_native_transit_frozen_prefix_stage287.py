@@ -90,6 +90,7 @@ class FrozenPrefixTest(unittest.TestCase):
         self.assertIsNone(task["require_node"])
         self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
         self.assertNotIn("fit", task["cmd"])
+        self.assertEqual(submit.task_specification("unit_frozen_prefix", "collect", main[0], 0)["ram_mb"], 1536)
         self.assertEqual(json.loads(json.dumps(spec.contract())), spec.contract())
 
 

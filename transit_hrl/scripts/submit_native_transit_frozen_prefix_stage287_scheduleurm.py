@@ -33,6 +33,8 @@ def task_specification(run, phase, key=None, chunk=None):
         resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{phase}",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command),
         cpu_training_justification="Frozen native CPU inference and paired continuations only; zero raw-reference or calibration refits, no actor updates.")
+    if phase in ("prefix", "collect"):
+        task["ram_mb"] = 1536
     return task
 
 

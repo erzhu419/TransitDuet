@@ -309,13 +309,15 @@ def seal_main(run):
 
 
 def collect(run, key, chunk):
+    start = time.monotonic()
     if not read(directory(run)/"pilot/result.json")["software_qualified"]:
         raise ValueError("Native pilot must qualify before main continuation collection")
     sealed = read(prefix_path(run, key)/"choices.json")
     jobs = [(p, draw, candidates) for p, candidates in enumerate(sealed["unions"]) if candidates for draw in chunks(key[0])[chunk]]
     output = prefix_path(run, key)/"continuations"/str(chunk)
     result = replay(run, key, jobs, output)
-    write_json(output/"receipt.json", {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "key": list(key), "chunk": chunk, **result})
+    write_json(output/"receipt.json", {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(), "key": list(key), "chunk": chunk,
+        "elapsed_s": time.monotonic()-start, "peak_rss_MiB": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024., **result})
 
 
 def report(run):

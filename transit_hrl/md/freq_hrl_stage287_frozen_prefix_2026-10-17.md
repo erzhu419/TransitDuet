@@ -63,5 +63,8 @@ Five focused unit tests passed. Freeze `t166452` on node004 reproduced all
 reserved-scene registration; only that 12,497-byte metadata file was transferred
 before retry. Frozen models remain server-only; the pulled receipt is 2,659 bytes.
 
-Pilot `t166461`-`t166480`: 20 tasks started on node002/004/005/006, 1 CPU and
-3 GiB reserved per task, no node pin. Main collection awaits pilot qualification.
+Pilot `t166461`-`t166480`: all 20 tasks completed with exit0, 99 native episodes,
+maximum RSS 680.64 MiB, mean 27.53 seconds/episode. `t166495` qualified the
+software-only pilot without reading performance labels. Only a 2,668-byte
+pilot summary was pulled. Main prefix/continuation tasks reserve 1.5 GiB/CPU
+(over twice the pilot maximum), with no node pin or scientific contract change.
