@@ -208,6 +208,7 @@ def report(root):
         print("V84_CONTEXT " + json.dumps(dict(context_index=context["context_index"], seed=context["seed"],
             day=context["day"], stratum=context["stratum"], time_s=context["time_s"],
             modes=modes, feedback=context["feedback"]["projected_vs_base"])))
+    pilot.write_json(root / "review/done.json", dict(status="compact_report_complete"))
 
 
 def smoke(root, v83_root):
