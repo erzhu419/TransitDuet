@@ -25,18 +25,30 @@ Run: `native_transit_abstention_confirmation_stage292_20261017_r2`.
 
 Validation: 14 focused/regression tests and two CLI startup checks passed.
 
-R2 preflight t173142-t173151 and aggregate t173158 passed: 72 native episodes,
-20 state-futures, peak RSS 687.00 MiB. Freeze t173130 retained the exact 153
-accepted changes and matching weights. Main t173159-t175830: 2,672 tasks,
-167 active states, 10,688 new state-futures, 41,216 native episodes. Main results
-are pending; inactive-state differences remain exactly zero in the 360-state mean.
-First launch snapshot: 379 placed on node002/004/005/006, remaining tasks queued.
-Large staging exclusion arguments hit rsync E2BIG; explicit code staging with
-`results` excluded and bounded targeted dispatch restored launches, without
-changing scheduler code. Local scalar artifacts occupy 11,185 bytes. Formal
-draw24 passed the native audit in states 0 and 1; 379 workers are running.
+## Completed 2026-10-18
+
+All 2,672 collection tasks exited zero: 10,688 state-futures, 41,216 native
+episodes; report t175880 exited zero. Pulled 11,517 report bytes only.
+Costs below are multiplied by 1e6; negative means improvement.
+
+| Contrast | Cost | Prefix CI95 | Conditional MC CI95 |
+| --- | --- | --- | --- |
+| Abstain - raw | -167.24 | [-411.14, +60.15] | [-337.07, +2.58] |
+| Abstain - matched thinning | -101.70 | [-231.36, +32.30] | [-177.38, -26.03] |
+| Abstain - old247 | -151.48 | [-377.09, +65.96] | [-323.79, +20.82] |
+
+Wait versus raw is -0.001839 min: prefix CI [-0.003845, -0.000378], MC CI
+[-0.002163, -0.001516]. Both 32-draw halves improve cost/wait. Wait retains
+85.9% of Stage291, but joint retention and cross-prefix cost-information criteria
+fail. Fleet versus raw is +20.35; the 408 nonzero weighted state-future effects
+are not independent model exposures. No controller promotion.
+
+Next: Stage293 compares inference conventions and attributes new-future effects
+without tuning, fitting or simulation. Separate cohort-conditional cost information
+from prefix uncertainty; alternate bootstrap intervals cannot overturn this test.
 
 Execution repair: r1 freeze t173117 succeeded, but t173119-t173128 failed before
 simulation: output-directory launch mirroring removed the remote-only sealed
 ledger. Only freeze now stages local registration metadata; later phases stage
 code only. R2 repeats the identical protocol/actions/seeds, not a new candidate.
+Explicit results-excluding staging and bounded dispatch also bypassed rsync E2BIG.

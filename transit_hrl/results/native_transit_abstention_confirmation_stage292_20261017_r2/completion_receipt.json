@@ -1,0 +1,31 @@
+{
+  "protocol": "native_transit_abstention_confirmation_stage292_v1",
+  "run_name": "native_transit_abstention_confirmation_stage292_20261017_r2",
+  "implementation_commit": "7fa3385e48",
+  "scheduler": {
+    "collection_task_count": 2672,
+    "collection_first_task_id": "t173159",
+    "collection_last_task_id": "t175830",
+    "collection_status_counts": {"done": 2672},
+    "collection_exit_code_counts": {"0": 2672},
+    "report": {"task_id": "t175880", "node": "node006", "status": "done", "exit_code": 0},
+    "allowed_nodes": ["node001", "node002", "node003", "node004", "node005", "node006"],
+    "require_node": null
+  },
+  "training_prefixes": 60,
+  "states": 360,
+  "active_states": 167,
+  "state_futures": 10688,
+  "native_episodes": 41216,
+  "preflight_native_episodes": 72,
+  "joint_retention_supported": false,
+  "primary_both_CI_passed": false,
+  "primary_both_halves_passed": true,
+  "cost_information_supported": false,
+  "fleet_information_supported": false,
+  "new_fits": 0,
+  "actor_updates": 0,
+  "held_prefixes_read": 0,
+  "controller_promoted": false,
+  "local_pull": {"confirmation_scalar_bytes": 11517, "total_stage292_scalar_artifact_bytes": 22702, "models_snapshots_or_rollouts_pulled": false}
+}
