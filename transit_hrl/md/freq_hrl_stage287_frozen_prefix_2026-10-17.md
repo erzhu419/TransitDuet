@@ -76,6 +76,7 @@ stream before the whole episode, retaining the full state/RNG check. Models,
 choices and future seeds are unchanged.
 
 Separate-worker checks `t168087`-`t168106` cover all six probes in 20 archived
-pilot prefixes (240 identity/observer episodes). Main restart requires their
-qualification. Only small receipts/manifest were pulled, not snapshots,
-trajectories or checkpoints.
+pilot prefixes: all completed with exit0. Report `t168108` qualified all 240
+identity/observer episodes, maximum RSS 696.27 MiB. No outcomes were used for
+selection. Main restart retains the sealed 1,360-task plan. Only small receipts
+and the manifest were pulled, not snapshots, trajectories or checkpoints.
