@@ -37,3 +37,15 @@ study, a repair of 40-to-200 training drift, or a comparison against fixed.
 All tests, statistics and replays use scheduler on node001-node006 and the
 existing dedicated CPU env. Retrieve only prepare/smoke/shard/summary artifacts;
 checkpoints, pair records and timing arrays stay on-server.
+
+Frozen source `bb041983ae`. Prepare `t173106` retains the original probability
+and reports V95 actor/day dose/effect axes, without new rollouts. Smoke
+`t173107` gates four live-planned shards `t173108-t173111`, ranges 0-240,
+240-480, 480-720, 720-960, 80 workers each. They are soft-preferred to
+node002/004/005/006, allowed only on node001-node006. Aggregate `t173112`
+waits for their four completion markers. Only small result directories sync.
+
+Smoke passes four tests and six full-day paths on node004. Both consumed V95
+cells reproduce endpoint contrasts, timing allocations and dose contrasts
+exactly. The 138-byte marker confirms no future day was read. Formal shards
+can now dispatch; the main policy and all learned parameters remain frozen.

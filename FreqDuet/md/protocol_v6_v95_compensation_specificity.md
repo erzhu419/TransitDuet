@@ -73,3 +73,10 @@ Keep the regularity advantage, but passenger/readiness nonharm relative to
 uniform is not established by intervals crossing zero. Nor is an exactly
 dose-controlled classifier effect established. V96 adds actor/day dose review
 and one frozen 32-new-day confirmation, without fitting p or changing the gate.
+
+Server-side axis review (29,005-byte V96 prepare summary): direct CV means
+improve for 9/10 actors and 15/16 days; journey for 7/10 and 9/16; readiness
+for 5/10 and 10/16. Actual holding falls for 10/10 actors and 12/16 days,
+whereas uniform's intended reduction is larger for all ten actor means.
+These descriptive directions do not add independent samples to the crossed
+intervals or turn realized, post-intervention holding into an external control.
