@@ -24,7 +24,8 @@ passenger-improvement/CV/readiness/completion nonharm criterion. Primary
 mechanism contrast adds loss-group replacement to preserve: both minus
 preserve. Inspect its CV and release/holding cross-covariance changes alongside
 passenger time, journey, holding and readiness. Other arms are controls, not
-fallback winners. Report the factorial interaction and intervention doses.
+fallback winners. Report the factorial interaction, intervention doses and
+actual terminal dispatch-gap mean, variance and CV-squared.
 
 Use 16 fresh days 1931001-1931016, two original actors and three matched
 logical-event samplers: 96 cells, four full-day arms each, 384 rollouts. Pair

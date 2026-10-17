@@ -70,6 +70,8 @@ class ReleaseHoldingTest(unittest.TestCase):
             forward_predecessor_trip_id=1, last_station=SimpleNamespace(station_id=2))
         context = SimpleNamespace(forward_headway_s=10.)
         self.assertEqual(rule.observable_coordinates(bus, context), (40., -25., -5.))
+        rule.env.headway_events.previous_departure_event = lambda *args: dict(trip_id=2, time_s=79.)
+        self.assertEqual(rule.observable_coordinates(bus, context), (40., -25., -5.))
         rule.env.current_time = 60.
         with self.assertRaises(AssertionError):
             rule.observable_coordinates(bus, context)

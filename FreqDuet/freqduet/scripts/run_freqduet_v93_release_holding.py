@@ -27,6 +27,7 @@ CONTRASTS = dict(preserve_vs_late=("preserve", "late"), loss_vs_late=("loss_only
     preserve_added_to_loss=("no_gain_early", "loss_only"))
 GROUP_FIELDS = ("count", "expected_holding_reduction_s", "early_minus_late_loss",
     "release_gap_s", "realized_holding_gap_s", "other_elapsed_gap_s")
+METRICS = (*source.experiment.METRICS, "dispatch_gap_mean_s", "dispatch_gap_variance_s2", "dispatch_cv_squared")
 
 
 def compensation_delta(late, early, release_gap, holding_gap, target):
@@ -73,12 +74,11 @@ class ReleaseHolding(timing.TimingAudit):
         for row in self.departures[self.cursor:]:
             self.completed[row["trip_id"], row["station_id"], row["direction"]] = row
         self.cursor = len(self.departures)
-        previous = self.env.headway_events.previous_departure_event(bus.last_station.station_id, bus.direction)
-        if previous is None or previous["trip_id"] != bus.forward_predecessor_trip_id:
-            raise AssertionError("valid local context lacks its matched completed predecessor")
-        before = self.completed[int(previous["trip_id"]), int(bus.last_station.station_id), bool(bus.direction)]
-        if before["time_s"] != previous["time_s"] or before["time_s"] > self.env.current_time:
-            raise AssertionError("release compensation used an unmatched or future departure")
+        before = self.completed[int(bus.forward_predecessor_trip_id), int(bus.last_station.station_id), bool(bus.direction)]
+        # Another bus may have overwritten the recorder's latest departure since this context was captured.
+        ready_time = before["time_s"] + context.forward_headway_s
+        if not before["time_s"] <= ready_time <= self.env.current_time:
+            raise AssertionError("release compensation used a future departure or pre-action context")
         launch = self.launches[int(bus.trip_id)]
         held = float(bus.episode_hold_vehicle_seconds) - launch["holding_counter_at_launch"]
         if held < 0:
@@ -123,6 +123,9 @@ class ReleaseHolding(timing.TimingAudit):
         self.group_summary = {g: dict(zip(GROUP_FIELDS, row.tolist()), selected=self.selected_counts[g])
                               for g, row in self.groups.items()}
         self.coordinates = coordinate_moments(self.arrivals)
+        gaps = np.asarray(runner.env._actual_dispatch_gaps_s)
+        self.dispatch = dict(dispatch_gap_mean_s=float(gaps.mean()), dispatch_gap_variance_s2=float(gaps.var()),
+            dispatch_cv_squared=float(gaps.var() / gaps.mean() ** 2))
         np.testing.assert_allclose(self.coordinates["cv_squared"], self.summary["arrival"]["cv_squared"], atol=1e-10, rtol=0)
         if self.max_selected_holding_increase > 1e-10 or self.predicted_gain_change < -1e-10:
             raise AssertionError("replacement left V89's lower-holding/nonworse-local-gain group")
@@ -133,7 +136,7 @@ def replay(root, seed, day, rep, mode):
     row, events, _, holds = pilot.rollout(root, seed, day, "stochastic", 187000000 + seed + 100 * day + rep,
         [0.] * 4, f"v93_seed{seed}_day{day}_r{rep}_{mode}", probability_rule=rule, trace_observer=rule, credit_observer=credit)
     row.update(waiting_person_s=float(credit.stream.total[0]), onboard_person_s=float(credit.stream.total[1]),
-        backlog_trip_s=float(credit.stream.total[4]), holding_person_s=rule.holding_person_s)
+        backlog_trip_s=float(credit.stream.total[4]), holding_person_s=rule.holding_person_s, **rule.dispatch)
     return row, events, holds, rule
 
 
@@ -149,7 +152,7 @@ def run_cell(root, index):
         moments[mode], series[mode], events[mode] = rule.coordinates, rule.summary["arrival"], event
         rule.save(root / "records" / f"p{index}_{mode}.npz")
     effects = {name: {} for name in (*CONTRASTS, "interaction")}
-    for metric in source.experiment.METRICS:
+    for metric in METRICS:
         for name, value in contrasts({mode: row[metric] for mode, row in rows.items()}).items():
             effects[name][metric] = value
     covariance_effects = {}
@@ -188,7 +191,7 @@ def aggregate(root):
     result = dict(status="release_holding_counterfactual_complete", effects=stats, timing_effects=intervals(rows, "timing_effects"),
         by_seed={str(seed): dict(effects=intervals([r for r in rows if r["seed"] == seed], "effects"),
             timing_effects=intervals([r for r in rows if r["seed"] == seed], "timing_effects")) for seed in pilot.SEEDS},
-        absolute={mode: {m: float(np.mean([r["results"][mode][m] for r in rows])) for m in source.experiment.METRICS} for mode in MODES},
+        absolute={mode: {m: float(np.mean([r["results"][mode][m] for r in rows])) for m in METRICS} for mode in MODES},
         context_totals={mode: {g: {k: float(sum(r["contexts"][mode][g][k] for r in rows))
             for k in (*GROUP_FIELDS, "selected")} for g in GROUPS} for mode in MODES},
         primary_contrast="preserve_vs_late", mechanism_contrast="loss_added_to_preserve",
