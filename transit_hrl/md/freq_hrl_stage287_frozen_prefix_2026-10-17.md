@@ -60,29 +60,22 @@ before dispatch; qualify pilot before main prefix/continuation collection.
 ## Execution
 
 Seven focused unit tests passed. Freeze `t166452` on node004 reproduced all
-19,200 cached choices exactly, with zero fits or native episodes. Initial
-`t166434` stopped after action replay because the server lacked the old
-reserved-scene registration; only that 12,497-byte metadata file was transferred
-before retry. Frozen models remain server-only; the pulled receipt is 2,659 bytes.
+19,200 cached choices exactly, with zero fits. All 80 new-prefix capture tasks
+`t166511`-`t166590` completed with exit0. The initial 20 same-process pilots
+completed 99 episodes, with maximum RSS 680.64 MiB; main tasks reserve 1.5 GiB/CPU.
 
-Pilot `t166461`-`t166480`: all 20 tasks completed with exit0, 99 native episodes,
-maximum RSS 680.64 MiB, mean 27.53 seconds/episode. `t166495` qualified the
-software-only pilot without reading performance labels. Only a 2,668-byte
-pilot summary was pulled. Main prefix/continuation tasks reserve 1.5 GiB/CPU
-(over twice the pilot maximum), with no node pin or scientific contract change.
+Seal `t166591`: 435 disagreement states out of 540 in 90 scenes, 1,360 chunks
+and 104,448 planned native episodes. The initial main batch was stopped after
+cross-worker snapshot failures (126 failed, 1,360 cancelled including retries).
+It supplies no performance evidence.
 
-All 80 new-prefix capture tasks `t166511`-`t166590` completed with exit0.
-Seal `t166591` fixed 435 disagreement states out of 540 states in 90 scenes;
-the 1,360 continuation tasks `t166592`-`t167951` planned 104,448 native episodes.
-The main plan pull is 159,674 bytes; no snapshots, trajectories or checkpoints
-were pulled.
+Diagnostic `t168086` confirmed identical physical state in old/new examples:
+only caller Torch RNG differed. Native construction forks/restores that stream;
+frozen evaluation leaves it unchanged. Replay now restores the archived caller
+stream before the whole episode, retaining the full state/RNG check. Models,
+choices and future seeds are unchanged.
 
-The initial main batch failed the strict snapshot check across worker processes
-and was stopped: 126 failed and 1,360 cancelled, including automatic retries.
-It supplies no performance evidence. The original pilot captured and replayed
-in one process and did not cover this boundary. Native construction forks and
-restores the caller's Torch RNG; deterministic evaluation leaves it unchanged.
-Replay now restores the archived caller stream before starting each episode,
-retaining the original full state/RNG comparison. Models, choices and future
-seeds are unchanged. Main restart requires separate-worker checks on all six
-probes in all 20 archived pilot prefixes (240 identity/observer episodes).
+Separate-worker checks `t168087`-`t168106` cover all six probes in 20 archived
+pilot prefixes (240 identity/observer episodes). Main restart requires their
+qualification. Only small receipts/manifest were pulled, not snapshots,
+trajectories or checkpoints.
