@@ -43,5 +43,25 @@ variance/service-boundary identities. Review is read-only consumed-day data.
 Shards `t169701-t169704` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`;
 the live planner allocates 24 workers each on node002/004/005/006. Reuse smoke
 cells 0/48. Aggregate `t169706` waits for those exact four small markers.
-Compressed timing records stay on-server. Formal mechanism results are pending;
-main policy, actors, critics, dual and original gate remain unchanged.
+Compressed timing records stay on-server. Main policy, actors, critics, dual
+and original gate remain unchanged.
+
+All 192 paths and aggregation completed, exit 0/retry 0; all original V89
+endpoints and contexts are exact. Only the 37,375-byte summary was retrieved.
+Arrival CV-squared covariance-allocated changes at the baseline mean:
+release +0.001158, CI [-0.002215,+0.004939]; realized holding -0.002954,
+CI [-0.003578,-0.002329]; other elapsed +0.001636,
+CI [+0.000774,+0.002506]. Their sum is -0.000160, offset by mean
+normalization +0.000909. Both actors have negative holding and positive other
+elapsed components. These are allocations, not isolated causal effects.
+
+Mean headway -2.919 s is reconstructed entirely by the last-service boundary;
+first boundary and count-normalization contributions are exactly zero. All
+four calendar bands shorten mean headway; their variance-change intervals
+cross zero. Boundary accounting does not imply only late trips changed.
+Arrival predecessors change on 72/503,040 matched events; no identities are
+unmatched. A rare edge could still have disproportionate squared error.
+V92 will reuse saved primitives to split observed nonholding stop time from
+remaining elapsed, expose variance/cross-covariance terms, allocate endpoint
+changes, and quantify changed-predecessor CV contributions. No new rollout or
+controller admission is justified by V91 alone; the original joint gate fails.
