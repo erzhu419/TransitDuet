@@ -37,3 +37,21 @@ occurs on the first physical record after reset, with a regression test.
 Shards `t166407-t166410` cover `[0,144)`, `[144,288)`, `[288,432)`, `[432,576)`
 on node002/004/005/006, 72 workers each. Aggregate `t166411` waits for their exact
 four markers. No timing result or controller advantage is claimed at dispatch.
+
+All 576 paths and aggregation completed exit 0/retry 0, reproducing the original
+endpoints. Read-only review `t166432` passes nine tests. Recovery-minus-tape
+passenger effects average +82.57 person-s at 15-30min, -44.32 at 30-60min, and
+-1,054,921.40 after 60min; tail waiting/onboard contributions are -997,548.32 /
+-57,373.08 person-s. Tail passenger and cumulative CV intervals are negative in
+15/24 prefixes each, positive in none. Executed holding has no clear tail change;
+passenger holding exposure falls in 11/24 conditional intervals. Readiness and
+backlog tail intervals all include zero. Target-vehicle next-trip identities
+match in every pair, but other vehicle assignments can change.
+
+Recovery-minus-closed passenger costs increase in 8/24 early 0-15min intervals,
+with no negative intervals; all full-day passenger/CV/readiness intervals remain
+unresolved in V85. Feedback suppresses late waiting amplification, not simply
+total holding, and no stable readiness mediation is established. These are
+consumed-prefix conditional descriptions, not a new policy win. Next separate
+the early/late actors' mean logit preference from their centered state response,
+without suppressing feedback or updating actor/critic/dual weights.
