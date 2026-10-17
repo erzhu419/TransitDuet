@@ -31,3 +31,10 @@ concentrated adverse case. Missing downstream events remain missing. These are
 consumed-prefix mechanism diagnostics, not fresh-day confirmation or additive
 attribution of the complete deployed policy effect. Decide on system credit or
 control changes only after examining repeatability and noise.
+
+Source `bd0f737cc7`; smoke `t166295` passed all nine unit tests and complete
+prefix/native/tape checks for both actors. Reference task `t166296` uses 48
+workers. Shards `t166298-t166301` cover `[0,669)`, `[669,1338)`, `[1338,2006)`,
+`[2006,2688)` on node002/004/005/006 with 48/48/48/49 workers. Aggregate
+`t166302` waits for these exact four markers. Only the 70-byte smoke marker was
+pulled manually. The matrix is pending; no scientific or promotion claim yet.
