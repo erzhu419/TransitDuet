@@ -83,6 +83,17 @@ def prefix_path(run, key):
     return directory(run)/"prefixes"/Path(*map(str, key))
 
 
+def task_receipt_dir(run, phase, key=None, probe=None, bank=None, index=None, chunk=None):
+    path = directory(run)/"receipts"/phase
+    if key is not None:
+        path /= Path(*map(str, key))
+    if probe is not None:
+        path /= f"probe{probe}/{bank}"
+    if index is not None:
+        path /= f"state{index}/chunk{chunk}"
+    return path
+
+
 def cube(rows):
     groups = list(dict.fromkeys((r["root"], r["scenario"]) for r in rows))
     replicas = list(dict.fromkeys(r["replica"] for r in rows))
@@ -210,8 +221,10 @@ def capture(run, key):
     write_json(path/"controls.json", {"raw": raw.tolist(), "stage247": old.tolist(), "logits": logits.tolist()})
     with (path/"prefix_refs.pkl").open("wb") as f:
         pickle.dump({"prefix": plan.prefix, "snapshots": plan.snapshots}, f, protocol=pickle.HIGHEST_PROTOCOL)
-    write_json(path/"receipt.json", {"contract": contract(), "key": list(key), "software_qualified": True,
-        "scene_seed": scene_seed(key), "native_episodes": 1, "states": len(rows), "fixed_profiles": len(raw)})
+    receipt = {"contract": contract(), "key": list(key), "software_qualified": True,
+        "scene_seed": scene_seed(key), "native_episodes": 1, "states": len(rows), "fixed_profiles": len(raw)}
+    write_json(path/"receipt.json", receipt)
+    return receipt
 
 
 def rollout(run, key, probe, draws, candidates, output):
@@ -277,10 +290,12 @@ def pilot(run, key):
     proposal = proposals(rows, raw, logits, banks[0])
     sealed = rule.seal(raw, old, proposal, banks[1], np.array([[[0]]]))
     rule.summarize(sealed, banks[2], np.array([[[0]]]))
-    write_json(path/"pilot/receipt.json", {"contract": contract(), "software_qualified": True,
+    receipt = {"contract": contract(), "software_qualified": True,
         "key": list(key), "probe": probe, "native_episodes": 1+sum(r["native_episodes"] for r in receipts),
         "exact_identities": sum(r["exact_identities"] for r in receipts), "frozen_profiles": len(raw),
-        "max_peak_rss_MiB": max(r["peak_rss_MiB"] for r in receipts), "outcomes_used_for_selection": False})
+        "max_peak_rss_MiB": max(r["peak_rss_MiB"] for r in receipts), "outcomes_used_for_selection": False}
+    write_json(path/"pilot/receipt.json", receipt)
+    return receipt
 
 
 def pilot_report(run):
@@ -396,20 +411,23 @@ def main():
     if a.phase in ("pilot", "capture", "menus") and (key not in keys(a.role) or (a.phase == "pilot") != (a.role == "pilot")):
         p.error("Unregistered prefix")
     if a.phase == "pilot":
-        pilot(a.run_name, key)
+        receipt = pilot(a.run_name, key)
     elif a.phase == "capture":
-        capture(a.run_name, key)
+        receipt = capture(a.run_name, key)
     elif a.phase == "menus":
-        rollout(a.run_name, key, a.probe, BANKS[a.bank], list(range(6)), menu_path(a.run_name, key, a.probe, a.bank))
+        _, receipt = rollout(a.run_name, key, a.probe, BANKS[a.bank], list(range(6)), menu_path(a.run_name, key, a.probe, a.bank))
     elif a.phase == "evaluate":
         plan = read(directory(a.run_name)/"seal/result.json")
         if a.state_index not in plan["active_indices"] or a.chunk is None:
             p.error("Unregistered frozen evaluation task")
         state = read(directory(a.run_name)/"sealed_raw/primary.json")["states"][a.state_index]
-        rollout(a.run_name, tuple(state["key"]), state["probe"], BANKS["evaluation"][a.chunk*8:a.chunk*8+8],
+        _, receipt = rollout(a.run_name, tuple(state["key"]), state["probe"], BANKS["evaluation"][a.chunk*8:a.chunk*8+8],
             state["candidates"], evaluation_path(a.run_name, a.state_index, a.chunk))
     else:
         {"freeze": freeze, "pilot-report": pilot_report, "seal": seal, "report": report}[a.phase](a.run_name)
+    if a.phase in ("pilot", "capture", "menus", "evaluate"):
+        write_json(task_receipt_dir(a.run_name, a.phase, key if a.phase != "evaluate" else None,
+            a.probe, a.bank, a.state_index, a.chunk)/"receipt.json", receipt)
     print("ABSTENTION_TRANSFER_PHASE_COMPLETE "+a.phase, flush=True)
 
 

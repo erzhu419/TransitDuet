@@ -118,6 +118,10 @@ class AbstentionTransferTest(unittest.TestCase):
         self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
         self.assertNotIn(str(spec.directory("unit294")), task["stage_input_paths"])
         self.assertEqual(task["stage_input_paths"][-1], str(spec.directory("unit294")/"inputs"))
+        self.assertEqual(task["result_dir"], str(spec.task_receipt_dir("unit294", "menus", spec.keys()[0], spec.PROBES[0], "proposal")))
+        self.assertIn("/receipts/capture/", submit.task_specification("unit294", "capture", spec.keys()[0])["result_dir"])
+        self.assertIn("/receipts/pilot/", submit.task_specification("unit294", "pilot", spec.keys("pilot")[0])["result_dir"])
+        self.assertIn("/receipts/evaluate/", submit.task_specification("unit294", "evaluate", index=0, chunk=0)["result_dir"])
         self.assertEqual(len(submit.tasks("unit294", "capture")), 240)
         self.assertEqual(len(submit.tasks("unit294", "menus")), 2880)
         previous = {**task, "status": "running", "exit_code": None}

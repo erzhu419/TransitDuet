@@ -27,14 +27,8 @@ def task_specification(run, phase, key=None, probe=None, bank=None, index=None, 
     if index is not None:
         command += ["--state-index", str(index), "--chunk", str(chunk)]
         suffix += f"/state{index}/chunk{chunk}"
-    if phase == "pilot":
-        output = spec.prefix_path(run, key)/"pilot"
-    elif phase == "capture":
-        output = spec.prefix_path(run, key)
-    elif phase == "menus":
-        output = spec.menu_path(run, key, probe, bank)
-    elif phase == "evaluate":
-        output = spec.evaluation_path(run, index, chunk)
+    if phase in ("pilot", "capture", "menus", "evaluate"):
+        output = spec.task_receipt_dir(run, phase, key, probe, bank, index, chunk)
     else:
         output = spec.directory(run)/phase
     # The result root itself is never staged: it contains server-only snapshots.
