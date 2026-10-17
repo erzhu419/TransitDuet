@@ -72,6 +72,12 @@ not total harm. Preserve reduces raw arrival variance -393.64 s2
 The all-twelve crossed result also passes; the original-two fresh-day CV
 interval crosses zero. Keep both facts, not a universal per-actor claim.
 
+Server-side axis review (16,655 bytes including the V95 reference budget):
+the ten-actor averaged journey/readiness effects are negative on all 16 days;
+CV-squared improves on 13/16. Both-minus-preserve improves CV on 9 days and
+worsens it on 7, versus five/five at the actor axis. These are descriptive
+directions, not extra independent samples or substitutes for crossed intervals.
+
 Next: V95 tests a compensation-blind mixture, with its scalar fixed only from
 V93 observable B200 holding budgets. This separates selector evidence from
 simply reducing intervention intensity, subject to measured closed-loop dose

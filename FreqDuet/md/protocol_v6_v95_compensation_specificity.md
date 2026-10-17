@@ -38,3 +38,15 @@ or claim against fixed-headway follows from this experiment.
 All prepare/statistics/tests/replays run through scheduler on node001-node006
 in the existing isolated CPU env. Retrieve only prepare/smoke/shard/summary
 markers and small statistics. Checkpoints and timing arrays stay on-server.
+
+Frozen source `6117e4485b`. Prepare `t173082` reports p=0.5248199759350295 and
+the V94 axis review, with no new rollout. Smoke `t173083` gates batch shards
+`t173084-t173087`: four live-plan ranges of 120 cells, 60 workers each, soft-
+preferred to node002/004/005/006 and allowed only on node001-node006.
+Aggregate `t173088` waits for their four completion markers. No local simulation
+or statistical fitting is used; formal cells remain gated until smoke passes.
+
+Smoke now passes all six tests and ten full-day paths on node004, including
+exact native/all-replacement endpoints, event samplers and executed holding
+for both actors. Retrieved only its 139-byte done marker. Formal mixture
+cells can now dispatch; no controller or training update is authorized.
