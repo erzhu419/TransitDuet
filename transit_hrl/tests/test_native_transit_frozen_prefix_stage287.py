@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import numpy as np
+import torch
 
 from scripts import run_native_transit_frozen_prefix_stage287 as spec
 from scripts import submit_native_transit_frozen_prefix_stage287_scheduleurm as submit
@@ -17,6 +18,19 @@ def profile(raw=0, **choices):
 
 
 class FrozenPrefixTest(unittest.TestCase):
+    def test_cross_worker_caller_torch_state_restored_before_native_constructor(self):
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(287)
+            expected = torch.get_rng_state()
+            snapshot = {"rng": {"torch": expected.tolist()}}
+            torch.manual_seed(123)
+            self.assertFalse(torch.equal(expected, torch.get_rng_state()))
+            spec.restore_caller_torch_rng(snapshot)
+            with torch.random.fork_rng(devices=[]):
+                torch.manual_seed(456)
+                torch.rand(100)
+            self.assertTrue(torch.equal(expected, torch.get_rng_state()))
+
     def test_actual_within_profile_divergence_not_cross_profile_variation(self):
         self.assertEqual(learning.active_union([profile(0), profile(1)], [2]*6), [[]]*6)
         self.assertEqual(learning.active_union([profile(0, observed_level=1), profile(3)], [2]*6), [[0, 1, 2]]*6)
@@ -91,7 +105,37 @@ class FrozenPrefixTest(unittest.TestCase):
         self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
         self.assertNotIn("fit", task["cmd"])
         self.assertEqual(submit.task_specification("unit_frozen_prefix", "collect", main[0], 0)["ram_mb"], 1536)
+        self.assertTrue(submit.task_specification("unit_frozen_prefix", "collect", main[0], 0)["signature"].endswith("/rng_repaired"))
         self.assertEqual(json.loads(json.dumps(spec.contract())), spec.contract())
+
+    def test_report_draw_indices_and_inactive_prefix_denominator(self):
+        keys = [("bridge", 397, "low_noise", 1), *[("new", 397, "low_noise", i) for i in range(8)]]
+        saved = {}
+
+        def read(path):
+            role = "bridge" if "bridge" in path.parts else "new"
+            inactive = role == "new" and path.parent.name == "0" and path.name == "choices.json"
+            if path.name == "choices.json":
+                return {"profiles": [profile() if inactive else profile(0, action_level=1, observed_level=2)],
+                    "unions": [[] if inactive else [0, 1, 2] for _ in range(6)]}
+            if path.name == "receipt.json":
+                return {"software_qualified": True, "contract": spec.contract()}
+            self.assertEqual(path.name, "labels.json")
+            return [{"probe_ordinal": p, "draw": d,
+                "values": {"0": [0.]*4, "1": [-1., 0., -1., -1.], "2": [-2., 0., -2., -2.]}}
+                for p in range(6) for d in spec.chunks(role)[int(path.parent.name)]]
+
+        with patch.object(spec, "prefixes", return_value=keys), patch.object(spec, "read", side_effect=read), \
+                patch.object(spec, "write_json", side_effect=lambda path, data: saved.update({path.name: data})), \
+                patch.object(spec, "replay", side_effect=AssertionError("Report must not simulate")):
+            spec.report("unit_frozen_prefix")
+        result = saved["result.json"]
+        self.assertTrue(result["joint_primary_passed"])
+        self.assertEqual(result["groups"]["new"]["prefixes"], 8)
+        self.assertEqual(result["groups"]["new"]["states"], 48)
+        self.assertEqual(result["groups"]["new"]["contrasts"]["vs_raw_observed_level"]["mean"]["cost"], -1.75)
+        self.assertEqual(result["groups"]["bridge"]["contrasts"]["vs_raw_observed_level"]["mean"]["cost"], -2.)
+        json.dumps(result, allow_nan=False)
 
 
 if __name__ == "__main__":

@@ -50,14 +50,16 @@ Bridge evidence has conditional MC uncertainty only, with one scene per stratum.
 
 New prefixes remain within the two historical frozen lower roots and five
 regimes. This is a single-intervention test, not new-domain, training-seed or
-full learned-HRL validation. Stage248/253 confirmation labels remain closed.
+full learned-HRL validation. Primary contrasts measure improvements relative
+to uniform and Stage247; absolute benefit against raw is reported separately.
+Stage248/253 confirmation labels remain closed.
 
 Run: `native_transit_frozen_prefix_stage287_20261017_r1`. Register frozen code
 before dispatch; qualify pilot before main prefix/continuation collection.
 
 ## Execution
 
-Five focused unit tests passed. Freeze `t166452` on node004 reproduced all
+Seven focused unit tests passed. Freeze `t166452` on node004 reproduced all
 19,200 cached choices exactly, with zero fits or native episodes. Initial
 `t166434` stopped after action replay because the server lacked the old
 reserved-scene registration; only that 12,497-byte metadata file was transferred
@@ -68,3 +70,19 @@ maximum RSS 680.64 MiB, mean 27.53 seconds/episode. `t166495` qualified the
 software-only pilot without reading performance labels. Only a 2,668-byte
 pilot summary was pulled. Main prefix/continuation tasks reserve 1.5 GiB/CPU
 (over twice the pilot maximum), with no node pin or scientific contract change.
+
+All 80 new-prefix capture tasks `t166511`-`t166590` completed with exit0.
+Seal `t166591` fixed 435 disagreement states out of 540 states in 90 scenes;
+the 1,360 continuation tasks `t166592`-`t167951` planned 104,448 native episodes.
+The main plan pull is 159,674 bytes; no snapshots, trajectories or checkpoints
+were pulled.
+
+The initial main batch failed the strict snapshot check across worker processes
+and was stopped: 126 failed and 1,360 cancelled, including automatic retries.
+It supplies no performance evidence. The original pilot captured and replayed
+in one process and did not cover this boundary. Native construction forks and
+restores the caller's Torch RNG; deterministic evaluation leaves it unchanged.
+Replay now restores the archived caller stream before starting each episode,
+retaining the original full state/RNG comparison. Models, choices and future
+seeds are unchanged. Main restart requires separate-worker checks on all six
+probes in all 20 archived pilot prefixes (240 identity/observer episodes).

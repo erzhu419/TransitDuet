@@ -1,5 +1,6 @@
 {
   "source_revision": "8deee83417",
+  "initial_native_runtime_revision": "63240b489d",
   "freeze_failed_metadata_only": "t166434",
   "freeze_qualified": "t166452",
   "pilot_tasks": [
@@ -8,5 +9,14 @@
     "t166471", "t166472", "t166473", "t166474", "t166475",
     "t166476", "t166477", "t166478", "t166479", "t166480"
   ],
-  "main_tasks_submitted": false
+  "pilot_report_task": "t166495",
+  "main_prefix_tasks": {"first": "t166511", "last": "t166590", "count": 80, "status": "done", "exit_code": 0},
+  "main_seal_task": "t166591",
+  "initial_main_continuation_tasks": {"first": "t166592", "last": "t167951", "count": 1360},
+  "initial_main_status_counts_including_automatic_retries": {"failed": 126, "cancelled": 1360},
+  "initial_main_valid_for_analysis": false,
+  "main_native_episodes_planned": 104448,
+  "main_ram_mb_per_cpu": 1536,
+  "main_tasks_submitted": false,
+  "main_restart_requires": "replay-pilot/result.json"
 }

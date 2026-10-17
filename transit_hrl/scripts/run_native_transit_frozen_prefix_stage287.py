@@ -219,6 +219,13 @@ def paired_values(branch, baseline):
     return [cost, fleet, cost-fleet, wait]
 
 
+def restore_caller_torch_rng(snapshot):
+    import torch
+    # Native construction forks/restores this stream; frozen evaluation does not
+    # consume it. Recreate the source caller's state before the whole episode.
+    torch.set_rng_state(torch.tensor(snapshot["rng"]["torch"], dtype=torch.uint8))
+
+
 def replay(run, key, jobs, output):
     path = prefix_path(run, key)
     sealed = read(path/"choices.json")
@@ -235,12 +242,14 @@ def replay(run, key, jobs, output):
         seed = future_seed(*key, probe, draw)
         audit = partial(NativeContinuationValueAudit, continuation_seed=seed)
         raw = output/f"probe{probe}_draw{draw}"
+        restore_caller_torch_rng(reference.snapshot)
         baseline, plan = source.shared.episode(root, scenario, scene, raw/"observer", checkpoint, model,
             probe, reference=reference, plan_class=audit)
         source.qualify_observer(baseline)
         branches, values = [], {}
         order = [registered["original_choice"], *[c for c in candidates if c != registered["original_choice"]]]
         for c in order:
+            restore_caller_torch_rng(plan.snapshot)
             branch, branch_plan = source.shared.episode(root, scenario, scene, raw/f"candidate{c}",
                 checkpoint, model, probe, candidate=c, reference=plan, plan_class=audit)
             source.shared.qualify(branch, baseline, candidate=c)
@@ -285,6 +294,27 @@ def pilot_report(run):
         "outcomes_used_for_selection": False})
 
 
+def replay_pilot(run, key):
+    start = time.monotonic()
+    sealed = read(prefix_path(run, key)/"choices.json")
+    jobs = [(p, 0, [row["original_choice"]]) for p, row in enumerate(sealed["rows"])]
+    result = replay(run, key, jobs, prefix_path(run, key)/"replay_pilot_raw")
+    write_json(prefix_path(run, key)/"replay_pilot.json", {"protocol": EXPERIMENT_PROTOCOL,
+        "contract": contract(), "key": list(key), **result, "outcomes_used_for_selection": False,
+        "elapsed_s": time.monotonic()-start, "peak_rss_MiB": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024.})
+
+
+def replay_pilot_report(run):
+    rows = [read(prefix_path(run, k)/"replay_pilot.json") for k in prefixes(pilot=True)]
+    if any(not r["software_qualified"] or r["contract"] != contract() or r["native_episodes"] != 12
+            or r["state_futures"] != 6 or r["exact_identities"] != 6 or r["outcomes_used_for_selection"] for r in rows):
+        raise ValueError("Cross-worker replay must qualify all six archived probes")
+    write_json(directory(run)/"replay-pilot/result.json", {"protocol": EXPERIMENT_PROTOCOL,
+        "contract": contract(), "software_qualified": True, "prefixes": 20, "states": 120,
+        "native_episodes": 240, "outcomes_used_for_selection": False,
+        "max_peak_rss_MiB": max(r["peak_rss_MiB"] for r in rows)})
+
+
 def chunks(role):
     return [list(range(i, i+4)) for i in (range(1, 33, 4) if role == "bridge" else range(0, 64, 4))]
 
@@ -310,8 +340,8 @@ def seal_main(run):
 
 def collect(run, key, chunk):
     start = time.monotonic()
-    if not read(directory(run)/"pilot/result.json")["software_qualified"]:
-        raise ValueError("Native pilot must qualify before main continuation collection")
+    if not read(directory(run)/"replay-pilot/result.json")["software_qualified"]:
+        raise ValueError("Cross-worker replay must qualify before main continuation collection")
     sealed = read(prefix_path(run, key)/"choices.json")
     jobs = [(p, draw, candidates) for p, candidates in enumerate(sealed["unions"]) if candidates for draw in chunks(key[0])[chunk]]
     output = prefix_path(run, key)/"continuations"/str(chunk)
@@ -348,25 +378,26 @@ def report(run):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-name", required=True)
-    p.add_argument("--phase", choices=("freeze", "pilot", "pilot-report", "prefix", "seal-main", "collect", "report"), required=True)
+    p.add_argument("--phase", choices=("freeze", "pilot", "pilot-report", "prefix", "seal-main", "replay-pilot", "replay-pilot-report", "collect", "report"), required=True)
     p.add_argument("--role", choices=("bridge", "new", "pilot_new"))
     p.add_argument("--seed", type=int, choices=ROOTS)
     p.add_argument("--scenario", choices=SCENARIOS)
     p.add_argument("--replica", type=int)
     p.add_argument("--chunk", type=int)
     a = p.parse_args()
-    if a.phase in ("freeze", "pilot-report", "seal-main", "report"):
-        {"freeze": freeze, "pilot-report": pilot_report, "seal-main": seal_main, "report": report}[a.phase](a.run_name)
+    if a.phase in ("freeze", "pilot-report", "seal-main", "replay-pilot-report", "report"):
+        {"freeze": freeze, "pilot-report": pilot_report, "seal-main": seal_main,
+            "replay-pilot-report": replay_pilot_report, "report": report}[a.phase](a.run_name)
     else:
         key = a.role, a.seed, a.scenario, a.replica
-        if key not in prefixes(pilot=a.phase == "pilot"):
+        if key not in prefixes(pilot=a.phase in ("pilot", "replay-pilot")):
             p.error("Prefix is not registered for this phase")
         if a.phase == "collect":
             if a.chunk not in range(len(chunks(a.role))):
                 p.error("Unregistered continuation chunk")
             collect(a.run_name, key, a.chunk)
         else:
-            (pilot if a.phase == "pilot" else capture)(a.run_name, key)
+            {"pilot": pilot, "replay-pilot": replay_pilot, "prefix": capture}[a.phase](a.run_name, key)
     print("FROZEN_PREFIX_PHASE_COMPLETE "+a.phase, flush=True)
 
 
