@@ -42,3 +42,11 @@ This consumed-day benchmark is not a new independent V96 confirmation.
 All tests/replays/statistics use scheduler on node001-node006 in the dedicated
 CPU env. Only smoke/shard/summary artifacts sync locally; all checkpoints,
 per-cell results and timing arrays remain on-server.
+
+Frozen source `e5da22c51b`; smoke `t173135` passes four tests and five full-day
+paths on node004. Original early sampling/holding paths, cached V96 native
+metrics, passive fixed recording and the same-day physical contract all match.
+Retrieved only its 126-byte marker. Four live-planned 83-worker shards
+`t173136-t173139` cover [0,248), [248,496), [496,744), [744,992), soft-preferred
+to node002/004/005/006 and allowed only on node001-node006. Aggregate `t173141`
+waits for all four small completion markers. No baseline result is claimed yet.
