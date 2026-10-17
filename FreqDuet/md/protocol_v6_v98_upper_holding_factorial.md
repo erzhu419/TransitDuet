@@ -43,3 +43,32 @@ Live planning allocated 39 available physical workers: `t175844` [0,296) with
 [886,1280) with 12. Preferences are node002/004/005/006, with only node001-006
 allowed and no hard pins. Aggregate `t175848` waits for all four shard markers.
 No V98 outcome or policy qualification is claimed before aggregation.
+
+Completed all tasks with exit 0 and no retries on the formal shards. Retrieved
+only the 254,962 B summary. The same ten actors and 32 days are crossed, after
+sampler averaging; deterministic zero corners are shared, not extra replicates.
+
+| Difference | Journey min | Arrival CV-squared | Readiness s |
+| --- | --- | --- | --- |
+| Preserve minus zero, B200 upper | +1.98236 [1.76430,2.24277] | -0.12756 [-0.13633,-0.11885] | +410.52 [357.54,462.55] |
+| Preserve minus zero, fixed upper | +1.98306 [1.76250,2.24611] | -0.12770 [-0.13644,-0.11913] | +410.35 [357.19,462.49] |
+| B200 minus fixed, preserve | +0.00008 [-0.00814,0.00824] | +0.00007 [-0.00020,0.00042] | +0.15 [-1.15,1.59] |
+| B200 minus fixed, zero | +0.00078 [-0.00126,0.00314] | -0.00008 [-0.00042,0.00029] | -0.02 [-0.07,0.02] |
+| Holding-by-upper interaction | -0.00070 [-0.00884,0.00750] | +0.00015 [-0.00032,0.00065] | +0.17 [-1.12,1.61] |
+
+Under both uppers, all ten actor means and all 32 day means have higher journey
+and readiness costs but lower CV-squared with preserve. Every actor-specific
+holding-effect CI has those same signs. Completed/unlaunched differences are
+zero. An isolated seed's small CV interaction (12161) does not replace the
+unresolved overall interaction or justify a new gate. Mean actual holding is
+283.44/283.40 s per trip under B200/fixed; zero is exactly zero. At B200 upper,
+extra onboard exposure is 1,717,345 person-s [1,655,070,1,777,520], extra waiting
+677,005 [425,696,991,666]; these are outcome components, not mediation effects.
+
+Decision: the fixed gap is almost entirely reproduced by the holding regime
+contrast under these deployed uppers. Do not promote zero: it loses regularity.
+Retain the V96 partial positive, stop split/p tuning, and prioritize lower
+system-cost credit. Upper and interaction CIs crossing zero do not establish
+equivalence or rule out benefits from a different upper. V99 first audits actual
+upper authority and completed lower reward components with passive, endpoint-
+matched replays; no new controller training or promotion.
