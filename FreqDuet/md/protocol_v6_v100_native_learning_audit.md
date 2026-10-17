@@ -39,3 +39,17 @@ Limitations: two already-consumed demand days, not a fresh efficacy test.
 Bellman consistency is not action-value truth. Finite native soft-return
 errors include continuation noise and state aliasing; they do not establish
 counterfactual action rankings or system passenger-cost calibration.
+
+Source `fbfb9f9d9d`. Prepare `t175920` completed on node004: all four focused
+tests pass and the V99 reward identity holds. Retrieved only its 19,465-byte
+summary. Native smoke `t175921` gates five CPU-batch shards `t175922-t175926`
+covering [0,2), [2,7), [7,12), [12,16), [16,20), using 2/5/5/4/4 workers.
+Aggregate `t175927` waits for all five shard markers. No V100 calibration
+result is claimed before those paths and native-contract checks complete.
+
+Native smoke passed on node004: exact cached endpoints/action counts and full
+timing path, one-to-one decision/transition identity, native probabilities and
+all local-trip next-state chains. The raw headway reward plus regularity minus
+load exactly reconstructs shaped reward, with no unexplained penalty. This is
+instrumentation admission, not evidence of actor/critic correctness. The smoke
+row is reused in the formal 20-path budget.

@@ -32,4 +32,23 @@ two complete endpoint/action-count/timing-path comparisons; retrieved only its
 [13,22), [22,31), [31,40), with 4/9/9/9/9 workers, soft-preferred to
 node001/002/004/005/006 and allowed only on node001-node006. The two smoke rows
 are reused, so total replay count stays 40. Aggregate `t175897` waits for all
-five markers. No V99 effect or objective-repair result is claimed yet.
+five markers. All five shards and aggregate have now completed, exit 0,
+with no formal retry; all 40 cached endpoints/action counts match exactly.
+
+Upper callbacks/plans are 262/88 per day. Mean path target-deviation RMS is
+1.146 s (preserve) and 1.056 s (zero); largest preserve deviation is 4.528 s.
+Planning is active, but deployed authority is very small relative to 360 s.
+
+Server-side V100 prepare joins the V99 reward and physical ledgers on the same
+20 actor/day pairs. Preserve-minus-zero shaped reward is +881.635/day:
++842.361 other reward, +63.312 regularity adjustment, minus 24.038 observed-load
+penalty. Yet journey is +1.913930 min, readiness +437.977 s, holding +282.653
+s/trip and CV squared -0.159299. Reward and passenger cost both increase in
+20/20 cells, 10/10 actor means and 2/2 day means. This supports objective
+misalignment, not an actor/critic failure verdict. `other` is the remainder
+after the two named terms; V100 captures raw reward to test its attribution.
+
+Next: audit native B200 actor/critic against their own entropy/cost-aware
+learning contract, not preserve's off-policy continuation or passenger cost.
+No policy switch or reward-coefficient retuning. These two consumed days are
+a source audit; the broader V98 experiment supplies replication evidence.
