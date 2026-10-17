@@ -1,0 +1,30 @@
+# V86: passive feedback timing audit
+
+V85 suppresses the full-day amplification under taped continuation, but saved
+endpoints do not distinguish along-route correction from return/dispatch costs.
+Existing per-cell logs contain no temporal ledger. No controller candidate,
+new cutoff, actor/critic/dual update or main-policy change follows this result.
+
+Replay the existing 45s intervention only: all 24 consumed prefixes, eight
+matched futures and the same three continuation regimes, 576 labelled paths.
+Zero/45 action-response inference remains V85's endpoint result; this audit
+targets fixed-45 regime differences. Every replay must match its V84/V85
+metrics and local witnesses, including original native whole paths in smoke.
+
+Sample exact existing system credit every 300s, plus target and day end:
+waiting, onboard, dispatch backlog, executed vehicle/passenger holding, launched
+count and readiness-delay sum. Preserve cleared-tail accounting. Record arrival
+headway moments and the existing return/actual-launch ledgers, with bus and trip
+identity; changing a bus's next trip is not a matched-trip latency comparison.
+CV is cumulative, not an additive exposure. Prefix launch means omit pending
+trips, so retain counts and backlog instead of claiming prefix readiness safety.
+
+Compare recovery minus each control on 0-15, 15-30, 30-60 minutes and the later
+tail, using paired eight-future intervals within each prefix. Recovery and taped
+exposures must agree through 15 minutes. This locates recorded cost changes;
+it does not identify natural mediation or establish fresh-day generalization.
+
+Tests, instrumentation smoke, replays and aggregation all use scheduler on
+node001-node006. Keep detailed timelines/ledgers server-side, pull small summary
+logs/markers only. Inspect whether cost divergence tracks subsequent holding
+or return/launch changes before choosing a control-credit modification.

@@ -52,9 +52,11 @@ def due_at_return(env, direction):
 
 
 def rollout(root, seed, scenario, mode, sampler_seed, theta, label, save_training=False,
-            training_path=None, probability_rule=step.probabilities, trace_observer=None, event_uniforms=None):
+            training_path=None, probability_rule=step.probabilities, trace_observer=None, event_uniforms=None,
+            credit_observer=None):
     _, Runner, load_config, runtime_torch = joint.optimized_runtime(root)
-    observer, moments = CreditObserver(), ArrivalMoments()
+    observer = CreditObserver() if credit_observer is None else credit_observer
+    moments = ArrivalMoments()
     uniforms = event.EventUniforms(sampler_seed) if event_uniforms is None else event_uniforms
     spent, records = defaultdict(float), []
     policy, encoder = None, None
