@@ -27,3 +27,20 @@ All computations and tests use scheduler on node001-node006. Retrieve small
 summaries only; actors, critics, dual and main policy remain frozen. The next
 control change depends on noise, follower error and actual arrival propagation
 evidence, not on searching a gate on these days.
+
+Source `0714930e21`, server bundle suffix `_bundle1`. Initial packaging missed
+the reused V81/V82 helpers; startup failed before replay and its seven tasks
+were cancelled. The completed bundle leaves algorithm/action laws unchanged.
+Smoke `t169641` passes twelve tests and exact full native/conditional paths for
+both actors, including completed primary-group follower labels. Review
+`t169642` completed: CV signs differ across repeats on 8/16 days. Combined
+untruncated between-day variance is 4.59e-5, CI [-9.72e-6,1.03e-4]; actor
+12011 alone has a positive interval [7.16e-6,2.26e-4]. Noise alone is not an
+adequate explanation. No-gain-minus-gain CV-squared is -0.005899,
+CI [-0.009856,-0.001810], with different intervention doses as noted above.
+
+Shards `t169645-t169648` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`;
+the planner allocates 24 workers each on node002/004/005/006. Smoke cells 0/48
+are reused. Aggregate `t169649` waits for those four small completion markers.
+Only 7,241 bytes of review data and the smoke marker were additionally pulled.
+Formal mechanism results are pending; no controller is admitted.
