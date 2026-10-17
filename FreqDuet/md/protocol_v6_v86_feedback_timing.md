@@ -14,7 +14,7 @@ metrics and local witnesses, including original native whole paths in smoke.
 Sample exact existing system credit every 300s, plus target and day end:
 waiting, onboard, dispatch backlog, executed vehicle/passenger holding, launched
 count and readiness-delay sum. Preserve cleared-tail accounting. Record arrival
-headway moments and the existing return/actual-launch ledgers, with bus and trip
+headway moments through each sample timestamp and existing return/launch ledgers, with bus and trip
 identity; changing a bus's next trip is not a matched-trip latency comparison.
 CV is cumulative, not an additive exposure. Prefix launch means omit pending
 trips, so retain counts and backlog instead of claiming prefix readiness safety.
@@ -28,3 +28,12 @@ Tests, instrumentation smoke, replays and aggregation all use scheduler on
 node001-node006. Keep detailed timelines/ledgers server-side, pull small summary
 logs/markers only. Inspect whether cost divergence tracks subsequent holding
 or return/launch changes before choosing a control-credit modification.
+
+Source `2e72a9fbd9`; smoke `t166406` passes six tests, four native path checks,
+three existing 45s endpoint/witness checks and pre-release exposure identity.
+An earlier observer attached before protocol initialization; it failed before
+simulation and its five queued dependents were cancelled. Initialization now
+occurs on the first physical record after reset, with a regression test.
+Shards `t166407-t166410` cover `[0,144)`, `[144,288)`, `[288,432)`, `[432,576)`
+on node002/004/005/006, 72 workers each. Aggregate `t166411` waits for their exact
+four markers. No timing result or controller advantage is claimed at dispatch.

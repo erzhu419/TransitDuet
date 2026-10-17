@@ -30,3 +30,19 @@ Shards `t166317-t166320` passed their smoke dependency and cover `[0,97)`,
 `[97,192)`, `[192,288)`, `[288,384)` on
 node002/004/005/006, 49/48/48/48 workers. Aggregate `t166321` waits for those
 exact markers. No V85 outcome has been used to change a controller.
+
+All 384 labels and aggregation completed exit 0/retry 0. Read-only review
+`t166390` (source `a2ea14a985`) passes two tests and reproduces original response
+means while separately computing same-action regime differences. For action
+45s, recovery-minus-recorded passenger/CV intervals are negative in 15/24
+prefixes and positive in none. Recovery-minus-closed intervals contain zero in
+all 24 for passenger, CV and readiness. Readiness versus recorded is likewise
+unresolved. These are conditional eight-future, unadjusted descriptive intervals,
+not equivalence tests or independent training-seed confirmation.
+
+The first recovered decision occurs 0-40s after the 900s deadline; all 328
+executed non-cached arms have zero pre-release command mismatches. Later feedback
+can suppress taped-path amplification, but full-day endpoints cannot locate
+when waiting/onboard costs accrue or attribute them to vehicle turnover.
+Keep the main policy and actors/critics/dual frozen. V86 adds passive temporal
+credit and return/launch records to existing 45s paths, not another controller.
