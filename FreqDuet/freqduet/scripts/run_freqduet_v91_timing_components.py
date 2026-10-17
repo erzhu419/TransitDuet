@@ -178,6 +178,8 @@ class TimingAudit(source.ConditionalCross):
         self.summary = dict(arrival=timing_series(self.arrivals), departure=timing_series(departures),
             departure_support_matches_arrivals=True,
             mean_readiness_s=float(np.mean([v["readiness_s"] for v in self.launches.values()])))
+        np.testing.assert_allclose(self.summary["mean_readiness_s"],
+            runner.env._measurement_details["fleet_readiness_delay_mean_s"], atol=1e-10, rtol=0)
         self.env, self.buses = None, {}
 
     def save(self, path):
@@ -196,7 +198,6 @@ def replay(root, seed, day, rep, mode):
     row.update(waiting_person_s=float(credit.stream.total[0]), onboard_person_s=float(credit.stream.total[1]),
         backlog_trip_s=float(credit.stream.total[4]), holding_person_s=rule.holding_person_s)
     np.testing.assert_allclose(rule.summary["arrival"]["cv_squared"], row["cv_squared"], atol=1e-10, rtol=0)
-    np.testing.assert_allclose(rule.summary["mean_readiness_s"], row["readiness_delay_s"], atol=1e-10, rtol=0)
     return row, events, holds, rule
 
 

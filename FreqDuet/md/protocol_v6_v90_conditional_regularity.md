@@ -43,7 +43,7 @@ Shards `t169645-t169648` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`;
 the planner allocates 24 workers each on node002/004/005/006. Smoke cells 0/48
 are reused. Aggregate `t169649` waits for those four small completion markers.
 Only 7,241 bytes of review data and the smoke marker were additionally pulled.
-Formal mechanism results are pending; no controller is admitted.
+No controller is admitted.
 
 All 192 replays and aggregation completed, exit 0/retry 0; V89 metrics, action
 counts and contexts are exact. Matched arrivals have zero unmatched identities.
