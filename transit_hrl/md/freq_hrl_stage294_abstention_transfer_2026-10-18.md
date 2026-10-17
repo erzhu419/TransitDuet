@@ -42,6 +42,15 @@ If waiting transfers but cost does not, retain the limited service claim and
 stop presenting this rule as joint improvement. If transfer fails, do not tune
 on this confirmation cohort: return to independent training-scene coverage.
 
+## Current Status
+
+Cached bridge t175907 completed on node006, exit0: all 360 old states and 16
+profiles exactly reproduce raw/247 controls, P8 proposals, S8 abstention and
+expected matching. Twenty tests and both CLI startup checks passed. Pilots
+t175910-t175919 are running across node002/004/005/006; sampled node002 Python
+workers each use about one CPU core. Main sampling has not been dispatched.
+Only the 7,634-byte scalar freeze report was pulled. Runtime code: `38de1865f5`.
+
 ## Limitations
 
 This is finite-MC planning-rule transfer after one intervention, not a deployable

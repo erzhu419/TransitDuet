@@ -1,0 +1,111 @@
+{
+  "protocol": "native_transit_abstention_transfer_stage294_v1",
+  "run_name": "native_transit_abstention_transfer_stage294_20261018_r1",
+  "implementation_commits": [
+    "e2ad9d9097",
+    "38de1865f5"
+  ],
+  "focused_and_regression_tests_passed": 20,
+  "cold_entrypoints_passed": 2,
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 1,
+    "native_ram_mb": 1536,
+    "offline_ram_mb": 3072,
+    "tasks": [
+      {
+        "id": "t175907",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/freeze",
+        "status": "done",
+        "node": "node006",
+        "exit_code": 0
+      },
+      {
+        "id": "t175910",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/397/low_noise/0",
+        "status": "running",
+        "node": "node006",
+        "exit_code": null
+      },
+      {
+        "id": "t175911",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/397/high_noise/0",
+        "status": "running",
+        "node": "node004",
+        "exit_code": null
+      },
+      {
+        "id": "t175912",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/397/hour_burst/0",
+        "status": "running",
+        "node": "node002",
+        "exit_code": null
+      },
+      {
+        "id": "t175913",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/397/persistent_shift/0",
+        "status": "running",
+        "node": "node005",
+        "exit_code": null
+      },
+      {
+        "id": "t175914",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/397/ood_period/0",
+        "status": "running",
+        "node": "node006",
+        "exit_code": null
+      },
+      {
+        "id": "t175915",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/401/low_noise/0",
+        "status": "running",
+        "node": "node004",
+        "exit_code": null
+      },
+      {
+        "id": "t175916",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/401/high_noise/0",
+        "status": "running",
+        "node": "node002",
+        "exit_code": null
+      },
+      {
+        "id": "t175917",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/401/hour_burst/0",
+        "status": "running",
+        "node": "node005",
+        "exit_code": null
+      },
+      {
+        "id": "t175918",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/401/persistent_shift/0",
+        "status": "running",
+        "node": "node006",
+        "exit_code": null
+      },
+      {
+        "id": "t175919",
+        "signature": "Freq-HRL/native_transit_abstention_transfer_stage294_v1/native_transit_abstention_transfer_stage294_20261018_r1/pilot/pilot/401/ood_period/0",
+        "status": "running",
+        "node": "node004",
+        "exit_code": null
+      }
+    ]
+  },
+  "cached_bridge_exact": true,
+  "main_sampling_dispatched": false,
+  "new_fits": 0,
+  "actor_updates": 0,
+  "local_pull": {
+    "scalar_report_bytes": 7634,
+    "models_snapshots_or_rollouts_pulled": false
+  }
+}
