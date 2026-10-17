@@ -38,3 +38,23 @@ complete event uniforms and actual holding paths. It releases shards `t166491-t1
 `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)` on node002/004/005/006, 24 workers
 each. Aggregate `t166496` waits for the exact four shard markers. Context
 results remain pending; no controller change is admitted.
+
+All 192 labelled paths and aggregation completed, reproducing V87 endpoints.
+Retrieved only 58,003 bytes. Group transport in seconds per decision:
+
+| Group | Common-state law | Visitation | Net |
+| --- | ---: | ---: | ---: |
+| Missing bilateral | +0.16805 | -0.11517 | +0.05289 |
+| More holding, predicted gain up | +0.86199 | -0.34820 | +0.51380 |
+| More holding, predicted gain not up | +1.62898 | -0.41053 | +1.21845 |
+| No more holding | -0.30690 | +0.06341 | -0.24348 |
+
+The no-gain group covers 33.15% of late and 33.47% of early decisions; its
+common-state CI [1.60725,1.65275] is positive for both actors. Missing-evidence
+net effects have opposite actor signs. Weighted review `t169480` passes four
+tests: no-gain versus gain-up extra-holding-weighted onboard load is 25.90 /
+31.91 passengers, current return pressure 1.333 / 1.423, and prior commanded
+holding over target 0.571 / 0.451. These are weighted current-state moments,
+not joint frequencies, realized passenger costs, or evidence of highest load/
+pressure concentration. The next step is a prospective conditional actor
+factorial on new days, not promotion from observational surrogate labels.
