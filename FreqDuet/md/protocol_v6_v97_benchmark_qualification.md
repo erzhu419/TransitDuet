@@ -50,3 +50,29 @@ Retrieved only its 126-byte marker. Four live-planned 83-worker shards
 `t173136-t173139` cover [0,248), [248,496), [496,744), [744,992), soft-preferred
 to node002/004/005/006 and allowed only on node001-node006. Aggregate `t173141`
 waits for all four small completion markers. No baseline result is claimed yet.
+
+All six tasks completed with exit 0 and no retries. Retrieved only the 213,844 B
+summary. Samplers are averaged within actor/day before the crossed bootstrap.
+
+| Difference (candidate minus reference) | Journey min | Arrival CV-squared | Readiness s | Holding s/trip |
+| --- | --- | --- | --- | --- |
+| B200 minus lower40 | +0.513 [0.153,0.899] | -0.00548 [-0.00915,-0.00216] | +218.59 [83.92,349.73] | +34.92 [12.54,56.98] |
+| Preserve minus lower40 | +0.244 [-0.051,0.547] | -0.00814 [-0.01197,-0.00477] | +116.13 [8.22,219.89] | +21.34 [1.90,40.50] |
+| Preserve minus fixed | +1.983 [1.764,2.245] | -0.12763 [-0.13642,-0.11903] | +410.50 [357.51,462.54] | +283.44 [275.98,290.40] |
+
+The same-day additive relief is 0.269 min journey, 102.46 s readiness and
+13.58 s/trip holding (V96); sizeable residual costs remain. Journey's residual
+crossed CI includes zero: this establishes neither harm nor equivalence. Of ten
+actor means, preserve is worse than lower40 on journey for seven and readiness
+for eight; of 32 day means, 31 and 32 respectively are worse. Seed 12143 already
+improves journey under late versus early, so a per-seed recovery fraction is
+not a uniform scientific estimand. Preserve versus fixed has worse journey and
+readiness but better CV-squared for every actor and every day. All completion
+differences are zero. Fixed has 32 shared day paths, not 960 independent runs.
+
+Decision: retain V96's positive frozen candidate, but reject full lower-drift
+repair or strong-fixed superiority. Do not tune p/split again. Before changing
+system credit, V98 crosses exact fixed versus B200 upper with preserve versus
+zero holding, reusing the two existing corners. This isolates controllable
+policy-regime effects and their interaction, not natural mediation. Main stays
+unchanged; these consumed-day diagnostics are not a fresh confirmation.
