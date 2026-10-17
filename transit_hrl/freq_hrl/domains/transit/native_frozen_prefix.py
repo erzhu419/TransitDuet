@@ -97,3 +97,29 @@ def summarize_prefixes(records, *, new, bootstrap=5000):
         result[name] = row
     return {"prefixes": len(records), "states": len(records)*6,
         "fixed_profile_count": records[0]["profiles"], "contrasts": result}
+
+
+def describe_prefixes(records):
+    """Post-confirmation attribution only; no selection or additional CI tests."""
+    means = np.asarray([r["mean"] for r in records])
+    pairs = [(v, "raw") for v in VARIANTS[1:]]+list(PRIMARY)
+    result = {}
+    for after, before in pairs:
+        effects = means[:, VARIANTS.index(after)]-means[:, VARIANTS.index(before)]
+        groups = {}
+        for axis in ("root", "scenario"):
+            for value in sorted({r[axis] for r in records}):
+                indices = [i for i, r in enumerate(records) if r[axis] == value]
+                groups[f"{axis}/{value}"] = {"prefixes": len(indices),
+                    "mean": dict(zip(FIELDS, map(float, effects[indices].mean(axis=0))))}
+        extremes = {}
+        for fi, field in enumerate(FIELDS):
+            order = np.argsort(effects[:, fi])
+            extremes[field] = {"better": int(np.sum(effects[:, fi] < 0)),
+                "worse": int(np.sum(effects[:, fi] > 0)),
+                "equal": int(np.sum(effects[:, fi] == 0)),
+                "extreme_prefixes": [{"key": [records[i][k] for k in ("root", "scenario", "replica")],
+                    "contribution_to_pooled_mean": float(effects[i, fi]/len(records))}
+                    for i in dict.fromkeys([int(order[0]), int(order[-1])])]}
+        result[after+"_vs_"+before] = {"groups": groups, "prefix_signs_and_extremes": extremes}
+    return result

@@ -352,6 +352,9 @@ def collect(run, key, chunk):
 
 def report(run):
     records = []
+    execution = {"chunks": 0, "native_episodes": 0, "state_futures": 0,
+        "exact_identities": 0, "matched_prefix_state_rng_branches": 0,
+        "max_peak_rss_MiB": 0., "max_chunk_elapsed_s": 0.}
     for key in prefixes():
         path = prefix_path(run, key)
         sealed, labels = read(path/"choices.json"), {}
@@ -362,6 +365,11 @@ def report(run):
                 receipt = read(output/"receipt.json")
                 if not receipt["software_qualified"] or receipt["contract"] != contract():
                     raise ValueError("Incomplete main continuation collection")
+                execution["chunks"] += 1
+                for field in ("native_episodes", "state_futures", "exact_identities", "matched_prefix_state_rng_branches"):
+                    execution[field] += receipt[field]
+                execution["max_peak_rss_MiB"] = max(execution["max_peak_rss_MiB"], receipt["peak_rss_MiB"])
+                execution["max_chunk_elapsed_s"] = max(execution["max_chunk_elapsed_s"], receipt["elapsed_s"])
                 for row in read(output/"labels.json"):
                     labels[row["probe_ordinal"], draws.index(row["draw"])] = {int(k): v for k, v in row["values"].items()}
         mean, covariance = learning.prefix_effects(sealed["profiles"], labels, len(draws))
@@ -372,7 +380,10 @@ def report(run):
     success = all(output["new"]["contrasts"][a+"_vs_"+b]["prefix_CI95"][f][1] < 0
         for a, b in learning.PRIMARY for f in ("cost", "wait_min"))
     write_json(directory(run)/"report/result.json", {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(),
-        "coverage_qualified": True, "groups": output, "joint_primary_passed": success, "new_fits": 0, "training_updates": 0})
+        "coverage_qualified": True, "groups": output, "joint_primary_passed": success, "new_fits": 0, "training_updates": 0,
+        "execution": execution})
+    write_json(directory(run)/"report/attribution.json", {"scope": "descriptive_only_no_selection_or_additional_tests",
+        "groups": {role: learning.describe_prefixes([r for r in records if r["role"] == role]) for role in ("bridge", "new")}})
 
 
 def main():

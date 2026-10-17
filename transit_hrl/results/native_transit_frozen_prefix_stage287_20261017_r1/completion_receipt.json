@@ -1,0 +1,36 @@
+{
+  "protocol": "native_transit_frozen_prefix_stage287_v1",
+  "run_name": "native_transit_frozen_prefix_stage287_20261017_r1",
+  "scheduler": {
+    "collection_first": "t168109",
+    "collection_last": "t169468",
+    "collection_signature_suffix": "rng_repaired",
+    "collection_status_counts": {"done": 1360},
+    "collection_exit_code_counts": {"0": 1360},
+    "expected_unique_tasks": 1360,
+    "missing_tasks": 0,
+    "unexpected_tasks": 0,
+    "collection_nodes": {"node002": 337, "node004": 341, "node005": 339, "node006": 343},
+    "reports": [
+      {"id": "t169630", "node": "node004", "status": "done", "exit_code": 0, "retry_count": 0},
+      {"id": "t169634", "node": "node006", "status": "done", "exit_code": 0, "retry_count": 0}
+    ]
+  },
+  "coverage": {"bridge_prefixes": 10, "new_prefixes": 80, "states": 540, "active_states": 435},
+  "execution": {
+    "native_episodes": 104448,
+    "exact_identities": 26368,
+    "matched_prefix_state_rng_branches": 78080,
+    "max_peak_rss_MiB": 708.375,
+    "new_fits": 0,
+    "training_updates": 0
+  },
+  "primary_unchanged_by_descriptive_extension": true,
+  "focused_report_test_passed": true,
+  "joint_primary_passed": false,
+  "controller_promoted": false,
+  "complex_level_branch_stopped": true,
+  "confirmation_labels_used_for_fitting_or_selection": false,
+  "local_pull": {"transport_bytes": 426448, "models_snapshots_or_rollout_ledgers": false},
+  "next_round_dispatched": false
+}

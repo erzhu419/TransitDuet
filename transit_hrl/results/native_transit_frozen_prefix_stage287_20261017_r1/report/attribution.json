@@ -1,0 +1,1941 @@
+{
+  "groups": {
+    "bridge": {
+      "action_level_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 0.0003085541992187505,
+              "fleet": 0.0003933376736111111,
+              "service": -8.47834743923605e-05,
+              "wait_min": -0.001097265625000004
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": -0.00021681188151041644,
+              "fleet": -0.00014648437499999997,
+              "service": -7.032750651041639e-05,
+              "wait_min": -0.0005409505208333338
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 0.0006257443847656264,
+              "fleet": 0.0009155273437499999,
+              "service": -0.00028978295898437334,
+              "wait_min": -0.003237955729166676
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 8.245890299479201e-05,
+              "fleet": 6.781684027777778e-05,
+              "service": 1.4642062717014231e-05,
+              "wait_min": 0.00013981119791667114
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": -2.5189615885416782e-05,
+              "fleet": -3.390842013888889e-05,
+              "service": 8.718804253472144e-06,
+              "wait_min": 5.330403645833219e-05
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -0.00015470646158854165,
+              "fleet": -0.00016276041666666668,
+              "service": 8.053955078125028e-06,
+              "wait_min": 0.00018107096354166732
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": -0.0002989514160156247,
+              "fleet": -0.00016954210069444436,
+              "service": -0.00012940931532118023,
+              "wait_min": -0.0012317708333333395
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -9.093974609374996e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 0.00012541412760416691,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "fleet": {
+            "better": 4,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -6.781684027777777e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 0.0001763237847222222,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "service": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -5.090965711805525e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 7.508295355902789e-06,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "wait_min": {
+            "better": 6,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.0006295898437500017,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 8.940429687499997e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          }
+        }
+      },
+      "observed_level_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": -6.24386067708331e-05,
+              "fleet": 0.0,
+              "service": -6.24386067708331e-05,
+              "wait_min": -0.0006157552083333367
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": -5.635315755208311e-05,
+              "fleet": -2.7126736111111113e-05,
+              "service": -2.922642144097201e-05,
+              "wait_min": -0.0001470052083333353
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": -6.220060221354052e-05,
+              "fleet": 0.00013563368055555556,
+              "service": -0.0001978342827690961,
+              "wait_min": -0.0019851888020833417
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": -9.864908854166639e-05,
+              "fleet": -6.781684027777777e-05,
+              "service": -3.0832248263888606e-05,
+              "wait_min": -8.414713541667208e-05
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 8.984285481770856e-05,
+              "fleet": 0.00010172526041666666,
+              "service": -1.188240559895815e-05,
+              "wait_min": -0.0001144205729166686
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -0.00022727408854166664,
+              "fleet": -0.00023735894097222225,
+              "service": 1.0084852430555596e-05,
+              "wait_min": 0.0002521158854166659
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 1.3015136718744877e-06,
+              "fleet": 0.0,
+              "service": 1.3015136718744877e-06,
+              "wait_min": 2.4739583333336392e-05
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 7,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.499296874999998e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.7448209635416684e-05,
+                "key": [
+                  397,
+                  "low_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          },
+          "fleet": {
+            "better": 4,
+            "equal": 3,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.7126736111111113e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.7126736111111113e-05,
+                "key": [
+                  397,
+                  "low_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          },
+          "service": {
+            "better": 7,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -3.284201388888872e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 6.66488715277776e-06,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          },
+          "wait_min": {
+            "better": 7,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.00038671875000000127,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 8.45703125e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          }
+        }
+      },
+      "observed_level_vs_stage247": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": -6.123457031250007e-05,
+              "fleet": -1.0850694444444428e-05,
+              "service": -5.038387586805562e-05,
+              "wait_min": -0.0005779296875000016
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": 6.056344401041702e-05,
+              "fleet": 5.4253472222222226e-05,
+              "service": 6.309971788194791e-06,
+              "wait_min": 0.00019518229166666512
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": -0.00015649975585937413,
+              "fleet": 2.710505431213761e-20,
+              "service": -0.00015649975585937416,
+              "wait_min": -0.0013406575520833403
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 2.7638997395833698e-05,
+              "fleet": 0.00010850694444444447,
+              "service": -8.086794704861077e-05,
+              "wait_min": -0.000805013020833336
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 9.077286783854189e-05,
+              "fleet": 0.00010172526041666666,
+              "service": -1.0952392578124815e-05,
+              "wait_min": -0.00011067708333333509
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -0.00010159570312500003,
+              "fleet": -0.00016954210069444444,
+              "service": 6.794639756944445e-05,
+              "wait_min": 0.0007574869791666663
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 0.00013800577799479098,
+              "fleet": 6.781684027777777e-05,
+              "service": 7.018893771701321e-05,
+              "wait_min": 0.0005419921875000038
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -3.60094726562499e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 3.511596679687508e-05,
+                "key": [
+                  401,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "fleet": {
+            "better": 5,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.7126736111111113e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.7126736111111113e-05,
+                "key": [
+                  397,
+                  "low_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "service": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.4162820095486122e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.4479324001735993e-05,
+                "key": [
+                  397,
+                  "persistent_shift",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "wait_min": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.0002495768229166677,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 0.00011263020833333418,
+                "key": [
+                  397,
+                  "persistent_shift",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          }
+        }
+      },
+      "observed_level_vs_uniform": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": -9.769488932291634e-05,
+              "fleet": -4.069010416666667e-05,
+              "service": -5.7004785156249646e-05,
+              "wait_min": -0.0005329752604166691
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": 0.00020012099609375,
+              "fleet": 0.0001980251736111111,
+              "service": 2.095822482638869e-06,
+              "wait_min": 9.941406249999938e-05
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 8.676660156250054e-05,
+              "fleet": 0.00020345052083333332,
+              "service": -0.00011668391927083286,
+              "wait_min": -0.0010981445312500044
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": -0.000256909016927083,
+              "fleet": -0.00020345052083333334,
+              "service": -5.345849609374966e-05,
+              "wait_min": -0.0003468424479166696
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 0.0003177041829427085,
+              "fleet": 0.0003390842013888888,
+              "service": -2.1380018446180427e-05,
+              "wait_min": -0.00015315755208333213
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 0.00011053466796874987,
+              "fleet": 5.4253472222222206e-05,
+              "service": 5.6281195746527784e-05,
+              "wait_min": 0.0005337727864583318
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": -2.0311686197918076e-06,
+              "fleet": 0.0,
+              "service": -2.0311686197918076e-06,
+              "wait_min": -1.9531250000000163e-05
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 5,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -3.8721175130208266e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 4.529840494791668e-05,
+                "key": [
+                  401,
+                  "low_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          },
+          "fleet": {
+            "better": 3,
+            "equal": 3,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.7126736111111113e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 4.747178819444443e-05,
+                "key": [
+                  401,
+                  "low_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "service": {
+            "better": 6,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.7471907552083238e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 8.624967447916677e-06,
+                "key": [
+                  401,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "wait_min": {
+            "better": 6,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.0002029947916666675,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 7.48697916666664e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          }
+        }
+      },
+      "stage247_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": -1.2040364583330268e-06,
+              "fleet": 1.0850694444444433e-05,
+              "service": -1.2054730902777465e-05,
+              "wait_min": -3.78255208333352e-05
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": -0.00011691660156250015,
+              "fleet": -8.138020833333334e-05,
+              "service": -3.55363932291668e-05,
+              "wait_min": -0.0003421875000000005
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 9.429915364583363e-05,
+              "fleet": 0.00013563368055555553,
+              "service": -4.133452690972193e-05,
+              "wait_min": -0.0006445312500000017
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": -0.00012628808593750007,
+              "fleet": -0.00017632378472222225,
+              "service": 5.003569878472216e-05,
+              "wait_min": 0.0007208658854166638
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": -9.300130208333328e-07,
+              "fleet": 0.0,
+              "service": -9.300130208333328e-07,
+              "wait_min": -3.7434895833334996e-06
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -0.00012567838541666662,
+              "fleet": -6.781684027777778e-05,
+              "service": -5.7861545138888844e-05,
+              "wait_min": -0.0005053710937500005
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": -0.0001367042643229165,
+              "fleet": -6.781684027777777e-05,
+              "service": -6.888742404513872e-05,
+              "wait_min": -0.0005172526041666674
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 4,
+            "equal": 2,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -3.521692708333339e-05,
+                "key": [
+                  401,
+                  "hour_burst",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.6730826822916744e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "fleet": {
+            "better": 4,
+            "equal": 5,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.7126736111111113e-05,
+                "key": [
+                  401,
+                  "hour_burst",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.7126736111111106e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              }
+            ],
+            "worse": 1
+          },
+          "service": {
+            "better": 5,
+            "equal": 2,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.3777484809027744e-05,
+                "key": [
+                  397,
+                  "persistent_shift",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.809733072916671e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          },
+          "wait_min": {
+            "better": 5,
+            "equal": 2,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.0001371419270833336,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 0.00022115885416666616,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 3
+          }
+        }
+      },
+      "uniform_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 3.5256282552083255e-05,
+              "fleet": 4.069010416666667e-05,
+              "service": -5.433821614583438e-06,
+              "wait_min": -8.277994791666766e-05
+            },
+            "prefixes": 5
+          },
+          "root/401": {
+            "mean": {
+              "cost": -0.0002564741536458331,
+              "fleet": -0.0002251519097222222,
+              "service": -3.132224392361088e-05,
+              "wait_min": -0.0002464192708333347
+            },
+            "prefixes": 5
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": -0.00014896720377604106,
+              "fleet": -6.781684027777775e-05,
+              "service": -8.115036349826324e-05,
+              "wait_min": -0.0008870442708333374
+            },
+            "prefixes": 2
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 0.00015825992838541662,
+              "fleet": 0.00013563368055555556,
+              "service": 2.2626247829861054e-05,
+              "wait_min": 0.0002626953124999975
+            },
+            "prefixes": 2
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": -0.00022786132812499993,
+              "fleet": -0.00023735894097222217,
+              "service": 9.497612847222278e-06,
+              "wait_min": 3.8736979166663525e-05
+            },
+            "prefixes": 2
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -0.00033780875651041653,
+              "fleet": -0.00029161241319444444,
+              "service": -4.6196343315972184e-05,
+              "wait_min": -0.00028165690104166595
+            },
+            "prefixes": 2
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 3.3326822916662953e-06,
+              "fleet": 0.0,
+              "service": 3.3326822916662953e-06,
+              "wait_min": 4.4270833333336555e-05
+            },
+            "prefixes": 2
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 5,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -5.803199869791663e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.9092317708333298e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "fleet": {
+            "better": 4,
+            "equal": 2,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -5.425347222222221e-05,
+                "key": [
+                  401,
+                  "low_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.3563368055555556e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "service": {
+            "better": 5,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.537010633680548e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 5.528949652777742e-06,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 4
+          },
+          "wait_min": {
+            "better": 4,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.00018372395833333375,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 6.367187499999924e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  1
+                ]
+              }
+            ],
+            "worse": 5
+          }
+        }
+      }
+    },
+    "new": {
+      "action_level_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 0.00011980274047851558,
+              "fleet": 0.00015920003255208334,
+              "service": -3.9397292073567645e-05,
+              "wait_min": -0.0004049560546874986
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": 5.943027954101557e-05,
+              "fleet": 7.544623480902782e-05,
+              "service": -1.6015955268012142e-05,
+              "wait_min": -0.00024607950846354185
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 7.521452840169253e-05,
+              "fleet": 0.0001992119683159723,
+              "service": -0.0001239974399142797,
+              "wait_min": -0.0012284393310546884
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 4.774785868326823e-05,
+              "fleet": 0.0001275804307725694,
+              "service": -7.983257208930113e-05,
+              "wait_min": -0.0008664601643880185
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 0.0001508420054117839,
+              "fleet": 0.00014834933810763893,
+              "service": 2.4926673041451224e-06,
+              "wait_min": -8.143107096354237e-06
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 5.172943623860657e-05,
+              "fleet": 7.756551106770829e-05,
+              "service": -2.5836074829101592e-05,
+              "wait_min": -0.00027482604980468776
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 0.00012254872131347666,
+              "fleet": 3.39084201388889e-05,
+              "service": 8.86403011745878e-05,
+              "wait_min": 0.0007502797444661479
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 35,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.7782683308919287e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.8411173502604143e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 44
+          },
+          "fleet": {
+            "better": 34,
+            "equal": 8,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.2037489149305557e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 3.0093722873263877e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 38
+          },
+          "service": {
+            "better": 38,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.9596908569335978e-05,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 5.257632446289075e-06,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  5
+                ]
+              }
+            ],
+            "worse": 41
+          },
+          "wait_min": {
+            "better": 37,
+            "equal": 1,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -0.0001932169596354169,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 5.039571126302084e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  5
+                ]
+              }
+            ],
+            "worse": 42
+          }
+        }
+      },
+      "observed_level_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 0.00023081657918294272,
+              "fleet": 0.00025177001953125005,
+              "service": -2.0953440348307383e-05,
+              "wait_min": -0.0002559692382812497
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": 7.620950317382828e-05,
+              "fleet": 8.57883029513889e-05,
+              "service": -9.57879977756069e-06,
+              "wait_min": -0.0001372273763020836
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 7.483184814452946e-06,
+              "fleet": 6.145901150173611e-05,
+              "service": -5.397582668728327e-05,
+              "wait_min": -0.0005832417805989595
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 6.827105712890624e-05,
+              "fleet": 0.00011444091796875003,
+              "service": -4.616986083984374e-05,
+              "wait_min": -0.00045756530761718715
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 0.00012203169759114605,
+              "fleet": 0.0001292758517795139,
+              "service": -7.24415418836784e-06,
+              "wait_min": -8.16090901692709e-05
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 0.00046099305725097657,
+              "fleet": 0.000518374972873264,
+              "service": -5.738191562228748e-05,
+              "wait_min": -0.0005880940755208337
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 0.00010878620910644556,
+              "fleet": 2.0345052083333315e-05,
+              "service": 8.844115702311217e-05,
+              "wait_min": 0.0007275187174479178
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 34,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.874361572265626e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 4.4276378377278654e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 46
+          },
+          "fleet": {
+            "better": 29,
+            "equal": 9,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.3563368055555551e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 4.831949869791669e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 42
+          },
+          "service": {
+            "better": 47,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -9.250952487521748e-06,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 7.977219645182303e-06,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  7
+                ]
+              }
+            ],
+            "worse": 33
+          },
+          "wait_min": {
+            "better": 47,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -9.089253743489605e-05,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 6.966451009114585e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  7
+                ]
+              }
+            ],
+            "worse": 33
+          }
+        }
+      },
+      "observed_level_vs_stage247": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 0.0002869891174316406,
+              "fleet": 0.0002924601236979167,
+              "service": -5.471006266276184e-06,
+              "wait_min": -0.00010356445312499976
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": 7.961196085611995e-05,
+              "fleet": 5.967881944444443e-05,
+              "service": 1.993314141167544e-05,
+              "wait_min": 0.00013724365234374982
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": -2.4845174153647534e-06,
+              "fleet": 6.357828776041645e-06,
+              "service": -8.842346191406587e-06,
+              "wait_min": -0.00016512044270833428
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 3.578432210286449e-05,
+              "fleet": 4.238552517361114e-05,
+              "service": -6.601203070746623e-06,
+              "wait_min": -8.992004394531219e-05
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 0.00015349107869466175,
+              "fleet": 0.00016064114040798612,
+              "service": -7.150061713324419e-06,
+              "wait_min": -8.588155110677083e-05
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 0.0005193693389892579,
+              "fleet": 0.0005649990505642363,
+              "service": -4.562971157497845e-05,
+              "wait_min": -0.000448984781901042
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 0.000210342473347982,
+              "fleet": 0.00010596381293402775,
+              "service": 0.00010437866041395422,
+              "wait_min": 0.0008741048177083345
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 33,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.0584463500976547e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 5.011961364746095e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 47
+          },
+          "fleet": {
+            "better": 33,
+            "equal": 8,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.2464328342013887e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 5.5948893229166685e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 39
+          },
+          "service": {
+            "better": 46,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -8.161778089735282e-06,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.5210096571180572e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  7
+                ]
+              }
+            ],
+            "worse": 34
+          },
+          "wait_min": {
+            "better": 49,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -8.32183837890626e-05,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 0.0001310150146484375,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  7
+                ]
+              }
+            ],
+            "worse": 31
+          }
+        }
+      },
+      "observed_level_vs_uniform": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 0.0001404336263020833,
+              "fleet": 0.0001586914062500001,
+              "service": -1.825777994791684e-05,
+              "wait_min": -0.00022162679036458313
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": -2.6592181396484282e-05,
+              "fleet": 1.9327799479166662e-05,
+              "service": -4.591998087565102e-05,
+              "wait_min": -0.0004487202962239592
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 6.418212890624794e-06,
+              "fleet": 5.510118272569443e-05,
+              "service": -4.868296983506978e-05,
+              "wait_min": -0.0005821940104166676
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 4.169980367024742e-05,
+              "fleet": 8.34994845920139e-05,
+              "service": -4.179968092176654e-05,
+              "wait_min": -0.00037976074218749975
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 7.648581441243506e-05,
+              "fleet": 8.7738037109375e-05,
+              "service": -1.125222269694001e-05,
+              "wait_min": -0.00011995442708333332
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 0.00025009381103515647,
+              "fleet": 0.000285678439670139,
+              "service": -3.5584628634982635e-05,
+              "wait_min": -0.00035191345214843775
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": -9.009402974446615e-05,
+              "fleet": -6.696912977430558e-05,
+              "service": -2.3124899970160672e-05,
+              "wait_min": -0.0002420450846354172
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 35,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.341477661132811e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.671554260253908e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 45
+          },
+          "fleet": {
+            "better": 27,
+            "equal": 11,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -6.4425998263888906e-06,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.9669867621527798e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 42
+          },
+          "service": {
+            "better": 50,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -9.124451022677992e-06,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.6175543891058916e-06,
+                "key": [
+                  397,
+                  "high_noise",
+                  7
+                ]
+              }
+            ],
+            "worse": 30
+          },
+          "wait_min": {
+            "better": 52,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -9.019673665364608e-05,
+                "key": [
+                  401,
+                  "high_noise",
+                  4
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.131652832031251e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  7
+                ]
+              }
+            ],
+            "worse": 28
+          }
+        }
+      },
+      "stage247_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": -5.617253824869784e-05,
+              "fleet": -4.069010416666665e-05,
+              "service": -1.5482434082031193e-05,
+              "wait_min": -0.00015240478515624988
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": -3.4024576822916767e-06,
+              "fleet": 2.6109483506944453e-05,
+              "service": -2.9511941189236136e-05,
+              "wait_min": -0.00027447102864583346
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 9.967702229817711e-06,
+              "fleet": 5.510118272569446e-05,
+              "service": -4.513348049587668e-05,
+              "wait_min": -0.00041812133789062507
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 3.2486735026041775e-05,
+              "fleet": 7.205539279513889e-05,
+              "service": -3.9568657769097136e-05,
+              "wait_min": -0.0003676452636718749
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": -3.145938110351565e-05,
+              "fleet": -3.136528862847222e-05,
+              "service": -9.409247504342015e-08,
+              "wait_min": 4.272460937499912e-06
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": -5.837628173828118e-05,
+              "fleet": -4.6624077690972206e-05,
+              "service": -1.1752204047309028e-05,
+              "wait_min": -0.00013910929361979176
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": -0.00010155626424153648,
+              "fleet": -8.561876085069444e-05,
+              "service": -1.5937503390842045e-05,
+              "wait_min": -0.00014658610026041654
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 37,
+            "equal": 11,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.7000752766927073e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  5
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.8982899983723954e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  0
+                ]
+              }
+            ],
+            "worse": 32
+          },
+          "fleet": {
+            "better": 26,
+            "equal": 36,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.6954210069444442e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  5
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 2.3735894097222226e-05,
+                "key": [
+                  401,
+                  "ood_period",
+                  0
+                ]
+              }
+            ],
+            "worse": 18
+          },
+          "service": {
+            "better": 37,
+            "equal": 11,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -8.753720431857636e-06,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 3.5329664442274293e-06,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              }
+            ],
+            "worse": 32
+          },
+          "wait_min": {
+            "better": 34,
+            "equal": 11,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -8.926188151041672e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  1
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 3.069661458333334e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  5
+                ]
+              }
+            ],
+            "worse": 35
+          }
+        }
+      },
+      "uniform_vs_raw": {
+        "groups": {
+          "root/397": {
+            "mean": {
+              "cost": 9.038295288085937e-05,
+              "fleet": 9.307861328125002e-05,
+              "service": -2.695660400390538e-06,
+              "wait_min": -3.434244791666655e-05
+            },
+            "prefixes": 40
+          },
+          "root/401": {
+            "mean": {
+              "cost": 0.00010280168457031254,
+              "fleet": 6.646050347222222e-05,
+              "service": 3.634118109809033e-05,
+              "wait_min": 0.00031149291992187556
+            },
+            "prefixes": 40
+          },
+          "scenario/high_noise": {
+            "mean": {
+              "cost": 1.0649719238281476e-06,
+              "fleet": 6.357828776041676e-06,
+              "service": -5.292856852213478e-06,
+              "wait_min": -1.0477701822917478e-06
+            },
+            "prefixes": 16
+          },
+          "scenario/hour_burst": {
+            "mean": {
+              "cost": 2.657125345865883e-05,
+              "fleet": 3.094143337673612e-05,
+              "service": -4.370179918077204e-06,
+              "wait_min": -7.780456542968729e-05
+            },
+            "prefixes": 16
+          },
+          "scenario/low_noise": {
+            "mean": {
+              "cost": 4.5545883178711017e-05,
+              "fleet": 4.1537814670138884e-05,
+              "service": 4.00806850857217e-06,
+              "wait_min": 3.8345336914062404e-05
+            },
+            "prefixes": 16
+          },
+          "scenario/ood_period": {
+            "mean": {
+              "cost": 0.0002108992462158201,
+              "fleet": 0.000232696533203125,
+              "service": -2.1797286987304846e-05,
+              "wait_min": -0.00023618062337239603
+            },
+            "prefixes": 16
+          },
+          "scenario/persistent_shift": {
+            "mean": {
+              "cost": 0.00019888023885091173,
+              "fleet": 8.731418185763888e-05,
+              "service": 0.00011156605699327285,
+              "wait_min": 0.0009695638020833352
+            },
+            "prefixes": 16
+          }
+        },
+        "prefix_signs_and_extremes": {
+          "cost": {
+            "better": 33,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.666118164062501e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.756083577473958e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 47
+          },
+          "fleet": {
+            "better": 27,
+            "equal": 17,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -1.4411078559027776e-05,
+                "key": [
+                  397,
+                  "hour_burst",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 1.864963107638889e-05,
+                "key": [
+                  397,
+                  "ood_period",
+                  3
+                ]
+              }
+            ],
+            "worse": 36
+          },
+          "service": {
+            "better": 37,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -3.209916856553817e-06,
+                "key": [
+                  397,
+                  "high_noise",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 8.835368177625888e-06,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              }
+            ],
+            "worse": 43
+          },
+          "wait_min": {
+            "better": 36,
+            "equal": 0,
+            "extreme_prefixes": [
+              {
+                "contribution_to_pooled_mean": -2.8959147135416655e-05,
+                "key": [
+                  397,
+                  "high_noise",
+                  3
+                ]
+              },
+              {
+                "contribution_to_pooled_mean": 7.268981933593755e-05,
+                "key": [
+                  401,
+                  "persistent_shift",
+                  1
+                ]
+              }
+            ],
+            "worse": 44
+          }
+        }
+      }
+    }
+  },
+  "scope": "descriptive_only_no_selection_or_additional_tests"
+}

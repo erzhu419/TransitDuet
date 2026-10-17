@@ -119,7 +119,9 @@ class FrozenPrefixTest(unittest.TestCase):
                 return {"profiles": [profile() if inactive else profile(0, action_level=1, observed_level=2)],
                     "unions": [[] if inactive else [0, 1, 2] for _ in range(6)]}
             if path.name == "receipt.json":
-                return {"software_qualified": True, "contract": spec.contract()}
+                return {"software_qualified": True, "contract": spec.contract(),
+                    "native_episodes": 96, "state_futures": 24, "exact_identities": 24,
+                    "matched_prefix_state_rng_branches": 72, "peak_rss_MiB": 700., "elapsed_s": 100.}
             self.assertEqual(path.name, "labels.json")
             return [{"probe_ordinal": p, "draw": d,
                 "values": {"0": [0.]*4, "1": [-1., 0., -1., -1.], "2": [-2., 0., -2., -2.]}}
@@ -135,6 +137,13 @@ class FrozenPrefixTest(unittest.TestCase):
         self.assertEqual(result["groups"]["new"]["states"], 48)
         self.assertEqual(result["groups"]["new"]["contrasts"]["vs_raw_observed_level"]["mean"]["cost"], -1.75)
         self.assertEqual(result["groups"]["bridge"]["contrasts"]["vs_raw_observed_level"]["mean"]["cost"], -2.)
+        self.assertEqual(result["execution"]["chunks"], 120)
+        self.assertEqual(result["execution"]["native_episodes"], 120*96)
+        described = saved["attribution.json"]["groups"]["new"]["observed_level_vs_raw"]
+        self.assertEqual(described["groups"]["root/397"]["mean"]["cost"], -1.75)
+        signs = described["prefix_signs_and_extremes"]["cost"]
+        self.assertEqual((signs["better"], signs["worse"], signs["equal"]), (7, 0, 1))
+        self.assertEqual(signs["extreme_prefixes"][0]["contribution_to_pooled_mean"], -.25)
         json.dumps(result, allow_nan=False)
 
 
