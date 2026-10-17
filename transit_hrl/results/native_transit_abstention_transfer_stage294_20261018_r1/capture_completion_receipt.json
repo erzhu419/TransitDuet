@@ -1,0 +1,60 @@
+{
+  "protocol": "native_transit_abstention_transfer_stage294_v1",
+  "run_name": "native_transit_abstention_transfer_stage294_20261018_r1",
+  "recorded_at_utc": "2026-10-17T23:57:51.629633+00:00",
+  "runtime_commit": "38de1865f5",
+  "scheduler": {
+    "pilot_ids": {
+      "first": "t175910",
+      "last": "t175919",
+      "count": 10
+    },
+    "pilot_status_counts": {
+      "done": 10
+    },
+    "pilot_exit_code_counts": {
+      "0": 10
+    },
+    "pilot_report": {
+      "id": "t175936",
+      "node": "node006",
+      "status": "done",
+      "exit_code": 0
+    },
+    "capture_ids": {
+      "first": "t175937",
+      "last": "t176176",
+      "count": 240
+    },
+    "capture_status_counts": {
+      "done": 240
+    },
+    "capture_exit_code_counts": {
+      "0": 240
+    },
+    "capture_nodes": {
+      "node006": 58,
+      "node004": 58,
+      "node002": 58,
+      "node005": 57,
+      "node001": 9
+    }
+  },
+  "pilot_native_episodes": 430,
+  "pilot_exact_identities": 60,
+  "qualified_new_prefixes": 240,
+  "causal_states": 1440,
+  "prefixes_per_root_regime": 24,
+  "fixed_profiles": 16,
+  "capture_complete": true,
+  "performance_conclusion": "pending_independent_E32",
+  "new_fits": 0,
+  "actor_updates": 0,
+  "rules_thresholds_and_inference_unchanged": true,
+  "scheduler_closeout": "existing_targeted_backend_probes_and_terminal_diagnostics_no_source_edit",
+  "local_pull": {
+    "pilot_scalar_report_bytes": 3537,
+    "additional_reads": "small_scalar_metadata_and_logs_only",
+    "models_snapshots_or_rollouts_pulled": false
+  }
+}

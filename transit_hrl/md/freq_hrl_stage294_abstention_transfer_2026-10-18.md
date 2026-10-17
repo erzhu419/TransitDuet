@@ -46,10 +46,28 @@ on this confirmation cohort: return to independent training-scene coverage.
 
 Cached bridge t175907 completed on node006, exit0: all 360 old states and 16
 profiles exactly reproduce raw/247 controls, P8 proposals, S8 abstention and
-expected matching. Twenty tests and both CLI startup checks passed. Pilots
-t175910-t175919 are running across node002/004/005/006; sampled node002 Python
-workers each use about one CPU core. Main sampling has not been dispatched.
-Only the 7,634-byte scalar freeze report was pulled. Runtime code: `38de1865f5`.
+expected matching. Twenty tests and both CLI startup checks passed.
+
+Pilots t175910-t175919 completed done/exit0. Aggregate t175936 also completed
+done/exit0: 430 native episodes, 60 exact identities, all ten root/regime groups
+and all six probe positions qualified. P2/S2/E2 draws were disjoint (0-1, 8-9,
+16-17); each group retained all 16 frozen profiles. No outcomes selected a rule.
+Peak RSS was 676.46 MiB. Fourteen-episode banks took 351.59-386.28 seconds;
+the fixed 1,536 MiB, one-CPU allocation is sufficient. An eight-future main menu
+task has 56 episodes, roughly 24 minutes at pilot throughput.
+
+Formal captures t175937-t176176 completed done/exit0: 240 qualified prefixes,
+1,440 states, 24 prefixes in each of ten root/regime groups, 16 profiles each.
+Existing scheduler targeted probes refreshed delayed terminal accounting;
+no capture was rerun and no scheduler source was modified.
+
+Menu tasks t176191-t179070 (2,880 tasks, 161,280 native episodes) are submitted
+to the unpinned node001-node006 pool. E32 remains gated on complete P8/S8
+sampling and the frozen action/matching ledger. Pilot storage projects about
+53.5 GiB for menus versus about 112.5 TiB free on the server filesystem.
+The scalar pilot report was 3,537 bytes; additional reads were small receipt
+metadata and logs. No models, snapshots or rollout panels were pulled.
+Runtime code remains `38de1865f5`; rules, thresholds and inference are unchanged.
 
 ## Limitations
 
