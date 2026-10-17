@@ -1,14 +1,28 @@
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 import unittest
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from run_freqduet_v86_feedback_timing import ITEMS, cleared_tail_at, headway_prefix, window_values, vehicle_chain
+from run_freqduet_v86_feedback_timing import ITEMS, TemporalCredit, cleared_tail_at, headway_prefix, window_values, vehicle_chain
 
 
 class FeedbackTimingTest(unittest.TestCase):
+    def test_protocol_is_initialized_by_reset_after_observer_attachment(self):
+        tracker = SimpleNamespace(record_step=lambda **kwargs: None)
+        env = SimpleNamespace(protocol=None, current_time=0., step=lambda: None,
+            launch_bus=lambda trip, actual_launch=None: None, _upper_interval_outcome_tracker=tracker)
+        credit = TemporalCredit(2.)
+        credit.attach(SimpleNamespace(env=env))
+        env.protocol = SimpleNamespace(evaluation_end_time_s=4.)
+        kwargs = {k: {False: 0.} for k in ("waiting_by_direction", "onboard_by_direction",
+            "waiting_low_by_direction", "onboard_low_by_direction", "dispatch_backlog_by_direction")}
+        tracker.record_step(dt_s=1., **kwargs)
+        self.assertEqual(credit.times, [2., 4.])
+        self.assertEqual(credit.samples, [])
+
     def test_all_existing_prefixes_futures_and_regimes_are_kept(self):
         self.assertEqual(len(ITEMS), 24 * 8 * 3)
 

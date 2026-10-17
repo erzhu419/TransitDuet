@@ -41,18 +41,20 @@ class TemporalCredit(pilot.CreditObserver):
         super().__init__()
         self.target, self.samples, self.launches = target, [], []
         self.last_time, self.last_total = 0., np.zeros(5)
+        self.times, self.cursor = None, 0
 
     def attach(self, runner):
         super().attach(runner)
         env = runner.env
-        self.horizon = float(env.protocol.evaluation_end_time_s)
-        self.times = list(np.arange(self.target, self.horizon, PERIOD_S)) + [self.horizon]
-        self.cursor = 0
         tracker = env._upper_interval_outcome_tracker
         original_record, original_launch = tracker.record_step, env.launch_bus
 
         def record_step(**kwargs):
             original_record(**kwargs)
+            # run_episode initializes the protocol in reset, after observer attachment.
+            if self.times is None:
+                self.horizon = float(env.protocol.evaluation_end_time_s)
+                self.times = list(np.arange(self.target, self.horizon, PERIOD_S)) + [self.horizon]
             self.last_time, self.last_total = self.stream.clock_s, self.stream.total.copy()
             if self.cursor < len(self.times) and self.last_time >= self.times[self.cursor]:
                 if self.last_time != self.times[self.cursor]:
