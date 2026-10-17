@@ -34,3 +34,13 @@ for both actors, and exercise all four corners. Calibration, mean estimation,
 evaluation and aggregation run only through scheduler on node001-node006.
 Keep raw paths/checkpoints on servers; retrieve small summaries only. Main and
 all actor/critic/dual weights remain frozen.
+
+Source `376437a3d9`; smoke `t166436` passes on node004: five unit tests,
+both actors' exact native metrics/event/physical-holding paths, and all four
+full-day policy corners. Calibration shards
+`t166437-t166440` cover `[0,8)`, `[8,16)`, `[16,24)`, `[24,32)` on
+node002/004/005/006, eight workers each, released by the smoke marker. Mean
+estimation `t166441` waits for all four calibration markers. Evaluation shards
+`t166442-t166445` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`, 24 workers
+each on the same four nodes, waiting for frozen means. Aggregate `t166450`
+waits for their exact completion markers. No V87 outcome is claimed at dispatch.
