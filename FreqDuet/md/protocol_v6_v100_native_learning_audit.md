@@ -53,3 +53,19 @@ all local-trip next-state chains. The raw headway reward plus regularity minus
 load exactly reconstructs shaped reward, with no unexplained penalty. This is
 instrumentation admission, not evidence of actor/critic correctness. The smoke
 row is reused in the formal 20-path budget.
+
+Completed: all five shards and aggregate exit 0, no formal retry. Retrieved
+only `summary/status.json` (133,202 bytes). All 20 native paths reproduce cache;
+each has 5,200 decisions and 260 exact completed trip chains, with zero updates.
+Mean actor KL/TV to its own soft optimum is 0.07109/0.12094; soft objective gap
+0.007109. Expected holding is 14.856 s versus 15.346 s at that fixed-score
+optimum, so actor fitting is not a demonstrated holding-reduction repair.
+
+Q mean versus training backup: bias -0.001890, MAE 0.26122. Versus native soft
+return: bias +0.02488, MAE 0.74665; cost critic bias +0.02447, MAE 0.34134.
+Policy Q bias -0.07612 includes the intentional pessimism charge. Reward-target
+clipping is zero; cost-target clipping is 2.617%. No unexplained reward shaping
+remains. These are local training units, not passenger minutes. Average bias
+is small, but conditional/action-difference accuracy is unresolved. Retain the
+V99 objective-conflict finding; V101 tests native seven-action differences and
+the fixed critic-implied distribution change before selecting a learning fix.
