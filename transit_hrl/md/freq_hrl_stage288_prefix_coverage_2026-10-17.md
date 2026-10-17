@@ -38,9 +38,22 @@ Run: `native_transit_prefix_coverage_stage288_20261017_r1`.
 Execution: eight focused tests passed, including a toy fit/report round trip
 and phase-gate regression; both CLI entry points start. Freeze `t169665`
 qualified all 16 profiles (eight active), maximum reconstruction error
-`1.67e-16`. Pilot captures `t169667`-`t169676` completed with exit0. Cross-worker
-paired replays `t169679`-`t169688` are running on node002/004/005/006; there is
-no node pin. Main sampling remains behind the native/solver pilot.
+`1.67e-16`. Pilot captures `t169667`-`t169676` and paired replays
+`t169679`-`t169688` all completed with exit0. Report `t169732` qualified 150
+native episodes and eight constrained fits; maximum KKT `8.85e-15`, native RSS
+681.16 MiB. No pilot outcomes were used for selection. Main source captures
+`t169737`-`t169836` also completed with exit0 (100 prefixes, six states each).
+Continuations `t169842`-`t172961` are registered: exactly 3,120 distinct tasks,
+zero missing/extra signatures, 87,360 planned native continuations. No node pin
+or protocol change. Registered-task input staging was completed before retrying
+dispatch. The first sampled 32 train/held workers launched eight per node on
+node002/004/005/006; continuation workers `t169842` (train) and `t172002` (held) were
+verified running. The first train probe8/draw0 six-action replay qualified
+under the exact prefix/state/RNG checks. No main performance conclusion yet.
+Only the 2,839-byte pilot summary was pulled this turn.
 
 Limits: conditional on fixed historical representations and rotations; single
 intervention with frozen lower, not an end-to-end or training-seed HRL claim.
+Scheduler wall timestamps for the short report `t169732` imply a negative
+duration (-14.02 s); they are not used for runtime accounting. Worker receipts
+carry monotonic `elapsed_s`.
