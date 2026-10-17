@@ -91,11 +91,11 @@ def propose(data, selection, raw, old):
     return np.stack(choices)
 
 
-def points(effects):
-    return {a: dict(zip(FIELDS, map(float, effects[:, :, i].mean(axis=(0, 1))))) for i, a in enumerate(ARMS)}
+def points(effects, *, arms=ARMS):
+    return {a: dict(zip(FIELDS, map(float, effects[:, :, i].mean(axis=(0, 1))))) for i, a in enumerate(arms)}
 
 
-def evaluate(rows, choices, draws):
+def evaluate(rows, choices, draws, *, arms=ARMS, pairs=PAIRS, seed=289):
     effects = source.learning.paired_controls(choices[:, None], draws)
     records = []
     for key in source.keys("train"):
@@ -108,8 +108,8 @@ def evaluate(rows, choices, draws):
         records.append({"root": key[1], "scenario": key[2], "replica": key[3],
             "mean": paired.mean(axis=(0, 1)), "MC_covariance": covariance})
     means = np.asarray([r["mean"] for r in records])
-    samples = np.zeros((5000, len(ARMS), len(FIELDS)))
-    rng = np.random.default_rng(289)
+    samples = np.zeros((5000, len(arms), len(FIELDS)))
+    rng = np.random.default_rng(seed)
     for root in source.ROOTS:
         for scenario in source.SCENARIOS:
             ix = [i for i, r in enumerate(records) if (r["root"], r["scenario"]) == (root, scenario)]
@@ -118,8 +118,8 @@ def evaluate(rows, choices, draws):
             samples += means[rng.choice(ix, (5000, 6), replace=True)].mean(axis=1)/(len(source.ROOTS)*len(source.SCENARIOS))
     mc = np.asarray([r["MC_covariance"] for r in records]).sum(axis=0)/len(records)**2
     comparisons = {}
-    for after, before in PAIRS:
-        a, b = ARMS.index(after), ARMS.index(before)
+    for after, before in pairs:
+        a, b = arms.index(after), arms.index(before)
         bounds = np.quantile(samples[:, a]-samples[:, b], [.025, .975], axis=0)
         variance = mc[a, a]+mc[b, b]-2*mc[a, b]
         comparisons[after+"_vs_"+before] = {
@@ -129,8 +129,8 @@ def evaluate(rows, choices, draws):
     # Scalar groups are descriptive; the sole primary interval uses all 60 prefixes.
     groups = {f"root{root}": [i for i, r in enumerate(records) if r["root"] == root] for root in source.ROOTS}
     groups.update({s: [i for i, r in enumerate(records) if r["scenario"] == s] for s in source.SCENARIOS})
-    return {"comparisons": comparisons, "halves": {h: points(effects[:, ds]) for h, ds in (("first4", slice(0, 4)), ("last4", slice(4, 8)))},
-        "descriptive_groups": {g: {a: dict(zip(FIELDS, map(float, means[ix, j].mean(axis=0)))) for j, a in enumerate(ARMS)} for g, ix in groups.items()}}
+    return {"comparisons": comparisons, "halves": {h: points(effects[:, ds], arms=arms) for h, ds in (("first4", slice(0, 4)), ("last4", slice(4, 8)))},
+        "descriptive_groups": {g: {a: dict(zip(FIELDS, map(float, means[ix, j].mean(axis=0)))) for j, a in enumerate(arms)} for g, ix in groups.items()}}
 
 
 def analyze(run):
