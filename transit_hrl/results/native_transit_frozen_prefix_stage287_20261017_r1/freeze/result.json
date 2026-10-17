@@ -1,0 +1,68 @@
+{
+  "cached_choice_checks": 19200,
+  "cached_choice_mismatches": 0,
+  "contract": {
+    "actor_updates": 0,
+    "analysis": "mean_fixed_profiles_and6_probes_then_prefix; new_stratified_prefix_bootstrap5000_seed287_95percent; bridge_conditional_MC_only; paired_MC_covariance_separate",
+    "baseline": "unchanged_Stage247_state_gls_pooled_safe_including_both_head_and_scalar_paths",
+    "boundary": "single_intervention_frozen_lower_new_scene_validation_not_training_seed_CI_or_end_to_end_HRL",
+    "bridge": "10_old_replica1_prefixes_one_per_root_regime_32_fresh_futures_draw1_to32",
+    "fits": 0,
+    "freeze": "exact_cached_19200_choices_replayed_before_new_scene_capture_all_choices_saved_before_future_rollouts",
+    "frozen_profiles": "16_mixed_historical_cells_x2_training_banks_equal_weight_not_independent_seeds",
+    "future_seed": "1787000000+role_index*1000000+root_index*100000+regime_index*10000+replica*1000+probe_ordinal*100+draw",
+    "intervention": "one_action_then_unchanged_native_greedy_suffix_fixed_lower_weights_61380_ticks",
+    "legacy_run": "native_transit_balanced_critic_stage247_development_20261015_r1",
+    "level_run": "native_transit_service_level_stage285_20261017_r1",
+    "main": "80_new_prefixes_8_per_root_regime_64_fresh_futures_draw0_to63",
+    "new_heads": "uniform_action_level_observed_level_only_raw_risk_gate_and_reference_frozen_no_contrast",
+    "new_scene_seed": "1687000000+root_index*100000+regime_index*1000+replica",
+    "pilot": "10_bridge_and10_separate_new_replica8_prefixes_one_probe_draw0_software_only_no_outcome_selection",
+    "primary": [
+      [
+        "observed_level",
+        "uniform"
+      ],
+      [
+        "observed_level",
+        "stage247"
+      ]
+    ],
+    "probes": [
+      8,
+      9,
+      22,
+      23,
+      36,
+      37
+    ],
+    "regimes": [
+      "low_noise",
+      "high_noise",
+      "hour_burst",
+      "persistent_shift",
+      "ood_period"
+    ],
+    "roots": [
+      397,
+      401
+    ],
+    "simulation": "only_within_profile_policy_disagreements_union_plus_native_identity_shared_future_tape_exact_prefix_state_rng",
+    "storage": "snapshots_models_choices_and_rollouts_server_only_small_receipts_and_scalar_report_pull",
+    "success": "both_primary_comparisons_cost_and_wait_prefix_CI_upper_below0_no_candidate_selection",
+    "variants": [
+      "raw",
+      "stage247",
+      "uniform",
+      "action_level",
+      "observed_level"
+    ]
+  },
+  "new_fits": 0,
+  "new_main_prefixes": 80,
+  "new_native_episodes": 0,
+  "new_software_pilot_prefixes": 10,
+  "profiles": 32,
+  "protocol": "native_transit_frozen_prefix_stage287_v1",
+  "software_qualified": true
+}

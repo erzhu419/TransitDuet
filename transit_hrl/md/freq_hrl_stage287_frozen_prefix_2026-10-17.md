@@ -54,3 +54,14 @@ full learned-HRL validation. Stage248/253 confirmation labels remain closed.
 
 Run: `native_transit_frozen_prefix_stage287_20261017_r1`. Register frozen code
 before dispatch; qualify pilot before main prefix/continuation collection.
+
+## Execution
+
+Five focused unit tests passed. Freeze `t166452` on node004 reproduced all
+19,200 cached choices exactly, with zero fits or native episodes. Initial
+`t166434` stopped after action replay because the server lacked the old
+reserved-scene registration; only that 12,497-byte metadata file was transferred
+before retry. Frozen models remain server-only; the pulled receipt is 2,659 bytes.
+
+Pilot `t166461`-`t166480`: 20 tasks started on node002/004/005/006, 1 CPU and
+3 GiB reserved per task, no node pin. Main collection awaits pilot qualification.
