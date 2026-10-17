@@ -40,3 +40,9 @@ eight resource-bounded 72-cell shards, 24 workers each: `t172995-t173002`.
 Their exact smoke marker gates fresh-day access; aggregate `t173003` waits
 for all eight shard markers. Tests and smoke have not run while capacity is
 unavailable. Only marker/summary directories are configured for retrieval.
+
+Smoke `t172994` subsequently passed four tests but stopped before any rollout:
+the nested smoke output directory was incorrectly used as the runtime root,
+so the unchanged optimization-proof loader searched the wrong parent. Separate
+the canonical runtime root from smoke-only pair/record output and add a path
+regression test. Keep the proof loader, action laws and statistical gate intact.

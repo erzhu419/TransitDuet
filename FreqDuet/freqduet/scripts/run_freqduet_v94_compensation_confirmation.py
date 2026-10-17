@@ -40,11 +40,11 @@ def timing_effect(base, candidate):
     return dict(**parts, **measured)
 
 
-def collect(root, seed, day, rep, index):
+def collect(root, seed, day, rep, index, *, artifact_root):
     actual = {}
     for mode in MODES:
         actual[mode] = frozen.replay(root, seed, day, rep, mode)
-        actual[mode][3].save(root / "records" / f"p{index}_{mode}.npz")
+        actual[mode][3].save(artifact_root / "records" / f"p{index}_{mode}.npz")
     rows = {mode: r[0] for mode, r in actual.items()}
     result = dict(index=index, seed=seed, day=day, rep=rep, results=rows,
         contexts={mode: r[3].group_summary for mode, r in actual.items()},
@@ -52,14 +52,14 @@ def collect(root, seed, day, rep, index):
                  for name, (a, b) in CONTRASTS.items()},
         timing_effects={name: timing_effect(actual[b][3], actual[a][3]) for name, (a, b) in CONTRASTS.items()},
         alignment={mode: pilot.event.alignment(actual["late"][1], actual[mode][1]) for mode in MODES[1:]})
-    pilot.write_json(root / "pairs" / f"p{index}.json", result)
+    pilot.write_json(artifact_root / "pairs" / f"p{index}.json", result)
     print("V94_CONFIRMATION_CELL_DONE " + str(index), flush=True)
     return result, actual["late"][1], actual["late"][2]
 
 
 def run_cell(root, index):
     if not (root / "pairs" / f"p{index}.json").exists():
-        collect(root, *ITEMS[index], index)
+        collect(root, *ITEMS[index], index, artifact_root=root)
 
 
 def describe(rows, field):
@@ -119,8 +119,8 @@ def aggregate(root):
 
 def smoke_case(root, seed, index):
     day, rep = frozen.DAYS[0], 0
-    current, events, holds = collect(root / "smoke_runs", seed, day, rep, index)
-    original = pilot.rollout(root / "smoke_runs", seed, day, "stochastic", 187000000 + seed + 100 * day,
+    current, events, holds = collect(root, seed, day, rep, index, artifact_root=root / "smoke_runs")
+    original = pilot.rollout(root, seed, day, "stochastic", 187000000 + seed + 100 * day,
         [0.] * 4, f"v94_native_seed{seed}")
     for metric in (*pilot.METRICS, "action_counts"):
         pilot.joint.assert_same_state(original[0][metric], current["results"]["late"][metric], "v94_native_endpoints")

@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -10,6 +11,19 @@ import run_freqduet_v94_compensation_confirmation as confirmation
 
 
 class CompensationConfirmationTest(unittest.TestCase):
+    def test_smoke_keeps_runtime_root_and_separates_formal_pair_artifacts(self):
+        root = Path("/results/protocol_v6_v94_compensation_confirmation")
+        row = dict.fromkeys(confirmation.pilot.METRICS, 0.)
+        row["action_counts"] = {}
+        current = dict(results=dict(late=row), contexts={mode: dict(nonloss=dict(selected=1))
+            for mode in confirmation.MODES[1:]})
+        with patch.object(confirmation, "collect", return_value=(current, {}, [])) as collect, patch.object(
+                confirmation.pilot, "rollout", return_value=(row, {}, {}, [])) as rollout:
+            confirmation.smoke_case(root, 12037, 0)
+        collect.assert_called_once_with(root, 12037, confirmation.frozen.DAYS[0], 0, 0,
+                                        artifact_root=root / "smoke_runs")
+        self.assertEqual(rollout.call_args.args[0], root)
+
     def test_archived_actor_split_fresh_days_and_budget_are_fixed(self):
         self.assertEqual(len(confirmation.TRAIN_SEEDS), 12)
         self.assertEqual(len(confirmation.VALIDATION_SEEDS), 10)
