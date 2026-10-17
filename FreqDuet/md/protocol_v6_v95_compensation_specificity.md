@@ -50,3 +50,26 @@ Smoke now passes all six tests and ten full-day paths on node004, including
 exact native/all-replacement endpoints, event samplers and executed holding
 for both actors. Retrieved only its 139-byte done marker. Formal mixture
 cells can now dispatch; no controller or training update is authorized.
+
+All tasks completed exit 0/retry 0; retrieved only the 108,738-byte summary.
+Preserve-minus-uniform: journey -0.01902 min [-0.04930,+0.01098], arrival
+CV-squared -0.001510 [-0.002557,-0.000545], readiness -1.79 s [-6.82,+2.76],
+holding -0.825 s/trip [-1.575,-0.134]. Completion counts do not change.
+Preserve still passes the original joint gate against B200; uniform does not
+because its arrival-CV interval crosses zero. This difference in gate outcomes
+is not itself a direct test; the direct CV contrast above is negative.
+
+Uniform's intended reduction is 4,558.90 versus preserve's 4,430.03 s/day,
+a difference +128.88 [+3.89,+256.90]; its own-state shadow-preserve difference
+is +112.89 [-0.61,+229.95]. Nevertheless, preserve executes less holding.
+Reference-budget targeting did not achieve identical closed-loop doses.
+The direct raw arrival variance falls -207.76 s2 [-356.14,-72.44], whereas
+CV mean normalization is -0.00000453 [-0.00003730,+0.00002849]. The direct
+release/holding cross term is +0.000161 [-0.000481,+0.000817], not a confirmed
+improvement. Lower release/holding diagonal terms contribute the CV reduction;
+covariance allocations are accounting, not isolated mediation effects.
+
+Keep the regularity advantage, but passenger/readiness nonharm relative to
+uniform is not established by intervals crossing zero. Nor is an exactly
+dose-controlled classifier effect established. V96 adds actor/day dose review
+and one frozen 32-new-day confirmation, without fitting p or changing the gate.
