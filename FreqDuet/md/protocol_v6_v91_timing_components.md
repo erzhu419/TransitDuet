@@ -65,3 +65,6 @@ V92 will reuse saved primitives to split observed nonholding stop time from
 remaining elapsed, expose variance/cross-covariance terms, allocate endpoint
 changes, and quantify changed-predecessor CV contributions. No new rollout or
 controller admission is justified by V91 alone; the original joint gate fails.
+
+The completed saved-record V92 review is recorded in
+`protocol_v6_v92_elapsed_review.md`; it requires no additional simulation.

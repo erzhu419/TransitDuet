@@ -22,3 +22,29 @@ through scheduler on node001-node006. Retrieve logs and small summaries only.
 Stop on inconsistent timing, unmatched completed stops or failed identities.
 The resulting service/covariance evidence determines whether a new control
 experiment has a concrete mechanism to test.
+
+Source `87bf5f2941`, scheduler `t169839`, node004: five tests pass and all
+192 saved paths reproduce V91's moments and parent allocations. No new
+rollouts; only the 35,064-byte summary is retrieved. Arrival allocations at
+the baseline mean are release +0.001158, executed holding -0.002954,
+observed nonholding stop +0.000539, and remaining elapsed +0.001097.
+The latter two have positive demand-day intervals for both frozen actors.
+Nonholding-stop own-variance change is -0.000031, CI [-0.000157,+0.000095]:
+its positive allocation is principally covariance, not greater stop variance.
+Executed-holding own variance changes by -0.006023, CI [-0.008126,-0.003949],
+while twice its covariance with release changes by +0.006512,
+CI [+0.003701,+0.009352]. Departure accounting has the same pattern.
+
+Of the -2.919 s mean-headway change, the last-release boundary contributes
+-2.848 s, last holding -0.055 s, observed stop +0.019 s, and remainder
+-0.034 s. These are boundary changes divided by headway sample count, not
+raw last-trip time differences. Every first-boundary component and count
+contribution is zero. Changed predecessors contribute -0.00000293 CV-squared,
+CI [-0.00006100,+0.00005222]; they do not explain the positive mean CV change.
+
+Next prioritize release-gap/cumulative-holding joint counterfactuals over
+another follower-forecast correction, global holding penalty or long training.
+The covariance change motivates that causal test but does not establish its
+action rule; no new controller is selected from these consumed paths. Keep
+the main frozen and original joint gate unchanged: arrival CV-squared remains
++0.000749, CI [-0.002954,+0.004880], despite passenger/readiness gains.
