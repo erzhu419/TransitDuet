@@ -35,3 +35,13 @@ support mechanism diagnosis, not generalization, a new gate or promotion.
 Tests, reference collection, independent action arms and aggregation all use
 scheduler on node001-node006. Pull only small summaries/markers. No actor,
 critic, dual or fitted-value update; no V81 threshold tuning or main switch.
+
+Source `d4c0c354f7`; smoke `t166281` completed exit 0/retry 0. Five tests pass,
+the reference exactly reproduces its V81 endpoints, both forced-native modes
+reproduce the entire command/arrival path, and a changed-action recorded-lower
+replay preserves every later lower command. These smoke arms are reused.
+Reference task `t166282` collects the remaining seven references using eight
+workers. Shards `t166283-t166286` cover `[0,84)`, `[84,168)`, `[168,252)`,
+`[252,336)` on node002/004/005/006 with 84 workers each, gated by reference
+completion. Aggregate `t166287` waits for their four completion markers.
+All results remain diagnostic; the main policy is unchanged.
