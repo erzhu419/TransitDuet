@@ -49,3 +49,31 @@ Smoke passes four tests and six full-day paths on node004. Both consumed V95
 cells reproduce endpoint contrasts, timing allocations and dose contrasts
 exactly. The 138-byte marker confirms no future day was read. Formal shards
 can now dispatch; the main policy and all learned parameters remain frozen.
+
+All tasks completed exit 0/retry 0; retrieved only the 155,813-byte summary.
+On the 32 new days, preserve-minus-B200 passes the original joint gate:
+journey -0.26876 min [-0.36039,-0.19137], CV-squared -0.002662
+[-0.003834,-0.001728], readiness -102.46 s [-130.91,-74.78], holding -13.58
+s/trip [-16.72,-10.47]. All ten actor and 32 day means jointly improve.
+
+Preserve-minus-uniform now also passes the direct original joint gate:
+passenger exposure -35,766 person-s [-60,482,-14,456], journey -0.02931 min
+[-0.04943,-0.01194], CV-squared -0.001334 [-0.001937,-0.000726], readiness
+-4.51 s [-8.05,-1.24]. Completion counts are unchanged. Direct CV means improve
+for 10/10 actors and 30/32 days; journey for 9/10 and 26/32; readiness for
+10/10 and 27/32. Not every actor-specific interval excludes zero. Uniform
+also passes against B200; its V95 gate failure must not be generalized.
+
+Expected uniform-minus-preserve reduction is -26.03 s/day [-110.07,+59.76],
+versus reference budgets 4,498.54/4,524.57 s/day. This is not an equivalence
+test. Preserve executes another -0.884 s/trip [-1.325,-0.470], so exact actual-
+dose control is still absent. Raw arrival variance -186.81 s2
+[-272.53,-101.43] improves despite +0.0000226 mean normalization. The direct
+release/holding cross allocation -0.0000376 [-0.000537,+0.000471] remains
+unresolved; covariance accounting is not isolated mediation.
+
+Freeze this positive candidate. V97 will add same-day lower-40-at-B200-context
+and the existing exact 360-second fixed baseline, without retuning. The new
+absolute journey 18.56 min is not compared to V34's 18.60 min across different
+days. This result confirms a frozen-regime improvement, not training repair,
+fixed-baseline superiority or authorization to switch main.
