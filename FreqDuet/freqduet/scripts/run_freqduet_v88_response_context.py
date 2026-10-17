@@ -150,6 +150,41 @@ def aggregate(root):
     print("V88_RESPONSE_CONTEXT_COMPLETE " + json.dumps({k: result[k] for k in ("sources", "transport")}), flush=True)
 
 
+def ratio_stat(numerator, denominator, bootstrap):
+    numerator, denominator = np.asarray(numerator), np.asarray(denominator)
+    sampled = numerator[bootstrap].mean(1) / denominator[bootstrap].mean(1)
+    return dict(mean=float(numerator.mean() / denominator.mean()),
+                ci95=np.quantile(sampled, [.025, .975]).tolist(), n_demand_days=len(numerator))
+
+
+def review(root):
+    rows = [json.loads((root / "pairs" / f"p{i}.json").read_text()) for i in range(len(ITEMS))]
+    bootstrap = np.random.default_rng(88000).integers(0, len(experiment.EVAL_DAYS), (4000, len(experiment.EVAL_DAYS)))
+    series, weighted = {}, {}
+    for group in ("more_hold_gain_up", "more_hold_gain_not_up"):
+        series[group] = {m: np.asarray([np.mean([r["sources"][s]["groups"][group]["contribution"][m]
+            for r in rows if r["day"] == day for s in SOURCES]) for day in experiment.EVAL_DAYS]) for m in FIELDS}
+        weighted[group] = {name: ratio_stat(series[group][m], series[group]["holding_difference_s"], bootstrap)
+            for name, m in (("onboard_passengers", "passenger_command_difference_s"),
+                            ("current_return_pressure", "return_pressure_weighted_difference_s"),
+                            ("commanded_holding_over_target", "spent_weighted_difference_s"))}
+    differences = {}
+    for name, m in (("onboard_passengers", "passenger_command_difference_s"),
+                    ("current_return_pressure", "return_pressure_weighted_difference_s"),
+                    ("commanded_holding_over_target", "spent_weighted_difference_s")):
+        a, b = [series[g] for g in ("more_hold_gain_not_up", "more_hold_gain_up")]
+        draws = a[m][bootstrap].mean(1) / a["holding_difference_s"][bootstrap].mean(1) - \
+                b[m][bootstrap].mean(1) / b["holding_difference_s"][bootstrap].mean(1)
+        differences[name] = dict(mean=weighted["more_hold_gain_not_up"][name]["mean"] -
+            weighted["more_hold_gain_up"][name]["mean"], ci95=np.quantile(draws, [.025, .975]).tolist())
+    result = dict(status="response_context_weighted_review_complete", weighted_conditions=weighted,
+        no_gain_minus_gain=differences, interpretation="extra-holding-weighted current conditions, not joint event frequencies or realized passenger costs",
+        actor_updates=0, main_policy_changed=False)
+    pilot.write_json(root / "review/status.json", result)
+    print("V88_WEIGHTED_REVIEW " + json.dumps(result), flush=True)
+    pilot.write_json(root / "review_ready/done.json", dict(status=result["status"]))
+
+
 def smoke(root, v87_root):
     for pattern in ("test_v87_*.py", "test_v88_*.py"):
         subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
@@ -163,7 +198,7 @@ def smoke(root, v87_root):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("smoke", "run", "aggregate"))
+    parser.add_argument("command", choices=("smoke", "run", "aggregate", "review"))
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--v87-root", type=Path)
     parser.add_argument("--start", type=int, default=0)
@@ -174,6 +209,8 @@ if __name__ == "__main__":
         smoke(args.out_root, args.v87_root)
     elif args.command == "aggregate":
         aggregate(args.out_root)
+    elif args.command == "review":
+        review(args.out_root)
     else:
         with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context("spawn")) as pool:
             for task in [pool.submit(run_cell, args.out_root, args.v87_root, i) for i in range(args.start, args.end)]:

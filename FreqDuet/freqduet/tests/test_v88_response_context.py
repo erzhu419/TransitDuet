@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from run_freqduet_v88_response_context import ContextSums, GROUPS, context_group, group_transport
+from run_freqduet_v88_response_context import ContextSums, GROUPS, context_group, group_transport, ratio_stat
 
 
 class ResponseContextTest(unittest.TestCase):
@@ -35,6 +35,11 @@ class ResponseContextTest(unittest.TestCase):
         self.assertEqual(sum(result[g]["expected_command_s"] for g in GROUPS), 0.)
         self.assertEqual(sum(result[g]["common_state_law_s"] for g in GROUPS), 5.)
         self.assertEqual(sum(result[g]["visitation_s"] for g in GROUPS), -5.)
+
+    def test_holding_weighted_condition_is_ratio_of_totals_not_mean_of_daily_ratios(self):
+        result = ratio_stat([1., 9.], [1., 3.], np.array([[0, 1], [0, 1]]))
+        self.assertEqual(result["mean"], 2.5)
+        self.assertEqual(result["ci95"], [2.5, 2.5])
 
 
 if __name__ == "__main__":
