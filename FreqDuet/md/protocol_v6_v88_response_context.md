@@ -17,7 +17,7 @@ At each current observable state evaluate both native laws and partition their
 expected holding difference: missing bilateral evidence; positive extra holding
 with predicted local regularity gain; positive extra holding without predicted
 gain; no extra holding. Record onboard passenger command exposure, current
-return-terminal backlog/ready pressure and accumulated trip holding. No future
+return-terminal backlog/ready pressure and accumulated commanded trip holding. No future
 label enters this partition or either deployed action. The local gain formula
 is the existing observable surrogate, not a validated causal action value;
 zero current backlog does not imply future vehicle-readiness safety.
@@ -31,3 +31,10 @@ it does not turn observational categories into a policy gate or new held-out
 evidence. Main, actor/critic/dual weights remain frozen. All tests, native smoke,
 replays and aggregation use scheduler on node001-node006; retain detailed data
 server-side and retrieve only small summaries.
+
+Source `0a2c269836`; smoke `t166489` passes eleven tests and all eight full-day
+checks: both actors, early/late native endpoints, expected-action accounting,
+complete event uniforms and actual holding paths. It releases shards `t166491-t166494`, covering
+`[0,24)`, `[24,48)`, `[48,72)`, `[72,96)` on node002/004/005/006, 24 workers
+each. Aggregate `t166496` waits for the exact four shard markers. Context
+results remain pending; no controller change is admitted.
