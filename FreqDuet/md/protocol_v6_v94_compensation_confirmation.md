@@ -46,3 +46,10 @@ the nested smoke output directory was incorrectly used as the runtime root,
 so the unchanged optimization-proof loader searched the wrong parent. Separate
 the canonical runtime root from smoke-only pair/record output and add a path
 regression test. Keep the proof loader, action laws and statistical gate intact.
+
+Repair source `30ea4ce32b`: replacement smoke `t173054` passes five tests and
+all eight full-day/native-check paths, exit 0/retry 0. The 161-byte real smoke
+marker was retrieved. Old queued tasks are cancelled; replacement shards
+`t173055-t173062` retain the original 576-cell/1,728-path design, 24 workers
+and explicit 16 GB RAM each. Aggregate `t173063` waits for their eight markers.
+The original failure is resolved by this replacement, not retried unchanged.
