@@ -1,6 +1,8 @@
 import copy
 from pathlib import Path
+import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -149,6 +151,21 @@ class PrefixCoverageTest(unittest.TestCase):
             self.assertIn("wide_vs_dense", report["controls"])
             self.assertIn("independent8_minus_MC_variance", report["training_errors"]["wide"])
             self.assertFalse(report["controller_promoted"])
+
+    def test_scheduler_gate_excludes_earlier_phases_but_requires_all_captures(self):
+        records = [{"id": f"t{i}", "status": "done", "exit_code": 0, **t}
+            for i, t in enumerate(submit.tasks("unit", "freeze")+submit.tasks("unit", "capture-pilot"))]
+        fake_scheduler = SimpleNamespace(load_state=lambda: {"tasks": records})
+        with patch.dict(sys.modules, {"scheduler": fake_scheduler}), \
+                patch.object(sys, "argv", ["submit", "--run-name", "unit", "--phase", "pilot-collect"]), \
+                patch.object(submit, "inventory", return_value=records), \
+                patch.object(spec, "read", return_value={"contract": spec.contract()}), \
+                patch.object(submit, "execute_bulk") as execute:
+            submit.main()
+            self.assertEqual(len(execute.call_args.args[0]), 10)
+            records[-1]["status"] = "running"
+            with self.assertRaises(SystemExit):
+                submit.main()
 
 
 if __name__ == "__main__":

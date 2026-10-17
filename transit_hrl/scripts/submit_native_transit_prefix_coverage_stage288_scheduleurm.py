@@ -74,11 +74,14 @@ def main():
             "capture": "pilot-report", "collect": "capture", "fit": "collect", "report": "fit"}[a.phase]
         sys.path.insert(0, str(SCHEDULER.parent))
         import scheduler
+        required = tasks(a.run_name, preceding)
+        signatures = {t["signature"] for t in required}
+        attempts = [t for t in existing if t["signature"] in signatures]
         records = {t["id"]: t for t in scheduler.load_state()["tasks"]}
-        missing = {t["id"] for t in existing}-records.keys()
+        missing = {t["id"] for t in attempts}-records.keys()
         if missing:
             records.update({t["id"]: t for t in scheduler.load_archive_tasks() if t["id"] in missing})
-        require_completed_attempts(existing, tasks(a.run_name, preceding), records)
+        require_completed_attempts(attempts, required, records)
         if a.phase in ("capture", "collect", "fit", "report") and not spec.read(directory/"pilot-report/result.json")["software_qualified"]:
             p.error("Native/solver preflight must qualify before main")
     batch = tasks(a.run_name, a.phase)
