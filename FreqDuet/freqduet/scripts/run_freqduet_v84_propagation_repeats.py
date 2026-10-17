@@ -31,7 +31,7 @@ def future_seed(context, future):
 def describe(values):
     x = np.asarray(values, dtype=float)
     mean, sd = float(x.mean()), float(x.std(ddof=1))
-    se = sd / np.sqrt(len(x))
+    se = float(sd / np.sqrt(len(x)))
     radius = float(student_t.ppf(.975, len(x) - 1)) * se
     return dict(mean=mean, future_sd=sd, mean_se=float(se), ci95=[mean - radius, mean + radius],
                 negative=int(sum(x < 0)), positive=int(sum(x > 0)), n=len(x))
@@ -181,6 +181,35 @@ def aggregate(root, v83_root):
     print("V84_PROPAGATION_REPEATS_COMPLETE", flush=True)
 
 
+def report(root):
+    summary = json.loads((root / "summary/status.json").read_text())
+    print("V84_TOTAL " + json.dumps({k: summary[k] for k in (
+        "labelled_arms", "references", "futures_per_prefix", "forced_native_checks",
+        "max_recorded_lower_changes", "actors_updated", "main_policy_changed", "controller_fits")}))
+    print("V84_STRATA " + json.dumps(summary["by_stratum"]))
+    for context in summary["contexts"]:
+        modes = {}
+        for mode in propagation.MODES:
+            effects = context["effects"][mode]["projected_vs_base"]
+            old = context["original_v83_effects"][mode]["projected_vs_base"]
+            metrics = {}
+            for m in RESPONSE_METRICS:
+                result = effects[m]
+                noise = context["action_noise"][mode][m]
+                alternatives = [i for i in range(7) if i != context["native_index"]]
+                ratios = [noise["paired_sd"][i] / noise["independent_sd"][i] for i in alternatives
+                          if noise["independent_sd"][i] > 0]
+                metrics[m] = dict(old=old[m], **result,
+                    old_sign_repeats=sum(float(x) * old[m] > 0 for x in context["future_effects"][mode][m]),
+                    paired_to_independent_sd_median=float(np.median(ratios)) if ratios else None,
+                    action_signal_above_sd=sum(abs(noise["mean_deltas"][i]) > noise["paired_sd"][i]
+                                               for i in alternatives))
+            modes[mode] = dict(metrics=metrics, stages={k: v for k, v in effects.items() if k.endswith("_loss")})
+        print("V84_CONTEXT " + json.dumps(dict(context_index=context["context_index"], seed=context["seed"],
+            day=context["day"], stratum=context["stratum"], time_s=context["time_s"],
+            modes=modes, feedback=context["feedback"]["projected_vs_base"])))
+
+
 def smoke(root, v83_root):
     tests = Path(__file__).resolve().parents[1] / "tests"
     for pattern in ("test_v83_*.py", "test_v84_*.py"):
@@ -217,7 +246,7 @@ def smoke(root, v83_root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("smoke", "references", "run", "aggregate"))
+    parser.add_argument("command", choices=("smoke", "references", "run", "aggregate", "report"))
     parser.add_argument("--out-root", type=Path, required=True)
     parser.add_argument("--v83-root", type=Path)
     parser.add_argument("--start", type=int, default=0)
@@ -234,6 +263,8 @@ def main():
                 task.result()
         marker = "reference_ready/done.json" if args.command == "references" else f"shards/{args.start}-{args.end}.json"
         pilot.write_json(args.out_root / marker, dict(status="complete"))
+    elif args.command == "report":
+        report(args.out_root)
     else:
         aggregate(args.out_root, args.v83_root)
 

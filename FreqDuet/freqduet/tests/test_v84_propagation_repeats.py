@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import sys
 import unittest
 
@@ -27,6 +28,12 @@ class PropagationRepeatsTest(unittest.TestCase):
         np.testing.assert_array_equal(result["mean_deltas"], np.arange(7.) - 3.)
         np.testing.assert_array_equal(result["paired_sd"], np.zeros(7))
         self.assertTrue(all(x > 0 for x in result["independent_sd"]))
+
+    def test_interval_counts_are_json_serializable(self):
+        stats = [describe(np.arange(8.) + 1.), describe(-np.arange(8.) - 1.)]
+        counts = dict(below=sum(s["ci95"][1] < 0 for s in stats),
+                      above=sum(s["ci95"][0] > 0 for s in stats))
+        self.assertEqual(json.loads(json.dumps(counts)), dict(below=1, above=1))
 
     def test_forked_event_uniforms_preserve_prefix_and_match_by_event(self):
         left, right = [pilot.event.EventUniforms(77) for _ in range(2)]
