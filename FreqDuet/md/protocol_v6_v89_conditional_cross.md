@@ -45,3 +45,21 @@ prospective days were read. It releases the prospective matrix. Shards
 5/8/7 workers. The live planner found only this spare capacity; do not
 oversubscribe busy nodes or move computation local. Aggregate `t169487` waits
 for those exact three markers. No prospective outcome is claimed at dispatch.
+
+All 480 rollouts and aggregation completed, exit 0/retry 0. Primary
+no-gain-only minus late: journey -0.44195 min, CI [-0.60299,-0.29832];
+readiness -169.09 s, CI [-182.67,-156.17]; holding -22.74 s/trip,
+CI [-25.09,-20.33]. Waiting and onboard exposure both decrease. CV-squared
+is +0.000749, CI [-0.002965,+0.004931]: non-harm is not established, but
+harm is not established either. Both actors have passenger/readiness benefits
+and unresolved CV effects. The registered joint diagnostic gate fails.
+
+Gain-only replacement worsens CV-squared +0.006648, CI [+0.003370,+0.009664].
+Both-group replacement saves more passenger time but does not pass the joint
+gate; its CV result differs across actors. CV interaction is -0.004172,
+CI [-0.007907,-0.000535], so group effects are not additive. Different
+intervention frequencies/doses preclude attributing their contrast solely to
+the local-gain label. No alternative arm replaces the registered primary.
+Only the 62,467-byte summary was retrieved. V90 will examine repeat noise,
+completed follower labels and actual arrival propagation, without changing
+actors, gates or the main policy.
