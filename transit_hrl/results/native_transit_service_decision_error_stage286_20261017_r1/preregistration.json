@@ -1,0 +1,143 @@
+{
+  "contract": {
+    "MC": "opposite_bank_only_per_fit_bank; sum_model_view_fold_contributions_for_each_unique_state_future_before_variance; independent_continuation_seed_per_state_draw; conditional_normal95_MC_error_bars_per_bank_only_no_pooled_bank_CI; development_diagnostic_not_confirmation_or_seed_CI",
+    "arms": [
+      "raw_prior",
+      "observed_context_df_offset_clip__raw_prior",
+      "action_level_clip__raw_prior",
+      "observed_level_clip__raw_prior",
+      "observed_level_linear_contrast_clip__raw_prior",
+      "observed_level_action_context_df_contrast_clip__raw_prior",
+      "observed_level_observed_context_df_contrast_clip__raw_prior",
+      "raw_linear_clip",
+      "observed_context_df_offset_clip__raw_linear_clip",
+      "action_level_clip__raw_linear_clip",
+      "observed_level_clip__raw_linear_clip",
+      "observed_level_linear_contrast_clip__raw_linear_clip",
+      "observed_level_action_context_df_contrast_clip__raw_linear_clip",
+      "observed_level_observed_context_df_contrast_clip__raw_linear_clip",
+      "observed_context_df_clip",
+      "observed_context_df_offset_clip__observed_context_df_clip",
+      "action_level_clip__observed_context_df_clip",
+      "observed_level_clip__observed_context_df_clip",
+      "observed_level_linear_contrast_clip__observed_context_df_clip",
+      "observed_level_action_context_df_contrast_clip__observed_context_df_clip",
+      "observed_level_observed_context_df_contrast_clip__observed_context_df_clip"
+    ],
+    "boundary": "reused_development_supervised_frozen_single_intervention_not_unseen_prefix_training_seed_CI_or_full_HRL; Stage253_248_169_closed; defaults_unchanged",
+    "budget": {
+      "actor_updates": 0,
+      "analysis_tasks": 1,
+      "cached_cells": 32,
+      "cached_queries": 1408,
+      "model_state_exposures": 49920,
+      "new_fits": 0,
+      "new_native_episodes": 0,
+      "new_policies": 0
+    },
+    "candidate": "best_raw_total_plus_each_frozen_risk_nonoriginal_feasible_action; raw_gate_and_lowest_candidate_index_ties; fixed_without_new_service_or_labels; no_candidate_for_empty_menu; store_predictions_before_evaluation",
+    "cohort": "unchanged32_cells_four_views_two_outer_folds_two_partitions_two_directions; full60_prefix54_both_banks_assigned16; all_development_states_no_selected_subgroups",
+    "comparisons": {
+      "action_context_df_contrast_vs_level__observed_context_df_clip": [
+        "observed_level_action_context_df_contrast_clip__observed_context_df_clip",
+        "observed_level_clip__observed_context_df_clip"
+      ],
+      "action_context_df_contrast_vs_level__raw_linear_clip": [
+        "observed_level_action_context_df_contrast_clip__raw_linear_clip",
+        "observed_level_clip__raw_linear_clip"
+      ],
+      "action_context_df_contrast_vs_level__raw_prior": [
+        "observed_level_action_context_df_contrast_clip__raw_prior",
+        "observed_level_clip__raw_prior"
+      ],
+      "action_vs_uniform__observed_context_df_clip": [
+        "action_level_clip__observed_context_df_clip",
+        "observed_context_df_offset_clip__observed_context_df_clip"
+      ],
+      "action_vs_uniform__raw_linear_clip": [
+        "action_level_clip__raw_linear_clip",
+        "observed_context_df_offset_clip__raw_linear_clip"
+      ],
+      "action_vs_uniform__raw_prior": [
+        "action_level_clip__raw_prior",
+        "observed_context_df_offset_clip__raw_prior"
+      ],
+      "linear_contrast_vs_level__observed_context_df_clip": [
+        "observed_level_linear_contrast_clip__observed_context_df_clip",
+        "observed_level_clip__observed_context_df_clip"
+      ],
+      "linear_contrast_vs_level__raw_linear_clip": [
+        "observed_level_linear_contrast_clip__raw_linear_clip",
+        "observed_level_clip__raw_linear_clip"
+      ],
+      "linear_contrast_vs_level__raw_prior": [
+        "observed_level_linear_contrast_clip__raw_prior",
+        "observed_level_clip__raw_prior"
+      ],
+      "observed_context_df_contrast_vs_level__observed_context_df_clip": [
+        "observed_level_observed_context_df_contrast_clip__observed_context_df_clip",
+        "observed_level_clip__observed_context_df_clip"
+      ],
+      "observed_context_df_contrast_vs_level__raw_linear_clip": [
+        "observed_level_observed_context_df_contrast_clip__raw_linear_clip",
+        "observed_level_clip__raw_linear_clip"
+      ],
+      "observed_context_df_contrast_vs_level__raw_prior": [
+        "observed_level_observed_context_df_contrast_clip__raw_prior",
+        "observed_level_clip__raw_prior"
+      ],
+      "observed_vs_action__observed_context_df_clip": [
+        "observed_level_clip__observed_context_df_clip",
+        "action_level_clip__observed_context_df_clip"
+      ],
+      "observed_vs_action__raw_linear_clip": [
+        "observed_level_clip__raw_linear_clip",
+        "action_level_clip__raw_linear_clip"
+      ],
+      "observed_vs_action__raw_prior": [
+        "observed_level_clip__raw_prior",
+        "action_level_clip__raw_prior"
+      ],
+      "observed_vs_uniform__observed_context_df_clip": [
+        "observed_level_clip__observed_context_df_clip",
+        "observed_context_df_offset_clip__observed_context_df_clip"
+      ],
+      "observed_vs_uniform__raw_linear_clip": [
+        "observed_level_clip__raw_linear_clip",
+        "observed_context_df_offset_clip__raw_linear_clip"
+      ],
+      "observed_vs_uniform__raw_prior": [
+        "observed_level_clip__raw_prior",
+        "observed_context_df_offset_clip__raw_prior"
+      ]
+    },
+    "concentration": "prefix_contributions_with_full_state_denominator; fleet_up_down_exposure_counts_and_net_unique_seed_counts_separately; repeated_model_exposures_not_independent_samples",
+    "controls": "used21_frozen_controller_outcomes_reproduce_Stage285_cells_and_reported_group_halves; paired_unique_unit_means_reproduce_controller_contrasts; service_plus_risk_margin_MSE_identity",
+    "errors": "service_risk_signed_cross_and_total_margin_MSE_at_same_fixed_candidate_plus_empirical_margin_sign_error; original_relative_targets; eligible_state_denominator; compare_to_Stage285_all_action_errors_without_replacing_objective",
+    "paired": "action_level_vs_uniform_observed_level_vs_uniform_observed_vs_action_and_each_frozen_contrast_added_to_observed_level; all_state_cost_fleet_service_wait; all16_fixed8+8; all_views_banks_scopes_no_winner_selection",
+    "scopes": [
+      "train_opposite",
+      "excluded_opposite",
+      "held_opposite",
+      "matched_held_opposite"
+    ],
+    "source_protocol": "native_transit_service_level_stage285_v1",
+    "source_run": "native_transit_service_level_stage285_20261017_r1",
+    "storage": "fixed_candidate_predictions_and_unique_unit_arrays_server_only_scalar_report_pull"
+  },
+  "protocol": "native_transit_service_decision_error_stage286_v1",
+  "scheduler": {
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 3072,
+    "require_node": null
+  },
+  "source_revision": "93e811c6c785f0aca6309e521e6231bdae547fce"
+}
