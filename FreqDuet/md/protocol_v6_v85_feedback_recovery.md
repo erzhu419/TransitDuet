@@ -14,7 +14,7 @@ Evaluate costs through day end, not just the 900s observation interval.
 
 There are 384 labelled arms. Reuse V84's corresponding closed-loop and all-day
 recorded-lower endpoints. Report paired differences of the 45-minus-0 response
-against both controls. This tests whether early feedback mediates the response;
+against both controls. This tests sensitivity to early feedback recovery;
 it is not another value-selector dataset or a cutoff sweep for promotion.
 
 Smoke verifies native complete-path identity for both actors, unchanged causal
@@ -23,3 +23,10 @@ execution of both recorded/recovered phases. All tests, audits, rollouts and
 aggregation use scheduler on node001-node006. Main, actors, critics and dual
 remain frozen; no default environment changes or local experiments. Keep tapes
 and trajectories on servers and pull only small summaries/markers.
+
+Source `158ebc7df9`; smoke/audit `t166316` passes five V84 and three V85 tests,
+both native complete-path checks and the changed-action timed-release check.
+Shards `t166317-t166320` passed their smoke dependency and cover `[0,97)`,
+`[97,192)`, `[192,288)`, `[288,384)` on
+node002/004/005/006, 49/48/48/48 workers. Aggregate `t166321` waits for those
+exact markers. No V85 outcome has been used to change a controller.

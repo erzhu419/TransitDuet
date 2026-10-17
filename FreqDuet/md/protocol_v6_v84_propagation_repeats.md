@@ -37,4 +37,21 @@ prefix/native/tape checks for both actors. Reference task `t166296` uses 48
 workers. Shards `t166298-t166301` cover `[0,669)`, `[669,1338)`, `[1338,2006)`,
 `[2006,2688)` on node002/004/005/006 with 48/48/48/49 workers. Aggregate
 `t166302` waits for these exact four markers. Only the 70-byte smoke marker was
-pulled manually. The matrix is pending; no scientific or promotion claim yet.
+pulled manually at dispatch; no scientific or promotion claim was made then.
+
+All rollout shards completed exit 0/retry 0. Initial aggregation failed only on
+NumPy integer JSON serialization; source `7daaf32f5d`, task `t166313` passed the
+new regression and rebuilt the complete summary without rerunning rollouts.
+Only compact logs were read. V83 closed-loop CV-squared stratum means
+`+9.43e-6/+1.00e-5/+5.14e-5` become `-6.21e-7/-5.47e-7/+6.08e-7`.
+The concentrated active/inactive passenger effects shrink from +1324/+4727 to
++15.9/+82.7 person-s, both conditional intervals crossing zero. Residual harms
+remain in individual prefixes; this is not evidence of global non-harm.
+
+Server audit in `t166316` finds only 8/144 passenger and 7/144 CV action contrasts
+with absolute mean above paired future SD in closed loop, versus 69/144 and
+73/144 with recorded lower. Closed-loop paired/independent SD medians are
+.0342/.0849. Feedback contrast intervals have six positive and four negative
+prefixes for each primary cost. These are descriptive consumed-prefix counts,
+not independent action samples or multiplicity-adjusted confirmation. No
+controller promotion. V85 tests a single delayed-feedback mechanism contrast.
