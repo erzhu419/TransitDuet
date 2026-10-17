@@ -21,6 +21,11 @@ Limitations: this confirms new conditional futures on known prefixes, not new
 prefix transfer or full learned HRL. MC intervals use a normal approximation;
 report event counts and split-future consistency. No controller promotion.
 
-Run: `native_transit_abstention_confirmation_stage292_20261017_r1`.
+Run: `native_transit_abstention_confirmation_stage292_20261017_r2`.
 
 Validation: 14 focused/regression tests and two CLI startup checks passed.
+
+Execution repair: r1 freeze t173117 succeeded, but t173119-t173128 failed before
+simulation: output-directory launch mirroring removed the remote-only sealed
+ledger. Only freeze now stages local registration metadata; later phases stage
+code only. R2 repeats the identical protocol/actions/seeds, not a new candidate.

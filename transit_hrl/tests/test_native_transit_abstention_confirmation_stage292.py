@@ -209,7 +209,8 @@ class AbstentionConfirmationTest(unittest.TestCase):
         task = submit.task_specification("unit292", "collect", 0, 1)
         self.assertEqual((task["cpu"], task["ram_mb"], task["require_node"]), (1, 1536, None))
         self.assertEqual(task["allowed_nodes"], [f"node{i:03}" for i in range(1, 7)])
-        self.assertIn(str(spec.directory("unit292")), task["stage_input_paths"])
+        self.assertNotIn(str(spec.directory("unit292")), task["stage_input_paths"])
+        self.assertIn(str(spec.directory("unit292")), submit.task_specification("unit292", "freeze")["stage_input_paths"])
         self.assertTrue(task["result_dir"].endswith("receipts/state0/chunk1"))
         records = [{"id": "t1", "status": "running", "exit_code": None, **submit.task_specification("unit292", "pilot-report")}]
         plan = {"contract": spec.contract(), "software_qualified": True, "active_indices": [0], "pilot_indices": [0]}

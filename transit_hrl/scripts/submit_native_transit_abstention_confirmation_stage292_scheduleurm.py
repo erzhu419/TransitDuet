@@ -31,9 +31,12 @@ def task_specification(run, phase, index=None, chunk=None):
     task.update(project=spec.EXPERIMENT_PROTOCOL, description="Freq-HRL frozen abstention confirmation "+suffix,
         signature=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{run}/{suffix}", resource_family=f"Freq-HRL/{spec.EXPERIMENT_PROTOCOL}/{phase}",
         cmd="PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= "+shlex.join(command),
-        result_dir=f"results/{run}/{output}", local_result_dir=f"results/{run}/{output}",
+        result_dir=str(spec.directory(run)/output), local_result_dir=str(spec.directory(run)/output),
         ram_mb=1536 if phase in ("pilot", "collect") else 3072,
         cpu_training_justification="Frozen Stage291 actions on new continuation futures from archived Stage288 prefixes; no fits, model inference for selection, actor updates or held-prefix access.")
+    if phase != "freeze":
+        # Output-directory staging mirrors the local copy and removes remote-only ledgers.
+        task["stage_input_paths"] = [p for p in task["stage_input_paths"] if p != str(spec.directory(run))]
     return task
 
 
