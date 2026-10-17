@@ -149,6 +149,7 @@ class PrefixCoverageTest(unittest.TestCase):
             report = spec.read(root/"report/result.json")
             self.assertEqual(report["held_prefixes"], 40)
             self.assertIn("wide_vs_dense", report["controls"])
+            self.assertGreaterEqual(report["controls"]["wide_vs_dense"]["conditional_MC_se"]["cost"], 0.)
             self.assertIn("independent8_minus_MC_variance", report["training_errors"]["wide"])
             self.assertFalse(report["controller_promoted"])
 

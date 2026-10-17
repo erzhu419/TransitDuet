@@ -21,6 +21,7 @@ coverage in the fixed simple Stage247 class, not another head/loss variant.
 - Compare feasible-margin cost/fleet/service MSE on fitted16, independent8 and
   held16; report independent label-mean variance separately. Pair held errors
   and control outcomes before a stratified 40-prefix bootstrap (5000, seed288).
+  Paired conditional control MC standard errors are reported separately.
   Fleet-error improvement and cost/wait improvement are separate conclusions.
   Control advancement requires wide to improve cost and wait versus dense,
   raw and unchanged Stage247. No best rotation/profile selection.

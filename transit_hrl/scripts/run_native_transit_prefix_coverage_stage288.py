@@ -294,11 +294,20 @@ def report(run):
     records = []
     for i, key in enumerate(keys("held")):
         indices = range(6*i, 6*i+6)
+        paired = effects[list(indices)]
+        centered = paired-paired.mean(axis=1, keepdims=True)
+        covariance = np.einsum("pdvf,pdwf->vwf", centered, centered)/(36*paired.shape[1]*(paired.shape[1]-1))
         records.append({"root": key[1], "scenario": key[2], "replica": key[3],
-            "mean": effects[list(indices)].mean(axis=(0, 1)).tolist(),
+            "mean": paired.mean(axis=(0, 1)).tolist(), "MC_covariance": covariance.tolist(),
             "margin_MSE": held_errors[:, list(indices)].mean(axis=1).tolist(),
             "margin_MC_variance": held_noise[list(indices)].mean(axis=0).tolist()})
     controls = learning.paired_prefix_summary(records)
+    mc = np.asarray([r["MC_covariance"] for r in records]).sum(axis=0)/len(records)**2
+    for name, comparison in controls.items():
+        after, before = name.split("_vs_")
+        a, b = learning.VARIANTS.index(after), learning.VARIANTS.index(before)
+        variance = mc[a, a]+mc[b, b]-2*mc[a, b]
+        comparison["conditional_MC_se"] = dict(zip(learning.FIELDS, map(float, np.sqrt(np.maximum(variance, 0.)))))
     error_fields = ("cost_margin_mse", "fleet_margin_mse", "service_margin_mse")
     errors = learning.paired_prefix_summary([{**r, "mean": r["margin_MSE"]} for r in records], fields=error_fields)
     control_pass = all(controls["wide_vs_"+v]["prefix_CI95"][f][1] < 0 for v in ("dense", "raw", "stage247") for f in ("cost", "wait_min"))
