@@ -28,3 +28,18 @@ include upper dispatch objectives; an interaction requires coordination rather
 than an isolated lower reward patch. Better journey at zero alone does not
 justify promotion if regularity/completion are harmed. No training or main
 switch in V98. Scheduler only on node001-node006; raw records stay on-server.
+
+Smoke `t175833` on node004 passes the three initial tests and five full-day
+paths under source `1a4c681b0a`: cached preserve, deterministic-zero repeat,
+external fixed parity, fixed/preserve execution and shared physical contracts.
+Zero bypasses the actor scorer; its inherited diagnostic counter initially
+stayed zero, causing an unused risk-summary division warning. Source
+`1eae342e9a` counts those decisions without changing the law; all four tests
+pass in `t175850`. Formal tasks were still queued when redirected to this
+source, and require both the full-path smoke and counter-test markers.
+
+Live planning allocated 39 available physical workers: `t175844` [0,296) with
+9, `t175845` [296,591) with 9, `t175846` [591,886) with 9 and `t175847`
+[886,1280) with 12. Preferences are node002/004/005/006, with only node001-006
+allowed and no hard pins. Aggregate `t175848` waits for all four shard markers.
+No V98 outcome or policy qualification is claimed before aggregation.
