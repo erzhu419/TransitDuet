@@ -44,3 +44,25 @@ estimation `t166441` waits for all four calibration markers. Evaluation shards
 `t166442-t166445` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`, 24 workers
 each on the same four nodes, waiting for frozen means. Aggregate `t166450`
 waits for their exact completion markers. No V87 outcome is claimed at dispatch.
+
+All 32 calibration and 384 evaluation runs completed exit 0/retry 0. Retrieved
+only the 40,348-byte summary. Read-only reviews `t166482` / `t166487` pass eight
+tests and reproduce the original contrast means. The order-symmetric changes
+below use the forward 40-to-200 direction; smaller costs are better:
+
+| Component | Journey min | CV-squared | Readiness delay s | Holding s/trip |
+| --- | ---: | ---: | ---: | ---: |
+| Total | +0.56091 | -0.005573 | +213.19 | +30.72 |
+| Mean preference | -0.15344 | +0.004517 | -63.80 | -8.47 |
+| Centered-logit response | +0.71435 | -0.010090 | +276.99 | +39.19 |
+
+Response journey CI is [0.5380,0.9379], mean preference [-0.2106,-0.1026].
+Forward interaction is -0.11799 min [-0.17393,-0.05893] and -58.48 s readiness;
+it is already shared between the symmetric components, not an extra summand.
+CV interaction is unresolved; journey interaction is much stronger for 12011
+than 933013. Both actors show worse journey/readiness but better CV at 200.
+Saved common-state expected actions decompose +1.54165 s/decision into policy
+law +2.35213 [2.31586,2.38420] and visitation -0.81048 [-0.90954,-0.71437].
+Logit mean is not physical mean holding. No corner solves the joint tradeoff;
+do not tune another constant bias. V88 locates the common-state response by
+observable context, preserving both native laws and the main policy.
