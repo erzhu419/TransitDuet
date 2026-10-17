@@ -35,3 +35,13 @@ and stopped on a 3.05e-8 s difference; its waiting tasks were cancelled. Compare
 raw counters directly with the raw simulator readiness metric instead, while
 retaining exact original V89 episode-row comparisons. No statistical or
 scientific tolerance/gate is changed.
+
+Verified source `8f54a2a06c`; smoke `t169699` passes six tests, both actors'
+native/conditional full event and actual-holding paths, original V89 metrics
+and contexts, raw readiness, common arrival/departure support and exact
+variance/service-boundary identities. Review is read-only consumed-day data.
+Shards `t169701-t169704` cover `[0,24)`, `[24,48)`, `[48,72)`, `[72,96)`;
+the live planner allocates 24 workers each on node002/004/005/006. Reuse smoke
+cells 0/48. Aggregate `t169706` waits for those exact four small markers.
+Compressed timing records stay on-server. Formal mechanism results are pending;
+main policy, actors, critics, dual and original gate remain unchanged.

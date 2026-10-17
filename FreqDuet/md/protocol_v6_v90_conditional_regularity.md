@@ -51,7 +51,7 @@ Only the 79,157-byte mechanism summary was retrieved. Primary CV-squared
 change +0.000749 splits into variance at baseline mean -0.000160,
 CI [-0.003944,+0.003951], and mean normalization +0.000909,
 CI [+0.000811,+0.001016]. Raw dispersion non-harm is unresolved; a clear
-dispersion increase is not established. Four-hour between-band variation
+dispersion increase is not established. The four-hour between-band CV-squared component
 increases +0.000112, CI [+0.000072,+0.000149].
 
 On candidate-visited primary-group states, follower-ready prediction bias is
@@ -64,3 +64,12 @@ headway changes, but those changes alone do not establish harmful propagation.
 V91 will distinguish actual release, realized holding and other elapsed-time
 contributions, and test the finite-service-span explanation of the mean shift.
 The original joint gate remains failed; actors, dual and main policy stay frozen.
+
+Read-only V91 review of these same pairs: mean headway 372.295 -> 369.376 s,
+paired change -2.919 s, CI [-3.242,-2.581]; raw variance change -23.2 s-squared,
+CI [-538.6,+559.8]. Day-weighted primary-group ready-formula reversal fraction
+is 22.03%, CI [21.62%,22.41%]. Completed-departure formula gain remains
+positive +0.000527, CI [+0.000460,+0.000600]. Thus normalization is identified,
+forecast/local-score optimism is real, and harmful downstream dispersion is
+not yet identified. These overlapping diagnostics are not additive causal
+shares, and the original CV non-harm criterion is still not met.
