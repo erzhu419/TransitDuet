@@ -25,3 +25,11 @@ remain unchanged. Use the audit to choose system-credit versus actor/critic/
 authority work; do not infer an optimal control law from shadow rewards. All
 tests/replays/aggregation use scheduler on node001-node006. Pull only markers
 and the small summary; no raw timing arrays or checkpoints.
+
+Frozen source `64c5c3208c`. Smoke `t175904` on node004 passes four tests and
+two complete endpoint/action-count/timing-path comparisons; retrieved only its
+104 B marker. Five smoke-gated shards `t175892-t175896` cover [0,4), [4,13),
+[13,22), [22,31), [31,40), with 4/9/9/9/9 workers, soft-preferred to
+node001/002/004/005/006 and allowed only on node001-node006. The two smoke rows
+are reused, so total replay count stays 40. Aggregate `t175897` waits for all
+five markers. No V99 effect or objective-repair result is claimed yet.

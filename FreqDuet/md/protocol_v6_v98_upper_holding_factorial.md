@@ -59,7 +59,7 @@ sampler averaging; deterministic zero corners are shared, not extra replicates.
 Under both uppers, all ten actor means and all 32 day means have higher journey
 and readiness costs but lower CV-squared with preserve. Every actor-specific
 holding-effect CI has those same signs. Completed/unlaunched differences are
-zero. An isolated seed's small CV interaction (12161) does not replace the
+zero. An isolated seed's small CV interaction (12161, unadjusted interval) does not replace the
 unresolved overall interaction or justify a new gate. Mean actual holding is
 283.44/283.40 s per trip under B200/fixed; zero is exactly zero. At B200 upper,
 extra onboard exposure is 1,717,345 person-s [1,655,070,1,777,520], extra waiting
