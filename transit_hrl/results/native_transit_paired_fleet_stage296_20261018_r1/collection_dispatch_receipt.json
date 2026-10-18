@@ -1,0 +1,99 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "recorded_at_utc": "2026-10-18T17:11:23.020529+00:00",
+  "scientific_source_revision": "1bea867609",
+  "scheduler_revision": "f33620ee36",
+  "scheduler": {
+    "ids": {
+      "first": "t183945",
+      "last": "t188744",
+      "count": 4800
+    },
+    "status_counts": {
+      "running": 55,
+      "launching": 73,
+      "queued": 4672
+    },
+    "phase_ids": {
+      "menus": {
+        "first": "t183945",
+        "last": "t187064",
+        "count": 3120
+      },
+      "targets": {
+        "first": "t187065",
+        "last": "t188744",
+        "count": 1680
+      }
+    },
+    "by_phase": {
+      "menus": {
+        "running": 55,
+        "launching": 73,
+        "queued": 2992
+      },
+      "targets": {
+        "queued": 1680
+      }
+    },
+    "assigned_by_node": {
+      "node006": 45,
+      "node002": 35,
+      "node004": 29,
+      "node005": 18,
+      "node001": 1
+    },
+    "failed_ids": [],
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 1536
+  },
+  "first_actual_process_check": {
+    "id": "t183946",
+    "node": "node006",
+    "state": "alive",
+    "pcpu": 98.7,
+    "ram_mb": 599
+  },
+  "native_episode_budget": {
+    "proposal_and_screen": 174720,
+    "independent_target": 94080,
+    "total_collection": 268800
+  },
+  "future_draws": {
+    "proposal": [
+      0,
+      7
+    ],
+    "screen": [
+      8,
+      15
+    ],
+    "target": [
+      16,
+      31
+    ],
+    "sealed_test_evaluation": [
+      32,
+      63
+    ]
+  },
+  "target_roles": [
+    "fit",
+    "calibration"
+  ],
+  "both_menu_and_target_banks_required_before_fit": true,
+  "Stage294_E32_used_for_tuning": false,
+  "scientific_risk_fits_completed": 0,
+  "test_E32_dispatched": false,
+  "raw_or_model_data_pulled": false,
+  "actor_updates": 0
+}

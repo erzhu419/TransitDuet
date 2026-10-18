@@ -1,0 +1,44 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "recorded_at_utc": "2026-10-18T17:05:16.248275+00:00",
+  "scientific_source_revision": "1bea867609",
+  "scheduler_revision": "f33620ee36",
+  "scheduler": {
+    "ids": {
+      "first": "t183661",
+      "last": "t183920",
+      "count": 260
+    },
+    "status_counts": {
+      "done": 260
+    },
+    "exit_code_counts": {
+      "0": 260
+    },
+    "by_node": {
+      "node006": 69,
+      "node002": 63,
+      "node004": 55,
+      "node005": 44,
+      "node001": 29
+    }
+  },
+  "audit": {
+    "capture_qualified": true,
+    "prefixes": 260,
+    "states": 1560,
+    "roles": {
+      "fit": 80,
+      "calibration": 60,
+      "test": 120
+    },
+    "fixed_profiles": 16,
+    "native_episodes": 260,
+    "raw_feasibility_and_finite_controls_qualified": true,
+    "Stage294_outcomes_read": false
+  },
+  "scalar_pull_bytes": 249,
+  "rows_snapshots_models_or_rollouts_pulled": false,
+  "scientific_risk_fits_completed": 0,
+  "actor_updates": 0
+}

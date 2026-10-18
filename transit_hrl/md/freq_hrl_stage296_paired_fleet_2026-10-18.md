@@ -47,12 +47,18 @@ T16 tasks together after completed captures. Scientific fitting requires both
 banks completely done/exit0. Sampling, seeds, action rules and the registered
 scientific contract are unchanged; E32 retains its separate model/action seal.
 
-Execution: source revision `1bea867609`. Freeze t183630/node006 completed
-done/exit0, exactly replaying 360 old control states; only 4,294 scalar bytes
-were pulled. Native pilots t183632-t183641 have launched on node002/node006,
-with node001-node006 still allowed and no node binding. Formal captures and
-P8/S8/T16 collection await successful pilot qualification; E32 awaits the
-later learned-model/action seal. No scientific risk fit has completed yet.
+Execution update (2026-10-19): scientific source `1bea867609`, scheduling
+revision `f33620ee36`. Freeze t183630 passed exact replay of 360 old states.
+Pilots t183632-t183641 and aggregate t183655 completed done/exit0: 570 native
+episodes, 80 exact identities, peak RSS 682.71 MiB; pilot labels are excluded.
+Captures t183661-t183920 completed done/exit0 and passed server-only coverage
+and control checks: 260 prefixes, 1,560 states, fit/calibration/test 80/60/120.
+Formal collection t183945-t188744 contains 3,120 P/S plus 1,680 T16 jobs
+(268,800 native episodes), dynamically scheduled across node001-node006.
+Only the 4,279-byte pilot scalar report and 249-byte capture audit were pulled
+this turn; rows, snapshots and models remain server-side. Fit awaits both
+sampling banks; E32 awaits the later model/action seal. No scientific risk fit
+or test E32 evaluation has completed yet.
 
 Limitations: single intervention with fixed lower and finite-MC proposal,
 not full end-to-end Freq-HRL or a fleet-safety theorem. Independent calibrated
