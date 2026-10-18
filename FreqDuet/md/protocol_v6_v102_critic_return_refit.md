@@ -51,3 +51,12 @@ with 3/2/2 workers soft-preferred to node001/002/004. Only the still-queued
 first shard was reduced from seven workers when live capacity fell; its
 cases, fit budget and marker are unchanged. Aggregate `t179144`
 waits for their three markers. No repair effect is claimed before completion.
+
+Completed: all three shards and aggregate `t179144` exit 0, formal retry 0.
+Retrieved only the 59822-byte summary. Combined MSE is 0.07166 untouched,
+0.09209 TD and 0.10255 MC; MC-minus-untouched combined MAE is +0.04864,
+CI [0.00372,0.09279]. MC's predicted fixed-charge gain +0.01421 becomes
+-0.00264 [-0.02219,0.02146] in held-day branches. Physical intervals all cross
+zero. Stop both fixed-budget refits, retain untouched critics/main, and use
+V103's disjoint-future teacher to separate local-value repair opportunity from
+system-objective conflict before collecting more data or updating an actor.
