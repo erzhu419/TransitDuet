@@ -32,3 +32,13 @@ actual shard. Scheduler on node001--node006 only, dedicated CPU environment;
 only markers/final small JSON return locally. A pass does not switch main or
 establish a frequency-separation contribution. A failure keeps the measured
 tradeoff and ends this fixed confirmation budget, without another gain search.
+
+## Run record
+
+Frozen source `e994b9693a`; V106 control implementations remain unchanged.
+Smoke `t183525` passed on node002: six tests and five exact cached replays,
+including metrics, action counts, physical contracts and evidence coverage.
+No fresh confirmation labels were used. Formal `t183526--t183529` covers
+0--300/300--720/720--1020/1020--1440, with 10/14/10/14 workers from the
+live CPU planner. Aggregate `t183530` waits for their four actual markers.
+All jobs are restricted to node001--node006; only small outputs synchronize.
