@@ -82,7 +82,7 @@ def completed_follower(row, ready, departures, arrivals, next_arrival):
 class DecisionTrace(prior.DisturbanceAudit):
     def __init__(self, seed, method):
         super().__init__(seed, method)
-        self.decisions, self.ready, self.previous = [], {}, {}
+        self.decisions, self.ready, self.previous, self.follower_ids = [], {}, {}, {}
         self.ledger = defaultdict(lambda: dict(actual=0., shadow=0., positive_excess=0.))
 
     def attach(self, runner):
@@ -91,9 +91,13 @@ class DecisionTrace(prior.DisturbanceAudit):
         self.bus_type, self.original_prepare = Bus, Bus._prepare_for_action
 
         def prepare(bus, now, buses, debug):
+            identities = {int(b.bus_id): int(b.trip_id) for b in buses}
             result = self.original_prepare(bus, now, buses, debug)
             key = int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction)
             self.ready[key] = float(now)
+            follower_id = bus.pre_action_follower_bus_id
+            follower_id = int(follower_id) if follower_id is not None else None
+            self.follower_ids[key] = follower_id, identities.get(follower_id)
             return result
 
         Bus._prepare_for_action = prepare
@@ -123,7 +127,7 @@ class DecisionTrace(prior.DisturbanceAudit):
         row.update(trip_id=key[0], station_id=key[1], direction=key[2],
             bus_id=int(bus.bus_id), ready_time_s=self.ready[key], policy_time_s=float(self.env.current_time),
             predecessor_trip_id=predecessor,
-            follower_trip_id=int(bus.pre_action_follower_trip_id) if bus.pre_action_follower_trip_id is not None else None,
+            follower_bus_id=self.follower_ids[key][0], follower_trip_id=self.follower_ids[key][1],
             follower_source=str(bus.pre_action_follower_source),
             own_executed_holding_s=held, prior_shadow_baseline_sum_s=ledger['shadow'],
             prior_signed_excess_s=held-ledger['shadow'], prior_positive_excess_s=ledger['positive_excess'])

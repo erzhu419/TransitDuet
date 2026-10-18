@@ -3,6 +3,7 @@ from types import SimpleNamespace
 import json
 import sys
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -62,6 +63,24 @@ class DecisionTraceTests(unittest.TestCase):
         self.assertEqual(len(run.ITEMS), 16)
         self.assertEqual(len(set(run.ITEMS)), 16)
         self.assertTrue(all((*item, 0) in run.prior.ITEMS for item in run.ITEMS))
+
+    def test_frozen_runtime_bus_id_is_resolved_at_prepare_prefix(self):
+        from env.bus import Bus
+        bus = SimpleNamespace(bus_id=0, trip_id=2, direction=True,
+            last_station=SimpleNamespace(station_id=5), pre_action_follower_bus_id=7)
+        follower = SimpleNamespace(bus_id=7, trip_id=22)
+        audit = run.DecisionTrace(run.prior.SEEDS[0], run.METHODS[0])
+        with patch.object(run.prior.DisturbanceAudit, 'attach'), \
+             patch.object(run.prior.DisturbanceAudit, 'detach'), \
+             patch.object(Bus, '_prepare_for_action', return_value=None):
+            audit.attach(SimpleNamespace())
+            try:
+                Bus._prepare_for_action(bus, 80., [bus, follower], False)
+                follower.trip_id = 24
+                self.assertEqual(audit.follower_ids[(2, 5, True)], (7, 22))
+                self.assertEqual(audit.ready[(2, 5, True)], 80.)
+            finally:
+                audit.detach()
 
 
 if __name__ == '__main__':

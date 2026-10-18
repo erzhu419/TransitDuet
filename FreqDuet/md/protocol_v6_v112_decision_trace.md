@@ -13,6 +13,8 @@ path. Failure blocks that path and downstream aggregation.
 Trace actual ready/policy times, identities, feasible bins, forward/follower
 evidence, release/executed-holding/nonholding coordinates, prior executed own
 holding and same-state shadow baseline/excess ledger, raw requests and commands.
+The frozen runtime exposes follower bus_id, not trip_id; resolve it from the
+same prepare-action prefix, never from the later vehicle/trip assignment.
 Only adjacent stops with the same predecessor support carried-level versus
 innovation comparisons. Track persistent negative levels after prior holding,
 especially when the feedback term is nonpositive. Innovation commands are
