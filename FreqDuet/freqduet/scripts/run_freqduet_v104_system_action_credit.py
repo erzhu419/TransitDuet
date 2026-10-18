@@ -112,7 +112,7 @@ def train(root, old):
     artifact = model.fit(*arrays)
     artifact.update(training_days=sorted({day for _, day in source.audit.ITEMS}),
                     held_days=list(DAYS), goals=list(model.GOALS), source='V101 frozen labels')
-    path = root / 'fit/model.pt'
+    path = root / 'models/system_credit.pt'
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(artifact, path)
     restored = torch.load(path, weights_only=False)
@@ -145,7 +145,7 @@ def arm(root, index):
 def summarize(root):
     arrays, metadata, physical = dataset(root, root, False)
     x, p, y = arrays
-    artifact = torch.load(root / 'fit/model.pt', weights_only=False)
+    artifact = torch.load(root / 'models/system_credit.pt', weights_only=False)
     pred = model.predict(artifact, x, p)
     errors = model.errors(pred, y, p)
     rows, effects, laws = [], [], []

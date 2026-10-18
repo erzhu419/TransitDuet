@@ -59,8 +59,10 @@ class SystemActionCreditTest(unittest.TestCase):
         p, y = np.full((2, 7), 1 / 7), rng.normal(size=(2, 4, 7, 3))
         pred = {k: np.zeros((2, 7, 3)) for k in ('direct_q', 'separated_a', 'zero')}
         pred['level_v'] = (y.mean(1) * p[..., None]).sum(1)
+        pred['direct_q_level'] = pred['level_v'] + 10.
         e = model.errors(pred, y, p)
         np.testing.assert_array_equal(e['level_v']['level_squared_error'], 0)
+        np.testing.assert_allclose(e['direct_q_level']['level_squared_error'], 100.)
         self.assertTrue(np.all(e['zero']['difference_mse'] > 0))
         np.testing.assert_allclose(e['signal']['difference_energy_minus_noise'],
                                   e['zero']['difference_mse'] - e['signal']['difference_noise_mse'])

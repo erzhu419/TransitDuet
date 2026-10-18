@@ -13,7 +13,7 @@ PAIRS = np.asarray([(a, b) for a in range(7) for b in range(a + 1, 7)])
 
 
 def center(values, probabilities):
-    return values - (values * probabilities[..., :, None]).sum(-2, keepdims=True)
+    return values - (values * probabilities[..., :, None]).sum(-2)[..., None, :]
 
 
 def differences(values):
@@ -84,7 +84,9 @@ def predict(artifact, states, probabilities):
             if name == 'level_v':
                 output[name] = value[:, 0] * norms['v_scale'] + norms['v_mean']
             elif name == 'direct_q':
-                output[name] = center(value * norms['q_scale'] + norms['y_mean'], p)
+                raw = value * norms['q_scale'] + norms['y_mean']
+                output['direct_q_level'] = (raw * p[..., :, None]).sum(1)
+                output[name] = center(raw, p)
             else:
                 output[name] = center(value * norms['a_scale'], p)
     output['zero'] = np.zeros_like(output['separated_a'])
@@ -117,6 +119,7 @@ def errors(prediction, outcomes, probabilities):
                             difference_mae=np.mean(np.abs(error), 1))
     level = (mean * p[..., :, None]).sum(1)
     result['level_v'] = dict(level_squared_error=(prediction['level_v'] - level) ** 2)
+    result['direct_q_level'] = dict(level_squared_error=(prediction['direct_q_level'] - level) ** 2)
     result['signal'] = dict(difference_noise_mse=noise,
                            difference_energy_minus_noise=np.mean(target ** 2, 1) - noise)
     return result
