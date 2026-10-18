@@ -21,7 +21,8 @@ def rank_correlation(x, y):
 
 
 def decompose(p, b, q, qp, cq, reward, cost, alpha, lam):
-    change = np.asarray(b) - p
+    p, b, q, qp, cq, reward, cost = [np.asarray(x, dtype=float) for x in (p, b, q, qp, cq, reward, cost)]
+    change = b - p
     row = dict(soft_reward_gain=float(change @ reward), cost_term_gain=float(-lam * (change @ cost)),
         entropy_gain=alpha * (source.entropy(b) - source.entropy(p)),
         pessimism_gain=float(-change @ (q - qp)),

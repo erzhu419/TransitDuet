@@ -27,6 +27,16 @@ class CachedAttributionTests(unittest.TestCase):
     def test_flat_cost_is_not_reported_as_a_rank_failure(self):
         self.assertIsNone(rank_correlation(np.zeros(7), np.arange(7)))
 
+    def test_float32_network_outputs_keep_double_precision_gain_identity(self):
+        p, b = np.full(7, 1 / 7), np.arange(1, 8) / 28
+        q, cq = (np.arange(7) / 7).astype(np.float32), (np.arange(7) / 13).astype(np.float32)
+        qp = q.astype(float) - .123
+        actual = decompose(p, b, q, qp, cq, q + .3, cq + .2, .1, .34567)
+        expected = decompose(p, b, q.astype(float), qp, cq.astype(float),
+                             (q + .3).astype(float), (cq + .2).astype(float), .1, .34567)
+        for key in actual:
+            self.assertAlmostEqual(actual[key], expected[key], places=12)
+
 
 if __name__ == '__main__':
     unittest.main()

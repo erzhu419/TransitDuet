@@ -88,7 +88,7 @@ def evaluate(trainer, v101_root, held_index):
         values = audit.native_values(trainer, [capture['state']])
         p = np.asarray(capture['p'])
         np.testing.assert_allclose(values['p'][0], p, atol=2e-6, rtol=0)
-        q, cq = values['q'][0], values['cost'][0]
+        q, cq = [values[k][0].astype(float) for k in ('q', 'cost')]
         charge = np.asarray(capture['q']) - capture['q_policy']
         qp = q - charge  # Keep the old uncertainty charge fixed across refits.
         b = source.boltzmann(qp - capture['lam'] * cq, capture['alpha'])
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     args = p.parse_args()
     if args.command == 'smoke':
         subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
-            str(Path(__file__).resolve().parents[1] / 'tests'), '-p', 'test_v102_*.py', '-v'], check=True)
+            str(Path(__file__).resolve().parents[1] / 'tests'), '-p', 'test_v10[12]_*.py', '-v'], check=True)
         run_item(args.out_root, args.v100_root, args.v101_root, 0, full_path=True)
         pilot.write_json(args.out_root / 'smoke/done.json', dict(status='native_path_and_frozen_critic_refit_passed'))
     elif args.command == 'aggregate':
