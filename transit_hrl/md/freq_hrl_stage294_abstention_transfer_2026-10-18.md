@@ -61,13 +61,27 @@ Formal captures t175937-t176176 completed done/exit0: 240 qualified prefixes,
 Existing scheduler targeted probes refreshed delayed terminal accounting;
 no capture was rerun and no scheduler source was modified.
 
-Menu tasks t176191-t179070 (2,880 tasks, 161,280 native episodes) are submitted
-to the unpinned node001-node006 pool. E32 remains gated on complete P8/S8
-sampling and the frozen action/matching ledger. Pilot storage projects about
-53.5 GiB for menus versus about 112.5 TiB free on the server filesystem.
-The scalar pilot report was 3,537 bytes; additional reads were small receipt
-metadata and logs. No models, snapshots or rollout panels were pulled.
-Runtime code remains `38de1865f5`; rules, thresholds and inference are unchanged.
+Menu tasks t176191-t179070 completed done/exit0. Sealing task t179254 completed
+done/exit0 on node006: all 23,040 state-futures, 161,280 native episodes and
+23,040 exact identities passed; values were finite and cost decomposition error
+was zero. P8/S8/E32 banks are disjoint. Twenty-two focused/regression tests pass.
+
+The frozen screen accepted 6,259 changed profile-state proposals; zero-event
+abstention retains 864. Expected matched thinning also retains 864 across 960
+strata (maximum count error 1.78e-15). These are decisions, not independent seeds.
+No evaluation labels were read. Audit code revision: `e41234b617`; selectors,
+thresholds and inference are unchanged.
+
+Independent E32 tasks t179258-t183453 (4,196 tasks) are submitted to the unpinned
+node001-node006 pool: 1,049 active states, 33,568 state-futures, 141,376 native
+episodes. The other 391 states have exact zero paired effects and remain in the
+1,440-state/240-prefix denominator. Draw16-47 uses frozen choices and matching
+weights, with no reselection or fits. Performance conclusions await this bank.
+At 06:58 UTC, 275 tasks were running and 3,921 queued, with no failures;
+placement was dynamic across node002/004/005/006. A node006 process sample
+confirmed 76 active E32 Python workers, with median CPU usage 98.9%.
+Only the 14,184-byte scalar seal report was pulled; the action/weight ledger,
+models, snapshots and rollout panels remain server-only.
 
 ## Limitations
 

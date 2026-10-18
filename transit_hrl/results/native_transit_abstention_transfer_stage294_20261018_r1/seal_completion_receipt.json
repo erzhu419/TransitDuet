@@ -1,0 +1,54 @@
+{
+  "protocol": "native_transit_abstention_transfer_stage294_v1",
+  "run_name": "native_transit_abstention_transfer_stage294_20261018_r1",
+  "recorded_at_utc": "2026-10-18T06:54:51.331292+00:00",
+  "menu_runtime_commit": "38de1865f5",
+  "audit_and_seal_commit": "e41234b617",
+  "scheduler": {
+    "menu_ids": {
+      "first": "t176191",
+      "last": "t179070",
+      "count": 2880
+    },
+    "menu_status_counts": {
+      "done": 2880
+    },
+    "menu_exit_code_counts": {
+      "0": 2880
+    },
+    "seal": {
+      "id": "t179254",
+      "status": "done",
+      "exit_code": 0,
+      "node": "node006"
+    }
+  },
+  "qualified_state_futures": 23040,
+  "qualified_native_episodes": 161280,
+  "exact_identity_vectors": 23040,
+  "all_values_finite": true,
+  "max_cost_decomposition_error": 0.0,
+  "future_banks_disjoint": true,
+  "matching": {
+    "eligible_changes": 6259,
+    "expected_thin_changes": 864.0,
+    "kept_changes": 864,
+    "matched_count_max_abs_difference": 1.7763568394002505e-15,
+    "randomizable_kept_changes": 859,
+    "strata": 960
+  },
+  "prefixes": 240,
+  "states": 1440,
+  "active_states": 1049,
+  "exact_identity_states_not_simulated": 391,
+  "evaluation_labels_read": false,
+  "selectors_thresholds_and_inference_unchanged": true,
+  "new_fits": 0,
+  "actor_updates": 0,
+  "focused_and_regression_tests_passed": 22,
+  "local_pull": {
+    "scalar_seal_report_bytes": 14184,
+    "models_snapshots_or_rollouts_pulled": false
+  },
+  "performance_conclusion": "pending_independent_E32"
+}
