@@ -66,4 +66,27 @@ shards `[0,3), [3,23), [23,34), [34,45), [45,72)` with `3/20/11/11/27`
 workers, planned on node001/002/004/005/006 from live capacity. Aggregate
 `t188761` waits for all five local completion markers and runs on a server.
 Only shard markers and final `summary/status.json` may synchronize locally.
-Independent performance is pending; main remains unchanged.
+All five shards and aggregate completed with exit code zero. Retrieved only the
+96,527-byte summary; all 72 full-day evaluations have zero unlaunched/incomplete
+trips. Both variants settle 41,600 actions, with zero positive holding at balanced
+gaps and zero accounting conservation error.
+
+## Outcome and decision
+
+Ledger versus B200: journey -0.9923 min, actual CV2 -0.00593, readiness -370.35 s;
+versus preserve: -0.6805 min, -0.00562, -262.16 s. Both joint diagnostics pass.
+Versus bilateral025: journey +0.4350 [0.2796, 0.5389] min, CV2 -0.00853
+[-0.01016, -0.00646], readiness +56.36 [48.36, 68.33] s: the third gate fails.
+
+Retaining budget versus single-step innovation adds journey +0.1598
+[0.0895, 0.2128] min, holding +11.21 [8.79, 13.82] s/trip and readiness
++20.67 [13.18, 29.54] s. CV2 +0.00056 [-0.00041, 0.00177] gives no regularity
+benefit; all eight actor/day journey differences are positive. Close the carried
+budget candidate, rather than tune its gain or promote the ablation post hoc.
+
+Single-step innovation also jointly improves B200/preserve, but versus bilateral
+still adds journey +0.2752 [0.1927, 0.3357] min, holding +36.64 s/trip and readiness
++35.69 s while improving CV2 -0.00909. No all-control joint improvement is shown.
+Next read only the 16 existing traces to separate carried-budget response,
+innovation clipping and between-path prefix changes. No new rollout, training or
+main-policy change is justified by this pilot alone.
