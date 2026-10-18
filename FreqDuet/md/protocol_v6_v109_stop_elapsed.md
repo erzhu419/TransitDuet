@@ -28,6 +28,7 @@ critics, duals, main policy and all original thresholds remain frozen.
 ## Run Record
 
 Frozen source `ac336aaecd`. Smoke `t183618` passed on node006: five V92 tests,
-six new tests and eighteen consumed primitive paths. Review `t183619` waits
-for that real smoke marker; both jobs use one CPU and only node001--node006.
+six new tests and eighteen consumed primitive paths. After syncing the real
+smoke marker, review `t183619` launched on node006; both jobs use one CPU
+and only node001--node006.
 Only the smoke marker and final small summary synchronize, not timing records.
