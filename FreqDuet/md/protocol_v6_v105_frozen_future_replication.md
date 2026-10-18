@@ -66,3 +66,28 @@ Before seeing effects, correct the diagnostic noise of the half-mean difference
 to Var(first)/16 + Var(second)/16 (the initial field divided their sum by 32).
 Rename it `split_difference_noise`, with a regression test. This reporting fix
 does not affect any model, proposal, rollout, cross-product or benefit gate.
+
+Replacement tasks `t183492--t183495` cover 2969--3200, 3200--3328,
+3328--3413 and 3413--3584, with 26/15/10/19 workers. The cancelled
+`t183475` process group was confirmed empty before submission. Aggregate
+`t183476` now waits for the three original completed markers plus these four
+replacement markers, not the cancelled shard. Its reporting source is
+`e932f6e3ab`; all rollouts retain `77b3274a09`. Six unit tests, including the
+noise regression, must succeed on the compute node before aggregation.
+
+## Outcome
+
+All 3584 arms and six tests completed; aggregate `t183476` on node004.
+Only the 430434-byte final JSON and small markers returned locally.
+A and teacher mixture fail crossed, conditional-MC and two-cohort joint gates.
+A passenger change = -1073 [-4776,3972] person-s, CV2 = +0.00000896
+[-0.000252,0.000192], readiness = +0.597 [-0.448,1.681] s (crossed intervals).
+Conditional readiness harm is positive: [0.115,1.101] s. Teacher passenger =
+-185 [-3114,3747], CV2 = +0.0000249 [-0.0000463,0.0000826], readiness =
++0.239 [-0.570,1.285]; passenger changes sign across the two cohorts.
+A contrast MSE is significantly worse than zero for all three goals, though
+better than direct Q. Independent-half cross-products confirm readiness signal
+(1.365 [0.064,3.172]), not passenger (57.7m [-4.6m,140.4m]) or CV2
+(-4.61e-10 [-4.46e-8,5.46e-8]). All three teacher optimism intervals are positive.
+Do not refit/select on V105 or expand training. Next: V106 full-day service
+tradeoffs with frozen controls and simple feedback; main remains unchanged.
