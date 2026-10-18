@@ -16,7 +16,7 @@ import run_freqduet_v106_service_tradeoff as prior
 
 
 pilot, confirmation = prior.pilot, prior.confirmation
-SEEDS = tuple(confirmation.VALIDATION_SEEDS)
+SEEDS = tuple(seed for seed in confirmation.TRAIN_SEEDS if seed not in prior.SEEDS)
 DAYS = tuple(range(2071001, 2071017))
 PRIMARY = ('forward025', 'bilateral025')
 METHODS = ('native', 'preserve', 'zero', *PRIMARY)

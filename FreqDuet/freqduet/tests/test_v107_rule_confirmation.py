@@ -19,6 +19,7 @@ class ConfirmationTests(unittest.TestCase):
         self.assertEqual(len(run.SEEDS), 10)
         self.assertEqual(len(run.DAYS), 16)
         self.assertFalse(set(run.SEEDS) & set(run.prior.SEEDS))
+        self.assertEqual(set(run.SEEDS), set(run.confirmation.TRAIN_SEEDS) - set(run.prior.SEEDS))
         self.assertFalse(set(run.DAYS) & set(run.prior.DAYS))
         self.assertEqual(len(run.ITEMS), 1440)
         self.assertEqual(len(set(run.ITEMS)), 1440)

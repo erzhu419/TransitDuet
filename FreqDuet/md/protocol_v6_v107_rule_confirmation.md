@@ -10,7 +10,7 @@ holding are controls; upper weights/deployment background, fleet, clocks,
 causal evidence and seven feasible holding bins remain the same. Zero is not
 an exact fixed-upper external baseline. Both actors and duals remain frozen.
 
-Use the other ten archived actors (`VALIDATION_SEEDS`, excluding 12037/933083),
+Use the other ten archived actors (all 12 `TRAIN_SEEDS`, excluding 12037/933083),
 and 16 new days 2071001--2071016. They are unseen in V106, not newly trained or
 untouched throughout the project's history. Native/preserve retain three paired
 samplers; zero and both deterministic rules retain one shared path per actor/day.
