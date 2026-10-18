@@ -47,5 +47,7 @@ Earlier smokes exposed an
 inapplicable current-tree attribute and float32 gain arithmetic; both are
 fixed, with no tolerance change. Earlier gated shards were cancelled before
 launch. Current shards `t179139-t179141` cover [0,14), [14,17), [17,20),
-with 7/2/2 workers soft-preferred to node001/002/004. Aggregate `t179144`
+with 3/2/2 workers soft-preferred to node001/002/004. Only the still-queued
+first shard was reduced from seven workers when live capacity fell; its
+cases, fit budget and marker are unchanged. Aggregate `t179144`
 waits for their three markers. No repair effect is claimed before completion.
