@@ -41,3 +41,24 @@ Formal tasks `t183520--t183523` cover 0--21/21--44/44--67/67--104 with
 7/8/8/13 workers, all gated by the real smoke marker. Aggregate `t183524`
 waits for their four actual shard markers. All tasks are restricted to
 node001--node006. No model, actor, dual or main-policy update.
+
+## Outcome
+
+All 104 replays and aggregate `t183524` completed with exit 0. Only the
+235779-byte final JSON was pulled. None of the six rules passes the original
+joint gate. Forward025 versus preserve: journey -1.7456 [-2.9822,-0.7546] min,
+CV2 +0.000242 [-0.008725,0.007615], readiness -310.24 [-452.52,-178.89] s.
+Bilateral025: journey -1.6914 [-2.8663,-0.7634] min, CV2 +0.001123
+[-0.002448,0.005331], readiness -311.17 [-447.26,-179.44] s. Both reduce
+passenger time and readiness in both actors and all four day averages, but
+CV2 worsens on two day averages and improves on two; nonharm is not confirmed.
+They still cost +0.807/+0.861 min and +72.6/+71.7 readiness seconds versus zero,
+while substantially improving CV2. No completion failures in any arm.
+
+Forward050 improves CV2 versus preserve (-0.012427 [-0.021420,-0.004717])
+but not joint service cost; bilateral050 increases onboard exposure despite
+roughly equal vehicle-holding time. Gain 1 improves CV2 but adds +2.95/+5.52
+journey minutes and +631/+1116 readiness seconds versus preserve. Bilateral
+evidence is actually used (~84% of decisions), not merely forward fallback.
+Next V107 freezes BOTH quarter-gain rules for other archived actors/new days;
+no "statistically equal CV", gain retuning, main switch or training expansion.
