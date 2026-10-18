@@ -27,12 +27,19 @@ CONTRASTS['bilateral025_vs_forward025'] = ('bilateral025', 'forward025')
 KINDS = ('arrival', 'departure')
 
 
+def timing_events(rule, kind):
+    if kind == 'arrival':
+        return rule.arrivals
+    observed = {(r['trip_id'], r['station_id'], r['direction']) for r in rule.arrivals}
+    return [r for r in rule.departures if (r['trip_id'], r['station_id'], r['direction']) in observed]
+
+
 def scoped_moments(rule, kind):
     full = rule.summary[kind]
     result = {'full': full}
     result.update({'band/' + k: v for k, v in full['four_hour_bands'].items()})
     groups = defaultdict(list)
-    for row in getattr(rule, kind + 's'):
+    for row in timing_events(rule, kind):
         groups[(row['station_id'], row['direction'])].append(row)
     for (station, direction), rows in groups.items():
         if len(rows) > 1:
@@ -88,7 +95,7 @@ def run_item(root, old, index):
         check_cached(result, json.loads((old / 'pairs' / f'p{prior.ITEMS.index(item)}.json').read_text()), item)
         np.testing.assert_allclose(rule.summary['arrival']['cv_squared'], row['cv_squared'], atol=1e-10, rtol=0)
         result.update(series=rule.summary, scopes={k: scoped_moments(rule, k) for k in KINDS},
-            coordinates={k: coordinates(getattr(rule, k + 's')) for k in KINDS})
+            coordinates={k: coordinates(timing_events(rule, k)) for k in KINDS})
         rule.save(root / 'records' / f'p{index}.npz')
         pilot.write_json(path, result)
     print('V108_TIMING_ITEM_DONE', index, flush=True)

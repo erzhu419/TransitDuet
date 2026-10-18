@@ -46,6 +46,12 @@ class RuleTimingTest(unittest.TestCase):
         self.assertEqual(scopes['full']['samples'], 3)
         self.assertEqual(sum(scopes[k]['samples'] for k in ('band/0', 'band/1')), 3)
 
+    def test_departure_accounting_uses_original_matched_arrival_support(self):
+        events = self.events([100., 200., 400.])
+        extra = dict(events[0], trip_id=9)
+        rule = SimpleNamespace(arrivals=events, departures=[extra, *events])
+        self.assertEqual(audit.timing_events(rule, 'departure'), events)
+
     def test_six_covariance_terms_and_boundaries_reconstruct_full_effect(self):
         def pack(events):
             return dict(coordinates={'arrival': audit.coordinates(events)},
