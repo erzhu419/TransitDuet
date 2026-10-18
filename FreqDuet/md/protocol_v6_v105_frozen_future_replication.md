@@ -14,7 +14,8 @@ that their old crossed evaluation reproduces the completed V104 review. The
 primary teacher summary is their fixed equal mixture; each original component
 is diagnostic only. No selecting the better component, refitting, reweighting,
 new margin, new gate, or scalar goal tuning on V105 labels. Keep native actors,
-critics, duals, upper plan and main unchanged.
+critics, duals, upper plan and main unchanged. Only the anchor action is forced;
+subsequent upper/lower feedback remains native and fully closed loop.
 
 Report all 21 signed action-pair differences, old/new contrast agreement,
 independent-cohort cross-products, MC noise and frozen-model difference error
@@ -46,3 +47,13 @@ Smoke: unit tests, freeze, then reproduce V104 context-0/future-0 extreme action
 and event timings exactly; no new future labels in smoke. Formal shards wait for
 smoke, aggregate waits for all actual shard markers. Models and raw records stay
 on server; synchronize only small markers and final JSON. No training expansion.
+
+## Run record
+
+Frozen source `77b3274a09`. Smoke `t183471` passed on node004: five tests,
+V104 model/law snapshot, reconstructed old teacher evaluation, and both cached
+extreme-action paths exactly reproduced. No new future labels used in smoke.
+Formal shards `t183472--t183475`: ranges 0--881, 881--1880, 1880--2468,
+2468--3584; 15/17/10/19 workers, respectively. Soft-preferred nodes 002/004/005/006,
+eligible on 001--006 only. Aggregate `t183476` waits for all four small markers.
+No V105 effect result yet. No additional training or main-policy change.
