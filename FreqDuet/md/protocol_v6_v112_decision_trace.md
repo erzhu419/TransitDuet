@@ -33,10 +33,16 @@ markers and final summary/status.json synchronize locally. Main stays frozen.
 
 ## Run Record
 
-Frozen source `e8792aa58b`; scheduler smoke `t183923` launched on node006 and
-passed seven tests. The two full-path exact replays are still pending at this
-record. Formal `t183924` (0--8) and `t183925` (8--16), each eight workers, wait
-for the real smoke marker; aggregate `t183927` waits for both shard markers.
+Frozen rollout source `e8792aa58b`; scheduler smoke `t183923` passed seven tests
+and both full-path exact replays on node006. Only its 113-byte marker returned.
+Formal `t183924` (0--8, node001) and `t183925` (8--16, node002), each eight
+workers, launched after that marker; aggregate `t183927` waits for both shards.
 Old `t183657--t183660` were cancelled after identifying the frozen runtime's
 missing follower-trip field; no old formal shard ran. The fix records the
 existing bus-to-trip identity at prepare time and does not alter control.
+
+The separate read-only cross-review reads completed compressed traces only
+after the all-path aggregate receipt. It separates repeated positive holding
+with nonpositive feedback into missing-forecast and matched completed-follower
+cohorts, and checks whether 45s commands persist under completed follower gaps.
+No additional rollout or alternative action is executed by this review.
