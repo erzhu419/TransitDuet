@@ -32,3 +32,31 @@ six new tests and eighteen consumed primitive paths. After syncing the real
 smoke marker, review `t183619` launched on node006; both jobs use one CPU
 and only node001--node006.
 Only the smoke marker and final small summary synchronize, not timing records.
+
+## Outcome And Decision
+
+Review t183619 completed with exit 0, reading all 288 paths; all V108 supports,
+moments, covariance collapses and crossed intervals reconstruct. Only the
+1104546-byte final JSON returned. Bilateral025 minus preserve, arrival CV2:
+
+| Contribution | Mean | Crossed actor/day 95% CI |
+| --- | --- | --- |
+| Nonholding stop allocation | +.002215 | [.001695,.002679] |
+| Remaining elapsed allocation | +.005449 | [.003331,.007422] |
+| Holding/stop cross | +.003746 | [.002351,.005159] |
+| Holding/remaining cross | +.011457 | [.005480,.017314] |
+
+Both allocations are positive in both actor means; stop in 16/16 day means,
+remaining in 14/16. Remaining-elapsed diagonal alone is inconclusive:
+-.000792 [-.003926,.002155]; stop diagonal +.000591 [.000334,.000847].
+At forward-direction stop 20, remaining diagonal actually falls by .012164
+while holding/remaining cross rises by .040628; stop allocation +.004192,
+remaining +.005804, raw headway variance +1292 s2. Nearly all CV2 change
+is on unchanged predecessor edges. Thus this is not simply more independent
+travel noise or overtaking. Departures show the same qualitative split.
+
+Keep this as two-actor covariance evidence, not causal mediation or a new
+controller result. The next hypothesis is V110: fixed-gain bilateral feedback
+plus causal, observed nonholding-disturbance feedforward, tested once on fresh
+development days. This tests compensation rather than fitting another absolute
+travel predictor. No V107 gate/sample extension or main-policy switch.
