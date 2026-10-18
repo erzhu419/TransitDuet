@@ -26,6 +26,8 @@ fleet, clocks, scenarios, actors, critics and duals stay fixed.
 
 Report all paired service effects, crossed actor/day intervals after sampler
 averaging, completion, and feedforward sign/magnitude/cap/actual command dose.
+Command deltas compare the shadow unmodified rule on the candidate's own
+trajectory; they are not matched-dose causal mediation.
 Diagnostic success requires passenger upper <0 and actual CV2/readiness/
 unlaunched/incomplete upper <=0 against native, preserve AND bilateral025.
 Zero only describes the service/regularity tradeoff. The two-actor pilot cannot
@@ -39,3 +41,14 @@ day shards wait for the real smoke marker; aggregation waits for actual shards.
 All computation goes through scheduler on node001--node006 using the isolated
 CPU environment. Timing primitives and checkpoints stay server-side; only
 markers and the final small JSON synchronize. Main policy remains frozen.
+
+## Run Record
+
+Frozen source `de2f0f81ae`; the output-counter serialization fix does not change
+the control equation. Smoke `t183624` passed on node006: eight tests, four exact
+cached V106 controls and two sampler-invariant candidate paths with exercised
+command changes. No new-day labels were used. Formal `t183625--t183629` covers
+0--5/5--21/21--38/38--52/52--72, with 5/16/17/14/20 workers from live CPU
+capacity (72 parallel workers, one batch). Aggregate `t183631` waits for those
+five actual shard markers. Only the 200-byte smoke marker returned before
+formal dispatch; all tasks are restricted to node001--node006.
