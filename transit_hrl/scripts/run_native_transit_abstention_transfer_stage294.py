@@ -384,8 +384,9 @@ def evaluation_path(run, index, chunk):
 
 def report(run):
     sealed, plan = read(directory(run)/"sealed_raw/primary.json"), read(directory(run)/"seal/result.json")
+    rows = [r for k in keys() for r in read(prefix_path(run, k)/"rows.json")]
     panels = np.zeros((1440, 32, 6, 4))
-    episodes = 0
+    episodes, identities, futures, max_error, max_rss = 0, 0, set(), 0., 0.
     for i in plan["active_indices"]:
         state = sealed["states"][i]
         for chunk in range(4):
@@ -395,25 +396,44 @@ def report(run):
             if (receipt["contract"] != contract() or not receipt["software_qualified"]
                     or receipt["key"] != state["key"] or receipt["probe"] != state["probe"]
                     or receipt["candidates"] != state["candidates"] or receipt["draws"] != list(draws)
+                    or receipt["state_futures"] != len(draws) or receipt["exact_identities"] != len(draws)
+                    or receipt["native_episodes"] != len(draws)*(1+len(state["candidates"]))
                     or [r["draw"] for r in labels] != list(draws)):
                 raise ValueError("Incomplete frozen evaluation")
             episodes += receipt["native_episodes"]
+            identities += receipt["exact_identities"]
+            max_rss = max(max_rss, receipt["peak_rss_MiB"])
             for r in labels:
                 if r["future_seed"] != future_seed(tuple(state["key"]), state["probe"], r["draw"]):
                     raise ValueError("Wrong evaluation future")
+                if r["future_seed"] in futures:
+                    raise ValueError("Repeated evaluation future")
+                futures.add(r["future_seed"])
                 if sorted(map(int, r["values"])) != state["candidates"]:
                     raise ValueError("Missing frozen action in evaluation")
+                values = np.asarray([r["values"][str(a)] for a in state["candidates"]])
+                if values.shape != (len(state["candidates"]), 4) or not np.isfinite(values).all():
+                    raise ValueError("Nonfinite or incomplete evaluation values")
+                if np.any(values[state["candidates"].index(rows[i]["original_choice"])] != 0):
+                    raise ValueError("Nonzero native evaluation identity")
+                error = float(np.max(abs(values[:, 0]-values[:, 1]-values[:, 2])))
+                if error > 1e-12:
+                    raise ValueError("Evaluation cost differs from fleet plus service")
+                max_error = max(max_error, error)
                 for action, value in r["values"].items():
                     panels[i, r["draw"]-16, int(action)] = value
-    if episodes != plan["evaluation_native_episodes"]:
+    if episodes != plan["evaluation_native_episodes"] or len(futures) != plan["evaluation_state_futures"]:
         raise ValueError("Evaluation physical budget differs from sealed plan")
-    rows = [r for k in keys() for r in read(prefix_path(run, k)/"rows.json")]
     result = rule.summarize(sealed, panels, cube(rows))
     result["descriptive_group_means"] = {f"{root}/{scenario}": dict(zip(rule.ARMS,
         [dict(zip(rule.FIELDS, values)) for values in group])) for (root, scenario), group
         in zip(((r, s) for r in ROOTS for s in SCENARIOS), result["descriptive_group_means"])}
     write_json(directory(run)/"report/result.json", {"protocol": EXPERIMENT_PROTOCOL, "contract": contract(),
         "coverage_qualified": True, "new_prefixes": 240, "states": 1440, "fixed_profiles": 16,
+        "evaluation_audit": {"tasks": len(plan["active_indices"])*4, "state_futures": len(futures),
+            "exact_identities": identities, "all_values_finite": True,
+            "max_cost_decomposition_error": max_error, "max_peak_rss_MiB": max_rss,
+            "exact_identity_states_retained": 1440-len(plan["active_indices"])},
         "evaluation_native_episodes": episodes, "matching": sealed["matching"], **result,
         "new_fits": 0, "actor_updates": 0, "controller_promoted": False})
 

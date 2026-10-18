@@ -216,6 +216,45 @@ class AbstentionTransferTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 spec.report("unit294")
 
+    def test_evaluation_audit_counts_identity_and_components(self):
+        key, probe = spec.keys()[0], spec.PROBES[0]
+        state = {"key": list(key), "probe": probe, "candidates": [0, 1]}
+        raw = np.zeros((1, 1440), int)
+        sealed = {"states": [state], "choices": np.stack((raw, raw, raw, raw), axis=1).tolist(),
+            "proposal": raw.tolist(), "matched_thin_probabilities": raw.tolist(), "matching": {}}
+        plan = {"active_indices": [0], "evaluation_native_episodes": 96, "evaluation_state_futures": 32}
+        rows = [{"original_choice": 0}]
+        receipt = {"contract": spec.contract(), "software_qualified": True, **state,
+            "state_futures": 8, "native_episodes": 24, "exact_identities": 8, "peak_rss_MiB": 700.}
+        corrupt = {}
+
+        def load(path):
+            if path.name == "primary.json": return sealed
+            if path.name == "result.json": return plan
+            if path.name == "rows.json": return rows
+            chunk = int(path.parent.name.removeprefix("chunk"))
+            draws = spec.BANKS["evaluation"][chunk*8:chunk*8+8]
+            if path.name == "receipt.json": return {**receipt, "draws": list(draws), **corrupt.get("receipt", {})}
+            return [{"draw": d, "future_seed": spec.future_seed(key, probe, d),
+                "values": {"0": corrupt.get("identity", [0., 0., 0., 0.]),
+                    "1": corrupt.get("value", [1., .25, .75, -.1])}} for d in draws]
+
+        with patch.object(spec, "keys", return_value=[key]), patch.object(spec, "read", side_effect=load), \
+                patch.object(spec, "cube", return_value=np.arange(1440).reshape(10, 24, 6)), \
+                patch.object(spec, "write_json") as save:
+            spec.report("unit294")
+            audit = save.call_args.args[1]["evaluation_audit"]
+            self.assertEqual((audit["tasks"], audit["state_futures"], audit["exact_identities"]), (4, 32, 32))
+            self.assertEqual(audit["max_cost_decomposition_error"], 0.)
+            for data, message in (({"receipt": {"exact_identities": 7}}, "Incomplete"),
+                    ({"identity": [0., 0., 0., 1.]}, "identity"),
+                    ({"value": [float("nan"), .25, .75, -.1]}, "Nonfinite"),
+                    ({"value": [1., .25, 2., -.1]}, "fleet plus service")):
+                corrupt.clear()
+                corrupt.update(data)
+                with self.subTest(data=data), self.assertRaisesRegex(ValueError, message):
+                    spec.report("unit294")
+
     def test_native_rollout_restores_archived_rng_and_checks_shared_tape(self):
         calls = []
         wrong_seed = False
