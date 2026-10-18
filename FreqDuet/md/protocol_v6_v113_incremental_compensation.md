@@ -50,3 +50,20 @@ pilot, not admission. The balance bound uses the existing follower estimate and
 does not guarantee full-day regularity. No external fixed-upper comparison or
 frequency-separation claim. All computation and raw traces remain on server nodes
 through scheduler; local retrieval is limited to small markers and summaries.
+
+## Run record
+
+Source `536feb4f0e`, scheduler smoke `t188755` on node001: all 13 tests and
+eight full-day replays passed. Four cached controls reproduce every result and
+all arrival/departure/launch arrays exactly; both incremental variants reproduce
+outcomes and settled execution accounting across two sampler seeds. Only the
+237-byte completion marker returned locally. Static review corrected an equality
+check that included intentionally different sampler IDs; old smoke `t188754`
+was stopped before independent labels, with no change to the controller or gates.
+
+After that receipt, submitted one independent batch `t188756--t188760`:
+shards `[0,3), [3,23), [23,34), [34,45), [45,72)` with `3/20/11/11/27`
+workers, planned on node001/002/004/005/006 from live capacity. Aggregate
+`t188761` waits for all five local completion markers and runs on a server.
+Only shard markers and final `summary/status.json` may synchronize locally.
+Independent performance is pending; main remains unchanged.
