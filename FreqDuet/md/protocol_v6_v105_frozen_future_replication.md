@@ -89,5 +89,7 @@ A contrast MSE is significantly worse than zero for all three goals, though
 better than direct Q. Independent-half cross-products confirm readiness signal
 (1.365 [0.064,3.172]), not passenger (57.7m [-4.6m,140.4m]) or CV2
 (-4.61e-10 [-4.46e-8,5.46e-8]). All three teacher optimism intervals are positive.
+Pooled noise-corrected energy intervals still include zero for every goal;
+the positive readiness cross-product is partial evidence, not joint reliability.
 Do not refit/select on V105 or expand training. Next: V106 full-day service
 tradeoffs with frozen controls and simple feedback; main remains unchanged.

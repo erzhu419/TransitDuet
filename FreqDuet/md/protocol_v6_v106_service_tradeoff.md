@@ -32,3 +32,12 @@ All tests/replays/aggregation via scheduler on node001--node006; only markers
 and the final small JSON return locally. If a simple rule achieves comparable
 regularity at lower service cost, freeze it for independent confirmation before
 redesigning learned credit; otherwise report the measured tradeoff first.
+
+## Run record
+
+Frozen source `f16fb97e77`. Smoke `t183519` passed on node005: six unit
+tests and eight replays, including both cached controls and sampler invariance.
+Formal tasks `t183520--t183523` cover 0--21/21--44/44--67/67--104 with
+7/8/8/13 workers, all gated by the real smoke marker. Aggregate `t183524`
+waits for their four actual shard markers. All tasks are restricted to
+node001--node006. No model, actor, dual or main-policy update.
