@@ -40,3 +40,13 @@ upper baseline comparison or evidence of learned frequency separation. Actor,
 critic, dual, main policy and original joint gates remain unchanged. Tests,
 replays and aggregation run only through scheduler on node001--node006 using
 the isolated CPU environment; the original TransitDuet project stays read-only.
+
+## Run Record
+
+Frozen source `7d664ad09d`. Smoke `t183574` passed on node004: eight focused
+tests and ten cached V107 paths; these paths count toward the 288, not extra
+confirmation samples. Formal `t183575--t183579` covers 0--28/28--90/90--173/
+173--221/221--288, with 14/31/42/24/34 workers planned from live free CPU.
+Aggregate `t183580` waits for those five actual shard markers. Only the
+169-byte smoke marker returned before formal dispatch; raw primitives remain
+on the servers. All tasks are restricted to node001--node006.
