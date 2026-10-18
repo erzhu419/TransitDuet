@@ -24,3 +24,10 @@ to decide whether a subsequent control candidate needs stop-service/load
 feedback, remaining-time propagation, or both. No new gate or candidate is
 selected from this audit. V107's confirmation budget stays closed; actors,
 critics, duals, main policy and all original thresholds remain frozen.
+
+## Run Record
+
+Frozen source `ac336aaecd`. Smoke `t183618` passed on node006: five V92 tests,
+six new tests and eighteen consumed primitive paths. Review `t183619` waits
+for that real smoke marker; both jobs use one CPU and only node001--node006.
+Only the smoke marker and final small summary synchronize, not timing records.
