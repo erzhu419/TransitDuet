@@ -1,21 +1,13 @@
 # V102: cross-day critic-only target repair
 
-V101's 1120 arms complete without retry. The critic-implied distribution has
-predicted soft gain +0.004407; measured native soft gain is +0.002448,
-95% CI [-0.005136,+0.011870]. With the original uncertainty charge retained,
-gain is +0.004722 [-0.002715,+0.015691]. Reward and cost contributions are
-+0.002476 and -0.000242; both intervals cross zero. No stable passenger,
-CV-squared or readiness benefit/harm is established for this one-action change.
-
-Cached review `t179113` passes three tests, performs no rollout/update, and
-returns only 136456 bytes. Reward-curve split-half rank correlation is 0.861
-versus critic/measurement 0.550; cost is 0.752 versus 0.457. Action-difference
-MSE is 0.04851/0.01516 versus label-mean variance 0.00533/0.00111. There is
-conditional action-value error beyond observed continuation noise, despite
-small mean gain-prediction error. Of 40 contexts, 22 have positive measured
-fixed-charge soft gain in both halves; among those, 11 have higher passenger
-time, 10 higher CV squared and 10 higher readiness delay by point estimate.
-These counts are descriptive, not simultaneous discoveries or a policy gate.
+V101 completes 1120 arms without retry; its measured native soft gain is
++0.002448, 95% CI [-0.005136,+0.011870]. Passenger/CV/readiness intervals
+also cross zero. Cached review `t179113` finds reward-curve split-half rank
+correlation 0.861 versus critic/measurement 0.550, cost 0.752 versus 0.457.
+Reward/cost action-difference MSE is 0.04851/0.01516 versus label-mean variance
+0.00533/0.00111. Mean calibration is insufficient; conditional action-value
+error may involve learning and state aliasing. Retain V99's separate objective
+conflict, without interpreting V101 as an aggregate system-harm finding.
 
 Test a critic-only repair before any actor distillation. Replay the same 20
 native B200 paths to recover exact trip chains. For each actor, fit on one
@@ -47,3 +39,13 @@ confirmation. Four futures and 40 visited prefixes cannot establish general
 value accuracy. A null result ends this fixed-budget candidate, not all MC
 methods. A positive result requires fresh-day confirmation and separate system
 credit repair before considering a policy change.
+
+Frozen source `4255f2f592`. Smoke `t179138` on node004 passes 11 tests,
+the full native timing/endpoint check, unchanged V101 forecast/effects and
+both frozen-actor refits; its item is reused. Retrieved only the 61-byte marker.
+Earlier smokes exposed an
+inapplicable current-tree attribute and float32 gain arithmetic; both are
+fixed, with no tolerance change. Earlier gated shards were cancelled before
+launch. Current shards `t179139-t179141` cover [0,14), [14,17), [17,20),
+with 7/2/2 workers soft-preferred to node001/002/004. Aggregate `t179144`
+waits for their three markers. No repair effect is claimed before completion.
