@@ -20,3 +20,10 @@ The output decides what a new training experiment must explain: screening
 optimism, sparse fleet events and/or persistent between-prefix differences.
 It cannot replace Stage294's failed joint criterion or select a new controller.
 Only scalar JSON is pulled; prefix records, panels and models stay remote.
+
+Run: `native_transit_screen_transfer_stage295_20261018_r1`; scheduler task
+`t183620`, worker revision `8976972d7b`. Twenty-nine focused/regression tests
+pass, including category conservation, independent fleet reversal, profile
+duplication, frozen-mean/half replay and remote worker input wiring. The small
+parent completion receipt travels inside this task's registration input;
+parent output directories are never staged.
