@@ -58,6 +58,12 @@ class FrozenFutureTests(unittest.TestCase):
         reversed_curve = run.contrast_metrics(y[:4], y)
         self.assertTrue(np.all(reversed_curve['independent_split_cross_product'] < 0))
 
+    def test_half_difference_noise_is_sum_of_independent_mean_variances(self):
+        y = np.arange(32, dtype=float)[:, None, None] * np.arange(7)[None, :, None] * np.ones((1, 1, 3))
+        a, b = run.model.differences(y[:16]), run.model.differences(y[16:])
+        expected = (a.var(0, ddof=1).mean(0) + b.var(0, ddof=1).mean(0)) / 16
+        np.testing.assert_allclose(run.contrast_metrics(y[:4], y)['split_difference_noise'], expected)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -56,4 +56,13 @@ extreme-action paths exactly reproduced. No new future labels used in smoke.
 Formal shards `t183472--t183475`: ranges 0--881, 881--1880, 1880--2468,
 2468--3584; 15/17/10/19 workers, respectively. Soft-preferred nodes 002/004/005/006,
 eligible on 001--006 only. Aggregate `t183476` waits for all four small markers.
-No V105 effect result yet. No additional training or main-policy change.
+No additional training or main-policy change.
+
+The last shard started later and remained active at the next review. Preserve
+2969 finished arms, stop its old process group, and reshard only missing IDs
+2969--3584 via the live CPU planner; the arm grid, source and RNG seeds remain
+unchanged. Aggregate waits for actual replacement markers and reads all arms.
+Before seeing effects, correct the diagnostic noise of the half-mean difference
+to Var(first)/16 + Var(second)/16 (the initial field divided their sum by 32).
+Rename it `split_difference_noise`, with a regression test. This reporting fix
+does not affect any model, proposal, rollout, cross-product or benefit gate.

@@ -52,7 +52,7 @@ def contrast_metrics(old, new):
     return dict(independent_split_cross_product=(ma * mb).mean(0),
         old_new_cross_product=(old_d * (ma + mb) / 2).mean(0),
         split_difference_mse=((ma - mb) ** 2).mean(0),
-        split_mean_noise=(a.var(0, ddof=1).mean(0) + b.var(0, ddof=1).mean(0)) / 32,
+        split_difference_noise=a.var(0, ddof=1).mean(0) / len(a) + b.var(0, ddof=1).mean(0) / len(b),
         pooled_mean_noise=model.differences(new).var(0, ddof=1).mean(0) / 32)
 
 
