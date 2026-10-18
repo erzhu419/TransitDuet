@@ -30,12 +30,16 @@ or full-day policy claim. Single-action effects cannot be summed into a new
 controller's daily gain. No search over gates, mixtures or reward weights.
 
 Source `35c958b25e`. Prepare `t176178` passes three tests and reviews V100;
-retrieved only its 3,061-byte summary. Smoke `t176179` gates native-reference
-shards `t176180-t176184` and action shards `t176185-t176189`. Live CPU planning
-allocates 41/84/84/83/83 workers to the 1120 arms across node001/002/004/005/006,
-with three waves per shard; node003 is busy. Aggregate `t176190` waits for all
-five action markers. Smoke and reference paths are reused, not repeated as
-additional formal evidence. No V101 effect is claimed before completion.
+retrieved only its 3,061-byte summary. Native-reference shards `t176180-t176184`
+finish all 20 cached-native checks; their five markers total 135 bytes. Initial
+idle-capacity action shards `t176185-t176189` and aggregate `t176190` were
+cancelled while still queued after other projects occupied CPU capacity.
+Replacement action shards `t179080-t179084` cover [0,143), [143,448), [448,692),
+[692,916), [916,1120), with 7/15/12/11/10 workers across node001/002/004/005/006.
+Source, 1120-arm budget and all diagnostic contracts are unchanged. Smoke and
+reference paths are reused, not repeated as additional formal evidence.
+Aggregate `t179085` waits for all five replacement shard markers.
+No V101 effect is claimed before completion.
 Smoke passed on node004: native cache identity, forced-native full timing,
 exact prefixes, seven-bin feasibility, completed-trip returns, frozen critics
 and both extreme forked actions with common event uniforms. Only its 69-byte
