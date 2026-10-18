@@ -30,3 +30,13 @@ These overlapping diagnostics do not decompose the causal passenger-time loss.
 All tests and replays go through scheduler on node001--node006. Full compressed
 decision traces and per-path diagnostics remain remote; only smoke/shard
 markers and final summary/status.json synchronize locally. Main stays frozen.
+
+## Run Record
+
+Frozen source `e8792aa58b`; scheduler smoke `t183923` launched on node006 and
+passed seven tests. The two full-path exact replays are still pending at this
+record. Formal `t183924` (0--8) and `t183925` (8--16), each eight workers, wait
+for the real smoke marker; aggregate `t183927` waits for both shard markers.
+Old `t183657--t183660` were cancelled after identifying the frozen runtime's
+missing follower-trip field; no old formal shard ran. The fix records the
+existing bus-to-trip identity at prepare time and does not alter control.
