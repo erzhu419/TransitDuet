@@ -42,6 +42,13 @@ pass. Checks cover honest fit/calibration ordering, forbidden test T16 access,
 seed/bank separation, unchanged service proposals, exact expected thinning,
 prefix-cluster calibration, duplicate-profile invariance and all-raw rejection.
 
+Execution: source revision `1bea867609`. Freeze t183630/node006 completed
+done/exit0, exactly replaying 360 old control states; only 4,294 scalar bytes
+were pulled. Native pilots t183632-t183641 have launched on node002/node006,
+with node001-node006 still allowed and no node binding. Formal captures and
+P8/S8/T16 collection await successful pilot qualification; E32 awaits the
+later learned-model/action seal. No scientific risk fit has completed yet.
+
 Limitations: single intervention with fixed lower and finite-MC proposal,
 not full end-to-end Freq-HRL or a fleet-safety theorem. Independent calibrated
 scores still require untouched test control outcomes; no positive claim yet.

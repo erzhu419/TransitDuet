@@ -1,0 +1,46 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "run_name": "native_transit_paired_fleet_stage296_20261018_r1",
+  "recorded_at_utc": "2026-10-18T15:39:59.508840+00:00",
+  "source_revision": "1bea867609",
+  "phase": "pilot",
+  "ids": {
+    "first": "t183632",
+    "last": "t183641",
+    "count": 10
+  },
+  "status_counts": {
+    "running": 10
+  },
+  "placed_by_node": {
+    "node006": 8,
+    "node002": 2
+  },
+  "allowed_nodes": [
+    "node001",
+    "node002",
+    "node003",
+    "node004",
+    "node005",
+    "node006"
+  ],
+  "require_node": null,
+  "cpu_per_task": 1,
+  "ram_mb_per_task": 1536,
+  "registered_main_scene_roles": {
+    "fit": 80,
+    "calibration": 60,
+    "test": 120
+  },
+  "formal_sampling_admitted": false,
+  "focused_and_regression_tests_passed": 34,
+  "Stage294_E32_used_for_tuning": false,
+  "scientific_risk_fits_completed": 0,
+  "performance_conclusion": "pending_independent_training_calibration_and_test",
+  "runtime_sample": {
+    "node": "node006",
+    "native_pilot_workers": 8,
+    "median_cpu_pct": 98.9,
+    "max_elapsed_s": 102
+  }
+}
