@@ -139,6 +139,14 @@ def run_item(root, index):
     print('V113_INCREMENTAL_ITEM_DONE', index, flush=True)
 
 
+def assert_sampler_invariance(first, second):
+    for key in ('results', 'contract', 'coverage', 'accounting'):
+        a, b = first[key], second[key]
+        if key == 'results':
+            a, b = [{k: v for k, v in row.items() if k != 'sampler_seed'} for row in (a, b)]
+        pilot.joint.assert_same_state(a, b, 'V113_sampler_invariance_'+key)
+
+
 def smoke(root, old, workers):
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
         str(Path(__file__).resolve().parents[1] / 'tests'), '-p', 'test_v113_*.py', '-v'], check=True)
@@ -158,8 +166,7 @@ def smoke(root, old, workers):
                 for key in before.files:
                     np.testing.assert_array_equal(new[key], before[key])
     for a, b in ((4, 5), (6, 7)):
-        for key in ('results', 'contract', 'coverage', 'accounting'):
-            pilot.joint.assert_same_state(actual[a][key], actual[b][key], 'V113_sampler_invariance_'+key)
+        assert_sampler_invariance(actual[a], actual[b])
         if actual[a]['accounting']['changed_commands'] == 0 or actual[a]['accounting']['balanced'] == 0:
             raise AssertionError('smoke failed to exercise changed and balanced decisions')
     pilot.write_json(root / 'smoke/done.json', dict(status='multistop_tests_exact_controls_and_execution_accounting_passed',

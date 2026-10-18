@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import unittest
+from copy import deepcopy
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from freqduet_incremental_compensation import ACTIONS, Compensation, bounded_action
@@ -102,6 +103,17 @@ class IncrementalTests(unittest.TestCase):
         self.rule.settle(key, 0.)
         with self.assertRaises(KeyError):
             self.rule.settle(key, 0.)
+
+    def test_sampler_metadata_differs_but_outcomes_must_match(self):
+        from run_freqduet_v113_incremental_compensation import assert_sampler_invariance
+        a = dict(results=dict(sampler_seed=1, journey_min=19., action_counts=[1, 2]),
+            contract={}, coverage={}, accounting=dict(executed_s=5.))
+        b = deepcopy(a)
+        b['results']['sampler_seed'] = 2
+        assert_sampler_invariance(a, b)
+        b['accounting']['executed_s'] = 10.
+        with self.assertRaises(AssertionError):
+            assert_sampler_invariance(a, b)
 
 
 if __name__ == '__main__':
