@@ -50,3 +50,30 @@ confirmation samples. Formal `t183575--t183579` covers 0--28/28--90/90--173/
 Aggregate `t183580` waits for those five actual shard markers. Only the
 169-byte smoke marker returned before formal dispatch; raw primitives remain
 on the servers. All tasks are restricted to node001--node006.
+
+## Outcome
+
+All 288 paths and aggregate t183580 completed with exit 0. All cached V107
+endpoints match; no unmatched scopes. Only the 805266-byte final JSON returned.
+On these two actors, bilateral minus preserve retains journey -1.1807 min
+[-1.3963,-.9984] and readiness -355.50 s [-418.21,-295.26]. Arrival CV2 remains
+inconclusive: -.000711 [-.005138,.003814]; raw variance -401 s2 [-1027,235].
+
+The exact arrival CV2 allocation is release -.007283, realized holding
+-.003263, other elapsed +.007664, mean normalization +.002170. All four
+allocated-term intervals exclude zero. The other-elapsed diagonal alone is
+unresolved (+.002160 [-.001959,.006082]); holding/other cross changes by
++.015203 [.008372,.021801]. This is covariance accounting, not evidence that
+exogenous travel noise itself increased. Full arrival/departure mean gaps
+shorten by 7.046/7.114 s, entirely through earlier last-service boundaries;
+first boundaries and full-day sample counts are unchanged.
+
+Arrival bands 0/1 have raw variance +577/+1027 s2, bands 2/3 -2398/-1283 s2;
+band sample counts differ as service moves across clock boundaries. At forward
+direction stops 1/20, raw variance changes -1368/+1292 s2; reverse direction
+stops 20/1 change -3826/-121 s2. Nearly all full-day predecessors are unchanged.
+Thus normalization is real but not the whole problem: downstream service and
+running-time covariance need separation. The two-actor audit does not replace
+V107's ten-actor confirmation or reopen its gate. Next: V109 reads existing
+timing primitives to split nonholding stop time from remaining elapsed, with
+zero new rollouts; no gain search, training or main-policy change.
