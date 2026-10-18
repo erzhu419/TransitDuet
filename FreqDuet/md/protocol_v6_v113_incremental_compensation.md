@@ -87,6 +87,6 @@ budget candidate, rather than tune its gain or promote the ablation post hoc.
 Single-step innovation also jointly improves B200/preserve, but versus bilateral
 still adds journey +0.2752 [0.1927, 0.3357] min, holding +36.64 s/trip and readiness
 +35.69 s while improving CV2 -0.00909. No all-control joint improvement is shown.
-Next read only the 16 existing traces to separate carried-budget response,
-innovation clipping and between-path prefix changes. No new rollout, training or
+The subsequent read-only V114 audit covers all 16 existing traces; its record is
+in `protocol_v6_v114_incremental_budget_audit.md`. No new rollout, training or
 main-policy change is justified by this pilot alone.
