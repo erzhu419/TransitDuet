@@ -72,7 +72,7 @@ class DisturbanceAudit(prior.TradeoffAudit):
         self.feedforward['absolute_adjustment_sum_s'] += abs(.75 * gap)
         self.feedforward['selected_command_delta_sum_s'] += float(pilot.step.ACTIONS[selected] - pilot.step.ACTIONS[old])
         self.feedforward['low_saturated'] += desired <= 0
-        self.feedforward['high_saturated'] += desired >= pilot.step.ACTIONS[-1]
+        self.feedforward['high_saturated'] += desired >= float(pilot.step.ACTIONS[-1])
         law = torch.zeros_like(baseline)
         law[0, selected] = 1.
         return law

@@ -1,9 +1,12 @@
 from pathlib import Path
 from types import SimpleNamespace
+import json
 import sys
 import unittest
+from unittest.mock import patch
 
 import numpy as np
+import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import run_freqduet_v110_observed_disturbance as run
@@ -63,6 +66,25 @@ class ObservedDisturbanceTest(unittest.TestCase):
         self.assertEqual(run.SEEDS, run.prior.SEEDS)
         for m in run.METHODS:
             self.assertEqual(sum(x[2] == m for x in run.ITEMS), 24 if m in ('native', 'preserve') else 8)
+
+    def test_exercised_candidate_counters_are_json_serializable(self):
+        audit = run.DisturbanceAudit(run.SEEDS[0], run.CANDIDATE)
+        audit.env = SimpleNamespace(current_time=200.)
+        audit.departures = [dict(trip_id=1, station_id=2, direction=True, time_s=100.,
+                                release=10., realized_holding=15.)]
+        audit.launches = {2: dict(time_s=30., holding_counter_at_launch=100.)}
+        bus = SimpleNamespace(trip_id=2, forward_predecessor_trip_id=1,
+            last_station=SimpleNamespace(station_id=2), direction=True, episode_hold_vehicle_seconds=125.)
+        context = self.context(forward_headway_s=80.)
+        audit.runner = SimpleNamespace(_pilot_agent=0, _pending_lower_action_context={0: context},
+                                       _bus_for_agent=lambda _: bus)
+        policy = SimpleNamespace(feasible_action_mask=lambda _: torch.ones((1, 7), dtype=torch.bool))
+        baseline = torch.tensor([[0., 0., 0., 1., 0., 0., 0.]])
+        with patch.object(run.prior.TradeoffAudit, '__call__', return_value=baseline):
+            law = audit(policy, None, None, None)
+        self.assertEqual(int(law.argmax()), 1)
+        self.assertEqual(audit.feedforward['changed_commands'], 1)
+        self.assertEqual(json.loads(json.dumps(audit.feedforward))['high_saturated'], 0)
 
 
 if __name__ == '__main__':
