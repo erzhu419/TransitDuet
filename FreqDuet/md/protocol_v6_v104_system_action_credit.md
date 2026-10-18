@@ -21,7 +21,8 @@ not a quadratic response. Same 16-hidden-unit Tanh action architecture and
 initialization, 256 full-prefix Adam updates at 0.0003 for separated A and direct
 Q. Train-only standardization: A uses contrast scale, Q full-outcome scale, V
 level scale. Thus this compares a parameterization/scaling package, not centering
-alone. Zero A is the no-action-signal control. No fit-budget/seed/penalty sweep.
+alone. V is a shared diagnostic benchmark, not an input to either action head or
+the solver. Zero A is the no-action-signal control. No fit-budget/seed/penalty sweep.
 
 Freeze the saved model before generating fresh reference or outcome labels.
 Validation: actors 12037/933083, demand days 2041001--2041004, first eligible
@@ -63,3 +64,17 @@ consumed V101 day 0: tests, native full-path no-op and both extreme actions must
 reproduce cached labels/timing exactly. Keep model/trajectories on server; pull
 only small completion markers and final summary. This small 2-actor/4-day pilot
 can reject a candidate, but cannot establish durable policy superiority.
+
+## Scheduler record
+
+Physical/model code: `dc6121729d`; fit-only development-error reporting:
+`a2cc8a773f`. Smoke `t179203` on node001 passed: five tests, exact native/no-op
+full paths, and cached 0/45-second labels and event timings. Earlier assertions were
+repaired (zero versus absent gradient; JSON anchor-key conversion), with no
+fresh demand days used and no scientific gate changed.
+
+Reference recovery `t179188--t179191` -> fit `t179192` -> fresh references
+`t179193--t179196` -> 448 arms `t179197--t179201` -> aggregate `t179202`.
+Arms use five scheduler-planned shards, 13/15/6/9/9 workers, eligible on
+node001--node006 only. Each phase waits for its predecessors' small markers.
+No service-effect result is available yet; main and all native learners remain frozen.
