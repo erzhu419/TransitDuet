@@ -44,3 +44,15 @@ Smoke passed on node004: native cache identity, forced-native full timing,
 exact prefixes, seven-bin feasibility, completed-trip returns, frozen critics
 and both extreme forked actions with common event uniforms. Only its 69-byte
 marker is retrieved; this admits the matrix, not a controller or effect claim.
+
+Completed: 1120 arms and aggregate `t179085` exit 0, formal retry 0. Retrieved
+only the 215247-byte summary, then the 136456-byte cached attribution from
+`t179113` (source `4646cd3334`, three tests pass, no new rollout/update).
+Native soft gain +0.002448 [-0.005136,+0.011870]; fixed-charge gain +0.004722
+[-0.002715,+0.015691], versus predicted +0.004407. Passenger, CV and readiness
+intervals all cross zero. Reward/cost action-difference MSE exceeds observed
+label-mean variance; reward predicted/observed rank correlation 0.550 versus
+split-future 0.861. Thus mean calibration does not establish action accuracy.
+Retain V99's separate objective-conflict evidence; do not claim V101 proves
+aggregate system harm. V102 tests a fixed-budget, cross-day critic-only repair
+without deploying its forecasts or changing actor/dual/main.
