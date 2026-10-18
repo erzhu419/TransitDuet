@@ -63,11 +63,23 @@ class ScreenTransferTest(unittest.TestCase):
         parent = {"contract": spec.source.contract(), "coverage_qualified": True}
         receipt = {"scheduler": {"collection_status_counts": {"done": 4196},
             "collection_exit_code_counts": {"0": 4196}, "report": {"status": "done", "exit_code": 0}}}
-        with patch.object(spec, "read", side_effect=lambda p: receipt if p.name == "completion_receipt.json" else parent):
-            self.assertEqual(spec.qualify_parent(), parent)
+        with patch.object(spec, "read", return_value=parent):
+            self.assertEqual(spec.qualify_parent(receipt), parent)
             receipt["scheduler"]["collection_status_counts"] = {"done": 4195, "running": 1}
             with self.assertRaisesRegex(ValueError, "Complete"):
-                spec.qualify_parent()
+                spec.qualify_parent(receipt)
+
+    def test_worker_uses_registered_completion_not_local_parent_receipt(self):
+        registration = {"contract": spec.contract(), "parent_completion": {"scheduler": "registered_snapshot"}}
+        args = self.fixture()
+        with patch.object(spec, "read", return_value=registration), \
+                patch.object(spec, "qualify_parent", return_value=args[-1]) as qualify, \
+                patch.object(spec, "load_cached", return_value=(args[0], args[4], args[1], args[2])), \
+                patch.object(spec.source, "cube", return_value=args[3]), patch.object(spec, "write_json") as save:
+            spec.analyze("unit295")
+            qualify.assert_called_once_with(registration["parent_completion"])
+            self.assertEqual(save.call_count, 2)
+            self.assertEqual(save.call_args.args[0].parts[-2:], ("report", "result.json"))
 
     def test_scheduler_is_unpinned_and_cannot_sync_remote_parent_outputs(self):
         task = submit.task_specification("unit295")

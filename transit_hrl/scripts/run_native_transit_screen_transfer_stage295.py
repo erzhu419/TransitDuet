@@ -34,9 +34,9 @@ def contract():
         "boundary": "closed_confirmation_diagnostic_not_policy_selection_or_new_confirmation; no_threshold_grid_or_controller_promotion"}
 
 
-def qualify_parent():
+def qualify_parent(receipt):
     path = source.directory(SOURCE_RUN)
-    parent, receipt = read(path/"report/result.json"), read(path/"completion_receipt.json")
+    parent = read(path/"report/result.json")
     if (parent["contract"] != source.contract() or not parent["coverage_qualified"]
             or receipt["scheduler"]["collection_status_counts"] != {"done": 4196}
             or receipt["scheduler"]["collection_exit_code_counts"] != {"0": 4196}
@@ -120,9 +120,10 @@ def diagnostics(sealed, screen, evaluation, cube, rows, parent):
 
 
 def analyze(run):
-    if read(directory(run)/"inputs/preregistration.json")["contract"] != contract():
+    registration = read(directory(run)/"inputs/preregistration.json")
+    if registration["contract"] != contract():
         raise ValueError("Changed screen transfer diagnostic contract")
-    parent = qualify_parent()
+    parent = qualify_parent(registration["parent_completion"])
     sealed, rows, screen, evaluation = load_cached()
     result, prefixes = diagnostics(sealed, screen, evaluation, source.cube(rows), rows, parent)
     write_json(directory(run)/"report_raw/prefixes.json", prefixes)

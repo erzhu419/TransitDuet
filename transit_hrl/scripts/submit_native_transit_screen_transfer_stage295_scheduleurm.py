@@ -37,9 +37,11 @@ if __name__ == "__main__":
     registration = spec.directory(run)/"inputs/preregistration.json"
     if registration.exists() or inventory(run, protocol_spec=spec):
         parser.error("Stage295 already registered")
-    spec.qualify_parent()
+    receipt = spec.read(spec.source.directory(spec.SOURCE_RUN)/"completion_receipt.json")
+    spec.qualify_parent(receipt)
     task = task_specification(run)
     write_json(registration, {"protocol": spec.EXPERIMENT_PROTOCOL, "contract": spec.contract(),
+        "parent_completion": receipt,
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "scheduler": {"allowed_nodes": task["allowed_nodes"], "require_node": None, "cpu_per_task": 1, "ram_mb": 3072}})
     execute_bulk([task], dry_run=False, intent_label=f"{spec.EXPERIMENT_PROTOCOL}:{run}")
