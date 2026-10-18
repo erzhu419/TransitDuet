@@ -24,8 +24,14 @@ class SystemActionCreditTest(unittest.TestCase):
         action, value = model.GoalHeads(5, 7), model.GoalHeads(5, 1)
         value(torch.ones(2, 5, dtype=torch.float64)).sum().backward()
         self.assertTrue(all(p.grad is None for p in action.parameters()))
+        before = copy.deepcopy(action.state_dict())
         action(torch.ones(2, 5, dtype=torch.float64))[..., 0].sum().backward()
-        self.assertTrue(all(p.grad is None for h in action.heads[1:] for p in h.parameters()))
+        self.assertTrue(all(p.grad is None or torch.count_nonzero(p.grad) == 0
+                            for h in action.heads[1:] for p in h.parameters()))
+        torch.optim.SGD(action.parameters(), lr=0.1).step()
+        for key, weights in action.state_dict().items():
+            if not key.startswith('heads.0.'):
+                torch.testing.assert_close(weights, before[key], atol=0, rtol=0)
 
     def test_signed_three_goal_proposal_and_zero_baseline(self):
         p = np.full(7, 1 / 7)
