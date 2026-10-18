@@ -46,3 +46,24 @@ after the all-path aggregate receipt. It separates repeated positive holding
 with nonpositive feedback into missing-forecast and matched completed-follower
 cohorts, and checks whether 45s commands persist under completed follower gaps.
 No additional rollout or alternative action is executed by this review.
+
+## Outcome And Decision
+
+All 16 paths reproduce every cached endpoint/audit and timing array. Nine tests
+pass. Aggregate `t183927` and cross-review `t188745` completed on node006;
+review source `09a0f6c5a7`. Only 216,405 bytes of summaries and 429 bytes of
+markers returned; all traces stay remote.
+
+FF has 6,757 repeated negative-R decisions with prior holding, nonpositive
+feedback and positive commands; 2,888 have no new negative innovation, and 316
+use no follower forecast. With matched completed follower labels, 5,784/6,272
+still have nonpositive feedback (200,955s holding), occurring in all eight
+actor/day cells. Follower-ready MAE is 64.75s bilateral025 / 70.86s FF, but
+8,642/9,626 matched FF 45s commands persist using completed gaps (89.78%).
+Same-state command excess 6.214s = raw feedforward 1.292 + clipping 4.910 +
+quantization .012. This diagnoses net command bias, not causal shares of service
+loss; near-zero net quantization does not establish negligible variance effects.
+
+Close V110. Next prioritize executed-compensation accounting and incremental
+disturbance response, testing multistop persistence/balanced gaps before any
+separately frozen controller pilot. No gain rescue, new training or main switch.
