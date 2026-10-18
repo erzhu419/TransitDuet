@@ -47,7 +47,7 @@ class DisturbanceAudit(prior.TradeoffAudit):
     def __init__(self, seed, method):
         super().__init__(seed, 'bilateral025' if method == CANDIDATE else method)
         self.variant = method
-        self.feedforward = dict(decisions=0, negative_gap=0, positive_gap=0,
+        self.feedforward = dict(decisions=0, negative_gap=0, positive_gap=0, changed_commands=0,
             nonholding_gap_sum_s=0., requested_adjustment_sum_s=0., absolute_adjustment_sum_s=0.,
             selected_command_delta_sum_s=0., low_saturated=0, high_saturated=0)
 
@@ -66,6 +66,7 @@ class DisturbanceAudit(prior.TradeoffAudit):
         self.feedforward['decisions'] += 1
         self.feedforward['negative_gap'] += gap < 0
         self.feedforward['positive_gap'] += gap > 0
+        self.feedforward['changed_commands'] += selected != old
         self.feedforward['nonholding_gap_sum_s'] += gap
         self.feedforward['requested_adjustment_sum_s'] += -.75 * gap
         self.feedforward['absolute_adjustment_sum_s'] += abs(.75 * gap)
@@ -147,7 +148,7 @@ def smoke(root, old, workers):
         pilot.joint.assert_same_state(actual[4]['results'][key], actual[5]['results'][key], 'V110_sampler_invariant_' + key)
     for key in ('contract', 'coverage', 'feedforward'):
         pilot.joint.assert_same_state(actual[4][key], actual[5][key], 'V110_sampler_invariant_' + key)
-    if actual[4]['feedforward']['decisions'] == 0 or actual[4]['feedforward']['absolute_adjustment_sum_s'] == 0:
+    if actual[4]['feedforward']['changed_commands'] == 0:
         raise AssertionError('V110 smoke did not exercise observed-disturbance compensation')
     pilot.write_json(root / 'smoke/done.json', dict(status='tests_cached_controls_and_causal_candidate_sampler_invariance_passed',
         smoke_rollouts=len(cases), fresh_development_labels=0, formal_rollouts=len(ITEMS), main_policy_changed=False))
