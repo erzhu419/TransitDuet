@@ -45,3 +45,35 @@ All jobs are restricted to node001--node006; only small outputs synchronize.
 At dispatch, two 14-worker shards did not fit the remaining CPU capacity.
 Resize only queued `t183527/t183529` to 7/9 workers (current total 36);
 all ranges, seeds, controllers, source and aggregate dependencies are unchanged.
+
+## Outcome
+
+All 1440 paths and aggregate t183530 finished with exit 0. Only the 165653-byte
+final JSON was retrieved. Both rules reduce passenger time and readiness in all
+ten actor means and all sixteen day means versus both B200 and preserve.
+Paired crossed actor/day 95% intervals, candidate minus control:
+
+| Contrast | Journey min | Actual CV2 | Readiness s |
+| --- | --- | --- | --- |
+| forward025 - B200 | -1.1953 [-1.3880,-1.0172] | +.001367 [-.004692,.008030] | -442.27 [-513.70,-371.56] |
+| bilateral025 - B200 | -1.4031 [-1.5935,-1.2260] | -.006404 [-.011435,-.001376] | -462.18 [-534.71,-390.81] |
+| forward025 - preserve | -.9994 [-1.1668,-.8470] | +.004546 [-.001382,.011118] | -339.35 [-393.26,-285.39] |
+| bilateral025 - preserve | -1.2072 [-1.3709,-1.0581] | -.003225 [-.007144,.001291] | -359.26 [-413.94,-304.91] |
+
+Bilateral passes the original joint gate versus B200, but neither rule passes
+against BOTH controls: actual CV2 versus preserve remains inconclusive. Forward
+CV2 worsens in 9/10 actor means and 10/16 day means versus preserve; bilateral
+worsens in 1/10 actor means and 4/16 day means. These counts are descriptive,
+not independent tests. All arms complete all trips. Bilateral uses follower
+evidence in 696319/832000 decisions (83.69%); remaining decisions use fallback.
+Relative to zero, forward/bilateral cost +.9194/+.7116 journey min and
++97.97/+78.06 readiness s, while reducing CV2 by .13104/.13881. Bilateral minus
+forward improves journey by .2078 min, CV2 by .007771 and readiness by 19.91 s
+(all paired intervals exclude zero), a reported co-primary comparison, not a
+post-hoc controller selection. The waiting-time benefit versus zero remains
+unresolved; the additional passenger cost is chiefly onboard exposure.
+
+Decision: close the fixed confirmation budget without gain tuning, additional
+confirmation days or gate relaxation. Keep the verified bilateral-versus-B200
+positive result and the preserve/zero tradeoffs; main remains frozen. V108 is
+a passive timing diagnosis on consumed paths, not another promotion attempt.
