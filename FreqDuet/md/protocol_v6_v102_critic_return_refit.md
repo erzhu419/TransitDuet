@@ -60,3 +60,10 @@ CI [0.00372,0.09279]. MC's predicted fixed-charge gain +0.01421 becomes
 zero. Stop both fixed-budget refits, retain untouched critics/main, and use
 V103's disjoint-future teacher to separate local-value repair opportunity from
 system-objective conflict before collecting more data or updating an actor.
+V103's cached review finds combined MSE worse in 10/10 actor means for TD and
+9/10 for MC, in both cross-day directions and both anchor-time means. MC's
+cost MSE improves versus TD by point estimate only, not versus untouched.
+Gain-prediction error is +0.01014 TD and +0.01685 MC; both absolute intervals
+cross zero, while TD-minus-untouched error rises +0.01045 [0.00171,0.02143].
+Do not attribute the failure solely to bootstrapping, overfit or state aliasing;
+this experiment does not identify which causes the cross-day deterioration.
