@@ -119,9 +119,12 @@ def train(root, old):
     restored = torch.load(path, weights_only=False)
     for key, value in model.predict(artifact, *arrays[:2]).items():
         np.testing.assert_array_equal(value, model.predict(restored, *arrays[:2])[key])
+    development = model.errors(model.predict(artifact, *arrays[:2]), arrays[2], arrays[1])
     pilot.write_json(root / 'fit/done.json', dict(status='three_system_heads_frozen',
         prefixes=artifact['prefixes'], updates_per_branch=artifact['steps'],
         goals=list(model.GOALS), final_losses=artifact['final_normalized_losses'],
+        development_errors={name: {key: dict(zip(model.GOALS, values.mean(0).tolist()))
+            for key, values in fields.items()} for name, fields in development.items()},
         actor_updates=0, dual_updates=0, main_policy_changed=False))
 
 
