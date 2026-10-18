@@ -69,3 +69,5 @@ remains. These are local training units, not passenger minutes. Average bias
 is small, but conditional/action-difference accuracy is unresolved. Retain the
 V99 objective-conflict finding; V101 tests native seven-action differences and
 the fixed critic-implied distribution change before selecting a learning fix.
+Server-side review gives seed-mean Q bias range [-0.07723, +0.13865] and
+day-mean biases +0.04785/+0.00190. This is not a uniform overvaluation finding.

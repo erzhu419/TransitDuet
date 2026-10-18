@@ -28,3 +28,15 @@ use scheduler on node001-node006; only compact summaries return locally.
 Limitations: consumed days and four conditional futures; no fresh-day efficacy
 or full-day policy claim. Single-action effects cannot be summed into a new
 controller's daily gain. No search over gates, mixtures or reward weights.
+
+Source `35c958b25e`. Prepare `t176178` passes three tests and reviews V100;
+retrieved only its 3,061-byte summary. Smoke `t176179` gates native-reference
+shards `t176180-t176184` and action shards `t176185-t176189`. Live CPU planning
+allocates 41/84/84/83/83 workers to the 1120 arms across node001/002/004/005/006,
+with three waves per shard; node003 is busy. Aggregate `t176190` waits for all
+five action markers. Smoke and reference paths are reused, not repeated as
+additional formal evidence. No V101 effect is claimed before completion.
+Smoke passed on node004: native cache identity, forced-native full timing,
+exact prefixes, seven-bin feasibility, completed-trip returns, frozen critics
+and both extreme forked actions with common event uniforms. Only its 69-byte
+marker is retrieved; this admits the matrix, not a controller or effect claim.
