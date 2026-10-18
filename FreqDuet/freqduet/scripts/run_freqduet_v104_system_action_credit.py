@@ -72,8 +72,9 @@ def reference(root, old, index, training):
     result, rule, _ = replay(root, seed, day, directory + str(index))
     if training:
         previous = source.read(old / 'references' / f'r{index}.json')
-        for key in ('captures',):
-            pilot.joint.assert_same_state(result[key], previous[key], 'old_native_' + key)
+        for target in source.TARGETS:
+            pilot.joint.assert_same_state(result['captures'][target], previous['captures'][str(target)],
+                                         'old_native_capture_' + str(target))
         for metric in (*source.frozen.METRICS, 'action_counts'):
             pilot.joint.assert_same_state(result['results'][metric], previous['results'][metric], metric)
     pilot.write_json(path, result)
