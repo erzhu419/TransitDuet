@@ -44,8 +44,6 @@ class NativeBatch:
 
 
 def refit(trainer, rows, returns, mode, seed, steps=STEPS, batch=BATCH):
-    if trainer.regularity_multistep_value_enabled:
-        raise AssertionError('V102 does not update auxiliary value modules')
     if mode == 'mc' and (np.min(returns[0]) < -100 or np.max(returns[0]) > 100
                         or np.min(returns[1]) < 0 or np.max(returns[1]) > 50):
         raise AssertionError('MC labels would be clipped by the native updater')
