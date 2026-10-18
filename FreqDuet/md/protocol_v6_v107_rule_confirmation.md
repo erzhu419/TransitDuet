@@ -42,3 +42,6 @@ No fresh confirmation labels were used. Formal `t183526--t183529` covers
 0--300/300--720/720--1020/1020--1440, with 10/14/10/14 workers from the
 live CPU planner. Aggregate `t183530` waits for their four actual markers.
 All jobs are restricted to node001--node006; only small outputs synchronize.
+At dispatch, two 14-worker shards did not fit the remaining CPU capacity.
+Resize only queued `t183527/t183529` to 7/9 workers (current total 36);
+all ranges, seeds, controllers, source and aggregate dependencies are unchanged.
