@@ -313,29 +313,58 @@ def menu_path(run, key, probe, bank):
     return prefix_path(run, key)/f"menus/probe{probe}/{bank}"
 
 
-def load_bank(run, bank):
+def load_bank(run, bank, rows):
     output = []
+    originals = {(r["root"], r["scenario"], r["replica"], r["probe_index"]): r["original_choice"] for r in rows}
+    episodes, identities, seeds = 0, 0, set()
+    max_error, max_rss = 0., 0.
     for key in keys():
         for probe in PROBES:
             path = menu_path(run, key, probe, bank)
             receipt, labels = read(path/"receipt.json"), read(path/"labels.json")
             if (receipt["contract"] != contract() or not receipt["software_qualified"]
+                    or receipt["key"] != list(key) or receipt["probe"] != probe
                     or receipt["draws"] != list(BANKS[bank]) or receipt["candidates"] != list(range(6))
+                    or receipt["state_futures"] != 8 or receipt["native_episodes"] != 56 or receipt["exact_identities"] != 8
                     or [r["draw"] for r in labels] != list(BANKS[bank])
                     or any(r["future_seed"] != future_seed(key, probe, r["draw"]) for r in labels)):
                 raise ValueError("Incomplete or changed proposal/screen bank")
-            output.append([[r["values"][str(a)] for a in range(6)] for r in labels])
-    return np.asarray(output)
+            if any(sorted(map(int, r["values"])) != list(range(6)) for r in labels):
+                raise ValueError("Menu does not contain exactly six candidate actions")
+            values = np.asarray([[r["values"][str(a)] for a in range(6)] for r in labels])
+            original = originals[(*key[1:], probe)]
+            if values.shape != (8, 6, 4) or not np.all(np.isfinite(values)) or np.any(values[:, original] != 0):
+                raise ValueError("Nonfinite menu values or nonzero native identity")
+            error = float(np.max(abs(values[..., 0]-values[..., 1]-values[..., 2])))
+            if error > 1e-12:
+                raise ValueError("Menu cost does not equal fleet plus service")
+            max_error = max(max_error, error)
+            max_rss = max(max_rss, receipt["peak_rss_MiB"])
+            episodes += receipt["native_episodes"]
+            identities += receipt["exact_identities"]
+            seeds.update(r["future_seed"] for r in labels)
+            output.append(values)
+    if len(output) != len(rows) or len(seeds) != 8*len(rows):
+        raise ValueError("Menu state coverage or future seeds are duplicated")
+    output = np.asarray(output)
+    return output, {"states": len(rows), "state_futures": len(seeds), "native_episodes": episodes,
+        "exact_identities": identities, "max_cost_decomposition_error": max_error,
+        "max_peak_rss_MiB": max_rss, "fleet_nonzero_action_futures": int(np.count_nonzero(output[..., 1]))}
 
 
 def seal(run):
     rows = [r for key in keys() for r in read(prefix_path(run, key)/"rows.json")]
     saved = [read(prefix_path(run, k)/"controls.json") for k in keys()]
     raw, old, logits = (np.concatenate([np.asarray(c[k]) for c in saved], axis=1) for k in ("raw", "stage247", "logits"))
-    proposal = proposals(rows, raw, logits, load_bank(run, "proposal"))
+    first, first_audit = load_bank(run, "proposal", rows)
+    proposal = proposals(rows, raw, logits, first)
     write_json(directory(run)/"sealed_raw/proposal.json", {"choices": proposal.tolist()})
     print("TRANSFER_P8_PROPOSALS_FROZEN", flush=True)
-    sealed = rule.seal(raw, old, proposal, load_bank(run, "screen"), cube(rows))
+    second, second_audit = load_bank(run, "screen", rows)
+    sealed = rule.seal(raw, old, proposal, second, cube(rows))
+    banks = [set(BANKS[name]) for name in ("proposal", "screen", "evaluation")]
+    if any(banks[a]&banks[b] for a, b in ((0, 1), (0, 2), (1, 2))):
+        raise ValueError("Proposal, screen and evaluation draws overlap")
     unions = rule.action_unions(sealed, [r["original_choice"] for r in rows])
     sealed["states"] = [{"key": ["new", r["root"], r["scenario"], r["replica"]],
         "probe": r["probe_index"], "candidates": unions[i]} for i, r in enumerate(rows)]
@@ -345,6 +374,7 @@ def seal(run):
         "software_qualified": True, "prefixes": 240, "states": len(rows), "active_indices": active,
         "evaluation_tasks": len(active)*4, "evaluation_state_futures": len(active)*32,
         "evaluation_native_episodes": 32*sum(1+len(u) for u in unions if u), "matching": sealed["matching"],
+        "menu_audit": {"proposal": first_audit, "screen": second_audit, "future_banks_disjoint": True},
         "evaluation_labels_read": False, "new_fits": 0, "actor_updates": 0})
 
 

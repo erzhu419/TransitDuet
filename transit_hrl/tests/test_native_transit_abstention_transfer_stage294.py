@@ -16,6 +16,80 @@ from scripts import submit_native_transit_abstention_transfer_stage294_scheduleu
 
 
 class AbstentionTransferTest(unittest.TestCase):
+    def test_menu_audit_checks_physical_counts_identity_and_components(self):
+        key, probe = spec.keys()[0], spec.PROBES[0]
+        rows = [{"root": key[1], "scenario": key[2], "replica": key[3], "probe_index": probe, "original_choice": 0}]
+        receipt = {"contract": spec.contract(), "software_qualified": True, "key": list(key), "probe": probe,
+            "draws": list(spec.BANKS["proposal"]), "candidates": list(range(6)), "state_futures": 8,
+            "native_episodes": 56, "exact_identities": 8, "peak_rss_MiB": 700.}
+        labels = [{"draw": d, "future_seed": spec.future_seed(key, probe, d),
+            "values": {str(a): [0., 0., 0., 0.] if a == 0 else [1., .25, .75, -.1] for a in range(6)}}
+            for d in spec.BANKS["proposal"]]
+
+        def load(path):
+            return receipt if path.name == "receipt.json" else labels
+
+        with patch.object(spec, "keys", return_value=[key]), patch.object(spec, "PROBES", (probe,)), \
+                patch.object(spec, "read", side_effect=load):
+            receipt["contract"] = spec.contract()
+            panel, audit = spec.load_bank("unit294", "proposal", rows)
+            self.assertEqual(panel.shape, (1, 8, 6, 4))
+            self.assertEqual((audit["native_episodes"], audit["exact_identities"], audit["state_futures"]), (56, 8, 8))
+            self.assertEqual(audit["fleet_nonzero_action_futures"], 40)
+            for field, value in (("native_episodes", 55), ("exact_identities", 7), ("key", ["new", 401, "low_noise", 0])):
+                with self.subTest(field=field):
+                    old = receipt[field]
+                    receipt[field] = value
+                    with self.assertRaisesRegex(ValueError, "Incomplete or changed"):
+                        spec.load_bank("unit294", "proposal", rows)
+                    receipt[field] = old
+            for action, field, value, message in ((0, 3, 1., "identity"), (1, 0, float("nan"), "Nonfinite"),
+                    (1, 2, 2., "fleet plus service")):
+                with self.subTest(action=action, field=field):
+                    old = labels[0]["values"][str(action)][field]
+                    labels[0]["values"][str(action)][field] = value
+                    with self.assertRaisesRegex(ValueError, message):
+                        spec.load_bank("unit294", "proposal", rows)
+                    labels[0]["values"][str(action)][field] = old
+
+    def test_seal_persists_proposals_before_reading_screen_and_never_evaluation(self):
+        key, probe = spec.keys()[0], spec.PROBES[0]
+        rows = [{"root": key[1], "scenario": key[2], "replica": key[3], "probe_index": probe, "original_choice": 0}]
+        raw = np.zeros((16, 1), int)
+        saved = {"raw": raw.tolist(), "stage247": raw.tolist(), "logits": np.zeros((16, 1, 6)).tolist()}
+        first = np.zeros((1, 8, 6, 4))
+        first[:, :, 1] = [-1., 0., -1., -.5]
+        second = first.copy()
+        second[:, :, 1, 1] = [-1., 1.]*4
+        audit = {"states": 1, "native_episodes": 56, "exact_identities": 8, "state_futures": 8}
+        with tempfile.TemporaryDirectory() as temp, patch.object(spec, "ROOT", Path(temp)), \
+                patch.object(spec, "keys", return_value=[key]), patch.object(spec, "PROBES", (probe,)):
+            spec.write_json(spec.prefix_path("unit294", key)/"rows.json", rows)
+            spec.write_json(spec.prefix_path("unit294", key)/"controls.json", saved)
+            opened = []
+
+            def bank(run, name, loaded_rows):
+                self.assertEqual(loaded_rows, rows)
+                self.assertIn(name, ("proposal", "screen"))
+                if name == "screen":
+                    self.assertTrue((spec.directory(run)/"sealed_raw/proposal.json").exists())
+                opened.append(name)
+                return (first if name == "proposal" else second), audit
+
+            with patch.object(spec, "load_bank", side_effect=bank):
+                spec.seal("unit294")
+            sealed = spec.read(spec.directory("unit294")/"sealed_raw/primary.json")
+            plan = spec.read(spec.directory("unit294")/"seal/result.json")
+            self.assertEqual(opened, ["proposal", "screen"])
+            self.assertEqual(plan["active_indices"], [0])
+            self.assertEqual(plan["evaluation_tasks"], 4)
+            self.assertEqual(plan["evaluation_native_episodes"], 96)
+            self.assertTrue(plan["menu_audit"]["future_banks_disjoint"])
+            self.assertFalse(plan["evaluation_labels_read"])
+            expected = rule.seal(raw, raw, np.ones_like(raw), second, np.array([[[0]]]))
+            for field in ("choices", "proposal", "matched_thin_probabilities", "matching"):
+                self.assertEqual(sealed[field], expected[field])
+
     def test_fresh_scene_and_future_namespaces_do_not_collide(self):
         scenes = [spec.scene_seed(k) for role in ("new", "pilot") for k in spec.keys(role)]
         futures = [spec.future_seed(k, p, d) for role in ("new", "pilot") for k in spec.keys(role)
