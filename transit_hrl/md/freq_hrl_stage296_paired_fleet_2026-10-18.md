@@ -37,10 +37,15 @@ Scheduler uses unpinned node001-node006, 1 CPU/1,536 MiB native or 3,072 MiB
 offline. Full samples/models stay server-side; only compact receipts/reports
 are pulled. Preflight must pass before formal sampling is admitted.
 
-Validation: 34 focused/regression tests pass; runner and submit CLI startup
+Validation: 35 focused/regression tests pass; runner and submit CLI startup
 pass. Checks cover honest fit/calibration ordering, forbidden test T16 access,
 seed/bank separation, unchanged service proposals, exact expected thinning,
 prefix-cluster calibration, duplicate-profile invariance and all-raw rejection.
+
+Scheduling update (2026-10-19): `collect` submits the same 3,120 P/S and 1,680
+T16 tasks together after completed captures. Scientific fitting requires both
+banks completely done/exit0. Sampling, seeds, action rules and the registered
+scientific contract are unchanged; E32 retains its separate model/action seal.
 
 Execution: source revision `1bea867609`. Freeze t183630/node006 completed
 done/exit0, exactly replaying 360 old control states; only 4,294 scalar bytes

@@ -221,5 +221,23 @@ class PairedFleetTest(unittest.TestCase):
             cwd=spec.ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_parallel_collection_preserves_tasks_and_fit_waits_for_both_banks(self):
+        run = "unit296"
+        menus, targets = submit.tasks(run, "menus"), submit.tasks(run, "targets")
+        self.assertEqual(submit.tasks(run, "collect"), menus+targets)
+        self.assertEqual(len(menus)+len(targets), 4800)
+        self.assertEqual(submit.preceding_phases("collect"), ("capture",))
+        self.assertEqual(submit.preceding_phases("targets"), ("capture",))
+        self.assertEqual(submit.preceding_phases("fit"), ("menus", "targets"))
+        complete = [{**t, "status": "done", "exit_code": 0} for t in menus+targets]
+        submit.require_completed(complete, menus+targets)
+        for index in (0, len(menus)):
+            with self.subTest(index=index):
+                original = complete[index]
+                complete[index] = {**original, "status": "running", "exit_code": None}
+                with self.assertRaisesRegex(ValueError, "Preceding phase"):
+                    submit.require_completed(complete, menus+targets)
+                complete[index] = original
+
 
 if __name__ == "__main__": unittest.main()

@@ -40,6 +40,8 @@ def task_specification(run, phase, key=None, probe=None, bank=None, chunk=0, ind
 
 
 def tasks(run, phase):
+    if phase == "collect":
+        return tasks(run, "menus")+tasks(run, "targets")
     if phase in ("pilot", "capture"):
         return [task_specification(run, phase, k) for k in (spec.keys("pilot") if phase == "pilot" else spec.keys())]
     if phase == "menus":
@@ -54,6 +56,14 @@ def tasks(run, phase):
     return [task_specification(run, phase)]
 
 
+def preceding_phases(phase):
+    if phase in ("menus", "targets", "collect"):
+        return ("capture",)
+    if phase == "fit":
+        return ("menus", "targets")
+    return (dict(zip(spec.PHASES[1:], spec.PHASES[:-1]))[phase],)
+
+
 def require_completed(existing, required):
     latest = {t["signature"]: t for t in existing}
     for task in required:
@@ -64,7 +74,7 @@ def require_completed(existing, required):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--run-name", required=True); p.add_argument("--phase", choices=spec.PHASES, required=True)
+    p.add_argument("--run-name", required=True); p.add_argument("--phase", choices=(*spec.PHASES, "collect"), required=True)
     a = p.parse_args()
     sys.path.insert(0, str(SCHEDULER.parent))
     import scheduler
@@ -83,8 +93,7 @@ def main():
             "Stage294_E32_excluded_from_all_fitting_calibration_and_selection": True})
     else:
         if spec.read(registration)["contract"] != spec.contract(): p.error("Changed Stage296 contract")
-        preceding = dict(zip(spec.PHASES[1:], spec.PHASES[:-1]))[a.phase]
-        required = tasks(a.run_name, preceding)
+        required = [task for phase in preceding_phases(a.phase) for task in tasks(a.run_name, phase)]
         signatures = {t["signature"] for t in required}
         if signatures-{t["signature"] for t in existing}:
             existing = [t for t in scheduler.load_archive_tasks() if str(t.get("signature", "")).startswith(prefix)]+existing
