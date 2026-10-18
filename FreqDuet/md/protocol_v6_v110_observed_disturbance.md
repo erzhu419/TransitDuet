@@ -52,3 +52,33 @@ command changes. No new-day labels were used. Formal `t183625--t183629` covers
 capacity (72 parallel workers, one batch). Aggregate `t183631` waits for those
 five actual shard markers. Only the 200-byte smoke marker returned before
 formal dispatch; all tasks are restricted to node001--node006.
+
+## Outcome
+
+All five shards and aggregate completed with exit 0. Retrieved only the
+43,943-byte final JSON. The candidate fails all three registered joint gates:
+
+| FF minus control | Journey, min (95% CI) | Actual CV2 (95% CI) | Readiness, s (95% CI) | Holding, s/trip |
+| --- | --- | --- | --- | --- |
+| B200 | +4.550 [3.218, 6.100] | +.3482 [.2619, .5086] | +587 [426, 769] | +47.36 |
+| preserve | +4.933 [3.549, 6.638] | +.3520 [.2667, .5054] | +702 [559, 862] | +62.55 |
+| bilateral025 | +6.169 [4.421, 8.274] | +.3503 [.2678, .5069] | +1004 [855, 1148] | +185.37 |
+
+Both actor means and all four demand-day means worsen for all these endpoints.
+Even zero holding has better actual CV2 (.1789 versus .4044). All arms finish
+all trips: this is a control failure, not a failed rollout or uncleared service.
+Relative to bilateral025, waiting exposure increases 6.253 million person-s and
+onboard exposure 1.313 million person-s. Holding rises from 154.21 to 339.58
+s/trip; the extra holding does not buy regularity or readiness.
+
+Among 38,056 valid-forward decisions, commands differ from the shadow original
+rule on the candidate's own states in 58.62%. Unrounded requests are <=0 in
+44.42% and >=45 in 28.15% (72.57% combined). These are request-boundary rates,
+not executed-bin fractions. Mean signed feedforward is only +1.29 s, but mean
+absolute feedforward is 60.20 s and mean quantized command change is +6.21 s.
+Missing forward evidence is 3,544/41,600 decisions. The shadow comparison is
+not a matched-dose intervention or a causal decomposition of the service loss.
+
+Close this fixed candidate without gain rescue or further confirmation. V111
+will audit existing action/timing records and the persistent-disturbance
+response before proposing a different controller. Main stays unchanged.
