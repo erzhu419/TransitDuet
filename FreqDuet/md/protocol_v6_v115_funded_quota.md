@@ -26,3 +26,18 @@ Authorization is relative to shadows on visited states, not the separate bilater
 trajectory. This is not evidence of frequency separation or external fixed-upper
 superiority. Models, upper, dual and main remain frozen; all computation through
 scheduler on node001--node006. Only small markers and final statistics return locally.
+
+## Run record
+
+Source `1f9c0a00b8`, smoke `t188774` on node006: all 11 tests and eight consumed
+paths passed. Five cached controls reproduce all results and full timing exactly.
+Three funded paths verify actual saving/reuse, nonpositive-innovation behavior,
+every-step physical prefix bounds and sampler invariance. Only a 255-byte marker
+returned locally. Independent labels are opened only after this receipt.
+
+Submitted one independent batch `t188776--t188780`: ranges `[0,22), [22,43),
+[43,56), [56,65), [65,72)`, `22/21/13/9/7` workers, planned on
+node001/002/004/005/006 from live capacity. Aggregate `t188781` waits for all
+five local shard markers and also runs on a server. Only markers and its final
+statistical JSON synchronize locally. Independent service effects are pending;
+no training, parameter search or main-policy change.
