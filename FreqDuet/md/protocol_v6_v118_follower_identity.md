@@ -22,3 +22,21 @@ pair is a diagnostic proxy, not actual CV2. No alternative action is executed.
 Tests, replay and aggregation run through scheduler on node001--node006; only
 the final small summary returns. No new days, fitting, training, quota allocation
 change or main-policy change. Preserve missing/past labels explicitly.
+
+## Outcome and decision
+
+Source `6e138e46a7`, task `t189898` on node006: six tests, all eight paths and
+41,600 decisions exact, including endpoints, accounts, timing and V117 contexts.
+Only 148,503 bytes returned. Earlier observer task `t189897` was cancelled; the
+runtime was unchanged. All 34,795 valid forecasts match next arrival/departure
+and same-trip/same-bus ready labels; identity contribution is zero.
+
+Cell-weighted ready bias +16.01 [13.37,17.69] s splits into ETA +15.81 and dwell
++0.193 s; pooled ready MAE is 65.65 s. Holding-sign disagreement is 36.26%
+[34.41,37.85] for negative cuts, 28.89% [28.09,29.43] for quota extras. These are
+fixed-time local pair signs, not changed-action returns.
+
+Keep quota/main frozen and close this identity audit. Next check whether the
+journey-average-speed ETA (34,778 forecasts) extrapolates historical holding/dwell
+into remaining travel, using completed prefixes. Require improved same-object
+action-sign reliability, not just MAE, before a new allocation candidate.
