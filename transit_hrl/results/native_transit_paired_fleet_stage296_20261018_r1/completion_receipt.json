@@ -1,0 +1,50 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "recorded_at_utc": "2026-10-19T04:00:46.750753+00:00",
+  "scientific_source_revision": "1bea867609",
+  "evaluation_execution_revision": "df6b03e859",
+  "analysis_revision": "b03ef592d1",
+  "scheduler": {
+    "evaluate_ids": {
+      "first": "t188793",
+      "last": "t189876",
+      "count": 1084
+    },
+    "evaluation_status_counts": {
+      "done": 1084
+    },
+    "evaluation_exit_code_counts": {
+      "0": 1084
+    },
+    "report": {
+      "id": "t189903",
+      "node": "node006",
+      "status": "done",
+      "exit_code": 0
+    }
+  },
+  "coverage_qualified": true,
+  "evaluation_native_episodes": 32448,
+  "state_futures": 8672,
+  "test_prefixes": 120,
+  "states_in_denominator": 720,
+  "fixed_profiles": 16,
+  "cost_wait_vs_raw_both_CIs_supported": true,
+  "both_E16_halves_cost_wait_negative": true,
+  "mean_and_half_arithmetic_reconciled": true,
+  "retention_arithmetic_reconciled": true,
+  "waiting_gain_retention": {
+    "all32": 0.29500706035700075,
+    "first16": 0.27375364009663977,
+    "last16": 0.3185464793891271
+  },
+  "joint_transfer_supported": false,
+  "primary_failure": "waiting_gain_retention_below50pct_in_pooled_and_both_halves",
+  "cost_information_vs_thinning_supported": false,
+  "fleet_improvement_vs_zero_abstain_supported": false,
+  "scalar_report_pull_bytes": 17348,
+  "raw_or_model_data_pulled": false,
+  "raw_reference_fits": 0,
+  "actor_updates": 0,
+  "controller_promoted": false
+}

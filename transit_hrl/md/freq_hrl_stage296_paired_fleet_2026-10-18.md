@@ -69,14 +69,49 @@ is exactly zero. These counts are not waiting-gain retention or new seeds.
 Independent E32 t188793-t189876 has 1,084 jobs over 271 disagreement states,
 32,448 native episodes, with all 720 states retained in the denominator.
 Actions and matching weights were sealed before dispatch; no E32 outcomes
-were read for fitting or calibration. Primary joint improvement and the
-50% waiting-gain retention requirement remain pending evaluation.
+were read for fitting or calibration. The primary result is reported below.
 
 Qualification pulls were 4,279 pilot scalar bytes and 249 capture-audit
 bytes; fitting/seal summaries added 6,369 bytes. Rows, snapshots, models,
 test action arrays and thinning weights remain server-side. No raw reference
 fit or actor update was added.
 
+## Independent E32 result (2026-10-19)
+
+All 1,084 tasks completed done/exit0; report t189903/node006 also completed
+done/exit0. Coverage and all 32,448 episodes / 8,672 state-futures qualified.
+Only the 17,348-byte scalar report was pulled. Pooled means, E16 halves and
+waiting-retention arithmetic reconcile. Negative values mean improvement.
+
+| Comparison / metric | Mean | Prefix CI95 | Conditional MC CI95 | First E16 | Last E16 |
+| --- | ---: | --- | --- | ---: | ---: |
+| Risk vs raw / cost | -0.000122999 | [-0.000212118, -0.000038735] | [-0.000184209, -0.000061790] | -0.000116218 | -0.000129780 |
+| Risk vs raw / wait_min | -0.000331535 | [-0.000684836, -0.000100426] | [-0.000398414, -0.000264655] | -0.000323351 | -0.000339719 |
+| Risk vs thinning / cost | -0.000016967 | [-0.000040269, +0.000003151] | [-0.000030895, -0.000003038] | -0.000007016 | -0.000026918 |
+| Risk vs thinning / wait_min | -0.000017930 | [-0.000051529, +0.000007374] | [-0.000034017, -0.000001843] | -0.000034616 | -0.000001244 |
+
+Relative-to-raw cost/wait improvement passes both uncertainty checks and both
+halves. The preregistered primary nevertheless FAILS: waiting-gain retention
+is 29.50% pooled, 27.38% / 31.85% in the halves, all below 50%. The original
+zero-abstention baseline has cost -0.000172291 and wait -0.001123820; its
+cost/wait intervals are also negative. It remains a comparator, not a
+post-hoc replacement for the failed primary.
+
+Filtering loses 0.000074610 service-cost benefit versus that baseline while
+point fleet savings improve by 0.000025318 (both fleet intervals cross zero).
+The total cost difference is +0.000049292, also inconclusive, whereas wait
+degradation is supported by both intervals. Extra value versus matched
+thinning has a negative MC interval and negative points in both halves, but
+its prefix interval crosses zero. Neither incremental-cost nor incremental-
+fleet claim passes the registered two-interval criterion.
+
+Next: Stage297 freezes the critic and proposals, compares fleet-only versus
+total-cost retention scores, and selects global cutoffs under an explicit
+waiting-gain budget using fit/calibration roles only. No E32-based threshold
+choice. A nontrivial development candidate must precede new-prefix confirmation.
+
 Limitations: single intervention with fixed lower and finite-MC proposal,
-not full end-to-end Freq-HRL or a fleet-safety theorem. Independent calibrated
-scores still require untouched test control outcomes; no positive claim yet.
+not full end-to-end Freq-HRL or a fleet-safety theorem. The all-state mean
+waiting benefit is about 0.020 seconds; this is not deployment-scale evidence.
+Incremental learned value across prefixes and the 50% retention claim remain
+unconfirmed; the failed primary is not promoted.

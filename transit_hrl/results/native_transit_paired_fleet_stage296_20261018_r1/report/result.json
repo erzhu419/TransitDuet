@@ -1,0 +1,656 @@
+{
+  "Stage294_E32_labels_read": false,
+  "actor_updates": 0,
+  "comparisons": {
+    "bias_calibrated_vs_raw": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -6.165207040816695e-05,
+          3.274742088559743e-05
+        ],
+        "fleet": [
+          -4.46388284610149e-05,
+          4.915995114620008e-05
+        ],
+        "service": [
+          -2.0529603849925506e-05,
+          -1.2896168357829204e-05
+        ],
+        "wait_min": [
+          -0.0001820548480523073,
+          -0.00011665934465602648
+        ]
+      },
+      "mean": {
+        "cost": -1.4452324761284762e-05,
+        "fleet": 2.26056134259259e-06,
+        "service": -1.6712886103877355e-05,
+        "wait_min": -0.0001493570963541669
+      },
+      "prefix_CI95": {
+        "cost": [
+          -8.248487114800354e-05,
+          7.156647488064242e-05
+        ],
+        "fleet": [
+          -6.442599826388889e-05,
+          9.720413773148147e-05
+        ],
+        "service": [
+          -3.465851248281971e-05,
+          -2.0570107241031427e-06
+        ],
+        "wait_min": [
+          -0.0003138893636067708,
+          -1.659037272135427e-05
+        ]
+      }
+    },
+    "matched_thin_vs_raw": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.0001623366008661162,
+          -4.9728492901968294e-05
+        ],
+        "fleet": [
+          -0.00012404298921032687,
+          -1.2570267927018804e-05
+        ],
+        "service": [
+          -4.486017758312588e-05,
+          -3.059165904761294e-05
+        ],
+        "wait_min": [
+          -0.0003749032820998517,
+          -0.0002523061905563988
+        ]
+      },
+      "mean": {
+        "cost": -0.00010603254688404225,
+        "fleet": -6.830662856867284e-05,
+        "service": -3.772591831536941e-05,
+        "wait_min": -0.00031360473632812525
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00018114596201578774,
+          -3.3303391814055345e-05
+        ],
+        "fleet": [
+          -0.00015010409884982638,
+          2.3478755244502226e-05
+        ],
+        "service": [
+          -7.751366376712e-05,
+          -1.2445480288281858e-05
+        ],
+        "wait_min": [
+          -0.0006442639781810626,
+          -0.00010101936057761828
+        ]
+      }
+    },
+    "paired_risk_vs_bias_calibrated": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.00017576637624861676,
+          -4.132735747534145e-05
+        ],
+        "fleet": [
+          -0.00015140638919915628,
+          -1.7683599226769658e-05
+        ],
+        "service": [
+          -3.176185959705479e-05,
+          -1.6241885700977528e-05
+        ],
+        "wait_min": [
+          -0.0002492895340626312,
+          -0.00011506593468736887
+        ]
+      },
+      "mean": {
+        "cost": -0.0001085468668619791,
+        "fleet": -8.454499421296297e-05,
+        "service": -2.4001872649016158e-05,
+        "wait_min": -0.00018217773437500002
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00023805499586317266,
+          3.168569607205964e-07
+        ],
+        "fleet": [
+          -0.00022560402199074068,
+          3.776832863136551e-05
+        ],
+        "service": [
+          -6.341299431694892e-05,
+          1.9077372007016904e-06
+        ],
+        "wait_min": [
+          -0.0005142238362630215,
+          3.949896918402732e-05
+        ]
+      }
+    },
+    "paired_risk_vs_matched_thin": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -3.0895132500060194e-05,
+          -3.0381569783830617e-06
+        ],
+        "fleet": [
+          -2.795116346822418e-05,
+          -4.445135170902712e-09
+        ],
+        "service": [
+          -4.7757574700091075e-06,
+          -1.2019234050391054e-06
+        ],
+        "wait_min": [
+          -3.40171658967085e-05,
+          -1.8430229053747464e-06
+        ]
+      },
+      "mean": {
+        "cost": -1.6966644739221626e-05,
+        "fleet": -1.3977804301697541e-05,
+        "service": -2.9888404375241064e-06,
+        "wait_min": -1.7930094401041627e-05
+      },
+      "prefix_CI95": {
+        "cost": [
+          -4.02685457695855e-05,
+          3.1511072059914016e-06
+        ],
+        "fleet": [
+          -3.6113880298755844e-05,
+          5.463023244598776e-06
+        ],
+        "service": [
+          -6.913424417001236e-06,
+          -3.6278984164014144e-08
+        ],
+        "wait_min": [
+          -5.152857462565109e-05,
+          7.373674180772612e-06
+        ]
+      }
+    },
+    "paired_risk_vs_raw": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.00018420885616530672,
+          -6.178952708122102e-05
+        ],
+        "fleet": [
+          -0.00014309475747864984,
+          -2.147410826209092e-05
+        ],
+        "service": [
+          -4.8485761298997944e-05,
+          -3.2943756206789095e-05
+        ],
+        "wait_min": [
+          -0.0003984144350361839,
+          -0.00026465522642214967
+        ]
+      },
+      "mean": {
+        "cost": -0.00012299919162326388,
+        "fleet": -8.228443287037038e-05,
+        "service": -4.071475875289352e-05,
+        "wait_min": -0.0003315348307291668
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00021211755038791228,
+          -3.8735452677408885e-05
+        ],
+        "fleet": [
+          -0.0001781378851996528,
+          1.71859176070601e-05
+        ],
+        "service": [
+          -8.242639313874419e-05,
+          -1.327447961877893e-05
+        ],
+        "wait_min": [
+          -0.0006848362223307294,
+          -0.00010042555067274283
+        ]
+      }
+    },
+    "paired_risk_vs_stage247": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.00010534343367036703,
+          3.2352195606130975e-05
+        ],
+        "fleet": [
+          -6.050664263750488e-05,
+          7.678268430417153e-05
+        ],
+        "service": [
+          -5.463687191311495e-05,
+          -3.4630407817787785e-05
+        ],
+        "wait_min": [
+          -0.00047741509109686564,
+          -0.0002982576519586903
+        ]
+      },
+      "mean": {
+        "cost": -3.649561903211803e-05,
+        "fleet": 8.138020833333323e-06,
+        "service": -4.4633639865451366e-05,
+        "wait_min": -0.00038783637152777796
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00013226017890082464,
+          5.176553046332464e-05
+        ],
+        "fleet": [
+          -9.087456597222221e-05,
+          0.0001046696415653934
+        ],
+        "service": [
+          -7.661294008608221e-05,
+          -1.8504068761754938e-05
+        ],
+        "wait_min": [
+          -0.0006528285725911462,
+          -0.0001618218994140626
+        ]
+      }
+    },
+    "paired_risk_vs_zero_abstain": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -7.504085324251577e-05,
+          0.00017362421370258557
+        ],
+        "fleet": [
+          -0.00014993674758293993,
+          9.930017350886583e-05
+        ],
+        "service": [
+          5.007733833345026e-05,
+          9.91425962006936e-05
+        ],
+        "wait_min": [
+          0.0005488550583861396,
+          0.0010357152541138593
+        ]
+      },
+      "mean": {
+        "cost": 4.929168023003489e-05,
+        "fleet": -2.531828703703704e-05,
+        "service": 7.460996726707193e-05,
+        "wait_min": 0.0007922851562499994
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00010235264336480028,
+          0.00019832513563368073
+        ],
+        "fleet": [
+          -0.00018582944516782406,
+          0.00012478863751446746
+        ],
+        "service": [
+          2.4812902447735978e-05,
+          0.00013378639686867065
+        ],
+        "wait_min": [
+          0.00030029778374566016,
+          0.0013897707790798614
+        ]
+      }
+    },
+    "stage247_vs_raw": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.0001273735794085768,
+          -4.5633565773714894e-05
+        ],
+        "fleet": [
+          -0.00013174667604551432,
+          -4.909823136189304e-05
+        ],
+        "service": [
+          -2.688513034357132e-06,
+          1.0526275259472881e-05
+        ],
+        "wait_min": [
+          -5.689677043647375e-06,
+          0.00011829275864086943
+        ]
+      },
+      "mean": {
+        "cost": -8.650357259114584e-05,
+        "fleet": -9.042245370370369e-05,
+        "service": 3.9188811125578745e-06,
+        "wait_min": 5.630154079861103e-05
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00013696448601616752,
+          -3.990826782226561e-05
+        ],
+        "fleet": [
+          -0.00014694213867187498,
+          -3.6847149884259255e-05
+        ],
+        "service": [
+          -1.8564324318214693e-05,
+          2.5720220653392657e-05
+        ],
+        "wait_min": [
+          -0.00017731635199652783,
+          0.00027930921766492996
+        ]
+      }
+    },
+    "zero_abstain_vs_raw": {
+      "conditional_MC_CI95": {
+        "cost": [
+          -0.0003114853647052415,
+          -3.3096379001356e-05
+        ],
+        "fleet": [
+          -0.00019620191374895493,
+          8.226962208228824e-05
+        ],
+        "service": [
+          -0.00014120500757826661,
+          -8.944444446166415e-05
+        ],
+        "wait_min": [
+          -0.001377266456640053,
+          -0.0008703735173182803
+        ]
+      },
+      "mean": {
+        "cost": -0.00017229087185329875,
+        "fleet": -5.6966145833333355e-05,
+        "service": -0.00011532472601996539,
+        "wait_min": -0.0011238199869791667
+      },
+      "prefix_CI95": {
+        "cost": [
+          -0.00034786004787868937,
+          -1.3428843180340376e-06
+        ],
+        "fleet": [
+          -0.0002366920753761574,
+          0.00013450905128761567
+        ],
+        "service": [
+          -0.00019604954386393257,
+          -4.995627886736828e-05
+        ],
+        "wait_min": [
+          -0.0018845604790581586,
+          -0.0005034851074218749
+        ]
+      }
+    }
+  },
+  "contract": {
+    "action": "retain_base_zero_abstain_proposal_iff_adjusted_risk_score_le0_else_raw; no_action_search",
+    "arms": [
+      "raw",
+      "stage247",
+      "zero_abstain",
+      "bias_calibrated",
+      "paired_risk",
+      "matched_thin"
+    ],
+    "banks": {
+      "evaluation": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "proposal": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "screen": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "target": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    "bias_control": "same_calibration_recipe_applied_to_unlearned_S8_fleet_mean",
+    "boundary": "single_intervention_fixed_lower_finite_MC_proposal_with_learned_risk; score_adjustment_not_actionwise_safety_certificate; not_end_to_end_HRL",
+    "budget": {
+      "actor_updates": 0,
+      "main_captures": 260,
+      "max_evaluation_native_episodes": 161280,
+      "menu_native_episodes": 174720,
+      "menu_tasks": 3120,
+      "pilot_native_episodes": 570,
+      "raw_reference_fits": 0,
+      "risk_fits": 1,
+      "target_native_episodes": 94080,
+      "target_tasks": 1680
+    },
+    "calibration": "independent60prefix_T16_selected_population_ratio_bias_plus1.6448536269514722_stratified_prefix_cluster_SE; upward_adjustment_floored0; no_grid",
+    "cohort": "fresh80_fit60_calibration120_test_prefixes_balanced_over10_root_regimes_all6probes; separate10_software_pilots",
+    "features": [
+      "clock_hours",
+      "historical_excess",
+      "active_headroom",
+      "same_active",
+      "other_active",
+      "same_queue",
+      "other_queue",
+      "same_load",
+      "same_remaining",
+      "lf_forecast",
+      "paired_mean_gap",
+      "paired_first_gap",
+      "paired_gap_std",
+      "paired_nominal_shift",
+      "paired_prefix_fleet_forecast",
+      "paired_full_fleet_forecast",
+      "P_fleet_mean",
+      "P_service_mean",
+      "P_wait_mean",
+      "S_fleet_mean",
+      "S_fleet_se",
+      "S_positive_fraction",
+      "S_negative_fraction",
+      "S_all_zero",
+      "S_service_mean",
+      "S_wait_mean"
+    ],
+    "freeze": "fit_model_before_calibration_T16_read; calibrated_model_and_all_test_actions_weights_before_any_test_E32; no_Stage294_E32_access",
+    "future_seed": "2100000000+role_index*10000000+root_index*1000000+regime_index*100000+replica*1000+probe_ordinal*100+draw",
+    "inference": "average16profiles_and6probes_before120prefix_stratified_bootstrap5000_seed296; shared_future_MC_normal95; both_E16_halves",
+    "matching": "frozen_expected_uniform_k_of_n_thinning_of_base_zero_abstain_changes_per_profile_root_regime_probe_over12_test_prefixes",
+    "models_source": "native_transit_prefix_coverage_stage288_20261017_r1/freeze_raw/models.json",
+    "primary": "paired_risk_vs_raw_cost_wait_both_CI_upper_lt0_both_halves_negative; service_and_wait_both_CI_upper_lt0; retain_at_least_half_zero_abstain_wait_gain_in_all32_and_both16",
+    "proposal": "unchanged_P8_wait_constrained_proposal_and_S8_zero_event_abstention; no_service_fit_or_action_reranking",
+    "risk_fit": "one26feature_standardized_ridge1_unpenalized_intercept_on_fit_role_independent_T16_paired_fleet_mean; changed_proposals_only; duplicates_are_profile_weights",
+    "roles": {
+      "calibration": 6,
+      "fit": 8,
+      "pilot": 1,
+      "test": 12
+    },
+    "scene_seed": "2070000000+role_index*500000+root_index*100000+regime_index*1000+replica",
+    "secondary": "fleet_vs_zero_abstain_and_cost_vs_matched_thin_both_CIs_upper_lt0_separate_claims"
+  },
+  "controller_promoted": false,
+  "cost_information_vs_thinning_supported": false,
+  "coverage_qualified": true,
+  "evaluation_native_episodes": 32448,
+  "fixed_profiles": 16,
+  "fleet_improvement_vs_zero_abstain_supported": false,
+  "halves": {
+    "first16": {
+      "bias_calibrated": {
+        "cost": 4.5727083333333355e-05,
+        "fleet": 6.32957175925926e-05,
+        "service": -1.7568634259259248e-05,
+        "wait_min": -0.00015948893229166732
+      },
+      "matched_thin": {
+        "cost": -0.0001092027203595198,
+        "fleet": -7.444782021604935e-05,
+        "service": -3.475490014347026e-05,
+        "wait_min": -0.000288734718605324
+      },
+      "paired_risk": {
+        "cost": -0.00011621842447916681,
+        "fleet": -7.640697337962961e-05,
+        "service": -3.9811451099537006e-05,
+        "wait_min": -0.0003233506944444442
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "stage247": {
+        "cost": -9.001571180555563e-05,
+        "fleet": -9.35872395833333e-05,
+        "service": 3.5715277777777837e-06,
+        "wait_min": 6.206597222222225e-05
+      },
+      "zero_abstain": {
+        "cost": -0.00015853794487847284,
+        "fleet": -4.159432870370368e-05,
+        "service": -0.00011694361617476871,
+        "wait_min": -0.0011811740451388912
+      }
+    },
+    "last16": {
+      "bias_calibrated": {
+        "cost": -7.46317328559028e-05,
+        "fleet": -5.8774594907407404e-05,
+        "service": -1.585713794849544e-05,
+        "wait_min": -0.00013922526041666632
+      },
+      "matched_thin": {
+        "cost": -0.00010286237340856487,
+        "fleet": -6.216543692129626e-05,
+        "service": -4.0696936487268515e-05,
+        "wait_min": -0.00033847475405092615
+      },
+      "paired_risk": {
+        "cost": -0.00012977995876736116,
+        "fleet": -8.816189236111111e-05,
+        "service": -4.1618066406249965e-05,
+        "wait_min": -0.00033971896701388924
+      },
+      "raw": {
+        "cost": 0.0,
+        "fleet": 0.0,
+        "service": 0.0,
+        "wait_min": 0.0
+      },
+      "stage247": {
+        "cost": -8.299143337673624e-05,
+        "fleet": -8.7257667824074e-05,
+        "service": 4.266234447337973e-06,
+        "wait_min": 5.053710937499968e-05
+      },
+      "zero_abstain": {
+        "cost": -0.0001860437988281252,
+        "fleet": -7.233796296296297e-05,
+        "service": -0.00011370583586516203,
+        "wait_min": -0.0010664659288194438
+      }
+    }
+  },
+  "joint_transfer_supported": false,
+  "matching": {
+    "eligible_changes": 379,
+    "expected_thin_changes": 77.0,
+    "kept_changes": 77,
+    "matched_count_max_abs_difference": 0.0,
+    "randomizable_kept_changes": 18,
+    "strata": 960
+  },
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "raw_reference_fits": 0,
+  "risk_error_diagnostics": {
+    "base_eligible_profile_state_examples": 379,
+    "test_E32_MSE_at_base_eligible_proposals": 0.0009202584530898617,
+    "test_E32_label_mean_variance_at_base_eligible_proposals": 0.00044683961356640285
+  },
+  "service_retention_supported": false,
+  "state_futures": 8672,
+  "states": 720,
+  "test_prefixes": 120,
+  "wait_retention_vs_zero_abstain": {
+    "all32": 0.29500706035700075,
+    "first16": 0.27375364009663977,
+    "last16": 0.3185464793891271
+  }
+}
