@@ -19,3 +19,19 @@ validation; do not silently relax the frozen 32-day/12-actor/two-mode protocol.
 If no admissible archive exists, report the exact data/provenance gaps and keep
 validation pending. V140/V141 points, V142 ranks, windows, tails and main policy
 remain fixed. No new replay, training, action selection or checkpoint download.
+
+Result: sourceca36161d0f, scheduler t195288/node006 exit0;7 tests pass.
+Across45 result stores,850 experiment directories and652 trace/ready bundles,
+12 have the required fields; all12 are the consumed V137 paths. None has
+unknown-use complete data, and none is independently admissible. No read errors.
+V135's384 formal paths cover16 already summarized days, with sparse launch-only
+traces and no all-query ready labels. The exact V137/V135 terminal reference
+restores completeness of V137's12 paths, not their independence.
+
+Gap: unused demand-day archives with all-query evidence/source/vehicle identity,
+same-vehicle ready labels, event arrays and matched terminal clocks, covering
+the frozen32-day x12-actor x2-mode design. Independent validation stays pending;
+no bootstrap, forecast scoring or new collection was launched. Only small
+summaries were fetched (final58301 bytes); raw data/checkpoints remain remote.
+The first recursive scan was cancelled on old V70 cell-cache traversal; the
+final scan follows actual recorder layouts and includes older directory names.
