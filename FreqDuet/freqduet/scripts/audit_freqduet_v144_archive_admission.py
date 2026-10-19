@@ -5,7 +5,6 @@ import argparse
 from collections import Counter, defaultdict
 import gzip
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
@@ -15,7 +14,6 @@ import numpy as np
 
 
 ARTIFACTS = {'traces', 'launch_traces', 'records', 'ready', 'ready_labels', 'terminal'}
-SKIP = ARTIFACTS | {'source', 'checkpoints', 'ckpt', '__pycache__', 'models', '.git'}
 META_KEYS = {'paths', 'pairs', 'cases', 'contexts', 'items', 'demand_days', 'days',
     'evaluation_days', 'eval_seeds', 'evaluation_seeds', 'demand_seeds', 'cohorts'}
 QUERY_FIELDS = ('trip_id', 'station_id', 'direction', 'policy_time_s', 'chosen_s', 'executed_s')
@@ -58,6 +56,12 @@ def result_roots(parents):
                 if root.is_dir():
                     found.add(root.resolve())
     return sorted(found)
+
+
+def artifact_bases(experiment):
+    # Current recorders write at out_root or its immediate smoke/shard child.
+    candidates = [experiment, *(p for p in experiment.iterdir() if p.is_dir() and p.name != 'source')]
+    return [p for p in candidates if any((p/d).is_dir() for d in ARTIFACTS)]
 
 
 def trace_schema(path):
@@ -135,23 +139,21 @@ def run(args):
         for p in sorted(root.iterdir()):
             if p.is_file() and p.name.endswith(('.tar', '.tar.gz', '.tgz', '.zip', '.tar.zst')):
                 compressed.append(str(p))
-            elif p.is_dir() and p.name.startswith('protocol_v6') and p.resolve() != args.out_root.resolve():
+            elif p.is_dir() and p.resolve() != args.out_root.resolve():
                 experiments.append(p)
-            elif p.is_dir():
-                older += 1
+                older += not p.name.startswith('protocol_v6')
         aliases.append(dict(root=str(root), other_result_directories=older))
     exposures, metadata, errors = defaultdict(set), [], []
     bases = []
     for i, experiment in enumerate(experiments):
-        for current, dirs, files in os.walk(experiment):
-            base = Path(current)
-            compressed.extend(str(base/f) for f in files if f.endswith(('.tar', '.tar.gz', '.tgz', '.zip', '.tar.zst')))
-            if set(dirs) & ARTIFACTS:
-                bases.append(base)
+        bases.extend(artifact_bases(experiment))
+        compressed.extend(str(p) for p in experiment.iterdir() if p.is_file()
+            and p.name.endswith(('.tar', '.tar.gz', '.tgz', '.zip', '.tar.zst')))
+        for base in (experiment/'summary', experiment/'prepare_summary'):
             for name in ('status.json', 'summary.json'):
-                if name not in files or base.name not in ('summary', 'prepare_summary'):
-                    continue
                 path = base/name
+                if not path.is_file():
+                    continue
                 try:
                     days = metadata_days(json.loads(path.read_text()))
                     for day in days:
@@ -159,9 +161,9 @@ def run(args):
                     metadata.append(dict(path=str(path), days=sorted(days)))
                 except (ValueError, OSError) as exc:
                     errors.append(dict(path=str(path), error=str(exc)))
-            dirs[:] = [d for d in dirs if d not in SKIP]
         print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=i+1, total=len(experiments),
-            unit='archive_metadata', elapsed_seconds=time.monotonic()-args.started)), flush=True)
+            unit='archive_metadata', experiment=experiment.name,
+            elapsed_seconds=time.monotonic()-args.started)), flush=True)
     rows, groups = [], []
     for i, base in enumerate(sorted(set(bases))):
         names = set()
@@ -201,8 +203,9 @@ def run(args):
             'The frozen 32-day/12-actor/two-mode design is not replaced by a convenient partial grid.',
         point_forecasts_recomputed=False, interval_updates=0, new_rollouts=0, new_demand_days=0,
         actor_updates=0, critic_updates=0, dual_updates=0, main_policy_changed=False,
-        limitations='Known FreqDuet server workspaces only, Protocol V6 result stores. Earlier-protocol '
-            'directories are counted but cannot certify the frozen physical/control protocol. '
+        limitations='Known FreqDuet server result stores, current recorder layouts at experiment roots '
+            'and immediate smoke/shard children, not recursive counterfactual cells or training caches. '
+            'Other-protocol directories are also inspected but their names cannot certify frozen physics. '
             'Aggregate/diagnostic day references establish prior outcome exposure; their absence '
             'does not prove independence. Schema checks do not score forecast outcomes. '
             'No records, raw traces or checkpoints are exported.'))

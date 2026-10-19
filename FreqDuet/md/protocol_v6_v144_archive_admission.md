@@ -1,11 +1,14 @@
 # V144: server archive admission, no new simulation
 
-Inventory Protocol V6 stores under known FreqDuet server workspaces. Read
+Inventory result stores under known FreqDuet server workspaces. Read
 directory/receipt metadata and existing trace schemas only; do not score
 prediction outcomes before independent-cohort admission. Required inputs are
 all-query ready-time identity/evidence, saved native source status, full timing
 records, same-vehicle ready labels and terminal dispatch/return clocks.
 Sparse launch-only traces cannot substitute for all eligible queries.
+Use the actual recorders' root/immediate smoke-or-shard layout; include older
+result directory names, but do not recursively inspect counterfactual cell or
+training caches that do not contain the required query/ready capture stream.
 
 Previously summarized/diagnosed demand days are development data even for a
 different actor. Missing prior-use references mean unknown, not unused. Inspect

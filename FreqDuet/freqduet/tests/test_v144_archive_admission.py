@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from audit_freqduet_v144_archive_admission import metadata_days, case_id, trace_schema, inspect_bundle
+from audit_freqduet_v144_archive_admission import metadata_days, case_id, trace_schema, inspect_bundle, artifact_bases
 
 
 class ArchiveAdmissionTests(unittest.TestCase):
@@ -39,6 +39,13 @@ class ArchiveAdmissionTests(unittest.TestCase):
     def test_natural_case_identity_does_not_merge_modes(self):
         self.assertNotEqual(case_id('12071_2351015_old'), case_id('12071_2351015_handoff'))
         self.assertIsNone(case_id('p15'))
+
+    def test_recorder_layout_does_not_traverse_counterfactual_cache(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            for p in ('records', 'smoke_runs/traces', 'cells/c15_f22_a10/cells/traces', 'source/traces'):
+                (root/p).mkdir(parents=True)
+            self.assertEqual(set(artifact_bases(root)), {root, root/'smoke_runs'})
 
 
 if __name__ == '__main__':
