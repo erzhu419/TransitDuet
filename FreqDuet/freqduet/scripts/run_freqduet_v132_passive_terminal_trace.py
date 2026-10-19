@@ -23,37 +23,10 @@ def key(row):
     return int(row['trip_id']), int(row['station_id']), bool(row['direction'])
 
 
-def snapshot_avl(bus):
-    snapshots = getattr(bus, '_follower_avl_snapshots', ())
-    behind = sorted((s for s in snapshots if s.on_route and s.direction == bus.direction
-        and s.bus_id != bus.bus_id and s.progress_m < bus.travel_distance-1e-6),
-        key=lambda s: -s.progress_m)
-    follower = next((s for s in snapshots if s.bus_id == bus.pre_action_follower_bus_id), None)
-    return dict(controlled_progress_m=float(bus.travel_distance),
-        follower_snapshot=None if follower is None else asdict(follower),
-        nearest_active_followers=[asdict(s) for s in behind[:3]])
-
-
 class PassiveTrace(original.PlanAudit):
     def __init__(self, seed, geometry):
         super().__init__(seed, geometry, original.frozen.PRIMARY, True)
-        self.ready_avl, self.queries = {}, {}
-
-    def attach(self, runner):
-        super().attach(runner)
-        self.trace_prepare = self.bus_type._prepare_for_action
-
-        def prepare(bus, now, buses, debug):
-            result = self.trace_prepare(bus, now, buses, debug)
-            stop = int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction)
-            self.ready_avl[stop] = snapshot_avl(bus)
-            return result
-
-        self.bus_type._prepare_for_action = prepare
-
-    def detach(self):
-        self.bus_type._prepare_for_action = self.trace_prepare
-        super().detach()
+        self.queries = {}
 
     def __call__(self, policy, states, features, theta):
         law = super().__call__(policy, states, features, theta)
@@ -63,7 +36,7 @@ class PassiveTrace(original.PlanAudit):
         context = self.runner._pending_lower_action_context[int(self.runner._pilot_agent)]
         # Copy already-produced evidence only; never query the predictor or actor again.
         self.queries[stop] = deepcopy(dict(evidence=self.evidence[stop],
-            online=self.online[stop], context=asdict(context), ready_avl=self.ready_avl[stop]))
+            online=self.online[stop], context=asdict(context)))
         return law
 
 
@@ -124,7 +97,7 @@ def replay(args):
 def brief(row):
     names = ('trip_id', 'station_id', 'direction', 'policy_time_s', 'chosen_s', 'executed_s',
         'raw_shadow_s', 'feedback_error_s', 'raw_feedback_error_s', 'prediction_time_s',
-        'component_used', 'request_gap_s', 'evidence', 'online', 'context', 'ready_avl')
+        'component_used', 'request_gap_s', 'evidence', 'online', 'context')
     result = {k: row[k] for k in names if k in row}
     result['unclipped_request_s'] = .25*row['feedback_error_s']
     return result
@@ -170,8 +143,11 @@ def aggregate(args):
     pilot.write_json(args.out_root/'summary/status.json', dict(status='v132_exact_passive_trace_complete',
         paths=paths, new_candidate_replays=2, reused_baseline_traces=2, new_demand_days=0,
         actor_updates=0, critic_updates=0, dual_updates=0, main_policy_changed=False,
+        unavailable_trace_fields=['ready_avl'],
         limitations='Two consumed paths only. Exact replay verifies passive instrumentation, not '
             'a new control effect. Ready-time AVL/prediction and later query clocks are distinct. '
+            'The pinned runtime has no cached AVL snapshot; legacy ready_avl null/empty values '
+            'are unavailable observations, not absent followers, and are excluded from this summary. '
             'Whole-path contrasts do not identify the daily value of one changed action.'))
     print('V132_EXACT_PASSIVE_TRACE_COMPLETE', flush=True)
 
@@ -193,4 +169,6 @@ if __name__ == '__main__':
             raise AssertionError('passive replay requires passed trace tests')
         replay(args)
     else:
+        subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
+            str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v132_*.py', '-v'], check=True)
         aggregate(args)

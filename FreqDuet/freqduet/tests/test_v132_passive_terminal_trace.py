@@ -19,16 +19,15 @@ class PassiveTraceTests(unittest.TestCase):
         observer.decisions = [dict(trip_id=16, station_id=5, direction=True)]
         observer.evidence[stop] = dict(ready_time_s=3240.)
         observer.online[stop] = dict(gap_s=540.)
-        observer.ready_avl[stop] = dict(follower_snapshot=dict(trip_id=18))
         observer.runner = SimpleNamespace(_pilot_agent=0, _pending_lower_action_context={0: Context()})
         law = object()
         with patch.object(run.original.PlanAudit, '__call__', return_value=law) as control:
             self.assertIs(observer(None, None, None, None), law)
             control.assert_called_once_with(None, None, None, None)
         observer.online[stop]['gap_s'] = 10.
-        observer.ready_avl[stop]['follower_snapshot']['trip_id'] = 99
+        observer.evidence[stop]['ready_time_s'] = 9999.
         self.assertEqual(observer.queries[stop]['online']['gap_s'], 540.)
-        self.assertEqual(observer.queries[stop]['ready_avl']['follower_snapshot']['trip_id'], 18)
+        self.assertEqual(observer.queries[stop]['evidence']['ready_time_s'], 3240.)
 
     def test_first_change_uses_policy_clock_not_trip_or_arrival_order(self):
         def row(trip, time, action):
@@ -48,20 +47,11 @@ class PassiveTraceTests(unittest.TestCase):
         self.assertEqual(result['baseline_only'], 1)
         self.assertEqual(result['total_chosen_delta_s'], -5.)
 
-    def test_snapshot_uses_frozen_avl_and_does_not_reestimate(self):
-        @dataclass
-        class Snapshot:
-            bus_id: int
-            direction: bool
-            on_route: bool
-            progress_m: float
-        snapshot = Snapshot(7, True, True, 0.)
-        bus = SimpleNamespace(_follower_avl_snapshots=[snapshot], bus_id=3, direction=True,
-            travel_distance=100., pre_action_follower_bus_id=7)
-        result = run.snapshot_avl(bus)
-        snapshot.bus_id = 88
-        self.assertEqual(result['follower_snapshot']['bus_id'], 7)
-        self.assertEqual(result['nearest_active_followers'][0]['progress_m'], 0.)
+    def test_brief_excludes_unobserved_legacy_avl_cache(self):
+        row = dict(feedback_error_s=142.5, ready_avl=dict(follower_snapshot=None))
+        result = run.brief(row)
+        self.assertNotIn('ready_avl', result)
+        self.assertEqual(result['unclipped_request_s'], 35.625)
 
 
 if __name__ == '__main__':
