@@ -27,3 +27,19 @@ Source `60c5b44c1a`, scheduler `t195159` on node006, six workers maximum.
 All 16 tests passed; both raw controls reproduce endpoints and full timing
 exactly. The two split smoke paths passed action-execution/ready-clock checks
 and are reused. The remaining six paths precede the server-side factorial summary.
+
+## Outcome and next decision
+
+All ten runs and aggregate completed; actual child exit 0, only 93,997 bytes
+returned. Split bilateral minus raw bilateral: journey -0.253047 min, readiness
+-22.09 s, holding -22.68 s/trip; CV2 -0.002170 [-0.005504,0.002035], joint gate
+fails. Versus raw funded the joint gate passes; versus split funded, journey
++0.011829 min, holding +6.17 s/trip, CV2 -0.001606 [-0.003287,0.000173].
+Both actors retain lower passenger time/readiness in all eight cells versus raw
+bilateral, but both still worsen CV2 on day 2231004 (+0.004356/+0.003579).
+Thus the regularity failure is not unique to innovation/quota/expiry. The package
+attenuates the forecast journey gain (interaction +0.065445 [0.006599,0.111355]
+min), without establishing separate causal effects of its components.
+Keep main frozen; no new-day confirmation or training yet. Next read the four
+consumed arms' actual release, cumulative holding and downstream arrival timing
+by time/stop, locating the first regularity divergence before changing a rule.
