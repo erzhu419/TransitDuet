@@ -3,7 +3,8 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from audit_freqduet_v136_handoff_propagation import direct_accounting, delay_accounting, pooled_profile
+from audit_freqduet_v136_handoff_propagation import (
+    direct_accounting, delay_accounting, pooled_profile, pattern_groups, variance_totals)
 
 
 class HandoffPropagationTests(unittest.TestCase):
@@ -51,6 +52,17 @@ class HandoffPropagationTests(unittest.TestCase):
         result = pooled_profile(path(10., 4., (8., 12.)), path(10., 9., (7., 13.)), lambda k: k[1])
         self.assertAlmostEqual(sum(result.values()), .05)
         self.assertAlmostEqual(result['2'], .025)
+
+    def test_joint_pattern_keeps_v135_passenger_gain_and_other_nonharm_definition(self):
+        row = dict(effects=dict(passenger_person_s=-1., cv_squared=0.,
+            inclusive_terminal_delay_s=0., trips_unlaunched=0., trips_incomplete=0.))
+        self.assertEqual(pattern_groups([row])['joint_improvement'], [row])
+
+    def test_lower_component_variance_can_be_outweighed_by_cross_terms(self):
+        result = variance_totals(dict(release_diagonal=-.02,
+            release__realized_holding_cross=.03, mean_normalization=0., cv_squared=.01))
+        self.assertEqual(result['diagonal_sum'], -.02)
+        self.assertEqual(result['cross_sum'], .03)
 
 
 if __name__ == '__main__':

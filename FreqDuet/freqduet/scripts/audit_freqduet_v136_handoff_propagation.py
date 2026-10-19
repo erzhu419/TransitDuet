@@ -199,7 +199,20 @@ def analyze_cell(root, out, index):
         cv2_by_station=pooled_profile(b, c, lambda k: (k[1], int(k[2]))),
         cv2_by_launch_band=pooled_profile(b, c, lambda k: int(b['launch_times'][k[0]]//14400)))
     write(out/'details'/f'p{index}.json', detail)
-    return dict(seed=seed, day=day, effects=effects, diagnostics=diagnostics,
+    return compact_cell(detail, receipt)
+
+
+def variance_totals(timing):
+    parts = {kind+'_sum': sum(v for k, v in timing.items() if k.endswith('_'+kind))
+        for kind in ('diagonal', 'cross')}
+    close(sum(parts.values())+timing['mean_normalization'], timing['cv_squared'], 'CV2 diagonal/cross identity')
+    return parts
+
+
+def compact_cell(detail, receipt):
+    diagnostics = dict(detail['diagnostics'], **variance_totals(detail['timing']['arrival']))
+    action_details = detail['actions']
+    return dict(seed=detail['seed'], day=detail['day'], effects=detail['effects'], diagnostics=diagnostics,
         handoff_queries=receipt['use']['handoff']['launch_handoffs'],
         cv2_by_station=detail['cv2_by_station'], cv2_by_launch_band=detail['cv2_by_launch_band'],
         first_direct_changes=sorted((r for r in action_details['direct_requests'] if r['direct_override_s'] != 0),
@@ -236,7 +249,7 @@ def pattern_groups(rows):
     return {name: [r for r in rows if predicate(r['effects'])] for name, predicate in (
         ('passenger_benefit_cv_harm', lambda e: e['passenger_person_s'] < 0 and e['cv_squared'] > 0),
         ('passenger_harm', lambda e: e['passenger_person_s'] > 0),
-        ('joint_improvement', lambda e: all(e[k] < 0 for k in frozen.PRIMARY)),
+        ('joint_improvement', frozen.frozen.joint_improvement),
         ('no_endpoint_change', lambda e: all(e[k] == 0 for k in frozen.PRIMARY)))}
 
 
@@ -251,11 +264,18 @@ def run(args):
     if parent['status'] != 'v135_frozen_handoff_confirmation_complete' or parent['paired_cells'] != len(frozen.ITEMS):
         raise AssertionError('V136 requires the complete V135 confirmation')
     rows = []
-    with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
-        tasks = [pool.submit(analyze_cell, args.v135_root, args.out_root, i) for i in range(len(frozen.ITEMS))]
-        for task in as_completed(tasks):
-            rows.append(task.result())
-            print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=len(rows), total=len(frozen.ITEMS), unit='pair')), flush=True)
+    if args.command == 'report':
+        for i, (seed, day) in enumerate(frozen.ITEMS):
+            detail = read(args.out_root/'details'/f'p{i}.json')
+            if (detail['seed'], detail['day']) != (seed, day):
+                raise AssertionError('saved V136 detail identity differs from V135 grid')
+            rows.append(compact_cell(detail, read(args.v135_root/'pairs'/f'p{i}.json')))
+    else:
+        with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
+            tasks = [pool.submit(analyze_cell, args.v135_root, args.out_root, i) for i in range(len(frozen.ITEMS))]
+            for task in as_completed(tasks):
+                rows.append(task.result())
+                print('SCHEDULEURM_PROGRESS '+json.dumps(dict(current=len(rows), total=len(frozen.ITEMS), unit='pair')), flush=True)
     rows.sort(key=lambda r: (r['seed'], r['day']))
     primary = [r for r in rows if r['seed'] in frozen.VALIDATION_SEEDS]
     secondary = [r for r in rows if r['seed'] in frozen.DEVELOPMENT_SEEDS]
@@ -265,6 +285,7 @@ def run(args):
     write(args.out_root/'summary/status.json', dict(status='v136_v135_readonly_propagation_complete',
         primary=primary_summary, development_actor_new_days=summarize(secondary),
         parent_primary_gate=parent['primary_joint_improvement'],
+        parent_cell_joint_improvements=parent['cohorts']['heldout_actors']['cell_joint_improvements'],
         parent_endpoint_intervals=parent['cohorts']['heldout_actors']['effects'][frozen.CONTRAST],
         by_actor=axes(primary, 'seed'), by_day=axes(primary, 'day'),
         patterns={name: dict(cells=len(chosen), endpoint_means=mean_table(chosen, 'effects'),
@@ -290,6 +311,7 @@ def run(args):
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('command', choices=('run', 'report'))
     p.add_argument('--v135-root', type=Path, required=True)
     p.add_argument('--out-root', type=Path, required=True)
     p.add_argument('--workers', type=int, default=4)
