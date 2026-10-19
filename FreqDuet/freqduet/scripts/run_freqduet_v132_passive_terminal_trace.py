@@ -30,7 +30,6 @@ def snapshot_avl(bus):
         key=lambda s: -s.progress_m)
     follower = next((s for s in snapshots if s.bus_id == bus.pre_action_follower_bus_id), None)
     return dict(controlled_progress_m=float(bus.travel_distance),
-        estimator_follower_trip_id=bus.pre_action_follower_trip_id,
         follower_snapshot=None if follower is None else asdict(follower),
         nearest_active_followers=[asdict(s) for s in behind[:3]])
 

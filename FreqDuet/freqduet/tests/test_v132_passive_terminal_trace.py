@@ -52,16 +52,15 @@ class PassiveTraceTests(unittest.TestCase):
         @dataclass
         class Snapshot:
             bus_id: int
-            trip_id: int
             direction: bool
             on_route: bool
             progress_m: float
-        snapshot = Snapshot(7, 18, True, True, 0.)
+        snapshot = Snapshot(7, True, True, 0.)
         bus = SimpleNamespace(_follower_avl_snapshots=[snapshot], bus_id=3, direction=True,
-            travel_distance=100., pre_action_follower_bus_id=7, pre_action_follower_trip_id=18)
+            travel_distance=100., pre_action_follower_bus_id=7)
         result = run.snapshot_avl(bus)
-        snapshot.trip_id = 88
-        self.assertEqual(result['follower_snapshot']['trip_id'], 18)
+        snapshot.bus_id = 88
+        self.assertEqual(result['follower_snapshot']['bus_id'], 7)
         self.assertEqual(result['nearest_active_followers'][0]['progress_m'], 0.)
 
 
