@@ -141,7 +141,7 @@ def replay(args, case):
     pilot.joint.assert_same_state(previous['contract'], rule.contract, 'V137_same_frozen_physics')
     terminal = dict(plans=rule.plans, dispatches=rule.dispatches,
         returns=list(rule.returns.values()), reference_clocks=rule.reference_clocks)
-    pilot.joint.assert_same_state(read(args.v135_root/'terminal'/(name+'.json')), terminal,
+    pilot.joint.assert_same_state(read(args.v135_root/'terminal'/(name+'.json')), json.loads(json.dumps(terminal)),
         'V137_all_terminal_plans_launches_returns_exact')
     record_path = args.out_root/'records'/(name+'.npz')
     rule.save(record_path)
