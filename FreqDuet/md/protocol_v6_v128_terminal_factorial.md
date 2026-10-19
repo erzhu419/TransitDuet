@@ -23,3 +23,27 @@ Reuse those treated paths; only then run the remaining six. Report all pairwise
 contrasts, terminal x lower interaction and crossed actor/day intervals as
 consumed diagnostics, never automatic promotion or independent confirmation.
 Use scheduler CPU conda on node001--node006, one worker/job; return small summaries.
+
+## Outcome (2026-10-19)
+
+Scheduler t195190 passed four tests and both exact neutral replays; t195191--194
+completed the remaining paths and server aggregation, all with child exit 0.
+Only the 113175-byte summary and tiny completion markers were returned locally.
+
+Relative to the same lower rule without terminal control, paired means are:
+
+| Lower | Journey, min | Actual arrival CV2 | Inclusive terminal delay, s |
+| --- | ---: | ---: | ---: |
+| Original bilateral | +0.18535 | -0.017291 | +686.08 |
+| Split-prediction bilateral | +0.21043 | -0.015838 | +607.45 |
+
+These directions hold in all four actor/day cells; all trips complete. The split
+arm's added passenger cost is mostly waiting (+232303 person-s); holding falls
+11.54 s/trip. With spacing in both arms, split improves journey by 0.20630 min
+but worsens arrival CV2 by 0.001783 (crossed CI [0.000480, 0.003286]). All three
+registered joint gates fail. No promotion, training expansion or main switch.
+
+Next: use the existing terminal records to quantify accumulated release delay
+and available recovery slack before designing bounded, plan-anchored coordination.
+Do not tune another spacing constant on these consumed days. Evidence:
+`freqduet/results_freqduet/protocol_v6_v128_terminal_factorial/summary/status.json`.
