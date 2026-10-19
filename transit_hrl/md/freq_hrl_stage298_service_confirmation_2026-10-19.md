@@ -37,3 +37,10 @@ Shared sampling defaults and Stage296 inference remain regression-tested;
 only protocol paths/seeds and arm names are supplied by the new experiment.
 This remains finite-MC single-intervention validation with fixed lower, not
 end-to-end learned HRL. Full panels, models and trajectories stay server-side.
+
+Execution: source `c762765aa1`; freeze t189917/node006 completed done/exit0,
+qualifying 400 new prefixes and seed separation (3,055 scalar bytes pulled).
+Pilots t189919-t189928 launched unpinned, currently placed on node006; the
+first actual process uses 99.5% CPU / 659 MiB. Formal capture, P/S and E32
+are not dispatched: they await native pilot qualification. No new performance
+claim is made from the development selection or software preflight.

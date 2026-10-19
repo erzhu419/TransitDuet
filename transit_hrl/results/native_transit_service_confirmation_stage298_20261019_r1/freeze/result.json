@@ -1,0 +1,111 @@
+{
+  "contract": {
+    "Stage296_E32_labels_used": false,
+    "Stage296_test_prefixes_reused": false,
+    "action": "frozen_Stage297_fleet_critic_plus_S8_service_score_le_locked_cutoff; retain_base_or_raw_only",
+    "actor_updates": 0,
+    "arms": [
+      "raw",
+      "stage247",
+      "zero_abstain",
+      "legacy_risk",
+      "joint_budgeted",
+      "service_rank_matched",
+      "matched_thin"
+    ],
+    "banks": {
+      "evaluation": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "proposal": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "screen": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "budget": {
+      "main_captures": 400,
+      "max_E32_episodes": 537600,
+      "menu_episodes": 268800,
+      "menus": 4800,
+      "pilot_episodes": 430
+    },
+    "cohort": "400_new_test_prefixes_replicas12to51; 10_excluded_pilots_replica1; same_Stage296_seed_formula",
+    "cohort_expansion": "Stage297_reserved120_expanded_before_any_new_capture_for_prefix_precision; policy_unchanged",
+    "inference": "average16profiles_and6probes; 400prefix_stratified_bootstrap5000_seed298; paired_MC95; both_E16",
+    "legacy_adjustment_source": "native_transit_paired_fleet_stage296_20261018_r1/fit_raw/calibrated_model.json",
+    "locked_policy": {
+      "joint": {
+        "family": "joint",
+        "index": 27,
+        "threshold": 0.002181045736174378
+      },
+      "risk": {
+        "family": "base",
+        "index": 0,
+        "threshold": null
+      }
+    },
+    "matching": "expected_uniform_thinning_per_profile_root_regime_probe_over40_test_prefixes",
+    "model_source": "native_transit_paired_fleet_stage296_20261018_r1/fit_raw/model_before_calibration.json",
+    "primary": "cost_wait_both_CIs_upper_lt0_both_E16_negative; service_wait_both_CIs_negative; wait_gain_retention_ge50pct_pooled_and_both_E16",
+    "proposal": "unchanged_P8_wait_constrained_proposal_S8_zero_abstention",
+    "raw_reference_fits": 0,
+    "risk_budgeted_control": "Stage297_selected_full_base; represented_by_zero_abstain",
+    "risk_fits": 0,
+    "seal": "all_actions_weights_and_sparse_union_before_E32; no_new_calibration",
+    "secondary": "cost_vs_matched_thin_service_rank_and_base_both_CIs_negative_separate_claims",
+    "service_control": "lowest_S8_service_scores_at_same_joint_action_count_per_profile_root_regime_probe; frozen_cohort_budget_control_not_online_policy",
+    "source_selection": "native_transit_service_protected_stage297_20261019_r1"
+  },
+  "excluded_pilots": 10,
+  "new_test_prefixes": 400,
+  "seeds_disjoint_from_Stage296": true,
+  "software_qualified": true
+}
