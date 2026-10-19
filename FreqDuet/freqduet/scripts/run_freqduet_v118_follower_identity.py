@@ -26,21 +26,17 @@ CI_FIELDS = ('identity_matches_next_arrival', 'identity_matches_next_departure',
     'next_ready_vs_departure_sign_disagrees')
 
 
-def capture_prediction(bus, now):
+def capture_prediction(bus, now, trip_by_bus):
     result = dict(bus_id=int(bus.bus_id), ready_time_s=float(now),
         follower_source=str(bus.pre_action_follower_source),
-        calibration_active=bool(bus.pre_action_follower_calibration_active),
         service_dwell_proxy_s=float(bus.last_service_dwell_s))
-    for name, attribute in (
-            ('predicted_follower_bus_id', 'pre_action_follower_bus_id'),
-            ('predicted_follower_trip_id', 'pre_action_follower_trip_id')):
-        value = getattr(bus, attribute)
-        result[name] = None if value is None else int(value)
+    follower = bus.pre_action_follower_bus_id
+    follower = None if follower is None else int(follower)
+    result.update(predicted_follower_bus_id=follower, predicted_follower_trip_id=trip_by_bus.get(follower))
     for name, attribute in (
             ('eta_prediction_s', 'pre_action_follower_eta'),
             ('spatial_gap_m', 'pre_action_follower_spatial_gap'),
-            ('speed_mps', 'pre_action_follower_speed'),
-            ('base_gap_prediction_s', 'pre_action_follower_base_departure_gap')):
+            ('speed_mps', 'pre_action_follower_speed')):
         value = getattr(bus, attribute)
         result[name] = None if value is None else float(value)
     return result
@@ -57,11 +53,12 @@ class IdentityAudit(frozen.FundedAudit):
         self.bus_type, self.original_prepare = Bus, Bus._prepare_for_action
 
         def prepare(bus, now, buses, debug):
+            identities = {int(b.bus_id): int(b.trip_id) for b in buses}
             result = self.original_prepare(bus, now, buses, debug)
             key = int(bus.trip_id), int(bus.last_station.station_id), bool(bus.direction)
             if key in self.ready:
                 raise AssertionError('a trip/stop has multiple action-ready captures')
-            self.ready[key] = capture_prediction(bus, now)
+            self.ready[key] = capture_prediction(bus, now, identities)
             return result
 
         Bus._prepare_for_action = prepare
@@ -180,7 +177,7 @@ def resolved_label(evidence, own_ready, identity, ready, arrivals, departures):
     return dict(result, same_ready_gap_s=gap, same_ready_error_s=predicted-gap,
         same_ready_abs_error_s=abs(predicted-gap), same_eta_error_s=eta_error,
         same_eta_abs_error_s=abs(eta_error), same_dwell_error_s=dwell_error,
-        calibration_or_gap_adjustment_s=adjustment,
+        gap_adjustment_s=adjustment,
         same_arrival_before_own_ready=arrival_eta < 0,
         same_after_ready_s=departures[identity]['time_s']-ready[identity]['ready_time_s'])
 
@@ -218,7 +215,7 @@ def analyse(root, index):
     groups, rows = defaultdict(list), {}
     for identity, row in trace.items():
         e, f = row['evidence'], row['follower_valid']
-        record = dict(follower_eligible=f, calibration_active=e['calibration_active'], follower_source=e['follower_source'])
+        record = dict(follower_eligible=f, follower_source=e['follower_source'])
         if f:
             predicted_id = (e['predicted_follower_trip_id'], identity[1], identity[2])
             record.update(resolved_label(e, e['ready_time_s'], predicted_id, ready, arrivals, departures))

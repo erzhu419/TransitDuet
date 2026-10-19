@@ -10,12 +10,11 @@ import run_freqduet_v118_follower_identity as run
 class FollowerIdentityTests(unittest.TestCase):
     def test_capture_uses_frozen_forecast_trip(self):
         bus = SimpleNamespace(bus_id=1, last_service_dwell_s=20., pre_action_follower_bus_id=2,
-            pre_action_follower_trip_id=10, pre_action_follower_source='same_time_avl_journey_speed_eta',
-            pre_action_follower_calibration_active=False, pre_action_follower_eta=100.,
-            pre_action_follower_spatial_gap=500., pre_action_follower_speed=5.,
-            pre_action_follower_base_departure_gap=120.)
-        record = run.capture_prediction(bus, 1000.)
-        bus.pre_action_follower_trip_id = 12
+            pre_action_follower_source='same_time_avl_journey_speed_eta', pre_action_follower_eta=100.,
+            pre_action_follower_spatial_gap=500., pre_action_follower_speed=5.)
+        identities = {2: 10}
+        record = run.capture_prediction(bus, 1000., identities)
+        identities[2] = 12
         self.assertEqual(record['predicted_follower_trip_id'], 10)
         self.assertEqual(record['ready_time_s'], 1000.)
 
