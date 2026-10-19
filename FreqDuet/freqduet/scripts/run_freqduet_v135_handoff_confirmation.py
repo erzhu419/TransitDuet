@@ -42,9 +42,9 @@ def bounds(index):
     return len(ITEMS)*index//SHARDS, len(ITEMS)*(index+1)//SHARDS
 
 
-def run_path(root, runtime, seed, day, mode):
+def run_path(root, runtime, seed, day, mode, *, artifact_root):
     name = f'{seed}_{day}_{mode}'
-    receipt = root/'paths'/(name+'.json')
+    receipt = artifact_root/'paths'/(name+'.json')
     if receipt.exists():
         return json.loads(receipt.read_text())
     rule = ConfirmationAudit(seed, frozen.prior.model.load_geometry(runtime), mode)
@@ -57,12 +57,12 @@ def run_path(root, runtime, seed, day, mode):
         raise AssertionError('confirmation updated the frozen deployment')
     values = {k: result[k] for k in original.frozen.prior.METRICS}
     values.update({k: rule.terminal[k] for k in ('inclusive_terminal_delay_s', 'qualification_shift_s')})
-    rule.save(root/'records'/(name+'.npz'))
+    rule.save(artifact_root/'records'/(name+'.npz'))
     selected = [dict(r, evidence=rule.evidence[frozen.prior.prior.key(r)],
         online=rule.online[frozen.prior.prior.key(r)]) for r in rule.decisions
         if rule.evidence[frozen.prior.prior.key(r)]['follower_source'] in frozen.prior.SOURCES]
-    frozen.prior.prior.identity.write_trace(root/'launch_traces'/(name+'.jsonl.gz'), selected)
-    pilot.write_json(root/'terminal'/(name+'.json'), dict(plans=rule.plans, dispatches=rule.dispatches,
+    frozen.prior.prior.identity.write_trace(artifact_root/'launch_traces'/(name+'.jsonl.gz'), selected)
+    pilot.write_json(artifact_root/'terminal'/(name+'.json'), dict(plans=rule.plans, dispatches=rule.dispatches,
         returns=list(rule.returns.values()), reference_clocks=rule.reference_clocks))
     row = dict(seed=seed, day=day, mode=mode, values=values, contract=rule.contract,
         decisions=len(rule.decisions), launch_handoffs=sum(r['status'] == 'launch_handoff_component'
@@ -72,11 +72,11 @@ def run_path(root, runtime, seed, day, mode):
     return row
 
 
-def collect_pair(root, runtime, seed, day, index):
-    receipt = root/'pairs'/f'p{index}.json'
+def collect_pair(root, runtime, seed, day, index, *, artifact_root):
+    receipt = artifact_root/'pairs'/f'p{index}.json'
     if receipt.exists():
         return json.loads(receipt.read_text())
-    paths = {mode: run_path(root, runtime, seed, day, mode) for mode in MODES}
+    paths = {mode: run_path(root, runtime, seed, day, mode, artifact_root=artifact_root) for mode in MODES}
     pilot.joint.assert_same_state(paths['old']['contract'], paths['handoff']['contract'], 'V135_same_physics')
     results = {mode: paths[mode]['values'] for mode in MODES}
     row = dict(index=index, seed=seed, day=day, sampler_seed=187000000+seed+100*day,
@@ -98,7 +98,7 @@ def assert_arrays(before_path, after_path):
 
 def smoke_pair(root, runtime, v133, v134, seed, index):
     day = 2231004
-    current = collect_pair(root/'smoke_runs', runtime, seed, day, index)
+    current = collect_pair(root, runtime, seed, day, index, artifact_root=root/'smoke_runs')
     old_index = 0 if seed == 12011 else 2
     old = json.loads((v133/'pairs'/f'p{old_index}.json').read_text())['values']
     candidate = json.loads((v134/'pairs'/f'p{old_index}.json').read_text())['values']
@@ -190,7 +190,8 @@ if __name__ == '__main__':
             raise AssertionError('new-day confirmation requires exact consumed-path smoke')
         start, end = bounds(args.shard)
         with ProcessPoolExecutor(max_workers=min(args.workers, end-start), mp_context=get_context('spawn')) as pool:
-            tasks = [pool.submit(collect_pair, args.out_root, args.runtime_root, *ITEMS[i], i)
+            tasks = [pool.submit(collect_pair, args.out_root, args.runtime_root, *ITEMS[i], i,
+                artifact_root=args.out_root)
                 for i in range(start, end)]
             for task in as_completed(tasks):
                 task.result()
