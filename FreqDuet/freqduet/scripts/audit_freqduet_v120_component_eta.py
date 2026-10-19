@@ -145,8 +145,8 @@ def build_history(arrivals, departures, ready, launches, geometry):
     return CompletedMeans(samples)
 
 
-def read_cell(root, index, geometry):
-    seed, day = prior.ITEMS[index]
+def read_cell(root, item, geometry):
+    seed, day = item
     name = f'{seed}_{day}_{prior.frozen.PRIMARY}_0'
     trace = prior.read_trace(root/'traces'/(name+'.jsonl.gz'))
     ready = {prior.audit.key(r): r for r in prior.read_trace(root/'ready'/(name+'.jsonl.gz'))}
@@ -248,18 +248,14 @@ def read_cell(root, index, geometry):
     return groups
 
 
-def aggregate(root, out, runtime):
-    parent = json.loads((root/'summary/status.json').read_text())
-    if parent['status'] != 'v115_passive_identity_replay_complete':
-        raise AssertionError('V120 requires the completed exact V118 replay')
-    geometry = load_geometry(runtime)
+def summarize_paths(root, items, geometry):
     combined, cells = defaultdict(list), []
     fields = ['component_used', 'minimum_support', 'historical_fallback']
     fields += [p+'_'+m for p in ('running_s', 'service_s', 'holding_s', 'ticks_s', 'target_service_s') for m in ('error', 'mae')]
     fields += [v+'_'+m for v in MODES for m in ('ready_mae_s', 'ready_mae_delta_s',
         'sign_disagrees', 'sign_delta', 'false_positive', 'false_negative', 'departure_sign_delta')]
-    for index, (seed, day) in enumerate(prior.ITEMS):
-        groups = read_cell(root, index, geometry)
+    for seed, day in items:
+        groups = read_cell(root, (seed, day), geometry)
         means = {}
         for group, rows in groups.items():
             combined[group].extend(rows)
@@ -268,20 +264,31 @@ def aggregate(root, out, runtime):
                 means[group] = {m: metrics[m]['mean'] for m in fields if m in metrics}
         cells.append(dict(seed=seed, day=day, means=means))
         print('V120_COMPONENT_CELL_DONE', seed, day, flush=True)
-    for cause in ('negative', 'quota'):
-        if len(combined[cause]) != parent['cohorts'][cause]['metrics']['same_ready_error_s']['n']:
-            raise AssertionError('V120 labelled cut denominator differs from V118')
     common = {g: sorted(set.intersection(*(set(c['means'][g]) for c in cells)))
         for g in cells[0]['means'] if all(g in c['means'] for c in cells)}
     inference_rows = [dict(seed=c['seed'], day=c['day'], values={g: {m: c['means'][g][m] for m in names}
         for g, names in common.items()}) for c in cells]
     intervals = prior.audit.inference.describe(inference_rows, 'values')
-    advance = intervals['forecasts']['split_ready_mae_delta_s']['ci95'][1] < 0 and all(
+    return dict(cohorts={g: clock.summarize(rows) for g, rows in combined.items()}, actor_day=cells,
+        cell_mean_intervals=intervals, eligible_for_independent_predictor_confirmation=passes(intervals))
+
+
+def passes(intervals):
+    return intervals['forecasts']['split_ready_mae_delta_s']['ci95'][1] < 0 and all(
         intervals[g]['split_sign_delta']['ci95'][1] < 0 and intervals[g]['split_departure_sign_delta']['mean'] <= 0
         for g in ('negative', 'quota'))
+
+
+def aggregate(root, out, runtime):
+    parent = json.loads((root/'summary/status.json').read_text())
+    if parent['status'] != 'v115_passive_identity_replay_complete':
+        raise AssertionError('V120 requires the completed exact V118 replay')
+    summary = summarize_paths(root, prior.ITEMS, load_geometry(runtime))
+    for cause in ('negative', 'quota'):
+        if summary['cohorts'][cause]['decisions'] != parent['cohorts'][cause]['metrics']['same_ready_error_s']['n']:
+            raise AssertionError('V120 labelled cut denominator differs from V118')
     prior.frozen.pilot.write_json(out/'summary/status.json', dict(status='v120_prequential_component_eta_complete',
-        cohorts={g: clock.summarize(rows) for g, rows in combined.items()}, actor_day=cells,
-        cell_mean_intervals=intervals, eligible_for_independent_predictor_confirmation=advance,
+        **summary,
         window_s=WINDOW_S, first_leg_origin='recorded_physical_launch',
         source_paths=len(prior.ITEMS), replayed_paths=0, new_demand_days=0,
         actor_updates=0, critic_updates=0, dual_updates=0, quota_changed=False, main_policy_changed=False,
@@ -291,7 +298,8 @@ def aggregate(root, out, runtime):
             'retain raw estimates. Uniform motion within a remaining road segment; future holding '
             'is a same-stop completed mean, not a future actor rollout. Future events are labels only. '
             'Local restoration signs are not closed-loop system returns. Two actors/four days.'))
-    print('V120_COMPONENT_COMPLETE independent_predictor_confirmation=', advance, flush=True)
+    print('V120_COMPONENT_COMPLETE independent_predictor_confirmation=',
+        summary['eligible_for_independent_predictor_confirmation'], flush=True)
 
 
 if __name__ == '__main__':
