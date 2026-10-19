@@ -40,14 +40,20 @@ class ExposureTimeline(SystemCreditStream):
     def __init__(self):
         super().__init__()
         self.bands = defaultdict(lambda: np.zeros(5))
+        self.band_start = self.total.copy()
 
     def advance(self, start_s, dt_s, *rates):
+        before = self.total.copy()
         super().advance(start_s, dt_s, *rates)
         stop, now = start_s+dt_s, start_s
         while now < stop:
             band = int(now//BIN_S)
             end = min(stop, (band+1)*BIN_S)
-            self.bands[band] += (end-now)*np.asarray(rates)
+            # Difference the native ledger; independently re-adding LF rates drifts.
+            cumulative = self.total.copy() if end == stop else before+(end-start_s)*np.asarray(rates)
+            self.bands[band] = cumulative-self.band_start
+            if end == (band+1)*BIN_S:
+                self.band_start = cumulative
             now = end
 
 

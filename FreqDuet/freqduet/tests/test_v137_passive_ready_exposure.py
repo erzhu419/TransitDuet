@@ -50,6 +50,12 @@ class PassiveReadyExposureTests(unittest.TestCase):
         self.assertLess(pair_loss_change(300., 300., 30., 0.), 0.)
         self.assertGreater(pair_loss_change(300., 420., 30., 0.), 0.)
 
+    def test_fractional_lf_bands_difference_the_native_ledger(self):
+        stream = ExposureTimeline()
+        for i in range(12000):
+            stream.advance(float(i), 1., 2., 3., .1234567, .2345678, 0.)
+        np.testing.assert_allclose(sum(stream.bands.values()), stream.total, rtol=0, atol=1e-10)
+
     def test_empty_forecast_support_is_unavailable_not_zero_mae(self):
         self.assertIsNone(label_summary([])['prediction_means'])
 
