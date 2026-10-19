@@ -116,17 +116,24 @@ def component_prediction(history, route, direction, origin, target, progress, no
         latest_completion_s=max(v['latest'] for v in estimates))
 
 
-def build_history(arrivals, departures, ready, geometry):
-    samples = []
+def build_history(arrivals, departures, ready, launches, geometry):
+    samples, launch_origins = [], 0
     for key, arrival in arrivals.items():
         trip, station, direction = key
         route = geometry[direction]
         i = route['index'][station]
         preceding = (trip, route['ids'][i-1], direction)
-        if i == 0 or preceding not in departures:
-            raise AssertionError('completed arrival lacks its adjacent preceding departure')
+        if i == 0:
+            raise AssertionError('terminal arrival entered ordinary stop telemetry')
+        if preceding in departures:
+            departure_time = departures[preceding]['time_s']
+        elif i == 1:
+            departure_time = launches[trip]['time_s']
+            launch_origins += 1
+        else:
+            raise AssertionError(f'non-first arrival {key} lacks adjacent departure {preceding}')
         samples.append((('running', direction, station), arrival['time_s'],
-            arrival['time_s']-departures[preceding]['time_s']))
+            arrival['time_s']-departure_time))
         end, start = departures[key], ready[key]['ready_time_s']
         held = end['realized_holding']-arrival['realized_holding']
         for channel, completion, value in (
@@ -134,6 +141,7 @@ def build_history(arrivals, departures, ready, geometry):
                 ('holding', end['time_s'], held),
                 ('ticks', end['time_s'], end['time_s']-start-held)):
             samples.append(((channel, direction, station), completion, value))
+    print('V120_HISTORY_PHYSICAL_LAUNCH_ORIGINS', launch_origins, flush=True)
     return CompletedMeans(samples)
 
 
@@ -153,9 +161,16 @@ def read_cell(root, index, geometry):
         by_a[key[0]][key] = row
     for row in events['departures']:
         by_d[int(row['trip_id'])].append(row)
-    prefixes = {trip: MovingPrefix(by_a[trip].values(), rows) for trip, rows in by_d.items()}
+    prefixes = {}
+    for trip, rows in by_d.items():
+        direction = prior.audit.key(rows[0])[2]
+        terminal = geometry[direction]['ids'][0]
+        motion_rows = list(rows)
+        if (trip, terminal, direction) not in departures:
+            motion_rows.append(dict(station_id=terminal, time_s=launches[trip]['time_s']))
+        prefixes[trip] = MovingPrefix(by_a[trip].values(), motion_rows)
     clocks = {trip: clock.CompletedPrefix(rows, by_a[trip], ready) for trip, rows in by_d.items()}
-    history = build_history(arrivals, departures, ready, geometry)
+    history = build_history(arrivals, departures, ready, launches, geometry)
     groups = defaultdict(list)
     for row in trace:
         e, own = row['evidence'], prior.audit.key(row)
@@ -267,7 +282,8 @@ def aggregate(root, out, runtime):
     prior.frozen.pilot.write_json(out/'summary/status.json', dict(status='v120_prequential_component_eta_complete',
         cohorts={g: clock.summarize(rows) for g, rows in combined.items()}, actor_day=cells,
         cell_mean_intervals=intervals, eligible_for_independent_predictor_confirmation=advance,
-        window_s=WINDOW_S, source_paths=len(prior.ITEMS), replayed_paths=0, new_demand_days=0,
+        window_s=WINDOW_S, first_leg_origin='recorded_physical_launch',
+        source_paths=len(prior.ITEMS), replayed_paths=0, new_demand_days=0,
         actor_updates=0, critic_updates=0, dual_updates=0, quota_changed=False, main_policy_changed=False,
         limitations='Consumed development days, not independent controller validation. Same-path '
             'rolling completed-label component means, not network training. Only causally confirmed '

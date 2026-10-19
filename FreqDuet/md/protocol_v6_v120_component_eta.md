@@ -10,6 +10,8 @@ strictly completed before prediction, from the last 3600 s; when that window
 is empty use the available completed history of the same key. No window or
 shrinkage search. Service matures at ready, running at arrival, holding/ticks
 at departure. Missing support keeps raw ETA, not zero components.
+The first road starts at recorded physical launch, not an ordinary terminal
+stop departure; every other road requires its adjacent completed departure.
 
 Frozen comparisons: raw; replace running only; replace stop components only;
 replace both. Components apply only when earlier arrival/departure events and

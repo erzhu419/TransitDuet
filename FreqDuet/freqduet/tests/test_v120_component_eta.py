@@ -57,6 +57,19 @@ class ComponentEtaTests(unittest.TestCase):
         h = run.CompletedMeans([(('running', True, 1), 5., 20.)])
         self.assertIsNone(run.component_prediction(h, self.route(), True, 0, 2, 50., 50.))
 
+    def test_first_road_uses_physical_launch_not_missing_terminal_stop(self):
+        key = (7, 1, True)
+        a = {key: dict(time_s=30., realized_holding=0.)}
+        d = {key: dict(time_s=40., realized_holding=5.)}
+        r = {key: dict(ready_time_s=34.)}
+        h = run.build_history(a, d, r, {7: dict(time_s=10.)}, {True: self.route()})
+        self.assertEqual(h.estimate(('running', True, 1), 50.)['mean'], 20.)
+        self.assertEqual(h.estimate(('service', True, 1), 50.)['mean'], 4.)
+        later = (7, 2, True)
+        with self.assertRaises(AssertionError):
+            run.build_history({later: a[key]}, {later: d[key]}, {later: r[key]},
+                {7: dict(time_s=10.)}, {True: self.route()})
+
 
 if __name__ == '__main__':
     unittest.main()
