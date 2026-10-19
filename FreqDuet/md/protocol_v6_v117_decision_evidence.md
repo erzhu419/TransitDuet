@@ -22,3 +22,25 @@ Tests and analysis run through scheduler on node001--node006; models, actors,
 dual and main policy stay frozen. No replay, new days, fitting or threshold search.
 Retrieve only the final summary. Decide the next allocation change from this
 diagnosis, not from a presumed benefit of restoring every removed action.
+
+## Outcome and decision
+
+Source `6e4111e446`, scheduler `t189888` on node006: six tests and 41,600
+decisions pass; V116 labels match exactly. Only 139,869 bytes returned locally.
+Extra delta_R response is six times the bilateral residual term already in
+quarter feedback (three times in fallback). Net feedback and extra response
+agree in 54.7% of stable negative-cut transitions, versus 76.8% for quota extras;
+agreement rates are similar in beneficial/harmful restoration cohorts.
+
+Cell-weighted predicted-minus-next-service-ready bias, beneficial/harmful
+restoration groups: negative cuts +19.09/+120.29 s; quota extras -2.65/+93.02 s.
+All eight cells show the same ordering. The bilateral estimate predicts every
+restoration beneficial; ready-to-departure timing flips the sign in only
+6.77%/4.82% of eligible negative/quota cases. Post-hoc groups partly select on
+this discrepancy, and missing follower IDs prevent identifying pure ETA error.
+
+Do not retune quota or add a D-direction gate: those predictions cannot separate
+the two restoration groups. Before changing allocation, capture predicted
+follower identity and its action-ready label on an exact, passive replay of
+consumed paths, then verify action-difference signs for the same object. That
+replay is a proposed next stage, not launched here. No new training or main change.
