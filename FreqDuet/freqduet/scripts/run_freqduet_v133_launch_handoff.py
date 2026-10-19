@@ -193,6 +193,8 @@ def aggregate(args):
         and statistics['handoff_mae_s'] <= statistics['original_mae_s'])
     for cell in cells:
         cell['prediction_errors'] = errors(cell['modified_forecasts'])
+        cell['shadow_changed_actions'] = sum(r['chosen_s'] != r['shadow_chosen_s'] for r in cell['modified_forecasts'])
+        cell['modified_forecast_examples'] = cell.pop('modified_forecasts')[:3]
     pilot.write_json(args.out_root/'summary/status.json', dict(status='v133_passive_launch_handoff_complete',
         actor_day_terminal=cells, prediction_errors=statistics, anchor=anchor,
         anchor_baseline_request_s=old_anchor['baseline']['unclipped_request_s'],
