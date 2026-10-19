@@ -98,14 +98,17 @@ def pool_summary(bucket):
         mean_upper_excess_s=None if not bucket['above_n'] else bucket['upper_excess_sum_s']/bucket['above_n'])
 
 
-def labels(row):
-    result = ['all', 'reason/'+row['support_reason'], 'hour13' if row['hour'] == 13 else 'rest']
+def labels(row, demand_end_s):
+    phase = 'before_demand_end' if row['time_s'] < demand_end_s else 'after_demand_end'
+    result = ['all', 'reason/'+row['support_reason'], 'hour13' if row['hour'] == 13 else 'rest', 'phase/'+phase]
     if row['hour'] == 13:
+        result.append('hour13/phase/'+phase)
         result.append('hour13/direction/'+str(int(row['episode'][2])))
         n = row['rank']['n']
         result.append('hour13/rank_support/'+('0-8' if n < 9 else '9-18' if n < 19 else '19+'))
         if row['rank']['finite'] and row['label_status'] == 'resolved':
-            result.append('hour13/'+('below' if row['below'] else 'above' if row['above'] else 'covered'))
+            outcome = 'below' if row['below'] else 'above' if row['above'] else 'covered'
+            result.extend(['hour13/'+outcome, 'hour13/phase/'+phase+'/'+outcome])
     return result
 
 
@@ -115,20 +118,23 @@ def run(args):
         raise AssertionError('requires completed unchanged V145')
     reg = parent['registration']
     actors, days, modes = [reg[k] for k in ('archived_actors', 'demand_days', 'modes')]
-    cells, buckets = [], defaultdict(Counter)
+    cells, buckets, clocks = [], defaultdict(Counter), Counter()
     cases = list(itertools.product(actors, days, modes))
     for i, (seed, day, mode) in enumerate(cases, 1):
         name = f'{seed}_{day}_{mode}'
         c = read(args.v145_root/'validation_cells'/(name+'.json'))
         if (c['seed'], c['day'], c['mode']) != (seed, day, mode):
             raise AssertionError('saved cell differs from registered grid')
+        clock = read(args.v145_root/'paths'/(name+'.json'))['contract']['clock']
+        clock_fields = ('service_start_hour', 'service_end_hour', 'demand_end_time_s', 'evaluation_end_time_s')
+        clocks[tuple(clock[k] for k in clock_fields)] += 1
         counts = Counter()
         with gzip.open(args.v145_root/'intervals'/(name+'.jsonl.gz'), 'rt') as f:
             for line in f:
                 row = json.loads(line)
                 counts[row['kind'], 'requests'] += 1
                 counts[row['kind'], 'finite_n'] += row['rank']['finite']
-                for label in labels(row):
+                for label in labels(row, clock['demand_end_time_s']):
                     add(buckets[mode, row['kind'], label], row)
         for kind in ('service', 'ready'):
             for field in ('requests', 'finite_n'):
@@ -159,6 +165,14 @@ def run(args):
             entry['query_diagnostics'] = pooled
             results[mode][kind], details[mode][kind] = entry, detail
     write(args.out_root/'details/marginals.json', details)
+    write(args.out_root/'boundary_summary/status.json', dict(status='v145_readonly_demand_boundary_complete',
+        execution_source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], paths=len(cases),
+        clocks=[dict(zip(clock_fields, k), paths=n) for k, n in sorted(clocks.items())],
+        results={m: {k: {g: v for g, v in entry['query_diagnostics'].items()
+            if g.startswith(('phase/', 'hour13/phase/'))} for k, entry in by_kind.items()}
+            for m, by_kind in results.items()}, new_rollouts=0, main_policy_changed=False,
+        limitations='Post-hoc descriptive split at the unchanged recorded demand cutoff. It does not replace '
+            'V145 hour13, the independent gate, or crossed episode-weighted inference; no boundary tuning.'))
     write(args.out_root/'summary/status.json', dict(status='v145_readonly_coverage_audit_complete',
         execution_source=os.environ['FREQDUET_DIAGNOSTIC_COMMIT'], paths=len(cases), results=results,
         primary_finite_coverage_confirmed=parent['primary_finite_coverage_confirmed'],

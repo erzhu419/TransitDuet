@@ -45,14 +45,23 @@ class CoverageAuditTests(unittest.TestCase):
     def test_miss_direction_distance_and_support_are_separate(self):
         row = dict(pool_n=10, survivor_n=10, rank=dict(finite=True, n=10, lower_s=4., upper_s=15.),
             label_status='resolved', covered=False, below=True, above=False, truth_s=1.,
-            hour=13, support_reason='finite', episode=[1, 2, False])
+            hour=13, time_s=47000., support_reason='finite', episode=[1, 2, False])
         bucket = Counter()
         add(bucket, row)
         stats = pool_summary(bucket)
         self.assertEqual(stats['mean_lower_shortfall_s'], 3.)
         self.assertEqual(stats['pool_depleted_n'], 0)
-        self.assertIn('hour13/rank_support/9-18', labels(row))
-        self.assertIn('hour13/below', labels(row))
+        self.assertIn('hour13/rank_support/9-18', labels(row, 46980.))
+        self.assertIn('hour13/below', labels(row, 46980.))
+
+    def test_demand_cutoff_is_the_recorded_clock_not_an_outcome_threshold(self):
+        row = dict(hour=13, time_s=46979., support_reason='finite', episode=[1, 2, False],
+            rank=dict(finite=True, n=10), label_status='resolved', below=True, above=False)
+        self.assertIn('hour13/phase/before_demand_end/below', labels(row, 46980.))
+        row['time_s'] = 46980.
+        self.assertIn('hour13/phase/after_demand_end/below', labels(row, 46980.))
+        row.update(below=False, above=True)
+        self.assertIn('phase/after_demand_end', labels(row, 46980.))
 
 
 if __name__ == '__main__':
