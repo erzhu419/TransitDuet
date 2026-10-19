@@ -5,7 +5,7 @@ Run: `native_transit_service_protected_stage297_20261019_r1`.
 Stage296 improves cost/wait versus raw but retains only 29.5% of baseline
 waiting gain. Its extra cost value versus matched thinning has a negative
 conditional MC interval, not a negative prefix interval. Freeze the critic,
-raw/lower weights and P8/S8 proposals; no new fits, simulation or action search.
+raw/lower weights and P8/S8 proposals; no critic refits, simulation or action search.
 
 Use only the existing 80 fit and 60 calibration prefixes. Define two global
 cutoff families from fit-role eligible score quantiles 1/16 through 16/16,
@@ -33,3 +33,12 @@ scheduler job, 1 CPU/3 GiB on node001-node006; pull only the small summary.
 Validation: 12 focused plus 35 prior regression tests pass, including shared-
 future cancellation, profile duplication, both-half retention and source-role
 isolation. The family-save-before-calibration-target ordering is exercised.
+
+Execution: t189910/node006 completed done/exit0; 7,859 scalar bytes pulled.
+The joint cutoff 0.002181045736174378 keeps 130/169 changed profile-states,
+retains 99.30% of calibration waiting gain and has cost -0.000477664 versus
+base -0.000427096. Fleet-only selection is full base. Both T8 cost points
+are negative and the joint waiting-budget bounds pass, admitting new-prefix
+confirmation. These are selection-data results, not independent evidence.
+Stage298 expands the initially reserved 120-prefix cohort to 400 before any
+new scene is generated; the selected policy and 50% target remain unchanged.

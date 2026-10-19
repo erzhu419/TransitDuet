@@ -117,23 +117,27 @@ def action_unions(sealed, originals):
 def effects(sealed, panels):
     choices = np.asarray(sealed["choices"])
     result = np.stack([base.paired_values(panels, choices[:, a], choices[:, 0]).mean(axis=0)
-        for a in range(len(ARMS))], axis=2)
+        for a in range(choices.shape[1])], axis=2)
     result[:, :, -1] = (base.paired_values(panels, np.asarray(sealed["proposal"]), choices[:, 0])
         *np.asarray(sealed["matched_thin_probabilities"])[:, :, None, None]).mean(axis=0)
     return result
 
 
-def summarize(sealed, panels, cube):
+def summarize(sealed, panels, cube, *, seed=296):
+    arms = tuple(sealed["arms"])
+    primary = arms[4]
+    pairs = tuple((a, "raw") for a in arms[1:])+tuple((primary, a) for a in
+        ("zero_abstain", arms[3], "matched_thin", "stage247", *arms[5:-1]))
     actual = effects(sealed, panels)
-    block, rng = actual[cube], np.random.default_rng(296)
+    block, rng = actual[cube], np.random.default_rng(seed)
     g, r, j, d = block.shape[:4]
     means = block.mean(axis=(2, 3))
     centered = block-block.mean(axis=3, keepdims=True)
     covariance = np.einsum("grjdvf,grjdwf->vwf", centered, centered)/(j*j*d*(d-1)*(g*r)**2)
     samples = sum(means[i, rng.choice(r, (5000, r), replace=True)].mean(axis=1)/g for i in range(g))
     comparisons = {}
-    for after, before in PAIRS:
-        a, b = ARMS.index(after), ARMS.index(before)
+    for after, before in pairs:
+        a, b = arms.index(after), arms.index(before)
         point = (means[:, :, a]-means[:, :, b]).mean(axis=(0, 1))
         se = np.sqrt(np.maximum(covariance[a, a]+covariance[b, b]-2*covariance[a, b], 0.))
         ci = np.quantile(samples[:, a]-samples[:, b], [.025, .975], axis=0)
@@ -142,17 +146,17 @@ def summarize(sealed, panels, cube):
             "prefix_CI95": {f: list(map(float, ci[:, k])) for k, f in enumerate(FIELDS)},
             "conditional_MC_CI95": {f: list(map(float, mc[:, k])) for k, f in enumerate(FIELDS)}}
     halves = {name: {arm: dict(zip(FIELDS, map(float, actual[:, ds, v].mean(axis=(0, 1)))))
-        for v, arm in enumerate(ARMS)} for name, ds in (("first16", slice(0, 16)), ("last16", slice(16, 32)))}
+        for v, arm in enumerate(arms)} for name, ds in (("first16", slice(0, 16)), ("last16", slice(16, 32)))}
     def passed(pair, fields):
         return all(comparisons[pair][interval][f][1] < 0 for interval in ("prefix_CI95", "conditional_MC_CI95") for f in fields)
     retention = {}
     for name, values in {"all32": {a: dict(zip(FIELDS, map(float, means[:, :, v].mean(axis=(0, 1)))))
-            for v, a in enumerate(ARMS)}, **halves}.items():
+            for v, a in enumerate(arms)}, **halves}.items():
         denominator = values["zero_abstain"]["wait_min"]
-        retention[name] = values["paired_risk"]["wait_min"]/denominator if denominator < 0 else None
-    both_halves = all(halves[h]["paired_risk"][f] < 0 for h in halves for f in ("cost", "wait_min"))
-    service = passed("paired_risk_vs_raw", ("service", "wait_min")) and all(v is not None and v >= .5 for v in retention.values())
+        retention[name] = values[primary]["wait_min"]/denominator if denominator < 0 else None
+    both_halves = all(halves[h][primary][f] < 0 for h in halves for f in ("cost", "wait_min"))
+    service = passed(primary+"_vs_raw", ("service", "wait_min")) and all(v is not None and v >= .5 for v in retention.values())
     return {"comparisons": comparisons, "halves": halves, "wait_retention_vs_zero_abstain": retention,
-        "service_retention_supported": service, "joint_transfer_supported": passed("paired_risk_vs_raw", ("cost", "wait_min")) and both_halves and service,
-        "fleet_improvement_vs_zero_abstain_supported": passed("paired_risk_vs_zero_abstain", ("fleet",)),
-        "cost_information_vs_thinning_supported": passed("paired_risk_vs_matched_thin", ("cost",))}
+        "service_retention_supported": service, "joint_transfer_supported": passed(primary+"_vs_raw", ("cost", "wait_min")) and both_halves and service,
+        "fleet_improvement_vs_zero_abstain_supported": passed(primary+"_vs_zero_abstain", ("fleet",)),
+        "cost_information_vs_thinning_supported": passed(primary+"_vs_matched_thin", ("cost",))}

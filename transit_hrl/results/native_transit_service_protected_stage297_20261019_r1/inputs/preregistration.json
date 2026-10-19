@@ -1,0 +1,29 @@
+{
+  "Stage296_E32_excluded_from_policy_family_and_calibration": true,
+  "contract": {
+    "actor_updates": 0,
+    "admissibility": "base_wait_both_CIs_negative_both_T8_negative; candidate_cost_negative_pooled_and_both_T8; service_mean_negative",
+    "calibration": "60_source_calibration_prefixes_T16; development_selection_not_confirmation",
+    "critic": "unchanged_Stage296_model_before_calibration; no_fitting",
+    "family": "fit_eligible_score_quantiles1to16_over16_plus_zero; shared_all_base_candidate; frozen_before_calibration_T16",
+    "new_confirmation_gate": "joint_selection_eligible_and_nontrivial_subset_of_base_and_cost_point_better_than_base",
+    "new_native_episodes": 0,
+    "next_test_cohort": "fresh120_balanced_prefixes; Stage296_test_replica12to23_reserved; no_Stage296_test_or_E32_reuse",
+    "proposal": "unchanged_P8_proposal_S8_zero_event_screen; retain_or_own_raw_only",
+    "raw_reference_fits": 0,
+    "retention": "W_candidate_minus0.5W_base_upper_le0; stratified_prefix_max_t5000_seed297_upper97.5pct_over_both_families; MC_Bonferroni97.5pct; both_T8_points_le0",
+    "risk_fits": 0,
+    "scores": {
+      "joint": "same_fleet_critic_plus_S8_paired_service_mean",
+      "risk": "frozen_fleet_critic"
+    },
+    "selection": "minimum_max_of_prefix_and_conditional_MC_cost_CI95_upper; ties_cost_mean_then_index; same_rule_both_families",
+    "source": "native_transit_paired_fleet_stage296_20261018_r1",
+    "source_roles": [
+      "fit",
+      "calibration"
+    ]
+  },
+  "protocol": "native_transit_service_protected_stage297_v1",
+  "source_revision": "7613d86ddb42c7c0a1acd0abe4ad6638d857e383"
+}

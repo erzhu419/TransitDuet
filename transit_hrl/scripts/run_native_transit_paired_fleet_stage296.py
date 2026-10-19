@@ -101,7 +101,8 @@ def freeze(run):
         "Stage294_outcomes_read": False, "new_fits": 0, "actor_updates": 0})
 
 
-def capture(run, key):
+def capture(run, key, *, protocol=None):
+    spec = protocol or sys.modules[__name__]
     from freq_hrl.domains.transit.native_candidate_value import causal_snapshot
     from freq_hrl.domains.transit.native_timetable_context import NativeTimetableContextAudit, qualify_timetable
     class CaptureAudit(NativeTimetableContextAudit):
@@ -112,18 +113,18 @@ def capture(run, key):
         def select_candidate(self, candidates):
             index = len(self.decisions)
             selected = super().select_candidate(candidates)
-            if index in PROBES:
+            if index in spec.PROBES:
                 self.snapshots[index] = self.snapshot if index == self.probe_index else causal_snapshot(self.env)
             return selected
     source, model, checkpoint = native.native_inputs(key[1])
-    path = prefix_path(run, key)
-    observer, plan = source.shared.episode(key[1], key[2], scene_seed(key), path/"raw/observer",
-        checkpoint, model, PROBES[-1], plan_class=CaptureAudit)
+    path = spec.prefix_path(run, key)
+    observer, plan = source.shared.episode(key[1], key[2], spec.scene_seed(key), path/"raw/observer",
+        checkpoint, model, spec.PROBES[-1], plan_class=CaptureAudit)
     source.qualify_observer(observer)
     rows = []
-    for probe in PROBES:
+    for probe in spec.PROBES:
         c = next(c for c in plan.contexts if c["index"] == probe)
-        row = {"root": key[1], "scenario": key[2], "replica": key[3], "scene_seed": scene_seed(key), "probe_index": probe,
+        row = {"root": key[1], "scenario": key[2], "replica": key[3], "scene_seed": spec.scene_seed(key), "probe_index": probe,
             **{k: copy.deepcopy(c[k]) for k in ("time_s", "direction", "native_state_v2", "nominal_s", "candidates")},
             "original_choice": c["greedy"], "context": source.labels.training_context(plan.snapshots[probe]),
             "occupancy_context": {k: copy.deepcopy(c[k]) for k in source.context_source.OCCUPANCY_KEYS},
@@ -135,33 +136,34 @@ def capture(run, key):
     write_json(path/"controls.json", {"raw": raw.tolist(), "stage247": old.tolist(), "logits": logits.tolist()})
     with (path/"prefix_refs.pkl").open("wb") as f:
         pickle.dump({"prefix": plan.prefix, "snapshots": plan.snapshots}, f, protocol=pickle.HIGHEST_PROTOCOL)
-    receipt = {"contract": contract(), "software_qualified": True, "key": list(key),
+    receipt = {"contract": spec.contract(), "software_qualified": True, "key": list(key),
         "native_episodes": 1, "states": len(rows), "fixed_profiles": len(raw)}
     write_json(path/"receipt.json", receipt)
     return receipt
 
 
-def rollout(run, key, probe, draws, candidates, output):
+def rollout(run, key, probe, draws, candidates, output, *, protocol=None):
+    spec = protocol or sys.modules[__name__]
     from freq_hrl.domains.transit.native_continuation_value import NativeContinuationValueAudit
     import torch
     source, model, checkpoint = native.native_inputs(key[1])
-    with (prefix_path(run, key)/"prefix_refs.pkl").open("rb") as f: refs = pickle.load(f)
-    row = next(r for r in read(prefix_path(run, key)/"rows.json") if r["probe_index"] == probe)
+    with (spec.prefix_path(run, key)/"prefix_refs.pkl").open("rb") as f: refs = pickle.load(f)
+    row = next(r for r in read(spec.prefix_path(run, key)/"rows.json") if r["probe_index"] == probe)
     records, start = [], time.monotonic()
     for draw in draws:
         reference = SimpleNamespace(prefix=refs["prefix"], snapshot=refs["snapshots"][probe])
-        seed = future_seed(key, probe, draw)
+        seed = spec.future_seed(key, probe, draw)
         audit = partial(NativeContinuationValueAudit, continuation_seed=seed)
         raw = output/f"raw/draw{draw}"
         torch.set_rng_state(torch.tensor(reference.snapshot["rng"]["torch"], dtype=torch.uint8))
-        baseline, plan = source.shared.episode(key[1], key[2], scene_seed(key), raw/"observer", checkpoint,
+        baseline, plan = source.shared.episode(key[1], key[2], spec.scene_seed(key), raw/"observer", checkpoint,
             model, probe, reference=reference, plan_class=audit)
         source.qualify_observer(baseline)
         branches, values = [], {}
         order = [row["original_choice"], *[c for c in candidates if c != row["original_choice"]]]
         for candidate in order:
             torch.set_rng_state(torch.tensor(plan.snapshot["rng"]["torch"], dtype=torch.uint8))
-            branch, branch_plan = source.shared.episode(key[1], key[2], scene_seed(key), raw/f"candidate{candidate}",
+            branch, branch_plan = source.shared.episode(key[1], key[2], spec.scene_seed(key), raw/f"candidate{candidate}",
                 checkpoint, model, probe, candidate=candidate, reference=plan, plan_class=audit)
             source.shared.qualify(branch, baseline, candidate=candidate)
             if branch_plan.env.scenario_tape.seed != seed or not branch_plan.env.scenario_tape._streams:
@@ -178,7 +180,7 @@ def rollout(run, key, probe, draws, candidates, output):
         records.append({"draw": draw, "future_seed": seed, "values": values})
         print(f"PAIRED_FLEET_DRAW_QUALIFIED {key} probe={probe} draw={draw}", flush=True)
     write_json(output/"labels.json", records)
-    receipt = {"contract": contract(), "software_qualified": True, "key": list(key), "probe": probe,
+    receipt = {"contract": spec.contract(), "software_qualified": True, "key": list(key), "probe": probe,
         "draws": list(draws), "candidates": list(candidates), "state_futures": len(draws),
         "native_episodes": len(draws)*(1+len(candidates)), "exact_identities": len(draws),
         "elapsed_s": time.monotonic()-start, "peak_rss_MiB": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024.}
@@ -228,33 +230,34 @@ def load_controls(run, role):
     return tuple(np.concatenate([np.asarray(s[name]) for s in saved], axis=1) for name in ("raw", "stage247", "logits"))
 
 
-def load_panel(run, role, bank):
+def load_panel(run, role, bank, *, protocol=None):
+    spec = protocol or sys.modules[__name__]
     if role == "test" and bank == "target": raise ValueError("Test targets are not part of this experiment")
     result, episodes, seeds = [], 0, set()
-    for key in keys(role):
-        rows = read(prefix_path(run, key)/"rows.json")
-        for probe in PROBES:
+    for key in spec.keys(role):
+        rows = read(spec.prefix_path(run, key)/"rows.json")
+        for probe in spec.PROBES:
             labels = []
-            for chunk in range(len(BANKS[bank])//8):
-                path = sample_path(run, key, probe, bank, chunk)
+            for chunk in range(len(spec.BANKS[bank])//8):
+                path = spec.sample_path(run, key, probe, bank, chunk)
                 receipt = read(path/"receipt.json")
-                draws = BANKS[bank][chunk*8:chunk*8+8]
-                if (receipt["contract"] != contract() or not receipt["software_qualified"]
+                draws = spec.BANKS[bank][chunk*8:chunk*8+8]
+                if (receipt["contract"] != spec.contract() or not receipt["software_qualified"]
                         or receipt["key"] != list(key) or receipt["probe"] != probe
                         or receipt["candidates"] != list(range(6)) or receipt["draws"] != list(draws)
                         or receipt["native_episodes"] != 56 or receipt["exact_identities"] != 8 or receipt["state_futures"] != 8):
                     raise ValueError("Incomplete paired-risk sampling receipt")
                 episodes += receipt["native_episodes"]
                 labels.extend(read(path/"labels.json"))
-            if [r["draw"] for r in labels] != list(BANKS[bank]): raise ValueError("Wrong paired-risk draws")
+            if [r["draw"] for r in labels] != list(spec.BANKS[bank]): raise ValueError("Wrong paired-risk draws")
             original = next(r["original_choice"] for r in rows if r["probe_index"] == probe)
             for r in labels:
-                if r["future_seed"] != future_seed(key, probe, r["draw"]) or r["future_seed"] in seeds:
+                if r["future_seed"] != spec.future_seed(key, probe, r["draw"]) or r["future_seed"] in seeds:
                     raise ValueError("Wrong or repeated paired-risk future")
                 seeds.add(r["future_seed"])
                 if sorted(map(int, r["values"])) != list(range(6)): raise ValueError("Incomplete paired-risk action menu")
             values = np.asarray([[r["values"][str(a)] for a in range(6)] for r in labels])
-            if (values.shape != (len(BANKS[bank]), 6, 4) or not np.isfinite(values).all()
+            if (values.shape != (len(spec.BANKS[bank]), 6, 4) or not np.isfinite(values).all()
                     or np.any(values[:, original] != 0) or np.max(abs(values[..., 0]-values[..., 1]-values[..., 2])) > 1e-12):
                 raise ValueError("Invalid paired-risk values, identity or cost components")
             result.append(values)
