@@ -3,6 +3,9 @@
 Design only. No new rollout, replay or training in V143. The twelve consumed
 V137 paths and all V140--V143 readouts are development evidence, not calibration
 or confirmation data. No fitting stage or residual correction is proposed.
+Prefer unconsumed server archives with complete prefix/ready/query records.
+If these are unavailable, validation stays pending: new collection or replay
+requires a separately authorized stage and is not launched by this protocol.
 
 Before any future collection, register 32 previously unused demand-day seeds
 and a separate fixed sampler seed per day, after checking existing experiment
@@ -30,9 +33,12 @@ classes; do not choose new temporal bins from test outcomes.
 
 Use the project's 5000 crossed actor/day bootstrap draws for 95% intervals,
 preserving modes and all queries within each sampled actor/day cell. A claim of
-finite-interval 80% coverage requires the lower one-sided 95% bound to reach 0.8
+finite-interval 80% coverage requires the lower one-sided 95% bound (fifth
+percentile of the draws) to reach 0.8
 for both stage types and both modes; insufficient support is inconclusive, not
-a pass. Marginal passing does not validate hour13 or any unsupported subgroup.
+a pass. Report contributing actors, days and cells; a cell with no finite resolved
+episode stays missing, and no cross-cell interval is claimed for an incomplete
+design. Marginal passing does not validate hour13 or any unsupported subgroup.
 This is an empirical fixed-actor/demand-distribution validation, not an IID or
 field guarantee. Availability and unresolved rates remain separate limitations;
 passing finite coverage alone cannot authorize control deployment.
