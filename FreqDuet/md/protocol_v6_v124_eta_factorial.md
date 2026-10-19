@@ -20,3 +20,10 @@ inspect day 2231004 separately alongside the complete grid, not as a new test.
 This separates forecast feedback from the combined innovation/quota/expiry
 package, not each package component. All runs/tests/aggregation through scheduler
 on node001--node006; return small receipts/JSON only. Main remains frozen.
+
+## Execution
+
+Source `60c5b44c1a`, scheduler `t195159` on node006, six workers maximum.
+All 16 tests passed; both raw controls reproduce endpoints and full timing
+exactly. The two split smoke paths passed action-execution/ready-clock checks
+and are reused. The remaining six paths precede the server-side factorial summary.
