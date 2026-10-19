@@ -39,5 +39,33 @@ Submitted one independent batch `t188776--t188780`: ranges `[0,22), [22,43),
 [43,56), [56,65), [65,72)`, `22/21/13/9/7` workers, planned on
 node001/002/004/005/006 from live capacity. Aggregate `t188781` waits for all
 five local shard markers and also runs on a server. Only markers and its final
-statistical JSON synchronize locally. Independent service effects are pending;
-no training, parameter search or main-policy change.
+statistical JSON synchronize locally. All 72 paths and aggregate have completed;
+only five 27-byte shard receipts and the 95,851-byte final summary were retrieved
+in addition to smoke. No training, parameter search or main-policy change.
+
+## Outcome and decision
+
+All 41,600 funded decisions settled; 4,464,469 physical prefix checks show minimum
+margin 0 s and zero conservation error. Authorization 318,770 s equals executed
+295,615 + expired 15,550 + remaining 7,605 s. There are 19,206 negative innovations,
+zero nonpositive-innovation commands above baseline, and zero positive holding at
+16,418 balanced decisions. No unlaunched or incomplete trips in any arm.
+
+Funded minus bilateral025: journey -0.06888 [-0.09862, -0.04410] min, holding
+-10.45 s/trip, readiness -6.56 [-9.02, -4.03] s; actual CV2 +0.001313
+[0.000619, 0.002405]. All eight actor/day cells have lower journey/holding/readiness
+but higher CV2. Thus the prefix constraint works without meeting the joint objective.
+
+Versus B200/preserve, journey improves -1.4256/-1.2508 min and readiness
+-477.60/-378.67 s, but CV2 intervals cross zero. Versus bounded_innovation, journey
+improves -0.5877 min and readiness -65.80 s, with CV2 CI [-0.01024, 0.00724].
+All four preregistered joint gates fail; keep main frozen and close this candidate
+for service admission, without retuning gains or non-harm margins.
+
+The single-step control's V113 CV2 advantage is not confirmed on these new days:
+versus bilateral025, +0.001015 [-0.006361, 0.012644], with day 2151003 notably worse.
+Retain the quota implementation as an audited constraint tool, not a validated
+controller. Next inspect consumed traces for which useful regularity compensation
+is removed by funding limits versus negative innovations before designing another
+allocation rule. These are two archived actors and four new demand days, not a
+large independent confirmation or frequency-separation result.
