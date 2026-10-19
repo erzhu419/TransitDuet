@@ -25,3 +25,13 @@ no gain search, day selection, widened margin, or automatic promotion.
 Only smoke/shard receipts and final summary return locally; raw traces,
 timing arrays and checkpoints remain remote. Two archived actors/four fresh
 days support a small structural pilot, not frequency or fixed-upper claims.
+
+## Execution
+
+Source `1046c64e3f`, smoke `t189938` on node006: 23 tests and all six consumed
+paths passed. Both original controls reproduce cached endpoints/timing exactly;
+raw funded decisions are exact, and both actors exercise corrected requests
+without physical-prefix overspending. Only the 254-byte smoke receipt returned.
+Formal shards `t190339--t190343`: `[0,4), [4,6), [6,12), [12,17), [17,24)`,
+4/2/6/5/7 workers, planned on node001/002/004/005/006. Aggregate `t190345`
+waits for all five small local shard receipts. Main and training remain frozen.
