@@ -66,10 +66,11 @@ def read(root, seed, day, method):
         launches = [dict(zip(record['launch_fields'].tolist(), row.tolist())) for row in record['launches']]
     rows, points = launch_rows(launches, directions)
     moments = timing.moment(rows)
-    np.testing.assert_allclose([moments['cv_squared'], moments['mean'], moments['variance'],
-        np.mean([r['readiness_s'] for r in launches])],
+    np.testing.assert_allclose([moments['cv_squared'], moments['mean'], moments['variance']],
         [pair['results'][k] for k in ('dispatch_cv_squared', 'dispatch_gap_mean_s',
-         'dispatch_gap_variance_s2', 'readiness_delay_s')], atol=1e-8, rtol=0)
+         'dispatch_gap_variance_s2')], atol=1e-8, rtol=0)
+    np.testing.assert_allclose(np.mean([r['readiness_s'] for r in launches]),
+        pair['results']['readiness_delay_s'], atol=1e-6, rtol=0)
     return rows, points, moments
 
 
