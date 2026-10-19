@@ -24,3 +24,13 @@ All collection, smoke and statistics run through scheduler on node001--006.
 Raw traces, labels, shadows and checkpoints stay remote; only small status
 summaries are fetched. Scientific validation and data collection are separate
 from control admission; main policy stays frozen even if interval coverage passes.
+
+Execution source6eaa4a389b: preflight t195290/node006 exit0,36 tests pass;
+both consumed modes reproduce actions, event arrays, terminal clocks, saved
+points and rank bounds. Initial t195289 stopped before replay because the smoke
+subdirectory lacked the existing runtime-equivalence proof reference; its
+server-side link was restored without changing models or forecast parameters.
+Formal paths submitted as t195292--t195296 using scheduler's live CPU plan
+(16/13/12/5/15 workers); t195297 waits for all768 cells and aggregates remotely.
+Independent results are pending. Only preflight/summary directories may sync
+locally; full new paths remain on the server.
