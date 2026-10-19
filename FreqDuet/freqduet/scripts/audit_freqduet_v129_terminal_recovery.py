@@ -86,6 +86,27 @@ def summarize_direction(rows):
         largest_supply_innovations=sorted(rows, key=lambda r: r['new_supply_s'], reverse=True)[:2])
 
 
+def paired_returns(record, baseline):
+    current_returns = {r['trip_id']: r for r in record['returns']}
+    old_returns = {r['trip_id']: r for r in baseline['returns']}
+    old_dispatches = {r['trip_id']: r for r in baseline['dispatches']}
+    rows = []
+    for dispatch in record['dispatches']:
+        prior, old = dispatch['prior_trip_id'], old_dispatches[dispatch['trip_id']]
+        if prior < 0 or (dispatch['bus_id'], prior) != (old['bus_id'], old['prior_trip_id']):
+            continue
+        c, b = current_returns[prior], old_returns[prior]
+        changes = {k: c[k]-b[k] for k in ('launch_s', 'holding_s', 'nonholding_elapsed_s')}
+        changes['visibility_lag_s'] = (dispatch['first_dispatch_visible_s']-c['return_s'])\
+            -(old['first_dispatch_visible_s']-b['return_s'])
+        changes['visible_s'] = dispatch['first_dispatch_visible_s']-old['first_dispatch_visible_s']
+        close(changes['visible_s'], sum(changes[k] for k in
+            ('launch_s', 'holding_s', 'nonholding_elapsed_s', 'visibility_lag_s')), 'paired return propagation')
+        rows.append(changes)
+    return dict(matched_returned_vehicles=len(rows),
+        means={k: fmean(r[k] for r in rows) for k in rows[0]} if rows else None)
+
+
 def analyze_path(record, baseline, receipt):
     clocks = {int(k): v for k, v in record['reference_clocks'].items()}
     launches = {r['trip_id']: r for r in record['dispatches']}
@@ -106,6 +127,7 @@ def analyze_path(record, baseline, receipt):
         row.update(trip_id=trip, **turnover_split(row, dispatch, launches, returns, clocks))
         gate_clock = clocks[trip]+row['inherited_s']
         row['sticky_clock_shortfall_s'] = max(0., gate_clock-dispatch['eligible_s'])
+        row['hard_wait_inside_native_s'] = min(row['hard_spacing_wait_s'], row['sticky_clock_shortfall_s'])
         row['qualification_shift_s'] = dispatch['eligible_s']-clocks[trip]
         row['native_readiness_s'] = dispatch['actual_s']-dispatch['eligible_s']
         old = original[trip]
@@ -114,7 +136,8 @@ def analyze_path(record, baseline, receipt):
         row['same_vehicle_prior'] = (dispatch['bus_id'], dispatch['prior_trip_id']) == (old['bus_id'], old['prior_trip_id'])
         group.append(row)
         rows.append(row)
-    mean_keys = ('delay_s', 'supply_floor_s', 'inherited_s', 'hard_spacing_wait_s', 'unexplained_s', 'immediate_release_advance_s',
+    mean_keys = ('delay_s', 'supply_floor_s', 'inherited_s', 'hard_spacing_wait_s', 'hard_wait_inside_native_s',
+        'unexplained_s', 'immediate_release_advance_s',
         'qualification_shift_s', 'native_readiness_s', 'actual_shift_s', 'reference_shift_s')
     means = {k: fmean(r[k] for r in rows) for k in mean_keys}
     for k, v in [('delay_s', 'inclusive_terminal_delay_s'), ('native_readiness_s', 'readiness_delay_s'),
@@ -130,6 +153,7 @@ def analyze_path(record, baseline, receipt):
         maximum_sticky_clock_shortfall_s=max(r['sticky_clock_shortfall_s'] for r in rows),
         remapped_vehicle_or_prior=sum(not r['same_vehicle_prior'] for r in rows),
         immediate_advance_trips=sum(r['immediate_release_advance_s'] > 0 for r in rows),
+        paired_returns=paired_returns(record, baseline),
         directions={k: summarize_direction(v) for k, v in grouped.items()})
 
 

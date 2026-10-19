@@ -11,8 +11,9 @@ short published gaps, recovery slack and new supply constraints. Follow the same
 vehicle's prior trip to expose carried launch lateness. Quantify conditional
 immediate release advance, sticky-eligibility clocks and vehicle remapping.
 
-Five synthetic tests cover persistence, recovery, short gaps, turnover inheritance
-and unexplained waits. Match recorded V128 delay endpoints before interpreting.
+Six synthetic tests cover persistence, recovery, short gaps, turnover inheritance,
+unexplained waits and paired return propagation. Match recorded V128 delay
+endpoints; split matched return changes into prior launch, holding and other time.
 All quantities are consumed-path accounting, not a new controller or an estimate
 of downstream policy benefit. Decide on any bounded plan-anchored candidate only
 after these records show where delay can actually recover.

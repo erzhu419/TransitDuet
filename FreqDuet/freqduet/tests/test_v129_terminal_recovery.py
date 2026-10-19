@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from audit_freqduet_v129_terminal_recovery import transition, turnover_split
+from audit_freqduet_v129_terminal_recovery import transition, turnover_split, paired_returns
 
 
 class RecoveryTests(unittest.TestCase):
@@ -44,6 +44,17 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(transition(0., 10., 0.)['hard_spacing_wait_s'], 0.)
         with self.assertRaises(AssertionError):
             transition(100., 100., 101.)
+
+    def test_paired_return_separates_prior_launch_holding_and_other_time(self):
+        def record(launch, held, other):
+            returned = launch+held+other
+            return dict(returns=[dict(trip_id=0, launch_s=launch, holding_s=held,
+                nonholding_elapsed_s=other, return_s=returned)], dispatches=[dict(trip_id=3,
+                prior_trip_id=0, bus_id=1, first_dispatch_visible_s=returned+1.)])
+        result = paired_returns(record(100., 10., 500.), record(0., 30., 510.))
+        self.assertEqual(result['matched_returned_vehicles'], 1)
+        self.assertEqual(result['means'], dict(launch_s=100., holding_s=-20.,
+            nonholding_elapsed_s=-10., visibility_lag_s=0., visible_s=70.))
 
 
 if __name__ == '__main__':
