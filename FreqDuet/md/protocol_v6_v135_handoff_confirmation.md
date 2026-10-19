@@ -23,3 +23,16 @@ All weights and the main deployment stay unchanged regardless of the result.
 Keep pair receipts, compact timing arrays and launch traces on the server; fetch
 only smoke/shard markers and the small final summary. These are simulated demand
 days and candidate-held-out archived actors, not field dates or new training runs.
+
+Outcome: sourcecee1177e2b; smoke t195235 (six tests/four exact consumed paths),
+six shards t195237--t195242 and aggregation t195243 exited0. All192 pairs/384
+evaluations completed; primary10 actors x16 days excludes the32 secondary pairs.
+Primary new-minus-old passenger time:-1901.769 person-s, CI[-5466.573,709.088];
+actual CV2:+0.0000513222, CI[-0.0000334059,0.0001607051]; inclusive launch
+delay:-0.175906 s/trip, CI[-0.336184,-0.049234]. Both joint gates fail.
+Only34/160 cells jointly improve;8/10 actor-average CV2 differences are positive.
+The two development actors on new days also fail both gates. Main stays frozen.
+Next: read existing timing/launch traces to separate immediate handoff changes
+from later holding and headway propagation; no refit on these confirmation days.
+Only43108-byte summary and tiny completion markers fetched. Initial t195234
+failed before simulation due nested smoke runtime-proof lookup; collector fixed.
