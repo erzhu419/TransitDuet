@@ -22,3 +22,23 @@ actual arrival CV2 and inclusive published-clock-to-launch delay no harm, plus
 completion. Record capped commands and actual lateness profiles separately.
 No automatic promotion, main switch, new day or training. All compute through
 scheduler on node001--006; keep full records there and return only small summaries.
+
+## Outcome (2026-10-19)
+
+Tasks t195198--202 exited 0; five tests and both exact neutral replays passed.
+All eight treated paths obeyed the 30 s eligibility-shift bound. Mean shift was
+1.09--1.90 s/trip; final directional lateness 15--537 s, versus V128's 1093--1964 s.
+Paired means against the same lower without terminal intervention:
+
+| Lower | Journey, min | Arrival CV2 | Inclusive launch delay, s |
+| --- | ---: | ---: | ---: |
+| Original bilateral | +0.00880 | -0.000329 | +2.052 |
+| Split-prediction bilateral | -0.02632 | -0.001910 | +0.264 |
+
+For split, crossed CI: journey [-0.09637,+0.00195], CV2 [-0.006173,-0.00000544],
+delay [-4.260,+2.324]. CV2 improves in all four cells; most journey gain comes
+from actor12011/day2231004. All three registered joint gates fail. No promotion.
+Next: read-only diagnosis of the three split cells with increased launch delay
+and the cross-actor difference on day2231004; no budget/gain tuning or training.
+Final summary (142360 bytes):
+`freqduet/results_freqduet/protocol_v6_v130_plan_terminal/summary/status.json`.
