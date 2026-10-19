@@ -24,3 +24,22 @@ Advance only to independent predictor confirmation if split's paired crossed
 95% upper bound is below zero for ready MAE and both cut cohorts' sign error,
 with neither cohort's departure-sign error worse in mean. No control promotion
 follows from this development-data diagnostic. Local signs are not system returns.
+
+## Outcome and next decision
+
+Source `a3822ea155`, scheduler `t189906`, node006: six tests, eight paths,
+exit 0; 171,084 bytes returned. Earlier `t189904` was cancelled before analysis:
+all 262 first roads per path start at physical launch, not a terminal stop event.
+No intermediate departure was missing. No replay or policy update occurred.
+
+Components cover 26,941/34,795 forecasts (77.43%), with no historical fallback.
+Pooled ready MAE: raw 65.65 s, running-only 56.29, stops-only 66.09, split 50.98.
+Split paired cell-mean MAE delta is -14.67 s [-16.11,-12.99]. Same-ready sign
+errors fall 36.31% to 29.05% (negative), 28.90% to 23.36% (quota); paired changes
+are -7.24 [-7.87,-6.61] and -5.53 [-6.20,-4.83] percentage points. All eight
+cells improve; actual departure-pair sign errors also decrease in both cohorts.
+
+The frozen advancement criterion passes. Preserve this split predictor without
+window/threshold tuning; next use fresh demand days for passive independent
+prediction/sign confirmation. Pending-stop coverage and factual holding-response
+uncertainty remain. No allocation or closed-loop controller change is justified yet.
