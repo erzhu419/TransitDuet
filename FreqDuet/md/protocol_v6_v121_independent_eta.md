@@ -22,3 +22,10 @@ Scheduler on node001--node006 only; independent conda/runtime unchanged. Return
 only final small JSON/logs. Actors, critic, dual, quota and main stay frozen.
 This confirms demand-day prediction/sign transfer, not passenger/CV2 control
 benefit or new-actor/network generalization. Any changed-control pilot is later.
+
+## Execution
+
+Source `df519a8dd5`, scheduler `t189909`, node006, eight CPU workers. All 15
+tests and exact V120 summary reproduction passed. Both actors' fresh-day passive
+preflights reproduced endpoints/accounts, original decisions and timing arrays.
+The remaining 14 paths run before final scoring; raw artifacts stay remote.
