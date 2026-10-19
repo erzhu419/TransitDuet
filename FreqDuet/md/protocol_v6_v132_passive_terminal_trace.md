@@ -19,6 +19,8 @@ not new efficacy evidence or grounds to change the main policy.
 Source cb062b9fd8: tests t195221 and replays t195222/node006, t195223/node005
 exited 0; both endpoints, all timing arrays/terminal records and 10400 executed
 lower actions are exact. First aggregation t195224 exited 0.
+Final tests and filtered summary: t195225/node006 exited 0, four tests passed;
+only the 50547-byte summary was fetched (plus tiny completion receipts).
 Actor12011: trip16/stop5 arrives3231, ready3241, queries3242; follower stays
 bus9/trip18. Its ETA source changes journey-speed -> route-speed, bypassing the
 component model: request gap357.733 -> 635 s, desired hold0.967 -> 35.625 s,
