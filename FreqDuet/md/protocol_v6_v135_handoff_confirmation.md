@@ -8,7 +8,7 @@ actors on those days =32 pairs, reported separately. No training or bias refit.
 
 Compare original component ETA with the fixed launch-handoff ETA. Each pair uses
 the same scenario and sampler seed, one evaluation per arm:384 rollouts total.
-Five focused tests and exact reproduction of four consumed V133/V134 no-terminal
+Six focused tests and exact reproduction of four consumed V133/V134 no-terminal
 paths precede any new-day evaluation. Six shards x32 pairs run in one campaign
 across node001--006 using the existing independent CPU environment.
 

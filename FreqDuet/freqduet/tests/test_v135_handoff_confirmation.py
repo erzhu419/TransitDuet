@@ -1,6 +1,8 @@
 from pathlib import Path
 import sys
+from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
 import run_freqduet_v135_handoff_confirmation as run
@@ -43,6 +45,15 @@ class HandoffConfirmationTests(unittest.TestCase):
             run.validate_grid(rows[:-1])
         with self.assertRaises(AssertionError):
             run.validate_grid([*rows[:-1], rows[0]])
+
+    def test_smoke_artifact_directory_does_not_move_runtime_proof_root(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)/'campaign'
+            with patch.object(run.frozen.prior.model, 'load_geometry', return_value={}), \
+                    patch.object(run.pilot, 'rollout', side_effect=RuntimeError('stop before simulation')) as rollout:
+                with self.assertRaisesRegex(RuntimeError, 'stop before simulation'):
+                    run.run_path(root, Path(directory), 12011, 2231004, 'old', artifact_root=root/'smoke_runs')
+                self.assertEqual(rollout.call_args.args[0], root)
 
 
 if __name__ == '__main__':
