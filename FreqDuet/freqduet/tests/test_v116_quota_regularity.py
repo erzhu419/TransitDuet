@@ -35,6 +35,16 @@ class QuotaRegularityTests(unittest.TestCase):
         self.assertEqual([r['quarter_shadow'] for r in a], [0., 5.])
         self.assertEqual([r['current_action'] for r in d], [5., 10.])
 
+    def test_initial_uncontrolled_events_stay_in_metric(self):
+        arrival = dict(trip_id=0, station_id=1, direction=True, time_s=10.,
+            release=0., realized_holding=0., other_elapsed=10.)
+        departure = dict(arrival, time_s=12., other_elapsed=12.)
+        a, d, _ = audit.coordinates([arrival], [departure], {})
+        self.assertEqual(len(a), 1)
+        self.assertEqual(d[0]['service_dwell'], 2.)
+        with self.assertRaisesRegex(AssertionError, 'untraced holding'):
+            audit.coordinates([arrival], [dict(departure, realized_holding=5.)], {})
+
     def test_geometry_resorts_when_shift_crosses_completed_neighbour(self):
         times = np.array([0., 10., 20., 40.])
         h = np.diff(times)
@@ -51,7 +61,8 @@ class QuotaRegularityTests(unittest.TestCase):
     def test_exact_covariance_and_boundary_normalization(self):
         def events(times, actions):
             return [dict(trip_id=i, station_id=0, direction=True, time_s=t,
-                current_action=a, before_current_action=t-a) for i, (t, a) in enumerate(zip(times, actions))]
+                current_action=a, arrival_time=t-a-1., service_dwell=1.)
+                for i, (t, a) in enumerate(zip(times, actions))]
         b = audit.series(events([0., 10., 30., 60.], [0., 5., 0., 10.]), audit.DEPARTURE_PARTS)
         c = audit.series(events([0., 12., 31., 66.], [0., 0., 5., 5.]), audit.DEPARTURE_PARTS)
         e = audit.effect(b, c, audit.DEPARTURE_PARTS)

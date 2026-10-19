@@ -18,7 +18,7 @@ import run_freqduet_v94_compensation_confirmation as inference
 
 
 ARRIVAL_PARTS = ('release', 'quarter_shadow', 'negative_pulse', 'positive_pulse', 'quota', 'other_elapsed')
-DEPARTURE_PARTS = ('before_current_action', 'current_action')
+DEPARTURE_PARTS = ('arrival_time', 'service_dwell', 'current_action')
 
 
 def key(row):
@@ -90,24 +90,27 @@ def coordinates(arrivals, departures, decisions):
         identity = key(row)
         end = dep[identity]
         actual = end['realized_holding']-row['realized_holding']
-        parts = action_parts(decisions[identity]) if decisions is not None else dict(
+        trace = decisions.get(identity) if decisions is not None else None
+        if decisions is not None and trace is None and actual != 0:
+            raise AssertionError('uncontrolled initial service executed untraced holding')
+        parts = action_parts(trace) if trace is not None else dict(
             quarter_shadow=actual, negative_pulse=0., positive_pulse=0., quota=0.)
         cumulative = totals[identity[0]]
         np.testing.assert_allclose(sum(cumulative.values()), row['realized_holding'], atol=1e-8, rtol=0)
-        if decisions is not None:
-            trace = decisions[identity]
+        if trace is not None:
             if (trace['executed_s'] != actual or trace['chosen_s'] != actual or
                     trace['executed_before_s'] != row['realized_holding'] or
                     not row['time_s'] <= trace['policy_time_s'] <= end['time_s']):
                 raise AssertionError('decision trace is not aligned to completed execution')
         result_arr.append(dict(row, **{n: cumulative[n] for n in ARRIVAL_PARTS[1:-1]}))
-        result_dep[identity] = dict(end, before_current_action=end['time_s']-actual, current_action=actual)
+        result_dep[identity] = dict(end, arrival_time=row['time_s'],
+            service_dwell=end['time_s']-actual-row['time_s'], current_action=actual)
         actions[identity] = actual
         for n in ARRIVAL_PARTS[1:-1]:
             cumulative[n] += parts[n]
     observed = {key(r) for r in arrivals}
-    if decisions is not None and observed != decisions.keys():
-        raise AssertionError('trace and observed stop support differ')
+    if decisions is not None and not decisions.keys() <= observed:
+        raise AssertionError('a completed decision is missing from observed stop support')
     return result_arr, [result_dep[key(r)] for r in departures if key(r) in observed], actions
 
 
@@ -130,6 +133,8 @@ def local_geometry(departures, decisions, moment):
         times = np.asarray([r['time_s'] for r in events])
         shifts = {name: np.zeros(len(events)) for name in ('negative', 'quota', 'all_cuts', 'all_shadows')}
         for i, event in enumerate(events):
+            if key(event) not in decisions:
+                continue
             row, parts = decisions[key(event)], action_parts(decisions[key(event)])
             for cause in ('negative', 'quota'):
                 cut = parts[cause+'_cut_s']
@@ -139,8 +144,8 @@ def local_geometry(departures, decisions, moment):
                 modified = times.copy()
                 modified[i] += cut
                 delta = geometry_change(times, modified, moment)
-                useful = delta['squared_gap_change_s2'] < 0
-                harmful = delta['squared_gap_change_s2'] > 0
+                useful = delta['cv_squared_change'] < -1e-12
+                harmful = delta['cv_squared_change'] > 1e-12
                 order_changed = not np.array_equal(np.argsort(modified, kind='stable'), np.arange(len(times)))
                 load = row['onboard_passengers']
                 names = (cause, cause+('_follower_valid' if row['follower_valid'] else '_follower_missing'),
@@ -154,6 +159,7 @@ def local_geometry(departures, decisions, moment):
                     c['harmful_restores'] += int(harmful)
                     c['useful_cut_s'] += cut*useful
                     c['harmful_cut_s'] += cut*harmful
+                    c['raw_squared_gap_useful_restores'] += int(delta['squared_gap_change_s2'] < 0)
                     c['order_changes'] += int(order_changed)
                     c['boundary_events'] += int(i in (0, len(times)-1))
                     c['onboard_exposure_if_restored_person_s'] += cut*load
@@ -199,6 +205,7 @@ def read_path(root, seed, day, method):
     if not math.isclose(sum(actions.values())/trips, pair['results']['holding_s_per_trip'], abs_tol=1e-6):
         raise AssertionError('completed action totals do not reproduce V115 holding')
     return dict(arrival=a, departure=d, actions=actions, decisions=decisions, departures=departures,
+        uncontrolled_events=len(actions)-len(decisions) if decisions is not None else None,
         results=pair['results'])
 
 
@@ -240,6 +247,7 @@ def review(root, out):
                     ('journey_min', 'cv_squared', 'readiness_delay_s', 'holding_s_per_trip')})
             effects.update({'local_restore_'+n: v for n, v in geometry.items()})
             cells.append(dict(seed=seed, day=day, effects=effects, cohorts=cohorts,
+                uncontrolled_zero_holding_events=f['uncontrolled_events'],
                 changed_arrival_predecessors=changed_predecessors(b['arrival'], f['arrival']),
                 changed_departure_predecessors=changed_predecessors(b['departure'], f['departure'])))
             print('V116_CONSUMED_CELL_DONE', seed, day, flush=True)
