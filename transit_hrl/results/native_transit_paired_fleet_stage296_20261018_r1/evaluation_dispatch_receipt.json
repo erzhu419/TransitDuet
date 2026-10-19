@@ -1,0 +1,63 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "recorded_at_utc": "2026-10-19T02:21:52.091856+00:00",
+  "scientific_source_revision": "1bea867609",
+  "execution_revision": "df6b03e859",
+  "fit": {
+    "id": "t188791",
+    "status": "done",
+    "exit_code": 0,
+    "model_and_actions_sealed": true
+  },
+  "scheduler": {
+    "ids": {
+      "first": "t188793",
+      "last": "t189876",
+      "count": 1084
+    },
+    "status_counts": {
+      "running": 141,
+      "launching": 220,
+      "queued": 723
+    },
+    "assigned_by_node": {
+      "node001": 87,
+      "node006": 82,
+      "node002": 73,
+      "node004": 65,
+      "node005": 54
+    },
+    "failed_ids": [],
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 1,
+    "ram_mb_per_task": 1536
+  },
+  "first_actual_process_check": {
+    "id": "t188793",
+    "node": "node001",
+    "state": "alive",
+    "pcpu": 99.8,
+    "ram_mb": 608
+  },
+  "active_states": 271,
+  "all_states_in_denominator": 720,
+  "state_futures": 8672,
+  "native_episode_budget": 32448,
+  "evaluation_draws": [
+    32,
+    63
+  ],
+  "no_test_outcomes_used_for_fitting_calibration_or_selection": true,
+  "evaluation_results_aggregated": false,
+  "raw_or_model_data_pulled": false,
+  "raw_reference_fits": 0,
+  "actor_updates": 0
+}

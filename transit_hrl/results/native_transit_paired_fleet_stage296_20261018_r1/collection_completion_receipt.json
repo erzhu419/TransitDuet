@@ -1,0 +1,48 @@
+{
+  "protocol": "native_transit_paired_fleet_stage296_v1",
+  "recorded_at_utc": "2026-10-19T02:13:34.689544+00:00",
+  "scientific_source_revision": "1bea867609",
+  "sampling_scheduler_revision": "f33620ee36",
+  "scheduler": {
+    "ids": {
+      "first": "t183945",
+      "last": "t188744",
+      "count": 4800
+    },
+    "by_phase": {
+      "menus": {
+        "count": 3120,
+        "status_counts": {
+          "done": 3120
+        },
+        "exit_code_counts": {
+          "0": 3120
+        }
+      },
+      "targets": {
+        "count": 1680,
+        "status_counts": {
+          "done": 1680
+        },
+        "exit_code_counts": {
+          "0": 1680
+        }
+      }
+    },
+    "by_node": {
+      "node006": 1089,
+      "node002": 998,
+      "node004": 930,
+      "node005": 793,
+      "node001": 990
+    }
+  },
+  "registered_collection_budget": {
+    "native_episodes": 268800,
+    "state_futures": 38400
+  },
+  "panel_validation": "required_inside_fit_before_seal",
+  "raw_or_model_data_pulled": false,
+  "Stage294_E32_used_for_tuning": false,
+  "scientific_risk_fit_task": "t188791"
+}

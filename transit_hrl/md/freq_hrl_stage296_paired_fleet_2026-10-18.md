@@ -53,12 +53,29 @@ Pilots t183632-t183641 and aggregate t183655 completed done/exit0: 570 native
 episodes, 80 exact identities, peak RSS 682.71 MiB; pilot labels are excluded.
 Captures t183661-t183920 completed done/exit0 and passed server-only coverage
 and control checks: 260 prefixes, 1,560 states, fit/calibration/test 80/60/120.
-Formal collection t183945-t188744 contains 3,120 P/S plus 1,680 T16 jobs
-(268,800 native episodes), dynamically scheduled across node001-node006.
-Only the 4,279-byte pilot scalar report and 249-byte capture audit were pulled
-this turn; rows, snapshots and models remain server-side. Fit awaits both
-sampling banks; E32 awaits the later model/action seal. No scientific risk fit
-or test E32 evaluation has completed yet.
+Formal collection t183945-t188744 completed all 3,120 P/S and 1,680 T16 jobs
+done/exit0 (268,800 native episodes). The qualified fit t188791/node001
+completed done/exit0, validating panels and saving its one ridge model before
+reading calibration T16. Normal-equation error is 8.67e-19. Independent
+calibration adds 0 to learned risk and 0.0652098 to the unlearned S8 score.
+Training MSE is 0.000626616 on changed proposals; calibration MSE is
+0.001776484 on base-eligible proposals. These are different populations,
+and calibration error is not untouched test-control evidence.
+
+The sealed test risk rule retains 77/379 baseline changed profile-state
+decisions (20.3%), covering 36 physical states; bias-only retains 40. It only
+retains baseline actions or returns raw, and expected thinning count error
+is exactly zero. These counts are not waiting-gain retention or new seeds.
+Independent E32 t188793-t189876 has 1,084 jobs over 271 disagreement states,
+32,448 native episodes, with all 720 states retained in the denominator.
+Actions and matching weights were sealed before dispatch; no E32 outcomes
+were read for fitting or calibration. Primary joint improvement and the
+50% waiting-gain retention requirement remain pending evaluation.
+
+Qualification pulls were 4,279 pilot scalar bytes and 249 capture-audit
+bytes; fitting/seal summaries added 6,369 bytes. Rows, snapshots, models,
+test action arrays and thinning weights remain server-side. No raw reference
+fit or actor update was added.
 
 Limitations: single intervention with fixed lower and finite-MC proposal,
 not full end-to-end Freq-HRL or a fleet-safety theorem. Independent calibrated
