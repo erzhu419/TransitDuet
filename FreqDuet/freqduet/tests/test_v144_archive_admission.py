@@ -47,6 +47,20 @@ class ArchiveAdmissionTests(unittest.TestCase):
                 (root/p).mkdir(parents=True)
             self.assertEqual(set(artifact_bases(root)), {root, root/'smoke_runs'})
 
+    def test_v137_reuses_exact_v135_terminal_instead_of_requiring_a_copy(self):
+        with tempfile.TemporaryDirectory() as d:
+            base = Path(d)/'protocol_v6_v137_passive_ready_exposure'
+            name = '12071_2351015_old'
+            receipt = base/'paths'/(name+'.json')
+            receipt.parent.mkdir(parents=True)
+            terminal = base.parent/'protocol_v6_v135_handoff_confirmation'/'terminal'/(name+'.json')
+            terminal.parent.mkdir(parents=True)
+            terminal.write_text('{}')
+            for exact in (True, False):
+                receipt.write_text(json.dumps(dict(terminal_path_exact=exact)))
+                r = inspect_bundle(base, name, {})
+                self.assertEqual('terminal' not in r['missing'], exact)
+
 
 if __name__ == '__main__':
     unittest.main()

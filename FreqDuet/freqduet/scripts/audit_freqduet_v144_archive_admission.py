@@ -107,6 +107,12 @@ def inspect_bundle(base, name, exposures):
     files = dict(trace=base/'traces'/(name+'.jsonl.gz'),
         ready=base/'ready_labels'/(name+'.jsonl.gz'), record=base/'records'/(name+'.npz'),
         terminal=base/'terminal'/(name+'.json'))
+    # V137 deliberately reuses V135 terminal clocks after exact passive replay.
+    if base.name == 'protocol_v6_v137_passive_ready_exposure':
+        receipt = base/'paths'/(name+'.json')
+        if receipt.is_file() and json.loads(receipt.read_text()).get('terminal_path_exact') is True:
+            files['terminal'] = base.parent/'protocol_v6_v135_handoff_confirmation'/'terminal'/(name+'.json')
+    row['terminal_source'] = str(files['terminal'])
     # V118/V124 used ready/, but sparse launch_traces never represent all queries.
     if not files['ready'].exists():
         files['ready'] = base/'ready'/(name+'.jsonl.gz')
@@ -195,7 +201,8 @@ def run(args):
         fields_complete_with_prior_use=len(complete)-len(unknown),
         fields_complete_use_unknown=len(unknown),
         complete_cases=[dict(base=r['base'], name=r['name'], identity=r['identity'],
-            use_status=r['use_status'], prior_summary_evidence=r['prior_summary_evidence']) for r in complete],
+            terminal_source=r['terminal_source'], use_status=r['use_status'],
+            prior_summary_evidence=r['prior_summary_evidence']) for r in complete],
         compressed_archives_not_opened=compressed, errors=errors,
         independently_admitted_paths=0, validation_run=False,
         admission='No archive is declared unused merely because no summary reference was found. '

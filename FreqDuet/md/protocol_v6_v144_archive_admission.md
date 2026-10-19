@@ -6,6 +6,8 @@ prediction outcomes before independent-cohort admission. Required inputs are
 all-query ready-time identity/evidence, saved native source status, full timing
 records, same-vehicle ready labels and terminal dispatch/return clocks.
 Sparse launch-only traces cannot substitute for all eligible queries.
+Resolve V137's deliberate V135 terminal reference using its exact-replay receipt;
+co-location is not a data-completeness requirement.
 Use the actual recorders' root/immediate smoke-or-shard layout; include older
 result directory names, but do not recursively inspect counterfactual cell or
 training caches that do not contain the required query/ready capture stream.
