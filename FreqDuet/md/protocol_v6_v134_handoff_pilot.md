@@ -17,3 +17,14 @@ passenger time and no increase in CV2, total launch delay or unfinished service;
 show failed cells instead of masking them with pooled means. No population CI
 from one day/two actors. Main remains frozen; independent-day evaluation requires
 interpreting this pilot first. Local only small summaries/markers, no trajectories.
+
+Outcome: source366cf193a8, tasks t195229--t195231/node006 exited0; three tests
+and four parallel candidate paths completed. Three of four cells jointly improve.
+Without terminal coordination both actors pass: mean journey-0.0801355 min,
+CV2-0.006311535, total launch delay-5.089695 s/trip, holding-3.282443 s/trip.
+With coordination12011 fails strict no-harm: journey-0.000798 min but
+CV2+0.0000959354 and total launch delay+0.015267 s/trip;933013 jointly improves.
+These are same-day development contrasts, not statistically confirmed harm/gain.
+Next: freeze this forecast candidate and validate the no-terminal arm on new
+demand days/remaining actors; no gain/bias/terminal-rule tuning or main switch.
+Only the23113-byte summary and tiny receipts were fetched; V133 summary21869 bytes.
