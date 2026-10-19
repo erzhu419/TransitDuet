@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from audit_freqduet_v138_request_feedback import clip_slope, split_request, clock_bands, request
+from audit_freqduet_v138_request_feedback import clip_slope, split_request, source_detail, clock_bands, request
 
 
 def state(own, front, follower, prediction, holding):
@@ -45,8 +45,9 @@ class RequestFeedbackTests(unittest.TestCase):
 
     def test_source_switch_retains_its_own_request_bucket(self):
         b = state([100, 0, 100], [0, 0, 100], [200, 0, 120], 140., 5.)
-        c = dict(b, u=10., h=10., source=('matched', 'route', 'fallback', False))
+        c = dict(b, u=10., h=10., prediction=180., source=('matched', 'route', 'fallback', False))
         self.assertEqual(split_request(b, c)[0], 'source_change')
+        self.assertEqual(source_detail(b, c)['forecast_error_s'], 5.)
 
     def test_request_regimes_use_original_gain(self):
         row = dict(context=dict(evidence_valid=True, follower_evidence_valid=False,

@@ -5,6 +5,7 @@ import argparse
 from collections import Counter, defaultdict
 import json
 from pathlib import Path
+from statistics import median
 import subprocess
 import sys
 
@@ -91,6 +92,16 @@ def split_request(b, c):
     return name, parts, slope
 
 
+def source_detail(b, c):
+    physical = timing_response(b, c)*clip_slope(b['u'], c['u'])
+    error = ((c['prediction']-c['true_gap'])-(b['prediction']-b['true_gap']))/8.
+    result = dict(zip(PARTS[:3], physical.tolist()))
+    result['forecast_error_s'] = error*clip_slope(b['u'], c['u'])
+    close(sum(result.values()), float(np.clip(c['u'], 0., 45.)-np.clip(b['u'], 0., 45.)),
+        'same-identity source-switch continuous allocation')
+    return result
+
+
 def ready_coordinates(path, identity):
     row, label = path['arrivals'][identity], path['ready'][identity]
     return np.asarray((row['release'], row['realized_holding'],
@@ -163,7 +174,10 @@ def load_path(root, terminal_root, seed, day, mode):
 
 
 def describe(rows):
+    changed = [r for r in rows if r['delta_s'] != 0]
     return dict(decisions=len(rows), changed_actions=sum(r['delta_s'] != 0 for r in rows),
+        median_changed_clipped_request_s=median(abs(r['clipped_request_delta_s']) for r in changed) if changed else None,
+        median_changed_action_s=median(abs(r['delta_s']) for r in changed) if changed else None,
         holding_delta_s=sum(r['delta_s'] for r in rows),
         positive_holding_s=sum(max(0., r['delta_s']) for r in rows),
         negative_holding_s=sum(min(0., r['delta_s']) for r in rows),
@@ -219,6 +233,8 @@ def analyze(args, seed, day, parent):
             base_holding_s=br['executed_s'], delta_s=delta, candidate_load=cr['query_load'],
             base_person_s=br['holding_person_s'], person_delta_s=person, load_change_person_s=load,
             category=category_name, parts=parts, clip_slope=slope,
+            source_transition=repr(bf['source'])+' -> '+repr(cf['source']),
+            source_detail=source_detail(bf, cf) if category_name == 'source_change' else None,
             raw_request_delta_s=cf['u']-bf['u'], clipped_request_delta_s=float(np.clip(cf['u'], 0., 45.)-np.clip(bf['u'], 0., 45.)),
             forward_delta_s=None if bf['forward'] is None or cf['forward'] is None else cf['forward']-bf['forward'],
             realized_follower_delta_s=None if bf['true_gap'] is None or cf['true_gap'] is None else cf['true_gap']-bf['true_gap']))
@@ -257,6 +273,13 @@ def analyze(args, seed, day, parent):
         downstream_by_category={g: describe([r for r in other if r['category'] == g]) for g in sorted({r['category'] for r in other})},
         downstream_by_sign={g: describe([r for r in other if int(np.sign(r['delta_s'])) == sign])
             for g, sign in (('increases', 1), ('decreases', -1), ('same_command', 0))},
+        source_switch_details={g: dict(decisions=len(group),
+            holding_delta_s=sum(r['delta_s'] for r in group),
+            continuous_parts_s={k: sum(r['source_detail'][k] for r in group) for k in PARTS[:4]},
+            continuous_parts_at_candidate_load_person_s={k: sum(r['source_detail'][k]*r['candidate_load'] for r in group) for k in PARTS[:4]},
+            discrete_jump_s=sum(r['parts']['discrete_jump_s'] for r in group))
+            for g in sorted({r['source_transition'] for r in other if r['source_detail'] is not None})
+            for group in [[r for r in other if r['source_detail'] is not None and r['source_transition'] == g]]},
         quantizer_mismatches=dict(quantizer_mismatches), ready_label_unresolved=dict(reasons),
         first_direct_query_s=first, complete_pre_direct_bands_equal=prefix,
         delay_accounting=delay, backlog_minus_sum_launch_delay_delta_s=effect['backlog_trip_s']-
@@ -284,7 +307,9 @@ def run(args):
         limitations='Six outcome-selected consumed pairs, no independent confirmation or tuning. Realized '
             'follower-ready labels include future feedback; timing/error decomposition is an identity, not '
             'pre-decision information or causal mediation. Identity, source and evidence-regime changes '
-            'retain separate whole-request buckets. Common clipping secant allocates stable request changes; '
+            'retain separate whole-request buckets. Source-switch details additionally allocate their '
+            'same-identity timing/error difference without asserting a same-state source intervention. '
+            'Common clipping secant allocates stable request changes; '
             'interior zero-net changes retain cancellation, saturated zero-net changes allocate zero. '
             'Discrete residual also includes any unsupported feasible-mask difference; empirical unmasked '
             'quantizer mismatches are reported. Command exposure bins use issuance clocks, not physical '
