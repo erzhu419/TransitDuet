@@ -137,7 +137,7 @@ def local_geometry(departures, decisions, moment):
                 continue
             row, parts = decisions[key(event)], action_parts(decisions[key(event)])
             for cause in ('negative', 'quota'):
-                cut = parts[cause+'_cut_s']
+                cut = parts['negative_cut_s'] if cause == 'negative' else -parts['quota']
                 shifts[cause][i] = cut
                 if not cut:
                     continue
@@ -164,7 +164,7 @@ def local_geometry(departures, decisions, moment):
                     c['boundary_events'] += int(i in (0, len(times)-1))
                     c['onboard_exposure_if_restored_person_s'] += cut*load
                     c['single_event_squared_gap_change_s2_sum'] += delta['squared_gap_change_s2']
-            shifts['all_cuts'][i] = parts['negative_cut_s']+parts['quota_cut_s']
+            shifts['all_cuts'][i] = parts['negative_cut_s']-parts['quota']
             shifts['all_shadows'][i] = row['shadow_s']-row['chosen_s']
         for name, delta in shifts.items():
             modified = times+delta
@@ -267,7 +267,8 @@ def review(root, out):
             'counterfactual. Joint shadow shifts include reordering and boundary normalization. Actual CV2 '
             'components are exact covariance accounting, not causal mediation. Pulse/quota components use '
             'quarter shadows on funded visited prefixes, not the separate bilateral states. Negative means '
-            'the response increment -0.75*delta_R is negative. Two actors/four consumed days; no new validation.'))
+            'the response increment -0.75*delta_R is negative. Quota restoration includes all unfunded pulse '
+            'extras, not just baseline cuts. Two actors/four consumed days; no new validation.'))
     print('V116_READONLY_QUOTA_REGULARITY_COMPLETE', flush=True)
 
 

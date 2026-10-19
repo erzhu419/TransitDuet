@@ -13,18 +13,18 @@ class QuotaRegularityTests(unittest.TestCase):
         return dict(shadow_s=shadow, chosen_s=chosen, raw_request_s=raw,
             feedback_error_s=40., available_s=available, increment_s=increment)
 
-    def test_negative_and_quota_cuts_are_disjoint(self):
-        parts = audit.action_parts(self.row(5., 0., 0.))
-        self.assertEqual((parts['negative_cut_s'], parts['quota_cut_s']), (5., 5.))
-        self.assertEqual(sum(parts[k] for k in audit.ARRIVAL_PARTS[1:-1]), 0.)
+    def test_negative_cuts_do_not_require_funding_cut(self):
+        parts = audit.action_parts(self.row(5., 10., 5.))
+        self.assertEqual((parts['negative_cut_s'], parts['quota_cut_s']), (5., 0.))
+        self.assertEqual(sum(parts[k] for k in audit.ARRIVAL_PARTS[1:-1]), 5.)
 
     def test_quota_of_positive_extra_is_not_baseline_cut(self):
         parts = audit.action_parts(self.row(20., 10., 10., increment=10.))
         self.assertEqual(parts['quota_cut_s'], 0.)
         self.assertEqual(parts['extra_quota_withheld_s'], 10.)
-        parts = audit.action_parts(self.row(20., 5., 5., increment=10.))
-        self.assertEqual(parts['quota_cut_s'], 5.)
-        self.assertEqual(parts['extra_quota_withheld_s'], 10.)
+        parts = audit.action_parts(self.row(20., 15., 15., increment=10.))
+        self.assertEqual(parts['quota_cut_s'], 0.)
+        self.assertEqual(parts['extra_quota_withheld_s'], 5.)
 
     def test_current_action_not_in_current_arrival(self):
         arrivals = [dict(trip_id=1, station_id=i, direction=1, time_s=t,

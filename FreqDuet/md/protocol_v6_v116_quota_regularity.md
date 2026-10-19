@@ -12,7 +12,8 @@ chain: A-B = (P-B)+(A-P). Disjoint removed baseline holding is
 withholds a positive pulse addition is reported separately. Negative here means
 the response increment `-0.75*delta_R<0`, not the raw residual innovation sign.
 
-For each cut, move only that recorded departure by the restored seconds, keeping
+For negative baseline cuts and all funding-withheld extras `P-A`, move only that
+recorded departure by the restored seconds, keeping
 all other completed departure times fixed. Measure exact finite-day CV2 change,
 squared-gap change, reordered
 neighbours and boundary events. Also calculate simultaneous negative/quota/all-cut
@@ -34,3 +35,12 @@ Use existing crossed actor/day bootstrap intervals on the eight consumed cells;
 report actor/day patterns. Decide whether evidence points to locally destructive
 cuts, follower evidence, or history/other-timing propagation before proposing
 another controller. Do not tune gains, quotas or admission gates on these paths.
+
+## Run record
+
+Initial source `2f0999559a`, task `t188792`, stopped at a missing decision on an
+initial uncontrolled service. Corrected source `913be92a37`, task `t189877` on
+node006, passes six tests and reproduces holding/actual arrival CV2 on all 16 paths.
+Only its 149,322-byte JSON returned. This first pass finds zero funding cuts to
+baseline authorization, so extend the local geometry to all funding-withheld
+positive extras, not only baseline cuts. Same consumed paths, no replay or tuning.
