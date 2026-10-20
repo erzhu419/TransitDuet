@@ -75,12 +75,13 @@ conditional MAE0.036->40.955s(no crossed CI for this sparse subgroup).
 V146 is unchanged and does not establish full-ETA interval coverage here.
 
 Keep V151 sealed as a positively validated forecast reference, not a controller
-replacement. Next read-only step: compare actual downstream-service and running/
-residence errors, especially active hours and the real launch regressions, to
-distinguish a worsened service estimate from removal of compensating errors.
-Then decide whether a clock-conditioned historical prior is justified; no
-hour-specific exemption, global bias offset, gate retuning or fitting on these
-confirmation days. Online causal equivalence is still required before control use.
+replacement. The actual downstream-service and running/residence comparison
+was completed in V152(t199247,source9fbd08c51b): service MAE
+improves overall;hour2 combines service degradation and lost cancellation in the
+point estimates;the four handoff launches improve service but expose existing
+running underprediction. Next localize running errors by segment/time, without
+hour-specific exemptions, global offsets or fitting on these confirmation days.
+Online causal equivalence is still required before control use.
 
 Local small summaries: results_freqduet/protocol_v6_v151_historical_service/
 workflow_1b783ea8f3/summary/status.json and readout_76f0bf7946/status.json.
