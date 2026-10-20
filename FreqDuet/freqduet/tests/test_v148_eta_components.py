@@ -114,6 +114,7 @@ class EtaComponentTests(unittest.TestCase):
         record = run.error_record([1], 4., parts, True)
         self.assertEqual(record['holding_mae_allocation_s'], -6.)
         self.assertEqual(sum(record[p+'_mae_allocation_s'] for p in run.PARTS), record['full_mae_s'])
+        self.assertEqual(record['post_ready_total_bias_s'], -6.)
 
     def test_observed_no_switch_has_zero_burden_not_a_fake_conditional_row(self):
         result = run.burden([], 10)

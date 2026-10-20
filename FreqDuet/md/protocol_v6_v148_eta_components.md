@@ -20,6 +20,8 @@ forecasts retain their whole error;other entries mean zero allocated contributio
 not measured zero component error. Report structured fraction. For MAE,use
 sign(total error)*component error;negative allocations offset other errors.
 Both signed errors and MAE allocations must sum to saved full-gap errors.
+Also report combined service and post-ready residence totals across phase switches;
+these avoid confusing a current/downstream or joint/separate relabeling with gain.
 
 For the frozen matched-identity source/status-switch set,subtract both paths'
 component errors. Keep the conditional349-cell group separate from switch burden

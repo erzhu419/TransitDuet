@@ -107,10 +107,12 @@ def component_packet(path, row, saved, geometry, history, services, durations, i
 def error_record(episode, error, parts, structured):
     close(sum(parts.values()), error)
     sign = float(np.sign(error))
+    totals = dict(parts, service_total=parts['current_service']+parts['downstream_service'],
+        post_ready_total=parts['holding']+parts['execution_wait']+parts['current_ready_joint'])
     return dict(episode=episode, full_bias_s=error, full_mae_s=abs(error),
         structured_fraction=float(structured),
-        **{p+'_bias_s': parts[p] for p in PARTS},
-        **{p+'_mae_allocation_s': sign*parts[p] for p in PARTS})
+        **{p+'_bias_s': v for p, v in totals.items()},
+        **{p+'_mae_allocation_s': sign*v for p, v in totals.items()})
 
 
 def decompose(path, row, saved, truth, geometry, history, services, durations, indexed):
