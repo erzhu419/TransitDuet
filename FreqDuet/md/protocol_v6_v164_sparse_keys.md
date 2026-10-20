@@ -13,3 +13,4 @@ Only five local summaries (29,349 bytes); per-key details remain remote.
 Next: preregister a larger fixed independent calibration cohort, retaining the
 estimator, conditions and 19-day minimum. Fix the protocol before collection;
 keep V163's failed admission and the unopened confirmation cohort unchanged.
+Completed by V165's fixed fresh 64-day registration; collection has not started.
