@@ -123,3 +123,11 @@ negative, together with the original joint-transfer gate. Native sampling
 reuses the qualified Stage298 path; the new arm only retains supported base
 actions, so no redundant native pilot or reference fitting is added.
 The six-module focused/regression suite passes 45 tests.
+
+Stage301 execution: freeze t199251/node001 qualified the locked policies and
+disjoint seeds. All 400 fresh captures t199255-t199654 completed done/exit0,
+zero retries. Formal P8/S8 jobs t199682-t204481 (4,800 jobs / 268,800 native
+episodes) are submitted unpinned to node001-node006. E32 remains gated on
+their completion and action/weight sealing. The matched-control cost
+contrasts remain necessary for attributing any gain to critic information,
+rather than only to a different intervention budget.

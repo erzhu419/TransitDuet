@@ -1,0 +1,104 @@
+{
+  "contract": {
+    "actions": "Stage298_joint_unchanged; Stage300_service_only_cutoff; all_actions_weights_unions_sealed_before_E32",
+    "actor_updates": 0,
+    "arms": [
+      "raw",
+      "stage247",
+      "zero_abstain",
+      "service_only",
+      "joint_budgeted",
+      "service_rank_matched",
+      "matched_thin"
+    ],
+    "banks": {
+      "evaluation": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "proposal": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "screen": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "budget": {
+      "captures": 400,
+      "max_E32_native_episodes": 537600,
+      "menu_native_episodes": 268800,
+      "menus": 4800
+    },
+    "cohort": "400_fresh_prefixes_test_replicas52to91; balanced40_per_root_regime",
+    "freeze": "old_cohorts_retired; no_new_calibration_or_refitting",
+    "inference": "average16profiles_and6probes;400prefix_stratified_bootstrap5000_seed301;paired_MC95;both_E16",
+    "joint_source": "native_transit_service_confirmation_stage298_20261019_r1",
+    "locked_policy": {
+      "joint": {
+        "family": "joint",
+        "index": 27,
+        "threshold": 0.002181045736174378
+      },
+      "service": {
+        "family": "service",
+        "index": 47,
+        "threshold": 0.0022712083333332397
+      }
+    },
+    "matching": "same_joint_count_service_ranking_and_expected_thinning_per_profile_root_regime_probe",
+    "native_qualification": "reuse_Stage298_qualified_native_path; new_arm_is_subset_of_previously_supported_base_actions",
+    "primary": "joint_vs_service_only_cost_both_CIs_upper_lt0_and_both_E16_cost_differences_lt0;joint_vs_raw_original_joint_transfer_gate",
+    "proposal": "same_P8_proposal_and_S8_zero_event_base; same_frozen_raw_critic_lower",
+    "raw_reference_fits": 0,
+    "risk_fits": 0,
+    "secondary": "service_only_vs_raw_and_joint_vs_matched_controls; separate_claims",
+    "service_source": "native_transit_service_control_stage300_20261020_r1"
+  },
+  "protocol": "native_transit_service_comparison_stage301_v1",
+  "service_calibration_task": "t199248",
+  "source_revision": "bd196b1bcc20aea9bab144be48b40fbd40c0d698"
+}

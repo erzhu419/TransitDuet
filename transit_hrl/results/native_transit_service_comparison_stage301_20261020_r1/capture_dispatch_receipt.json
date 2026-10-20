@@ -1,0 +1,71 @@
+{
+  "protocol": "native_transit_service_comparison_stage301_v1",
+  "recorded_at_utc": "2026-10-20T05:59:58.578263+00:00",
+  "source_revision": "bd196b1bcc20aea9bab144be48b40fbd40c0d698",
+  "freeze_task": {
+    "id": "t199251",
+    "node": "node001",
+    "status": "done",
+    "exit_code": 0
+  },
+  "freeze_scalar_pull_bytes": 2633,
+  "joint_policy_unchanged": true,
+  "service_policy_locked_from_old_fit_calibration": true,
+  "fresh_test_prefixes": 400,
+  "replicas": [
+    52,
+    91
+  ],
+  "native_qualification_reused": true,
+  "new_native_pilot_episodes": 0,
+  "scheduler": {
+    "phase": "capture",
+    "first": "t199255",
+    "last": "t199654",
+    "count": 400,
+    "status_counts": {
+      "launching": 398,
+      "running": 2
+    },
+    "active_nodes": {
+      "node005": 90,
+      "node001": 90,
+      "node004": 89,
+      "node006": 88,
+      "node002": 43
+    },
+    "failed_ids": [],
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "require_node": null,
+    "cpu_per_task": 1,
+    "ram_mb": 1536
+  },
+  "actual_process_check": {
+    "id": "t199269",
+    "node": "node006",
+    "state": "dead",
+    "alive_pids": [],
+    "vram_mb": 0,
+    "ram_mb": 0,
+    "pcpu": 0.0,
+    "exit_code": 0,
+    "backend_finished_at": 1792475993.534668,
+    "backend_state": "LOCAL_EXIT_STATUS",
+    "terminal_reason": "launcher exit-status sentinel recorded rc=0",
+    "terminal_diagnosis_deferred": true,
+    "terminal_ok": true
+  },
+  "formal_P8_S8_dispatched": false,
+  "E32_dispatched": false,
+  "raw_reference_fits": 0,
+  "risk_fits": 0,
+  "actor_updates": 0,
+  "raw_or_model_data_pulled": false
+}
