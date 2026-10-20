@@ -65,3 +65,12 @@ on node001--006; raw paths and checkpoints stay there. Only small summary/log pu
 Passing establishes prediction evidence, not a controller replacement. Binary
 published demand/clearance phase does not model arbitrary future demand profiles.
 V146 intervals still concern the current stage, not full-ETA coverage.
+
+## Execution
+
+Registered source c0658db77a; final execution source d7996d60b4 adds server-only
+per-query shadow archives and JSON-safe counters, with no candidate/gate changes.
+Final-source preflight t199050 on node006: 11 tests and one consumed old/handoff
+pair passed, native exit0; no new demand days read. Formal scheduler shards
+t199051--t199054 cover all384 pairs, planned40 workers, allowed node001--006 only.
+Formal path collection has started; predictor effects have not been read out.
