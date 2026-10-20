@@ -113,15 +113,17 @@ def record(episode, values, truth):
         **{a+'_delta_mae_s': abs(errors[a])-abs(errors['base']) for a in ARMS[1:]})
 
 
-def evaluate_pair(root, runtime, seed, day):
+def evaluate_pair(root, runtime, seed, day, save_shadows=False):
     geometry = candidate.model.load_geometry(runtime)
     paths, predictions, modes, counts = {}, {}, {}, Counter()
     for mode in MODES:
         path, objects = prior.prepare(root, seed, day, mode, geometry)
         phases = candidate.PhaseServices(path['arrivals'], path['ready'], path['cutoff'])
-        selected, groups = {}, defaultdict(list)
+        selected, groups, shadows = {}, defaultdict(list), []
         for k, row in path['trace'].items():
             values, detail = candidate.forecasts(path, row, path['shadows'][k], geometry, objects, phases)
+            if save_shadows:
+                shadows.append(dict(query=list(k), time_s=row['prediction_time_s'], points=values, **detail))
             counts[mode+'/prediction/'+detail['status']] += 1
             for support in ('phase_supported_stops', 'phase_unsupported_stops'):
                 counts[mode+'/'+support] += detail[support]
@@ -133,7 +135,7 @@ def evaluate_pair(root, runtime, seed, day):
             if any(v is None or not math.isfinite(v) or v < 0. for v in values.values()):
                 raise AssertionError('candidate lost a finite baseline point')
             for arm in ARMS[1:]:
-                counts[mode+'/'+arm+'_changed_queries'] += abs(values[arm]-values['base']) > 1e-7
+                counts[mode+'/'+arm+'_changed_queries'] += bool(abs(values[arm]-values['base']) > 1e-7)
             r = record([*prior.prior.follower(row), *k[1:]], values, truth)
             now = row['prediction_time_s']
             labels = ['all', 'clearance' if now >= path['cutoff'] else 'active']
@@ -143,6 +145,8 @@ def evaluate_pair(root, runtime, seed, day):
                 groups[label].append(r)
             selected[k] = values, truth
         paths[mode], predictions[mode] = path, selected
+        if save_shadows:
+            reference.capture.identity.write_trace(root/'candidate_shadows'/f'{seed}_{day}_{mode}.jsonl.gz', shadows)
         modes[mode] = {g: prior.prior.describe(rows) for g, rows in groups.items()}
         for stats in modes[mode].values():
             metrics = stats['metrics']
@@ -180,7 +184,7 @@ def run_one(root, runtime, index):
         reference.collect(root/'confirmation', runtime, seed, day, mode, SAMPLERS[day])
         if not (root/'confirmation/validation_cells'/f'{seed}_{day}_{mode}.json').exists():
             reference.evaluate_path(root/'confirmation', runtime, seed, day, mode)
-    write(target, evaluate_pair(root/'confirmation', runtime, seed, day))
+    write(target, evaluate_pair(root/'confirmation', runtime, seed, day, save_shadows=True))
 
 
 def run(args):
