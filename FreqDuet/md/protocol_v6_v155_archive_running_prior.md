@@ -20,5 +20,20 @@ only;all models,paths and cell data stay server. No controller admission.
 Source107db12b04,scheduler t204492. Initial dispatch misclassified the negated
 word "training" in its description;only the description was corrected. CPU
 training permission remains disabled;scientific source and parameters unchanged.
-Task is running on node005 after10 passing tests and a completed first archive
-pair. No overall V155 result yet;V154 gate and main-policy status unchanged.
+Completed on node005,exit0,no retries;10 tests passed,384 pairs/768 paths.
+Only95497-byte summary pulled. Paired full-ETA MAE delta(old/handoff,seconds):
+
+| Scope | Old delta,95% CI | Handoff delta,95% CI |
+| --- | --- | --- |
+| all | -9.535 [-9.785,-9.282] | -9.538 [-9.787,-9.289] |
+| hour2 | -11.960 [-12.867,-10.932] | -11.993 [-12.902,-10.970] |
+| clearance | -0.463 [-0.969,0.028] | -0.454 [-0.962,0.033] |
+| hour13 | -0.505 [-0.995,-0.039] | -0.503 [-0.999,-0.045] |
+
+All12 actor and32 day margins improve in all/hour2. Clearance running MAE
+improves1.112/1.102s with CI below0,but full-ETA non-harm remains unconfirmed.
+All complete prior legs have8 days:low-support group is absent,not passed.
+Original fixed_joint_gate=false remains. Freeze the useful candidate;next V156
+only diagnoses clearance cancellation and fixed0/1-day running-history deletion.
+Do not relax gates,retune weights,refit priors or switch main. This consumed
+archive result is not fresh independent confirmation or control efficacy.
