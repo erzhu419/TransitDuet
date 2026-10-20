@@ -51,6 +51,19 @@ def day_ids(value, day_context=False):
     return days
 
 
+def outcome_day_ids(value):
+    def outcomes(item):
+        if isinstance(item, dict):
+            if item.get('status') == 'preregistered_not_collected':
+                return {}
+            return {k: outcomes(v) for k, v in item.items()}
+        if isinstance(item, list):
+            return [outcomes(v) for v in item]
+        return item
+
+    return day_ids(outcomes(value))
+
+
 def metadata_files(experiment):
     # Bounded recorder layouts: no traversal into old counterfactual/training caches.
     stages = [experiment, *(p for p in experiment.iterdir() if p.is_dir() and
@@ -84,12 +97,12 @@ def inventory(args, running, services):
                             for token in ('inventory', 'admission')):
                         continue
                     days = day_ids(value)
+                    consumed = outcome_day_ids(value) if completed else set()
                     # Registrations alone reserve days; completed summaries establish exposure.
-                    role = 'completed_experiment' if completed else 'registration_only'
                     for day in days:
+                        role = 'completed_experiment' if day in consumed else 'registration_only'
                         references[day].append(dict(path=str(path), role=role))
-                    if completed:
-                        exposed.update(days)
+                    exposed.update(consumed)
                 except (ValueError, OSError) as exc:
                     errors.append(dict(path=str(path), error=str(exc)))
     prior_days = set(running['days']) | set(services['calibration_days'])

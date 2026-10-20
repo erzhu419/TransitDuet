@@ -17,9 +17,12 @@ For e=prediction-truth,T=m-e:fixed-tail bounds would be
 
 V159 extraction/readback now reproduces V158 on all 768 archived paths,including
 query time,same-follower target-ready/label-available time and observable context.
-Next:complete read-only metadata sidecars for follower-validity/provenance,
+V160 completes read-only sidecars for follower-validity/provenance,
 joint-current-residence conditional support and separate shadow service support.
 Late policy-time load is unavailable as query-time context and stays excluded.
+Independent calibration/confirmation cohorts of 32 new days each are reserved,
+not collected. Next:seal the interval estimator and final inference gates before
+fresh collection;day reservation alone is not a full interval-analysis protocol.
 Online updates require labels strictly completed before the query;keep signed
 asymmetry and unsupported states,without changing the point or filling zeros.
 An eventual fixed interval protocol needs calibration/confirmation days disjoint

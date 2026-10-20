@@ -7,6 +7,14 @@ import extract_freqduet_v159_joint_residuals as extract
 
 
 class ResidualTests(unittest.TestCase):
+    def test_completed_metadata_job_does_not_consume_its_reserved_days(self):
+        value = dict(status='v160_metadata_and_preregistration_complete',
+            development=dict(days=[2451001]), registration=dict(status='preregistered_not_collected',
+                calibration_days=[2851001], confirmation_days=[2852001]))
+        self.assertEqual(extract.day_ids(value), {2451001, 2851001, 2852001})
+        self.assertEqual(extract.outcome_day_ids(value), {2451001})
+        self.assertEqual(extract.outcome_day_ids(value['registration']), set())
+
     def test_day_fields_include_nested_splits_not_actor_ids(self):
         self.assertEqual(extract.day_ids(dict(registration=dict(days=dict(
             calibration=[1001], confirmation=[2001]), archived_actors=[12011],
