@@ -7,6 +7,16 @@ from scripts import submit_native_transit_service_comparison_audit_stage302_sche
 
 
 class ServiceComparisonAuditTests(unittest.TestCase):
+    def test_service_vs_base_mean_is_derived_from_official_raw_comparisons(self):
+        fields = audit.source.parent.learning.FIELDS
+        official = {"comparisons": {name+"_vs_raw": {"mean": dict.fromkeys(fields, value)}
+            for name, value in (("service_only", -3.), ("zero_abstain", -2.))}}
+        result = {"all32": {"service_only_vs_zero_abstain": {"mean": dict.fromkeys(fields, -1.)}}}
+        audit.verify_paired_means(result, official, "service_only")
+        result["all32"]["service_only_vs_zero_abstain"]["mean"]["cost"] = 1.
+        with self.assertRaisesRegex(ValueError, "paired means"):
+            audit.verify_paired_means(result, official, "service_only")
+
     def test_joint_minus_service_only_uses_correct_arm_and_sign(self):
         actual = np.zeros((20, 32, 7, 4)); cube = np.arange(20).reshape(10, 2, 1)
         actual[:, :, 3, 0] = -3.; actual[:, :, 4, 0] = -4.

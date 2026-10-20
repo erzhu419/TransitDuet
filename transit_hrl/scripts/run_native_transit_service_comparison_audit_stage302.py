@@ -31,6 +31,17 @@ def contract():
         "new_native_episodes": 0, "raw_reference_fits": 0, "risk_fits": 0, "actor_updates": 0}
 
 
+def verify_paired_means(result, official, primary):
+    for pair, statistics in result["all32"].items():
+        if pair == "half_base_wait_margin": continue
+        before = pair.removeprefix(primary+"_vs_")
+        for field in source.parent.learning.FIELDS:
+            expected = official["comparisons"][primary+"_vs_raw"]["mean"][field]
+            if before != "raw": expected -= official["comparisons"][before+"_vs_raw"]["mean"][field]
+            if abs(statistics["mean"][field]-expected) > 1e-12:
+                raise ValueError("Audit differs from the frozen Stage301 paired means")
+
+
 def run_audit(run):
     parent = source.directory(SOURCE)
     official = source.read(parent/"report/result.json")
@@ -49,12 +60,8 @@ def run_audit(run):
     joint = paired_statistics(actual, cube, arms=source.ARMS, comparators=COMPARATORS, seed=301)
     service = paired_statistics(actual, cube, arms=source.ARMS, primary="service_only",
         comparators=("raw", "zero_abstain"), seed=301)
-    for result in (joint, service):
-        for pair, statistics in result["all32"].items():
-            if pair == "half_base_wait_margin": continue
-            for field in source.parent.learning.FIELDS:
-                if abs(statistics["mean"][field]-official["comparisons"][pair]["mean"][field]) > 1e-12:
-                    raise ValueError("Audit differs from the frozen Stage301 paired means")
+    verify_paired_means(joint, official, "joint_budgeted")
+    verify_paired_means(service, official, "service_only")
     write_json(directory(run)/"report/result.json", {"protocol": PROTOCOL, "contract": contract(),
         "source_coverage_qualified": True, "test_prefixes": 400, "fixed_profiles": 16,
         "source_registered_primary_passed": official["critic_incremental_claim_supported"],
