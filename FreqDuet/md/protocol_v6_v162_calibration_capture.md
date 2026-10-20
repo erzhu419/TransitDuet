@@ -19,5 +19,15 @@ Only after admission may calibration shards run through scheduler on nodes
 001-006. Traces, records, support and residual files stay server-side; only
 small preflight/progress/completion summaries come back locally.
 
+Admission passed on node006 (`t208239`, source `25a2eddeaf`): nine tests,
+10,400 query records, 8,742 archived V151 forecasts reproduced across both
+consumed paths; all original actions/timing/terminal clocks remained exact.
+The initial launch lacked the existing runtime receipts; these were restored
+server-side and the private runtime path was made explicit. No fresh day ran
+during the failed launches. The local preflight summary is 600 bytes.
+Calibration is dispatched as 48 shards of eight actor/day pairs, eight workers
+per shard, restricted to node001-node006. Confirmation and interval fit stay off.
+Scheduler IDs: `t208240-t208287`; each requests eight CPU cores and no GPU.
+
 Next: audit the completed calibration metadata and support, without fitting
 intervals or opening confirmation until separately authorized.
