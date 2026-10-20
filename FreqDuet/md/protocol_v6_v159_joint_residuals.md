@@ -14,3 +14,10 @@ No rollout, training, interval fitting or promotion. V151, V146 (3s/0s), 3600s
 window, 0.1/0.1 tails and main deployment remain fixed. Raw residuals stay on the
 server; only inventory/count receipts return locally. Next: use the inventory to
 decide whether an independent calibration/confirmation collection is necessary.
+
+Execution: source `6b5dfe58a8`, scheduler `t204596`, node006, eight workers,
+384 actor/day pairs (768 archived paths). Six tests and the first pair's V158
+moment reproduction passed; full extraction is still running. Initial inventory:
+45 result roots, 78 groups; no independently certified split. The 16 unrecognized
+names were located in V112's old `p0`-`p15` diagnostic traces (`t204598`), not a
+new independent cohort. V112 stores their identities under `pairs/`, not `paths/`.
