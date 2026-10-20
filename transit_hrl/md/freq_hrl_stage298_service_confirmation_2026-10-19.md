@@ -94,3 +94,8 @@ The all-state waiting reduction is about 0.071 seconds per single intervention.
 Next: Stage299 adds paired retention-margin/half/group inference without
 changing this primary result. Then define a deployable service-only control
 on old fit/calibration data, keeping Stage298 retired from policy tuning.
+Stage300 preserves the original risk/joint candidates in the simultaneous
+calibration family and adds service-only cutoffs from old fit quantiles.
+Only base/service candidates can be selected; the existing joint stays
+frozen. New simulation admission requires a nontrivial service subset with
+better development cost than base. The four-module test set passes 28 tests.
