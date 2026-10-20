@@ -41,7 +41,7 @@ end-to-end learned HRL. Full panels, models and trajectories stay server-side.
 Execution: source `c762765aa1`; freeze t189917/node006 completed done/exit0.
 All ten pilots t189919-t189928 passed; official pilot-report t189937/node006
 qualified 430 episodes and 60 exact replay identities, peak RSS 687.37 MiB,
-with pilot labels excluded (3,084 scalar report bytes pulled this turn).
+with pilot labels excluded (3,084 scalar bytes in the preflight report).
 All 400 captures t189939-t190338 completed done/exit0 with zero retries.
 Successful exit records were reconciled before proceeding; no capture was
 rerun. Placement: node006 136, node004 104, node005 83, node001 52, node002 25.
@@ -49,6 +49,16 @@ The 4,800 P/S jobs t190356-t195155 are submitted through scheduler, unpinned
 over node001-node006, for 268,800 native episodes. Initial native process
 t190357/node006 is alive at 100% CPU / 578 MiB; the dispatch receipt records
 5 running, 123 launching and 4,672 queued jobs at that snapshot.
-E32 remains undispatched;
-actions and matching weights will be sealed only after all P/S jobs succeed.
-No new fits or performance conclusions are introduced by this sampling step.
+E32 was not dispatched at that initial sampling snapshot.
+
+Follow-up (2026-10-20): all 4,800 P/S jobs completed done/exit0, with zero
+retries and 268,800 native episodes. Seal t195343/node004 passed the full
+receipt/menu/seed checks and froze all actions and matching weights before
+test E32 access. Only its 12,009-byte summary/index was pulled; full panels,
+actions, models and trajectories remain server-side. The sparse union has
+914 active states, requiring 3,656 E32 jobs / 108,672 native episodes.
+Evaluation t195344-t198999 is submitted through scheduler with unchanged
+policy and inference rules. The first physical E32 check, t195353/node001,
+is alive at 97.3% CPU / 582 MiB; its dispatch snapshot records 10 running,
+118 launching and 3,528 queued jobs. No new fits or performance conclusions
+are introduced; the primary and matched-control tests await independent E32.
