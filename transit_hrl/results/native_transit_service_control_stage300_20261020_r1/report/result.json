@@ -1,0 +1,171 @@
+{
+  "base": {
+    "changed_profile_states": 169,
+    "conditional_MC_CI95": {
+      "cost": [
+        -0.0007111316853323568,
+        -0.0001430598945287541
+      ],
+      "fleet": [
+        -0.0005458692112217981,
+        2.503587788846485e-05
+      ],
+      "service": [
+        -0.00021524776813061666,
+        -0.00011811047839716104
+      ],
+      "wait_min": [
+        -0.0019385678292110616,
+        -0.0010141448444000516
+      ]
+    },
+    "cost_upper_objective": -4.146410915798692e-05,
+    "family": "base",
+    "halves": {
+      "first8": {
+        "cost": -0.0004828221788194443,
+        "fleet": -0.00036168981481481485,
+        "service": -0.00012113236400462912,
+        "wait_min": -0.0010690104166666656
+      },
+      "last8": {
+        "cost": -0.000371369401041667,
+        "fleet": -0.00015914351851851856,
+        "service": -0.0002122258825231485,
+        "wait_min": -0.001883702256944446
+      }
+    },
+    "index": 0,
+    "mean": {
+      "cost": -0.00042709578993055543,
+      "fleet": -0.0002604166666666666,
+      "service": -0.00016667912326388885,
+      "wait_min": -0.0014763563368055566
+    },
+    "prefix_CI95": {
+      "cost": [
+        -0.0008227770632595487,
+        -4.146410915798692e-05
+      ],
+      "fleet": [
+        -0.0006085431134259258,
+        7.871274594907348e-05
+      ],
+      "service": [
+        -0.0002772612156394669,
+        -7.606450403284193e-05
+      ],
+      "wait_min": [
+        -0.002401158582899307,
+        -0.0006956605360243064
+      ]
+    },
+    "retention_constraint_passed": true,
+    "retention_difference_MC_bonferroni_upper": -0.0003488822070668119,
+    "retention_difference_prefix_simultaneous_upper": -0.0001268119348548743,
+    "selection_eligible": true,
+    "threshold": null,
+    "waiting_gain_retention": 1.0
+  },
+  "confirmation_performed": false,
+  "contract": {
+    "Stage298_E32_used_for_calibration": false,
+    "action": "base_eligible_and_S8_paired_service_mean_le_cutoff_else_own_raw; no_batch_budget_or_fleet_score",
+    "actor_updates": 0,
+    "calibration": "same_Stage297_prefix_max_t_and_MC_Bonferroni_waiting_floor_over_entire_expanded_family; same_cost_upper_objective",
+    "confirmation_gate": "selected_service_nontrivial_subset_and_cost_point_better_than_base; no_claim_from_development",
+    "family": "preserve_all_Stage297_base_risk_joint_candidates_plus_service_fit_quantiles1to16_and_zero",
+    "frozen_joint": "Stage298_locked_policy_unchanged; do_not_reselect_joint",
+    "hypothesis_informed_by_Stage298": true,
+    "new_native_episodes": 0,
+    "next_confirmation": "only_if_admitted; genuinely_new_prefixes_and_futures; Stage298_retired_from_tuning",
+    "raw_reference_fits": 0,
+    "risk_fits": 0,
+    "roles": [
+      "fit",
+      "calibration"
+    ],
+    "selection": "eligible_base_or_service_only; minimize_max_cost_CI95_upper_then_mean_then_index",
+    "source": "native_transit_paired_fleet_stage296_20261018_r1"
+  },
+  "development_calibration_prefixes": 60,
+  "family_candidates": 52,
+  "fresh_confirmation_admitted": true,
+  "interpretation": "development_control_only; hypothesis_informed_by_Stage298; needs_new_prefix_confirmation",
+  "parent_files_modified": false,
+  "prefix_retention_max_t_critical": 2.5389483308490473,
+  "protocol": "native_transit_service_control_stage300_v1",
+  "selection": {
+    "changed_profile_states": 142,
+    "conditional_MC_CI95": {
+      "cost": [
+        -0.0007219680559410614,
+        -0.00020070522964921671
+      ],
+      "fleet": [
+        -0.0005391250092713581,
+        -1.4260407395308558e-05
+      ],
+      "service": [
+        -0.0002255221426069173,
+        -0.00014376572631669403
+      ],
+      "wait_min": [
+        -0.0020453647134678625,
+        -0.001281892230976584
+      ]
+    },
+    "cost_upper_objective": -0.0001497692504882813,
+    "family": "service",
+    "halves": {
+      "first8": {
+        "cost": -0.0005065742838541669,
+        "fleet": -0.0003490306712962963,
+        "service": -0.00015754361255787024,
+        "wait_min": -0.001408398437499999
+      },
+      "last8": {
+        "cost": -0.0004160990017361115,
+        "fleet": -0.0002043547453703704,
+        "service": -0.00021174425636574107,
+        "wait_min": -0.0019188585069444448
+      }
+    },
+    "index": 47,
+    "mean": {
+      "cost": -0.000461336642795139,
+      "fleet": -0.0002766927083333333,
+      "service": -0.00018464393446180567,
+      "wait_min": -0.0016636284722222232
+    },
+    "prefix_CI95": {
+      "cost": [
+        -0.0008154818372938369,
+        -0.0001497692504882813
+      ],
+      "fleet": [
+        -0.000585055881076389,
+        -1.1754918981481483e-05
+      ],
+      "service": [
+        -0.00030074617078993017,
+        -9.040350875289378e-05
+      ],
+      "wait_min": [
+        -0.0026604207356770836,
+        -0.0008283452690972231
+      ]
+    },
+    "retention_constraint_passed": true,
+    "retention_difference_MC_bonferroni_upper": -0.0005587630368207928,
+    "retention_difference_prefix_simultaneous_upper": -0.00020000461973841666,
+    "selection_eligible": true,
+    "threshold": 0.0022712083333332397,
+    "waiting_gain_retention": 1.1268475169225567
+  },
+  "source_fit_prefixes": 80,
+  "source_target_coverage": {
+    "native_episodes": 40320,
+    "state_futures": 5760
+  }
+}

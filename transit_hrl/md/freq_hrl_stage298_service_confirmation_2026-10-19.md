@@ -99,3 +99,27 @@ calibration family and adds service-only cutoffs from old fit quantiles.
 Only base/service candidates can be selected; the existing joint stays
 frozen. New simulation admission requires a nontrivial service subset with
 better development cost than base. The four-module test set passes 28 tests.
+
+Stage299 audit t199245/node001 completed done/exit0 without new fits or
+simulation (43,954 report bytes). The paired waiting-floor margin is -542.534
+in the scaled units: prefix CI [-784.631, -341.923], MC [-619.030, -466.038].
+Both E16 margins also have both CI upper bounds below zero. Each half's
+cost/wait versus raw has both CIs below zero. Against service ranking, only
+last16 cost has both CIs below zero; first16 and pooled cost do not. Waiting
+versus service ranking is slightly worse in both halves, with CIs crossing zero.
+Fixed-stratum leave-one-prefix point ranges remain negative: cost versus raw
+[-210.417, -187.664], waiting [-1201.383, -1043.087]. Group means are
+descriptive: cost favors joint in 10/10 root/regime groups, waiting in 9/10;
+hour-burst/persistent-shift groups supply 85.83% of pooled waiting benefit.
+
+Stage300 t199248/node001 completed done/exit0. Its 52-candidate development
+family selected service cutoff 0.0022712083333332397: 142/169 base changes,
+112.68% of base waiting gain, cost -0.000461337 versus base -0.000427096.
+This admits prospective confirmation, not a performance claim.
+Stage301 locks this cutoff and the unchanged joint rule on 400 fresh test
+prefixes, replicas52-91. Its critic-increment claim requires joint cost
+versus service-only to have both CIs below zero and both E16 differences
+negative, together with the original joint-transfer gate. Native sampling
+reuses the qualified Stage298 path; the new arm only retains supported base
+actions, so no redundant native pilot or reference fitting is added.
+The six-module focused/regression suite passes 45 tests.

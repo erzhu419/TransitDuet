@@ -1,0 +1,24 @@
+{
+  "contract": {
+    "Stage298_E32_used_for_calibration": false,
+    "action": "base_eligible_and_S8_paired_service_mean_le_cutoff_else_own_raw; no_batch_budget_or_fleet_score",
+    "actor_updates": 0,
+    "calibration": "same_Stage297_prefix_max_t_and_MC_Bonferroni_waiting_floor_over_entire_expanded_family; same_cost_upper_objective",
+    "confirmation_gate": "selected_service_nontrivial_subset_and_cost_point_better_than_base; no_claim_from_development",
+    "family": "preserve_all_Stage297_base_risk_joint_candidates_plus_service_fit_quantiles1to16_and_zero",
+    "frozen_joint": "Stage298_locked_policy_unchanged; do_not_reselect_joint",
+    "hypothesis_informed_by_Stage298": true,
+    "new_native_episodes": 0,
+    "next_confirmation": "only_if_admitted; genuinely_new_prefixes_and_futures; Stage298_retired_from_tuning",
+    "raw_reference_fits": 0,
+    "risk_fits": 0,
+    "roles": [
+      "fit",
+      "calibration"
+    ],
+    "selection": "eligible_base_or_service_only; minimize_max_cost_CI95_upper_then_mean_then_index",
+    "source": "native_transit_paired_fleet_stage296_20261018_r1"
+  },
+  "protocol": "native_transit_service_control_stage300_v1",
+  "source_revision": "ff2bc4707d8548093da3c3454dd1a6cbc4989b34"
+}
