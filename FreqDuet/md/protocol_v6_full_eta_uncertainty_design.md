@@ -15,8 +15,11 @@ daily-mean ranges or standard errors omit future within-day variation.
 For e=prediction-truth,T=m-e:fixed-tail bounds would be
 [m-Q_0.9(e|context),m-Q_0.1(e|context)]. No quantiles are estimated here.
 
-Next:extract joint residuals from existing server archives,including query time,
-same-follower target-ready/label-available time,observable context and support.
+V159 extraction/readback now reproduces V158 on all 768 archived paths,including
+query time,same-follower target-ready/label-available time and observable context.
+Next:complete read-only metadata sidecars for follower-validity/provenance,
+joint-current-residence conditional support and separate shadow service support.
+Late policy-time load is unavailable as query-time context and stays excluded.
 Online updates require labels strictly completed before the query;keep signed
 asymmetry and unsupported states,without changing the point or filling zeros.
 An eventual fixed interval protocol needs calibration/confirmation days disjoint

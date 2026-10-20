@@ -1,23 +1,29 @@
 # V159: clocked joint residual archive
 
-Read-only extraction on the consumed V145 development archive: paired running,
-service and post-ready residence residuals for fixed V151 and the unpromoted
-eight-day running shadow. Preserve query/label clocks, physical follower identity,
-observable state, support and episode membership; retain unresolved/opaque cases.
-Reproduce V158 component moments before accepting the extracted dataset.
+Completed development extraction `t204596` (`6b5dfe58a8`) and independent
+readback `t204600` (`944df2d9f1`), node006, eight workers. All 384 actor/day
+pairs / 768 archived paths reproduce V158 moments from the written records.
+Six extraction tests and four readback tests passed.
 
-Separately inventory server archives and demand-day exposure. Missing references
-do not establish independence; unknown-use days are not scored. Report independent
-calibration/confirmation gaps instead of constructing a convenient split.
+Of 3,993,600 queries, 3,343,763 have joint running/service/post-ready residuals;
+2,735 retain opaque full residuals and 647,102 lack valid follower evidence.
+Identity, query/label clocks, component sums, episode weights, saved observable
+state and strict completed-prefix support passed. The 2,787 same-clock ready
+states have earlier callback order. Signed errors remain prediction minus truth.
 
-No rollout, training, interval fitting or promotion. V151, V146 (3s/0s), 3600s
-window, 0.1/0.1 tails and main deployment remain fixed. Raw residuals stay on the
-server; only inventory/count receipts return locally. Next: use the inventory to
-decide whether an independent calibration/confirmation collection is necessary.
+Metadata gaps: 35,462 joint-current-residence queries lack their conditional
+support log; shadow service calls are not separately exported (1,695 queries
+change service mean); follower-validity is not an exported state field.
+All policy snapshots are later than the query, so query-time load is absent,
+not backfilled from those snapshots.
 
-Execution: source `6b5dfe58a8`, scheduler `t204596`, node006, eight workers,
-384 actor/day pairs (768 archived paths). Six tests and the first pair's V158
-moment reproduction passed; full extraction is still running. Initial inventory:
-45 result roots, 78 groups; no independently certified split. The 16 unrecognized
-names were located in V112's old `p0`-`p15` diagnostic traces (`t204598`), not a
-new independent cohort. V112 stores their identities under `pairs/`, not `paths/`.
+Next: recover validity/provenance and conditional support as read-only metadata
+sidecars, preserving the residual files. Keep late-snapshot load unavailable at
+query time. Independent calibration and confirmation still need distinct unused
+day cohorts, disjoint from prior fitting and consumed development/validation,
+with complete frozen-deployment archives and outcome-use provenance. None is
+certified in the 45-root/78-group inventory; V112's `p0`-`p15` are old diagnostics.
+
+V151/main, V146 (3s/0s), the 3600s window and 0.1/0.1 tails remain unchanged.
+No new forecasts, replay, training or interval fit during readback. Raw records
+stay server-side; only small receipts return locally.
