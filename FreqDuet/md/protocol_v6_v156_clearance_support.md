@@ -46,6 +46,9 @@ Direct paired single-minus-eight-day full MAE:all+2.538[2.420,2.656]old,
 +2.539[2.421,2.658]handoff;clearance-0.527[-0.896,-0.157]old,
 -0.530[-0.902,-0.156]handoff. All12 actor margins agree;clearance24/32 day
 margins favor single. This is a real conditional tradeoff,not a dominance result.
+On common structured support,its0.529/0.532s advantage includes0.366/0.360s
+extra cancellation. Running-only advantages0.163/0.172s have crossed intervals
+[-0.590,0.268]/[-0.604,0.259]. Single-day running superiority is not established.
 
 Launch harm includes12161/933059 on2451015:single+15.806s versus full+7.488/7.377s;
 12071/2451027:single+0.983s versus full-24.224s. Handoff-only933031/2451023 improves
