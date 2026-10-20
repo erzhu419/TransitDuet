@@ -41,9 +41,17 @@ clearance launch MAE worsens10.865/2.329s,versus eight-day gains3.120/7.574s;
 only3/4 queries,no crossed CI. Zero-day forecasts reproduce V151 per query,
 including unsupported running-leg fallback;this is identity,not new validation.
 
-Original V155 joint gate remains unpassed. Next summarize direct paired
-single-minus-eight-day contrasts from saved cells and retain sparse launch
-cells,without forecasting again,changing weights or promoting the single day.
+Saved-cell readout830be90017,t204548,node006,3 tests passed;only35403 bytes pulled.
+Direct paired single-minus-eight-day full MAE:all+2.538[2.420,2.656]old,
++2.539[2.421,2.658]handoff;clearance-0.527[-0.896,-0.157]old,
+-0.530[-0.902,-0.156]handoff. All12 actor margins agree;clearance24/32 day
+margins favor single. This is a real conditional tradeoff,not a dominance result.
+
+Launch harm includes12161/933059 on2451015:single+15.806s versus full+7.488/7.377s;
+12071/2451027:single+0.983s versus full-24.224s. Handoff-only933031/2451023 improves
+under both. Thus the handoff aggregate masks3/4 worsened single-day queries.
+Original V155 joint gate remains unpassed. Next V157 only reconstructs these
+seven saved queries and exposes per-leg prefix/prior/truth accounting,no new arm.
 Limitations:controlled deletion changes both prior composition and n/(n+1)
 strength. This one fixed prior day cannot establish which effect explains its
 clearance advantage,or validate natural low-support performance. Main,V151,V146,
