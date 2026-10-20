@@ -32,5 +32,15 @@ Scheduling update: unfinished FreqDuet jobs use high priority and manual
 dispatch. The calibration batch has no failed retries; the old preflight
 startup failures are separate historical tasks. No data recollection required.
 
-Next: audit the completed calibration metadata and support, without fitting
-intervals or opening confirmation until separately authorized.
+Readback passed on node002 (`t208303`, audit source `c5bef892c6`): five tests,
+768/768 paths, all 48 shards, 64 paths per actor and 24 per calibration day.
+All 3,993,600 queries retain query-time state/support and unavailable late load;
+3,340,895 query-valid followers all resolve to same-vehicle target-ready labels.
+Strict support clocks, separate policy/load clocks, 2,575 earlier same-clock
+ready callbacks, and joint residual identities passed. No missing eligible label.
+Native support admits 3,134,878 vectors; frozen keys with at least 19 days retain
+3,104,478 (old/handoff: 92.921%/92.926% of eligible queries). Sparse keys abstain.
+Only three summary files, 20,874 bytes total, were fetched; raw data stay remote.
+Next: calibration-only deterministic maps and stratum support admission, then
+seal before confirmation release. Neither fitting nor confirmation ran here;
+V151, V146, main policy, window and tails remain unchanged.
