@@ -34,34 +34,20 @@ pulled. Saved-moment readout da5ac49463,t204575,node006:3 tests and original
 covariance matrices reproduced,no new forecasts;339663-byte summary only.
 
 Eight-day complete-leg MAE(old):all21.148->14.381s,paired gain6.767[6.670,6.849];
-hour2 gain8.351[8.032,8.657];clearance gain0.674[0.453,0.894]. Handoff gains
-6.766/8.369/0.669s. Prior daily-mean variance is10.15% of average prior leg
-variance overall,24.30% in clearance. These are leg-duration components,not
-full-ETA day-mean shares. Clearance prefix entries are77.13% before the query
-hour. Daily-mean ranges omit within-day spread;they are not predictive bands.
+hour2 gain8.351[8.032,8.657];clearance gain0.674[0.453,0.894]. Handoff agrees.
+Prior daily-mean variance is10.15% of average prior leg variance overall,24.30%
+in clearance;this is not the full-ETA day-mean fraction or predictive coverage.
 
-Eight-day,holding-identified cohort(old;1654172 all/42411 clearance queries):
+Holding-identified cohort(old;1654172 all/42411 clearance queries):within-cell
+variance99.928%[99.905,99.954]all,95.865%[94.005,97.653]clearance;day-mean
+fractions0.072%/4.108%. Handoff agrees. Coarse residence has different support.
+Running/holding rho=-0.233all,-0.254clearance[-0.295,-0.214];service/holding
+rho=-0.231/-0.163. Running/service clearance rho+0.014 crosses0. Holding/ticks
+rho=-0.820all,but ticks have small variance. Ignoring covariance overstates full
+variance23.18%all,33.77%clearance[28.15,40.34],not interval width or coverage.
 
-| Scope | Within actor/day variance %,95% CI | Common day-mean variance %,95% CI |
-| --- | --- | --- |
-| all | 99.928 [99.905,99.954] | 0.072 [0.045,0.095] |
-| hour2 | 97.610 [96.428,98.743] | 2.376 [1.243,3.557] |
-| clearance | 95.865 [94.005,97.653] | 4.108 [2.320,5.969] |
-| hour13 | 95.411 [93.437,97.379] | 4.562 [2.597,6.541] |
-
-Handoff shares agree(all99.928% within;clearance95.906%). Coarse residence
-analysis agrees in direction;its support is not interchangeable with this table.
-Running/holding correlations all-0.233[-0.241,-0.225],clearance-0.254[-0.295,-0.214].
-Service/holding:-0.231/-0.163. Running/service:all+0.111;clearance+0.014,crossing0.
-Holding/execution-wait:-0.820 overall,but execution-wait variance is small.
-Clearance running/holding covariance is-248.130s^2:within-240.724 and day-7.338.
-Ignoring covariance overstates total variance23.18%[22.00,24.34]overall and
-33.77%[28.15,40.34]clearance,not an interval-width or coverage result.
-
-Decision:conditional joint residual blocks around unchanged points,not independent
-component intervals or a dominant all-day bias. Preserve local context and day
-blocks;keep post-ready residence joint when holding is inseparable. See
-protocol_v6_full_eta_uncertainty_design.md. No interval fitted or main promoted.
-Within-cell dependence includes stop/state/horizon and local day-by-context
-variation;first/second moments do not identify conditional tails. Consumed days
-cannot supply fresh confirmation or justify weight/window/quantile tuning.
+Next:state-conditional joint residual blocks around unchanged points,not a
+dominant whole-day bias or independent intervals;see
+protocol_v6_full_eta_uncertainty_design.md. Within-cell still mixes stop/state/
+horizon and local day-by-context variation. Joint tails remain unidentified;
+no fit,tuning,confirmation claim or main promotion. Detailed CIs stay in summaries.
