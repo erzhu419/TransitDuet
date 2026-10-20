@@ -1,0 +1,67 @@
+{
+  "protocol": "native_transit_closed_loop_preflight_stage303_v1",
+  "recorded_at_utc": "2026-10-20T20:50:58.662243+00:00",
+  "source_revision": "de25f421273b9cbf318232d620382699238a3803",
+  "scheduler": {
+    "count": 30,
+    "first": "t208491",
+    "last": "t208520",
+    "status_counts": {
+      "done": 7,
+      "running": 23
+    },
+    "active_nodes": {
+      "node001": 7,
+      "node006": 5,
+      "node004": 6,
+      "node005": 5
+    },
+    "failed_ids": [],
+    "require_node": null,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 1536
+  },
+  "physical_worker": {
+    "id": "t208492",
+    "node": "node001",
+    "state": "alive",
+    "alive_pids": [
+      604688,
+      604714
+    ],
+    "vram_mb": 0,
+    "ram_mb": 608,
+    "pcpu": 99.3
+  },
+  "history_witness": {
+    "task": "t208491",
+    "node": "node001",
+    "software_qualified": true,
+    "native_episodes": 5,
+    "arm": "raw",
+    "profile": 0,
+    "root": 397,
+    "scenario": "low_noise",
+    "nontrivial_history_witness": {
+      "exact_identity": true,
+      "forced_candidate": 0,
+      "prior_probe": 8
+    }
+  },
+  "native_episode_budget": 4590,
+  "all_pilots_qualified": false,
+  "performance_claim": false,
+  "raw_reference_fits": 0,
+  "risk_fits": 0,
+  "actor_updates": 0,
+  "raw_or_model_data_pulled": false,
+  "scalar_witness_bytes_pulled": 214
+}

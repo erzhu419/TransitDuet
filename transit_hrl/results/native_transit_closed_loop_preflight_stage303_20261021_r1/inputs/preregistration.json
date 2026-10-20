@@ -1,0 +1,43 @@
+{
+  "contract": {
+    "actor_updates": 0,
+    "arms": [
+      "raw",
+      "service_only",
+      "joint_budgeted"
+    ],
+    "budget": {
+      "native_episodes": 4590,
+      "tasks": 30
+    },
+    "cohort": "10_fresh_pilot_scenes; both_roots_all5regimes; one_fixed_profile_not_a_training_seed",
+    "future": "actual_scene2090000000_namespace; independent_inner_future2140000000_namespace; no_E32_selection",
+    "history": "replay_each_controller_actual_prior_actions; rebuild_physical_state_context_and_P8S8_at_second_probe",
+    "locked_policy": {
+      "joint": {
+        "family": "joint",
+        "index": 27,
+        "threshold": 0.002181045736174378
+      },
+      "service": {
+        "family": "service",
+        "index": 47,
+        "threshold": 0.0022712083333332397
+      }
+    },
+    "probes": [
+      8,
+      9
+    ],
+    "profile": 0,
+    "proposal_screen": "unchanged_P8_S8_all6actions; frozen_raw_fleet_critic_and_cutoffs; no_reranking",
+    "qualification": "unchanged_weights; full_native_ledgers; exact_nontrivial_history_identity; registered_prior_overrides",
+    "raw_reference_fits": 0,
+    "risk_fits": 0,
+    "scope": "software_preflight_only; all_pilot_scenes_excluded_from_future_performance_claims",
+    "source": "native_transit_service_comparison_stage301_20261020_r1"
+  },
+  "protocol": "native_transit_closed_loop_preflight_stage303_v1",
+  "source_report_task": "t208473",
+  "source_revision": "de25f421273b9cbf318232d620382699238a3803"
+}
