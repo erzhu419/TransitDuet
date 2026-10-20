@@ -27,3 +27,8 @@ Limitations:consumed data,not confirmation;fixed8 prior days;daily-mean variance
 mixes latent shifts and finite-sample noise. Day-mean ranges are not predictive
 intervals. Correlation is not a causal effect. Keep missing support/undefined
 correlation explicit. Only small summaries/logs local;all path/cell data server.
+
+Execution e5a6705971,scheduler t204550,node006,8 workers.8 focused tests passed;
+first saved actor/day pair reproduced V156 endpoints in both modes. Remaining
+383 pairs are running. No overall dependence result or uncertainty-model decision
+yet;no new predictor,interval or controller admitted.
