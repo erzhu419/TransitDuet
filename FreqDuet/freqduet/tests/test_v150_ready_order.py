@@ -1,5 +1,8 @@
+from pathlib import Path
+import sys
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
 import audit_freqduet_v150_ready_order as audit
 
 
