@@ -77,3 +77,43 @@ allowed node001--006 only. Queued t199054 was cancelled without running and spli
 into two7-worker ranges247:316 and316:384 to fit dispersed free CPU slots; no
 case, sampler, candidate or gate changed. Formal collection and paired computation
 have started; predictor effects have not been read out.
+
+## Independent readout
+
+All five formal shards exited0: 384 crossed cells/768 paths, no missing required
+labels. Original joint gate FAIL; service mechanism PASS; clock mechanism FAIL.
+Seconds below; CI95 uses the registered5000 crossed actor/day draws. Joint equals
+service on these paths; clock equals V141 to numerical precision.
+
+| Metric | old: V141 -> service | handoff: V141 -> service |
+| --- | --- | --- |
+| Clearance signed bias | 21.721 -> 15.305 | 21.665 -> 15.259 |
+| Clearance MAE | 40.791 -> 38.016 | 40.820 -> 38.052 |
+| Clearance MAE delta CI95 | -2.775 [-3.362,-2.248] | -2.768 [-3.367,-2.233] |
+| All-day MAE delta CI95 | -0.0740 [-0.0906,-0.0593] | -0.0738 [-0.0907,-0.0591] |
+| Hour13 MAE delta CI95 | -2.410 [-2.924,-1.949] | -2.404 [-2.929,-1.938] |
+
+Both modes have improving MAE margins for all12 actors/all32 days in these three
+scopes. All-day absolute-cell-bias nevertheless increases0.091/0.105s: reducing
+clearance overprediction moves the all-day signed bias further below zero.
+Same-identity source-switch burden changes -0.0000867s/valid matched decision,
+CI95 [-0.0003549,+0.0001631]; non-harm is not established, not proven harm.
+Conditional switch MAE24.605 -> 24.601 has only346/384 contributing cells, no CI.
+
+Read-only audit t199125/node006, source6c6aee1c13: three tests/384 cells/native
+exit0; saved endpoints and switch burden reproduced, no new rollout or fitting.
+Clock has zero newly structured queries; max difference from V1415.684e-13s.
+2329/34209 switches retain an opaque fallback on at least one side, contributing
+0.182892 of0.321451s/decision total burden. Those fallbacks remain blocked by
+strict physical-segment evidence or missing completed service survivors.
+Downstream-service bias remains11.905/11.930s after correction;13958/13909
+clearance queries still lack same-phase samples at one or more downstream stops.
+
+Decision: preserve the service component as an independently supported prediction
+candidate, not a promoted controller. Keep the original joint rejection and all
+frozen settings. Next inspect residual service error by phase support and causal
+input availability at retained fallback boundaries; establish nonzero target
+coverage on consumed paths before preregistering any new clock candidate. No
+threshold/window/quantile changes or further tuning on V149 confirmation days.
+Small local summaries: results_freqduet/protocol_v6_v149_phase_clock/summary/status.json
+and readout_6c6aee1c13/status.json; raw paths remain on the server.
