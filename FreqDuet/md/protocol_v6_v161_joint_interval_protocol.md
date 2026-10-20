@@ -4,6 +4,8 @@ Protocol only, using V160's reserved 32 calibration days (2851001-2851032) and
 32 confirmation days (2852001-2852032), all 12 actors, both old/handoff modes.
 The original matched sampler allocation and whole-day split are unchanged.
 No collection, interval fit, replay, training or main-policy change is authorized.
+Server protocol check: scheduler task `t204658`, node006, source `09553bc920`;
+nine unit checks passed and the protocol was sealed without opening residuals.
 
 V151 is the point reference; the running shadow is diagnostic only. V146 3s/0s,
 the native 3600s window and .1/.1 tails remain fixed. Same-query running, service
