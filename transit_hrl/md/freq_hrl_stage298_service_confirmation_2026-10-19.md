@@ -62,3 +62,35 @@ policy and inference rules. The first physical E32 check, t195353/node001,
 is alive at 97.3% CPU / 582 MiB; its dispatch snapshot records 10 running,
 118 launching and 3,528 queued jobs. No new fits or performance conclusions
 are introduced; the primary and matched-control tests await independent E32.
+
+Independent E32 completion (2026-10-20): all 3,656 tasks completed done/exit0
+with zero retries. Official report t199244/node001 qualified 108,672 native
+episodes / 29,248 unique state-futures; only 18,437 report bytes were pulled.
+The registered joint-transfer gate passes. Cost/wait versus raw have both
+CI95 upper bounds below zero; pooled / first16 / last16 waiting retention
+is 92.37% / 97.62% / 87.17%, exceeding the registered 50% point floor.
+
+Below, estimates and CI endpoints are multiplied by 1e6; waiting uses minutes.
+Negative differences favor the joint rule.
+
+| Comparator | Metric | Mean | Prefix CI95 | Conditional MC CI95 |
+| --- | --- | ---: | --- | --- |
+| raw | cost | -202.006 | [-288.844, -119.627] | [-265.551, -138.460] |
+| raw | wait | -1182.737 | [-1658.035, -781.291] | [-1299.168, -1066.305] |
+| thinning | cost | -25.592 | [-52.490, 2.744] | [-48.385, -2.800] |
+| thinning | wait | -246.449 | [-376.541, -133.691] | [-293.894, -199.004] |
+| service ranking | cost | -12.153 | [-38.628, 10.337] | [-26.931, 2.626] |
+| service ranking | wait | 15.392 | [-11.078, 44.784] | [-0.186, 30.970] |
+
+First16 / last16 cost versus raw: -225.068 / -178.943; wait: -1244.139 /
+-1121.335 in the same scaled units. Both halves also favor joint over
+thinning on cost/wait. Versus service ranking, cost favors joint in both
+halves but waiting is worse in both. Relative to full base, joint costs
+11.301 more and waits 97.669 more (scaled); no extra fleet saving is supported.
+Thus the service-preserving rule transfers, but learned fleet information
+has not established additional cost value over strong matched controls.
+The all-state waiting reduction is about 0.071 seconds per single intervention.
+
+Next: Stage299 adds paired retention-margin/half/group inference without
+changing this primary result. Then define a deployable service-only control
+on old fit/calibration data, keeping Stage298 retired from policy tuning.
