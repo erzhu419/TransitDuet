@@ -34,3 +34,10 @@ node001--006. Details stay remote;only a small final JSON may be fetched.
 This is consumed-path additive clock accounting,not intervention mediation or
 controller admission. Decide the next repair only after the complete decomposition;
 do not fit an offset or change controls on these days.
+
+Read-only follow-up after the main audit:unallocated error dominates switch MAE.
+Split its saved raw forecast into ETA minus actual signed arrival gap,service
+proxy minus target full service,and saved gap minus ETA/proxy(existing adjustment).
+The first term is an arrival clock,not pure running;past target arrivals remain
+signed. Reproduce V148's original unallocated bias/MAE budget per cell before
+crossed statistics. This is a post-hoc explanation,not refitting or a new gate.
