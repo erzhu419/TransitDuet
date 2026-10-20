@@ -72,5 +72,8 @@ Registered source c0658db77a; final execution source d7996d60b4 adds server-only
 per-query shadow archives and JSON-safe counters, with no candidate/gate changes.
 Final-source preflight t199050 on node006: 11 tests and one consumed old/handoff
 pair passed, native exit0; no new demand days read. Formal scheduler shards
-t199051--t199054 cover all384 pairs, planned40 workers, allowed node001--006 only.
-Formal path collection has started; predictor effects have not been read out.
+t199051--t199053 plus t199068/t199069 cover all384 pairs, planned40 workers,
+allowed node001--006 only. Queued t199054 was cancelled without running and split
+into two7-worker ranges247:316 and316:384 to fit dispersed free CPU slots; no
+case, sampler, candidate or gate changed. Formal collection and paired computation
+have started; predictor effects have not been read out.
