@@ -204,7 +204,7 @@ def evaluate_pair(root, runtime, seed, day, cells, save=False, verify=False):
                 shadows.append(dict(query=list(k), time_s=row['prediction_time_s'], points=points, details=details))
             status, truth = prior.prior.prior.target_label(row, path['ready'])
             counts[mode+'/label/'+status] += 1
-            if status != 'resolved' or points['v149'] is None:
+            if status != 'resolved' or points['v141'] is None:
                 continue
             if any(v is None or not math.isfinite(v) or v < 0. for v in points.values()):
                 raise AssertionError('V151 lost a finite baseline point')
