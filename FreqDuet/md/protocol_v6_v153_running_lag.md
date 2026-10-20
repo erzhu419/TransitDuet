@@ -16,3 +16,9 @@ instantaneous speed. Derive moving-time averages using only past events;do not
 infer an unobserved instantaneous speed or use future durations as inputs.
 These comparisons diagnose lag and observable motion;they do not validate a
 new predictor or uniquely identify future stochastic changes. No tuning here.
+
+Source cf7e297449,scheduler t204485,8 workers,allowed node001--006.
+Superseded t204484 cancelled while queued;complete V152 component support is
+used rather than assuming physical position alone guarantees a full forecast.
+Initial dispatch:all six nodes report0 available CPU;task remains queued,not
+failed. Tests and analysis have not run;no V153 result is available yet.
