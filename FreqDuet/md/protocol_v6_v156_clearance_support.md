@@ -18,3 +18,7 @@ Single/zero histories are controlled support-deletion stress,not natural low
 support or independent validation. Zero-prior equality is a fallback identity.
 Report intervals and denominators;missing groups remain inconclusive. No gate
 relaxation or main promotion. Scheduler,node001--006,8 workers;small summary only.
+
+Source8d1e201a13,t204531,node006,8 workers.10 tests and first saved pair passed;
+V155 endpoints and zero-prior fallback reconciled. Remaining pairs running;
+no overall V156 result yet. Original V155 joint gate remains unpassed.
