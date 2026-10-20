@@ -22,5 +22,16 @@ Server scheduler,node001--006,8 workers. Tests and first saved pair before the
 remaining95 pairs. Running moments sealed before scores;no parameter search.
 Pull only small summary;moments,per-cell outputs and original paths stay server.
 
-Source5be4cea534,scheduler t204491. Initial dispatch is resource-waiting,not
-a script failure;tests and development scores are not yet available.
+Source5be4cea534,t204491,node004,exit0,no retries;6 tests passed,96 pairs/192
+paths complete. Only93483-byte summary pulled. Relative to V151-LODO,old/handoff
+full ETA MAE falls44.729->35.289s /44.723->35.289s;paired delta-9.439/-9.434s,
+CI[-9.666,-9.160]/[-9.658,-9.165]. Hour2 delta-11.473/-11.474s;all12 actor and
+8 day margins improve in both scopes. All-day running MAE improves10.612/10.601s;
+induced service-clock mean change is only0.00014/0.00011s.
+
+Development gate remains false:clearance full delta-0.883/-0.863s has CI
+[-2.507,0.822]/[-2.476,0.827];hour13 also crosses0. Low-support group never
+occurs(all replaced legs have7 prior days),so it is untested,not zero harm.
+Next freeze weights and revalidate on disjoint existing V145 archives(V155);
+no tuning on these eight days or new replay/training. This is useful LODO
+development evidence,not an independent positive result or controller gain.

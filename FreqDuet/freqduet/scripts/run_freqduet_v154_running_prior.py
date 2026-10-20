@@ -84,14 +84,14 @@ def fallback(path, row, geometry, objects, phases):
     return values['joint']
 
 
-def case(root, out, runtime, seed, day, running, services):
+def case(path_root, out, runtime, seed, day, running, services):
     geometry = native.model.load_geometry(runtime)
     modes, counts = {}, Counter()
     service_cells = candidate.exclude_day(services['actors'][str(seed)], day)
     if any(d['day'] == day for c in service_cells for d in c['days']):
         raise AssertionError('held day leaked into service prior')
     for mode in frozen.MODES:
-        path, objects = prepare(root/'calibration', seed, day, mode, geometry)
+        path, objects = prepare(path_root, seed, day, mode, geometry)
         phases = frozen.candidate.frozen.PhaseServices(path['arrivals'], path['ready'], path['cutoff'])
         service = frozen.candidate.ServiceLaw(service_cells, path['arrivals'], path['ready'], path['cutoff'])
         law = candidate.RunningLaw(running['actors'][str(seed)], day, prior.RunningPrefix(path, geometry))
@@ -160,10 +160,10 @@ def run(args):
     running = build(args.v151_root/'calibration', native.model.load_geometry(args.runtime))
     write(args.out_root/'model.json', running)
     cases = list(frozen.CAL_CASES)
-    case(args.v151_root, args.out_root, args.runtime, *cases[0], running, services)
+    case(args.v151_root/'calibration', args.out_root, args.runtime, *cases[0], running, services)
     print('V154_FIRST_LODO_PAIR_COMPLETE', flush=True)
     with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
-        jobs = [pool.submit(case, args.v151_root, args.out_root, args.runtime, s, d, running, services)
+        jobs = [pool.submit(case, args.v151_root/'calibration', args.out_root, args.runtime, s, d, running, services)
             for s, d in cases[1:]]
         for n, job in enumerate(as_completed(jobs), 2):
             job.result()
