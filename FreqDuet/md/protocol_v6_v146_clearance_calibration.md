@@ -42,4 +42,35 @@ confirmation t195335--t195339 and aggregate t195340 wait for the local small
 seal_summary_441553aa65/done.json. No confirmation outcome may inform fitting.
 Calibration completed: t195334 exit0,sealed from5635 native-finite clearance
 queries,all768 cells/all32 days,zero unresolved labels. Fixed dL=3s,dU=0s;
-only1520-byte seal receipt fetched to release confirmation. Confirmation pending.
+only1520-byte seal receipt fetched to release confirmation.
+
+## Confirmation
+
+t195335--t195340 completed without retries; all768 confirmation paths resolve.
+Both modes pass all three coverage gates and the paired clearance-score gate.
+Episode-first, equal actor/day crossed estimates, native -> calibrated coverage%:
+
+| Scope | old | handoff |
+| --- | --- | --- |
+| Clearance service | 61.42 -> 91.36 | 60.98 -> 90.15 |
+| Hour13 service | 65.72 -> 90.37 | 64.70 -> 89.41 |
+| All-day service | 85.12 -> 85.82 | 85.07 -> 85.73 |
+
+One-sided95% coverage lower bounds(old/handoff): clearance88.95/87.80%,
+hour13 88.09/87.16%,all-day85.37/85.30%; all exceed80%. Clearance score
+changes are -4.929s[-5.773,-4.096] and -5.062s[-6.052,-4.097](two-sided95%).
+Clearance widths13.50->15.72s and13.60->15.86s: improved score despite widening.
+All-day finite availability54.747/54.778% remains identical; no finite unresolved
+labels. Read-only audit ade0291e0b/t199000/node006 exit0,5 tests pass: every
+path/scope preserves request/support counts,label states and abstention reasons;
+active-service and ready negative controls are identical. Both modes have all12
+actor coverage margins above80% in every primary scope,and all12 actor/all32 day
+score margins improve. Clearance actor minima88.40/89.05%;hour13 87.65/87.01%.
+Each mode still has3/32 day margins below80% in clearance and hour13;clearance
+minima72.98/72.12%. These are descriptive margins,not new gates or per-day
+guarantees. Only48288 bytes of final/audit summaries fetched this analysis;
+full marginal rows,traces and checkpoints stay remote.
+
+Next: freeze the sealed3s/0s calibration. Audit full same-vehicle follower ETA
+and source-switch gap-change errors on saved paths before any control admission;
+retain native low-support abstention. No point/window/tail or main-policy change.
