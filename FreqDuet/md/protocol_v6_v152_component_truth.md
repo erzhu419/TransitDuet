@@ -26,8 +26,9 @@ reconciled. Only224652-byte summary pulled. Paired old/handoff component support
 
 ## Next
 
-Keep V151 sealed. Localize running underprediction by segment/time using saved
-observable speed and completed-prefix lag before designing new calibration;
-do not restore biased service to mask it. No replay,refit,training or policy
+Keep V151 sealed. Segment/time localization completed in V153(t204485):hour2
+shows prefix mixing;launch underprediction persists despite recent samples.
+Next design support-aware segment/time priors,not biased service compensation.
+No replay,refit,training or policy
 change. Summary: results_freqduet/protocol_v6_v151_historical_service/
 component_truth_9fbd08c51b/status.json.
