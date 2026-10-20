@@ -20,8 +20,8 @@ METHOD_FIELDS = ('frozen', 'target', 'conditioning', 'support', 'estimator', 'co
 RAW = {'traces', 'launch_traces', 'records', 'ready', 'ready_labels', 'terminal',
     'query_snapshots', 'queries', 'residuals'}
 SKIP = {'source', 'atoms', 'maps', 'details', 'checkpoints', 'ckpt', 'ckpts', 'logs',
-    'figures', 'plots', '__pycache__'}
-RECEIPTS = {'paths', 'pairs', 'cases', 'cells', 'capture_cells'}
+    'figures', 'plots', '__pycache__', 'cells', 'cases', 'candidates', 'candidate_shadows', 'sidecars'}
+RECEIPTS = {'paths', 'pairs', 'capture_cells'}
 META_NAMES = {'model.json', 'protocol.json', 'preregistration.json', 'registration.json',
     'status.json', 'summary.json', 'manifest.json'}
 
@@ -54,6 +54,7 @@ def inventory(args, confirmation):
     targets = set(CALIBRATION) | set(confirmation)
     for root in sorted(roots):
         require(root.is_dir(), 'known result root missing: '+str(root))
+        print('V165_INVENTORY_ROOT', str(root), flush=True)
         for directory, children, names in os.walk(root):
             path = Path(directory)
             children[:] = sorted(d for d in children if d not in SKIP and
@@ -97,8 +98,9 @@ def inventory(args, confirmation):
                 references.append(dict(path=str(path), field=field, value=hit))
     summary = dict(**{k: sorted(v) for k, v in found.items()}, errors=errors,
         result_roots=len(roots), metadata_files=len(files), artifact_names=bundles, generators=scripts,
-        scope='V159 recorded days plus current known FreqDuet result metadata, artifact names and generator '
-            'literals/ranges; raw arrays, traces and compressed archive contents are not opened')
+        scope='V159 recorded days plus current known FreqDuet protocol/model/summary metadata, path/pair '
+            'receipts, artifact names and generator literals/ranges; historical query-level cells/cases, '
+            'raw arrays/traces and compressed archive contents are not opened')
     write(args.out_root/'details/freshness.json', dict(summary=summary, references=references))
     return summary
 
