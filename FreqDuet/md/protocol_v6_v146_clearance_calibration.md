@@ -34,3 +34,9 @@ validation or control efficacy. No RL training, policy switch, native point,
 window or tail changes. After a failed/inconclusive confirmation, preserve it;
 any revised method needs a separate preregistration and fresh confirmation days.
 Only preflight/seal/final small summaries may sync locally; raw paths stay remote.
+
+Execution441553aa65 was pushed before new paths. Preflight t195327/node006 exit0,
+10 tests pass; the unchanged collector reuses its V145 exact-replay proof.
+Calibration t195329--t195333 (71/22/53/45/66 workers), seal t195334;
+confirmation t195335--t195339 and aggregate t195340 wait for the local small
+seal_summary_441553aa65/done.json. No confirmation outcome may inform fitting.
