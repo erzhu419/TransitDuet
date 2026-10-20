@@ -30,18 +30,19 @@ def contract():
         "new_native_episodes": 0, "raw_reference_fits": 0, "risk_fits": 0, "actor_updates": 0}
 
 
-def paired_statistics(actual, cube):
-    arms = source.ARMS
+def paired_statistics(actual, cube, *, arms=source.ARMS,
+        comparators=("raw", "zero_abstain", "matched_thin", "service_rank_matched", "stage247", "legacy_risk"),
+        primary="joint_budgeted", seed=299):
     weights, names = [], []
-    for arm in ("raw", "zero_abstain", "matched_thin", "service_rank_matched", "stage247", "legacy_risk"):
-        w = np.zeros(len(arms)); w[arms.index("joint_budgeted")] = 1.; w[arms.index(arm)] -= 1.
-        weights.append(w); names.append("joint_budgeted_vs_"+arm)
-    w = np.zeros(len(arms)); w[4], w[2] = 1., -.5
+    for arm in comparators:
+        w = np.zeros(len(arms)); w[arms.index(primary)] = 1.; w[arms.index(arm)] -= 1.
+        weights.append(w); names.append(primary+"_vs_"+arm)
+    w = np.zeros(len(arms)); w[arms.index(primary)], w[arms.index("zero_abstain")] = 1., -.5
     weights.append(w); names.append("half_base_wait_margin")
     values = np.einsum("sdaf,ka->sdkf", actual, np.asarray(weights))
     block = values[cube]
     g, r, j, d = block.shape[:4]
-    rng = np.random.default_rng(299)
+    rng = np.random.default_rng(seed)
     indices = [rng.integers(r, size=(5000, r)) for _ in range(g)]
     output = {}
     for label, ds in (("all32", slice(None)), ("first16", slice(0, 16)), ("last16", slice(16, 32))):
