@@ -19,3 +19,8 @@ follower load. Inspect archived schemas and prefix support, not hypothetical fie
 
 All tests/analysis through scheduler on node001--006; only summary JSON locally.
 Keep the original V149 gate and do not tune on these confirmation days.
+
+Supplement: read the saved ready-label insertion order to separate a follower's
+already completed same-clock callback from a later callback in that tick. Require
+the same physical follower and reconcile the full service-fallback population.
+This establishes event observability only; no new points or future-label inputs.
