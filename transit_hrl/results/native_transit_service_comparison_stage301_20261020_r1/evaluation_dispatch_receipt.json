@@ -1,0 +1,61 @@
+{
+  "protocol": "native_transit_service_comparison_stage301_v1",
+  "recorded_at_utc": "2026-10-20T15:33:03.973128+00:00",
+  "source_revision": "bd196b1bcc20aea9bab144be48b40fbd40c0d698",
+  "seal_task": {
+    "id": "t204681",
+    "node": "node004",
+    "status": "done",
+    "exit_code": 0,
+    "retry_count": 0
+  },
+  "scheduler": {
+    "phase": "evaluate",
+    "count": 3524,
+    "first": "t204712",
+    "last": "t208235",
+    "status_counts": {
+      "launching": 334,
+      "running": 3,
+      "queued": 3187
+    },
+    "active_nodes": {
+      "node005": 75,
+      "node001": 75,
+      "node006": 74,
+      "node004": 72,
+      "node002": 41
+    },
+    "failed_ids": [],
+    "require_node": null,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 1536
+  },
+  "actual_process_check": {
+    "id": "t204713",
+    "node": "node001",
+    "state": "alive",
+    "alive_pids": [
+      360034,
+      360051
+    ],
+    "vram_mb": 0,
+    "ram_mb": 586,
+    "pcpu": 99.7
+  },
+  "evaluation_native_episode_budget": 105952,
+  "actions_and_weights_frozen_before_E32": true,
+  "performance_results_read": false,
+  "raw_reference_fits": 0,
+  "risk_fits": 0,
+  "actor_updates": 0,
+  "raw_or_model_data_pulled": false
+}

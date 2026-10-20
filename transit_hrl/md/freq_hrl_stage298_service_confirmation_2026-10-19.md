@@ -131,3 +131,17 @@ episodes) are submitted unpinned to node001-node006. E32 remains gated on
 their completion and action/weight sealing. The matched-control cost
 contrasts remain necessary for attributing any gain to critic information,
 rather than only to a different intervention budget.
+
+Stage301 follow-up (2026-10-20): all 4,800 P/S tasks completed done/exit0,
+zero retries, for 268,800 native episodes. Seal t204681/node004 completed
+done/exit0 after checking the full receipts, seeds, identities and cost
+decomposition; its 5,945-byte summary/index is the only server data pulled.
+Actions and matching weights are frozen before E32. The sparse union has
+881 active states: 3,524 E32 tasks / 105,952 native episodes. Evaluation
+t204712-t208235 is submitted through scheduler, unpinned over node001-node006,
+using unchanged joint/service cutoffs and draws32-63. No raw/critic fitting
+or actor updates are added. P/S scores are not independent performance
+evidence; the registered two-CI and E16 comparisons await E32.
+Physical E32 probe t204713/node001 is alive at 99.7% CPU / 586 MiB. The
+dispatch snapshot records 3 running, 334 launching and 3,187 queued tasks
+across five active nodes, with no failures.
