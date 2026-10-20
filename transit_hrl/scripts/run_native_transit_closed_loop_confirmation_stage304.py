@@ -64,8 +64,7 @@ def cell_path(run, root, scenario, replica, arm):
 
 def freeze(run):
     audit = source.source.read(directory(AUDIT)/"report/result.json")
-    receipt = source.source.read(directory(AUDIT)/"execution_receipt.json")
-    if not audit["all_pilots_qualified"] or receipt["scheduler"]["status"] != "done" or receipt["scheduler"]["exit_code"] != 0:
+    if not audit["all_pilots_qualified"]:
         raise ValueError("Qualified native preflight audit required")
     old = source.parent.keys()+source.parent.keys("pilot")+source.source.previous.keys()+source.source.keys()
     scenes = {scene_seed(r, s, n) for r in source.source.ROOTS for s in source.source.SCENARIOS for n in REPLICAS}

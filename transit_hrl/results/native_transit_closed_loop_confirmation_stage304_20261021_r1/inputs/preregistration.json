@@ -1,0 +1,73 @@
+{
+  "contract": {
+    "CI_boundary": "both_intervals_measure_full_episode_sampling;neither_is_old_fixed_prefix_conditional_MC",
+    "actor_updates": 0,
+    "actual_world": "2080000000+root_index100000+regime_index1000+replica",
+    "arms": [
+      "raw",
+      "zero_abstain",
+      "service_only",
+      "joint_budgeted"
+    ],
+    "banks": {
+      "proposal": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "screen": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "budget": {
+      "actual_controller_episodes": 1280,
+      "evaluation_tasks": 1280,
+      "native_episodes_including_inner_and_identity": 219520,
+      "paired_scene_units": 320
+    },
+    "cohort": "320_fresh_full_native_scenes;32_per_root_regime;paired4controllers;no_pilot_scenes",
+    "freeze": "freeze_algorithm_cutoffs_seeds_and_inference_before_new_scenes;actions_use_current_on_policy_state",
+    "history": "own_executed_prior_actions;new_native_context_and_independent_P8S8_at_second_probe",
+    "inference": "320_independent_episode_units;stratified_bootstrap5000_seed304_and_paired_stratified_normal95;first16_last16_scenes_each_group",
+    "inner_future": "2030000000+root_index1000000+regime_index100000+replica1000+probe_ordinal100+draw",
+    "locked_policy": {
+      "joint": {
+        "family": "joint",
+        "index": 27,
+        "threshold": 0.002181045736174378
+      },
+      "service": {
+        "family": "service",
+        "index": 47,
+        "threshold": 0.0022712083333332397
+      }
+    },
+    "primary": "service_only_vs_raw_cost_wait_service_both_CI_upper_lt0;cost_wait_both_seed_halves_negative;half_base_wait_margin_both_CIs_negative_pooled_and_halves",
+    "probes": [
+      8,
+      9
+    ],
+    "profile": 0,
+    "qualification_source": "native_transit_closed_loop_preflight_audit_stage303_20261021_r1",
+    "raw_reference_fits": 0,
+    "risk_fits": 0,
+    "scope": "two_native_upper_decisions_fixed_lower;profile0;not_end_to_end_HRL",
+    "secondary": "joint_vs_raw;zero_abstain_vs_raw;joint_vs_service_only_cost_both_CIs_upper_lt0_and_both_halves_negative_with_joint_transfer"
+  },
+  "native_qualification_task": "t208523",
+  "pilot_metrics_used_for_selection": false,
+  "protocol": "native_transit_closed_loop_confirmation_stage304_v1",
+  "source_revision": "3592e1a9971d29985ebbe27601ecd20b7f715193"
+}

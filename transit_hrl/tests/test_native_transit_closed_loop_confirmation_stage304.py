@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
@@ -8,6 +11,17 @@ from scripts import submit_native_transit_closed_loop_confirmation_stage304_sche
 
 
 class ClosedLoopConfirmationTests(unittest.TestCase):
+    def test_remote_freeze_needs_native_report_not_local_dispatch_receipt(self):
+        with TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            report = base/spec.AUDIT/"report/result.json"
+            report.parent.mkdir(parents=True); report.write_text(json.dumps({"all_pilots_qualified": True}))
+            with patch.object(spec, "directory", side_effect=lambda run: base/run), patch.object(spec, "contract", return_value={}):
+                spec.freeze("unit")
+            r = json.loads((base/"unit/freeze/result.json").read_text())
+            self.assertTrue(r["software_qualified"])
+            self.assertEqual((r["scene_units"], r["distinct_inner_seeds"]), (320, 10240))
+
     def fixture(self):
         values = np.zeros((10, 32, 4, 4))
         values[:, :, 1] = [-2., -1., -1., -2.]
