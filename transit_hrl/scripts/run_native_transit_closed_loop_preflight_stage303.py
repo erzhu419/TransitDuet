@@ -19,6 +19,8 @@ SOURCE = "native_transit_service_comparison_stage301_20261020_r1"
 ARMS = ("raw", "service_only", "joint_budgeted")
 PROBES = (8, 9)
 PROFILE = 0
+REPLICA = 0
+BANKS = {"proposal": tuple(range(8)), "screen": tuple(range(8, 16))}
 parent = source.parent
 
 
@@ -76,7 +78,8 @@ def choose(run, arm, row, first, screen):
     _, keep = parent.native.rule.screen(proposal, raw, screen)
     service = parent.native.rule.paired_values(screen, proposal, raw)[..., 2].mean(axis=2)
     locked = source.read(directory(run)/"inputs/preregistration.json")["contract"]["locked_policy"]
-    if arm == "service_only": accepted = keep & (service <= locked["service"]["threshold"])
+    if arm == "zero_abstain": accepted = keep
+    elif arm == "service_only": accepted = keep & (service <= locked["service"]["threshold"])
     else:
         model = source.read(parent.directory(source.previous.selection.PARENT)/"fit_raw/model_before_calibration.json")
         fleet = parent.learning.predict(model, parent.learning.features([row], raw, proposal, first, screen))
@@ -84,16 +87,17 @@ def choose(run, arm, row, first, screen):
     return int(np.where(accepted, proposal, raw)[PROFILE, 0])
 
 
-def run_pilot(run, root, scenario, arm):
+def run_pilot(run, root, scenario, arm, *, protocol=None):
     import torch
     from freq_hrl.domains.transit.native_timetable_context import NativeTimetableContextAudit, qualify_timetable
     native, model, checkpoint = parent.native.native_inputs(root)
+    spec = protocol or sys.modules[__name__]
     shared = native.shared
-    output = directory(run)/"cells"/str(root)/scenario/arm
-    scene, episodes = scene_seed(root, scenario), 0
+    output = spec.directory(run)/"cells"/str(root)/scenario/arm
+    scene, episodes, state_matches, identities = spec.scene_seed(root, scenario), 0, 0, 0
 
     def episode(probe, history, label, *, candidate=None, reference=None, future=None):
-        nonlocal episodes
+        nonlocal episodes, state_matches
         runner = shared.native.make_runner(root, scenario, output/"raw"/label, checkpoint)
         before = shared.native.model_arrays(runner)
         plan = replay_plan_class(NativeTimetableContextAudit, history, future)(runner.env, model, probe,
@@ -118,11 +122,12 @@ def run_pilot(run, root, scenario, arm):
         native.qualify_observer(compact)
         if any(plan.applied_choices[p] != action for p, action in history.items()): raise ValueError("Past controller choices were not replayed")
         episodes += 1
+        state_matches += int(reference is not None)
         return compact, plan
 
     def context(plan, probe):
         c = next(c for c in plan.contexts if c["index"] == probe)
-        row = {"root": root, "scenario": scenario, "replica": 0, "scene_seed": scene, "probe_index": probe,
+        row = {"root": root, "scenario": scenario, "replica": spec.REPLICA, "scene_seed": scene, "probe_index": probe,
             **{k: copy.deepcopy(c[k]) for k in ("time_s", "direction", "native_state_v2", "nominal_s", "candidates")},
             "original_choice": c["greedy"], "context": native.labels.training_context(plan.snapshot),
             "occupancy_context": {k: copy.deepcopy(c[k]) for k in native.context_source.OCCUPANCY_KEYS},
@@ -131,10 +136,11 @@ def run_pilot(run, root, scenario, arm):
         return row
 
     def panel(row, reference, history, draws):
+        nonlocal identities
         records = []
         probe = row["probe_index"]
         for draw in draws:
-            seed = future_seed(root, scenario, probe, draw)
+            seed = spec.future_seed(root, scenario, probe, draw)
             torch.set_rng_state(torch.tensor(reference.snapshot["rng"]["torch"], dtype=torch.uint8))
             baseline, current = episode(probe, history, f"probe{probe}/draw{draw}/observer", reference=reference, future=seed)
             values = {}
@@ -150,37 +156,41 @@ def run_pilot(run, root, scenario, arm):
                 values[str(candidate)] = [cost, fleet, cost-fleet,
                     branch["restricted_wait_horizon_min"]-baseline["restricted_wait_horizon_min"]]
             if values[str(row["original_choice"])] != [0., 0., 0., 0.]: raise ValueError("Closed-loop identity differs")
+            identities += 1
             records.append({"draw": draw, "future_seed": seed, "values": values})
         write_json(output/f"probe{probe}/draws{draws[0]}to{draws[-1]}.json", records)
         return np.asarray([[[r["values"][str(a)] for a in range(6)] for r in records]])
 
     history, decisions, witness = {}, [], None
-    for probe in PROBES:
+    for probe in spec.PROBES:
         _, plan = episode(probe, history, f"actual/probe{probe}")
         row = context(plan, probe)
-        if arm == "raw" and probe == PROBES[0]:
+        if arm == "raw" and probe == spec.PROBES[0]:
             original_curve = row["candidates"][row["original_choice"]]["commitment"]["prefix_planned_s"]
             forced = next((i for i, c in enumerate(row["candidates"]) if c["commitment"]["prefix_planned_s"] != original_curve), None)
             if forced is None: raise ValueError("Pilot did not exercise a nontrivial prior timetable action")
-            baseline, ref = episode(PROBES[1], {probe: forced}, "witness/observer")
+            baseline, ref = episode(spec.PROBES[1], {probe: forced}, "witness/observer")
             torch.set_rng_state(torch.tensor(ref.snapshot["rng"]["torch"], dtype=torch.uint8))
-            identity, _ = episode(PROBES[1], {probe: forced}, "witness/identity",
+            identity, _ = episode(spec.PROBES[1], {probe: forced}, "witness/identity",
                 candidate=ref.probe["greedy"], reference=ref)
             shared.qualify(identity, baseline, candidate=ref.probe["greedy"])
+            identities += 1
             witness = {"prior_probe": probe, "forced_candidate": forced, "exact_identity": True}
         if arm == "raw": first = screen = None
         else:
-            first = panel(row, plan, history, list(range(8)))
-            screen = panel(row, plan, history, list(range(8, 16)))
+            first = panel(row, plan, history, list(spec.BANKS["proposal"]))
+            screen = panel(row, plan, history, list(spec.BANKS["screen"]))
         selected = choose(run, arm, row, first, screen)
         decisions.append({"probe": probe, "history_before": dict(history), "selected": selected, "row": row})
         history[probe] = selected
         print(f"CLOSED_LOOP_DECISION_QUALIFIED {root} {scenario} {arm} probe={probe} action={selected}", flush=True)
-    final, _ = episode(PROBES[-1], history, "actual/final")
+    final, _ = episode(spec.PROBES[-1], history, "actual/final")
     if episodes != (5 if arm == "raw" else 227): raise ValueError("Closed-loop preflight budget differs")
-    write_json(output/"result.json", {"protocol": PROTOCOL, "contract": contract(), "software_qualified": True,
+    write_json(output/"result.json", {"protocol": spec.PROTOCOL, "contract": spec.contract(), "software_qualified": True,
         "root": root, "scenario": scenario, "arm": arm, "native_episodes": episodes,
         "profile": PROFILE, "decisions": decisions, "nontrivial_history_witness": witness,
+        "ledger_qualified_episodes": episodes, "prefix_state_rng_matches": state_matches,
+        "exact_identity_replays": identities,
         "performance_claim": False,
         "actual_metrics": {k: final[k] for k in ("service_cost_restricted", "restricted_wait_horizon_min", "peak_fleet")}})
 
