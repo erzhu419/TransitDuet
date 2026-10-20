@@ -1,0 +1,63 @@
+{
+  "protocol": "native_transit_closed_loop_confirmation_stage304_v1",
+  "recorded_at_utc": "2026-10-20T23:51:59.515460+00:00",
+  "source_revision": "2851a7567ce10972a37c47428044f123daa1e8c8",
+  "freeze_task": {
+    "id": "t208538",
+    "status": "done",
+    "node": "node001",
+    "exit_code": 0,
+    "retry_count": 0
+  },
+  "native_qualification_task": "t208523",
+  "scheduler": {
+    "count": 1280,
+    "first": "t208544",
+    "last": "t209823",
+    "status_counts": {
+      "launching": 108,
+      "running": 15,
+      "queued": 1157
+    },
+    "active_nodes": {
+      "node002": 17,
+      "node006": 13,
+      "node001": 30,
+      "node005": 28,
+      "node004": 35
+    },
+    "failed_ids": [],
+    "require_node": null,
+    "allowed_nodes": [
+      "node001",
+      "node002",
+      "node003",
+      "node004",
+      "node005",
+      "node006"
+    ],
+    "cpu_per_task": 1,
+    "ram_mb": 1536
+  },
+  "actual_process_check": {
+    "id": "t208546",
+    "node": "node002",
+    "state": "alive",
+    "alive_pids": [
+      210077,
+      210117
+    ],
+    "vram_mb": 0,
+    "ram_mb": 533,
+    "pcpu": 98.0
+  },
+  "independent_scene_units": 320,
+  "actual_controller_episodes": 1280,
+  "native_episode_budget_including_inner": 219520,
+  "policies_frozen_before_scenes": true,
+  "performance_results_read": false,
+  "raw_reference_fits": 0,
+  "risk_fits": 0,
+  "actor_updates": 0,
+  "raw_or_model_data_pulled": false
+}

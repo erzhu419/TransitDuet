@@ -27,4 +27,14 @@ both 16-scene halves, and at least half the base wait gain is retained with
 paired-margin CIs. Joint/raw and joint/service-only are separate claims.
 Both CIs describe the same independent episode sampling; neither is the old
 fixed-prefix conditional MC interval. This is a two-decision fixed-lower
-evaluation, not all44 decisions or end-to-end learned HRL. 65 tests pass.
+evaluation, not all44 decisions or end-to-end learned HRL. 66 tests pass.
+
+Execution: first freeze t208533 failed on a local-only metadata path, before
+any formal simulation; its failure receipt is retained. The corrected r2
+freeze t208538/node001 completed done/exit0 with the same rules and seeds.
+Formal evaluation t208544-t209823 is submitted: 1,280 jobs, 1 CPU / 1,536 MiB
+each, unpinned over node001-node006. Full profiles and raw trajectories stay
+server-side; only qualification and freeze summaries were pulled.
+Physical worker t208546/node002 is alive at 98% CPU / 533 MiB. The initial
+snapshot records 15 running, 108 launching and 1,157 queued jobs, across five
+active nodes, without failures. Formal performance results have not been read.
