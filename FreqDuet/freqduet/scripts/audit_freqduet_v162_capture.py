@@ -17,7 +17,7 @@ import sys
 import run_freqduet_v162_calibration_capture as capture
 
 
-read, write, require, close = capture.read, capture.write, capture.require, capture.close
+read, write, require, close = capture.read, capture.write, capture.require, capture.metadata.close
 stream = capture.metadata.stream
 CAPTURE_SOURCE = '25a2eddeaf'
 CHANNELS = {'running', 'service', 'residence'}
