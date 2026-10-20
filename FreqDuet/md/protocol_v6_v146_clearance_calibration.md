@@ -40,3 +40,6 @@ Execution441553aa65 was pushed before new paths. Preflight t195327/node006 exit0
 Calibration t195329--t195333 (71/22/53/45/66 workers), seal t195334;
 confirmation t195335--t195339 and aggregate t195340 wait for the local small
 seal_summary_441553aa65/done.json. No confirmation outcome may inform fitting.
+Calibration completed: t195334 exit0,sealed from5635 native-finite clearance
+queries,all768 cells/all32 days,zero unresolved labels. Fixed dL=3s,dU=0s;
+only1520-byte seal receipt fetched to release confirmation. Confirmation pending.
