@@ -34,3 +34,11 @@ calibration shards precede model sealing; confirmation waits for the sealed
 prior; aggregation waits for every confirmation shard. Only small receipts and
 summaries are returned locally; the model, traces, arrays and checkpoints stay
 on server. Freeze the estimator before calibration and the prior before confirmation.
+
+Execution source1b783ea8f3. Preflight t199152 passed12 tests and consumed baseline
+reconstruction, then stopped before a new rollout because the stage-local
+runtime_optimization_20261014 link was missing. Linked the established shared
+proof directory, without changing code, then t199164 passed both calibration
+smoke paths(exit0). Calibration t199175--t199180(8 workers/shard), seal t199181,
+confirmation t199182--t199187(8 workers/shard), aggregation t199188. Dependencies
+use only small synced receipts. No scientific confirmation result at submission.
