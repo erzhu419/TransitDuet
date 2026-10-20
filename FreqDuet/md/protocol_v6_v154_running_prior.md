@@ -27,7 +27,8 @@ paths complete. Only93483-byte summary pulled. Relative to V151-LODO,old/handoff
 full ETA MAE falls44.729->35.289s /44.723->35.289s;paired delta-9.439/-9.434s,
 CI[-9.666,-9.160]/[-9.658,-9.165]. Hour2 delta-11.473/-11.474s;all12 actor and
 8 day margins improve in both scopes. All-day running MAE improves10.612/10.601s;
-induced service-clock mean change is only0.00014/0.00011s.
+induced service-clock mean change is only0.00014/0.00011s. Hour2 full bias
+improves-35.320->-14.154s(old),so substantial residual underprediction remains.
 
 Development gate remains false:clearance full delta-0.883/-0.863s has CI
 [-2.507,0.822]/[-2.476,0.827];hour13 also crosses0. Low-support group never

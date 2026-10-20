@@ -16,3 +16,9 @@ Scheduler,node001--006,8 workers;tests and first pair before remaining383 pairs.
 Check archive fields and prior-day disjointness before scoring. No replay or
 training;main,V146(3s,0s),3600s window,.1/.1 tails unchanged. Small summaries
 only;all models,paths and cell data stay server. No controller admission.
+
+Source107db12b04,scheduler t204492. Initial dispatch misclassified the negated
+word "training" in its description;only the description was corrected. CPU
+training permission remains disabled;scientific source and parameters unchanged.
+Task is running on node005 after10 passing tests and a completed first archive
+pair. No overall V155 result yet;V154 gate and main-policy status unchanged.
