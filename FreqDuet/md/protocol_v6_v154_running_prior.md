@@ -21,3 +21,6 @@ crossed actor/day draws are descriptive LODO development,not fresh confirmation.
 Server scheduler,node001--006,8 workers. Tests and first saved pair before the
 remaining95 pairs. Running moments sealed before scores;no parameter search.
 Pull only small summary;moments,per-cell outputs and original paths stay server.
+
+Source5be4cea534,scheduler t204491. Initial dispatch is resource-waiting,not
+a script failure;tests and development scores are not yet available.
