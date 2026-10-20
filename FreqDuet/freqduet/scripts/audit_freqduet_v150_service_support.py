@@ -225,12 +225,14 @@ def run(args):
     subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s',
         str(Path(__file__).resolve().parents[1]/'tests'), '-p', 'test_v150_service_support.py', '-v'], check=True)
     geometry = frozen.candidate.model.load_geometry(args.runtime)
+    case(args.v149_root, args.out_root, geometry, *frozen.CASES[0])
+    print('V150_SAVED_CASE_RECONSTRUCTION_COMPLETE', flush=True)
     with ProcessPoolExecutor(max_workers=args.workers, mp_context=get_context('spawn')) as pool:
-        jobs = [pool.submit(case, args.v149_root, args.out_root, geometry, s, d) for s, d in frozen.CASES]
-        for n, job in enumerate(as_completed(jobs), 1):
+        jobs = [pool.submit(case, args.v149_root, args.out_root, geometry, s, d) for s, d in frozen.CASES[1:]]
+        for n, job in enumerate(as_completed(jobs), 2):
             job.result()
             if n % 32 == 0:
-                print('V150_READONLY_PROGRESS', n, len(jobs), flush=True)
+                print('V150_READONLY_PROGRESS', n, len(frozen.CASES), flush=True)
     cells = [read(args.out_root/'cells'/f'{s}_{d}.json') for s, d in frozen.CASES]
     result = {m: {section: parts.prior.aggregate(cells, lambda c: c['modes'][m][section])
         for section in ('budgets', 'queries', 'stops', 'fallback')} for m in frozen.MODES}
