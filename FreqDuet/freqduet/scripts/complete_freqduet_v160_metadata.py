@@ -169,13 +169,21 @@ def case(args, seed, day, services):
 
 def literal_conflicts(path, reserved):
     found = set()
-    for node in ast.walk(ast.parse(path.read_text())):
-        if isinstance(node, ast.Constant) and isinstance(node.value, int) and node.value in reserved:
-            found.add(node.value)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'range' and node.args and all(
-                isinstance(a, ast.Constant) and isinstance(a.value, int) for a in node.args):
-            value = range(*(a.value for a in node.args))
-            found.update(n for n in reserved if n in value)
+
+    class Days(ast.NodeVisitor):
+        def visit_Constant(self, node):
+            if isinstance(node.value, int) and node.value in reserved:
+                found.add(node.value)
+
+        def visit_Call(self, node):
+            if isinstance(node.func, ast.Name) and node.func.id == 'range' and node.args and all(
+                    isinstance(a, ast.Constant) and isinstance(a.value, int) for a in node.args):
+                value = range(*(a.value for a in node.args))
+                found.update(n for n in reserved if n in value)
+            else:
+                self.generic_visit(node)
+
+    Days().visit(ast.parse(path.read_text()))
     return found
 
 

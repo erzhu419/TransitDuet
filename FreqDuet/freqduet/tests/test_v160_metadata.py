@@ -72,6 +72,8 @@ class MetadataTests(unittest.TestCase):
             path = Path(directory)/'prior.py'
             path.write_text('DAYS = range(100, 103)\n')
             self.assertEqual(metadata.literal_conflicts(path, {102, 103}), {102})
+            path.write_text('DAYS = range(100, 103)\nOTHER_DAY = 103\n')
+            self.assertEqual(metadata.literal_conflicts(path, {102, 103}), {102, 103})
 
     def test_reserved_cohorts_and_samplers_are_disjoint(self):
         self.assertEqual((len(metadata.CALIBRATION), len(metadata.CONFIRMATION)), (32, 32))
