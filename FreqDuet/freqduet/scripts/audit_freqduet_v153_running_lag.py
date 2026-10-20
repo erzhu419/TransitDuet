@@ -128,6 +128,7 @@ def case(root, v152, out, runtime, seed, day, model):
         path, objects = parts.prepare(root/'confirmation', seed, day, mode, geometry)
         path['_observed_ready'] = candidate.ObservedReady(path['ready'])
         law = candidate.ServiceLaw(model['actors'][str(seed)], path['arrivals'], path['ready'], path['cutoff'])
+        phases = candidate.frozen.PhaseServices(path['arrivals'], path['ready'], path['cutoff'])
         prefix = RunningPrefix(path, geometry)
         groups, distributions, allocations, reconciled = (defaultdict(list), defaultdict(list),
             defaultdict(list), defaultdict(list))
@@ -138,24 +139,26 @@ def case(root, v152, out, runtime, seed, day, model):
             s = saved[k]
             if label != 'resolved' or s['points']['v141'] is None:
                 continue
-            reference, _, _ = candidate.position(path, row, objects[-1], geometry, objects)
-            if reference is None:
-                packet, _, _ = parts.component_packet(path, row, path['shadows'][k], geometry, *objects)
-                has_reference = packet is not None
-            else:
-                has_reference = True
-            p, status, _ = candidate.position(path, row, objects[-1], geometry, objects, law, True)
+            reference_packet, _, _ = prior.structured_packet(path, row, geometry, objects, phases)
+            if reference_packet is None:
+                reference_packet, _, _ = parts.component_packet(path, row, path['shadows'][k], geometry, *objects)
+            has_reference = reference_packet is not None
+            joint_packet, _, status = prior.structured_packet(path, row, geometry, objects, phases, law, True)
             if status != s['details']['joint']['status']:
                 raise AssertionError('frozen V151 running support changed')
-            if p is None:
-                p = reference
-            if p is None:
+            if joint_packet is None:
+                joint_packet = reference_packet
+                p, _, _ = candidate.position(path, row, objects[-1], geometry, objects)
+            else:
+                p, _, _ = candidate.position(path, row, objects[-1], geometry, objects, law, True)
+            if p is None or joint_packet is None:
                 counts[mode+'/no_structured_running_clock'] += 1
                 continue
             routes = geometry[bool(row['direction'])]
             episode = (*stats.follower(row), *k[1:])
             segments = legs(path, row, p, prefix, objects[0])
             predicted, actual = sum(r['predicted_s'] for r in segments), sum(r['truth_s'] for r in segments)
+            close(predicted, joint_packet['running'])
             exact = parts.actual_parts(path, row, routes)
             close(actual, exact['running'])
             scopes = ['all', 'hour/'+str(int(row['prediction_time_s']//3600))]
