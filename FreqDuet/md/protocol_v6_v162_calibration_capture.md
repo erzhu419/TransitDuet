@@ -28,6 +28,9 @@ during the failed launches. The local preflight summary is 600 bytes.
 Calibration is dispatched as 48 shards of eight actor/day pairs, eight workers
 per shard, restricted to node001-node006. Confirmation and interval fit stay off.
 Scheduler IDs: `t208240-t208287`; each requests eight CPU cores and no GPU.
+Scheduling update: unfinished FreqDuet jobs use high priority and manual
+dispatch. The calibration batch has no failed retries; the old preflight
+startup failures are separate historical tasks. No data recollection required.
 
 Next: audit the completed calibration metadata and support, without fitting
 intervals or opening confirmation until separately authorized.
