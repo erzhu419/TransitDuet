@@ -2,6 +2,7 @@
 
 from bisect import bisect_left
 from collections import defaultdict
+from itertools import accumulate
 
 import freqduet_phase_clock_eta as frozen
 
@@ -16,7 +17,14 @@ class ServiceLaw:
                 modes = [v for v in day['modes'] if v]
                 for values in modes:
                     samples.extend((day['day'], float(v), 1./len(modes)/len(values)) for v in values)
-            self.prior[cell['direction'], cell['station'], cell['clearance']] = samples
+            samples.sort(key=lambda r: r[1])
+            maxima = defaultdict(float)
+            for day, value, _ in samples:
+                maxima[day] = max(maxima[day], value)
+            self.prior[cell['direction'], cell['station'], cell['clearance']] = dict(
+                values=[d for _, d, _ in samples], maxima=list(maxima.values()),
+                weights=[0., *accumulate(w for _, _, w in samples)],
+                moments=[0., *accumulate(d*w for _, d, w in samples)])
         groups = defaultdict(list)
         for k, arrival in arrivals.items():
             end = ready[k]['ready_time_s']
@@ -33,18 +41,26 @@ class ServiceLaw:
         if historical:
             start = 0
         local = self.local.get(k, [])[start:end]
-        past = self.prior.get(k, [])
-        survivors = [(d-elapsed, w) for _, d, w in past if d >= elapsed]
+        past = self.prior.get(k)
+        prior_n = prior_survivors = prior_days = survivor_days = 0
+        mass = excess = 0.
+        if past is not None:
+            prior_n, prior_days = len(past['values']), len(past['maxima'])
+            i = bisect_left(past['values'], elapsed)
+            prior_survivors = prior_n-i
+            survivor_days = sum(v >= elapsed for v in past['maxima'])
+            mass = past['weights'][-1]-past['weights'][i]
+            excess = max(0., past['moments'][-1]-past['moments'][i]-elapsed*mass)
+        local_survivors = [(d-elapsed) for _, d in local if d >= elapsed]
         if local:
-            survivors.extend((d-elapsed, 1./len(local)) for _, d in local if d >= elapsed)
-        if not survivors:
+            mass += len(local_survivors)/len(local)
+            excess += sum(local_survivors)/len(local)
+        if prior_survivors+len(local_survivors) == 0:
             return None
-        mass = sum(w for _, w in survivors)
-        return dict(mean=sum(d*w for d, w in survivors)/mass,
-            local_n=len(local), local_survivor_n=sum(d >= elapsed for _, d in local),
-            prior_n=len(past), prior_days=len({day for day, _, _ in past}),
-            prior_survivor_n=sum(d >= elapsed for _, d, _ in past),
-            prior_survivor_days=len({day for day, d, _ in past if d >= elapsed}),
+        return dict(mean=excess/mass,
+            local_n=len(local), local_survivor_n=len(local_survivors),
+            prior_n=prior_n, prior_days=prior_days,
+            prior_survivor_n=prior_survivors, prior_survivor_days=survivor_days,
             latest_current_s=local[-1][0] if local else None,
             historical_fallback=historical, conditional_mass=mass)
 
